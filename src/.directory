@@ -1,7 +1,0 @@
-[URL properties]
-BgColor=255,255,255
-BgImage[$e]=kenwimer.png
-DontPreview=textthumbnail,ldifvcardthumbnail
-EnableSoundPreviews=false
-IconSize=48
-ViewMode=konq_iconview
