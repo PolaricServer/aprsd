@@ -1,0 +1,85 @@
+
+package aprs;
+import java.util.*;
+import java.io.*;
+import java.text.*;
+import  java.util.regex.*;
+
+public class Client
+{
+   private StationDB    _db; 
+   static private Pattern _pattern = Pattern.compile(
+	   "\\*\\*\\*\\s+Got\\s+data:\\s+"+
+      "(\\p{Alpha}{3}\\s+\\p{Alpha}{3}\\s+[0-9]{2}\\s+[0-9]{2}:[0-9]{2}:[0-9]{2}\\s+CEST\\s+[0-9]{4})" + 
+      ":\\s+"+
+      "([A-Z0-9\\-]{2,10}>.*)");
+   
+   private static final String _encoding = "utf-8"; 
+   
+   DateFormat df = new SimpleDateFormat("dd MMM. HH:mm",
+           new DateFormatSymbols(new Locale("no")));
+   
+   
+   public Client(StationDB db, Properties config) throws IOException
+   {
+      _db=db;     
+      TimeZone.setDefault(null);
+   }
+
+
+
+
+   
+   public static void main( String[] args )
+   {
+        /* Get properties from configfile */
+        if (args.length < 2)
+           System.out.println("Usage: Client <config-file> <log-file>");
+           
+        Properties config = new Properties();
+        final StationDB db = null; /* May use a dummy db instead ??*/ 
+     
+        try {
+           FileInputStream fin = new FileInputStream(args[0]);
+           config.load(fin);
+           BufferedReader ifile = new BufferedReader((new FileReader(args[1])));
+           BufferedReader keyb = new BufferedReader(new InputStreamReader(System.in));
+           
+           System.out.println( "*** LA3T APRS Playback client: "+args[1] );
+      
+           /* Connect APRS server */
+           AprsInput p = new AprsInput(config, db);
+           Thread t = new Thread(p);
+           t.start(); 
+
+           String txt = null, tdate = null, treport = null;
+           do
+           {   
+               System.out.print(">");
+               String command = keyb.readLine();
+                 /* Add some command interpreting here */
+               
+               treport = null;
+               while (treport==null) {
+                  txt = ifile.readLine();
+                  if (txt == null)
+                     break;
+                  Matcher m = _pattern.matcher(txt);
+                  if (m.matches())
+                  {
+                      tdate = m.group(1);
+                      treport = m.group(2);
+                      System.out.println("["+tdate+"]:  "+treport); 
+                  }
+               }
+           } while (txt != null);
+           ifile.close();
+
+        }
+        catch( IOException ioe )
+        {
+             System.err.println( "*** I/O ERROR:\n" + ioe );
+             System.exit( -1 );
+        }
+   }
+}
