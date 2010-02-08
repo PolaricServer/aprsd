@@ -39,7 +39,7 @@ $(INSTALLDIR)/aprs.jar: aprs.jar
 	
 aprs: $(LIBDIR)
 	@make TDIR=$(LIBDIR) CLASSPATH=$(LIBDIR):$(CLASSPATH) compile     
-	cd $(LIBDIR);jar cvf ../aprs.jar *;cd ..;rm -R $(LIBDIR)
+	cd $(LIBDIR);jar cvf ../aprs.jar *;cd ..
 
 
 compile: $(PACKAGES)
@@ -63,4 +63,4 @@ scala:
 	
 
 clean:
-	rm -R $(LIBDIR) ~ src/*~
+	rm -R $(LIBDIR) ./*~ src/*~
