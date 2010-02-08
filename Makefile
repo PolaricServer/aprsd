@@ -39,7 +39,7 @@ $(INSTALLDIR)/aprs.jar: aprs.jar
 	
 aprs: $(LIBDIR)
 	@make TDIR=$(LIBDIR) CLASSPATH=$(LIBDIR):$(CLASSPATH) compile     
-	cd $(LIBDIR);jar cvf ../aprs.jar *
+	cd $(LIBDIR);jar cvf ../aprs.jar *;cd ..;rm -R $(LIBDIR)
 
 
 compile: $(PACKAGES)
