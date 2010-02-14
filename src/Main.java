@@ -46,6 +46,7 @@ public class Main
            
            /* Database of stations/objects */
            db  = new StationDBImp(config); 
+           AprsPoint.setDB(db);
            msg = new MessageProcessor(config);
 
            /* Start parser and connect it to channel(s) if any */
