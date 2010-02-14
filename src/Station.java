@@ -71,47 +71,22 @@ public static class Status implements Serializable
     public Station(String id)
        { _callsign = id; }
         
-    /* Experimental statistics/info about connectivity. 
-     * This should be done somewhat differently. Should use relational database. 
-     * Should address: 
-     *    - Remove old stuff (at least for mobile stations)
-     *    - What should we do about mobile stations?
-     *    - Should we report stations that are not shown or garbage collected? 
-     */    
-     
-    private HashSet<Station>  _trFrom; 
-    private HashSet<Station>  _trTo;        
-    
-    public void addTrFrom(Station s)
-    {
-       if (_trFrom  == null) 
-          _trFrom = new HashSet();
-      _trFrom.add(s);
-    }
-       
-    public Set<Station> getTrFrom()
-       {  return _trFrom; }
+
+    public Set<String> getTrafficFrom()
+       {  return _db.getRoutes().getToEdges(getIdent()); }
        
                        
-    public void addTrTo(Station s)
-    {
-       if (_trTo  == null) 
-          _trTo = new HashSet();
-      _trTo.add(s);
-    }   
-       
-    public Set<Station> getTrTo()
-       {  return _trTo; }
+    public Set<String> getTrafficTo()
+       { return _db.getRoutes().getFromEdges(getIdent());}
               
               
     public boolean isInfra()
-       { return _trFrom != null; }
-       
-    /* End of experimental statistics/info about connectivity */    
+       { return getTrafficFrom() != null && !getTrafficFrom().isEmpty(); }
        
        
     public synchronized History.Item getHItem()
        { return new History.Item(_updated, _position, _speed, _course); }
+       
        
     public String getIdent()
        { return _callsign; }
@@ -211,6 +186,7 @@ public static class Status implements Serializable
               }
               if (_report_ignored >= 2) {
                  _history.clear();
+                 _db.getRoutes().removeOldEdges(getIdent(), ts);
                  distance = 0;
               }
               
@@ -236,6 +212,7 @@ public static class Status implements Serializable
                if (getHistory().isEmpty() && _autotrail)
                    _trailcolor = _colTab.nextColour();
                _history.add(_updated, _position, _speed, _course); 
+               _db.getRoutes().removeOldEdges(getIdent(), _history.oldestPoint());
                setChanging();
            }
         }
@@ -275,6 +252,7 @@ public static class Status implements Serializable
             return false;
         if (!Main.ownobjects.mayExpire(this))
             return false;
+        _db.getRoutes().removeNode(this.getIdent());
         return (_expired = true); 
         
     }
