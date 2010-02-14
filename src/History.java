@@ -57,6 +57,14 @@ public class History implements Iterable<History.Item>, Serializable
         { _items.clear(); }
         
     
+    public Date oldestPoint()
+    {
+       Item it =_items.peekLast();
+       if (it == null) return null;
+       else return it.time;
+    }
+    
+    
     public synchronized void add(Date t, Reference p, int sp, int crs)
     { 
         Date now = new Date(); 
