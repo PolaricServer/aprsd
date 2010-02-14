@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2002 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +19,10 @@ import uk.me.jstott.jcoord.*;
 
 public interface StationDB
 {
+    public RouteInfo getRoutes();
+    
     public AprsPoint getItem(String id);
     
-        /* FIXME */
     public void removeStation(String id);
 
     public Station getStation(String id);
