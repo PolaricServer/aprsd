@@ -142,9 +142,8 @@ public class AprsParser implements Channel.Receiver
             if ( to != null) {
                 if (!skip) 
                   { skip=false; 
-                    to.addTrFrom(from); /* FIXME: These two functions should be combined into one */
-                    from.addTrTo(to);
-                    System.out.println(from.getIdent()+"-->"+to.getIdent()); 
+                    _db.getRoutes().addEdge(from.getIdent(), to.getIdent());
+                    System.out.println(from.getIdent() + "-->" + to.getIdent()); 
                   }
                 from = to;
             }
@@ -152,13 +151,12 @@ public class AprsParser implements Channel.Receiver
                skip = true;
         }
         
-        if (pp[plen-2].matches("qA.")) {
+        if ((plen >= 2) && pp[plen-2].matches("qA.")) {
            if (tindex == -1) {
                Station to = _db.getStation(pp[plen-1]);
                if (to != null) {
-                   to.addTrFrom(s);
-                   s.addTrTo(to);                 
-                   System.out.println(s.getIdent()+"-->"+pp[plen-1]+" [IGATE DIRECT]");
+                   _db.getRoutes().addEdge(s.getIdent(), to.getIdent());           
+                   System.out.println(s.getIdent()+"-->"+to.getIdent()+" [IGATE DIRECT]");
                }
            }
            else {
@@ -167,8 +165,7 @@ public class AprsParser implements Channel.Receiver
                   last = _db.getStation(pp[tindex-1]);
                Station x = _db.getStation(pp[plen-1]);
                if (last != null && x != null) {
-                  x.addTrFrom(last);
-                  last.addTrTo(x);
+                  _db.getRoutes().addEdge(last.getIdent(), x.getIdent());
                   System.out.println(last.getIdent()+"-->"+x.getIdent()+" [IGATE]");
                }
            }
