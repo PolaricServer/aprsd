@@ -24,6 +24,7 @@ public class StationDBImp implements StationDB, Runnable
     private SortedMap<String, AprsPoint> _map = new ConcurrentSkipListMap();
     private String _file;
     private boolean _hasChanged = false; 
+    private RouteInfo _routes;
     
     
     public StationDBImp(Properties config)
@@ -34,7 +35,10 @@ public class StationDBImp implements StationDB, Runnable
         t.start(); 
     }
     
-
+    public RouteInfo getRoutes()
+        { return _routes; }
+    
+    
     /** 
      * Save (checkpoint) station data to disk file. 
      */
@@ -45,9 +49,11 @@ public class StationDBImp implements StationDB, Runnable
              System.out.println("*** Saving station data...");
              FileOutputStream fs = new FileOutputStream(_file);
              ObjectOutput ofs = new ObjectOutputStream(fs);
-        
+             
+             ofs.writeObject(_routes);
              for (AprsPoint s: _map.values())
                 { ofs.writeObject(s); }
+
            }
            catch (Exception e) {
                System.out.println("*** StationDBImp: cannot save: "+e);
@@ -65,7 +71,8 @@ public class StationDBImp implements StationDB, Runnable
           System.out.println("*** Restoring station data...");
           FileInputStream fs = new FileInputStream(_file);
           ObjectInput ifs = new ObjectInputStream(fs);
-        
+          
+          _routes = (RouteInfo) ifs.readObject();
           while (true)
           { 
               AprsPoint st = (AprsPoint) ifs.readObject(); 
@@ -76,6 +83,8 @@ public class StationDBImp implements StationDB, Runnable
         catch (EOFException e) { }
         catch (Exception e) {
             System.out.println("*** StationDBImp: cannot restore: "+e);
+            _map.clear();
+            _routes = new RouteInfo();
         } 
     }
     
@@ -95,6 +104,7 @@ public class StationDBImp implements StationDB, Runnable
                 System.out.println("        Removing: "+st.getIdent()); 
                 // stn.remove();
                 removeStation(st.getIdent());
+                _routes.removeNode(st.getIdent());
              } 
          }    
     }
@@ -109,7 +119,6 @@ public class StationDBImp implements StationDB, Runnable
     }
     
     
-    /* FIXME */
     public synchronized void removeStation(String id)
        {   _map.remove(id);
            _hasChanged = true; }
