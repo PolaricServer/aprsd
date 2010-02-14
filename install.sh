@@ -14,7 +14,7 @@ ln -s /etc/init.d/aprsd /etc/rc6.d/K20aprsd
 
 echo 'Polaric-APRSD is now installed.'
 
-if [ ! -f $(INSTALLDIR)/server.ini ]
+if [ ! -f $(INSTALLDIR)/server.ini ] ;
    cp $(INSTALLDIR)/server.ini.example $(INSTALLDIR)/server.ini
    echo 'Please edit server.ini'
 fi
