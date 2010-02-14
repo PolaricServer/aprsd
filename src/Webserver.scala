@@ -39,7 +39,6 @@ package aprs {
            <label id={id}> {content}</label>
            <br/>;
 
-
    private def TXT(t:String): NodeSeq = <xml:group>{t}</xml:group>
    
    
@@ -372,13 +371,32 @@ package aprs {
         val simple =  ( parms.getProperty("simple") != null )
         val prefix = null
 
+
+
+        def itemList(items : Set[String]) = 
+             <div class="trblock">
+             {  
+                var i=0
+                for (it <- items) yield {
+                    i += 1
+                    val xx = _db.getItem(it)
+                    val linkable = (xx != null  && xx.visible() && xx.getPosition() != null)
+                    <span class={ if (linkable) "link_id" else ""} onclick={
+                        if (linkable) 
+                           "findAndShowStation('" + xx.getIdent() + "')"
+                        else "" }> {it + " " } </span>
+                }
+             }
+             </div>
+        
+        
         
         /* Fields to be filled in */
         def fields(hdr: Properties, parms: Properties): NodeSeq =
             <xml:group>  
             <label for="callsign" class="leftlab">Ident:</label>
             <label id="callsign"><b> { x.getIdent() } </b></label>
-            <br /> 
+            <br/>
             { if (!simple)
                  simpleLabel("symbol", "leftlab", "Symbol:",TXT( x.getSymtab()+" "+x.getSymbol())) else null }
             { if (x.getAlias() != null)
@@ -406,23 +424,23 @@ package aprs {
 
             { simpleLabel("hrd", "leftlab", "Sist rapportert:", TXT( df.format(x.getUpdated()))) }
             
-            { if (s != null && s.isInfra() )
-               { simpleLabel("hrds", "leftlab", "Trafikk fra:",
-                    <xml:group>
-                     {  for (it <- s.getTrFrom()) yield  
-                           TXT(it.getIdent()+" ") }
-                     </xml:group>
-                 )} else null } 
-                 
-            { if (s != null && s.getTrTo != null )
-               { simpleLabel("hrds", "leftlab", "Trafikk til:",
-                    <xml:group>
-                     {  for (it <- s.getTrTo()) yield  
-                           TXT(it.getIdent()+" ") }
-                     </xml:group>
-                 )} else null } 
-                                
-                                
+            { if ((s.getTrafficTo != null && !s.getTrafficTo.isEmpty) || 
+                  (s.getTrafficFrom != null && !s.getTrafficFrom.isEmpty))
+                <hr/> }
+                
+            { if (simple) 
+               <div id="traffic">
+                  { if (s != null && s.isInfra() )
+                     {  <label for="hrds" class="leftlab">Trafikk fra:</label>
+                        <label id="hrds"> { itemList(s.getTrafficFrom()) } </label> } else null }
+               
+                  { if (s != null && s.getTrafficTo != null && !s.getTrafficTo.isEmpty)
+                     {  <label for="hrd" class="leftlab">Trafikk til:</label>
+                        <label id="hrd"> { itemList(s.getTrafficTo()) } </label> } else null }
+               </div>
+               else null                    
+            }
+                                 
             { if (edit && canUpdate)
                   <div>
                   <br/>
@@ -433,7 +451,7 @@ package aprs {
                   { if (s != null)
                        <xml:group>
                        <label for="newcolor" class="leftlab">Spor:</label>
-                       {checkBox("newcolor", false, TXT("Finn ny Farge")) }
+                       { checkBox("newcolor", false, TXT("Finn ny Farge")) }
                        </xml:group> else null}
                   <br/>   
                   <label for="nalias" class="leftlab">Ny alias:</label>
