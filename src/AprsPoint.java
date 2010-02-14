@@ -24,6 +24,7 @@ public abstract class AprsPoint implements Serializable
     private static long     _nonMovingTime = 1000 * 60 * 5;   
     private static SymTable _symTab        = new SymTable ("symbols");
     private static Notifier _change        = new Notifier();
+    protected static StationDB _db         = null;
     
     public static void waitChange()
        { waitChange(null, null); }
@@ -34,7 +35,8 @@ public abstract class AprsPoint implements Serializable
     protected static boolean changeOf(String x, String y)
        { return x != y || (x != null && !x.equals(y)); }   
          
-       
+    public static void setDB(StationDB db) 
+       { _db = db; }   
          
     protected Reference   _position;  
     protected char        _symbol; 
