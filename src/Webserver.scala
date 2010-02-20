@@ -423,10 +423,6 @@ package aprs {
                   {simpleLabel("cspeed", "leftlab", "Bevegelse:", _directionIcon(s.getCourse())) }}
 
             { simpleLabel("hrd", "leftlab", "Sist rapportert:", TXT( df.format(x.getUpdated()))) }
-            
-            { if ((s.getTrafficTo != null && !s.getTrafficTo.isEmpty) || 
-                  (s.getTrafficFrom != null && !s.getTrafficFrom.isEmpty))
-                <hr/> }
                 
             { if (simple) 
                <div id="traffic">
