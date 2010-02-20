@@ -20,7 +20,7 @@ import java.io.*;
 
 public abstract class Channel
 {
-     private static final long HRD_TIMEOUT = 1000 * 60 * 30; /* 30 minutes */
+     private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      private LinkedHashMap<String, Date> _heard = new LinkedHashMap();
     
      
@@ -73,12 +73,21 @@ public abstract class Channel
     public static final String _encoding = "cp865";
     
 
+    /**
+      * Returns true if call is heard.
+      */
     public boolean heard(String call)
      {
          removeOldHeardEntries();
          return _heard.containsKey(call);
      }
          
+   /**
+     * Number of stations heard.
+     */     
+    public int nHeard()
+       { return _heard.keySet().size(); }
+       
     
     public PrintWriter getWriter()
        { return _out; }
@@ -107,17 +116,17 @@ public abstract class Channel
             
             if (p.type == '}') {
               /* Special treatment for third-party type. 
-               * Strip off type character and apply this function recursively
-               * on the wrapped message. 
-               */
+              * Strip off type character and apply this function recursively
+              * on the wrapped message. 
+              */
                p = string2packet(p.report.substring(1));
                if (p != null)
                   p.thirdparty = true; 
             }
             else if (p.type == ':') 
                /* Special treatment for message type.
-                * Extract recipient id
-                */
+               * Extract recipient id
+               */
                 p.msgto = p.report.substring(1,9).trim();
 
             /* Remove first comma in path */
