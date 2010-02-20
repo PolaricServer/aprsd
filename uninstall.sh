@@ -4,6 +4,9 @@ INSTALLDIR=/usr/local/polaric-aprsd
 
 /etc/init.d/polaric_aprsd stop
 
+echo 'Removing user...'
+userdel polaric
+
 echo 'Removing links...'
 rm /etc/init.d/la3t_aprsd
 rm /etc/rc0.d/K20aprsd
