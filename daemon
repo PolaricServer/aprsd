@@ -6,17 +6,18 @@ SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB
   INIFILE=$HOME/server.ini
   PIDFILE=$HOME/daemon.pid
      JAVA=java
-     
+     USER=polaric
+         
 ###################################################
 # We dont need to change anything below this line
 ###################################################
  
 case "$1" in 
    start) 
-         if start-stop-daemon --test --start --pidfile "$PIDFILE" --user root \
+         if start-stop-daemon --test --start --pidfile "$PIDFILE" --user $USER \
                  --startas "$JAVA" >/dev/null; then
              cd $HOME;\
-              $JAVA -Xverify:none -server $SERIALPORTS -cp $CLASSPATH \
+              su -p $USER $JAVA -Xverify:none -server $SERIALPORTS -cp $CLASSPATH \
               aprs.Main $INIFILE >> $LOGFILE  2>&1 &
              echo $! > $PIDFILE
              echo ""
