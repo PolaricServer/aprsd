@@ -4,7 +4,8 @@ INSTALLDIR=/usr/local/polaric-aprsd
 
 /etc/init.d/polaric-aprsd stop
 
-echo 'Removing links...'
+echo 'Removing from system...'
+rm /etc/logrotate.d/polaric-aprsd
 rm /etc/init.d/polaric-aprsd
 rm /etc/rc0.d/K20polaric
 rm /etc/rc1.d/K20polaric
