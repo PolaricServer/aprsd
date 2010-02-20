@@ -1,4 +1,3 @@
- 
 /* 
  * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
@@ -12,6 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+ 
 package aprs;
 import java.io.*;
 import java.util.*;
@@ -44,12 +44,12 @@ public class TncChannel extends Channel implements Runnable
  
     /**
      * The generic sendPacket method is unsupported on generic TNCs. 
-     * cannot set addresses per packet. If callsign does not match
-     * TNC callsign or explicitly requested, we use third party format. 
+     * We cannot set addresses per packet. If callsign is not null and match
+     * TNC callsign, or explicitly requested, we use third party format. 
      */ 
     public void sendPacket(Packet p)
     {
-       if (p.thirdparty || !p.to.equals(_myCall))
+       if (p.thirdparty || (p.to != null && !p.to.equals(_myCall)))
            _out.print(
              "}" + p.from + ">" + p.to +
                 ((p.via != null && p.via.length() > 0) ? ","+p.via : "") + 
@@ -90,7 +90,7 @@ public class TncChannel extends Channel implements Runnable
   
    
    /**
-    * Init the TNC - set it in converse mode
+    * Init the TNC - set it to converse mode
     */
     private void initTnc()
     {
