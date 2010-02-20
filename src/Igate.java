@@ -25,6 +25,7 @@ public class Igate implements Channel.Receiver
     private Channel _inetChan, _rfChan;
     private boolean _allowRf;
     private String  _myCall; /* Move this ? */
+    private long    _msgcnt = 0; 
     
     public Igate(Properties config) 
     {
@@ -44,13 +45,13 @@ public class Igate implements Channel.Receiver
     private void gate_to_inet(Channel.Packet p)
     {
        /* Note, we assume that third-party headers are stripped 
-        * by the channel-implementation. 
-        * It may be an idea to add user-defined filters as well. 
+        * by the channel-implementation.  
         */
        if ( p.type == '?' /* QUERY */ ||
             p.via.matches(".*((TCP[A-Z0-9]{2})|NOGATE|RFONLY|NO_TX).*") ) 
-           return; 
-           
+           return;
+            
+       _msgcnt++;
        System.out.println("*** IGATED");
        p.via += (",qAR,"+_myCall);
        if (_inetChan != null) 
@@ -68,11 +69,11 @@ public class Igate implements Channel.Receiver
             && /* Sender NOT heard on RF */
                ! _rfChan.heard(p.from)
                
-            && /* Receiver not heard in INET */ 
+            && /* Receiver not heard on INET side */ 
                ( ! _inetChan.heard(p.to)  && !( p.msgto!=null && _inetChan.heard(p.msgto)))
                
             && /* No TCPXX, NOGATE, or RFONLY in header */
-               p.via.matches(".*((TCP[A-Z0-9]{2})|NOGATE|RFONLY|NO_TX).*") )
+               ! p.via.matches(".*((TCP[A-Z0-9]{2})|NOGATE|RFONLY|NO_TX).*") )
        {        
           System.out.println("*** GATED TO RF");
           _rfChan.sendPacket(p);
@@ -80,11 +81,29 @@ public class Igate implements Channel.Receiver
     }
     
     
+    /**
+     * Respond to query be sending a capabilities report. 
+     * For now, we only respond to queries on the RF channel. Should we include
+     * internet side as well???
+     */
+    private void answer_query()
+    {
+        Channel.Packet p = new Channel.Packet(); 
+        p.type = '<';
+        p.report = "<IGATE,MSG_CNT="+_msgcnt+",LOC_CNT="+_rfChan.nHeard()+",Polaric-Aprsd";
+        _rfChan.sendPacket(p);
+    }
+    
+    
     
     public void receivePacket(Channel.Packet p)
     {
-        if (p.source == _rfChan)
-           gate_to_inet(p);
+        if (p.source == _rfChan) {
+           if (p.report.matches("\\?IGATE\\?.*"))
+               answer_query();
+           else
+               gate_to_inet(p);
+        }
         else
            if ( _allowRf )
               gate_to_rf(p);
