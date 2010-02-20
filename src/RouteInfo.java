@@ -41,7 +41,7 @@ public class RouteInfo implements Serializable
      *    - Should we report stations that are not shown? 
      */    
      
-    private Map<String, Node> _nodes = new HashMap();        
+    private Map<String, Node> _nodes = Collections.synchronizedMap(new HashMap());        
     
     
     
@@ -64,15 +64,31 @@ public class RouteInfo implements Serializable
        
        
     public synchronized void removeNode(String stn)
-       { _nodes.remove(stn); }
+    { 
+        _nodes.remove(stn); 
+    }
               
               
+              
+              
+    private synchronized Set<String> clean(Set<String> s)
+    {
+       Iterator<String> it = s.iterator();   
+       while ( it.hasNext() ) {
+            String key = it.next();
+            if (!_nodes.containsKey(key))
+               it.remove();
+       } 
+       return s;   
+    }
+                
+                
     public Set<String> getFromEdges(String stn)
-       { return (_nodes.get(stn) !=null ? _nodes.get(stn).from.keySet() : null); }
+       { return (_nodes.get(stn) !=null ? clean(_nodes.get(stn).from.keySet()) : null); }
 
 
     public Set<String> getToEdges(String stn)
-       { return (_nodes.get(stn) != null ? _nodes.get(stn).to.keySet() : null); }
+       { return (_nodes.get(stn) != null ? clean(_nodes.get(stn).to.keySet()) : null); }
        
        
     public Edge getEdge(String from, String to)
@@ -92,15 +108,24 @@ public class RouteInfo implements Serializable
           return;
        if (_nodes.get(stn) == null)
           return; 
-       for (String to: getFromEdges(stn)) {
-            Edge e = getEdge(stn, to);
-            if (e.ts.getTime() < agelimit.getTime())
-               removeEdge(stn, to);
-          }    
-       for (String from: getToEdges(stn)) {
-           Edge e = getEdge(from, stn);
-           if (e.ts.getTime() < agelimit.getTime())
-              removeEdge(from, stn);
+          
+       Iterator<String> it = getFromEdges(stn).iterator();   
+       while ( it.hasNext() ) {
+            String x = it.next();
+            Edge e = getEdge(stn, x);
+            if (e.ts.getTime() < agelimit.getTime()) {
+               it.remove();
+               _nodes.get(x).to.remove(stn);
+            }
+       }    
+       it = getToEdges(stn).iterator();
+       while ( it.hasNext() ) {
+           String x = it.next();
+           Edge e = getEdge(x, stn);
+           if (e.ts.getTime() < agelimit.getTime()) {
+              it.remove(); 
+             _nodes.get(x).from.remove(stn); 
+          }
        }  
     }
     
