@@ -2,6 +2,9 @@
 
 INSTALLDIR=/usr/local/polaric-aprsd
 
+echo 'Creating user...'
+useradd -r -d $INSTALLDIR
+
 echo 'Creating links...'
 ln -s $(INSTALLDIR)/daemon /etc/init.d/polaric_aprsd
 ln -s /etc/init.d/polaric_aprsd /etc/rc0.d/K20aprsd
