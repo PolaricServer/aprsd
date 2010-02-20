@@ -2,10 +2,10 @@
 
 INSTALLDIR=/usr/local/polaric-aprsd
 
-/etc/init.d/polaric_aprsd stop
+/etc/init.d/polaric-aprsd stop
 
 echo 'Removing links...'
-rm /etc/init.d/polaric_aprsd
+rm /etc/init.d/polaric-aprsd
 rm /etc/rc0.d/K20polaric
 rm /etc/rc1.d/K20polaric
 rm /etc/rc2.d/S20polaric
