@@ -1,0 +1,55 @@
+INSTALLATION OF POLARIC-SERVER ON A DEBIAN LINUX PLATFORM
+
+
+APRS SERVER (POLARIC-APRSD)
+---------------------------
+
+install software packages (Ubuntu or Debian):
+   sun-java6-bin
+   librxtx-java (if you are going to use a TNC on a serial port)
+   scala-library 
+    (not in Debian Lenny - the package is available in testing/unstable and
+     can be installed on lenny-systems)
+    
+Unpack the tarball with the server software in /usr/local/polaric-aprsd
+(in /usr/local/polaric-aprsd - tar zxvf polaric-aprsd.tar.gz)
+
+In polaric-aprsd run install-script: sh install.sh
+It sets up a startup-script and a logrotate script
+
+Edit server.ini 
+(I am working on more documentation: http://hans.priv.no/la7eca/index.wc?id=aprsd)
+
+start the server: 
+/etc/init.d/polaric-aprsd start
+    
+
+WEB-CLIENT (MAP-SERVICE)
+------------------------
+
+install software packages (Ubuntu eller Debian):
+   apache2
+   php5
+   php5-gd
+   php5-mapscript
+    
+
+Apache2 config: 
+   a2enmod proxy
+   a2enmod proxy_http
+   
+   Add the following to the apache setup, e.g. in sites-enabled/000-default
+   
+   ProxyPass /aprs/srv http://localhost:8081
+   ProxyPass /aprs/srv/* http://localhost:8081
+   ProxyPassReverse /aprs/srv http://localhost:8081
+   
+   Comment out "Deny from All" in mods-enabled/proxy.conf
+   
+   (Note: We assume that DocumentRoot is set to /var/www/ and that the aprs
+    web application is installed under /var/www/aprs )
+   
+  
+Unpack the tarball containing the web application to /var/www/aprs
+(in /var/www - tar zxvf polaric-webapp.tar.gz)
+
