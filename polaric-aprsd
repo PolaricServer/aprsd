@@ -2,6 +2,7 @@
      HOME=/usr/local/polaric-aprsd
 CLASSPATH=$HOME/jcoord.jar:$HOME/aprs.jar:/usr/share/java/RXTXcomm.jar:/usr/share/java/scala-library.jar
 SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB0:/dev/ttyUSB1:/dev/ttyACM0:/dev/ttyACM1
+    FLAGS=-Djava.net.preferIPv4Stack=true
   LOGFILE=$HOME/logs/aprsd.log
   INIFILE=$HOME/server.ini
   PIDFILE=$HOME/daemon.pid
@@ -16,11 +17,21 @@ case "$1" in
          if start-stop-daemon --test --start --pidfile "$PIDFILE" --user root \
                  --startas "$JAVA" >/dev/null; then
              cd $HOME;\
-              $JAVA -Xverify:none -server $SERIALPORTS -cp $CLASSPATH \
+              $JAVA -Xverify:none -server $SERIALPORTS $FLAGS -cp $CLASSPATH \
               aprs.Main $INIFILE >> $LOGFILE  2>&1 &
              echo $! > $PIDFILE
              echo ""
              sleep 4;
+             
+             # Mapserver specific things 
+             rm -R /tmp/wms >& /dev/null
+             rm -R /tmp/wms_raster >& /dev/null
+             mkdir /tmp/wms
+             mkdir /tmp/wms_raster
+             chown www-data.www-data /tmp/wms
+             chown www-data.www-data /tmp/wms
+             
+             # Start webserver 
              apache2ctl restart 
              beep -f 800 -n -f 1100 -n -f 1500
 	 else
