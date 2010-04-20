@@ -16,6 +16,7 @@ public abstract class HttpServer extends NanoHTTPD
    private String       _timezone;
    protected String     _serverurl;
    private   String     _icon, _icondir, _adminuser, _updateusers;
+   protected   boolean    _infraonly;
 
            
    public static final String _encoding = "UTF-8";
@@ -37,6 +38,7 @@ public abstract class HttpServer extends NanoHTTPD
       _utmzone     = Integer.parseInt(config.getProperty("map.utm.zone", "33").trim());
       _icon        = config.getProperty("map.icon.default", "sym.gif").trim();
       _icondir     = config.getProperty("map.icon.dir", "icons").trim();
+      _infraonly   = config.getProperty("map.infraonly", "false").trim().matches("true|yes");
       _adminuser   = config.getProperty("user.admin","admin").trim();
       _updateusers = config.getProperty("user.update", "").trim();
       _serverurl   = config.getProperty("server.url", "/srv").trim();
@@ -119,8 +121,15 @@ public abstract class HttpServer extends NanoHTTPD
          ByteArrayOutputStream os = new ByteArrayOutputStream(1024);
          PrintWriter out = new PrintWriter(new OutputStreamWriter(os, _encoding));
          
+         /* Determine the View Filter. Currently, there are just two
+          * and they are hardcoded. The idea is to use a dictionary of
+          * View filters and look them up by name
+          */
+         String filtid = _infraonly ? "infra" : parms.getProperty("filter");
+         ViewFilter vfilt = ViewFilter.getFilter(filtid);
+         
          if ("/status".equals(uri))
-             type = _serveStatus(header, parms, out);
+             type = _serveStatus(header, parms, out, vfilt);
          else if ("/station".equals(uri))
              type = _serveStation(header, parms, out);
          else if ("/findstation".equals(uri))
@@ -128,7 +137,7 @@ public abstract class HttpServer extends NanoHTTPD
          else if ("/history".equals(uri))
              type = _serveStationHistory(header, parms, out);    
          else if ("/mapdata".equals(uri))
-             type = serveMapData(header, parms, out);
+             type = serveMapData(header, parms, out, vfilt, filtid);
          else if ("/addobject".equals(uri))
              type = _serveAddObject(header, parms, out);
          else if ("/deleteobject".equals(uri))
@@ -151,7 +160,7 @@ public abstract class HttpServer extends NanoHTTPD
    protected abstract String _serveAddObject (Properties header, Properties parms, PrintWriter out);
    protected abstract String _serveDeleteObject (Properties header, Properties parms, PrintWriter out);
    protected abstract String _serveDeleteAllObjects (Properties header, Properties parms, PrintWriter out);
-   protected abstract String _serveStatus (Properties header, Properties parms, PrintWriter out);
+   protected abstract String _serveStatus (Properties header, Properties parms, PrintWriter out, ViewFilter vf);
    protected abstract String _serveStationHistory (Properties header, Properties parms, PrintWriter out);
 
 
@@ -204,12 +213,13 @@ public abstract class HttpServer extends NanoHTTPD
 
 
 
-  
+  private int _seq = 0;
    
    /**
     * Produces XML (Ka-map overlay spec.) for plotting station/symbols/labels on map.   
     */
-   public String serveMapData(Properties header, Properties parms, PrintWriter out)
+   public String serveMapData(Properties header, Properties parms, PrintWriter out, 
+          ViewFilter vfilt, String filt)
    {  
         UTMRef uleft = null, lright = null;
         if (parms.getProperty("x1") != null) {
@@ -220,17 +230,21 @@ public abstract class HttpServer extends NanoHTTPD
           uleft = new UTMRef((double) x1, (double) x2, 'W', _utmzone); /* FIXME: Lat zone */
           lright = new UTMRef((double) x3, (double) x4, 'W', _utmzone);
         }
-
+        
+        /* Sequence number at the time of request */
+        _seq = (_seq+1) % 32000;
+        
         if (parms.getProperty("wait") != null) 
             Station.waitChange(uleft, lright);
             
         synchronized (this) {    
-        out.println("<overlay>");
+        out.println("<overlay seq=\""+_seq+"\"" +
+            (filt==null ? ""  : " view=\"" + filt + "\"") + ">");
         out.println("<meta name=\"utmzone\" value=\""+ _utmzone + "\"/>");
         out.println("<meta name=\"login\" value=\""+ getAuthUser(header) + "\"/>");
         out.println("<meta name=\"adminuser\" value=\""+ _adminuser.equals(getAuthUser(header)) + "\"/>");
         out.println("<meta name=\"updateuser\" value=\""+ authorizedForUpdate(header) + "\"/>");
-        
+            
         int i=0;
         for (Signs.Item s: Signs.getList())
         {
@@ -252,7 +266,9 @@ public abstract class HttpServer extends NanoHTTPD
             {
                if (s.getPosition() == null)
                    continue; 
-            
+               if (!vfilt.useObject(s))
+                   continue;
+                   
                UTMRef ref = toUTM(s.getPosition()); 
                if (ref == null) continue; 
             
@@ -269,7 +285,7 @@ public abstract class HttpServer extends NanoHTTPD
                                ((s instanceof AprsObject) && Main.ownobjects.hasObject(s.getIdent())  ? " own=\"true\"":"") +">");
                   out.println("   <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
         
-                  if (!s.isLabelHidden()) {
+                  if (vfilt.showIdent(s)) {
                      String style = "lobject";
                      if (s instanceof Station)
                         style = (!(((Station) s).getHistory().isEmpty()) ? "lmoving" : "lstill");
@@ -283,6 +299,10 @@ public abstract class HttpServer extends NanoHTTPD
                   
                   if (s instanceof Station)
                      printTrailXml(out, (Station) s);
+                  if (vfilt.showPath(s) && s.isInfra())
+                     printPathXml(out, (Station) s, uleft, lright);
+                  
+                  
                   out.println("</point>");
                }
             }
@@ -294,7 +314,29 @@ public abstract class HttpServer extends NanoHTTPD
    }
 
      
-   
+   private void printPathXml(PrintWriter out, Station s, UTMRef uleft, UTMRef lright)
+   {
+       UTMRef ity = toUTM(s.getPosition());
+       Set<String> from = s.getTrafficTo();
+       if (from == null || from.isEmpty())
+           return;
+       Iterator<String> it = from.iterator();    
+       while (it.hasNext()) 
+       {
+            AprsPoint p = _db.getItem(it.next());
+            if (p==null || !p.isInside(uleft, lright))
+                continue;
+            Reference x = p.getPosition();
+            UTMRef itx = toUTM(x);
+            if (itx != null) { 
+               out.print("<linestring stroke=\"1\" opacity=\"1.0\" color=\"009\">");
+               out.print((int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()));
+               out.print(", ");
+               out.print((int) Math.round(ity.getEasting())+ " " + (int) Math.round(ity.getNorthing()));
+               out.println("</linestring>");
+            }
+       }
+   }
    
    
    /** 
