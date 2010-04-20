@@ -67,6 +67,8 @@ public abstract class AprsPoint implements Serializable
         catch (Exception e) { return false; }
     }
     
+    public boolean isInfra() 
+       { return false; }
    
     public boolean isEmergency()
        { return (_altsym && _symbol=='!'); }
