@@ -70,7 +70,7 @@ public class History implements Iterable<History.Item>, Serializable
         Date now = new Date(); 
         _sum_speed += sp;
          
-        /* New report is newer than the last report - put it first*/
+        /* New report is newer than the last report - put it first */
         if ( _items.size() == 0 || t.getTime() >= _items.getFirst().time.getTime()) 
             _items.addFirst(new Item(t, p, sp, crs)); 
 
@@ -92,6 +92,7 @@ public class History implements Iterable<History.Item>, Serializable
     public List<Item> items()
        { return _items; }
        
+       
     public Item getFirst()
        { return _items.getFirst(); }  
 
@@ -104,22 +105,6 @@ public class History implements Iterable<History.Item>, Serializable
     }
     
 
-    
-    /* FIXME: this check should perhaps be done on raw packet history instead
-     * of this move-history. 
-     */
-    public synchronized boolean hasDuplicate(int depth, Reference pos, int speed)
-    {
-        int cnt = 0;
-        for (Item it:_items)
-           if (it.pos.toLatLng().distance(pos.toLatLng()) == 0 && it.speed == speed)
-              return true;
-           else if (cnt++ == depth)
-              break;
-       return false;
-    }
-    
-    
     
     protected synchronized void cleanUp(Date now)
     {
