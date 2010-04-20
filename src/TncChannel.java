@@ -56,6 +56,7 @@ public class TncChannel extends Channel implements Runnable
                 ":" + p.report + "\r" );
        else 
            _out.print(p.report+"\r");
+       _out.flush();    
     }
    
     
