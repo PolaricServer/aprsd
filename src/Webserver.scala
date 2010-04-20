@@ -279,8 +279,9 @@ package aprs {
     * Presents a status list over registered stations (standard HTML)
     */
    
-   def _serveStatus(hdr: Properties, parms: Properties, out: PrintWriter): String =
+   def _serveStatus(hdr: Properties, parms: Properties, out: PrintWriter, vfilt: ViewFilter): String =
    {
+       val infra = _infraonly || "infra".equals(parms.getProperty("filter"));
        val result: NodeSeq =
           <br/>
           <form>
@@ -292,7 +293,7 @@ package aprs {
           <table>
          {
             for ( x:AprsPoint <- _db.getAll()
-                  if x.isInstanceOf[Station]  ) yield
+                  if x.isInstanceOf[Station] && !vfilt.useObject(x)) yield
             {
                val s = x.asInstanceOf[Station]
                val moving = !s.getHistory().isEmpty()
@@ -377,7 +378,8 @@ package aprs {
              <div class="trblock">
              {  
                 var i=0
-                for (it <- items) yield {
+                if (items != null) 
+                 for (it <- items) yield {
                     i += 1
                     val xx = _db.getItem(it)
                     val linkable = (xx != null  && xx.visible() && xx.getPosition() != null)
@@ -386,6 +388,7 @@ package aprs {
                            "findAndShowStation('" + xx.getIdent() + "')"
                         else "" }> {it + " " } </span>
                 }
+                else null;
              }
              </div>
         
