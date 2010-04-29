@@ -29,7 +29,7 @@ case "$1" in
              mkdir /tmp/wms
              mkdir /tmp/wms_raster
              chown www-data.www-data /tmp/wms
-             chown www-data.www-data /tmp/wms
+             chown www-data.www-data /tmp/wms_raster
              
              # Start webserver 
              apache2ctl restart 
