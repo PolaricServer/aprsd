@@ -23,7 +23,7 @@ public interface StationDB
     
     public AprsPoint getItem(String id);
     
-    public void removeStation(String id);
+    public void removeItem(String id);
 
     public Station getStation(String id);
     
