@@ -49,6 +49,8 @@ public class TncChannel extends Channel implements Runnable
      */ 
     public void sendPacket(Packet p)
     {
+       if (_out == null)
+          return;
        if (p.thirdparty || (p.to != null && !p.to.equals(_myCall)))
            _out.print(
              "}" + p.from + ">" + p.to +
@@ -69,7 +71,7 @@ public class TncChannel extends Channel implements Runnable
         System.out.println("Serial port: "+_portName);
         CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(_portName);
         if ( portIdentifier.isCurrentlyOwned() )
-            System.out.println("*** Error: Port "+ _portName + " is currently in use");
+            System.out.println("*** ERROR: Port "+ _portName + " is currently in use");
         else
         {
             CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);
@@ -82,7 +84,7 @@ public class TncChannel extends Channel implements Runnable
                 return (SerialPort) commPort;
             }
             else
-                System.out.println("*** Error: Port " + _portName + " is not a serial port.");
+                System.out.println("*** ERROR: Port " + _portName + " is not a serial port.");
         }    
         return null; 
     }
@@ -159,12 +161,15 @@ public class TncChannel extends Channel implements Runnable
                       receivePacket(inp);
                    }
                    catch (java.io.IOException e) {
-                      if (_close) { System.err.println("*** Stopping TNC thread"); return; } 
+                      if (_close) { System.out.println("*** Stopping TNC thread"); return; } 
                       else continue;             
                    }
                }
            }
-
+           catch(NoSuchPortException e)
+           {
+                System.out.println("*** ERROR: serial port " + _portName + " not found");
+           }
            catch(Exception e)
            {   
                 e.printStackTrace(System.out); 
