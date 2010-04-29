@@ -51,7 +51,8 @@ public class AprsObject extends AprsPoint implements Serializable
                                     String descr, char sym, boolean altsym)
     { 
          /* Should try to share code with Station class ?*/
-         if (_symbol != sym || _altsym != altsym)
+         if (_symbol != sym || _altsym != altsym || 
+              (_position == null && newpos != null))
             setChanging();
 
           if (_position != null && _updated != null) {
@@ -59,6 +60,7 @@ public class AprsObject extends AprsPoint implements Serializable
               if (distance > 10)
                  setChanging();
           }
+          
          updatePosition(ts, newpos);        
          setDescr(descr); 
          _symbol = sym; 
