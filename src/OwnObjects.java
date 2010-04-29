@@ -93,7 +93,7 @@ public class OwnObjects implements Runnable
 
          /* Ignore if object already exists.
           * FIXME: If object exists, we may take over the name??  */
-         if (obj == null ||
+         if (obj == null || !obj.visible() ||
              (_forceUpdate && (_ownObjects.contains(id) || obj.getOwner() == _myself)))
          {
             if (id.length() > 9)
@@ -105,6 +105,7 @@ public class OwnObjects implements Runnable
             sendObjectReport(obj, false);
             return true;
          }
+       
          System.out.println("WARNING: Object "+sym+" already exists somewhere else");
          return false;
     }
@@ -115,8 +116,8 @@ public class OwnObjects implements Runnable
         for (String oid: _ownObjects) {
            AprsObject obj = (AprsObject) _db.getItem(oid);
            if (obj!=null) {
-              obj.kill();
               sendObjectReport(obj, true);
+              obj.kill();
            }
         }
         _ownObjects.clear();
@@ -134,6 +135,9 @@ public class OwnObjects implements Runnable
         return true;
     }
 
+    protected void finalize() throws Throwable {
+       deleteAll(); 
+    }
 
     public synchronized boolean hasObject(String id)
     {
