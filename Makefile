@@ -13,7 +13,7 @@
 ##########################################################################
   CLASSDIR = classes
  CLASSPATH = jcoord.jar:/usr/share/java/RXTXcomm.jar
-INSTALLDIR = /var/www/test/WEB-INF/lib
+INSTALLDIR = /usr/local/polaric-aprsd
 JSPINSTALL = /var/www/test/bull/jsp
      JAVAC = javac -target 1.5
        JAR = jar
@@ -60,7 +60,7 @@ core:
 .PHONY : scala
 scala:            
 	scalac -d $(TDIR) -classpath $(LIBDIR):$(CLASSPATH) src/*.scala
-	
 
+	
 clean:
 	rm -R $(LIBDIR) ./*~ src/*~
