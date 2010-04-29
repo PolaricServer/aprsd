@@ -28,6 +28,18 @@ public class ViewFilter {
        { return !x.isLabelHidden(); }
 
 
+  public static class Callsign extends ViewFilter
+  {      
+      protected String _call;
+       
+      public Callsign(String c)
+         { _call = c; }
+         
+        public boolean useObject(AprsPoint x)
+          { return x.getIdent().matches(_call); }
+  }
+  
+  
   public static class Tracking extends ViewFilter
   {  
        public boolean showIdent(AprsPoint x)
@@ -72,6 +84,7 @@ public class ViewFilter {
   static {
       _map.put("all", new ViewFilter());
       _map.put("track", new Tracking());
+      _map.put("le", new Callsign("LE.*"));
       _map.put("infra", new Infra("LD.*"));
       _map.put("ainfra", new Infra(null));
       _map.put("moving", new Moving());
