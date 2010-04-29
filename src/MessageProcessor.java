@@ -82,7 +82,7 @@ public class MessageProcessor implements Runnable
    public MessageProcessor(Properties config)
    {
        _myCall = config.getProperty("message.mycall", "N0CALL").trim();
-       _key = config.getProperty("message.auth.key", "NOKEY");
+       _key = config.getProperty("message.auth.key", "NOKEY").trim();
        _thread = new Thread(this);
        _thread.start();
    }  
@@ -262,7 +262,7 @@ public class MessageProcessor implements Runnable
               }
             }
 
-         } catch (Exception e) {System.out.println("*** WARNING: "+e);}
+         } catch (Exception e) { System.out.println("*** MSGPROCESSOR WARNING: "+e); }
        }
     }
 
