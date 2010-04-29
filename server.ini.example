@@ -6,14 +6,10 @@ user.update = la7eca|le2xa|admin|vfs
 
 #######################################
 # APRS IS server to get input from
-#######################################
-#inetchannel.host = srv.aprs.la 
-inetchannel.host = ahubswe.net
+####################################### 
+inetchannel.host = aprs.la3t.no
 inetchannel.port = 14580 
-inetchannel.filter =  r/69/17/650 r/62/7/460
 inetchannel.on   = true
-# inetchannel.host = la3t.hamradio.no
-# inetchannel.port = 10151
 inetchannel.user = LA3T-1 
 inetchannel.pass = 3319 
 
