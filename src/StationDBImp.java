@@ -103,7 +103,7 @@ public class StationDBImp implements StationDB, Runnable
              {
                 System.out.println("        Removing: "+st.getIdent()); 
                 // stn.remove();
-                removeStation(st.getIdent());
+                removeItem(st.getIdent());
                 _routes.removeNode(st.getIdent());
              } 
          }    
@@ -119,7 +119,7 @@ public class StationDBImp implements StationDB, Runnable
     }
     
     
-    public synchronized void removeStation(String id)
+    public synchronized void removeItem(String id)
        {   _map.remove(id);
            _hasChanged = true; }
         
