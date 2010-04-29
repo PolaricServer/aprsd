@@ -155,7 +155,7 @@ public static class Status implements Serializable
      
      
     public void setUpdated(Date ts)
-      { _updated = ts; }
+      { _updated = ts; _expired = false; }
       
         
     public synchronized void update(Date ts, Reference newpos, int crs, int sp, int alt, 
