@@ -115,8 +115,8 @@ public class RouteInfo implements Serializable
             Edge e = getEdge(stn, x);
             if (e.ts.getTime() < agelimit.getTime()) {
                it.remove();
-               // _nodes.get(x).to.remove(stn);
-               removeEdge(x, stn);
+               _nodes.get(x).to.remove(stn);
+               // removeEdge(x, stn);
             }
        }    
        it = getToEdges(stn).iterator();
@@ -125,8 +125,8 @@ public class RouteInfo implements Serializable
            Edge e = getEdge(x, stn);
            if (e.ts.getTime() < agelimit.getTime()) {
               it.remove(); 
-             // _nodes.get(x).from.remove(stn); 
-             removeEdge(x, stn);
+             _nodes.get(x).from.remove(stn); 
+             // removeEdge(x, stn);
           }
        }  
     }
