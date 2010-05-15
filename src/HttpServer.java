@@ -291,7 +291,14 @@ public abstract class HttpServer extends NanoHTTPD
                         style = (!(((Station) s).getHistory().isEmpty()) ? "lmoving" : "lstill");
                      if (s.isEmergency())
                         style += " lflash";
-                           
+                        
+                     if (vfilt instanceof ViewFilter.Infra) {
+                        if (s instanceof Station && ((Station)s).isIgate())
+                           style += " igate";
+                        if (s instanceof Station && ((Station)s).isWideDigi())
+                           style += " wdigi";
+                     }
+                                                   
                      out.println("   <label style=\""+style+"\">");
                      out.println("       "+s.getDisplayId());
                      out.println("   </label>"); 
