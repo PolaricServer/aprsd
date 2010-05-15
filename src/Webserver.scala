@@ -426,8 +426,15 @@ package aprs {
                   {simpleLabel("cspeed", "leftlab", "Bevegelse:", _directionIcon(s.getCourse())) }}
 
             { simpleLabel("hrd", "leftlab", "Sist rapportert:", TXT( df.format(x.getUpdated()))) }
-                
-            { if (simple) 
+            
+            { var txt = "";
+              if (s.isIgate()) txt += "IGATE "; 
+              if (s.isWideDigi()) txt += "Wide-Digi";
+              if ((s.isIgate() || s.isWideDigi()) && simple)
+                { simpleLabel("infra", "leftlab", "Infrastruktur:", TXT(txt)) } else null 
+            }
+            
+            { if (simple)        
                <div id="traffic">
                   { if (s != null && s.isInfra() )
                      {  <label for="hrds" class="leftlab">Trafikk fra:</label>
@@ -439,6 +446,8 @@ package aprs {
                </div>
                else null                    
             }
+            
+           
                                  
             { if (edit && canUpdate)
                   <div>
