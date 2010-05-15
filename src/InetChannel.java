@@ -112,8 +112,7 @@ public class InetChannel extends Channel implements Runnable
            catch(Exception e)
            {    System.out.println("*** Error in connection to APRS server '"+_host+"' : "+e); 
                 e.printStackTrace(System.out); 
-                retry = MAX_RETRY - 1; 
-                // If other error, we retry only once before giving up.
+                retry += 2;
            }
         
            try { if (sock != null) sock.close(); } catch (Exception e) {}
