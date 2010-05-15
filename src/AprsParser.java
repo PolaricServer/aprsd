@@ -22,9 +22,11 @@ import uk.me.jstott.jcoord.*;
 
 public class AprsParser implements Channel.Receiver
 { 
+    /* Standard APRS position report format */
     private static Pattern _stdPat = Pattern.compile
        ("(\\d+\\.\\d+)([NS])(\\S)(\\d+\\.\\d+)([EW])(\\S)\\s*(.*)");
 
+    /* Weather report format */
     private static Pattern _wxPat = Pattern.compile
        ("(\\d\\d\\d|...)/(\\d\\d\\d|...)g(\\d\\d\\d|...)t(\\d\\d\\d|...).*");
                 
@@ -143,6 +145,8 @@ public class AprsParser implements Channel.Receiver
                 if (!skip) 
                   { skip=false; 
                     _db.getRoutes().addEdge(from.getIdent(), to.getIdent());
+                    if (i>0)
+                       to.setWideDigi(true);
                   }
                 from = to;
             }
@@ -150,13 +154,18 @@ public class AprsParser implements Channel.Receiver
                skip = true;
         }
         
-        if ((plen >= 2) && pp[plen-2].matches("qA.")) {
+        /* Has packet been gated through APRS-IS?
+         * The last node in path is igate
+         */
+        if ((plen >= 2) && pp[plen-2].matches("qA.")) 
+        {
            if (tindex == -1) {
                Station to = _db.getStation(pp[plen-1]);
-               if (to != null) 
-                   _db.getRoutes().addEdge(s.getIdent(), to.getIdent());           
-                   /* Igate direct  */
-
+               if (to != null) {
+                   _db.getRoutes().addEdge(s.getIdent(), to.getIdent());  
+                   to.setIgate(true);         
+                   /* Igate direct (has not been digipeated) */
+               }  
            }
            else {
                Station last = null;
@@ -165,11 +174,14 @@ public class AprsParser implements Channel.Receiver
                Station x = _db.getStation(pp[plen-1]);
                if (last != null && x != null) {
                   _db.getRoutes().addEdge(last.getIdent(), x.getIdent());
-                  /* Igate */
+                  x.setIgate(true);
+                  /* Path from last digi to igate */
                }
            }
        }
     } 
+    
+    
     
 
     private void parseMessage(String msg, Station station)
