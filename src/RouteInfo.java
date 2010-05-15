@@ -67,19 +67,17 @@ public class RouteInfo implements Serializable
     { 
         _nodes.remove(stn); 
     }
-              
-              
+                  
               
               
     private synchronized Set<String> clean(Set<String> s)
     {
        Iterator<String> it = s.iterator();   
-       while ( it.hasNext() ) {
-            String key = it.next();
-            if (!_nodes.containsKey(key))
-               it.remove();
-       } 
-       return s;   
+       Set<String> x = new HashSet();
+       for (String key: s)
+            if (_nodes.containsKey(key))
+              x.add(key);
+       return x;   
     }
                 
                 
