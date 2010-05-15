@@ -61,11 +61,11 @@ public static class Status implements Serializable
      * Other variables (presentation, storage, etc.)
      */
 
-    private String[]    _trailcolor = new String[] {"dddddd","ff0000"};
+    private String[]    _trailcolor = new String[] {"dddddd", "ff0000"};
     private boolean     _autotrail = true;
     private boolean     _expired = false; 
     private int         _report_ignored = 0;
-
+    private boolean     _igate, _wdigi;
        
        
     public Station(String id)
@@ -84,6 +84,22 @@ public static class Status implements Serializable
        { return getTrafficFrom() != null && !getTrafficFrom().isEmpty(); }
        
        
+    public boolean isIgate()
+       { return _igate; }
+       
+       
+    public void setIgate(boolean x)
+       { _igate = x; }
+       
+       
+    public boolean isWideDigi()
+       { return _wdigi; }
+       
+       
+    public void setWideDigi(boolean x)
+       { _wdigi = x; }       
+    
+    
     public synchronized History.Item getHItem()
        { return new History.Item(_updated, _position, _speed, _course); }
        
