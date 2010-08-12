@@ -96,10 +96,17 @@ public abstract class Channel
     public abstract void sendPacket(Channel.Packet p);
     
     
+    /**
+     * Configure receivers. 
+     * Each channel can have up to two receivers (subscribers). 
+     */
     public void setReceivers(Receiver r1, Receiver r2)
        { _r1 = r1; _r2 = r2; }
            
     
+    /**
+     * Convert text string to packet structure. 
+     */
     private Packet string2packet(String packet)
     {
         Matcher m = _ppat.matcher(packet);
@@ -138,7 +145,11 @@ public abstract class Channel
     }
     
     
-    
+    /**
+     * Process incoming packet. 
+     * To be called from subclass. Parses packet, updates heard table, checks for
+     * duplicates and if all is ok, deliver packet to receivers.
+     */
     protected void receivePacket(String packet)
     {
        Packet p = string2packet(packet);
@@ -156,6 +167,8 @@ public abstract class Channel
              _r2.receivePacket(p);
        }
     }
+    
+    public String toString() {return "Channel"; }
     
 }
 
