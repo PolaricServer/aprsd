@@ -2,7 +2,7 @@ httpserver.port = 8081
 timezone = Europe/Oslo
 
 user.admin = admin
-user.update = la7eca|le2xa|admin|vfs 
+user.update = xxx 
 
 #######################################
 # APRS IS server to get input from
@@ -10,24 +10,24 @@ user.update = la7eca|le2xa|admin|vfs
 inetchannel.host = aprs.la3t.no
 inetchannel.port = 14580 
 inetchannel.on   = true
-inetchannel.user = LA3T-1 
-inetchannel.pass = 3319 
+inetchannel.user = XXXX 
+inetchannel.pass = 0123 
 
 
 #######################################
 # APRS objects setup
 #######################################
 #objects.file = objects
-objects.mycall = LA3T-1
+objects.mycall = XXXX
 objects.transmit.period = 240 
 objects.forceupdate = true
 
 #######################################
 # APRS Messages and commands
 #######################################
-message.mycall = LA3T-1 
-message.auth.key = PolaricHacker 
-remotectl.mycall = LA3T-1 
+message.mycall = XXXX 
+message.auth.key = ****** 
+remotectl.mycall = XXXX 
 remotectl.on = true
 
 
