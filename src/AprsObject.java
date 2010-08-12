@@ -37,6 +37,14 @@ public class AprsObject extends AprsPoint implements Serializable
        }
         
 
+    public synchronized void reset()
+    {
+       _killed = true;
+       super.reset();
+    }
+    
+    
+    
     public String getIdent()
        { return _ident; }
        
@@ -47,6 +55,14 @@ public class AprsObject extends AprsPoint implements Serializable
        { return _owner; }
        
        
+    public synchronized void update()
+    {  
+        if (!_killed)
+            setChanging();
+        _killed = false;  
+    }
+    
+    
     public synchronized void update(Date ts, Reference newpos, int crs, int sp, int alt, 
                                     String descr, char sym, boolean altsym)
     { 
