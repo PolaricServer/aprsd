@@ -105,6 +105,11 @@ public abstract class AprsPoint implements Serializable
        { return _alias; }
                
         
+    public synchronized void reset()
+    {
+       _updated  = new Date(0);
+       setChanging();
+    }
     
     public synchronized boolean setAlias(String a)
     {  
