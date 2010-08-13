@@ -168,7 +168,9 @@ public abstract class HttpServer extends NanoHTTPD
          res.addHeader("Content-length", "" + is.available()); 
          return res; 
        }
-       catch (IOException e) {return null;} 
+       catch (Exception e) 
+          { System.out.println("*** HTTP REQ exception: "+e.getMessage()); 
+            return null;} 
        finally { _requests--; }
    }
 
