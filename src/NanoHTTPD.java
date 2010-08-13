@@ -172,10 +172,12 @@ public class NanoHTTPD
 	// Socket & server code
 	// ==================================================
 
+
 	/**
 	 * Starts a HTTP server to given port.<p>
 	 * Throws an IOException if the socket is already in use
-	 */
+	 */        
+        private long tid = 0;
 	public NanoHTTPD( int port ) throws IOException
 	{
 		myTcpPort = port;
@@ -193,7 +195,7 @@ public class NanoHTTPD
 					catch ( IOException ioe )
 					{}
 				}
-			});
+			}, "NanoHTTP"+(tid++) );
 		t.setDaemon( true );
 		t.start();
 	}
@@ -246,13 +248,14 @@ public class NanoHTTPD
 	/**
 	 * Handles one session, i.e. parses the HTTP request
 	 * and returns the response.
-	 */
+	 */  
+        private long tid1 = 0;
 	private class HTTPSession implements Runnable
 	{
 		public HTTPSession( Socket s )
 		{
 			mySocket = s;
-			Thread t = new Thread( this );
+			Thread t = new Thread( this, "HTTPSession-"+(tid1++) );
 			t.setDaemon( true );
 			t.start();
 		}
