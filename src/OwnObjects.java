@@ -29,17 +29,17 @@ public class OwnObjects implements Runnable
     private StationDB       _db;
     private BufferedReader  _rd;
     private StringTokenizer _next;
-    private Set<String>    _ownObjects = new LinkedHashSet<String>();
+    private Set<String>     _ownObjects = new LinkedHashSet<String>();
     private Thread          _thread;
     private Station	    _myself;
     private boolean         _forceUpdate;
+    private int              _tid;
     
     
     public OwnObjects(Properties config, StationDB db) 
     {
         _allowRf = config.getProperty("objects.rfgate.allow", "false").trim().matches("true|yes");
         _myCall = config.getProperty("objects.mycall", "N0CALL").trim();
-        _file = config.getProperty("objects.file", null);
         _txPeriod = Integer.parseInt(config.getProperty("objects.transmit.period", "0").trim());
         _forceUpdate = config.getProperty("objects.forceupdate", "false").trim().matches("true|yes");
         _db = db;
@@ -51,42 +51,16 @@ public class OwnObjects implements Runnable
            _myself = _db.newStation(_myCall);
            
         /* Should not expire as long as we have objects */
-        
-        if (_file != null)
-           try {
-              _rd = new BufferedReader(new FileReader(_file));
-              while (_rd.ready())
-              {
-                  String line = _rd.readLine();
-                  if (!line.startsWith("#")) 
-                  {                 
-                      String[] x = line.split(",\\s*");  
-                      if (x.length < 5)
-                          continue;
-                      if (!x[0].matches("[0-9]{2}[a-zA-Z]") || 
-                          !x[1].matches("[0-9]{6}") || !x[2].matches("[0-9]{7}"))
-                          continue;    
-                      double easting = Long.parseLong(x[1]);
-                      double northing = Long.parseLong(x[2]);
-                      Reference pos = new UTMRef( Integer.parseInt( x[0].substring(0,2)), 
-                                                  x[0].charAt(2),
-                                                  easting, northing);                       
-
-                      String sym = x[4].trim();
-                      add (x[3].trim(), pos, sym.charAt(0), sym.charAt(1), x[5].trim());
-                  }
-              }      
-           }
-           catch (Exception e) 
-                { System.out.println("OBJECTLIST WARNING: "+e); }
-    
-           if (_txPeriod > 0) {
-              _thread = new Thread(this);
-              _thread.start();
-           }
+           
+         if (_txPeriod > 0) {
+            _thread = new Thread(this, "OwnObjects-"+(_tid++));
+            _thread.start();
+         }
     }  
        
-
+    public int nItems() 
+        { return _ownObjects.size(); }
+    
     public synchronized boolean add(String id, Reference pos, char symtab, char sym, String comment)
     {
          AprsObject obj = (AprsObject) _db.getItem(id);
@@ -111,7 +85,7 @@ public class OwnObjects implements Runnable
     }
     
     
-    public synchronized void deleteAll()
+    public synchronized void clear()
     {
         for (String oid: _ownObjects) {
            AprsObject obj = (AprsObject) _db.getItem(oid);
@@ -135,9 +109,13 @@ public class OwnObjects implements Runnable
         return true;
     }
 
+
+
+
     protected void finalize() throws Throwable {
-       deleteAll(); 
+       // deleteAll(); 
     }
+
 
     public synchronized boolean hasObject(String id)
     {
@@ -211,6 +189,8 @@ public class OwnObjects implements Runnable
        chan.sendPacket(p);
     }
 
+
+
     protected void sendObjectReport(AprsObject obj, boolean delete)
     {
         sendObjectReport(_inetChan, obj, delete);
@@ -219,6 +199,30 @@ public class OwnObjects implements Runnable
     }
     
     
+    void save(ObjectOutput ofs)
+    { 
+       try { 
+          ofs.writeObject(_ownObjects.size());
+          for (String s: _ownObjects) {
+              System.out.println("Save ownobj: "+s);
+              ofs.writeObject(s); 
+          }
+       } catch (Exception e) {} 
+    }
+
+
+    void restore(ObjectInput ifs)
+     {
+        try { 
+            int n = (Integer) ifs.readObject(); 
+            for (int i=0; i<n; i++) {
+                String x = (String) ifs.readObject();
+                System.out.println("Restore ownobj: "+x);
+                _ownObjects.add(x); 
+            }
+        } catch (Exception e) {} 
+     }
+
     
     public void run() 
     {
