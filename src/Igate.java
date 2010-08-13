@@ -33,7 +33,10 @@ public class Igate implements Channel.Receiver
         _myCall = config.getProperty("igate.mycall", "N0CALL").trim();
     }  
        
-       
+    /**
+     * Configure the igate with the channels to gate between. 
+     * must be one RF channel and one APRS-IS channel.
+     */   
     public void setChannels(Channel rf, Channel inet)
     {
         _inetChan = inet;
@@ -95,7 +98,9 @@ public class Igate implements Channel.Receiver
     }
     
     
-    
+    /**
+     * Receive and gate an APRS packet.
+     */
     public void receivePacket(Channel.Packet p)
     {
         if (p.source == _rfChan) {
@@ -107,7 +112,6 @@ public class Igate implements Channel.Receiver
         else
            if ( _allowRf )
               gate_to_rf(p);
-              
     }
     
 }
