@@ -82,7 +82,7 @@ public class InetChannel extends Channel implements Runnable
                System.out.println("*** Connection to APRS server '"+_host+"' established");
                BufferedReader rder = new BufferedReader(new InputStreamReader(sock.getInputStream(), _encoding));
                _out = new PrintWriter(new OutputStreamWriter(sock.getOutputStream(), _encoding));
-               _out.print("user "+_user +" pass "+_pass+ " vers Polaric Server\r\n");
+               _out.print("user "+_user +" pass "+_pass+ " vers Polaric APRSD\r\n");
                if (_filter.length() > 0)
                    _out.print("# filter "+_filter+ "\r\n"); 
                _out.flush();
@@ -122,6 +122,6 @@ public class InetChannel extends Channel implements Runnable
         System.out.println("*** Couldn't connect to APRS server '"+_host+"' - giving up");        
     }
  
-
+    public String toString() {return _host+":"+_port+", userid="+_user; }
 }
 
