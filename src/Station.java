@@ -121,6 +121,14 @@ public static class Status implements Serializable
         { return _status; }
     
     
+    public synchronized void reset()
+    {  
+        _history = new History();
+        _db.getRoutes().removeNode(this.getIdent());
+        super.reset(); 
+    }
+          
+    
     public synchronized History getHistory() 
         { return _history; }        
       
@@ -170,8 +178,10 @@ public static class Status implements Serializable
     }
      
      
-    public void setUpdated(Date ts)
+     
+    public synchronized void setUpdated(Date ts)
       { _updated = ts; _expired = false; }
+      
       
         
     public synchronized void update(Date ts, Reference newpos, int crs, int sp, int alt, 
