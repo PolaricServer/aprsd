@@ -17,7 +17,7 @@ package aprs {
 
 
    val doctype = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN \">";
-
+   val _time = new Date();
 
 
    private def htmlBody (content : NodeSeq) : Node =
@@ -38,6 +38,7 @@ package aprs {
            <label for={id} class={cls}>{lbl}</label>
            <label id={id}> {content}</label>
            <br/>;
+           
 
    private def TXT(t:String): NodeSeq = <xml:group>{t}</xml:group>
    
@@ -50,21 +51,33 @@ package aprs {
           </input>
 
 
-// checked={if (check) "true" else "false"}
+  /**
+   * Modify a function to execute only if user is authorized for update. 
+   * Runs original function if authorized. Return error message if not. 
+   */
+  private def IF_AUTH( func: (Properties, Properties) => NodeSeq ) 
+                    : (Properties, Properties) => NodeSeq = 
+  {
+      def wrapper(hdr: Properties, parms: Properties) : NodeSeq =
+        if (authorizedForUpdate(hdr))
+           func(hdr, parms)
+        else
+           <h2>Du er ikke autorisert for denne operasjonen</h2>
+      
+      wrapper
+  }
 
 
    /**
-    * Generic HTML form method
-    * Field content and action to be performed are given as function-arguments (closures)
+    * Generic HTML form method.
+    * Field content and action to be performed are given as function-arguments
     */
    private def htmlForm( hdr: Properties, parms: Properties,
                          prefix : NodeSeq,
                          fields : (Properties, Properties) => NodeSeq,
                          action : (Properties, Properties) => NodeSeq ) : NodeSeq =
    {
-        val admin = true
-        
-        if (admin && parms.getProperty("update") != null) 
+        if (parms.getProperty("update") != null) 
            <div><script source="javascript">setTimeout('window.close()', 2000);</script>
            { action(hdr, parms) }
            </div>;
@@ -77,11 +90,7 @@ package aprs {
            </fieldset>
 
            <input type="submit" onclick="window.close()" id="cancel" value="Avbryt"/>
-           {  if (admin)
-                 <input type="submit" name="update" id="update" value="Oppdater"/>
-              else
-                 null
-           }
+           <input type="submit" name="update" id="update" value="Oppdater"/>
            </form>
    }
 
@@ -111,7 +120,7 @@ package aprs {
         try {
            if (x != null && y != null)
                new UTMRef( x.toDouble, y.toDouble,
-                        if (utmnz==null) 'W' else utmz(0),
+                        if (utmnz==null) 'W' else utmnz(0),
                         if (utmz==null) _utmzone else utmz.toInt )  /* FIXME: Lat zone */
            else
                null
@@ -140,7 +149,7 @@ package aprs {
    
    
    /**
-    * HTML form elements (fields) for entering a UTM reference
+    * HTML form elements (fields) for entering a UTM reference.
     */
    private def utmForm(nzone: Char, zone: Int) : NodeSeq =
        <input id="utmz" name="utmz" type="text" size="2" maxlength="2" value={zone.toString} />
@@ -150,6 +159,55 @@ package aprs {
 
 
 
+
+   /** 
+    * Admin interface. 
+    * To be developed further...
+    */
+   def _serveAdmin(hdr: Properties, parms: Properties, out: PrintWriter) : String =
+   {   
+       val cmd = parms.getProperty("cmd")
+       
+       def action(hdr: Properties, parms: Properties): NodeSeq =
+          if (!authorizedForAdmin(hdr))
+              <h3>Du er ikke autorisert for admin operasjoner</h3>
+          else if ("gc".equals(cmd)) {
+              _db.garbageCollect()
+              <h3>GC, ok</h3>
+          }
+          else if ("clearobj".equals(cmd)) {
+              _db.getOwnObjects().clear()
+              <h3>Clear own objects, ok</h3>
+          }
+          else if ("clearlinks".equals(cmd)) {
+              _db.getRoutes().clear()
+              <h3>Clear link information, ok</h3>    
+          }
+          else if ("info".equals(cmd))    
+              <h3>Status info for Polaric APRSD</h3>
+              <fieldset>
+              { simpleLabel("items", "leftlab", "Server kjørt siden:", TXT(""+_time)) }
+              { simpleLabel("items", "leftlab", "Antall APRS enheter:", TXT(""+_db.nItems())) }
+              { simpleLabel("items", "leftlab", "Antall forbindelser:", TXT(""+_db.getRoutes().nItems()+", "+_db.getRoutes.nItemsX())) }
+              { simpleLabel("items", "leftlab", "Egne objekter:", TXT(""+_db.getOwnObjects().nItems())) }   
+              { simpleLabel("items", "leftlab", "Antall aktive Tråder:", TXT(""+(Thread.activeCount()-4))) }  
+              { simpleLabel("items", "leftlab", "Antall HTTP klienter:", TXT(""+_requests)) }  
+              { simpleLabel("items", "leftlab", "Antall HTTP forespørsler:", TXT(""+_reqNo)) }   
+              { simpleLabel("freemem", "leftlab", "Brukt minne:", 
+                  TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
+              <br/>
+              { simpleLabel("ch1", "leftlab", "Kanal 1 (APRS-IS):", TXT(""+Main.ch1)) } 
+              { simpleLabel("ch2", "leftlab", "Kanal 2 (TNC):", TXT(""+Main.ch2)) }    
+              </fieldset>       
+          else
+             <h3>Ukjent kommando</h3>
+             
+        printHtml (out, htmlBody(action(hdr, parms)));    
+   }
+   
+   
+   
+   
    /**
     * Delete APRS object.
     */          
@@ -162,7 +220,7 @@ package aprs {
        def fields(hdr: Properties, parms: Properties): NodeSeq =
            <label for="objid" class="lleftlab">Objekt ID:</label>
            <input id="objid" name="objid" type="text" size="9" maxlength="9"
-              value={if (id==null) "" else id} />;
+              value={if (id==null) "" else fixText(id)} />;
       
       
        def action(hdr: Properties, parms: Properties): NodeSeq =
@@ -176,27 +234,38 @@ package aprs {
               else
                   <h3>Fant ikke objekt: {id}</h3>
           }  
-       printHtml (out, htmlBody (htmlForm(hdr, parms, prefix, fields, action)))
+          
+       printHtml (out, htmlBody (htmlForm(hdr, parms, prefix, fields, IF_AUTH(action) )))
    }          
 
 
 
-   /**
-    * Delete all own APRS objects.
-    */          
-   def _serveDeleteAllObjects(hdr: Properties, parms: Properties, out: PrintWriter) : String =        
+
+   def _serveResetInfo(hdr: Properties, parms: Properties, out: PrintWriter) : String =
    {
-      def action(hdr: Properties, parms: Properties): NodeSeq =
-      {
-           Main.ownobjects.deleteAll()
-           <h3>Alle objekt slettet!</h3>
-      }
-      printHtml (out, htmlBody (htmlForm (hdr, parms,
-           <h2>Slett alle objekter</h2>,
-           (_,_)=> <p>Du vil slette alle egne objekter - er du sikker?</p>,
-           action)))
-   }
-    
+       val id = parms.getProperty("objid")
+       val prefix = <h2>Nullstill info om stasjon/objekt</h2>
+       
+       def fields(hdr: Properties, parms: Properties): NodeSeq =
+           <label for="objid" class="lleftlab">Objekt ID:</label>
+           <input id="objid" name="objid" type="text" size="9" maxlength="9"
+              value={if (id==null) "" else id} />;
+      
+      
+       def action(hdr: Properties, parms: Properties): NodeSeq =
+          if (id == null) {
+              <h3>Feil:</h3>
+              <p>må oppgi 'objid' som parameter</p>;
+          }
+          else {
+             val x = _db.getItem(id);
+             if (x != null)
+                x.reset();
+             <h3>Info om objekt nullstilt!</h3>
+          }  
+       printHtml (out, htmlBody (htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
+   }          
+
 
 
              
@@ -218,6 +287,9 @@ package aprs {
             <label for="objsym" class="lleftlab">Symbol:</label>
             <input id="osymtab" name="osymtab" type="text" size="1" maxlength="1" value="/" />
             <input id="osym" name="osym" type="text" size="1" maxlength="1" value="c" />
+            <br/>      
+            <label for="descr" class="lleftlab">Beskrivelse:</label>
+            <input id="descr" name="descr" type="text" size="30" maxlength="40"/>
             <br/>
             <label for="utmz" class="lleftlab">Pos (UTM): </label>
             {  if (pos==null)
@@ -237,9 +309,11 @@ package aprs {
             else {
                val osymtab = parms.getProperty("osymtab")
                val osym  = parms.getProperty("osym")
+               val otxt = parms.getProperty("descr")
                if ( Main.ownobjects.add(id, pos,
                       if (osymtab==null) '/' else osymtab(0),
-                      if (osym==null) 'c' else osym(0), "" ) )
+                      if (osym==null) 'c' else osym(0),
+                      if (otxt==null) "" else otxt) )
                   
                   <h2>Objekt registrert</h2>
                   <p>ident={"'"+id+"'"}<br/>pos={showUTM(pos) }</p>;
@@ -248,28 +322,28 @@ package aprs {
                   <p>Objekt '{id}' er allerede registrert av noen andre</p>
            };
             
-        printHtml (out, htmlBody (htmlForm(hdr, parms, prefix, fields, action)))
+        printHtml (out, htmlBody (htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
     }
 
 
    def _directionIcon(direction:Int): NodeSeq = 
         direction match {
           case x if !(22 until 337 contains x) =>
-              <div><img src= {_serverurl + "/dicons/dN.png"}/> N</div>
+              <div><img src= {"srv/dicons/dN.png"}/> N</div>
           case x if (22 until 67 contains x) =>
-              <div><img src= {_serverurl + "/dicons/dNE.png"}/> NE</div>
+              <div><img src= {"srv/dicons/dNE.png"}/> NE</div>
           case x if (67 until 112 contains x) =>
-              <div><img src= {_serverurl + "/dicons/dE.png"}/> E</div>
+              <div><img src= {"srv/dicons/dE.png"}/> E</div>
           case x if (112 until 157 contains x) =>
-              <div><img src= {_serverurl + "/dicons/dSE.png"}/> SE</div>
+              <div><img src= {"srv/dicons/dSE.png"}/> SE</div>
           case x if (157 until 202 contains x) =>
-              <div><img src= {_serverurl + "/dicons/dS.png"}/> S</div>
+              <div><img src= {"srv/dicons/dS.png"}/> S</div>
           case x if (202 until 247 contains x) =>
-              <div><img src= {_serverurl + "/dicons/dSW.png"}/> SW</div>
+              <div><img src= {"srv/dicons/dSW.png"}/> SW</div>
           case x if (247 until 292 contains x) =>
-              <div><img src= {_serverurl + "/dicons/dW.png"}/> W</div>
+              <div><img src= {"srv/dicons/dW.png"}/> W</div>
           case x if (292 until 337 contains x) =>
-              <div><img src= {_serverurl + "/dicons/dNW.png"}/> NW</div>
+              <div><img src= {"srv/dicons/dNW.png"}/> NW</div>
           case _ => null;
       }
 
@@ -293,7 +367,7 @@ package aprs {
           <table>
          {
             for ( x:AprsPoint <- _db.getAll()
-                  if x.isInstanceOf[Station] && !vfilt.useObject(x)) yield
+                  if (x.isInstanceOf[Station] && vfilt.useObject(x))  ) yield
             {
                val s = x.asInstanceOf[Station]
                val moving = !s.getHistory().isEmpty()
@@ -309,7 +383,7 @@ package aprs {
                   if (!s.visible())
                      <div>(foreldet)</div>
                   else
-                     { if (moving) <img src="icons/new.gif" width="16" height="16"/>;
+                     { if (moving) <img src="srv/dicons/new.gif" width="16" height="16"/>;
                        if (s.getPosition() != null) showUTM(s.getPosition())
                        else <div>(ikke registrert)</div> }
                } </td>
@@ -371,7 +445,8 @@ package aprs {
         val edit  =  ( parms.getProperty("edit") != null )
         val simple =  ( parms.getProperty("simple") != null )
         val prefix = null
-
+        if (obj != null)
+            obj.update();
 
 
         def itemList(items : Set[String]) = 
@@ -428,10 +503,12 @@ package aprs {
             { simpleLabel("hrd", "leftlab", "Sist rapportert:", TXT( df.format(x.getUpdated()))) }
             
             { var txt = "";
-              if (s.isIgate()) txt += "IGATE "; 
-              if (s.isWideDigi()) txt += "Wide-Digi";
-              if ((s.isIgate() || s.isWideDigi()) && simple)
-                { simpleLabel("infra", "leftlab", "Infrastruktur:", TXT(txt)) } else null 
+              if (s != null) {
+                 if (s.isIgate()) txt += "IGATE "; 
+                 if (s.isWideDigi()) txt += "Wide-Digi";
+                 if ((s.isIgate() || s.isWideDigi()) && simple)
+                   { simpleLabel("infra", "leftlab", "Infrastruktur:", TXT(txt)) } else null 
+              } else null
             }
             
             { if (simple)        
@@ -477,47 +554,45 @@ package aprs {
 
         /* Action. To be executed when user hits 'submit' button */
         def action(hdr: Properties, parms: Properties): NodeSeq =
-          if (parms.getProperty("update") != null && canUpdate) 
-          {
-                val perm = parms.getProperty("perm");
-                x.setPermanent( "true".equals(perm) );  
-                val hide = parms.getProperty("hidelabel");
-                x.setLabelHidden( "true".equals(hide) );     
-                
-                val newcolor = parms.getProperty("newcolor");
-                if (s != null && "true".equals(newcolor) )
-                   s.nextTrailColor();             
+        {
+             val perm = parms.getProperty("perm");
+             x.setPermanent( "true".equals(perm) );  
+             val hide = parms.getProperty("hidelabel");
+             x.setLabelHidden( "true".equals(hide) );     
+             
+             val newcolor = parms.getProperty("newcolor");
+             if (s != null && "true".equals(newcolor) )
+                s.nextTrailColor();             
 
 
-                /* Alias setting */
-                var alias = parms.getProperty("nalias");
-                var ch = false;
-                if (alias != null && alias.length() > 0)      
-                    ch = x.setAlias(fixText(alias));
-                else
-                   { ch = x.setAlias(null)
-                     alias = "NULL"
-                   }
-                System.out.println("*** ALIAS: "+alias);   
-                if (ch)
-                    Main.rctl.sendRequestAll("ALIAS "+x.getIdent()+" "+alias, null);
+             /* Alias setting */
+             var alias = parms.getProperty("nalias");
+             var ch = false;
+             if (alias != null && alias.length() > 0)      
+                 ch = x.setAlias(fixText(alias));
+             else
+                { ch = x.setAlias(null)
+                  alias = "NULL"
+                }
+             System.out.println("*** ALIAS: "+alias);   
+             if (ch)
+                 Main.rctl.sendRequestAll("ALIAS "+x.getIdent()+" "+alias, null);
 
-                /* Icon setting */
-                var icon = parms.getProperty("iconselect");
-                if ("system".equals(icon)) 
-                    icon = null; 
-                if (x.setIcon(icon))
-                    Main.rctl.sendRequestAll("ICON "+x.getIdent() + " " +
-                       { if (icon==null) "NULL" else icon }, 
-                       null);
-              
-              <h3>Oppdatert</h3>
-          }
-          else null
+             /* Icon setting */
+             var icon = parms.getProperty("iconselect");
+             if ("system".equals(icon)) 
+                 icon = null; 
+             if (x.setIcon(icon))
+                 Main.rctl.sendRequestAll("ICON "+x.getIdent() + " " +
+                    { if (icon==null) "NULL" else icon }, 
+                    null);
+            
+             <h3>Oppdatert</h3>
+        }
 
 
-        printHtml (out, htmlBody ( if (simple) fields(hdr,parms)
-                                   else htmlForm(hdr, parms, prefix, fields, action)))
+        printHtml (out, htmlBody ( if (simple) fields(hdr, parms)
+                                   else htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
     }
       
 
