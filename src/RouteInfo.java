@@ -41,10 +41,24 @@ public class RouteInfo implements Serializable
      *    - Should we report stations that are not shown? 
      */    
      
-    private Map<String, Node> _nodes = Collections.synchronizedMap(new HashMap());        
+    private Map<String, Node> _nodes = new HashMap(); 
+//    private Map<String, Node> _nodes = Collections.synchronizedMap(new HashMap());        
+    private long nEdges;
     
+    public long nItems() 
+       { return nEdges; }
+       
+    public long nItemsX()
+    {
+        long n = 0; 
+        for (Node node: _nodes.values())
+           n += node.from.size();
+        return n;
+    }
     
-    
+    public synchronized void clear()
+        { _nodes.clear(); nEdges = 0; } 
+        
     public synchronized void addEdge(String from, String to)
     {     
         if (!_nodes.containsKey(from))
@@ -57,6 +71,7 @@ public class RouteInfo implements Serializable
            e = new Edge();
            _nodes.get(from).addFrom(to, e); 
            _nodes.get(to).addTo(from, e);
+           nEdges++;
         }
         else
            e.update();
@@ -66,6 +81,14 @@ public class RouteInfo implements Serializable
     public synchronized void removeNode(String stn)
     { 
         _nodes.remove(stn); 
+        for (Node n: _nodes.values()) {
+            if (n.from.containsKey(stn)) {
+                n.from.remove(stn); nEdges--;
+            }
+            if (n.to.containsKey(stn)) {
+               n.to.remove(stn); nEdges--;
+            }
+        }
     }
                   
               
@@ -95,8 +118,11 @@ public class RouteInfo implements Serializable
        
     public synchronized void removeEdge(String from, String to) 
     {  
+        if (_nodes.get(from).from == null)
+           return;
         _nodes.get(from).from.remove(to); 
         _nodes.get(to).to.remove(from);
+        nEdges--;
     }
               
               
@@ -111,20 +137,20 @@ public class RouteInfo implements Serializable
        while ( it.hasNext() ) {
             String x = it.next();
             Edge e = getEdge(stn, x);
-            if (e.ts.getTime() < agelimit.getTime()) {
+            if (e != null && e.ts.getTime() < agelimit.getTime()) {
                it.remove();
                _nodes.get(x).to.remove(stn);
-               // removeEdge(x, stn);
+               nEdges--;
             }
        }    
        it = getToEdges(stn).iterator();
        while ( it.hasNext() ) {
            String x = it.next();
            Edge e = getEdge(x, stn);
-           if (e.ts.getTime() < agelimit.getTime()) {
+           if (e != null && e.ts.getTime() < agelimit.getTime()) {
               it.remove(); 
-             _nodes.get(x).from.remove(stn); 
-             // removeEdge(x, stn);
+             _nodes.get(x).from.remove(stn);
+             nEdges--; 
           }
        }  
     }
