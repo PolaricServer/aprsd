@@ -27,34 +27,39 @@ public class Notifier
     private static long _timeout  = 1000 * 120;  /* Maximum wait time: 2min */
  
     
-    public synchronized void waitSignal(UTMRef uleft, UTMRef lright)
+    public void waitSignal(UTMRef uleft, UTMRef lright)
     {
          long wstart = (new Date()).getTime();
          long elapsed = 0;
          boolean found = false;
          do {
-            try {
-                  wait(found ? _mintime-elapsed : _timeout-elapsed);
+              try {
+                  synchronized(this) {
+                    wait(found ? _mintime-elapsed : _timeout-elapsed);
+                  }
                   /* Wait a little to allow more updates to arrive */
                   Thread.sleep(500); 
-            }
-            catch (Exception e) {}    
-            elapsed = (new Date()).getTime() - wstart;
+              }
+               catch (Exception e) {}    
+               elapsed = (new Date()).getTime() - wstart;
             
-            /* Has there been events inside the interest zone */
-            found = found || signalledPt == null || uleft == null || 
-                             signalledPt.isInside(uleft, lright); 
-            
-         /* Wait no shorter than _mintime and no longer 
-          * than _timeout 
-          */
+              /* Has there been events inside the interest zone */
+              synchronized(this) {
+                 found = found || signalledPt == null || uleft == null || 
+                                  signalledPt.isInside(uleft, lright); 
+              }
+           /* Wait no shorter than _mintime and no longer 
+            * than _timeout 
+            */
          } while ( !(found && elapsed > _mintime) &&
                    elapsed < _timeout );
 
     }
     
+    
     public synchronized void signal(AprsPoint st)
-    {    signalled = new Date(); 
+    {   
+         signalled = new Date(); 
          signalledPt = st;
          notifyAll();
     }
