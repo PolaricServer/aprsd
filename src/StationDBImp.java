@@ -25,15 +25,32 @@ public class StationDBImp implements StationDB, Runnable
     private String _file;
     private boolean _hasChanged = false; 
     private RouteInfo _routes;
-    
+    private OwnObjects _ownobj;
+
     
     public StationDBImp(Properties config)
     {
         _file = config.getProperty("stations.file", "stations.dat");
+        _ownobj = new OwnObjects(config, this); 
         restore();
-        Thread t = new Thread(this);
+        Thread t = new Thread(this, "StationDBImp");
         t.start(); 
     }
+    
+    
+    private static final Runtime s_runtime = Runtime.getRuntime ();
+    public static long usedMemory ()
+      { return s_runtime.totalMemory () - s_runtime.freeMemory (); }
+    
+
+
+    public int nItems() 
+        { return _map.size(); }
+    
+    
+    public OwnObjects getOwnObjects()
+        { return _ownobj; }
+
     
     public RouteInfo getRoutes()
         { return _routes; }
@@ -51,9 +68,9 @@ public class StationDBImp implements StationDB, Runnable
              ObjectOutput ofs = new ObjectOutputStream(fs);
              
              ofs.writeObject(_routes);
+             _ownobj.save(ofs);
              for (AprsPoint s: _map.values())
                 { ofs.writeObject(s); }
-
            }
            catch (Exception e) {
                System.out.println("*** StationDBImp: cannot save: "+e);
@@ -73,12 +90,14 @@ public class StationDBImp implements StationDB, Runnable
           ObjectInput ifs = new ObjectInputStream(fs);
           
           _routes = (RouteInfo) ifs.readObject();
+          _ownobj.restore(ifs);
           while (true)
           { 
               AprsPoint st = (AprsPoint) ifs.readObject(); 
               System.out.println("        Read object: "+st.getIdent() );
               _map.put(st.getIdent(), st);
           }
+
         }
         catch (EOFException e) { }
         catch (Exception e) {
@@ -89,12 +108,16 @@ public class StationDBImp implements StationDB, Runnable
     }
     
     
-    
-    private synchronized void garbageCollect()
+    /**
+     * Garbage collection.
+     * Removes expired objects and tries to to a little more
+     * agressive JVM garbage collection. 
+     */
+    public synchronized void garbageCollect()
     {
          Date now = new Date();  
-         
          System.out.println("*** Garbage collection...");
+         System.out.println("        Memory usage = "+usedMemory());
          Iterator<AprsPoint> stn = _map.values().iterator();
          while (stn.hasNext()) 
          {
@@ -102,11 +125,17 @@ public class StationDBImp implements StationDB, Runnable
              if (st.expired() && !st.isPermanent() ) 
              {
                 System.out.println("        Removing: "+st.getIdent()); 
-                // stn.remove();
                 removeItem(st.getIdent());
-                _routes.removeNode(st.getIdent());
+                _routes.removeNode(st.getIdent()); 
              } 
-         }    
+         } 
+         System.out.println("        Doing JVM finalization and GC");              
+         s_runtime.runFinalization ();
+         s_runtime.gc ();
+         Thread.currentThread ().yield ();
+         System.out.println("        Memory usage = "+usedMemory());
+         System.out.println("        Free memory  = "+s_runtime.freeMemory ());
+         System.out.println("*** Garbage collection finished");  
     }
     
     
@@ -120,8 +149,10 @@ public class StationDBImp implements StationDB, Runnable
     
     
     public synchronized void removeItem(String id)
-       {   _map.remove(id);
-           _hasChanged = true; }
+    {   
+           _map.remove(id);
+           _hasChanged = true; 
+    }
         
         
         
