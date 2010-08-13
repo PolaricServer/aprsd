@@ -176,7 +176,7 @@ public class TncChannel extends Channel implements Runnable
            }  
      }
 
-
+    public String toString() { return "TNC on" + _portName+", "+_baud+" baud]"; }
 
 }
 
