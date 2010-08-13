@@ -11,9 +11,9 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-   private static InetChannel ch1 = null;
-   private static TncChannel  ch2 = null;
-   private static StationDB db = null;
+   static InetChannel ch1 = null;
+   static TncChannel  ch2 = null;
+   static StationDB db = null;
    static OwnObjects ownobjects;
    static MessageProcessor msg;
    static RemoteCtl rctl;
@@ -60,21 +60,21 @@ public class Main
                System.out.println("*** Activate Internet Channel");
                ch1 = new InetChannel(config);
                ch1.setReceivers((Channel.Receiver) p, igate); 
-               Thread t = new Thread(ch1);
+               Thread t = new Thread(ch1, "InetChannel");
                t.start(); 
            }
            if (config.getProperty("tncchannel.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate TNC Channel");
                ch2 = new TncChannel(config);
                ch2.setReceivers((Channel.Receiver) p, igate);
-               Thread t = new Thread(ch2);
+               Thread t = new Thread(ch2, "TncChannel");
                t.start(); 
            } 
            if (config.getProperty("remotectl.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate Remote Control");
                rctl = new RemoteCtl(config, msg, db);
            }
-
+ 
            
            /* Message processing */
            msg.setChannels(ch2, ch1);  
@@ -84,8 +84,8 @@ public class Main
                igate.setChannels(ch2, ch1);
 
            /* APRS objects */
-           ownobjects = new OwnObjects(config, db);
-           ownobjects.setChannels(ch2, ch1);
+           ownobjects = db.getOwnObjects();  // new OwnObjects(config, db);
+           ownobjects.setChannels(ch2, ch1); 
            
            /* Start HTTP server */
            int http_port = Integer.parseInt(config.getProperty("httpserver.port", "8081"));
