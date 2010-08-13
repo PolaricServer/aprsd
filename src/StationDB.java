@@ -19,8 +19,12 @@ import uk.me.jstott.jcoord.*;
 
 public interface StationDB
 {
+    public int nItems(); 
+    
     public RouteInfo getRoutes();
     
+    public OwnObjects getOwnObjects(); 
+
     public AprsPoint getItem(String id);
     
     public void removeItem(String id);
@@ -41,5 +45,6 @@ public interface StationDB
           search(UTMRef uleft, UTMRef lright);       
     
     public void save(); 
+    public void garbageCollect();
 
 }
