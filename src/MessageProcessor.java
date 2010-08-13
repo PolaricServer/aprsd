@@ -70,7 +70,7 @@ public class MessageProcessor implements Runnable
    private String     _myCall; /* Move this ? */
    private Thread     _thread;
    private String     _key;
-
+   private int        _threadid;
     
    private static String getNextId()
    {
@@ -78,12 +78,12 @@ public class MessageProcessor implements Runnable
       return ""+_msgno;
    }
 
-    
+   private int threadid=0;
    public MessageProcessor(Properties config)
    {
        _myCall = config.getProperty("message.mycall", "N0CALL").trim();
        _key = config.getProperty("message.auth.key", "NOKEY").trim();
-       _thread = new Thread(this);
+       _thread = new Thread(this, "MessageProcessor-"+(threadid++));
        _thread.start();
    }  
        
