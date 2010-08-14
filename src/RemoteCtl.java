@@ -11,7 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package aprs;
+package no.polaric.aprsd;
 import java.util.regex.*;
 import java.io.*;
 import java.net.*;
@@ -55,6 +55,7 @@ public class RemoteCtl implements MessageProcessor.Notification
    {
        String myCall = config.getProperty("remotectl.mycall", "N0CALL").trim();
        _parent = config.getProperty("remotectl.connect", null);
+          
        mp.subscribe(myCall, new Subscriber(), true);
        _msg = mp;
        _db = db;
