@@ -25,7 +25,7 @@ JSPINSTALL = /var/www/test/bull/jsp
 ##################################################
     LIBDIR = _lib
  JAVAFLAGS =
- PACKAGES  = core scala
+ PACKAGES  = core httpd scala
 
 
 
@@ -57,10 +57,14 @@ $(LIBDIR):
 core: 
 	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/*.java 
 
+.PHONY : httpd
+httpd: 
+	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/httpd/*.java 
+	
 .PHONY : scala
 scala:            
-	scalac -d $(TDIR) -classpath $(LIBDIR):$(CLASSPATH) src/*.scala
+	scalac -d $(TDIR) -classpath $(LIBDIR):$(CLASSPATH) src/httpd/*.scala
 
 	
 clean:
-	rm -R $(LIBDIR) ./*~ src/*~
+	rm -R $(LIBDIR) ./*~ src/*~ src/httpd/*~
