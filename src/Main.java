@@ -1,5 +1,5 @@
 
-package aprs;
+package no.polaric.aprsd;
 import uk.me.jstott.jcoord.*;
 import java.util.*;
 import java.io.*;
@@ -11,10 +11,10 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-   static InetChannel ch1 = null;
-   static TncChannel  ch2 = null;
    static StationDB db = null;
-   static OwnObjects ownobjects;
+   public static InetChannel ch1 = null;
+   public static TncChannel  ch2 = null;
+   public static OwnObjects ownobjects; 
    static MessageProcessor msg;
    static RemoteCtl rctl;
 
@@ -90,9 +90,9 @@ public class Main
            /* Start HTTP server */
            int http_port = Integer.parseInt(config.getProperty("httpserver.port", "8081"));
 
-           Class cls = Class.forName("aprs.Webserver");
-           Constructor<HttpServer> con = cls.getConstructors()[0];
-           HttpServer ws = con.newInstance(db, http_port, config);
+           Class cls = Class.forName("no.polaric.aprsd.http.Webserver");
+           Constructor con = cls.getConstructors()[0];
+           Object ws = con.newInstance(db, http_port, config);
            
            System.out.println( "*** HTTP server ready on port " + http_port);
         }
