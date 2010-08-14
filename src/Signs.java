@@ -1,4 +1,4 @@
-package aprs;
+package no.polaric.aprsd;
 import java.net.*;
 import java.util.*;
 import java.io.*;

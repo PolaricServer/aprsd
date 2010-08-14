@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  */
  
-package aprs;
+package no.polaric.aprsd;
 import java.io.*;
 import java.util.*;
 import gnu.io.*;
