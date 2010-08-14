@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package aprs;
+package no.polaric.aprsd;
 import java.util.*;
 import java.util.regex.*;
 import java.io.*;
