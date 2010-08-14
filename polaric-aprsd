@@ -18,7 +18,7 @@ case "$1" in
                  --startas "$JAVA" >/dev/null; then
              cd $HOME;\
               $JAVA -Xverify:none -server $SERIALPORTS $FLAGS -cp $CLASSPATH \
-              aprs.Main $INIFILE >> $LOGFILE  2>&1 &
+              no.polaric.aprsd.Main $INIFILE >> $LOGFILE  2>&1 &
              echo $! > $PIDFILE
              echo ""
              sleep 4;
