@@ -11,7 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package aprs;
+package no.polaric.aprsd;
 import java.util.regex.*;
 import java.io.*;
 import java.net.*;
@@ -32,7 +32,11 @@ public class AprsParser implements Channel.Receiver
                 
     private static DateFormat _dtgFormat = new SimpleDateFormat("ddhhmm");
     private static DateFormat _hmsFormat = new SimpleDateFormat("hhmmss");
-       
+    
+    // FIXME: These are also defined in HttpServer.java
+    public static Calendar utcTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
+    public static Calendar localTime = Calendar.getInstance();
+    
        
     // FIXME: Handle ambiguity in latitude ?
      
@@ -433,7 +437,7 @@ public class AprsParser implements Channel.Receiver
          Date now = new Date();
          
          /* Default timezone is zulu */
-         ts = (Calendar) HttpServer.utcTime.clone();
+         ts = (Calendar) utcTime.clone();
          ts.setTime( now ) ;
          
          if (compressed || tst == 'h') {
@@ -454,7 +458,7 @@ public class AprsParser implements Channel.Receiver
              /* Parse time in DDHHMM format */
              if (tst != 'z') {
                 /* Local time */
-               ts = (Calendar) HttpServer.localTime.clone(); 
+               ts = (Calendar) localTime.clone(); 
                _dtgFormat.setCalendar(ts);
             }
             day  = Integer.parseInt(dstr.substring(0,2));
