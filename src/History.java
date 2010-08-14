@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  */
  
-package aprs;
+package no.polaric.aprsd;
 import uk.me.jstott.jcoord.*; 
 import java.util.*;   
 import java.io.Serializable;  
