@@ -268,7 +268,7 @@ public abstract class HttpServer extends NanoHTTPD
             (filt==null ? ""  : " view=\"" + filt + "\"") + ">");
         out.println("<meta name=\"utmzone\" value=\""+ _utmzone + "\"/>");
         out.println("<meta name=\"login\" value=\""+ getAuthUser(header) + "\"/>");
-        out.println("<meta name=\"adminuser\" value=\""+ _adminuser.equals(getAuthUser(header)) + "\"/>");
+        out.println("<meta name=\"adminuser\" value=\""+ authorizedForAdmin(header) + "\"/>");
         out.println("<meta name=\"updateuser\" value=\""+ authorizedForUpdate(header) + "\"/>");
             
             
