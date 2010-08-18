@@ -129,6 +129,10 @@ public class StationDBImp implements StationDB, Runnable
                 _routes.removeNode(st.getIdent()); 
              } 
          } 
+         Calendar t = Calendar.getInstance();
+         t.add(Calendar.DAY_OF_YEAR, 1);
+         _routes.removeOldEdges(t.getTime());
+         
          System.out.println("        Doing JVM finalization and GC");              
          s_runtime.runFinalization ();
          s_runtime.gc ();
