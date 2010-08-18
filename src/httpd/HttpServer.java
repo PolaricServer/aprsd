@@ -366,7 +366,7 @@ public abstract class HttpServer extends NanoHTTPD
        while (it.hasNext()) 
        {
             AprsPoint p = _db.getItem(it.next());
-            if (p==null || !p.isInside(uleft, lright))
+            if (p==null || !p.isInside(uleft, lright) || p.expired())
                 continue;
             Reference x = p.getPosition();
             UTMRef itx = toUTM(x);
