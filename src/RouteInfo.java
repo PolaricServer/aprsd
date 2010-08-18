@@ -59,6 +59,7 @@ public class RouteInfo implements Serializable
     public synchronized void clear()
         { _nodes.clear(); nEdges = 0; } 
         
+        
     public synchronized void addEdge(String from, String to)
     {     
         if (!_nodes.containsKey(from))
@@ -73,7 +74,7 @@ public class RouteInfo implements Serializable
            _nodes.get(to).addTo(from, e);
            nEdges++;
         }
-        else
+        else 
            e.update();
     }
        
@@ -125,7 +126,9 @@ public class RouteInfo implements Serializable
         nEdges--;
     }
               
-              
+    /**
+     * Remove edges older than the given date from/to the given stn.
+     */          
     public synchronized void removeOldEdges(String stn, Date agelimit)
     {
        if (agelimit == null)
@@ -137,22 +140,23 @@ public class RouteInfo implements Serializable
        while ( it.hasNext() ) {
             String x = it.next();
             Edge e = getEdge(stn, x);
-            if (e != null && e.ts.getTime() < agelimit.getTime()) {
-               it.remove();
-               _nodes.get(x).to.remove(stn);
-               nEdges--;
-            }
+            if (e != null && e.ts.getTime() < agelimit.getTime()) 
+                removeEdge(stn, x);
        }    
        it = getToEdges(stn).iterator();
        while ( it.hasNext() ) {
            String x = it.next();
            Edge e = getEdge(x, stn);
-           if (e != null && e.ts.getTime() < agelimit.getTime()) {
-              it.remove(); 
-             _nodes.get(x).from.remove(stn);
-             nEdges--; 
-          }
+           if (e != null && e.ts.getTime() < agelimit.getTime())  
+               removeEdge(x, stn);
        }  
+    }
+    
+    
+    public void removeOldEdges(Date agelimit)
+    {
+        for (String x: _nodes.keySet())
+            removeOldEdges(agelimit); 
     }
     
 }
