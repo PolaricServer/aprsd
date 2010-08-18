@@ -20,12 +20,14 @@ package no.polaric.aprsd.http
    val doctype = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN \">";
    val _time = new Date();
 
+   
 
-   private def htmlBody (content : NodeSeq) : Node =
+   private def htmlBody (head : NodeSeq, content : NodeSeq) : Node =
    {
         <html>
         <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        { head }
         <link rel="STYLESHEET" href="style.css" type="text/css"/>
         </head>
         <body>
@@ -168,7 +170,8 @@ package no.polaric.aprsd.http
    def _serveAdmin(hdr: Properties, parms: Properties, out: PrintWriter) : String =
    {   
        val cmd = parms.getProperty("cmd")
-       
+       val head = <meta http-equiv="refresh" content="60" />
+
        def action(hdr: Properties, parms: Properties): NodeSeq =
           if (!authorizedForAdmin(hdr))
               <h3>Du er ikke autorisert for admin operasjoner</h3>
@@ -189,7 +192,7 @@ package no.polaric.aprsd.http
               <fieldset>
               { simpleLabel("items", "leftlab", "Server kjørt siden:", TXT(""+_time)) }
               { simpleLabel("items", "leftlab", "Antall APRS enheter:", TXT(""+_db.nItems())) }
-              { simpleLabel("items", "leftlab", "Antall forbindelser:", TXT(""+_db.getRoutes().nItems()+", "+_db.getRoutes.nItemsX())) }
+              { simpleLabel("items", "leftlab", "Antall forbindelser:", TXT(""+_db.getRoutes().nItems())) }
               { simpleLabel("items", "leftlab", "Egne objekter:", TXT(""+_db.getOwnObjects().nItems())) }   
               { simpleLabel("items", "leftlab", "Antall aktive Tråder:", TXT(""+(Thread.activeCount()-4))) }  
               { simpleLabel("items", "leftlab", "Antall HTTP klienter:", TXT(""+_requests)) }  
@@ -199,11 +202,12 @@ package no.polaric.aprsd.http
               <br/>
               { simpleLabel("ch1", "leftlab", "Kanal 1 (APRS-IS):", TXT(""+Main.ch1)) } 
               { simpleLabel("ch2", "leftlab", "Kanal 2 (TNC):", TXT(""+Main.ch2)) }    
-              </fieldset>       
+              </fieldset>  
+              <input type="submit" onclick="window.close()" id="cancel" value="Avbryt"/>
           else
              <h3>Ukjent kommando</h3>
              
-        printHtml (out, htmlBody(action(hdr, parms)));    
+        printHtml (out, htmlBody(head, action(hdr, parms)));    
    }
    
    
@@ -236,7 +240,7 @@ package no.polaric.aprsd.http
                   <h3>Fant ikke objekt: {id}</h3>
           }  
           
-       printHtml (out, htmlBody (htmlForm(hdr, parms, prefix, fields, IF_AUTH(action) )))
+       printHtml (out, htmlBody (null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action) )))
    }          
 
 
@@ -264,7 +268,7 @@ package no.polaric.aprsd.http
                 x.reset();
              <h3>Info om objekt nullstilt!</h3>
           }  
-       printHtml (out, htmlBody (htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
+       printHtml (out, htmlBody (null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
    }          
 
 
@@ -323,7 +327,7 @@ package no.polaric.aprsd.http
                   <p>Objekt '{id}' er allerede registrert av noen andre</p>
            };
             
-        printHtml (out, htmlBody (htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
+        printHtml (out, htmlBody (null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
     }
 
 
@@ -398,7 +402,7 @@ package no.polaric.aprsd.http
            }
         } 
         </table>;
-        printHtml (out, htmlBody (result))
+        printHtml (out, htmlBody (null, result))
    }
  
 
@@ -592,7 +596,8 @@ package no.polaric.aprsd.http
         }
 
 
-        printHtml (out, htmlBody ( if (simple) fields(hdr, parms)
+        printHtml (out, htmlBody ( null, 
+                                   if (simple) fields(hdr, parms)
                                    else htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
     }
       
@@ -637,7 +642,7 @@ package no.polaric.aprsd.http
                }
              </table>
 
-        printHtml(out, htmlBody(result))
+        printHtml(out, htmlBody(null, result))
     }
    
    
