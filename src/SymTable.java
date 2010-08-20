@@ -21,7 +21,7 @@ public class SymTable
                if (!line.startsWith("#")) 
                {               
                    String[] x = line.split("\\s+");  
-                   if (x[0].length() < 2 || (x[0].charAt(0) != '\\' && x[0].charAt(0) != '/'))
+                   if (x[0].length() < 2) // FIXME: sanitize input (legal characters)
                        continue;
                    _stab.put(x[0], x[1]);
                }
@@ -33,9 +33,11 @@ public class SymTable
 
 
 
-    public String getIcon(char sym, boolean alt)
+    public String getIcon(char sym, char alt)
     {
-         String key = "" + (alt ? '\\' : '/') + sym;
-         return _stab.get(key);
+         String key = "" + alt + sym;
+         String icon = _stab.get(key);
+         return (icon==null ? _stab.get(""+"\\"+sym) : icon);
+              
     }
 }
