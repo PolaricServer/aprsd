@@ -156,7 +156,7 @@ public class RouteInfo implements Serializable
     public void removeOldEdges(Date agelimit)
     {
         for (String x: _nodes.keySet())
-            removeOldEdges(agelimit); 
+            removeOldEdges(x, agelimit); 
     }
     
 }
