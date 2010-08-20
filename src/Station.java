@@ -185,7 +185,7 @@ public static class Status implements Serializable
       
         
     public synchronized void update(Date ts, Reference newpos, int crs, int sp, int alt, 
-                                    String descr, char sym, boolean altsym)
+                                    String descr, char sym, char altsym)
     { 
         if (_position != null && _updated != null)
         { 
