@@ -40,7 +40,7 @@ public abstract class AprsPoint implements Serializable
          
     protected Reference   _position;  
     protected char        _symbol; 
-    protected boolean     _altsym; 
+    protected char        _altsym; 
     protected String      _icon; 
     private String        _alias;  
     protected boolean     _changing = false; 
@@ -71,7 +71,7 @@ public abstract class AprsPoint implements Serializable
        { return false; }
    
     public boolean isEmergency()
-       { return (_altsym && _symbol=='!'); }
+       { return (_altsym=='\\' && _symbol=='!'); }
              
              
     public Reference getPosition ()   
@@ -82,7 +82,7 @@ public abstract class AprsPoint implements Serializable
        { return _symbol; }
        
     public char getSymtab()
-       { return ( _altsym ? '\\' : '/'); }
+       { return _altsym;}
        
     public boolean iconIsNull()
        { return _icon == null; }
@@ -210,7 +210,7 @@ public abstract class AprsPoint implements Serializable
         
         
     public abstract void update(Date ts, Reference newpos, int crs, int sp, int alt, 
-                                String descr, char sym, boolean altsym);        
+                                String descr, char sym, char altsym);        
         
     public abstract boolean expired();
     public boolean visible() { return !expired(); }
