@@ -335,10 +335,8 @@ public class AprsParser implements Channel.Receiver
             pos_lat = d + m/60.0 + s/6000.0;
             if (!north) pos_lat *= -1.0;
                     
-            // Symbol. FIXME: Overlay not supported yet
-	        	char symbol = msg.charAt(7);
-		      char ch = msg.charAt(8);
-		      boolean altsym = (ch != '/');  
+	    char symbol = msg.charAt(7);
+	    char altsym = msg.charAt(8);
                
             // Parse the longitude
             d = msg.charAt(1)-28;
@@ -611,7 +609,7 @@ public class AprsParser implements Channel.Receiver
             if (comment.length() < 1 || comment.equals(" "))
                comment = null;
                
-            station.update(time, pos, course, speed, (int) altitude, comment, symbol, (symtab != '/') );
+            station.update(time, pos, course, speed, (int) altitude, comment, symbol, symtab );
             
             log("     POS: "+ pos);         
     }
