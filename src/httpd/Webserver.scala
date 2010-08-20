@@ -191,11 +191,12 @@ package no.polaric.aprsd.http
               <h3>Status info for Polaric APRSD</h3>
               <fieldset>
               { simpleLabel("items", "leftlab", "Server kjørt siden:", TXT(""+_time)) }
+              { simpleLabel("items", "leftlab", "Server versjon:", TXT(""+Main.version)) }
               { simpleLabel("items", "leftlab", "Antall APRS enheter:", TXT(""+_db.nItems())) }
               { simpleLabel("items", "leftlab", "Antall forbindelser:", TXT(""+_db.getRoutes().nItems())) }
               { simpleLabel("items", "leftlab", "Egne objekter:", TXT(""+_db.getOwnObjects().nItems())) }   
               { simpleLabel("items", "leftlab", "Antall aktive Tråder:", TXT(""+(Thread.activeCount()-4))) }  
-              { simpleLabel("items", "leftlab", "Antall HTTP klienter:", TXT(""+_requests)) }  
+              { simpleLabel("items", "leftlab", "Antall HTTP klienter:", TXT(""+(_requests-1))) }  
               { simpleLabel("items", "leftlab", "Antall HTTP forespørsler:", TXT(""+_reqNo)) }   
               { simpleLabel("freemem", "leftlab", "Brukt minne:", 
                   TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
