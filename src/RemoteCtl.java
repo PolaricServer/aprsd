@@ -50,7 +50,10 @@ public class RemoteCtl implements MessageProcessor.Notification
    private MessageProcessor _msg;
    private StationDB _db;
 
-   
+   public String getParent()
+       { return _parent; }
+       
+       
    public RemoteCtl(Properties config, MessageProcessor mp, StationDB db)
    {
        String myCall = config.getProperty("remotectl.mycall", "N0CALL").trim();
