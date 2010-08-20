@@ -128,9 +128,10 @@ public class StationDBImp implements StationDB, Runnable
                 removeItem(st.getIdent());
                 _routes.removeNode(st.getIdent()); 
              } 
-         } 
+         }
+         System.out.println("        Removing old edges from route table");
          Calendar t = Calendar.getInstance();
-         t.add(Calendar.DAY_OF_YEAR, 1);
+         t.add(Calendar.DAY_OF_YEAR, -1);
          _routes.removeOldEdges(t.getTime());
          
          System.out.println("        Doing JVM finalization and GC");              
