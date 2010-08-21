@@ -1,0 +1,50 @@
+httpserver.port = 8081
+timezone = Europe/Oslo
+
+user.admin = admin
+user.update = xxx 
+
+#######################################
+# APRS IS server to get input from
+####################################### 
+inetchannel.host = aprs.la3t.no
+inetchannel.port = 14580 
+inetchannel.on   = true
+inetchannel.user = XXXX 
+inetchannel.pass = 0123 
+
+
+#######################################
+# APRS objects setup
+#######################################
+#objects.file = objects
+objects.mycall = XXXX
+objects.transmit.period = 240 
+objects.forceupdate = true
+
+#######################################
+# APRS Messages and commands
+#######################################
+message.mycall = XXXX 
+message.auth.key = ****** 
+remotectl.mycall = XXXX 
+remotectl.on = true
+
+
+#######################################
+# Map trails
+#######################################
+map.trail.maxAge = 40 
+map.trail.maxPause = 20 
+map.trail.maxAge.extended = 30
+map.trail.maxPause.extended = 20 
+
+
+#######################################
+# Properties of map overlay
+#######################################
+map.icon.default = sym00.gif
+map.label.fontsize  = 16
+map.label.textcolor = black
+map.label.boxcolor  = #ffff88
+map.label.boxcolor3 = #e7f4ff
