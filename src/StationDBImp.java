@@ -161,7 +161,7 @@ public class StationDBImp implements StationDB, Runnable
         
         
         
-    public synchronized AprsPoint getItem(String id)
+    public AprsPoint getItem(String id)
        { return _map.get(id); }
        
        
