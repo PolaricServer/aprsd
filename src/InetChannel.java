@@ -24,7 +24,9 @@ public class InetChannel extends Channel implements Runnable
     private   String      _host;
     private   int         _port;
     private   String      _user, _pass, _filter;
-
+    private   boolean     _close = false;
+    private   Socket      _sock = null; 
+    private   BufferedReader _rder = null;
     
     
     public InetChannel(Properties config) 
@@ -53,7 +55,26 @@ public class InetChannel extends Channel implements Runnable
         }      
     }
     
- 
+    private void _close()
+    {
+       try { 
+          if (_rder != null) _rder.close(); 
+          if (_out != null) _out.close();
+          if (_sock != null) _sock.close(); 
+          Thread.sleep(500);
+       } catch (Exception e) {}
+    }
+    
+    public void close()
+    {
+       try {
+         _close = true;
+         Thread.sleep(5000);
+         _close();
+       } catch (Exception e) {}  
+    }
+    
+   
     
     /**
      * Main thread - connects to server and awaits incoming packets. 
@@ -61,17 +82,15 @@ public class InetChannel extends Channel implements Runnable
     static final int MAX_RETRY = 8;  
     public void run()
     {
-
         int retry = 0;
-        Socket sock = null; 
-         
+               
         while (retry <= MAX_RETRY) 
         { 
            try {
-               sock = new Socket(_host, _port);
+               _sock = new Socket(_host, _port);
                  // 5 minutes timeout
-               sock.setSoTimeout(1000 * 60 * 5);       
-               if (!sock.isConnected()) 
+               _sock.setSoTimeout(1000 * 60 * 5);       
+               if (!_sock.isConnected()) 
                {
                    System.out.println("*** Connection to APRS server '"+_host+"' failed");
                    retry++;
@@ -80,19 +99,19 @@ public class InetChannel extends Channel implements Runnable
                
                retry = 0; 
                System.out.println("*** Connection to APRS server '"+_host+"' established");
-               BufferedReader rder = new BufferedReader(new InputStreamReader(sock.getInputStream(), _encoding));
-               _out = new PrintWriter(new OutputStreamWriter(sock.getOutputStream(), _encoding));
+               _rder = new BufferedReader(new InputStreamReader(_sock.getInputStream(), _encoding));
+               _out = new PrintWriter(new OutputStreamWriter(_sock.getOutputStream(), _encoding));
                _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+Main.version+"\r\n");
+               
                if (_filter.length() > 0)
                    _out.print("# filter "+_filter+ "\r\n"); 
                _out.flush();
-               while (true) 
+               while (!_close) 
                {
-                   String inp = rder.readLine(); 
+                   String inp = _rder.readLine(); 
                    if (inp != null) {
                       System.out.println(new Date() + ":  "+inp);
                       receivePacket(inp);
-
                    }
                    else {   
                       System.out.println("*** Disconnected from APRS server '"+_host+"'");
@@ -102,22 +121,27 @@ public class InetChannel extends Channel implements Runnable
            }
            catch (java.net.ConnectException e)
            {
-              System.out.println("*** APRS server '"+_host+"' : "+e.getMessage());
-              retry++; 
+                System.out.println("*** APRS server '"+_host+"' : "+e.getMessage());
+                retry++; 
            }
            catch (java.net.SocketTimeoutException e)
            {
-              System.out.println("*** APRS server: connection timeout");
+                System.out.println("*** APRS server: connection timeout");
            }
            catch(Exception e)
-           {    System.out.println("*** Error in connection to APRS server '"+_host+"' : "+e); 
-                e.printStackTrace(System.out); 
+           {   
+                System.out.println("*** APRS server '"+_host+"' : "+e); 
                 retry += 2;
            }
+           finally 
+             { _close(); }
         
-           try { if (sock != null) sock.close(); } catch (Exception e) {}
+           if (_close)
+                   return;
+         
            if (retry <= MAX_RETRY) 
-               try { Thread.sleep(30000 * 2 ^ retry); } catch (Exception e) {} 
+               try { Thread.sleep(30000 * 2 ^ retry); } 
+               catch (Exception e) {} 
         }
         System.out.println("*** Couldn't connect to APRS server '"+_host+"' - giving up");        
     }
