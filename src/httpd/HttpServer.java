@@ -295,19 +295,22 @@ public abstract class HttpServer extends NanoHTTPD
         /* Output APRS objects */
         for (AprsPoint s: _db.search(uleft, lright)) 
         {
-            synchronized (s) 
-            {
-               if (s.getPosition() == null)
-                   continue; 
-               if (!vfilt.useObject(s))
-                   continue;
+        
+            if (s.getPosition() == null)
+                continue; 
+            if (!vfilt.useObject(s))
+                continue;
                    
-               UTMRef ref = toUTM(s.getPosition()); 
-               if (ref == null) continue; 
-            
-               if (!s.visible()) 
+            UTMRef ref = toUTM(s.getPosition()); 
+            if (ref == null) continue; 
+               
+            if (!s.visible()) 
                    out.println("<delete id=\""+fixText(s.getIdent())+"\"/>");
-               else {
+            else {
+               synchronized(s) {
+                  ref = toUTM(s.getPosition()); 
+                  if (ref == null) continue; 
+                  
                   String title = s.getDescr() == null ? "" 
                              : "title=\"[" + fixText(s.getIdent()) + "] " + fixText(s.getDescr()) + "\"";
                   String icon = "srv/icons/"+ (s.getIcon() != null ? s.getIcon() : _icon);    
@@ -336,16 +339,15 @@ public abstract class HttpServer extends NanoHTTPD
                      out.println("       "+fixText(s.getDisplayId()));
                      out.println("   </label>"); 
                   }
-                  
                   if (s instanceof Station)
                      printTrailXml(out, (Station) s);
-                  if (vfilt.showPath(s) && s.isInfra())
-                     printPathXml(out, (Station) s, uleft, lright);
-                  
-                  
-                  out.println("</point>");
-               }
+               } /* synchronized(s) */
+               
+               if (vfilt.showPath(s) && s.isInfra())
+                  printPathXml(out, (Station) s, uleft, lright);              
+               out.println("</point>");
             }
+          
             /* Allow other threads to run */ 
             Thread.currentThread ().yield ();
         }        
@@ -362,8 +364,9 @@ public abstract class HttpServer extends NanoHTTPD
    {
        UTMRef ity = toUTM(s.getPosition());
        Set<String> from = s.getTrafficTo();
-       if (from == null || from.isEmpty())
+       if (from == null || from.isEmpty()) 
            return;
+       
        Iterator<String> it = from.iterator();    
        while (it.hasNext()) 
        {
