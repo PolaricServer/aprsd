@@ -11,13 +11,13 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-   public static String version = "1.0b3";
+   public static String version = "1.0b3+test";
    static StationDB db = null;
    public static InetChannel ch1 = null;
    public static TncChannel  ch2 = null;
    public static OwnObjects ownobjects; 
    static MessageProcessor msg;
-   static RemoteCtl rctl;
+   public static RemoteCtl rctl;
 
 
  
@@ -35,6 +35,7 @@ public class Main
                 public void run() 
                    { System.out.println("*** LA3T APRS Server shutdown"); 
                      if (db  != null) db.save(); 
+                     if (ch1 != null) ch1.close();
                      if (ch2 != null) ch2.close(); 
                    } 
              });
