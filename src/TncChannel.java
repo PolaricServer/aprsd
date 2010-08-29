@@ -115,6 +115,7 @@ public class TncChannel extends Channel implements Runnable
     
     private void restoreTnc()
     {
+       System.out.println("*** Restore Tnc");
        try {
           OutputStream o = _serialPort.getOutputStream();
           o.write(3);
@@ -133,7 +134,7 @@ public class TncChannel extends Channel implements Runnable
        try {
          restoreTnc(); 
          _close = true;
-         Thread.sleep(5000);
+         Thread.sleep(4000);
          if (_out != null) _out.close(); 
          if (_in != null) _in.close(); 
        }
