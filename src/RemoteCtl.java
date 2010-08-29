@@ -53,6 +53,9 @@ public class RemoteCtl implements MessageProcessor.Notification
    public String getParent()
        { return _parent; }
        
+   public Set<String> getChildren()
+       { return _children; }
+       
        
    public RemoteCtl(Properties config, MessageProcessor mp, StationDB db)
    {
@@ -76,12 +79,17 @@ public class RemoteCtl implements MessageProcessor.Notification
       _children.remove(id);
    }
    
-
+   /** 
+    * Send request to given destination.
+    */
    public void sendRequest(String dest, String text)
      { _msg.sendMessage(dest, text, true, true, null); }
 
      
-     
+   /**
+    * Send request to all. To parent and children servers. 
+    * may specify an exception. 
+    */  
    public void sendRequestAll(String text, String except)
    {
       if (_parent != null && !_parent.equals(except))
