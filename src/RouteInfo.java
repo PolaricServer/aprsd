@@ -47,14 +47,7 @@ public class RouteInfo implements Serializable
     
     public long nItems() 
        { return nEdges; }
-       
-    public long nItemsX()
-    {
-        long n = 0; 
-        for (Node node: _nodes.values())
-           n += node.from.size();
-        return n;
-    }
+
     
     public synchronized void clear()
         { _nodes.clear(); nEdges = 0; } 
@@ -105,15 +98,15 @@ public class RouteInfo implements Serializable
     }
                 
                 
-    public Set<String> getFromEdges(String stn)
+    public synchronized Set<String> getFromEdges(String stn)
        { return (_nodes.get(stn) !=null ? clean(_nodes.get(stn).from.keySet()) : null); }
 
 
-    public Set<String> getToEdges(String stn)
+    public synchronized Set<String> getToEdges(String stn)
        { return (_nodes.get(stn) != null ? clean(_nodes.get(stn).to.keySet()) : null); }
        
        
-    public Edge getEdge(String from, String to)
+    public synchronized Edge getEdge(String from, String to)
        { return (_nodes.get(from) != null ? _nodes.get(from).from.get(to) : null); }
        
        
