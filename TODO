@@ -3,26 +3,25 @@ VERSION 1.0
 
 * Fix thread contention problem leading to delays in 
   incoming packet processing. 
-     DONE (1.0b2)
+      DONE (1.0b2)
      
 * Change package name and separate out HTTP server code.
-     DONE (1.0b2)
+      DONE (1.0b2)
 
 * Administrative interface 
-     STARTED (status screen) (1.0b2)
+      STARTED (status screen) (1.0b2)
 
 * Announce version id on login to APRS-IS
-     DONE (1.0b3)
+      DONE (1.0b3)
      
 * Allow symbol overlays
-     DONE (1.0b3)
-     
-* [C] Allow user to type in positions in Latlong format. 
-     DONE (1.0b2)
-     
-* [C] Map dragging problem with FF under Windows. 
+      DONE (1.0b3)
 
-* [C] Sometimes last update in trail is missing. Fix?
+* Possible deadlock problem
+      DONE
+           
+* [C] Allow user to type in positions in Latlong format. 
+      DONE (1.0b2)
 
 * [C] Extent choice on load. Remember last extent on reload.
       DONE
@@ -34,6 +33,10 @@ VERSION 1.0
       DONE 
 
 * [C] Google Chrome issues. 
+     
+* [C] Map dragging problem with FF under Windows. 
+
+* [C] Sometimes last update in trail is missing. Fix?
 
 * Code cleanups, stress test and performance tuning? 
 
