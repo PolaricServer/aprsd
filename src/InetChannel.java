@@ -79,7 +79,7 @@ public class InetChannel extends Channel implements Runnable
     /**
      * Main thread - connects to server and awaits incoming packets. 
      */
-    static final int MAX_RETRY = 8;  
+    static final int MAX_RETRY = 10;  
     public void run()
     {
         int retry = 0;
@@ -126,7 +126,7 @@ public class InetChannel extends Channel implements Runnable
            }
            catch (java.net.SocketTimeoutException e)
            {
-                System.out.println("*** APRS server: connection timeout");
+                System.out.println("*** APRS server'"+_host+"' : socket timeout");
            }
            catch(Exception e)
            {   
@@ -140,12 +140,17 @@ public class InetChannel extends Channel implements Runnable
                    return;
          
            if (retry <= MAX_RETRY) 
-               try { Thread.sleep(30000 * 2 ^ retry); } 
+               try { 
+                   long sleep = 30000 * (long) Math.pow(2, retry);
+                   if (sleep > 7680) 
+                      sleep = 7680; /* Max 2. hours */
+                   Thread.sleep(sleep); 
+               } 
                catch (Exception e) {} 
         }
         System.out.println("*** Couldn't connect to APRS server '"+_host+"' - giving up");        
     }
  
-    public String toString() {return _host+":"+_port+", userid="+_user; }
+    public String toString() { return _host+":"+_port+", userid="+_user; }
 }
 
