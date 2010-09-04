@@ -11,12 +11,11 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-   public static String version = "1.0b4";
+   public static String version = "1.0b4+test";
    static StationDB db = null;
    public static InetChannel ch1 = null;
    public static TncChannel  ch2 = null;
    public static OwnObjects ownobjects; 
-   static MessageProcessor msg;
    public static RemoteCtl rctl;
 
 
@@ -49,10 +48,9 @@ public class Main
            /* Database of stations/objects */
            db  = new StationDBImp(config); 
            AprsPoint.setDB(db);
-           msg = new MessageProcessor(config);
 
            /* Start parser and connect it to channel(s) if any */
-           AprsParser p = new AprsParser(db, msg);
+           AprsParser p = new AprsParser(db, db.getMsgProcessor());
            Igate igate  = null;
            if (config.getProperty("igate.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate IGATE");
@@ -74,12 +72,12 @@ public class Main
            } 
            if (config.getProperty("remotectl.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate Remote Control");
-               rctl = new RemoteCtl(config, msg, db);
+               rctl = new RemoteCtl(config, db.getMsgProcessor(), db);
            }
  
            
            /* Message processing */
-           msg.setChannels(ch2, ch1);  
+           db.getMsgProcessor().setChannels(ch2, ch1);  
 
            /* Igate */  
            if (igate != null)
