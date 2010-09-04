@@ -4,7 +4,9 @@
 /^ airplane.png
 /& info.gif
 \& info.gif
-/+ sym02.png 
+R& diamond-R.gif
+I& diamond-I.gif
+/+ sym02.png
 /- house.gif
 /_ wx.gif
 \_ wx.gif
@@ -26,8 +28,10 @@
 \# 035a.gif
 \- house.gif
 \> car.gif
+4> car-4.gif
+5> car-5.gif
 \? info.gif
-\P 080.gif
+\P 080a.gif
 /u van.gif
 \u van.gif
 /v van.gif
@@ -42,4 +46,8 @@
 /r radio.png
 P0 circleP.png
 \m sign.gif
+S# star-S.gif
+B# star-B.gif
+L# star-L.gif
+1# star-1.gif
 #
