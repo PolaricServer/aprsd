@@ -26,12 +26,14 @@ public class StationDBImp implements StationDB, Runnable
     private boolean _hasChanged = false; 
     private RouteInfo _routes;
     private OwnObjects _ownobj;
+    private MessageProcessor _msgProc;
 
     
     public StationDBImp(Properties config)
     {
         _file = config.getProperty("stations.file", "stations.dat");
         _ownobj = new OwnObjects(config, this); 
+        _msgProc = new MessageProcessor(config);
         restore();
         Thread t = new Thread(this, "StationDBImp");
         t.start(); 
@@ -51,6 +53,8 @@ public class StationDBImp implements StationDB, Runnable
     public OwnObjects getOwnObjects()
         { return _ownobj; }
 
+    public MessageProcessor getMsgProcessor()
+        { return _msgProc; }
     
     public RouteInfo getRoutes()
         { return _routes; }
@@ -68,6 +72,7 @@ public class StationDBImp implements StationDB, Runnable
              ObjectOutput ofs = new ObjectOutputStream(fs);
              
              ofs.writeObject(_routes);
+             _msgProc.save(ofs);
              _ownobj.save(ofs);
              for (AprsPoint s: _map.values())
                 { ofs.writeObject(s); }
@@ -90,6 +95,7 @@ public class StationDBImp implements StationDB, Runnable
           ObjectInput ifs = new ObjectInputStream(fs);
           
           _routes = (RouteInfo) ifs.readObject();
+          _msgProc.restore(ifs);
           _ownobj.restore(ifs);
           while (true)
           { 
