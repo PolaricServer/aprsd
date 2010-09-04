@@ -24,7 +24,9 @@ public interface StationDB
     public RouteInfo getRoutes();
     
     public OwnObjects getOwnObjects(); 
-
+    
+    public MessageProcessor getMsgProcessor();
+    
     public AprsPoint getItem(String id);
     
     public void removeItem(String id);
