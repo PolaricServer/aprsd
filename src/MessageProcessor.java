@@ -49,12 +49,7 @@ public class MessageProcessor implements Runnable
        MessageHandler recipient;
        boolean verify;
        
-       private LinkedHashMap<String, Boolean> recMessages =
-       new LinkedHashMap()
-       {
-           protected boolean removeEldestEntry(Map.Entry e)
-               { return size() > 100; }
-       };
+
        Subscriber(MessageHandler rec, boolean ver)
          {recipient = rec; verify = ver;}
    }
@@ -63,6 +58,13 @@ public class MessageProcessor implements Runnable
    private static final int _MSG_INTERVAL = 20;
    private static final int _MSG_MAX_RETRY = 3; 
    
+   private LinkedHashMap<String, Boolean> recMessages =
+       new LinkedHashMap()
+       {
+           protected boolean removeEldestEntry(Map.Entry e)
+               { return size() > 100; }
+       };
+       
    private Map<String, Subscriber> _subscribers = new HashMap();
    private Map<String, OutMessage> _outgoing = new HashMap();
    private static int _msgno = 0;
@@ -111,7 +113,7 @@ public class MessageProcessor implements Runnable
       } 
       Subscriber subs = _subscribers.get(recipient);
       if (subs != null) {
-         if (!subs.recMessages.containsKey(msgid)) {
+         if (!recMessages.containsKey(sender.getIdent()+"#"+msgid)) { 
             boolean result = !subs.verify;
             if (subs.verify &&
                 text.length() > 9 && text.charAt(text.length()-9) == '#')
@@ -124,11 +126,11 @@ public class MessageProcessor implements Runnable
                result = mac.equals
                   (SecUtils.digestB64(_key+sender.getIdent()+recipient+text+msgid, 8));
             }
-            result = result && subs.recipient.handleMessage(sender,text);
-            subs.recMessages.put(msgid, result);
+            result = result && subs.recipient.handleMessage(sender, text);
+            recMessages.put(sender.getIdent()+"#"+msgid, result);
          }     
          if (msgid != null)
-            sendAck(sender.getIdent(), msgid, subs.recMessages.get(msgid));
+            sendAck(sender.getIdent(), msgid, recMessages.get(sender.getIdent()+"#"+msgid));
       }      
    }
    
@@ -230,6 +232,21 @@ public class MessageProcessor implements Runnable
    }
 
 
+    void save(ObjectOutput ofs)
+    { 
+       try { 
+          ofs.writeObject(_msgno);
+       } catch (Exception e) {} 
+    }
+
+
+    void restore(ObjectInput ifs)
+     {
+        try { 
+            _msgno = (Integer) ifs.readObject(); 
+        } catch (Exception e) {} 
+     }
+     
 
     /**
      * Main thread.
