@@ -18,21 +18,31 @@ VERSION 1.0
       DONE (1.0b3)
 
 * Possible deadlock problem
-      DONE
+      DONE (1.0b4)
+      
+* APRS-IS connect retry and give up. Fix. 
+      DONE.
+    
+* Alternative trail length.
+
            
 * [C] Allow user to type in positions in Latlong format. 
       DONE (1.0b2)
 
 * [C] Extent choice on load. Remember last extent on reload.
-      DONE
+      DONE (1.0b4)
 
 * [C] Local hiding of labels - survive zoom/pan and update of objects. 
-      DONE
+      DONE (1.0b4)
 
 * [C] Fixes to extent changing/zooming (Did not always trigger XML reload).
-      DONE 
+      DONE (1.0b4)
+      
+* [C] New bug: Permalink problems because of temporary map layer during startup.
 
 * [C] Google Chrome issues. 
+
+* [C] Zoom to full extents - remove or fix.
      
 * [C] Map dragging problem with FF under Windows. 
 
