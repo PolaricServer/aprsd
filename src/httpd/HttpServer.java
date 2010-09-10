@@ -234,7 +234,18 @@ public abstract class HttpServer extends NanoHTTPD
       { return showDMstring(llref.getLatitude())+"N, "+showDMstring(llref.getLongitude())+"E"; }
    
 
-
+  private long getSession(Properties parms)
+  {
+     String s_str  = parms.getProperty("clientses");
+     if (s_str != null && s_str.matches("[0-9]+")) {
+        long s_id = Long.parseLong(s_str);
+        if (s_id > 0)
+           return s_id;
+     }
+     return /* should be more secure - random number? */ _seq;       
+  }
+  
+  
 
   private int _seq = 0;
    
@@ -260,10 +271,16 @@ public abstract class HttpServer extends NanoHTTPD
           _seq = (_seq+1) % 32000;
           seq = _seq;
         }
+        long client = getSession(parms);
         
         /* If requested, wait for a state change (see Notifier.java) */
         if (parms.getProperty("wait") != null) 
-            Station.waitChange(uleft, lright);
+            if (! Station.waitChange(uleft, lright, client) ) {
+               System.out.println("*** Cancel XML request : "+client);
+               out.println("<overlay cancel=\"true\"/>");
+               out.flush();
+               return "text/xml; charset=utf-8";
+            }
                 
         /* XML header with meta information */           
         out.println("<overlay seq=\""+_seq+"\"" +
@@ -272,7 +289,7 @@ public abstract class HttpServer extends NanoHTTPD
         out.println("<meta name=\"login\" value=\""+ getAuthUser(header) + "\"/>");
         out.println("<meta name=\"adminuser\" value=\""+ authorizedForAdmin(header) + "\"/>");
         out.println("<meta name=\"updateuser\" value=\""+ authorizedForUpdate(header) + "\"/>");
-            
+        out.println("<meta name=\"clientses\" value=\""+ client + "\"/>");    
             
         /* Output signs. A sign is not an APRS object
          * just a small icon and a title. This will probably be removed. 
