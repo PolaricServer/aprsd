@@ -25,18 +25,35 @@ public class Notifier
     private AprsPoint signalledPt; 
     private static long _mintime  = 1000 * 10;   /* Minimum wait time: 10s */
     private static long _timeout  = 1000 * 120;  /* Maximum wait time: 2min */
- 
+    private Map<Long, Boolean> _waiters = new HashMap();
     
-    public void waitSignal(UTMRef uleft, UTMRef lright)
+    
+    
+    public boolean waitSignal(UTMRef uleft, UTMRef lright, long id)
     {
          long wstart = (new Date()).getTime();
          long elapsed = 0;
          boolean found = false;
+         synchronized (this) {
+            /* Abort any other waiter having the same id  */
+            if (_waiters.containsKey(id)) {
+                _waiters.put(id, true);
+                notifyAll();
+            }
+            else
+                _waiters.put(id, false);
+         }    
          do {
               try {
+                  Thread.sleep(100);
                   synchronized(this) {
-                    wait(found ? _mintime-elapsed : _timeout-elapsed);
-                  }
+                     wait(found ? _mintime-elapsed : _timeout-elapsed);
+                     Boolean abort = _waiters.get(id);
+                     if (abort != null && abort == true) {
+                        _waiters.put(id, false);
+                        return false;        
+                     }
+                  } 
                   /* Wait a little to allow more updates to arrive */
                   Thread.sleep(500); 
               }
@@ -53,7 +70,8 @@ public class Notifier
             */
          } while ( !(found && elapsed > _mintime) &&
                    elapsed < _timeout );
-
+         _waiters.remove(id);
+         return true;
     }
     
     
