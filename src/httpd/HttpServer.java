@@ -146,12 +146,12 @@ public abstract class HttpServer extends NanoHTTPD
        //  System.out.println("HTTP REQ ["+reqNo+"]: "+uri+", "+parms);
          if ("/admin".equals(uri))
              type = _serveAdmin(header, parms, out);   
-         else if ("/status".equals(uri))
-             type = _serveStatus(header, parms, out, vfilt);
+         else if ("/search".equals(uri))
+             type = _serveSearch(header, parms, out, vfilt);
          else if ("/station".equals(uri))
              type = _serveStation(header, parms, out);
          else if ("/findstation".equals(uri))
-             type = serveFindStation(header, parms, out);
+             type = serveFindItem(header, parms, out);
          else if ("/history".equals(uri))
              type = _serveStationHistory(header, parms, out);    
          else if ("/mapdata".equals(uri))
@@ -183,7 +183,7 @@ public abstract class HttpServer extends NanoHTTPD
    protected abstract String _serveAddObject (Properties header, Properties parms, PrintWriter out);
    protected abstract String _serveDeleteObject (Properties header, Properties parms, PrintWriter out);
    protected abstract String _serveResetInfo (Properties header, Properties parms, PrintWriter out);
-   protected abstract String _serveStatus (Properties header, Properties parms, PrintWriter out, ViewFilter vf);
+   protected abstract String _serveSearch (Properties header, Properties parms, PrintWriter out, ViewFilter vf);
    protected abstract String _serveStationHistory (Properties header, Properties parms, PrintWriter out);
 
 
@@ -204,9 +204,9 @@ public abstract class HttpServer extends NanoHTTPD
     * Look up a station and return id, x and y coordinates (separated by commas)
     * If not found, return nothing.
     */
-   public String serveFindStation(Properties header, Properties parms, PrintWriter out)
+   public String serveFindItem(Properties header, Properties parms, PrintWriter out)
    { 
-       Station s = _db.getStation(parms.getProperty("id").toUpperCase());
+       AprsPoint s = _db.getItem(parms.getProperty("id").toUpperCase());
        if (s!=null && !s.expired() && s.getPosition() != null) {
           UTMRef xpos = toUTM(s.getPosition()); 
           out.println(s.getIdent()+","+ (long) Math.round(xpos.getEasting()) + "," + (long) Math.round(xpos.getNorthing()));   
