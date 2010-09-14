@@ -29,7 +29,12 @@ VERSION 1.0
 
 * Alternative trail length.
 
-           
+* Alternative stylesheets for XML overlay
+          
+* [C/S] Improve XML request code: Cancel running XML requests at new request. 
+        Simple client session support. 
+      DONE
+      
 * [C] Allow user to type in positions in Latlong format. 
       DONE (1.0b2)
 
@@ -42,19 +47,25 @@ VERSION 1.0
 * [C] Fixes to extent changing/zooming (Did not always trigger XML reload).
       DONE (1.0b4)
       
-* [C] New bug: Permalink problems because of temporary map layer during startup.
+* [C] Permalink problems because of temporary map layer during startup.
       DONE
 
-* [C] OpenLayers upgrade. 
+* [C] OpenLayers upgrade. Some kamap/ol cleanup. 
       DONE
       
-* [C] Google Chrome issues. 
-
 * [C] Zoom to full extents - remove or fix.
+      DONE
+      
+* [C] Reduced MGRS positioning bug. 
+      DONE
      
-* [C] Map dragging problem with FF under Windows. 
+* [C] Left button popup behaviour. Map dragging problem. 
+      FF under Windows. 
+      DONE
 
 * [C] Sometimes last update in trail is missing. Fix?
+
+* [C] Google Chrome and Safari issues.
 
 * Code cleanups, stress test and performance tuning? 
 
@@ -83,8 +94,6 @@ Preparations for V.2.0 M.0
 * More configurable view profiles? 
 
 * More flexible logging?
- 
-* [C] Clean-up and move to latest version of OpenLayers. 
 
  
  
