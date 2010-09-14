@@ -359,46 +359,46 @@ package no.polaric.aprsd.http
     * Presents a status list over registered stations (standard HTML)
     */
    
-   def _serveStatus(hdr: Properties, parms: Properties, out: PrintWriter, vfilt: ViewFilter): String =
+   def _serveSearch(hdr: Properties, parms: Properties, out: PrintWriter, vfilt: ViewFilter): String =
    {
-       val infra = _infraonly || "infra".equals(parms.getProperty("filter"));
+       var arg = parms.getProperty("filter");
+       if (arg == null) 
+           arg  = "__NOCALL__"; 
+       val infra = _infraonly || "infra".equals(arg);
        val result: NodeSeq =
-          <br/>
-          <form>
-          APRS stasjoner: <input type="text"  width="10" id="findcall" />
-          <input type="button"
-             onclick="findAndShowStation(document.getElementById('findcall').value)"
-             value="Finn" />
-          </form><br/>
-          <table>
+         <table>
          {
-            for ( x:AprsPoint <- _db.getAll()
-                  if (x.isInstanceOf[Station] && vfilt.useObject(x))  ) yield
+            for ( x:AprsPoint <- _db.getAll(arg)
+                  if ( vfilt.useObject(x)) ) yield
             {
-               val s = x.asInstanceOf[Station]
-               val moving = !s.getHistory().isEmpty()
+               val s = if (!x.isInstanceOf[Station]) null
+                       else x.asInstanceOf[Station];
+
+               val moving = if (s!=null) !s.getHistory().isEmpty()
+                            else false;
 
                <tr onclick={
-                 if (s.visible() && s.getPosition() != null) 
-                     "findAndShowStation('" + s.getIdent() + "')"
+                 if (x.visible() && x.getPosition() != null) 
+                     "findAndShowStation('" + x.getIdent() + "')"
                  else "" 
                }>
           
-               <td>{s.getIdent()}</td>
+               <td>{x.getIdent()}</td>
                <td> {
-                  if (!s.visible())
+                  if (!x.visible())
                      <div>(foreldet)</div>
                   else
                      { if (moving) <img src="srv/dicons/new.gif" width="16" height="16"/>;
-                       if (s.getPosition() != null) showUTM(s.getPosition())
+                       if (x.getPosition() != null) showUTM(x.getPosition())
                        else <div>(ikke registrert)</div> }
                } </td>
 
 
-               <td> { if (!s.getHistory().isEmpty() && s.getSpeed() > 0)
-                       _directionIcon(s.getCourse()) else null} </td>
-               <td> { df.format(s.getUpdated()) } </td>
-               <td> { if (s.getDescr() != null) fixText(s.getDescr()) else "" } </td>
+               <td> { if (moving && s.getSpeed() > 0)
+                       _directionIcon(s.getCourse()) else 
+                          if (s==null) TXT("obj") else null } </td>
+               <td> { df.format(x.getUpdated()) } </td>
+               <td> { if (x.getDescr() != null) fixText(x.getDescr()) else "" } </td>
                </tr>
            }
         } 
