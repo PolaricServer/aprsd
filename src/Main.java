@@ -11,10 +11,11 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-   public static String version = "1.0b4+test";
+   public static String version = "1.0b5";
    static StationDB db = null;
    public static InetChannel ch1 = null;
    public static TncChannel  ch2 = null;
+   public static Igate igate  = null;
    public static OwnObjects ownobjects; 
    public static RemoteCtl rctl;
 
@@ -51,7 +52,6 @@ public class Main
 
            /* Start parser and connect it to channel(s) if any */
            AprsParser p = new AprsParser(db, db.getMsgProcessor());
-           Igate igate  = null;
            if (config.getProperty("igate.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate IGATE");
                igate = new Igate(config);
