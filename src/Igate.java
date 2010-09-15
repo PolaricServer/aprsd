@@ -114,4 +114,8 @@ public class Igate implements Channel.Receiver
               gate_to_rf(p);
     }
     
+    
+    
+    public String toString() 
+      { return "msg_cnt="+_msgcnt+", loc_cnt="+_rfChan.nHeard(); }
 }
