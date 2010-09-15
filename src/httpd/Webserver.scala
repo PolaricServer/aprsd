@@ -195,14 +195,20 @@ package no.polaric.aprsd.http
               { simpleLabel("items", "leftlab", "Antall APRS enheter:", TXT(""+_db.nItems())) }
               { simpleLabel("items", "leftlab", "Antall forbindelser:", TXT(""+_db.getRoutes().nItems())) }
               { simpleLabel("items", "leftlab", "Egne objekter:", TXT(""+_db.getOwnObjects().nItems())) }   
-              { simpleLabel("items", "leftlab", "Antall aktive Tråder:", TXT(""+(Thread.activeCount()-4))) }  
               { simpleLabel("items", "leftlab", "Antall HTTP klienter:", TXT(""+(_requests-1))) }  
               { simpleLabel("items", "leftlab", "Antall HTTP forespørsler:", TXT(""+_reqNo)) }   
               { simpleLabel("freemem", "leftlab", "Brukt minne:", 
                   TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
               <br/>
-              { simpleLabel("ch1", "leftlab", "Kanal 1 (APRS-IS):", TXT(""+Main.ch1)) } 
-              { simpleLabel("ch2", "leftlab", "Kanal 2 (TNC):", TXT(""+Main.ch2)) }    
+              { simpleLabel("ch1", "leftlab", "Kanal 1 (APRS-IS): ", 
+                   if (Main.ch1==null) TXT("---") else TXT(""+Main.ch1)) } 
+              { simpleLabel("ch2", "leftlab", "Kanal 2 (TNC): ", 
+                   if (Main.ch2==null) TXT("---") else TXT(""+Main.ch2)) }
+              { simpleLabel("igate", "leftlab", "Igate: ", 
+                   if (Main.igate==null) TXT("---") else TXT(""+Main.igate)) }   
+              { if (!Main.rctl.isEmpty())  
+                   simpleLabel("rctl", "leftlab", "Fjernkontroll: ", TXT(""+Main.rctl)) else null; }     
+                   
               </fieldset>  
               <input type="submit" onclick="window.close()" id="cancel" value="Avbryt"/>
           else
