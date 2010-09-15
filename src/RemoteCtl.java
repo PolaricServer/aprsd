@@ -18,8 +18,8 @@ import java.net.*;
 import java.util.*;
 
 
-/* OBS. Dette er work-in progress. Planen var å kunne
- * sende kommandoer til serveren via APRS meldinger
+/*
+ * Ideen er å kunne sende kommandoer mellom servere via APRS meldinger
  */
 
 public class RemoteCtl implements MessageProcessor.Notification
@@ -105,7 +105,7 @@ public class RemoteCtl implements MessageProcessor.Notification
     * Return false if request is rejected.
     */
    protected boolean processRequest(Station sender, String text)
-   {
+   {    
       String[] arg = text.split("\\s+", 2);
       if (arg.length == 0)
          return false;
@@ -185,5 +185,16 @@ public class RemoteCtl implements MessageProcessor.Notification
       if (item != null)
         item.setIcon(arg[1]);
       return true;
-   }     
+   } 
+       
+       
+   public boolean isEmpty() 
+       { return _parent == null && _children.size() == 0; }    
+   
+   public String toString() {
+      String res = (_parent==null ? "" : _parent);
+      for (String x : _children)
+          res += " "+x;  
+      return res; 
+   }
 }
