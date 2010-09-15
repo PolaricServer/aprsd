@@ -197,11 +197,14 @@ public class StationDBImp implements StationDB, Runnable
     
     
         
-    public synchronized List<AprsPoint> getAll()
+    public synchronized List<AprsPoint> getAll(String srch)
     {
         LinkedList<AprsPoint> result = new LinkedList();
+        srch = srch.toUpperCase(); 
         for (AprsPoint s: _map.values())
-           result.add(s);
+           if (s.getIdent().toUpperCase().contains(srch) ||
+               s.getDescr().toUpperCase().contains(srch) ) 
+               result.add(s);
         return result;
     }
        
@@ -217,7 +220,7 @@ public class StationDBImp implements StationDB, Runnable
           search(UTMRef uleft, UTMRef lright)
     {
          if (uleft==null || lright==null)
-            return getAll();
+            return getAll(null);
             
          LinkedList<AprsPoint> result = new LinkedList();
          for (AprsPoint s: _map.values())
