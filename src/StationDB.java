@@ -38,7 +38,7 @@ public interface StationDB
     public AprsObject newObject(Station owner, String id);
     
     
-    public List<AprsPoint> getAll();
+    public List<AprsPoint> getAll(String arg);
     
     public List<AprsPoint>
           search(Reference x1, Reference y1, Reference x2, Reference y2);
