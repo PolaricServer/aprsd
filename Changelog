@@ -1,0 +1,37 @@
+1.0 beta 2
+----------
+ 
+* Fix thread contention problem leading to delays in 
+  incoming packet processing. 
+* Change package name and separate out HTTP server code.
+* Administrative interface -- STARTED
+* [C] Allow user to type in positions in Latlong format. 
+
+1.0 beta 3
+----------
+
+* Announce version id on login to APRS-IS
+* Allow symbol overlays
+
+1.0 beta 4
+----------
+
+* Possible deadlock problem
+* [C] Extent choice on load. Remember last extent on reload.
+* [C] Local hiding of labels - survive zoom/pan and update of objects. 
+* [C] Fixes to extent changing/zooming (Did not always trigger XML reload).
+   
+1.0 beta 5
+----------
+
+* APRS-IS connect retry and give up. Fix.
+* Startup script, passwd script.  
+* Additions to admin-status screen.
+* [C/S] Improve XML request code: Cancel running XML requests at new request. 
+        Simple client session support. 
+* [C/S] Search objects/stations.
+* [C] Permalink problems because of temporary map layer during startup (see next item).
+* [C] OpenLayers upgrade. Some kamap/ol code cleanup. 
+* [C] Reduced MGRS positioning bug. 
+* [C] Left button popup behaviour. Map dragging when active popup.  
+* [C] Zoom buttons.
