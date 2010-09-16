@@ -1,67 +1,16 @@
 VERSION 1.0
 -----------
 
-* Fix thread contention problem leading to delays in 
-  incoming packet processing. 
-      DONE (1.0b2)
-     
-* Change package name and separate out HTTP server code.
-      DONE (1.0b2)
-
-* Administrative interface 
-      STARTED (status screen) (1.0b2)
-
-* Announce version id on login to APRS-IS
-      DONE (1.0b3)
-     
-* Allow symbol overlays
-      DONE (1.0b3)
-
-* Possible deadlock problem
-      DONE (1.0b4)
-      
-* APRS-IS connect retry and give up. Fix. 
-      DONE.
-   
-* polaric-passwd script? 
-
 * Timestamp parsing. Date is wrong (future) in some rare cases. 5 sept -> 2 oct. 
 
-* Alternative trail length.
+* Alternative trail lengths.
 
-* Alternative stylesheets for XML overlay
-          
-* [C/S] Improve XML request code: Cancel running XML requests at new request. 
-        Simple client session support. 
-      DONE
-      
-* [C] Allow user to type in positions in Latlong format. 
-      DONE (1.0b2)
+* Alternative stylesheets for XML overlay.
 
-* [C] Extent choice on load. Remember last extent on reload.
-      DONE (1.0b4)
+* Administrative interface. 
+     STARTED (1.0b2)
 
-* [C] Local hiding of labels - survive zoom/pan and update of objects. 
-      DONE (1.0b4)
-
-* [C] Fixes to extent changing/zooming (Did not always trigger XML reload).
-      DONE (1.0b4)
-      
-* [C] Permalink problems because of temporary map layer during startup.
-      DONE
-
-* [C] OpenLayers upgrade. Some kamap/ol cleanup. 
-      DONE
-      
-* [C] Zoom to full extents - remove or fix.
-      DONE
-      
-* [C] Reduced MGRS positioning bug. 
-      DONE
-     
-* [C] Left button popup behaviour. Map dragging problem. 
-      FF under Windows. 
-      DONE
+* Additions to search function.
 
 * [C] Sometimes last update in trail is missing. Fix?
 
@@ -91,7 +40,9 @@ Preparations for V.2.0 M.0
   
 * Permissions (objects, other)? Sender id? Consider simple user profile support? 
 
-* More configurable view profiles? 
+* More configurable view profiles?  
+
+* Consider per station logging to files? 
 
 * More flexible logging?
 
