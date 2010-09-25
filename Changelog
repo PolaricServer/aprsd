@@ -17,7 +17,7 @@
 ----------
 
 * Possible deadlock problem
-* [C] Extent choice on load. Remember last extent on reload.
+* [C] Extent choice on load. Remember last extent/map on reload.
 * [C] Local hiding of labels - survive zoom/pan and update of objects. 
 * [C] Fixes to extent changing/zooming (Did not always trigger XML reload).
    
