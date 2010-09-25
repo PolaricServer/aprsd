@@ -50,24 +50,24 @@ public class Notifier
                      wait(found ? _mintime-elapsed : _timeout-elapsed);
                      Boolean abort = _waiters.get(id);
                      if (abort != null && abort == true) {
-                        _waiters.put(id, false);
-                        return false;        
+                         _waiters.put(id, false);
+                         return false;        
                      }
                   } 
                   /* Wait a little to allow more updates to arrive */
                   Thread.sleep(500); 
               }
-               catch (Exception e) {}    
-               elapsed = (new Date()).getTime() - wstart;
+              catch (Exception e) {}    
+              elapsed = (new Date()).getTime() - wstart;
             
               /* Has there been events inside the interest zone */
               synchronized(this) {
                  found = found || signalledPt == null || uleft == null || 
                                   signalledPt.isInside(uleft, lright); 
               }
-           /* Wait no shorter than _mintime and no longer 
-            * than _timeout 
-            */
+            /* Wait no shorter than _mintime and no longer 
+             * than _timeout 
+             */
          } while ( !(found && elapsed > _mintime) &&
                    elapsed < _timeout );
          _waiters.remove(id);
@@ -81,4 +81,12 @@ public class Notifier
          signalledPt = st;
          notifyAll();
     }
+    
+    public synchronized void abortAll()
+    {
+       for (long x: _waiters.keySet())
+          _waiters.put(x, true);
+       notifyAll();   
+    }
+    
 }
