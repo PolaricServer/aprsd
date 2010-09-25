@@ -26,6 +26,9 @@ public abstract class AprsPoint implements Serializable
     private static Notifier _change        = new Notifier();
     protected static StationDB _db         = null;
     
+    public static void abortWaiters()
+      { _change.abortAll(); }
+      
     public static boolean waitChange(long clientid)
        { return waitChange(null, null, clientid); }
        
