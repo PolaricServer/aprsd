@@ -34,10 +34,10 @@ remotectl.on = true
 #######################################
 # Map trails
 #######################################
-map.trail.maxAge = 40 
-map.trail.maxPause = 20 
-map.trail.maxAge.extended = 30
-map.trail.maxPause.extended = 20 
+map.trail.maxAge = 20 
+map.trail.maxPause = 10 
+map.trail.maxAge.extended = 40
+map.trail.maxPause.extended = 15 
 
 
 #######################################
