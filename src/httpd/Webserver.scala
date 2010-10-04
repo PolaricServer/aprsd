@@ -37,12 +37,17 @@ package no.polaric.aprsd.http
    }
    
    
-   private def simpleLabel(id:String, cls:String, lbl:String, content: NodeSeq): NodeSeq =
+   private def lSimpleLabel(id:String, cls:String, lbl:String, content: NodeSeq): NodeSeq =
            <label for={id} class={cls}>{lbl}</label>
            <label id={id}> {content}</label>
-           <br/>;
-           
-
+          ;
+ 
+   private def simpleLabel(id:String, cls:String, lbl:String, content: NodeSeq): NodeSeq =
+           <xml:group>
+           {lSimpleLabel(id,cls,lbl,content)}
+           <br/>
+           </xml:group>; 
+ 
    private def TXT(t:String): NodeSeq = <xml:group>{t}</xml:group>
    
    
@@ -217,6 +222,51 @@ package no.polaric.aprsd.http
         printHtml (out, htmlBody(head, action(hdr, parms)));    
    }
    
+   
+   def _serveSarMode(hdr: Properties, parms: Properties, out: PrintWriter) : String =
+   {
+       val prefix = <h2>Søk og redningsmodus</h2>
+       var reason = parms.getProperty("sar_reason")
+       val on = parms.getProperty("sar_on")
+       
+       def fields(hdr: Properties, parms: Properties): NodeSeq =          
+           <xml:group>
+           <p>Alias-info bare synlig for innloggete brukere.</p>
+           <label for="sar_on" class="lleftlab">SAR modus:</label>
+           { checkBox("sar_on", _sarmode!=null, TXT("aktivert")) }  
+           <br/>
+           <label for="sar_reason" class="lleftlab">Beskrivelse:</label>
+           { if (_sarmode == null)
+                <input id="sar_reason" name="sar_reason" width="50" value={""} ></input>
+             else 
+                <xml:group>
+                <label id="sar_reason">{ _sarmode.getReason() }
+                <em> { "("+_sarmode.getUser()+")" } </em></label>
+                <br/>
+                { simpleLabel("sar_date", "lleftlab", "Aktivert:", TXT(""+_sarmode.getTime())) }
+                </xml:group>
+           }
+           </xml:group>     
+              
+              
+       def action(hdr: Properties, parms: Properties): NodeSeq = 
+       {
+          AprsPoint.abortWaiters(true);
+          if (on != null && "true".equals(on) ) {
+               _sarmode = new SarMode(reason, getAuthUser(hdr));
+               <h3>Aktivert</h3>
+               <p>{reason}</p>
+          }
+          else {   
+               _sarmode = null;
+               <h3>Avsluttet</h3>
+          } 
+       }
+       
+       
+       
+       printHtml (out, htmlBody (null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action) )))
+   }
    
    
    
@@ -620,7 +670,6 @@ package no.polaric.aprsd.http
    def _serveStationHistory(hdr: Properties, parms: Properties, out: PrintWriter): String =
    {        
        val s = _db.getStation(parms.getProperty("id"))
-
        val result: NodeSeq =
           if (s == null)
              <h2>Feil:</h2><p>Fant ikke stasjon</p>;
@@ -650,9 +699,30 @@ package no.polaric.aprsd.http
              </table>
 
         printHtml(out, htmlBody(null, result))
-    }
-   
-   
+    } 
+  
+  
+  
+
+    def _serveTrailPoint(hdr: Properties, parms: Properties, out: PrintWriter): String =
+    {
+       val s = _db.getStation(parms.getProperty("id"))
+       val index = Integer.parseInt(parms.getProperty("index"))
+       val h = s.getHistory()
+       val item = h.getPoint(index)
+       /* FIXME: Check if valid result */
     
+       val result : NodeSeq =
+         <xml:group>
+         <label for="callsign" class="lleftlab">Ident:</label>
+         <label id="callsign"><b> { s.getIdent() } </b></label>
+         <br/> 
+         { simpleLabel("time",  "lleftlab", "Tidspunkt:", TXT( df.format(item.time))) }
+         { simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )  }
+         { lSimpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course))  }
+         </xml:group>
+       printHtml(out, htmlBody(null, result)) 
+    }
+  
   }
 }
