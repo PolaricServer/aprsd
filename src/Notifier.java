@@ -25,8 +25,8 @@ public class Notifier
     private AprsPoint signalledPt; 
     private static long _mintime  = 1000 * 10;   /* Minimum wait time: 10s */
     private static long _timeout  = 1000 * 120;  /* Maximum wait time: 2min */
-    private Map<Long, Boolean> _waiters = new HashMap();
-    
+    private Map<Long, Integer> _waiters = new HashMap();
+    // 0 = continue waiting, 1 = return XML, 2 = abort and return nothing
     
     
     public boolean waitSignal(UTMRef uleft, UTMRef lright, long id)
@@ -37,22 +37,24 @@ public class Notifier
          synchronized (this) {
             /* Abort any other waiter having the same id  */
             if (_waiters.containsKey(id)) {
-                _waiters.put(id, true);
+                _waiters.put(id, 2);
                 notifyAll();
             }
             else
-                _waiters.put(id, false);
+                _waiters.put(id, 0);
          }    
          do {
               try {
                   Thread.sleep(100);
                   synchronized(this) {
                      wait(found ? _mintime-elapsed : _timeout-elapsed);
-                     Boolean abort = _waiters.get(id);
-                     if (abort != null && abort == true) {
-                         _waiters.put(id, false);
-                         return false;        
+                     Integer abort = _waiters.get(id);
+                     if (abort != null && abort > 0) {
+                         System.out.println("*** Abort waiter: "+id);
+                         _waiters.put(id, 0);
+                         return (abort==1) ? true : false;        
                      }
+                     
                   } 
                   /* Wait a little to allow more updates to arrive */
                   Thread.sleep(500); 
@@ -82,10 +84,10 @@ public class Notifier
          notifyAll();
     }
     
-    public synchronized void abortAll()
+    public synchronized void abortAll(boolean retval)
     {
        for (long x: _waiters.keySet())
-          _waiters.put(x, true);
+          _waiters.put(x, retval ? 1 : 2 );
        notifyAll();   
     }
     
