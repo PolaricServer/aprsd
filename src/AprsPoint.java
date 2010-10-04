@@ -19,15 +19,15 @@ import java.io.Serializable;
   
 
 
-public abstract class AprsPoint implements Serializable
+public abstract class AprsPoint extends Point implements Serializable
 {
     private static long     _nonMovingTime = 1000 * 60 * 5;   
     private static SymTable _symTab        = new SymTable ("symbols");
     private static Notifier _change        = new Notifier();
     protected static StationDB _db         = null;
     
-    public static void abortWaiters()
-      { _change.abortAll(); }
+    public static void abortWaiters(boolean retval)
+      { _change.abortAll(retval); }
       
     public static boolean waitChange(long clientid)
        { return waitChange(null, null, clientid); }
@@ -41,34 +41,14 @@ public abstract class AprsPoint implements Serializable
     public static void setDB(StationDB db) 
        { _db = db; }   
          
-    protected Reference   _position;  
     protected char        _symbol; 
     protected char        _altsym; 
-    protected String      _icon; 
     private String        _alias;  
     protected boolean     _changing = false; 
     protected Date        _updated = new Date(), _lastChanged;
     protected boolean     _permanent = false;
-    private boolean       _hidelabel = false; 
-    private String        _description;    
+    private boolean       _hidelabel = false;  
     
-    /**
-     * Test if position is inside of the rectangular area defined by uleft (upper left corner)
-     * and lright (lower right corner). Assume that uleft and lright are the same
-     * UTM zone. 
-     */          
-    public boolean isInside(UTMRef uleft, UTMRef lright)
-    {
-         /* FIXME: Add lat zone as well */
-        if (_position == null)
-           return false;
-        try {
-           UTMRef ref = _position.toLatLng().toUTMRef(uleft.getLngZone());
-           return ( ref.getEasting() >= uleft.getEasting() && ref.getNorthing() >= uleft.getNorthing() &&
-                    ref.getEasting() <= lright.getEasting() && ref.getNorthing() <= lright.getNorthing() );
-        }
-        catch (Exception e) { return false; }
-    }
     
     public boolean isInfra() 
        { return false; }
@@ -76,19 +56,12 @@ public abstract class AprsPoint implements Serializable
     public boolean isEmergency()
        { return (_altsym=='\\' && _symbol=='!'); }
              
-             
-    public Reference getPosition ()   
-       { return _position; } 
-
 
     public char getSymbol()
        { return _symbol; }
        
     public char getSymtab()
        { return _altsym;}
-       
-    public boolean iconIsNull()
-       { return _icon == null; }
     
        
     public String getIcon()
@@ -101,9 +74,13 @@ public abstract class AprsPoint implements Serializable
     
     public abstract String getIdent();
 
-    public String getDisplayId()
-       { return _alias != null ? _alias : getIdent(); }    
+    public String getDisplayId(boolean usealias)
+       { return (usealias && _alias != null) ? _alias : getIdent(); }    
     
+    public String getDisplayId()
+       { return getDisplayId(true); }
+       
+       
     public String getAlias()
        { return _alias; }
                
@@ -134,10 +111,6 @@ public abstract class AprsPoint implements Serializable
       }
       return false;
     }
-
-
-    public String getDescr()
-       { return (_description == null ? "" : _description); }
        
        
     public synchronized void setDescr(String d)
