@@ -97,6 +97,9 @@ public class History implements Iterable<History.Item>, Serializable
        { return _items.getFirst(); }  
 
 
+    public Item getPoint(int index)
+       { return _items.get(index-1); }
+    
 
     public Iterator<Item> iterator()
     {
