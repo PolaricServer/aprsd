@@ -4,27 +4,38 @@ VERSION 1.0
 * Fix distance measurement. Use canvas. 
      DONE
      
-* Timestamp parsing. Date is wrong (future) in some rare cases. 5 sept -> 2 oct. 
+* Administrative interface. 
+     STARTED (1.0b2)
+     
+* [C] Recovery of client, at reboot of server?
+     DONE (reload at statuscode 503) 
+     
+* Simple SAR mode: Hide local annotations for other than logged-in users. 
+     DONE 
 
-* Alternative trail lengths.
+* Additions to search function.
+     
+* Timestamp parsing. Date is wrong (future) in transition between months
+  and possibly in some other rare cases. 
+  
+* Proper handling of "signs". 
 
 * CSS cleanup. Alternative stylesheets for XML overlay?
 
-* Administrative interface. 
-     STARTED (1.0b2)
-
-* Additions to search function.
-
-* Simple SAR mode: Hide local annotations for other than logged-in users. 
-
-* [C/S] Recovery of client, at reboot of server?
-     DONE (reload at statuscode 503) 
-
-* [C] Sometimes last update in trail is missing. Fix?
+* Code cleanups, stress test and performance tuning? 
 
 * [C] Google Chrome and Safari issues.
 
-* Code cleanups, stress test and performance tuning? 
+Trails
+------
+* Alternative trail lengths.
+
+* [C] Hover and onclick info (callsign, time, course, speed) for trails points.   
+      DONE
+
+* [C] Hide trails
+
+* [C] Sometimes last update in trail is missing. Fix?
 
 
 
@@ -54,6 +65,8 @@ Preparations for V.2.0 M.0
 * Consider per station logging to files? 
 
 * More flexible logging?
+
+* Side pane (stations, summary info)
 
  
  
