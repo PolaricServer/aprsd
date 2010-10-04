@@ -12,13 +12,14 @@ import java.util.concurrent.locks.*;
 
 public abstract class HttpServer extends NanoHTTPD
 {
-   protected StationDB  _db;
-   protected int        _utmzone;
-   private String       _timezone;
-   protected String     _serverurl;
-   private   String     _icon, _icondir, _adminuser, _updateusers;
-   protected   boolean    _infraonly;
-
+   protected  StationDB  _db;
+   protected  int        _utmzone;
+   protected  char       _utmlatzone;
+   private    String     _timezone;
+   protected  String     _serverurl;
+   private    String     _icon, _icondir, _adminuser, _updateusers;
+   protected  boolean    _infraonly;
+   protected  SarMode    _sarmode = null;
            
    public static final String _encoding = "UTF-8";
    public static final int _buffer_size = 4096;
@@ -38,6 +39,7 @@ public abstract class HttpServer extends NanoHTTPD
       super(port); 
       _db=db; 
       _utmzone     = Integer.parseInt(config.getProperty("map.utm.zone", "33").trim());
+      _utmlatzone  = config.getProperty("map.utm.latzone", "W").charAt(0);
       _icon        = config.getProperty("map.icon.default", "sym.gif").trim();
       _icondir     = config.getProperty("map.icon.dir", "icons").trim();
       _infraonly   = config.getProperty("map.infraonly", "false").trim().matches("true|yes");
@@ -85,7 +87,7 @@ public abstract class HttpServer extends NanoHTTPD
     * (we assume that there is a front end webserver which already 
     * did the authentication).  
     */ 
-   private final String getAuthUser(Properties header)
+   protected final String getAuthUser(Properties header)
    {
          String auth = header.getProperty("authorization", null);
          if (auth==null)
@@ -143,7 +145,6 @@ public abstract class HttpServer extends NanoHTTPD
           */
          String filtid = _infraonly ? "infra" : parms.getProperty("filter");
          ViewFilter vfilt = ViewFilter.getFilter(filtid);
-       //  System.out.println("HTTP REQ ["+reqNo+"]: "+uri+", "+parms);
          if ("/admin".equals(uri))
              type = _serveAdmin(header, parms, out);   
          else if ("/search".equals(uri))
@@ -154,6 +155,8 @@ public abstract class HttpServer extends NanoHTTPD
              type = serveFindItem(header, parms, out);
          else if ("/history".equals(uri))
              type = _serveStationHistory(header, parms, out);    
+         else if ("/trailpoint".equals(uri))
+             type = _serveTrailPoint(header, parms, out);     
          else if ("/mapdata".equals(uri))
              type = serveMapData(header, parms, out, vfilt, filtid);
          else if ("/addobject".equals(uri))
@@ -162,6 +165,8 @@ public abstract class HttpServer extends NanoHTTPD
              type = _serveDeleteObject(header, parms, out);
          else if ("/resetinfo".equals(uri))
              type = _serveResetInfo(header, parms, out);    
+         else if ("/sarmode".equals(uri))
+             type = _serveSarMode(header, parms, out);        
          else 
              return serveFile( uri, header, new File("."), true );
        
@@ -185,7 +190,8 @@ public abstract class HttpServer extends NanoHTTPD
    protected abstract String _serveResetInfo (Properties header, Properties parms, PrintWriter out);
    protected abstract String _serveSearch (Properties header, Properties parms, PrintWriter out, ViewFilter vf);
    protected abstract String _serveStationHistory (Properties header, Properties parms, PrintWriter out);
-
+   protected abstract String _serveSarMode (Properties header, Properties parms, PrintWriter out);
+   protected abstract String _serveTrailPoint (Properties header, Properties parms, PrintWriter out);
 
     
    protected String fixText(String t)
@@ -261,9 +267,12 @@ public abstract class HttpServer extends NanoHTTPD
           long x2 = Long.parseLong( parms.getProperty("x2") );
           long x3 = Long.parseLong( parms.getProperty("x3") );    
           long x4 = Long.parseLong( parms.getProperty("x4") );
-          uleft = new UTMRef((double) x1, (double) x2, 'W', _utmzone); /* FIXME: Lat zone */
-          lright = new UTMRef((double) x3, (double) x4, 'W', _utmzone);
+          uleft = new UTMRef((double) x1, (double) x2, _utmlatzone, _utmzone); 
+          lright = new UTMRef((double) x3, (double) x4, _utmlatzone, _utmzone);
         }
+        long scale = 0;
+        if (parms.getProperty("scale") != null)
+           scale = Long.parseLong(parms.getProperty("scale"));
         
         /* Sequence number at the time of request */
         long seq  = 0;
@@ -272,14 +281,15 @@ public abstract class HttpServer extends NanoHTTPD
           seq = _seq;
         }
         long client = getSession(parms);
+        boolean showSarInfo = (getAuthUser(header) != null || _sarmode == null);
         
         /* If requested, wait for a state change (see Notifier.java) */
         if (parms.getProperty("wait") != null) 
             if (! Station.waitChange(uleft, lright, client) ) {
-               System.out.println("*** Cancel XML request : "+client);
-               out.println("<overlay cancel=\"true\"/>");
-               out.flush();
-               return "text/xml; charset=utf-8";
+                System.out.println("*** Cancel XML request : "+client);
+                out.println("<overlay cancel=\"true\"/>");             
+                out.flush();
+                return "text/xml; charset=utf-8";
             }
                 
         /* XML header with meta information */           
@@ -290,17 +300,20 @@ public abstract class HttpServer extends NanoHTTPD
         out.println("<meta name=\"adminuser\" value=\""+ authorizedForAdmin(header) + "\"/>");
         out.println("<meta name=\"updateuser\" value=\""+ authorizedForUpdate(header) + "\"/>");
         out.println("<meta name=\"clientses\" value=\""+ client + "\"/>");    
-            
+        out.println("<meta name=\"sarmode\" value=\""+ (_sarmode!=null ? "true" : "false")+"\"/>");    
+        
         /* Output signs. A sign is not an APRS object
-         * just a small icon and a title. This will probably be removed. 
+         * just a small icon and a title. It may be a better idea to do this
+         * in map-layers instead?
          */
         int i=0;
         for (Signs.Item s: Signs.getList())
         {
-            UTMRef ref = toUTM(s.pos); 
-            if (ref == null) continue;
-            String title = s.text == null ? "" : "title=\"" + fixText(s.text) + "\"";
-            String icon = "srv/icons/"+ s.icon;    
+            UTMRef ref = toUTM(s.getPosition()); 
+            if (ref == null || !s.visible(scale) || !s.isInside(uleft, lright))
+                continue;
+            String title = s.getDescr() == null ? "" : "title=\"" + fixText(s.getDescr()) + "\"";
+            String icon = "srv/icons/"+ s.getIcon();    
            
             out.println("<point id=\"__sign" + (i++) + "\" x=\""
                          + (int) Math.round(ref.getEasting()) + "\" y=\"" + (int) Math.round(ref.getNorthing())+ "\" " 
@@ -353,7 +366,7 @@ public abstract class HttpServer extends NanoHTTPD
                      }
                                                    
                      out.println("   <label style=\""+style+"\">");
-                     out.println("       "+fixText(s.getDisplayId()));
+                     out.println("       "+fixText(s.getDisplayId(showSarInfo)));
                      out.println("   </label>"); 
                   }
                   if (s instanceof Station)
