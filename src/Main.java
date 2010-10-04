@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-   public static String version = "1.0b5";
+   public static String version = "1.0b5+test";
    static StationDB db = null;
    public static InetChannel ch1 = null;
    public static TncChannel  ch2 = null;
@@ -33,17 +33,18 @@ public class Main
         Runtime.getRuntime().addShutdownHook( new Thread() 
              {
                 public void run() 
-                   { System.out.println("*** LA3T APRS Server shutdown"); 
+                   { 
+                     System.out.println("*** Polaric APRSD shutdown"); 
                      if (db  != null) db.save(); 
                      if (ch1 != null) ch1.close();
-                     if (ch2 != null) ch2.close(); 
+                     if (ch2 != null) ch2.close();
                    } 
              });
              
         try {
            FileInputStream fin = new FileInputStream(args[0]);
            config.load(fin);
-           System.out.println( "*** LA3T APRS Server startup" );
+           System.out.println( "*** Polaric APRSD startup" );
            
            
            /* Database of stations/objects */
