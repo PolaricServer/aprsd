@@ -59,7 +59,7 @@ case "$1" in
 	 
    restart|force-reload)
 	 $0 stop
-	 sleep 8 
+	 sleep 15
 	 $0 start
 	 ;;  
   
