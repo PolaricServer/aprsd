@@ -74,7 +74,7 @@ public class OwnObjects implements Runnable
                 id = id.substring(0,9);
             _myself.setUpdated(new Date());
             obj = _db.newObject(_myself, id);
-            obj.update(new Date(), pos, 0, 0, 0, comment, sym, symtab);
+            obj.update(new Date(), pos, 0, 0, 0, comment, sym, symtab,  "");
             _ownObjects.add(id);
             sendObjectReport(obj, false);
             return true;
