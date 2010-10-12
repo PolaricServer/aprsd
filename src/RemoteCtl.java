@@ -18,11 +18,12 @@ import java.net.*;
 import java.util.*;
 
 
-/*
- * Ideen er å kunne sende kommandoer mellom servere via APRS meldinger
+/**
+ * Remote control. Execute commands on associated servers by exchanging
+ * APRS messages. 
  */
 
-public class RemoteCtl implements MessageProcessor.Notification
+public class RemoteCtl implements Runnable, MessageProcessor.Notification
 {
 
    protected class Subscriber implements MessageProcessor.MessageHandler
@@ -45,7 +46,7 @@ public class RemoteCtl implements MessageProcessor.Notification
     */
    private Set<String> _children = new HashSet<String>();
    private String _parent;
-
+   private Thread _thread;
    
    private MessageProcessor _msg;
    private StationDB _db;
@@ -56,7 +57,8 @@ public class RemoteCtl implements MessageProcessor.Notification
    public Set<String> getChildren()
        { return _children; }
        
-       
+   
+   private int threadid=0;    
    public RemoteCtl(Properties config, MessageProcessor mp, StationDB db)
    {
        String myCall = config.getProperty("remotectl.mycall", "N0CALL").trim();
@@ -67,8 +69,8 @@ public class RemoteCtl implements MessageProcessor.Notification
        _db = db;
        if (_parent != null) {
           _parent.trim();
-          System.out.println("*** RemoteCtl: Send CON");
-          sendRequest(_parent, "CON");
+          _thread = new Thread(this, "RemoteCtl-"+(threadid++));
+          _thread.start();
        }
    }
 
@@ -191,10 +193,27 @@ public class RemoteCtl implements MessageProcessor.Notification
    public boolean isEmpty() 
        { return _parent == null && _children.size() == 0; }    
    
+   
    public String toString() {
       String res = (_parent==null ? "" : _parent);
       for (String x : _children)
           res += " "+x;  
       return res; 
    }
+   
+   
+   /* 
+    * Thread to refresh connection to "parent" every 10 minutes
+    */
+   public void run()
+   {
+      while (true) {
+         System.out.println("*** RemoteCtl: Send CON");
+         sendRequest(_parent, "CON");
+         try {
+            Thread.sleep(600000);
+         } catch (Exception e) {}
+     }
+   } 
+   
 }
