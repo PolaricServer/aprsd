@@ -1,42 +1,22 @@
 VERSION 1.0
 -----------
 
-* Fix distance measurement. Use canvas. 
-     DONE
-     
 * Administrative interface. 
      STARTED (1.0b2)
-     
-* [C] Recovery of client, at reboot of server?
-     DONE (reload at statuscode 503) 
-     
-* Simple SAR mode: Hide local annotations for other than logged-in users. 
-     DONE 
-
-* Additions to search function.
-     
-* Timestamp parsing. Date is wrong (future) in transition between months
-  and possibly in some other rare cases. 
-  
-* Proper handling of "signs". 
 
 * CSS cleanup. Alternative stylesheets for XML overlay?
 
 * Code cleanups, stress test and performance tuning? 
 
-* [C] Google Chrome and Safari issues.
+* Additions to search function?
 
-Trails
-------
-* Alternative trail lengths.
-
-* [C] Hover and onclick info (callsign, time, course, speed) for trails points.   
-      DONE
+* [C/S] Alternative trail lengths.
 
 * [C] Hide trails
 
 * [C] Sometimes last update in trail is missing. Fix?
 
+* [C] Webkit (Google Chrome and Safari) issues.
 
 
 Preparations for V.2.0 M.0
