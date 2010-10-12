@@ -101,7 +101,7 @@ public static class Status implements Serializable
     
     
     public synchronized History.Item getHItem()
-       { return new History.Item(_updated, _position, _speed, _course); }
+       { return new History.Item(_updated, _position, _speed, _course, ""); }
        
        
     public String getIdent()
@@ -185,7 +185,7 @@ public static class Status implements Serializable
       
         
     public synchronized void update(Date ts, Reference newpos, int crs, int sp, int alt, 
-                                    String descr, char sym, char altsym)
+                                    String descr, char sym, char altsym, String pathinfo)
     { 
         if (_position != null && _updated != null)
         { 
@@ -220,7 +220,7 @@ public static class Status implements Serializable
                * history 
                */
                if (tdistance < 0) {
-                   _history.add(ts, newpos, sp, crs);
+                   _history.add(ts, newpos, sp, crs, pathinfo);
                    System.out.println("*** Old report - update trail");
                    setChanging(); 
                    return;
@@ -237,7 +237,7 @@ public static class Status implements Serializable
            {   
                if (getHistory().isEmpty() && _autotrail)
                    _trailcolor = _colTab.nextColour();
-               _history.add(_updated, _position, _speed, _course); 
+               _history.add(_updated, _position, _speed, _course, pathinfo); 
                _db.getRoutes().removeOldEdges(getIdent(), _history.oldestPoint());
                setChanging();
            }
