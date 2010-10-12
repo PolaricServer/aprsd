@@ -18,7 +18,11 @@ import java.util.*;
 import java.io.Serializable;
   
 
-
+/**
+ * Geographic point.
+ * Every point has a location, icon and description. 
+ */
+ 
 public abstract class Point implements Serializable
 {             
     protected Reference   _position;  
@@ -27,7 +31,7 @@ public abstract class Point implements Serializable
     
     /**
      * Test if position is inside of the rectangular area defined by uleft (upper left corner)
-     * and lright (lower right corner). Assume that uleft and lright are the same
+     * and lright (lower right corner). Assume that uleft and lright are within the same
      * UTM zone. 
      */          
     public boolean isInside(UTMRef uleft, UTMRef lright)
