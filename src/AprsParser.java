@@ -83,13 +83,13 @@ public class AprsParser implements Channel.Receiver
             case '!': 
             case '=':
                log("     Real time position report"); 
-               parseStdAprs(p.report, station, false);
+               parseStdAprs(p.report, station, false, p.via);
                break;
               
             case '@':
             case '/': 
                log("     Timestamped position report");   
-               parseStdAprs(p.report, station, true);
+               parseStdAprs(p.report, station, true, p.via);
                break;
                
             case ';': 
@@ -99,7 +99,7 @@ public class AprsParser implements Channel.Receiver
             case '\'':
             case '`': 
                log("     Mic-E report");
-               parseMicE(p.to, p.report, station); 
+               parseMicE(p.to, p.report, station, p.via); 
                break;
                
             case ':':
@@ -238,7 +238,7 @@ public class AprsParser implements Channel.Receiver
             obj.setOwner(station);
         }     
         if (op=='*') 
-           parseStdAprs(msg.substring(10), obj, true);
+           parseStdAprs(msg.substring(10), obj, true, "");
         else {
            obj.kill();
            System.out.println("   OBJECT KILL: id="+ident+", op="+op);
@@ -252,7 +252,7 @@ public class AprsParser implements Channel.Receiver
      * Parse mic-e data.
      * Based on http://www.aprs-is.net/javAPRS/mice_parser.htm
      */
-    private void parseMicE (String toField, String msg, AprsPoint station) 
+    private void parseMicE (String toField, String msg, AprsPoint station, String pathinfo) 
     {
             int j, k;
             Double pos_lat, pos_long; 
@@ -401,7 +401,7 @@ public class AprsParser implements Channel.Receiver
             }
             log(" COMMENT: "+ comment);
             
-            station.update(new Date(), pos, d, speed, altitude, comment, symbol, altsym);  
+            station.update(new Date(), pos, d, speed, altitude, comment, symbol, altsym, pathinfo);  
             return;
     }
 
@@ -426,18 +426,19 @@ public class AprsParser implements Channel.Receiver
      * 'Compression' of timestamp is experimental. It is not part of 
      * the standard APRS protocol
      */
-    private Date parseTimestamp(String data, boolean compressed)
+        private static Date parseTimestamp(String data, boolean compressed)
     { 
          Calendar ts;
          int day,hour,min,sec;
          char tst = (compressed ? 0 : data.charAt(6));
          String dstr = data.substring(0, (compressed ? 3:6) ); 
-         Date now = new Date();
-         
+         Calendar now = (Calendar) localTime.clone();    
+            
          /* Default timezone is zulu */
          ts = (Calendar) utcTime.clone();
-         ts.setTime( now ) ;
-         
+         ts.setTimeInMillis( now.getTimeInMillis() + 
+               (now.get(Calendar.ZONE_OFFSET)+now.get(Calendar.DST_OFFSET))) ;
+                  
          if (compressed || tst == 'h') {
              /* Parse time in HHMMSS format */
              day = ts.get(Calendar.DAY_OF_MONTH);
@@ -464,13 +465,23 @@ public class AprsParser implements Channel.Receiver
             min  = Integer.parseInt(dstr.substring(4,6));
             sec  = 0;
          }
-         ts.set(Calendar.YEAR, now.getYear()+1900);
-         ts.set(Calendar.MONTH, now.getMonth());
+         /* Sanity check */
+         if (day<1||day>31||hour>24||min>59||sec>59) { 
+            System.out.println("*** WARNING: Timestamp format problem: "+dstr);
+            return new Date();
+         }
+                
+         ts.set(Calendar.YEAR, now.get(Calendar.YEAR));
+         ts.set(Calendar.MONTH, now.get(Calendar.MONTH));
          ts.set(Calendar.DAY_OF_MONTH, day);
          ts.set(Calendar.HOUR_OF_DAY, hour);
          ts.set(Calendar.MINUTE, min);
          ts.set(Calendar.SECOND, sec);
-
+         
+         /* Day numbers after today is assumed to be in the previous month */
+         if (ts.get(Calendar.DAY_OF_MONTH) > now.get(Calendar.DAY_OF_MONTH)) 
+             ts.add(Calendar.MONTH, -1);
+             
          return ts.getTime();
     }
     
@@ -480,7 +491,7 @@ public class AprsParser implements Channel.Receiver
     /** 
      * Parse standard position data.
      */
-    private void parseStdAprs(String data, AprsPoint station, boolean timestamp)
+    private void parseStdAprs(String data, AprsPoint station, boolean timestamp, String pathinfo)
     {
            Date time = new Date();
            long altitude = -1; 
@@ -609,7 +620,7 @@ public class AprsParser implements Channel.Receiver
             if (comment.length() < 1 || comment.equals(" "))
                comment = null;
                
-            station.update(time, pos, course, speed, (int) altitude, comment, symbol, symtab );
+            station.update(time, pos, course, speed, (int) altitude, comment, symbol, symtab, pathinfo );
             
             log("     POS: "+ pos);         
     }
