@@ -26,8 +26,9 @@ public class History implements Iterable<History.Item>, Serializable
        public Reference pos;
        public int speed;
        public int course; 
-       public Item(Date t, Reference p, int sp, int crs)
-         { time = t; pos = p; speed = sp; course = crs; } 
+       public String pathinfo;
+       public Item(Date t, Reference p, int sp, int crs, String path)
+         { time = t; pos = p; speed = sp; course = crs; pathinfo = path;} 
     }
     
     private static long _maxAge = 1000 * 60 * 15;          // Max age of a history item (default 30 minutes) 
@@ -65,14 +66,14 @@ public class History implements Iterable<History.Item>, Serializable
     }
     
     
-    public synchronized void add(Date t, Reference p, int sp, int crs)
+    public synchronized void add(Date t, Reference p, int sp, int crs, String path)
     { 
         Date now = new Date(); 
         _sum_speed += sp;
          
         /* New report is newer than the last report - put it first */
         if ( _items.size() == 0 || t.getTime() >= _items.getFirst().time.getTime()) 
-            _items.addFirst(new Item(t, p, sp, crs)); 
+            _items.addFirst(new Item(t, p, sp, crs, path)); 
 
         else {       
            /* New report is older than the last report - find the right place and put it there */
@@ -83,7 +84,7 @@ public class History implements Iterable<History.Item>, Serializable
                  break;
            }
           it.previous();
-          it.add(new Item(t, p, sp, crs));
+          it.add(new Item(t, p, sp, crs, path));
        }
        cleanUp(now);
     }
