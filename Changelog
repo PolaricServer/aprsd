@@ -35,3 +35,15 @@
 * [C] Reduced MGRS positioning bug. 
 * [C] Left button popup behaviour. Map dragging when active popup.  
 * [C] Zoom buttons.
+
+1.0 beta 6
+----------
+
+* Fix and improve distance measurement. Use canvas. 
+* Simple SAR mode: Hide local annotations for other than logged-in users. 
+* RemoteCtl reconnect.
+* Timestamp parsing. Sanity checking, incorrect interpretation in some rare cases, fix.  
+* Proper handling of "signs". Zoom level/area filtering. 
+* [C] Recovery of client, at reboot of server (reload at statuscode 503) 
+* [C] Iframe version
+* [C] Hover and onclick info (callsign, time, course, speed) for trails points.   
