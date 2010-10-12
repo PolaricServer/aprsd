@@ -679,8 +679,13 @@ package no.polaric.aprsd.http
                {
                    val h = s.getHistory()
                    var x = s.getHItem()
-                   for (it <- h.items()) yield
-                      <tr>
+                   var i = 0;
+                   for (it <- h.items()) yield {
+                      i += 1
+                      val arg = "'"+s.getIdent()+"', "+i
+                      <tr onmouseover={"histList_hover("+arg+");"} 
+                          onmouseout={"histList_hout("+arg+");"}
+                          onclick = {"histList_click("+arg+");"} >
                       <td> { tf.format(x.time) } </td>
                       <td> { showUTM(x.pos) } </td>
                       <td> { if (x.speed >= 0) x.speed.toString else "" } </td>
@@ -694,7 +699,7 @@ package no.polaric.aprsd.http
                              "%.1f km" format dist
                       }</td>
                       </tr>
-
+                   }
                }
              </table>
 
@@ -720,6 +725,9 @@ package no.polaric.aprsd.http
          { simpleLabel("time",  "lleftlab", "Tidspunkt:", TXT( df.format(item.time))) }
          { simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )  }
          { lSimpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course))  }
+         <div id="traffic">
+         { lSimpleLabel("via",   "lleftlab", "APRS via:", TXT(item.pathinfo))  }
+         </div>
          </xml:group>
        printHtml(out, htmlBody(null, result)) 
     }
