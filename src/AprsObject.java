@@ -64,7 +64,7 @@ public class AprsObject extends AprsPoint implements Serializable
     
     
     public synchronized void update(Date ts, Reference newpos, int crs, int sp, int alt, 
-                                    String descr, char sym, char altsym)
+                                    String descr, char sym, char altsym, String pathinfo)
     { 
          /* Should try to share code with Station class ?*/
          if (_symbol != sym || _altsym != altsym || 
