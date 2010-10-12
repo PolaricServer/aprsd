@@ -186,7 +186,7 @@ public abstract class AprsPoint extends Point implements Serializable
         
         
     public abstract void update(Date ts, Reference newpos, int crs, int sp, int alt, 
-                                String descr, char sym, char altsym);        
+                                String descr, char sym, char altsym, String pathinfo);        
         
     public abstract boolean expired();
     public boolean visible() { return !expired(); }
