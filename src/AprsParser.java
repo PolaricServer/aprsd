@@ -467,7 +467,7 @@ public class AprsParser implements Channel.Receiver
          }
          /* Sanity check */
          if (day<1||day>31||hour>24||min>59||sec>59) { 
-            System.out.println("*** WARNING: Timestamp format problem: "+dstr);
+            System.out.println("*** WARNING: Timestamp format problem: "+dstr+tst);
             return new Date();
          }
                 
