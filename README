@@ -6,7 +6,7 @@ APRS SERVER (POLARIC-APRSD)
 
 install software packages (Ubuntu or Debian):
    beep
-   sun-java6-bin
+   sun-java6-bin (or openjdk 6)
    librxtx-java (if you are going to use a TNC on a serial port)
    scala-library 
     ( not in Debian Lenny - the package is available in testing/unstable and
