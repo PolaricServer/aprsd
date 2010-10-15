@@ -7,26 +7,35 @@ user.update = xxx
 #######################################
 # APRS IS server to get input from
 ####################################### 
-inetchannel.host = aprs.la3t.no
+inetchannel.host = aprs.no
 inetchannel.port = 14580 
 inetchannel.on   = true
 inetchannel.user = XXXX 
 inetchannel.pass = 0123 
 
+#######################################
+# TNC and igate
+#######################################
+tncchannel.on = false
+tncchannel.port = /dev/ttyS0
+tncchannel.mycall = XXXX
+
+igate.on = false
+igate.mycall = XXXX
+
 
 #######################################
 # APRS objects setup
 #######################################
-#objects.file = objects
 objects.mycall = XXXX
 objects.transmit.period = 240 
-objects.forceupdate = true
+
 
 #######################################
 # APRS Messages and commands
 #######################################
 message.mycall = XXXX 
-message.auth.key = ****** 
+message.auth.key = ******
 remotectl.mycall = XXXX 
 remotectl.on = true
 
