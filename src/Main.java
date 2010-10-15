@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-   public static String version = "1.0b6(LA1H)";
+   public static String version = "1.0b6";
    static StationDB db = null;
    public static InetChannel ch1 = null;
    public static TncChannel  ch2 = null;
@@ -28,8 +28,7 @@ public class Main
            System.out.println("Usage: Daemon <config-file>");
            
         Properties config = new Properties();
-       
-   
+          
         Runtime.getRuntime().addShutdownHook( new Thread() 
              {
                 public void run() 
@@ -85,7 +84,7 @@ public class Main
                igate.setChannels(ch2, ch1);
 
            /* APRS objects */
-           ownobjects = db.getOwnObjects();  // new OwnObjects(config, db);
+           ownobjects = db.getOwnObjects(); 
            ownobjects.setChannels(ch2, ch1); 
            
            /* Start HTTP server */
