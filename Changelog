@@ -46,4 +46,4 @@
 * Proper handling of "signs". Zoom level/area filtering. 
 * [C] Recovery of client, at reboot of server (reload at statuscode 503) 
 * [C] Iframe version
-* [C] Hover and onclick info (callsign, time, course, speed) for trails points.   
+* [C/S] Hover and onclick info (callsign, time, course, speed) for trails points.   
