@@ -111,7 +111,7 @@ public class InetChannel extends Channel implements Runnable
                    String inp = _rder.readLine(); 
                    if (inp != null) {
                       System.out.println(new Date() + ":  "+inp);
-                      receivePacket(inp);
+                      receivePacket(inp, false);
                    }
                    else {   
                       System.out.println("*** Disconnected from APRS server '"+_host+"'");
