@@ -25,7 +25,8 @@ VERSION 1.0
       Can now pan map and zoom via buttons on top, but this is 
       slow on Ipad. Zoom gesture does not work yet.  
      
-      
+* [C] Use "Compiled" OpenLayers Javascript file to speed up loading. 
+      DONE.       
 
 
 Preparations for V.2.0 M.0
