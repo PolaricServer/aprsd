@@ -30,7 +30,7 @@ public class Igate implements Channel.Receiver
     public Igate(Properties config) 
     {
         _allowRf = config.getProperty("igate.rfgate.allow", "false").trim().matches("true|yes");
-        _myCall = config.getProperty("igate.mycall", "N0CALL").trim();
+        _myCall = config.getProperty("igate.mycall", "N0CALL").trim().toUpperCase();
     }  
        
     /**
@@ -101,8 +101,10 @@ public class Igate implements Channel.Receiver
     /**
      * Receive and gate an APRS packet.
      */
-    public void receivePacket(Channel.Packet p)
+    public void receivePacket(Channel.Packet p, boolean dup)
     {
+        if (dup)
+           return;
         if (p.source == _rfChan) {
            if (p.report.matches("\\?IGATE\\?.*"))
                answer_query();
