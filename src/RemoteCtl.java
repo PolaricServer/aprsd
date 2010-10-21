@@ -61,7 +61,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private int threadid=0;    
    public RemoteCtl(Properties config, MessageProcessor mp, StationDB db)
    {
-       String myCall = config.getProperty("remotectl.mycall", "N0CALL").trim();
+       String myCall = config.getProperty("remotectl.mycall", "N0CALL").trim().toUpperCase();
        _parent = config.getProperty("remotectl.connect", null);
           
        mp.subscribe(myCall, new Subscriber(), true);
