@@ -66,6 +66,7 @@ public static class Status implements Serializable
     private boolean     _expired = false; 
     private int         _report_ignored = 0;
     private boolean     _igate, _wdigi;
+    private Date        _infra_updated = null;
        
        
     public Station(String id)
@@ -84,20 +85,35 @@ public static class Status implements Serializable
        { return getTrafficFrom() != null && !getTrafficFrom().isEmpty(); }
        
        
+    /**
+     * Reset infrastructure settings if older than 24 hours 
+     */
+    private void expireInfra()
+    {
+        Date now = new Date();
+        if (_infra_updated != null && 
+            _infra_updated.getTime() + 1000*60*60*24 < now.getTime())
+          _igate = _wdigi = false; 
+    } 
+    
     public boolean isIgate()
-       { return _igate; }
+       { expireInfra(); 
+         return _igate; }
        
        
     public void setIgate(boolean x)
-       { _igate = x; }
+       { _infra_updated = new Date(); 
+         _igate = x; }
        
        
     public boolean isWideDigi()
-       { return _wdigi; }
+       { expireInfra(); 
+         return _wdigi; }
        
        
     public void setWideDigi(boolean x)
-       { _wdigi = x; }       
+       { _infra_updated = new Date(); 
+         _wdigi = x; }       
     
     
     public synchronized History.Item getHItem()
