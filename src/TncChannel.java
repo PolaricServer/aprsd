@@ -31,9 +31,9 @@ public class TncChannel extends Channel implements Runnable
     
     public TncChannel(Properties config) 
     {
-        _myCall = config.getProperty("tncchannel.mycall", "").trim();
+        _myCall = config.getProperty("tncchannel.mycall", "").trim().toUpperCase();
         if (_myCall.length() > 0)
-           _myCall = config.getProperty("igate.mycall", "N0CALL").trim();
+           _myCall = config.getProperty("igate.mycall", "N0CALL").trim().toUpperCase();
            
         _portName = config.getProperty("tncchannel.port", "localhost").trim();
         _baud= Integer.parseInt(config.getProperty("tncchannel.baud", "9600").trim());
@@ -159,7 +159,7 @@ public class TncChannel extends Channel implements Runnable
                    try {
                       String inp = _in.readLine(); 
                       System.out.println(new Date() + ":  "+inp);
-                      receivePacket(inp);
+                      receivePacket(inp, false);
                    }
                    catch (java.io.IOException e) {
                       if (_close) { System.out.println("*** Stopping TNC thread"); return; } 
