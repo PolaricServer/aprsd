@@ -53,7 +53,7 @@ public abstract class Channel
     
     
     public interface Receiver {
-        public void receivePacket(Channel.Packet p);
+        public void receivePacket(Channel.Packet p, boolean dup);
     }
     
     
@@ -150,7 +150,7 @@ public abstract class Channel
      * To be called from subclass. Parses packet, updates heard table, checks for
      * duplicates and if all is ok, deliver packet to receivers.
      */
-    protected void receivePacket(String packet)
+    protected void receivePacket(String packet, boolean dup)
     {
        Packet p = string2packet(packet);
        if (p == null)
@@ -158,14 +158,12 @@ public abstract class Channel
        p.source = this;
        _heard.put(p.from, new Date());
 
-       if (_dupCheck.checkPacket(p.from, p.to, p.report))
-          System.out.println("*** DUPLICATE PACKET - Ignored");
-       else {
-          if (_r1 != null) 
-             _r1.receivePacket(p);
-          if (_r2 != null)
-             _r2.receivePacket(p);
-       }
+       dup = _dupCheck.checkPacket(p.from, p.to, p.report);
+       if (_r1 != null) 
+           _r1.receivePacket(p, dup);
+       if (_r2 != null)
+           _r2.receivePacket(p, dup);
+       
     }
     
     public String toString() {return "Channel"; }
