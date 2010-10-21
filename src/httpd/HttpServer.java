@@ -400,13 +400,16 @@ public abstract class HttpServer extends NanoHTTPD
        Iterator<String> it = from.iterator();    
        while (it.hasNext()) 
        {
-            AprsPoint p = _db.getItem(it.next());
+            Station p = (Station)_db.getItem(it.next());
             if (p==null || !p.isInside(uleft, lright) || p.expired())
                 continue;
             Reference x = p.getPosition();
             UTMRef itx = toUTM(x);
+            RouteInfo.Edge e = _db.getRoutes().getEdge(s.getIdent(), p.getIdent());
             if (itx != null) { 
-               out.print("<linestring stroke=\"1\" opacity=\"1.0\" color=\"009\">");
+               out.print("<linestring stroke="+
+                   (e.primary ? "\"2\"" : "\"1\"")  + " opacity=\"1.0\" color=\""  +
+                   (e.primary ? "B00\">" : "00A\">"));
                out.print((int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()));
                out.print(", ");
                out.print((int) Math.round(ity.getEasting())+ " " + (int) Math.round(ity.getNorthing()));
