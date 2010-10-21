@@ -60,7 +60,7 @@ public class AprsParser implements Channel.Receiver
     }
     
        
-    public void receivePacket(Channel.Packet p)
+    public void receivePacket(Channel.Packet p, boolean duplicate)
     {
         if (_db == null)
            return; 
@@ -72,7 +72,7 @@ public class AprsParser implements Channel.Receiver
         if (station == null)
             station = _db.newStation(p.from); 
    
-        try {    
+        if (!duplicate) try {    
         switch(p.type)
         {
             case '>':
@@ -112,7 +112,7 @@ public class AprsParser implements Channel.Receiver
         }catch (NumberFormatException e)
           { log("     WARNING: Cannot parse number in input. Report string probably malformed"); }
         
-        parsePath(station, p.via);   
+        parsePath(station, p.via, duplicate);   
     }
 
     
@@ -126,7 +126,7 @@ public class AprsParser implements Channel.Receiver
           Bør kunne resette akkumulert statistikk 
           "Dekningskart" basert på hørte rapporter (må vente til vi får inn PostGIS) */
 
-    private void parsePath(Station s, String path)
+    private void parsePath(Station s, String path, boolean duplicate)
     {
         if (path == null)
            return;
@@ -148,7 +148,7 @@ public class AprsParser implements Channel.Receiver
             if ( to != null) {
                 if (!skip) 
                   { skip=false; 
-                    _db.getRoutes().addEdge(from.getIdent(), to.getIdent());
+                    _db.getRoutes().addEdge(from.getIdent(), to.getIdent(), !duplicate);
                     if (i>0)
                        to.setWideDigi(true);
                   }
@@ -166,7 +166,7 @@ public class AprsParser implements Channel.Receiver
            if (tindex == -1) {
                Station to = _db.getStation(pp[plen-1]);
                if (to != null) {
-                   _db.getRoutes().addEdge(s.getIdent(), to.getIdent());  
+                   _db.getRoutes().addEdge(s.getIdent(), to.getIdent(), !duplicate);  
                    to.setIgate(true);         
                    /* Igate direct (has not been digipeated) */
                }  
@@ -177,7 +177,7 @@ public class AprsParser implements Channel.Receiver
                   last = _db.getStation(pp[tindex-1]);
                Station x = _db.getStation(pp[plen-1]);
                if (last != null && x != null) {
-                  _db.getRoutes().addEdge(last.getIdent(), x.getIdent());
+                  _db.getRoutes().addEdge(last.getIdent(), x.getIdent(), !duplicate);
                   x.setIgate(true);
                   /* Path from last digi to igate */
                }
