@@ -29,8 +29,17 @@ public class RouteInfo implements Serializable
     
     public static class Edge implements Serializable {
        public Date ts;
+       public boolean primary = false;
        public Edge() { ts = new Date(); }
-       public void update() { ts = new Date(); } 
+       public void update(boolean p) 
+       {
+           Date now = new Date();
+           if (primary && ts != null && ts.getTime() + 100*60*60*24 < now.getTime())
+              primary = false;
+           if (p)
+              primary = true;
+           ts = new Date(); 
+       }
     }
     
         
@@ -41,8 +50,7 @@ public class RouteInfo implements Serializable
      *    - Should we report stations that are not shown? 
      */    
      
-    private Map<String, Node> _nodes = new HashMap(); 
-//    private Map<String, Node> _nodes = Collections.synchronizedMap(new HashMap());        
+    private Map<String, Node> _nodes = new HashMap();        
     private long nEdges;
     
     public long nItems() 
@@ -53,7 +61,7 @@ public class RouteInfo implements Serializable
         { _nodes.clear(); nEdges = 0; } 
         
         
-    public synchronized void addEdge(String from, String to)
+    public synchronized void addEdge(String from, String to, boolean p)
     {     
         if (!_nodes.containsKey(from))
            _nodes.put(from, new Node());
@@ -68,7 +76,7 @@ public class RouteInfo implements Serializable
            nEdges++;
         }
         else 
-           e.update();
+           e.update(p);
     }
        
        
