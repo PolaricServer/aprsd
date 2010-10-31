@@ -9,14 +9,14 @@ public class Signs
 {
     private static Signs _signs = new Signs("signs");
     
-    public static class Item extends Point {
+    public static class Item extends PointObject {
         public long _maxScale;
         
         public boolean visible(long scale)
           { return scale <= _maxScale; }
           
         public Item (Reference r, long sc, String ic, String txt)
-          { _position = r; _maxScale = sc; _icon = ic; _description = txt; }
+          { super(r);  _maxScale = sc; _icon = ic; _description = txt; }
     }
     
     private BufferedReader  _rd;
