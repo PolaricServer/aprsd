@@ -8,23 +8,31 @@ VERSION 1.0
 
 * Code cleanups, stress test and performance tuning? 
 
-* Additions to search function?
+* Traffic analysis - time limit on classification, primary/secondary 
+  connections. 
+      DONE.
 
+* More trouble with timestamp interpretation. Stations using timestamp
+  may not show up because of wrong day. Fix.
+      DONE.
+      
+* Trails may cover area much bigger than screen at highest zoom levels. Limit
+  the area to what is necessary to display them. 
+      DONE
+      
 * [C/S] Alternative trail lengths.
 
-* [C] Hide trails
+* [C/S] Station ident as query parameter -> zoom to location. 
+      DONE
+      
+* [C] Hide/show trails
+      DONE.
 
 * [C] Sometimes last update in trail is missing. Fix?
 
 * [C] Webkit (Google Chrome and Safari) issues??
+      FIXED LOGIN issue (1.0b7) 
 
-* [C] Some touch screen awareness to make it just a little 
-      usable for ipad, etc..?
-      
-      STARTED (1.0b6) - mapped some touch events to mouse events.
-      Can now pan map and zoom via buttons on top, but this is 
-      slow on Ipad. Zoom gesture does not work yet.  
-     
 * [C] Use "Compiled" OpenLayers Javascript file to speed up loading. 
       DONE.       
 
@@ -35,6 +43,13 @@ Preparations for V.2.0 M.0
 * Replace HTTP server (efficiency, extensibility). The "Simple 
   framework" http://www.simpleframework.org can be a good candidate. 
   Jetty may be a little complicated to set up?
+  
+* [C] Some touch screen awareness to make it just a little 
+      usable for ipad, etc..?
+      
+      STARTED (1.0b6) - mapped some touch events to mouse events.
+      Can now pan map and zoom via buttons on top, but this is 
+      slow on Ipad. Zoom gesture does not work yet. 
 
 * Allow a dynamic number of data channels to be configured. 
   Not just two. 
@@ -45,6 +60,8 @@ Preparations for V.2.0 M.0
 
 * Change class hierarchy to support other types of position objects, 
   not just plain APRS. 
+  
+* Additions to search function?
 
 * AIS objects and input channel.    
   
