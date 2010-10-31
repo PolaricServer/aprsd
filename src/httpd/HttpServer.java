@@ -212,7 +212,16 @@ public abstract class HttpServer extends NanoHTTPD
     */
    public String serveFindItem(Properties header, Properties parms, PrintWriter out)
    { 
-       AprsPoint s = _db.getItem(parms.getProperty("id").toUpperCase());
+       String ident = parms.getProperty("id").toUpperCase();
+       AprsPoint s = _db.getItem(ident);
+       if (s==null) {
+          int i = ident.lastIndexOf('-');
+          if (i > -1)    
+             ident = ident.substring(0, i);
+          List<AprsPoint> l = _db.getAll(ident);
+          if (l.size() > 0)
+              s = l.get(0);
+       }
        if (s!=null && !s.expired() && s.getPosition() != null) {
           UTMRef xpos = toUTM(s.getPosition()); 
           out.println(s.getIdent()+","+ (long) Math.round(xpos.getEasting()) + "," + (long) Math.round(xpos.getNorthing()));   
@@ -370,7 +379,7 @@ public abstract class HttpServer extends NanoHTTPD
                      out.println("   </label>"); 
                   }
                   if (s instanceof Station)
-                     printTrailXml(out, (Station) s);
+                     printTrailXml(out, (Station) s, uleft, lright);
                } /* synchronized(s) */
                
                if (vfilt.showPath(s) && s.isInfra())
@@ -422,7 +431,7 @@ public abstract class HttpServer extends NanoHTTPD
    /** 
     * Print a history trail of a moving station as a XML linestring object. 
     */
-   private void printTrailXml(PrintWriter out, Station s)
+   private void printTrailXml(PrintWriter out, Station s, UTMRef uleft, UTMRef lright)
    {
        History h = s.getHistory();
        if (h.isEmpty())
@@ -433,9 +442,10 @@ public abstract class HttpServer extends NanoHTTPD
        
        boolean first = true;
        Reference x = s.getPosition(); 
+       int state = 1;
        UTMRef itx = toUTM(x);  
        for (History.Item it : h) 
-       {
+       {       
           if (itx != null) {       
               if (!first) 
                   out.print(", "); 
@@ -443,9 +453,19 @@ public abstract class HttpServer extends NanoHTTPD
                   first = false;   
               out.println((int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()));
           }
-          itx = toUTM(it.pos);
+            
+          itx = toUTM(it.getPosition());
+          if (itx == null)
+             System.out.println("*** DEBUG: trail point is null (printTrailXml)");
+          else if (it.isInside(uleft, lright, 0.7, 0.7))
+             state = 2;
+          else
+             if (state == 2) {
+                state = 3; 
+                break;
+             }    
        }
-       if (itx != null)
+       if (itx != null & state < 3)
            out.println(", "+ (int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()));
        out.println("   </linestring>");
    }
