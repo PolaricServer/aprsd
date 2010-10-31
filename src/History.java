@@ -21,14 +21,13 @@ import java.io.Serializable;
   
 public class History implements Iterable<History.Item>, Serializable
 {
-    public static class Item implements Serializable {
+    public static class Item extends Point {
        public Date time; 
-       public Reference pos;
        public int speed;
        public int course; 
        public String pathinfo;
        public Item(Date t, Reference p, int sp, int crs, String path)
-         { time = t; pos = p; speed = sp; course = crs; pathinfo = path;} 
+         { super(p); time = t; speed = sp; course = crs; pathinfo = path;} 
     }
     
     private static long _maxAge = 1000 * 60 * 15;          // Max age of a history item (default 30 minutes) 
