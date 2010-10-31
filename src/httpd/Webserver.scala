@@ -435,7 +435,7 @@ package no.polaric.aprsd.http
 
                <tr onclick={
                  if (x.visible() && x.getPosition() != null) 
-                     "findAndShowStation('" + x.getIdent() + "')"
+                     "findStation('" + x.getIdent() + "', 'true')"
                  else "" 
                }>
           
@@ -687,11 +687,11 @@ package no.polaric.aprsd.http
                           onmouseout={"histList_hout("+arg+");"}
                           onclick = {"histList_click("+arg+");"} >
                       <td> { tf.format(x.time) } </td>
-                      <td> { showUTM(x.pos) } </td>
+                      <td> { showUTM(x.getPosition()) } </td>
                       <td> { if (x.speed >= 0) x.speed.toString else "" } </td>
                       <td> { if (x.speed > 0) _directionIcon(x.course) else ""} </td>
                       <td>{
-                         val dist = x.pos.toLatLng().distance(it.pos.toLatLng())
+                         val dist = x.getPosition().toLatLng().distance(it.getPosition().toLatLng())
                          x = it;
                          if (dist < 1)
                              "%3d m" format Math.round(dist*1000)
