@@ -31,6 +31,7 @@ public class AprsObject extends AprsPoint implements Serializable
        
     public AprsObject(Station owner, String id)
        { 
+         super(null);
          _owner = owner;
          _ident = id;        
          _updated = new Date(); 
