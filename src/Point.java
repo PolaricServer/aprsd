@@ -19,52 +19,44 @@ import java.io.Serializable;
   
 
 /**
- * Geographic point.
- * Every point has a location, icon and description. 
+ * Geographic position.
+ * Every point has a location
  */
  
 public abstract class Point implements Serializable
 {             
-    protected Reference   _position;  
-    protected String      _icon; 
-    protected String      _description;    
+    protected Reference   _position;
+      
+    public Point (Reference p)
+       { _position = p; }
+          
     
     /**
      * Test if position is inside of the rectangular area defined by uleft (upper left corner)
      * and lright (lower right corner). Assume that uleft and lright are within the same
      * UTM zone. 
      */          
-    public boolean isInside(UTMRef uleft, UTMRef lright)
+    public boolean isInside(UTMRef uleft, UTMRef lright, double xext, double yext)
     {
+        double xoff  = xext * (lright.getEasting()  - uleft.getEasting());
+        double yoff = yext * (lright.getNorthing() - uleft.getNorthing());
+    
          /* FIXME: Add lat zone as well */
         if (_position == null)
            return false;
         try {
            UTMRef ref = _position.toLatLng().toUTMRef(uleft.getLngZone());
-           return ( ref.getEasting() >= uleft.getEasting() && ref.getNorthing() >= uleft.getNorthing() &&
-                    ref.getEasting() <= lright.getEasting() && ref.getNorthing() <= lright.getNorthing() );
+           return ( ref.getEasting() >= uleft.getEasting()-xoff && ref.getNorthing() >= uleft.getNorthing()-yoff &&
+                    ref.getEasting() <= lright.getEasting()+xoff && ref.getNorthing() <= lright.getNorthing()+yoff );
         }
         catch (Exception e) { return false; }
     }
     
+    
+    public boolean isInside(UTMRef uleft, UTMRef lright)
+       { return isInside(uleft, lright, 0, 0); }
+       
     public Reference getPosition ()   
        { return _position; } 
 
-       
-    public boolean iconIsNull()
-       { return _icon == null; }
-    
-       
-    /*  Redefined in AprsPoint */   
-    public String getIcon()
-    { 
-       if (_icon != null)
-          return _icon; 
-       return null;
-    }           
-    
-    public String getDescr()
-       { return (_description == null ? "" : _description); }
-       
-    public boolean visible() {return true;}
 }
