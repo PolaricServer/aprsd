@@ -70,7 +70,7 @@ public static class Status implements Serializable
        
        
     public Station(String id)
-       { _callsign = id; }
+       { super(null); _callsign = id; }
         
 
     public Set<String> getTrafficFrom()
@@ -181,15 +181,14 @@ public static class Status implements Serializable
        if (_history == null)
           return false;    
        
-       for (History.Item it : _history) {
-           try {
-              UTMRef ref = it.pos.toLatLng().toUTMRef(uleft.getLngZone());
-              if ( ref.getEasting() >= uleft.getEasting() && ref.getNorthing() >= uleft.getNorthing() &&
-                   ref.getEasting() <= lright.getEasting() && ref.getNorthing() <= lright.getNorthing() )
-                  return true;
-           }
-           catch (Exception e) { continue; }
-       }
+       /* If part of trace is inside displayed area and the station itself is within a 
+        * certain distance from displayed area 
+        */
+       if (super.isInside(uleft, lright, 1, 1))
+        for (History.Item it : _history) 
+          if (it.isInside(uleft, lright))
+             return true;
+         
        return false;
     }
      
