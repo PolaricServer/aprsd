@@ -143,18 +143,20 @@ public class AprsParser implements Channel.Receiver
         }
         Station from = s;
         boolean skip = false;
+        int n = 0;
         for (i=0; i<=tindex; i++) {
             Station to = _db.getStation(pp[i]);
             if ( to != null) {
-                if (!skip) 
-                  { skip=false; 
-                    _db.getRoutes().addEdge(from.getIdent(), to.getIdent(), !duplicate);
-                    if (i>0)
-                       to.setWideDigi(true);
-                  }
+                n++; 
+                if (!skip) { 
+                   skip=false;
+                   _db.getRoutes().addEdge(from.getIdent(), to.getIdent(), !duplicate); 
+                }
+                if (n>1 && i<=tindex) 
+                   to.setWideDigi(true); /* Digi is WIDE */
                 from = to;
             }
-            else if (!pp[i].matches("(WIDE|TRACE).*"))
+            else if (!pp[i].matches("(WIDE|TRACE|NOR|SAR).*"))
                skip = true;
         }
         
@@ -173,7 +175,7 @@ public class AprsParser implements Channel.Receiver
            }
            else {
                Station last = null;
-               if (pp[tindex].matches("(WIDE|TRACE).*") && tindex > 0)
+               if (pp[tindex].matches("(WIDE|TRACE|NOR|SAR).*") && tindex > 0)
                   last = _db.getStation(pp[tindex-1]);
                Station x = _db.getStation(pp[plen-1]);
                if (last != null && x != null) {
@@ -426,18 +428,19 @@ public class AprsParser implements Channel.Receiver
      * 'Compression' of timestamp is experimental. It is not part of 
      * the standard APRS protocol
      */
-        private static Date parseTimestamp(String data, boolean compressed)
+    private static Date parseTimestamp(String data, boolean compressed)
     { 
          Calendar ts;
          int day,hour,min,sec;
          char tst = (compressed ? 0 : data.charAt(6));
          String dstr = data.substring(0, (compressed ? 3:6) ); 
          Calendar now = (Calendar) localTime.clone();    
-            
+         now.setTimeInMillis((new Date()).getTime());
+                                    
+                                       
          /* Default timezone is zulu */
          ts = (Calendar) utcTime.clone();
-         ts.setTimeInMillis( now.getTimeInMillis() + 
-               (now.get(Calendar.ZONE_OFFSET)+now.get(Calendar.DST_OFFSET))) ;
+         ts.setTimeInMillis( now.getTimeInMillis()) ;
                   
          if (compressed || tst == 'h') {
              /* Parse time in HHMMSS format */
@@ -454,8 +457,8 @@ public class AprsParser implements Channel.Receiver
              } 
          }
          else {
-             /* Parse time in DDHHMM format */
-             if (tst != 'z') {
+            /* Parse time in DDHHMM format */
+            if (tst != 'z') {
                 /* Local time */
                ts = (Calendar) localTime.clone(); 
                _dtgFormat.setCalendar(ts);
