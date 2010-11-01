@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-   public static String version = "1.0b6+test";
+   public static String version = "1.0b7";
    static StationDB db = null;
    public static InetChannel ch1 = null;
    public static TncChannel  ch2 = null;
