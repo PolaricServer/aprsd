@@ -47,3 +47,19 @@
 * [C] Recovery of client, at reboot of server (reload at statuscode 503) 
 * [C] Iframe version
 * [C/S] Hover and onclick info (callsign, time, course, speed) for trails points.   
+
+1.0 beta 7
+----------
+
+* Traffic analysis - time limit on classification, primary/secondary 
+  connections. 
+* Fix serious bug with timestamp interpretation. Stations using timestamp
+  did not show up because of wrong day.
+* Trails may cover area much bigger than screen at highest zoom levels. Could 
+  eat a lot of resources and lead to browser- or even system-breakdown! Limit 
+  the area to what is necessary to display them. 
+* [C/S] Station ident as query parameter -> zoom to location. 
+* [C] Hide/show trails
+* [C] Fixed login issue with some browsers (Google Chrome..).
+* [C] Use "Compiled" OpenLayers Javascript file to speed up loading. 
+      
