@@ -8,33 +8,12 @@ VERSION 1.0
 
 * Code cleanups, stress test and performance tuning? 
 
-* Traffic analysis - time limit on classification, primary/secondary 
-  connections. 
-      DONE.
-
-* More trouble with timestamp interpretation. Stations using timestamp
-  may not show up because of wrong day. Fix.
-      DONE.
-      
-* Trails may cover area much bigger than screen at highest zoom levels. Limit
-  the area to what is necessary to display them. 
-      DONE
-      
 * [C/S] Alternative trail lengths.
-
-* [C/S] Station ident as query parameter -> zoom to location. 
-      DONE
-      
-* [C] Hide/show trails
-      DONE.
 
 * [C] Sometimes last update in trail is missing. Fix?
 
 * [C] Webkit (Google Chrome and Safari) issues??
       FIXED LOGIN issue (1.0b7) 
-
-* [C] Use "Compiled" OpenLayers Javascript file to speed up loading. 
-      DONE.       
 
 
 Preparations for V.2.0 M.0
