@@ -200,7 +200,8 @@ package no.polaric.aprsd.http
               { simpleLabel("items", "leftlab", "Antall APRS enheter:", TXT(""+_db.nItems())) }
               { simpleLabel("items", "leftlab", "Antall forbindelser:", TXT(""+_db.getRoutes().nItems())) }
               { simpleLabel("items", "leftlab", "Egne objekter:", TXT(""+_db.getOwnObjects().nItems())) }   
-              { simpleLabel("items", "leftlab", "Antall HTTP klienter:", TXT(""+(_requests-1))) }  
+              { simpleLabel("items", "leftlab", "Antall HTTP klienter nå:", TXT(""+(_requests-1))) }  
+              { simpleLabel("items", "leftlab", "Antall besøk (sesjoner):", TXT(""+_sessions)) }
               { simpleLabel("items", "leftlab", "Antall HTTP forespørsler:", TXT(""+_reqNo)) }   
               { simpleLabel("freemem", "leftlab", "Brukt minne:", 
                   TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
