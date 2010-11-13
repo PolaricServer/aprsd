@@ -38,6 +38,9 @@ public abstract class Point implements Serializable
      */          
     public boolean isInside(UTMRef uleft, UTMRef lright, double xext, double yext)
     {
+        if (uleft == null || lright == null)
+           return false; 
+        
         double xoff  = xext * (lright.getEasting()  - uleft.getEasting());
         double yoff = yext * (lright.getNorthing() - uleft.getNorthing());
     
