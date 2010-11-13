@@ -1,4 +1,4 @@
-INSTALLATION OF POLARIC-SERVER ON A DEBIAN LINUX PLATFORM
+INSTALLATION OF POLARIC-SERVER ON A UBUNTU/DEBIAN LINUX PLATFORM
 
 
 APRS SERVER (POLARIC-APRSD)
@@ -6,11 +6,12 @@ APRS SERVER (POLARIC-APRSD)
 
 install software packages (Ubuntu or Debian):
    beep
-   sun-java6-bin (or openjdk 6)
+   sun-java6-bin (or openjdk 6) - 
+    ( is selected automatically when you install scala-library ).
    librxtx-java (if you are going to use a TNC on a serial port)
    scala-library 
     ( not in Debian Lenny - the package is available in testing/unstable and
-      can be installed on lenny-systems)
+      can be installed on lenny-systems).
     
 Unpack the tarball with the server software in /usr/local/polaric-aprsd
 (in /usr/local/polaric-aprsd - tar zxvf polaric-aprsd.tar.gz)
@@ -53,7 +54,7 @@ Apache2 config:
       Require valid-user
     </Location>
    
-   Comment out "Deny from All" in /etc/apache2/mods-enabled/proxy.conf
+   If necessary, comment out "Deny from All" in /etc/apache2/mods-enabled/proxy.conf
    
    (Note: We assume that DocumentRoot is set to /var/www/ and that the aprs
     web application is installed under /var/www/aprs )
@@ -65,3 +66,30 @@ Unpack the tarball containing the web application to /var/www/aprs
 Make sure that the cache directory has the right owner. In /var/www/aprs: 
     chown www-data.www-data kacache2
     
+    
+ADDING USERS
+------------
+    
+To add a user 'la3t' go to the directory /usr/local/polaric-aprsd and type
+   ./polaric-passwd la3t
+       
+or whatever username you choose. You will be asked to choose a password.
+Edit server.ini and put the username in the 'user.update' field and if you want the
+user to have full administrator rights, to the 'user.admin' field.
+   user.update = la3t
+   
+The values of user.update and user.admin are regular expressions, so you can
+set it up to recognize many users. Restart the server to make the changes
+effective.
+
+By default, all users have access to ka-map maps. This can be restricted if you
+want. See /var/www/aprs/ka-map/config/config.php for the ka-map setup. 
+
+
+CLIENT SETUP
+------------
+
+Map-layers, default map views and filters can be configured in the file
+    /var/www/aprs/mapconfig.js
+    
+
