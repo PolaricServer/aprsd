@@ -44,7 +44,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     * filter or area of interest. Based on callsign or geographical
     * position. 
     */
-   private Set<String> _children = new HashSet<String>();
+   private Map<String, Date> _children = new HashMap<String, Date>();
    private String _parent;
    private Thread _thread;
    
@@ -55,7 +55,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        { return _parent; }
        
    public Set<String> getChildren()
-       { return _children; }
+       { return _children.keySet(); }
        
    
    private int threadid=0;    
@@ -67,11 +67,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        mp.subscribe(myCall, new Subscriber(), true);
        _msg = mp;
        _db = db;
-       if (_parent != null) {
-          _parent.trim();
-          _thread = new Thread(this, "RemoteCtl-"+(threadid++));
-          _thread.start();
-       }
+       if (_parent != null) 
+            _parent.trim();
+       _thread = new Thread(this, "RemoteCtl-"+(threadid++));
+       _thread.start();
    }
 
 
@@ -96,7 +95,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    {
       if (_parent != null && !_parent.equals(except))
          _msg.sendMessage(_parent, text, true, true, this);
-      for (String r: _children)
+      for (String r: _children.keySet() )
          if (!r.equals(except))
             _msg.sendMessage(r, text, true, true, this);
    }
@@ -127,11 +126,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       if (p)
          sendRequestAll(text, sender.getIdent());
 
-       /* If the originating node is not parent or child,
+       /* If the originating node is not parent,
         * add it to children list.
         */
       if (_parent == null || !_parent.equals(sender.getIdent()))
-         _children.add(sender.getIdent());  
+         _children.put(sender.getIdent(), new Date());  
       return true;
    }
 
@@ -196,24 +195,31 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    
    public String toString() {
       String res = (_parent==null ? "" : _parent);
-      for (String x : _children)
+      for (String x : getChildren())
           res += " "+x;  
       return res; 
    }
    
    
    /* 
-    * Thread to refresh connection to "parent" every 10 minutes
+    * Thread to refresh connection to "parent" every 10 minutes. 
+    * Parent removes a child if its timestamp is older than 30 minutes.
     */
    public void run()
    {
       while (true) {
-         System.out.println("*** RemoteCtl: Send CON");
-         sendRequest(_parent, "CON");
+         if (_parent != null) {
+            System.out.println("*** RemoteCtl: Send CON");
+            sendRequest(_parent, "CON");
+         }
+
+         for (String x : getChildren()) 
+             if (_children.get(x).getTime() + 1800000 <= (new Date()).getTime()) 
+                _children.remove(x);
+             
          try {
             Thread.sleep(600000);
          } catch (Exception e) {}
-     }
+      }
    } 
-   
 }
