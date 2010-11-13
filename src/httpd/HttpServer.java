@@ -249,7 +249,8 @@ public abstract class HttpServer extends NanoHTTPD
       { return showDMstring(llref.getLatitude())+"N, "+showDMstring(llref.getLongitude())+"E"; }
    
 
-  private long getSession(Properties parms)
+  protected long _sessions = 0;
+  private synchronized long getSession(Properties parms)
   {
      String s_str  = parms.getProperty("clientses");
      if (s_str != null && s_str.matches("[0-9]+")) {
@@ -257,10 +258,11 @@ public abstract class HttpServer extends NanoHTTPD
         if (s_id > 0)
            return s_id;
      }
-     return /* should be more secure - random number? */ _seq;       
+     _sessions = (_sessions +1) % 2000000000;
+     return _sessions;       
   }
   
-  
+   
 
   private int _seq = 0;
    
@@ -284,7 +286,7 @@ public abstract class HttpServer extends NanoHTTPD
            scale = Long.parseLong(parms.getProperty("scale"));
         
         /* Sequence number at the time of request */
-        long seq  = 0;
+        int seq  = 0;
         synchronized (this) {
           _seq = (_seq+1) % 32000;
           seq = _seq;
@@ -295,7 +297,6 @@ public abstract class HttpServer extends NanoHTTPD
         /* If requested, wait for a state change (see Notifier.java) */
         if (parms.getProperty("wait") != null) 
             if (! Station.waitChange(uleft, lright, client) ) {
-                System.out.println("*** Cancel XML request : "+client);
                 out.println("<overlay cancel=\"true\"/>");             
                 out.flush();
                 return "text/xml; charset=utf-8";
