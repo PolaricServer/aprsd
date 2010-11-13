@@ -50,7 +50,6 @@ public class Notifier
                      wait(found ? _mintime-elapsed : _timeout-elapsed);
                      Integer abort = _waiters.get(id);
                      if (abort != null && abort > 0) {
-                         System.out.println("*** Abort waiter: "+id);
                          _waiters.put(id, 0);
                          return (abort==1) ? true : false;        
                      }
