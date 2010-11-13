@@ -34,11 +34,11 @@ Preparations for V.2.0 M.0
   Not just two. 
 
 * Allow objects with certain attributes (like input channel, callsign) to 
-  be visible only for logged in users. And/Or allow aliases, etc. 
-  to be visible only for logged in users. SAR mode? 
+  be visible only for logged in users.  
 
 * Change class hierarchy to support other types of position objects, 
   not just plain APRS. 
+      STARTED.
   
 * Additions to search function?
 
