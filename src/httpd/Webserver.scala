@@ -283,7 +283,7 @@ package no.polaric.aprsd.http
        def fields(hdr: Properties, parms: Properties): NodeSeq =
            <label for="objid" class="lleftlab">Objekt ID:</label>
            <input id="objid" name="objid" type="text" size="9" maxlength="9"
-              value={if (id==null) "" else fixText(id)} />;
+              value={if (id==null) "" else id.replaceFirst("@.*", "")} />;
       
       
        def action(hdr: Properties, parms: Properties): NodeSeq =
@@ -360,6 +360,11 @@ package no.polaric.aprsd.http
                else
                   showUTM(pos)
             }
+            <br/>
+            <div>
+            <label for="perm" class="lleftlab">Innstillinger: </label>
+            {checkBox("perm", false, TXT("Tidløs (Permanent)"))}
+            </div>
             </xml:group>
              
              
@@ -373,10 +378,12 @@ package no.polaric.aprsd.http
                val osymtab = parms.getProperty("osymtab")
                val osym  = parms.getProperty("osym")
                val otxt = parms.getProperty("descr")
+               val perm = parms.getProperty("perm");
                if ( Main.ownobjects.add(id, pos,
                       if (osymtab==null) '/' else osymtab(0),
                       if (osym==null) 'c' else osym(0),
-                      if (otxt==null) "" else otxt) )
+                      if (otxt==null) "" else otxt,
+                      "true".equals(perm) ))
                   
                   <h2>Objekt registrert</h2>
                   <p>ident={"'"+id+"'"}<br/>pos={showUTM(pos) }</p>;
@@ -455,7 +462,7 @@ package no.polaric.aprsd.http
                        _directionIcon(s.getCourse()) else 
                           if (s==null) TXT("obj") else null } </td>
                <td> { df.format(x.getUpdated()) } </td>
-               <td> { if (x.getDescr() != null) fixText(x.getDescr()) else "" } </td>
+               <td> { if (x.getDescr() != null) x.getDescr() else "" } </td>
                </tr>
            }
         } 
@@ -536,7 +543,7 @@ package no.polaric.aprsd.http
         def fields(hdr: Properties, parms: Properties): NodeSeq =
             <xml:group>  
             <label for="callsign" class="leftlab">Ident:</label>
-            <label id="callsign"><b> { x.getIdent() } </b></label>
+            <label id="callsign"><b> { x.getIdent().replaceFirst("@.*","") } </b></label>
             <br/>
             { if (!simple)
                  simpleLabel("symbol", "leftlab", "Symbol:",TXT( x.getSymtab()+" "+x.getSymbol())) else null }
@@ -545,7 +552,7 @@ package no.polaric.aprsd.http
             { if (obj != null)
                  simpleLabel("owner", "leftlab", "Avsender:", <b>{obj.getOwner().getIdent()}</b>) else null}
             { if (x.getDescr() != null && x.getDescr().length() > 0)
-                 simpleLabel("descr", "leftlab", "Beskrivelse:", TXT(fixText(x.getDescr()))) else null}
+                 simpleLabel("descr", "leftlab", "Beskrivelse:", TXT(x.getDescr())) else null}
             { if (s != null && s.getStatus() != null)
                  simpleLabel("status", "leftlab", "Status:",
                       TXT ( s.getStatus().text + " [" + df.format(s.getStatus().time)+"]"))  else null}
@@ -592,9 +599,9 @@ package no.polaric.aprsd.http
             { if (edit && canUpdate)
                   <div>
                   <br/>
-                  <label for="perm" class="leftlab">Innstillinger:</label>
-                  {checkBox("perm", x.isPermanent(), TXT("Permanent"))}
+                  <label for="hidelabel" class="leftlab">Innstillinger:</label>
                   {checkBox("hidelabel", x.isLabelHidden(), TXT("Skjul ID"))}
+                  {checkBox("pers", x.isPersistent(), TXT("Varig lagring"))}
                   <br/>
                   { if (s != null)
                        <xml:group>
@@ -618,8 +625,8 @@ package no.polaric.aprsd.http
         /* Action. To be executed when user hits 'submit' button */
         def action(hdr: Properties, parms: Properties): NodeSeq =
         {
-             val perm = parms.getProperty("perm");
-             x.setPermanent( "true".equals(perm) );  
+             val perm = parms.getProperty("pers");
+             x.setPersistent( "true".equals(perm) );  
              val hide = parms.getProperty("hidelabel");
              x.setLabelHidden( "true".equals(hide) );     
              
@@ -632,7 +639,7 @@ package no.polaric.aprsd.http
              var alias = parms.getProperty("nalias");
              var ch = false;
              if (alias != null && alias.length() > 0)      
-                 ch = x.setAlias(fixText(alias));
+                 ch = x.setAlias(alias);
              else
                 { ch = x.setAlias(null)
                   alias = "NULL"
