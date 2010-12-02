@@ -8,16 +8,29 @@ VERSION 1.0
 
 * Code cleanups, stress test and performance tuning? 
 
-* [C/S] Alternative trail lengths.
+* Default callsign in config file. 
+
+* Prevent running server without proper configuration!
+
+* Permanent objects and 111111z timestamp. 
+  see http://www.aprs.org/info/object-perm.txt
+  
+* Use UTF-8 character set at APRS side.
+      DONE.
 
 * [C] Sometimes last update in trail is missing. Fix?
 
 * [C] Webkit (Google Chrome and Safari) issues??
       FIXED LOGIN issue (1.0b7) 
 
+* [C] High and low zoom levels: Different view filters. 
+
+
 
 Preparations for V.2.0 M.0
 --------------------------
+ 
+* [C/S] Alternative trail lengths.
  
 * Replace HTTP server (efficiency, extensibility). The "Simple 
   framework" http://www.simpleframework.org can be a good candidate. 
