@@ -227,20 +227,17 @@ public class AprsParser implements Channel.Receiver
         String ident = msg.substring(1,10).trim();
         char op = msg.charAt(10);
         
-        AprsPoint x = _db.getItem(ident); 
+        AprsPoint x = _db.getItem(ident+'@'+station.getIdent());      
         AprsObject obj;
         if (x == null)
             obj = _db.newObject(station, ident);
-        else {
-            if (!(x instanceof AprsObject)) {
-                log("     WARNING: Ident already used (object report ignored): "+x);
-                return;
-            }
+        else 
             obj = (AprsObject) x;
-            obj.setOwner(station);
-        }     
-        if (op=='*') 
+             
+        if (op=='*') {
            parseStdAprs(msg.substring(10), obj, true, "");
+           _db.deactivateSimilarObjects(ident, station);
+        }
         else {
            obj.kill();
            System.out.println("   OBJECT KILL: id="+ident+", op="+op);
@@ -458,7 +455,11 @@ public class AprsParser implements Channel.Receiver
          }
          else {
             /* Parse time in DDHHMM format */
-            if (tst != 'z') {
+            if (tst == 'z') {
+               if (dstr.equals("111111")) 
+                  return null; /* Timeless timestamp, ugh! */
+            }
+            else {
                 /* Local time */
                ts = (Calendar) localTime.clone(); 
                _dtgFormat.setCalendar(ts);
