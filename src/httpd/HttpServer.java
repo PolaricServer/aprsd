@@ -196,11 +196,19 @@ public abstract class HttpServer extends NanoHTTPD
     
    protected String fixText(String t)
    {
+        t = t.replaceAll("&amp;", "##amp;"); 
+        t = t.replaceAll("&lt;", "##lt;");
+        t = t.replaceAll("&gt;", "##gt;");   
+        t = t.replaceAll("&quot;", "##amp;");
         t = t.replaceAll("&", "&amp;");   
         t = t.replaceAll("<", "&lt;");
         t = t.replaceAll(">", "&gt;");
         t = t.replaceAll("\"", "&quot;");
         t = t.replaceAll("\\p{Cntrl}", "?");
+        t = t.replaceAll("##amp;", "&amp;"); 
+        t = t.replaceAll("##lt;", "&lt;");
+        t = t.replaceAll("##gt;", "&gt;");   
+        t = t.replaceAll("##quot;", "&amp;"); 
         return t; 
    }
    
@@ -358,7 +366,7 @@ public abstract class HttpServer extends NanoHTTPD
                   out.println("<point id=\""+fixText(s.getIdent())+"\" x=\""
                                + (int) Math.round(ref.getEasting()) + "\" y=\"" + (int) Math.round(ref.getNorthing())+ "\" " 
                                + title + (s.isChanging() ? " redraw=\"true\"" : "") +
-                               ((s instanceof AprsObject) && Main.ownobjects.hasObject(s.getIdent())  ? " own=\"true\"":"") +">");
+                               ((s instanceof AprsObject) && Main.ownobjects.hasObject(s.getIdent().replaceFirst("@.*",""))  ? " own=\"true\"":"") +">");
                   out.println("   <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
         
                   if (vfilt.showIdent(s)) {
@@ -445,6 +453,7 @@ public abstract class HttpServer extends NanoHTTPD
        Reference x = s.getPosition(); 
        int state = 1;
        UTMRef itx = toUTM(x);  
+       
        for (History.Item it : h) 
        {       
           if (itx != null) {       
