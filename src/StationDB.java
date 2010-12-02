@@ -37,6 +37,7 @@ public interface StationDB
     
     public AprsObject newObject(Station owner, String id);
     
+    public void deactivateSimilarObjects(String id, Station owner);
     
     public List<AprsPoint> getAll(String arg);
     
