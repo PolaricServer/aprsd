@@ -11,6 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+ 
 package no.polaric.aprsd;
 import java.util.regex.*;
 import java.io.*;
@@ -61,7 +62,8 @@ public class OwnObjects implements Runnable
     public int nItems() 
         { return _ownObjects.size(); }
     
-    public synchronized boolean add(String id, Reference pos, char symtab, char sym, String comment)
+    public synchronized boolean add(String id, Reference pos, char symtab, char sym, 
+                        String comment, boolean perm)
     {
          AprsObject obj = (AprsObject) _db.getItem(id);
 
@@ -75,6 +77,7 @@ public class OwnObjects implements Runnable
             _myself.setUpdated(new Date());
             obj = _db.newObject(_myself, id);
             obj.update(new Date(), pos, 0, 0, 0, comment, sym, symtab,  "");
+            obj.setTimeless(perm);
             _ownObjects.add(id);
             sendObjectReport(obj, false);
             return true;
@@ -88,7 +91,7 @@ public class OwnObjects implements Runnable
     public synchronized void clear()
     {
         for (String oid: _ownObjects) {
-           AprsObject obj = (AprsObject) _db.getItem(oid);
+           AprsObject obj = (AprsObject) _db.getItem(oid+'@'+_myself.getIdent());
            if (obj!=null) {
               sendObjectReport(obj, true);
               obj.kill();
@@ -100,7 +103,7 @@ public class OwnObjects implements Runnable
 
     public synchronized boolean delete(String id)
     {
-        AprsObject obj = (AprsObject) _db.getItem(id);
+        AprsObject obj = (AprsObject) _db.getItem(id+'@'+_myself.getIdent());
         if (obj==null)
             return false;
         obj.kill();
@@ -165,7 +168,7 @@ public class OwnObjects implements Runnable
     {
         LatLng llref = pos.toLatLng();
         _tsformat.setCalendar(_utcTime);
-        return _tsformat.format(d) + "z"  
+        return (d==null ? "111111" : _tsformat.format(d)) + "z"  
                + _latformat.format(toGpsNumber(llref.getLatitude())) + symtab 
                + _lngformat.format(toGpsNumber(llref.getLongitude())) + sym ;  
     }
@@ -177,14 +180,15 @@ public class OwnObjects implements Runnable
     {
        if (chan == null)
           return;
-       String id = (obj.getIdent() + "         ").substring(0,9);
+       String id = (obj.getIdent().replaceFirst("@.*","") + "         ").substring(0,9);
        Channel.Packet p = new Channel.Packet();
        p.from = _myCall;
        p.to = "APRS";
        p.type = ';';
        /* Should type char be part of report ? */
-       p.report = ";" + id + (delete ? "_" : "*") + posReport(obj.getUpdated(), obj.getPosition(), obj.getSymbol(), obj.getSymtab())
-                     + obj.getDescr(); 
+       p.report = ";" + id + (delete ? "_" : "*") 
+                   + posReport((obj.isTimeless() ? null : obj.getUpdated()), obj.getPosition(), obj.getSymbol(), obj.getSymtab())
+                   + obj.getDescr(); 
        System.out.println("*** OBJECTREPORT SEND: "+ p.from+">"+p.to+":"+p.report);
        chan.sendPacket(p);
     }
@@ -231,7 +235,7 @@ public class OwnObjects implements Runnable
             Thread.sleep(3000);
             synchronized(this) {
               for (String oid: _ownObjects) {
-                 AprsObject obj = (AprsObject) _db.getItem(oid);
+                 AprsObject obj = (AprsObject) _db.getItem(oid+'@'+_myself.getIdent());
                  sendObjectReport(obj, false);
               }
             }
