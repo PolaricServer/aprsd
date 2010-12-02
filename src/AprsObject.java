@@ -25,10 +25,16 @@ public class AprsObject extends AprsPoint implements Serializable
     /*
      * Attributes of object/item record (APRS data)
      */
-    private String      _ident; 
-    private Station     _owner;
-    private boolean     _killed = false;
-       
+    private String    _ident; 
+    private Station   _owner;
+    private boolean   _killed = false;
+    private boolean   _timeless = false;
+       /* If an object is timeless it also permanent, i.e. it allows other permanent objects 
+        * to exist with the same name (in another area and with another owner id)
+        * Permanence is a proposed APRS 1.2 feature
+        */
+        
+        
     public AprsObject(Station owner, String id)
        { 
          super(null);
@@ -43,17 +49,26 @@ public class AprsObject extends AprsPoint implements Serializable
        _killed = true;
        super.reset();
     }
-    
-    
+      
     
     public String getIdent()
-       { return _ident; }
+       { return _ident+'@'+_owner.getIdent(); }
+       
        
     public void setOwner(Station o)
        { _owner = o; }
        
+       
     public Station getOwner()
        { return _owner; }
+       
+       
+    public void setTimeless(boolean p)
+       { _timeless = p; }
+       
+       
+    public boolean isTimeless()
+       { return _timeless; }
        
        
     public synchronized void update()
@@ -77,7 +92,10 @@ public class AprsObject extends AprsPoint implements Serializable
               if (distance > 10)
                  setChanging();
           }
-          
+         if (ts==null) {
+            setTimeless(true);
+            ts = new Date();
+         }
          updatePosition(ts, newpos);        
          setDescr(descr); 
          _symbol = sym; 
