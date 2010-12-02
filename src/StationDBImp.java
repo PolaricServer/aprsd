@@ -22,8 +22,8 @@ import java.util.concurrent.*;
 public class StationDBImp implements StationDB, Runnable
 {
     private SortedMap<String, AprsPoint> _map = new ConcurrentSkipListMap();
-    private String _file;
-    private boolean _hasChanged = false; 
+    private String     _file;
+    private boolean   _hasChanged = false; 
     private RouteInfo _routes;
     private OwnObjects _ownobj;
     private MessageProcessor _msgProc;
@@ -123,12 +123,11 @@ public class StationDBImp implements StationDB, Runnable
     {
          Date now = new Date();  
          System.out.println("*** Garbage collection...");
-         System.out.println("        Memory usage = "+usedMemory());
          Iterator<AprsPoint> stn = _map.values().iterator();
          while (stn.hasNext()) 
          {
              AprsPoint st = stn.next();
-             if (st.expired() && !st.isPermanent() ) 
+             if (st.expired() && !st.isPersistent() ) 
              {
                 System.out.println("        Removing: "+st.getIdent()); 
                 removeItem(st.getIdent());
@@ -144,7 +143,6 @@ public class StationDBImp implements StationDB, Runnable
          s_runtime.runFinalization ();
          s_runtime.gc ();
          Thread.currentThread ().yield ();
-         System.out.println("        Memory usage = "+usedMemory());
          System.out.println("        Free memory  = "+s_runtime.freeMemory ());
          System.out.println("*** Garbage collection finished");  
     }
@@ -187,12 +185,27 @@ public class StationDBImp implements StationDB, Runnable
         return st;
     }
     
-    
-    public AprsObject newObject(Station owner, String id)
+    /** 
+     * Create a new APRS object.
+     * Note that an object is in this database identified by 'ident@owner'
+     */
+    public synchronized AprsObject newObject(Station owner, String id)
     {
         AprsObject st = new AprsObject(owner, id);
-        _map.put(id, st); 
+        _map.put(id+'@'+owner.getIdent(), st); 
         return st;
+    }
+    
+    
+    public synchronized void deactivateSimilarObjects(String id, Station owner)
+    {
+        Collection<AprsPoint> dupes =  _map.subMap(id+'@', id+'@'+"zzzzz").values();
+        for (AprsPoint x : dupes)
+           if (x instanceof AprsObject && !((AprsObject)x).isTimeless() && 
+                  !owner.getIdent().equals(((AprsObject)x).getOwner().getIdent())) {
+               System.out.println("*** Object overtaken/deactivated: "+id+"@"+((AprsObject)x).getOwner().getIdent());
+               ((AprsObject)x).kill();
+           }
     }
     
     
