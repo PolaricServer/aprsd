@@ -70,7 +70,7 @@ public abstract class Channel
     protected PrintWriter  _out = null; 
     
     private static DupCheck  _dupCheck = new DupCheck();
-    public static final String _encoding = "cp865";
+    public static final String _encoding = "UTF-8";
     
 
     /**
