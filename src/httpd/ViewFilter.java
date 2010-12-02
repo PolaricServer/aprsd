@@ -45,7 +45,7 @@ public class ViewFilter {
   {  
        public boolean showIdent(AprsPoint x)
            { return !x.isLabelHidden() && (x.getSymtab() != '/' || x.getSymbol() != '_') && x.getSymbol() != '-' && 
-                    !_map.get("infra").useObject(x); }
+                    x.getSymbol() != '&' && !_map.get("infra").useObject(x); }
   }
   
   
