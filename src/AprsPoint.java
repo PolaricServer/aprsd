@@ -46,11 +46,11 @@ public abstract class AprsPoint extends PointObject implements Serializable
          
     protected char        _symbol; 
     protected char        _altsym; 
-    private String        _alias;  
+    private   String      _alias;  
     protected boolean     _changing = false; 
     protected Date        _updated = new Date(), _lastChanged;
-    protected boolean     _permanent = false;
-    private boolean       _hidelabel = false;  
+    protected boolean     _persistent = false;
+    private   boolean     _hidelabel = false;  
     
     
     public boolean isInfra() 
@@ -78,7 +78,7 @@ public abstract class AprsPoint extends PointObject implements Serializable
     public abstract String getIdent();
 
     public String getDisplayId(boolean usealias)
-       { return (usealias && _alias != null) ? _alias : getIdent(); }    
+       { return (usealias && _alias != null) ? _alias : getIdent().replaceFirst("@.*",""); }    
     
     public String getDisplayId()
        { return getDisplayId(true); }
@@ -131,12 +131,12 @@ public abstract class AprsPoint extends PointObject implements Serializable
        { return _updated; }
        
                    
-    public boolean isPermanent()
-       { return _permanent; }
+    public boolean isPersistent()
+       { return _persistent; }
        
        
-    public void setPermanent(boolean p)
-       { _permanent = p; }
+    public void setPersistent(boolean p)
+       { _persistent = p; }
     
     
     public boolean isLabelHidden()
