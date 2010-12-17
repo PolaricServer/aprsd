@@ -17,7 +17,12 @@ import java.util.*;
 import java.io.Serializable;
   
   
-  
+    /** 
+     * Experimental statistics/info about connectivity.
+     * This is essentially a graph where edges represent where packets have 
+     * travelled. 
+     */ 
+       
 public class RouteInfo implements Serializable
 {
     protected static class Node implements Serializable {
@@ -31,6 +36,7 @@ public class RouteInfo implements Serializable
        public Date ts;
        public boolean primary = false;
        public Edge() { ts = new Date(); }
+       
        public void update(boolean p) 
        {
            Date now = new Date();
@@ -43,12 +49,7 @@ public class RouteInfo implements Serializable
     }
     
         
-    /* Experimental statistics/info about connectivity. 
-     * Should address: 
-     *    - Remove old stuff (at least for mobile stations)
-     *    - What should we do about mobile stations?
-     *    - Should we report stations that are not shown? 
-     */    
+   
      
     private Map<String, Node> _nodes = new HashMap();        
     private long nEdges;
