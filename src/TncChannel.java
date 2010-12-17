@@ -32,9 +32,11 @@ public class TncChannel extends Channel implements Runnable
     public TncChannel(Properties config) 
     {
         _myCall = config.getProperty("tncchannel.mycall", "").trim().toUpperCase();
-        if (_myCall.length() > 0)
-           _myCall = config.getProperty("igate.mycall", "N0CALL").trim().toUpperCase();
-           
+        if (_myCall.length() == 0)
+           _myCall = config.getProperty("igate.mycall", "").trim().toUpperCase();
+        if (_myCall.length() == 0)
+           _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();  
+        
         _portName = config.getProperty("tncchannel.port", "localhost").trim();
         _baud= Integer.parseInt(config.getProperty("tncchannel.baud", "9600").trim());
         
@@ -151,8 +153,8 @@ public class TncChannel extends Channel implements Runnable
                if (_serialPort == null)
                    return; /* Throw exception instead? Move to constructor? */
                    
-               _in = new BufferedReader(new InputStreamReader(_serialPort.getInputStream(), _encoding));
-               _out = new PrintWriter(new OutputStreamWriter(_serialPort.getOutputStream(), _encoding));
+               _in = new BufferedReader(new InputStreamReader(_serialPort.getInputStream(), _rx_encoding));
+               _out = new PrintWriter(new OutputStreamWriter(_serialPort.getOutputStream(), _tx_encoding));
                initTnc();
                while (true) 
                {
