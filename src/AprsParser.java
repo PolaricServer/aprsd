@@ -11,6 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+ 
 package no.polaric.aprsd;
 import java.util.regex.*;
 import java.io.*;
@@ -59,7 +60,10 @@ public class AprsParser implements Channel.Receiver
             System.out.println(txt);
     }
     
-       
+    /**
+     * Receive APRS packet. 
+     * Duplicate packets are only parsed wrt. path (infrastructure analysis)
+     */
     public void receivePacket(Channel.Packet p, boolean duplicate)
     {
         if (_db == null)
@@ -116,16 +120,10 @@ public class AprsParser implements Channel.Receiver
     }
 
     
-       /* Registrere for hver node
-          Telle pakker, gi indikasjon på mengde trafikk
-          Skille mellom hørt og trafikk? 
-          Vise grafisk på kart? 
-          Detektere om node er igate, W1 eller W* digipeater? 
-          Detektere om node er infrastruktur?
-          Planleggingsverktøy: Identifisere suboptimale oppsett? 
-          Bør kunne resette akkumulert statistikk 
-          "Dekningskart" basert på hørte rapporter (må vente til vi får inn PostGIS) */
-
+       
+   /**
+    * Parse path to get info about infrastructure.
+    */    
     private void parsePath(Station s, String path, boolean duplicate)
     {
         if (path == null)
@@ -189,7 +187,9 @@ public class AprsParser implements Channel.Receiver
     
     
     
-
+    /**
+     * Parse APRS message.
+     */
     private void parseMessage(String msg, Station station)
     {
         String msgid = null;
@@ -205,7 +205,9 @@ public class AprsParser implements Channel.Receiver
     }
 
 
-    
+    /**
+     * Parse APRS status report.
+     */
     private void parseStatusReport(String msg, Station station)
     {
         Date d = null;
@@ -221,7 +223,9 @@ public class AprsParser implements Channel.Receiver
     
     
     
-    
+    /**
+     * Parse APRS object report.
+     */
     private void parseObjectReport(String msg, Station station)
     {
         String ident = msg.substring(1,10).trim();
@@ -379,15 +383,25 @@ public class AprsParser implements Channel.Receiver
             if (msg.length() > 9)
             {  
                j = msg.indexOf('}', 9);
-               if (j >= 9 + 3) {
+                if (j >= 9 + 3) {
                   altitude = (int)Math.round(((((((msg.charAt(j-3)-33)*91) 
                                                + (msg.charAt(j-2)-33))*91) 
                                                + (msg.charAt(j-1)-33))-10000)*3.28084);
-                  if (msg.length() > j)
+                  if (msg.length() > j) 
                       comment = msg.substring(j+1);
                }
-               else
+               else {
                   comment = msg.substring(9); 
+                  if (comment.charAt(0) == ']' || comment.charAt(0) == '>') { 
+                      comment = comment.substring(1);
+                      if (comment.length() > 0 && comment.charAt(comment.length() -1) == '=')
+                         comment = comment.substring(0, comment.length()-1);
+                  }
+                  else if (comment.charAt(0) == '\'')
+                         comment = comment.substring(1, comment.length()-1);
+                  if (comment.length() == 0)
+                      comment = null;
+               } 
             }                
             
             
