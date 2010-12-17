@@ -40,7 +40,10 @@ public class OwnObjects implements Runnable
     public OwnObjects(Properties config, StationDB db) 
     {
         _allowRf = config.getProperty("objects.rfgate.allow", "false").trim().matches("true|yes");
-        _myCall = config.getProperty("objects.mycall", "N0CALL").trim().toUpperCase();
+        _myCall = config.getProperty("objects.mycall", "").trim().toUpperCase();
+        if (_myCall.length() == 0)
+           _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
+           
         _txPeriod = Integer.parseInt(config.getProperty("objects.transmit.period", "0").trim());
         _forceUpdate = config.getProperty("objects.forceupdate", "false").trim().matches("true|yes");
         _db = db;
