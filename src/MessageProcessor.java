@@ -82,14 +82,16 @@ public class MessageProcessor implements Runnable
    private int threadid=0;
    public MessageProcessor(Properties config)
    {
-       _myCall = config.getProperty("message.mycall", "N0CALL").trim().toUpperCase();
+       _myCall = config.getProperty("message.mycall", "").trim().toUpperCase();
+       if (_myCall.length() == 0)
+           _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
        _key = config.getProperty("message.auth.key", "NOKEY").trim();
        _thread = new Thread(this, "MessageProcessor-"+(threadid++));
        _thread.start();
    }  
        
            
-   /* Share with igate.java ?? */        
+      
    public void setChannels(Channel rf, Channel inet)
    {
        _inetChan = inet;
