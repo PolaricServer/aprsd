@@ -26,9 +26,9 @@ package no.polaric.aprsd.http
    {
         <html>
         <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         { head }
-        <link rel="STYLESHEET" href="style.css" type="text/css"/>
+        <link href="style.css" rel="stylesheet" type="text/css" />
         </head>
         <body>
           {content} 
@@ -503,7 +503,7 @@ package no.polaric.aprsd.http
 
   
    /** 
-    * Presents a list over last positions and movements (standard HTML)
+    * Info about station/object (standard HTML)
     */
    def _serveStation(hdr: Properties, parms: Properties, out: PrintWriter): String =
    {        
@@ -683,7 +683,7 @@ package no.polaric.aprsd.http
              <h2>Feil:</h2><p>Fant ikke stasjon</p>;
           else
              <table>
-               <tr><th>Tidspunkt</th><th>Posisjon</th><th>Km/h </th><th>Retn </th><th>Distanse</th></tr>
+               <tr><th>Tidspunkt</th><th>Km/h </th><th>Retn </th><th>Distanse</th><th>APRS via</th></tr>
                {
                    val h = s.getHistory()
                    var x = s.getHItem()
@@ -695,7 +695,6 @@ package no.polaric.aprsd.http
                           onmouseout={"histList_hout("+arg+");"}
                           onclick = {"histList_click("+arg+");"} >
                       <td> { tf.format(x.time) } </td>
-                      <td> { showUTM(x.getPosition()) } </td>
                       <td> { if (x.speed >= 0) x.speed.toString else "" } </td>
                       <td> { if (x.speed > 0) _directionIcon(x.course) else ""} </td>
                       <td>{
@@ -706,6 +705,10 @@ package no.polaric.aprsd.http
                          else
                              "%.1f km" format dist
                       }</td>
+                      <td> { 
+                        TXT(it.pathinfo
+                         .replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]+(\\-[0-9]+)?\\*?),|(qA.),", "")
+                         .replaceAll("\\*", "").replaceAll(",", ", ")) } </td>
                       </tr>
                    }
                }
