@@ -61,8 +61,12 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private int threadid=0;    
    public RemoteCtl(Properties config, MessageProcessor mp, StationDB db)
    {
-       String myCall = config.getProperty("remotectl.mycall", "N0CALL").trim().toUpperCase();
+       String myCall = config.getProperty("remotectl.mycall", "").trim().toUpperCase();
+       if (myCall.length() == 0)
+           myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
        _parent = config.getProperty("remotectl.connect", null);
+       if (_parent != null) 
+          _parent = _parent.trim().toUpperCase();
           
        mp.subscribe(myCall, new Subscriber(), true);
        _msg = mp;
@@ -95,7 +99,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    {
       if (_parent != null && !_parent.equals(except))
          _msg.sendMessage(_parent, text, true, true, this);
-      for (String r: _children.keySet() )
+      for (String r: getChildren() )
          if (!r.equals(except))
             _msg.sendMessage(r, text, true, true, this);
    }
@@ -216,6 +220,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
          for (String x : getChildren()) 
              if (_children.get(x).getTime() + 1800000 <= (new Date()).getTime()) 
                 _children.remove(x);
+         
              
          try {
             Thread.sleep(600000);
