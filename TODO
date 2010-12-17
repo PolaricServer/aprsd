@@ -4,28 +4,44 @@ VERSION 1.0
 * Administrative interface. 
      STARTED (1.0b2)
 
-* CSS cleanup. Alternative stylesheets for XML overlay?
-
-* Code cleanups, stress test and performance tuning? 
-
 * Default callsign in config file. 
-
-* Prevent running server without proper configuration!
+      DONE.
 
 * Permanent objects and 111111z timestamp. 
   see http://www.aprs.org/info/object-perm.txt
-  
-* Use UTF-8 character set at APRS side.
+      DONE.
+ 
+* Mic-E comment cleanups.
+      DONE.
+      
+* Use UTF-8 character set at APRS side. Fallback to CP-850.
       DONE.
 
 * [C] Sometimes last update in trail is missing. Fix?
 
-* [C] Webkit (Google Chrome and Safari) issues??
+* [C] Webkit issues (trouble on Android, Google Chrome, Safari)
       FIXED LOGIN issue (1.0b7) 
+      FIXED Dropdown menu issue 
+      FIXED issue with CSS from backend server - correct mimetype
 
-* [C] High and low zoom levels: Different view filters. 
-
-
+* [C] Fix scrollbar handling on popups. 
+      DONE.
+      
+* [C] Scale is missing when reloading at highest scale. Fix. 
+      DONE. 
+      
+* Use APRS paths in history lists instead of UTM positions. 
+      DONE.
+      
+      
+* Check use of callsigns
+      IMPLEMENTED default myCall
+            
+            
+* Config documentation
+      
+      
+      
 
 Preparations for V.2.0 M.0
 --------------------------
