@@ -29,8 +29,10 @@ public class Igate implements Channel.Receiver
     
     public Igate(Properties config) 
     {
-        _allowRf = config.getProperty("igate.rfgate.allow", "false").trim().matches("true|yes");
-        _myCall = config.getProperty("igate.mycall", "N0CALL").trim().toUpperCase();
+        _allowRf = config.getProperty("igate.rfgate.allow", "true").trim().matches("true|yes");
+        _myCall = config.getProperty("igate.mycall", "").trim().toUpperCase();
+        if (_myCall.length() == 0)
+           _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
     }  
        
     /**
