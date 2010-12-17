@@ -33,7 +33,9 @@ public class InetChannel extends Channel implements Runnable
     {
         _host = config.getProperty("inetchannel.host", "localhost").trim();
         _port = Integer.parseInt(config.getProperty("inetchannel.port", "10151").trim());
-        _user = config.getProperty("inetchannel.user", "TEST").trim();
+        _user = config.getProperty("inetchannel.user", "").trim().toUpperCase();
+        if (_user.length() == 0)
+           _user = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
         _pass = config.getProperty("inetchannel.pass", "-1").trim();
         _filter = config.getProperty("inetchannel.filter", ""); 
     }
@@ -99,8 +101,8 @@ public class InetChannel extends Channel implements Runnable
                
                retry = 0; 
                System.out.println("*** Connection to APRS server '"+_host+"' established");
-               _rder = new BufferedReader(new InputStreamReader(_sock.getInputStream(), _encoding));
-               _out = new PrintWriter(new OutputStreamWriter(_sock.getOutputStream(), _encoding));
+               _rder = new BufferedReader(new InputStreamReader(_sock.getInputStream(), _rx_encoding));
+               _out = new PrintWriter(new OutputStreamWriter(_sock.getOutputStream(), _tx_encoding));
                _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+Main.version+"\r\n");
                
                if (_filter.length() > 0)
@@ -131,6 +133,7 @@ public class InetChannel extends Channel implements Runnable
            catch(Exception e)
            {   
                 System.out.println("*** APRS server '"+_host+"' : "+e); 
+                e.printStackTrace(System.out);
                 retry += 2;
            }
            finally 
