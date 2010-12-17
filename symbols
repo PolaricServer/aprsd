@@ -2,17 +2,17 @@
 /# 035.gif
 /' airplane.png
 /^ airplane.png
-/& info.gif
-\& info.gif
+/& diamond-G.png 
+D& diamond-G.png
+\& diamond-I.gif 
 R& diamond-R.gif
 I& diamond-I.gif
-/$ phone.gif
-/+ sym02.png
-/- house.gif
+/+ sym02.png 
+/- home.png 
 /_ wx.gif
 \_ wx.gif
 /> car.gif
-/K house.gif
+/K home.png 
 /P 080.gif
 /R car.gif
 /U 085.gif
@@ -23,11 +23,11 @@ I& diamond-I.gif
 \c node2.gif
 /j car.gif
 /k car.gif
-/o house.gif
-/y house.gif
+/o home.gif
+/y home.gif
 \! emerg.gif
 \# 035a.gif
-\- house.gif
+\- home.png 
 \> car.gif
 4> car-4.gif
 5> car-5.gif
@@ -38,7 +38,7 @@ I& diamond-I.gif
 /v van.gif
 \v van.gif
 /= 061.gif
-/I info.gif
+/I info.png
 /s boat.gif
 /U bus.gif
 \U new.gif
@@ -52,3 +52,4 @@ B# star-B.gif
 L# star-L.gif
 1# star-1.gif
 #
+
