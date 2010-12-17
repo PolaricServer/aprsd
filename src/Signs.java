@@ -28,7 +28,7 @@ public class Signs
      * Format of each line: 
      * UTM-zone, UTM-easting, UTM-northing, max-scale, icon-filename, description.
      * Example:  
-     *    33Wi, 123456i, 1234567, 30000, symbol.gif, This is my site 
+     *    33W, 123456, 1234567, 30000, symbol.gif, This is my site 
      */
     protected Signs(String file) 
     {
