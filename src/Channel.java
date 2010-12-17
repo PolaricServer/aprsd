@@ -16,13 +16,14 @@ package no.polaric.aprsd;
 import java.util.*;
 import java.util.regex.*;
 import java.io.*;
+import se.raek.charset.*;
 
 
 public abstract class Channel
 {
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      private LinkedHashMap<String, Date> _heard = new LinkedHashMap();
-    
+   
      
      private void removeOldHeardEntries()
      {
@@ -70,8 +71,8 @@ public abstract class Channel
     protected PrintWriter  _out = null; 
     
     private static DupCheck  _dupCheck = new DupCheck();
-    public static final String _encoding = "UTF-8";
-    
+    public static final String _rx_encoding = "X-UTF-8_with_cp-850_fallback";
+    public static final String _tx_encoding = "UTF-8";
 
     /**
       * Returns true if call is heard.
