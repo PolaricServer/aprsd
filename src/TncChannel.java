@@ -19,6 +19,10 @@ import gnu.io.*;
   /* Similar to javax.comm */
 
 
+/**
+ * TNC channel. For devices in TNC2 compatible mode.
+ */
+ 
 public class TncChannel extends Channel implements Runnable
 {
     private  String _portName; 
@@ -33,11 +37,9 @@ public class TncChannel extends Channel implements Runnable
     {
         _myCall = config.getProperty("tncchannel.mycall", "").trim().toUpperCase();
         if (_myCall.length() == 0)
-           _myCall = config.getProperty("igate.mycall", "").trim().toUpperCase();
-        if (_myCall.length() == 0)
            _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();  
         
-        _portName = config.getProperty("tncchannel.port", "localhost").trim();
+        _portName = config.getProperty("tncchannel.port", "/dev/ttyS0").trim();
         _baud= Integer.parseInt(config.getProperty("tncchannel.baud", "9600").trim());
         
     }
