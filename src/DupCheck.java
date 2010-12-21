@@ -12,6 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+ 
 package no.polaric.aprsd;
 import java.util.*;
 
@@ -45,7 +46,9 @@ public class DupCheck
           }
      } 
      
-    
+     /**
+      *  Returns true if packet is a duplicate.
+      */
      public synchronized boolean checkPacket(String from, String to, String report)
      {
          String composed = from+to+report;
