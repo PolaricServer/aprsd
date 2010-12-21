@@ -33,13 +33,16 @@ VERSION 1.0
 * Use APRS paths in history lists instead of UTM positions. 
       DONE.
       
+* Ordered presentation of icons (by filename). Some tidying and improvements 
+  of icon fileset. 
+      DONE.
       
 * Check use of callsigns
       IMPLEMENTED default myCall
             
             
-* Config documentation
-      
+* Add more to README documentation
+      DONE.
       
       
 
