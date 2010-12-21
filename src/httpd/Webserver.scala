@@ -473,16 +473,21 @@ package no.polaric.aprsd.http
 
 
 
-
+   /**
+    * Selection of icon. List available icons. 
+    */
    def iconSelect(s: AprsPoint): NodeSeq =
    {
        val icondir = new File("./icons");
        
        val flt = new FilenameFilter()
            { def accept(dir:File, f: String): boolean = f.matches(".*\\.(png|gif|jpg)") } 
-           
-       val files = icondir.listFiles(flt);
+       val cmp = new Comparator[File] ()
+           { def compare (f1: File, f2: File) : int = f1.getName().compareTo(f2.getName()) } 
        
+       val files = icondir.listFiles(flt);
+       Arrays.sort(files, cmp);
+          
        <div id="iconselect">    
        <input type="radio" name="iconselect" value="system"
                    checked={if (s.iconIsNull()) "checked" else null:String }>Automatisk</input>
