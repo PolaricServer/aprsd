@@ -215,7 +215,7 @@ public abstract class HttpServer extends NanoHTTPD
    
    
    /**
-    * Look up a station and return id, x and y coordinates (separated by commas)
+    * Look up a station and return id, x and y coordinates (separated by commas).
     * If not found, return nothing.
     */
    public String serveFindItem(Properties header, Properties parms, PrintWriter out)
