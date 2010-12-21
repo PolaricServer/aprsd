@@ -11,6 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+ 
 package no.polaric.aprsd;
 import java.util.regex.*;
 import java.io.*;
@@ -57,7 +58,7 @@ public class Igate implements Channel.Receiver
            return;
             
        _msgcnt++;
-       System.out.println("*** IGATED");
+       System.out.println("*** GATED TO INTERNET");
        p.via += (",qAR,"+_myCall);
        if (_inetChan != null) 
            _inetChan.sendPacket(p);
