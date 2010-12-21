@@ -62,8 +62,10 @@ public class OwnObjects implements Runnable
          }
     }  
        
+       
     public int nItems() 
         { return _ownObjects.size(); }
+    
     
     public synchronized boolean add(String id, Reference pos, char symtab, char sym, 
                         String comment, boolean perm)
@@ -71,7 +73,10 @@ public class OwnObjects implements Runnable
          AprsObject obj = (AprsObject) _db.getItem(id);
 
          /* Ignore if object already exists.
-          * FIXME: If object exists, we may take over the name??  */
+          * FIXME: If object exists, we may take over the name, but since
+          * these objects arent just local, we should ask the user first, if this is
+          * intendeed. For now we only take over our own, if forceupdate = true
+          */
          if (obj == null || !obj.visible() ||
              (_forceUpdate && (_ownObjects.contains(id) || obj.getOwner() == _myself)))
          {
