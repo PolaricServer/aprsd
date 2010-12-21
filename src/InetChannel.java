@@ -32,7 +32,7 @@ public class InetChannel extends Channel implements Runnable
     public InetChannel(Properties config) 
     {
         _host = config.getProperty("inetchannel.host", "localhost").trim();
-        _port = Integer.parseInt(config.getProperty("inetchannel.port", "10151").trim());
+        _port = Integer.parseInt(config.getProperty("inetchannel.port", "14580").trim());
         _user = config.getProperty("inetchannel.user", "").trim().toUpperCase();
         if (_user.length() == 0)
            _user = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
