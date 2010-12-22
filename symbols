@@ -1,3 +1,10 @@
+####################################
+# Symbol to icon mapping
+#
+# format: 
+#  <sym-table><symbol>  <icon-file>
+####################################
+
 /[ runner.gif
 /# star-0.gif
 /' airplane.png
