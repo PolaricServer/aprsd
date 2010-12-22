@@ -63,3 +63,22 @@
 * [C] Fixed login issue with some browsers (Google Chrome..).
 * [C] Use "Compiled" OpenLayers Javascript file to speed up loading. 
       
+      
+1.0 RC
+------
+
+* Default myCall in config file. 
+* Permanent objects and 111111z timestamp. 
+  see http://www.aprs.org/info/object-perm.txt 
+* Mic-E comment cleanups.
+* Use UTF-8 character set at APRS side. Fallback to CP-850.
+* Use APRS paths in history lists instead of UTM positions. 
+* Ordered presentation of icons (by filename). Some tidying and improvements 
+  of icon fileset. 
+* Attempt to remove empty tiles in ka-map cache at restart.
+* [C] Fix Google Chrome and Safari issues.
+* [C] Fix scrollbar handling on popups.  
+* [C] Scale was missing when reloading at highest scale. Fix.  
+
+ 
+ 
