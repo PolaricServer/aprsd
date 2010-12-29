@@ -91,7 +91,7 @@ port is usually /dev/ttyS0 (corresponds to COM1 in Windows). A USB to serial
 converter is typically /dev/ttyUSB0 or /dev/ttyACM0. This will depend on your 
 system and TNC setup.
 
-(I am working on more documentation: http://hans.priv.no/la7eca/?id=aprsd)
+(some more documentation can be found here: http://hans.priv.no/la7eca/?id=aprsd)
 
 
     
@@ -114,6 +114,7 @@ By default, all users have access to ka-map maps. This can be restricted if you
 want. See /var/www/aprs/ka-map/config/config.php for the ka-map setup. If 
 this access is restricted you may want to add usernames here too to
 grant access to users.
+
 
 
 CLIENT SETUP
