@@ -108,8 +108,12 @@ public class MessageProcessor implements Runnable
    {
       if (_myCall.equals(recipient) && text.matches("(ack|rej).+")) {
          msgid = text.substring(3, text.length());
-         _outgoing.remove(msgid);
-         /* FIXME: notify recipient about result? */
+         
+         /* notify recipient about negative result? */
+         OutMessage m = _outgoing.get(msgid);
+         if (text.matches("(rej).+") && m != null && m.not != null)
+             m.not.reportFailure(m.recipient);
+         _outgoing.remove(msgid);   
          return;
       } 
       Subscriber subs = _subscribers.get(recipient);
@@ -182,6 +186,7 @@ public class MessageProcessor implements Runnable
                              
       sendPacket(message);       
    }
+   
    
    public void sendMessage(String recipient, String text,
                        boolean acked, boolean authenticated)
@@ -264,7 +269,6 @@ public class MessageProcessor implements Runnable
               for (OutMessage m: _outgoing.values()) {
                  Date t = new Date();
                  long tdiff = t.getTime() - m.time.getTime();
-                 
                  if (tdiff >= _MSG_INTERVAL*1000) {
                    if (m.retry_cnt >= _MSG_MAX_RETRY) {
                       if (m.not != null)
