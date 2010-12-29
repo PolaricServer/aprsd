@@ -212,7 +212,7 @@ package no.polaric.aprsd.http
                    if (Main.ch2==null) TXT("---") else TXT(""+Main.ch2)) }
               { simpleLabel("igate", "leftlab", "Igate: ", 
                    if (Main.igate==null) TXT("---") else TXT(""+Main.igate)) }   
-              { if (!Main.rctl.isEmpty())  
+              { if (Main.rctl != null && !Main.rctl.isEmpty())  
                    simpleLabel("rctl", "leftlab", "Fjernkontroll: ", TXT(""+Main.rctl)) else null; }     
                    
               </fieldset>  
