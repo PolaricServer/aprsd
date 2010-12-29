@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -11,6 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+ 
 package no.polaric.aprsd;
 import java.util.regex.*;
 import java.io.*;
@@ -78,9 +79,12 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    }
 
 
+   private int _try_parent = 0;
    public void reportFailure(String id)
    {
-      System.out.println("*** WARNING: Failed to deliver message");
+      System.out.println("*** WARNING: Failed to deliver message to: "+id);
+      if (id.equals(_parent))
+         _parent = null;
       _children.remove(id);
    }
    
@@ -88,7 +92,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     * Send request to given destination.
     */
    public void sendRequest(String dest, String text)
-     { _msg.sendMessage(dest, text, true, true, null); }
+     { _msg.sendMessage(dest, text, true, true, this); }
 
      
    /**
@@ -211,20 +215,21 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */
    public void run()
    {
-      while (true) {
-         if (_parent != null) {
-            System.out.println("*** RemoteCtl: Send CON");
-            sendRequest(_parent, "CON");
-         }
-
-         for (String x : getChildren()) 
-             if (_children.get(x).getTime() + 1800000 <= (new Date()).getTime()) 
-                _children.remove(x);
-         
-             
-         try {
+      while (true) 
+      try {
+         Thread.sleep(5000);
+         while (true) {
+            if (_parent != null) {
+               System.out.println("*** RemoteCtl: Send CON: "+_parent);
+               sendRequest(_parent, "CON");
+            }
+            
+            for (String x : getChildren()) 
+                if (_children.get(x).getTime() + 1800000 <= (new Date()).getTime()) 
+                   _children.remove(x);
+            
             Thread.sleep(600000);
-         } catch (Exception e) {}
-      }
+         }
+      } catch (Exception e) {}
    } 
 }
