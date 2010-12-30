@@ -20,7 +20,10 @@ import java.util.*;
 import java.text.*;
 import uk.me.jstott.jcoord.*;
 
-
+/**
+ * Objects owned by this instance of Polaric Server.
+ */
+ 
 public class OwnObjects implements Runnable
 { 
     private Channel         _inetChan, _rfChan;
@@ -66,7 +69,9 @@ public class OwnObjects implements Runnable
     public int nItems() 
         { return _ownObjects.size(); }
     
-    
+    /**
+     * Add an object.
+     */  
     public synchronized boolean add(String id, Reference pos, char symtab, char sym, 
                         String comment, boolean perm)
     {
@@ -95,7 +100,9 @@ public class OwnObjects implements Runnable
          return false;
     }
     
-    
+    /**
+     * Delete all own objects. 
+     */
     public synchronized void clear()
     {
         for (String oid: _ownObjects) {
@@ -108,7 +115,9 @@ public class OwnObjects implements Runnable
         _ownObjects.clear();
     }
 
-
+    /** 
+     * Delete object with the given id.
+     */
     public synchronized boolean delete(String id)
     {
         AprsObject obj = (AprsObject) _db.getItem(id+'@'+_myself.getIdent());
@@ -183,7 +192,9 @@ public class OwnObjects implements Runnable
     
     
     
-    
+    /**
+     * send object report on the given channel.
+     */
     protected void sendObjectReport(Channel chan, AprsObject obj, boolean delete)
     {
        if (chan == null)
