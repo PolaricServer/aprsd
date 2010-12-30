@@ -18,9 +18,15 @@ import java.util.*;
 import java.io.Serializable;  
   
   
-  
+/**
+ * Movement history of APRS stations. A history has a certain maximum length with
+ * respect to time span. 
+ */  
 public class History implements Iterable<History.Item>, Serializable
 {
+    /**
+     * History item. It is a geographical point with timestamp and some additional info.
+     */
     public static class Item extends Point {
        public Date time; 
        public int speed;
@@ -56,7 +62,9 @@ public class History implements Iterable<History.Item>, Serializable
     public void clear()
         { _items.clear(); }
         
-    
+    /**
+     * Get the time of the oldest item in history.
+     */
     public Date oldestPoint()
     {
        Item it =_items.peekLast();
@@ -65,6 +73,9 @@ public class History implements Iterable<History.Item>, Serializable
     }
     
     
+    /**
+     * Add a position report to history.
+     */
     public synchronized void add(Date t, Reference p, int sp, int crs, String path)
     { 
         Date now = new Date(); 
@@ -108,7 +119,9 @@ public class History implements Iterable<History.Item>, Serializable
     }
     
 
-    
+    /**
+     * Remove the oldest entries in history.
+     */
     protected synchronized void cleanUp(Date now)
     {
         if (isEmpty())
