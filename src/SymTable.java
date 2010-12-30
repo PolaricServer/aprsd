@@ -3,7 +3,9 @@ import java.net.*;
 import java.util.*;
 import java.io.*;
 
-
+/**
+ * Symbol to icon mapping.
+ */
 public class SymTable 
 {
     private BufferedReader  _rd;
@@ -21,7 +23,7 @@ public class SymTable
                if (!line.startsWith("#")) 
                {               
                    String[] x = line.split("\\s+");  
-                   if (x[0].length() < 2) // FIXME: sanitize input (legal characters)
+                   if (x[0].length() < 2) 
                        continue;
                    _stab.put(x[0], x[1]);
                }
