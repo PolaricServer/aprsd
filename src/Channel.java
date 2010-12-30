@@ -18,7 +18,9 @@ import java.util.regex.*;
 import java.io.*;
 import se.raek.charset.*;
 
-
+/**
+ * Channel for sending/receiving APRS data. 
+ */
 public abstract class Channel
 {
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
@@ -39,7 +41,9 @@ public abstract class Channel
      }
 
 
-     
+    /**
+     *  APRS packet.
+     */ 
     public static class Packet implements Cloneable {
         public String from, to, msgto, via, report; 
         public char type; 
@@ -52,7 +56,9 @@ public abstract class Channel
     }
     
     
-    
+    /**
+     * Interface for receivers of APRS packets.
+     */
     public interface Receiver {
         public void receivePacket(Channel.Packet p, boolean dup);
     }
