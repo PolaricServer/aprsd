@@ -16,7 +16,9 @@ package no.polaric.aprsd;
 import java.util.List;  
 import uk.me.jstott.jcoord.*;
 
-
+/**
+ * Interface to database of stations, objects, etc.
+ */
 public interface StationDB
 {
     public int nItems(); 
