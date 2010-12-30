@@ -20,7 +20,9 @@ import java.util.*;
 import java.text.*;
 import uk.me.jstott.jcoord.*;
 
-
+/**
+ * Parse and interpret APRS datastreams.
+ */
 public class AprsParser implements Channel.Receiver
 { 
     /* Standard APRS position report format */
