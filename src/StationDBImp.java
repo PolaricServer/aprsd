@@ -18,7 +18,10 @@ import java.io.*;
 import uk.me.jstott.jcoord.*; 
 import java.util.concurrent.*;
  
-  
+/**
+ * In-memory implementation of StationDB.
+ * Data is saved to a file. Periodically and when program ends.
+ */
 public class StationDBImp implements StationDB, Runnable
 {
     private SortedMap<String, AprsPoint> _map = new ConcurrentSkipListMap();
@@ -196,7 +199,9 @@ public class StationDBImp implements StationDB, Runnable
         return st;
     }
     
-    
+    /**
+     * Deactivate objects having the same name. 
+     */
     public synchronized void deactivateSimilarObjects(String id, Station owner)
     {
         Collection<AprsPoint> dupes =  _map.subMap(id+'@', id+'@'+"zzzzz").values();
