@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,19 +19,31 @@ import java.net.*;
 import java.util.*;
 
 
-
+/**
+ * Implement APRS messaging.
+ * We also add an option to use a Message Authentication scheme (MAC field). 
+ */
+ 
 public class MessageProcessor implements Runnable
 {
-
+    
+   /** 
+    * Interface for message subscribers. 
+    */
    public interface MessageHandler {
       public boolean handleMessage(Station sender, String text);
    }
 
+   /**
+    * Interface for reporting failure in delivering messages.
+    */
    public interface Notification {
       public void reportFailure(String id);
    }
 
-   /* Keep record of unacked outgoing messages */
+   /**
+    * Keep record of unacked outgoing messages. 
+    */
    private static class OutMessage
    {
       String msgid;
@@ -44,6 +56,9 @@ public class MessageProcessor implements Runnable
         { msgid = mid; recipient = rec; message = msg; time = new Date(); not=n; }
    }
 
+   /**
+    * Keep record of subscribers to this service.
+    */
    private static class Subscriber
    {
        MessageHandler recipient;
@@ -57,6 +72,7 @@ public class MessageProcessor implements Runnable
    private static final int _MSG_INTERVAL = 20;
    private static final int _MSG_MAX_RETRY = 3; 
    
+   /* The last 100 received messages */
    private LinkedHashMap<String, Boolean> recMessages =
        new LinkedHashMap()
        {
@@ -143,6 +159,9 @@ public class MessageProcessor implements Runnable
 
    /**
     * Subscribe to message delivery service.
+    * @param recipient: Ident of the recipient. 
+    * @param handler: The message handler interface of the recipient (used to deliver message)
+    * @param verify: If true - verify authenticicy of message by using MAC scheme. 
     */
    public void subscribe(String recipient, MessageHandler handler, boolean verify)
       { _subscribers.put(recipient, new Subscriber(handler, verify)); }
