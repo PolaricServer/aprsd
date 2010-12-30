@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,9 @@ import java.util.*;
 import java.text.*;
 import uk.me.jstott.jcoord.*;
 
-
+/**
+ * Igate - Gateway between RF channel and internet channel.
+ */
 public class Igate implements Channel.Receiver
 { 
     private Channel _inetChan, _rfChan;
@@ -47,7 +49,9 @@ public class Igate implements Channel.Receiver
     }
     
     
-
+    /**
+     * Gate packet (from RF) to internet.
+     */
     private void gate_to_inet(Channel.Packet p)
     {
        /* Note, we assume that third-party headers are stripped 
@@ -66,7 +70,9 @@ public class Igate implements Channel.Receiver
     }
 
     
-    
+    /**
+     * Gate packet (from internet) to RF.
+     */
     private void gate_to_rf(Channel.Packet p)
     {
        if (    /* Receiver heard on RF */
