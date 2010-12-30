@@ -19,7 +19,7 @@ import java.io.Serializable;
   
 
 /**
- * Object at a single location
+ * Object at a single location.
  * Every point has a location, icon and description. 
  */
  
