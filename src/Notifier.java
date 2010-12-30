@@ -18,7 +18,11 @@ import java.util.*;
 import java.io.Serializable;
   
   
-  
+/**
+ * This class allows threads to wait for certain events to occur within
+ * a geographical area. 
+ */
+ 
 public class Notifier
 {
     private Date signalled = new Date(); 
@@ -28,7 +32,13 @@ public class Notifier
     private Map<Long, Integer> _waiters = new HashMap();
     // 0 = continue waiting, 1 = return XML, 2 = abort and return nothing
     
-    
+    /**
+     * Wait for an event to happen within the given geographical area. 
+     * @param uleft: Upper left corner of the area.
+     * @param lright: Lower right corner of the area. 
+     * @param id: Identity of the waiter thread. Assumed to be a unique number. 
+     *            Other waiters with the same id will be aborted.
+     */
     public boolean waitSignal(UTMRef uleft, UTMRef lright, long id)
     {
          long wstart = (new Date()).getTime();
@@ -75,7 +85,10 @@ public class Notifier
          return true;
     }
     
-    
+    /**
+     * Signal an event on a certain geographical point. This will wake up
+     * waiters that subscribes to an area containing this location.
+     */
     public synchronized void signal(AprsPoint st)
     {   
          signalled = new Date(); 
@@ -83,6 +96,9 @@ public class Notifier
          notifyAll();
     }
     
+    /**
+     * Abort all waiters.
+     */
     public synchronized void abortAll(boolean retval)
     {
        for (long x: _waiters.keySet())
