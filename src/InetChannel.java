@@ -18,7 +18,9 @@ import java.net.*;
 import java.util.*;
 
 
-
+/**
+ * Internet channel. Connect to APRS-IS server. 
+ */
 public class InetChannel extends Channel implements Runnable
 {
     private   String      _host;
@@ -41,7 +43,9 @@ public class InetChannel extends Channel implements Runnable
     }
  
  
-    
+    /**
+     * Send a packet to APRS-IS.
+     */ 
     public void sendPacket(Packet p)
     {  
         if (p.via == null || p.via.equals("")) {
@@ -79,7 +83,7 @@ public class InetChannel extends Channel implements Runnable
    
     
     /**
-     * Main thread - connects to server and awaits incoming packets. 
+     * Main thread - connects to APRS-IS server and awaits incoming packets. 
      */
     static final int MAX_RETRY = 10;  
     public void run()
