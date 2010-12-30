@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,9 @@ import java.util.*;
 import java.io.Serializable;
   
 
-
+/**
+ * APRS geographical point.
+ */
 public abstract class AprsPoint extends PointObject implements Serializable
 {
     private static long     _nonMovingTime = 1000 * 60 * 5;   
@@ -150,7 +152,10 @@ public abstract class AprsPoint extends PointObject implements Serializable
         }
       }
       
-      
+    
+    /**
+     * Called to indicate that something has changed.
+     */
     public synchronized void setChanging()
     {
          _changing = true;
@@ -160,7 +165,8 @@ public abstract class AprsPoint extends PointObject implements Serializable
            
       
       
-    /*
+    /**
+     * Return true and signal a change if position etc. is updated recently.
      * This must also be called periodically to ensure that asyncronous waiters
      * are updated when a station has stopped updating. 
      */ 
