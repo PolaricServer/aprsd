@@ -64,8 +64,8 @@
 * [C] Use "Compiled" OpenLayers Javascript file to speed up loading. 
       
       
-1.0 RC
-------
+1.0 
+---
 
 * Default myCall in config file. 
 * Permanent objects and 111111z timestamp. 
