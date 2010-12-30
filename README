@@ -22,8 +22,10 @@ It sets up a startup-script and a logrotate script
 Edit server.ini (see below)
 
 
-start the server: 
-/etc/init.d/polaric-aprsd start
+(re)start the server: 
+/etc/init.d/polaric-aprsd restart
+
+Remember to restart the server if you change the configuration (server.ini, symbols, etc..)
 
     
 
@@ -67,6 +69,9 @@ Unpack the tarball containing the web application to /var/www/aprs
 Make sure that the cache directory has the right owner. In /var/www/aprs: 
     chown www-data.www-data kacache2
     
+Apache can be restarted with the command
+    apache2ctl restart
+    
     
     
 SERVER SETUP
@@ -82,8 +87,9 @@ It is possible to set separate callsigns (identifiers) for the internet-channel,
 the TNC channel, for objects and messages, but usually not necessary. 
 
 To connect to an APRS-IS server, edit the 'inetchannel.host', 'inetchannel.port' 
-and 'inetchannel.pass' fields and set 'inetchannel.on = true'. You have to set the 
-correct passcode ('inetchannel.pass') to be allowed to send data to APRS-IS.
+and 'inetchannel.pass' fields and set 'inetchannel.on = true'. You also have 
+to set the correct passcode ('inetchannel.pass') to be allowed to send data 
+to APRS-IS.
 
 To use a TNC, you need to set 'tncchannel.port' to the correct device name. 
 The set the baudrate, use 'tncchannel.baud'. An old fashioned serial 
@@ -103,12 +109,15 @@ To add a user 'la3t' go to the directory /usr/local/polaric-aprsd and type
        
 or whatever username you choose. You will be asked to choose a password.
 Edit server.ini and put the username in the 'user.update' field and if you want the
-user to have full administrator rights, to the 'user.admin' field.
+user to have full administrator rights, add it to the 'user.admin' field.
    user.update = la3t
    
 The values of 'user.update' and 'user.admin' are regular expressions, so you can
-set it up to recognize many users. Restart the server to make the changes
-effective.
+set it up to recognize many users. For instance, to allow two users to update: xxx 
+and yyy, write 
+  user.update = xxx|yyy
+
+Restart the server to make the changes effective.
 
 By default, all users have access to ka-map maps. This can be restricted if you
 want. See /var/www/aprs/ka-map/config/config.php for the ka-map setup. If 
