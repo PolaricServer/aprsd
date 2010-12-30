@@ -183,6 +183,8 @@ public abstract class HttpServer extends NanoHTTPD
          synchronized(this) { _requests--; } }
    }
 
+   /* Stubs for the server methods that are implemented in Scala. 
+    */
    protected abstract String _serveAdmin(Properties header, Properties parms, PrintWriter out);
    protected abstract String _serveStation(Properties header, Properties parms, PrintWriter out);
    protected abstract String _serveAddObject (Properties header, Properties parms, PrintWriter out);
