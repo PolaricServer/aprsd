@@ -18,10 +18,18 @@ import java.util.*;
 import java.security.*;
 import com.mindprod.base64.Base64;
 
+
+/**
+ * Some utilities related to security.
+ */
  
 public class SecUtils
 {
-       
+    /**
+     * Compute a MD5 hash from the text. Text can be given as
+     * an array of bytes, a string or both. A string will be converted
+     * to bytes using the UTF-8 encoding before computing the hash.
+     */   
     public final static byte[] digest ( byte[] bytes, String txt )
     {
        try{
@@ -39,7 +47,9 @@ public class SecUtils
     }
 
     
-    
+    /**
+     * Compute a MD5 hash from the text, represented as a hexadecimal string.
+     */ 
     public final static String digestHex(String txt)
         {return b2hex(digest(null, txt));}
 
