@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,9 @@
 package no.polaric.aprsd;
 import java.util.*;
 
-
+/**
+ * Duplicate checking.
+ */
 public class DupCheck 
 {
      private static final Boolean TRUE = true;
