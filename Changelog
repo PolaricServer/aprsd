@@ -71,7 +71,8 @@
 * Permanent objects and 111111z timestamp. 
   see http://www.aprs.org/info/object-perm.txt 
 * Mic-E comment cleanups.
-* Use UTF-8 character set at APRS side. Fallback to CP-850.
+* Use UTF-8 character encoding at APRS side. Fallback to CP-850 if not 
+  valid UTF-8.
 * Use APRS paths in history lists instead of UTM positions. 
 * Ordered presentation of icons (by filename). Some tidying and improvements 
   of icon fileset. 
