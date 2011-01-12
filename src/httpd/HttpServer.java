@@ -1,7 +1,15 @@
 
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
-import nanohttpd.*;
+
+import org.simpleframework.http.core.Container;
+import org.simpleframework.transport.connect.Connection;
+import org.simpleframework.transport.connect.SocketConnection;
+import org.simpleframework.http.*;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.io.PrintStream;
+
 import uk.me.jstott.jcoord.*;
 import java.util.*;
 import java.io.*;
@@ -10,19 +18,19 @@ import com.mindprod.base64.Base64;
 import java.util.concurrent.locks.*; 
 
 
-public abstract class HttpServer extends NanoHTTPD
+public abstract class HttpServer implements Container
 {
    protected  StationDB  _db;
    protected  int        _utmzone;
    protected  char       _utmlatzone;
    private    String     _timezone;
-   protected  String     _serverurl;
-   private    String     _icon, _icondir, _adminuser, _updateusers;
+   protected  String     _serverurl, _wfiledir;
+   private    String     _icon, _adminuser, _updateusers;
    protected  boolean    _infraonly;
    protected  SarMode    _sarmode = null;
            
    public static final String _encoding = "UTF-8";
-   public static final int _buffer_size = 4096;
+
 
    DateFormat df = new SimpleDateFormat("dd MMM. HH:mm",
            new DateFormatSymbols(new Locale("no")));
@@ -36,12 +44,11 @@ public abstract class HttpServer extends NanoHTTPD
    
    public HttpServer(StationDB db, int port, Properties config) throws IOException
    {
-      super(port); 
       _db=db; 
       _utmzone     = Integer.parseInt(config.getProperty("map.utm.zone", "33").trim());
       _utmlatzone  = config.getProperty("map.utm.latzone", "W").charAt(0);
       _icon        = config.getProperty("map.icon.default", "sym.gif").trim();
-      _icondir     = config.getProperty("map.icon.dir", "icons").trim();
+      _wfiledir    = config.getProperty("map.web.dir", "/aprsd").trim();
       _infraonly   = config.getProperty("map.infraonly", "false").trim().matches("true|yes");
       _adminuser   = config.getProperty("user.admin","admin").trim();
       _updateusers = config.getProperty("user.update", "").trim();
@@ -64,6 +71,11 @@ public abstract class HttpServer extends NanoHTTPD
           df.setTimeZone(z);
           tf.setTimeZone(z);
       }
+      
+      /* Configure this web container */
+      Connection connection = new SocketConnection(this);
+      SocketAddress address = new InetSocketAddress(port);
+      connection.connect(address);
    }
 
 
@@ -87,11 +99,11 @@ public abstract class HttpServer extends NanoHTTPD
     * (we assume that there is a front end webserver which already 
     * did the authentication).  
     */ 
-   protected final String getAuthUser(Properties header)
+   protected final String getAuthUser(Request req)
    {
-         String auth = header.getProperty("authorization", null);
+         String auth = req.getValue("authorization");
          if (auth==null)
-            auth = header.getProperty("Authorization", null);
+            auth = req.getValue("Authorization");
          if (auth != null) {
            Base64 b64 = new Base64();
            byte[] dauth = b64.decode(auth.substring(6));
@@ -102,9 +114,9 @@ public abstract class HttpServer extends NanoHTTPD
    
 
 
-   protected final boolean authorizedForUpdate(Properties header)
+   protected final boolean authorizedForUpdate(Request req)
    {
-       String user = getAuthUser(header);
+       String user = getAuthUser(req);
 
        if (user == null)
           user="_NOLOGIN_";
@@ -113,9 +125,9 @@ public abstract class HttpServer extends NanoHTTPD
    }
    
 
-   protected final boolean authorizedForAdmin(Properties header)
+   protected final boolean authorizedForAdmin(Request req)
    {
-       String user = getAuthUser(header);
+       String user = getAuthUser(req);
        return (user != null && user.matches(_adminuser)); 
    } 
    
@@ -126,7 +138,7 @@ public abstract class HttpServer extends NanoHTTPD
    /** 
     * Generic HTTP serve method. Dispatches to other methods based on uri
     */
-   public Response serve( String uri, String method, Properties header, Properties parms )
+   public void handle (Request req, Response resp)
    {
        int reqNo;
        synchronized (this) {
@@ -135,65 +147,79 @@ public abstract class HttpServer extends NanoHTTPD
        }
        
        try {
-         String type; 
-         ByteArrayOutputStream os = new ByteArrayOutputStream(_buffer_size);
+         String type = "text/html"; 
+         /* FIXME: Consider moving getOutputStream to service methods */
+         OutputStream os = resp.getOutputStream();
          PrintWriter out = new PrintWriter(new OutputStreamWriter(os, _encoding));
+         String uri = req.getTarget().replaceAll("\\?.*", ""); 
+         System.out.println("target="+uri);
          
          /* Determine the View Filter. Currently, there are just two
           * and they are hardcoded. The idea is to use a dictionary of
-          * View filters and look them up by name
+          * View filters and look them up by name. 
+          * FIXME: Consider moving these to service methods.
           */
-         String filtid = _infraonly ? "infra" : parms.getProperty("filter");
+         String filtid = _infraonly ? "infra" : req.getParameter("filter");
          ViewFilter vfilt = ViewFilter.getFilter(filtid);
+          
+         /* FIXME: Move some of this to service methods? Before content
+          * or use full buffering 
+          */
+         long time = System.currentTimeMillis();
+         resp.set("Server", "Polaric Server 1.0+dev");
+         resp.setDate("Date", time);
+         resp.setDate("Last-Modified", time); 
+         
+         
          if ("/admin".equals(uri))
-             type = _serveAdmin(header, parms, out);   
+             type = _serveAdmin(req, out);   
          else if ("/search".equals(uri))
-             type = _serveSearch(header, parms, out, vfilt);
+             type = _serveSearch(req, out, vfilt);
          else if ("/station".equals(uri))
-             type = _serveStation(header, parms, out);
+             type = _serveStation(req, out);
          else if ("/findstation".equals(uri))
-             type = serveFindItem(header, parms, out);
+             type = serveFindItem(req, out);
          else if ("/history".equals(uri))
-             type = _serveStationHistory(header, parms, out);    
+             type = _serveStationHistory(req, out);    
          else if ("/trailpoint".equals(uri))
-             type = _serveTrailPoint(header, parms, out);     
+             type = _serveTrailPoint(req, out);     
          else if ("/mapdata".equals(uri))
-             type = serveMapData(header, parms, out, vfilt, filtid);
+             type = serveMapData(req, out, vfilt, filtid);
          else if ("/addobject".equals(uri))
-             type = _serveAddObject(header, parms, out);
+             type = _serveAddObject(req, out);
          else if ("/deleteobject".equals(uri))
-             type = _serveDeleteObject(header, parms, out);
+             type = _serveDeleteObject(req, out);
          else if ("/resetinfo".equals(uri))
-             type = _serveResetInfo(header, parms, out);    
+             type = _serveResetInfo(req, out);    
          else if ("/sarmode".equals(uri))
-             type = _serveSarMode(header, parms, out);        
-         else 
-             return serveFile( uri, header, new File("."), true );
-       
-         InputStream is = new ByteArrayInputStream(os.toByteArray());   // FIXME: this copies buffer content?       
-         Response res = new Response(HTTP_OK, type, is);
-         res.addHeader("Content-length", "" + is.available()); 
-         return res; 
+             type = _serveSarMode(req, out);        
+         else {
+             out.println("<html><body>Unknown service: "+uri+"</body></html>");
+             resp.setCode(404); 
+             resp.setText("Not found");
+         }
+             
+         resp.set("Content-Type", type);
+         out.close();
        }
        catch (Throwable e) 
           { System.out.println("*** HTTP REQ exception: "+e.getMessage());
-            e.printStackTrace(System.out); 
-            return null; } 
+            e.printStackTrace(System.out); } 
        finally {
          synchronized(this) { _requests--; } }
    }
 
    /* Stubs for the server methods that are implemented in Scala. 
     */
-   protected abstract String _serveAdmin(Properties header, Properties parms, PrintWriter out);
-   protected abstract String _serveStation(Properties header, Properties parms, PrintWriter out);
-   protected abstract String _serveAddObject (Properties header, Properties parms, PrintWriter out);
-   protected abstract String _serveDeleteObject (Properties header, Properties parms, PrintWriter out);
-   protected abstract String _serveResetInfo (Properties header, Properties parms, PrintWriter out);
-   protected abstract String _serveSearch (Properties header, Properties parms, PrintWriter out, ViewFilter vf);
-   protected abstract String _serveStationHistory (Properties header, Properties parms, PrintWriter out);
-   protected abstract String _serveSarMode (Properties header, Properties parms, PrintWriter out);
-   protected abstract String _serveTrailPoint (Properties header, Properties parms, PrintWriter out);
+   protected abstract String _serveAdmin(Request req, PrintWriter out);
+   protected abstract String _serveStation(Request req, PrintWriter out);
+   protected abstract String _serveAddObject (Request req, PrintWriter out);
+   protected abstract String _serveDeleteObject (Request req, PrintWriter out);
+   protected abstract String _serveResetInfo (Request req, PrintWriter out);
+   protected abstract String _serveSearch (Request req, PrintWriter out, ViewFilter vf);
+   protected abstract String _serveStationHistory (Request req, PrintWriter out);
+   protected abstract String _serveSarMode (Request req, PrintWriter out);
+   protected abstract String _serveTrailPoint (Request req, PrintWriter out);
 
     
    protected String fixText(String t)
@@ -220,9 +246,11 @@ public abstract class HttpServer extends NanoHTTPD
     * Look up a station and return id, x and y coordinates (separated by commas).
     * If not found, return nothing.
     */
-   public String serveFindItem(Properties header, Properties parms, PrintWriter out)
+   public String serveFindItem(Request req, PrintWriter out)
+       throws IOException
    { 
-       String ident = parms.getProperty("id").toUpperCase();
+       
+       String ident = req.getParameter("id").toUpperCase();
        AprsPoint s = _db.getItem(ident);
        if (s==null) {
           int i = ident.lastIndexOf('-');
@@ -260,9 +288,10 @@ public abstract class HttpServer extends NanoHTTPD
    
 
   protected long _sessions = 0;
-  private synchronized long getSession(Properties parms)
+  private synchronized long getSession(Request req)
+      throws IOException
   {
-     String s_str  = parms.getProperty("clientses");
+     String s_str  = req.getParameter("clientses");
      if (s_str != null && s_str.matches("[0-9]+")) {
         long s_id = Long.parseLong(s_str);
         if (s_id > 0)
@@ -279,21 +308,22 @@ public abstract class HttpServer extends NanoHTTPD
    /**
     * Produces XML (Ka-map overlay spec.) for plotting station/symbols/labels on map.   
     */
-   public String serveMapData(Properties header, Properties parms, PrintWriter out, 
-          ViewFilter vfilt, String filt)
+   public String serveMapData(Request req, PrintWriter out, 
+          ViewFilter vfilt, String filt) throws IOException
    {  
         UTMRef uleft = null, lright = null;
-        if (parms.getProperty("x1") != null) {
-          long x1 = Long.parseLong( parms.getProperty("x1") );
-          long x2 = Long.parseLong( parms.getProperty("x2") );
-          long x3 = Long.parseLong( parms.getProperty("x3") );    
-          long x4 = Long.parseLong( parms.getProperty("x4") );
+        Form parms = req.getForm();
+        if (parms.get("x1") != null) {
+          long x1 = Long.parseLong( parms.get("x1") );
+          long x2 = Long.parseLong( parms.get("x2") );
+          long x3 = Long.parseLong( parms.get("x3") );    
+          long x4 = Long.parseLong( parms.get("x4") );
           uleft = new UTMRef((double) x1, (double) x2, _utmlatzone, _utmzone); 
           lright = new UTMRef((double) x3, (double) x4, _utmlatzone, _utmzone);
         }
         long scale = 0;
-        if (parms.getProperty("scale") != null)
-           scale = Long.parseLong(parms.getProperty("scale"));
+        if (parms.get("scale") != null)
+           scale = Long.parseLong(parms.get("scale"));
         
         /* Sequence number at the time of request */
         int seq  = 0;
@@ -301,11 +331,11 @@ public abstract class HttpServer extends NanoHTTPD
           _seq = (_seq+1) % 32000;
           seq = _seq;
         }
-        long client = getSession(parms);
-        boolean showSarInfo = (getAuthUser(header) != null || _sarmode == null);
+        long client = getSession(req);
+        boolean showSarInfo = (getAuthUser(req) != null || _sarmode == null);
         
         /* If requested, wait for a state change (see Notifier.java) */
-        if (parms.getProperty("wait") != null) 
+        if (parms.get("wait") != null) 
             if (! Station.waitChange(uleft, lright, client) ) {
                 out.println("<overlay cancel=\"true\"/>");             
                 out.flush();
@@ -316,9 +346,9 @@ public abstract class HttpServer extends NanoHTTPD
         out.println("<overlay seq=\""+_seq+"\"" +
             (filt==null ? ""  : " view=\"" + filt + "\"") + ">");
         out.println("<meta name=\"utmzone\" value=\""+ _utmzone + "\"/>");
-        out.println("<meta name=\"login\" value=\""+ getAuthUser(header) + "\"/>");
-        out.println("<meta name=\"adminuser\" value=\""+ authorizedForAdmin(header) + "\"/>");
-        out.println("<meta name=\"updateuser\" value=\""+ authorizedForUpdate(header) + "\"/>");
+        out.println("<meta name=\"login\" value=\""+ getAuthUser(req) + "\"/>");
+        out.println("<meta name=\"adminuser\" value=\""+ authorizedForAdmin(req) + "\"/>");
+        out.println("<meta name=\"updateuser\" value=\""+ authorizedForUpdate(req) + "\"/>");
         out.println("<meta name=\"clientses\" value=\""+ client + "\"/>");    
         out.println("<meta name=\"sarmode\" value=\""+ (_sarmode!=null ? "true" : "false")+"\"/>");    
         
@@ -333,7 +363,7 @@ public abstract class HttpServer extends NanoHTTPD
             if (ref == null || !s.visible(scale) || !s.isInside(uleft, lright))
                 continue;
             String title = s.getDescr() == null ? "" : "title=\"" + fixText(s.getDescr()) + "\"";
-            String icon = "srv/icons/"+ s.getIcon();    
+            String icon = _wfiledir +"/icons/"+ s.getIcon();    
            
             out.println("<point id=\"__sign" + (i++) + "\" x=\""
                          + (int) Math.round(ref.getEasting()) + "\" y=\"" + (int) Math.round(ref.getNorthing())+ "\" " 
@@ -363,7 +393,7 @@ public abstract class HttpServer extends NanoHTTPD
                   
                   String title = s.getDescr() == null ? "" 
                              : "title=\"[" + fixText(s.getIdent()) + "] " + fixText(s.getDescr()) + "\"";
-                  String icon = "srv/icons/"+ (s.getIcon() != null ? s.getIcon() : _icon);    
+                  String icon = _wfiledir + "/icons/"+ (s.getIcon() != null ? s.getIcon() : _icon);    
                 
                   out.println("<point id=\""+fixText(s.getIdent())+"\" x=\""
                                + (int) Math.round(ref.getEasting()) + "\" y=\"" + (int) Math.round(ref.getNorthing())+ "\" " 
