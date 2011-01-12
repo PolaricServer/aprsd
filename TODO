@@ -1,58 +1,8 @@
+Updates to 1.0.1, etc.
+----------------------
 
-Preparations for V.2.0 M.0
---------------------------
-
+* Check for empty position in object input.
+* Fix configurable icon directory. Use Apache for static icon files. 
+* Station get status text from other stations???? Fix?
 * [C] Sometimes last update in trail is missing. Fix?
- 
-* [C/S] Alternative trail lengths.
- 
-* Replace HTTP server (efficiency, extensibility). The "Simple 
-  framework" http://www.simpleframework.org can be a good candidate. 
-  Jetty may be a little complicated to set up?
-  
-* [C] Some touch screen awareness to make it just a little 
-      usable for ipad, etc..?
-      
-      STARTED (1.0b6) - mapped some touch events to mouse events.
-      Can now pan map and zoom via buttons on top, but this is 
-      slow on Ipad. Zoom gesture does not work yet. 
 
-* Allow a dynamic number of data channels to be configured. 
-  Not just two. 
-
-* Allow objects with certain attributes (like input channel, callsign) to 
-  be visible only for logged in users.  
-
-* Change class hierarchy to support other types of position objects, 
-  not just plain APRS. 
-      STARTED.
-  
-* Additions to search function?
-
-* AIS objects and input channel.    
-  
-* Permissions (objects, other)? Sender id? Consider simple user profile support? 
-
-* More configurable view profiles?  
-
-* More flexible logging?
-
-* API at client side
-
- 
- 
- VERSION 2.0. M.0
- ----------------
- 
- Use a database system for storing position/APRS data and try to 
- make the code more modular/extensible. 
-  
- * Conceptual model
- * Revise class hierarchy. Focus on data. Make the switch to database easier. 
-   Some changes may however wait until we move to database. 
- * Initial database schema.
- * Implementation. 
-  
- * Consider web framework/http server like Lift or Servlets/JSP. Consider
-   a more MVC based design. 
- 
