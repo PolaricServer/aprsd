@@ -1,17 +1,61 @@
-
+--------------------------
 Preparations for V.2.0 M.0
+Version 1.1, etc. 
 --------------------------
 
-* [C] Sometimes last update in trail is missing. Fix?
  
-* [C/S] Alternative trail lengths.
+Web Server
+----------
  
 * Replace HTTP server (efficiency, extensibility). The "Simple 
   framework" http://www.simpleframework.org can be a good candidate. 
-  Jetty may be a little complicated to set up?
-  
+     DONE. 
+
+* Use Apache for all static files. 
+     DONE.
+     
+* Simplify webserver impl. (esp. Scala part). 
+ 
+* Make it RESTful? Use RESTlets?
+
+
+
+API, Extensibility
+------------------
+
+* [C] Javascript API at client side
+
+* Component API, add components in config.
+      DONE. 
+
+* Framework for web-interface extensions in Scala. 
+
+* Jar files in a subdirectory - easier to add extra components
+      DONE.
+
+
+
+Database
+--------
+
+* Database setup. Collect simple update events in a database. 
+       DONE - IN PROGRESS.
+       
+* Can this be a plugin module? Database stuff should be completely optional in 1.1, 1.2
+  etc.. (core database stuff will be part of core P.S. in later releases).
+       DONE.
+       
+* Some experimentation in external programs/plugins? 
+        
+* Experimental search functionality/trails - but as external module? 
+
+
+
+Other
+-----
+
 * [C] Some touch screen awareness to make it just a little 
-      usable for ipad, etc..?
+      usable for mobile devices?
       
       STARTED (1.0b6) - mapped some touch events to mouse events.
       Can now pan map and zoom via buttons on top, but this is 
@@ -27,9 +71,9 @@ Preparations for V.2.0 M.0
   not just plain APRS. 
       STARTED.
   
+* AIS objects and input channel.
+    
 * Additions to search function?
-
-* AIS objects and input channel.    
   
 * Permissions (objects, other)? Sender id? Consider simple user profile support? 
 
@@ -37,22 +81,6 @@ Preparations for V.2.0 M.0
 
 * More flexible logging?
 
-* API at client side
+* Traffic load statistics (per station). 
 
- 
- 
- VERSION 2.0. M.0
- ----------------
- 
- Use a database system for storing position/APRS data and try to 
- make the code more modular/extensible. 
-  
- * Conceptual model
- * Revise class hierarchy. Focus on data. Make the switch to database easier. 
-   Some changes may however wait until we move to database. 
- * Initial database schema.
- * Implementation. 
-  
- * Consider web framework/http server like Lift or Servlets/JSP. Consider
-   a more MVC based design. 
  
