@@ -417,6 +417,8 @@ public class AprsParser implements Channel.Receiver
             log(" COMMENT: "+ comment);
             
             station.update(new Date(), pos, d, speed, altitude, comment, symbol, altsym, pathinfo);  
+            Main.dblog.addPosReport(station.getIdent(), new  Date(), pos, d, speed, 
+                                    altitude, comment, symbol, altsym, pathinfo );
             return;
     }
 
@@ -641,7 +643,8 @@ public class AprsParser implements Channel.Receiver
                comment = null;
                
             station.update(time, pos, course, speed, (int) altitude, comment, symbol, symtab, pathinfo );
-            
+            Main.dblog.addPosReport(station.getIdent(), time, pos, course, speed, 
+                                    (int) altitude, comment, symbol, symtab, pathinfo );
             log("     POS: "+ pos);         
     }
     
