@@ -26,6 +26,8 @@ public abstract class Channel
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      private LinkedHashMap<String, Date> _heard = new LinkedHashMap();
    
+     public enum Type {inet, radio};
+     
      
      private void removeOldHeardEntries()
      {
