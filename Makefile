@@ -12,8 +12,8 @@
 ## JAR:   Jar archiver
 ##########################################################################
   CLASSDIR = classes
- CLASSPATH = jcoord.jar:utf8-with-fallback.jar:/usr/share/java/RXTXcomm.jar
-INSTALLDIR = /usr/local/polaric-aprsd
+ CLASSPATH = jcoord.jar:utf8-with-fallback.jar:/usr/share/java/RXTXcomm.jar:simple.jar
+INSTALLDIR = /usr/local/polaric-aprsd/lib
 JSPINSTALL = /var/www/test/bull/jsp
      JAVAC = javac -target 1.5
        JAR = jar
