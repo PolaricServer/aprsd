@@ -21,31 +21,84 @@ import uk.me.jstott.jcoord.*;
  */
 public interface StationDB
 {
+    /** 
+     * Return the number of items. 
+     */
     public int nItems(); 
     
+    
+    /**
+     * Get info on routes. Where APRS packets have travelled.
+     */
     public RouteInfo getRoutes();
     
+    
+    /**
+     * Get APRS objects owned by this server. 
+     */
     public OwnObjects getOwnObjects(); 
     
+    
+    /**
+     * Get messaging processor.
+     */
     public MessageProcessor getMsgProcessor();
     
+    
+    /**
+     * Get item. 
+     * @param id: identifier (typically a callsign) of item.
+     */
     public AprsPoint getItem(String id);
     
+    
+    /**
+     * Remove item.
+     * @param id: identifier (typically a callsign) of item.
+     */
     public void removeItem(String id);
 
+
+    /**
+     * Get an APRS station. 
+     * @param id: identifier (typically a callsign) of item.
+     */    
     public Station getStation(String id);
     
+    
+    /**
+     * Create a new APRS station. 
+     * @param id: identifier (typically a callsign) of item.
+     */
     public Station newStation(String id);
     
+    
+    /**
+     * Create a new APRS object. 
+     * @param owner: identifier (typically a callsign) of owner station.
+     * @param id: identifier of object.
+     */    
     public AprsObject newObject(Station owner, String id);
     
+    
+    /**
+     * Deactivate other objects having the given owner and id. 
+     */ 
     public void deactivateSimilarObjects(String id, Station owner);
+    
     
     public List<AprsPoint> getAll(String arg);
     
+    
+    /**
+     * Search. Return a list of all items within the given geographical area.
+     */
     public List<AprsPoint>
           search(Reference x1, Reference y1, Reference x2, Reference y2);
-    
+   
+   /**
+    * Search. Return a list of all items within the given geographical area.
+    */
     public List<AprsPoint>
           search(UTMRef uleft, UTMRef lright);       
     
