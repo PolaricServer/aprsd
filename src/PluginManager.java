@@ -14,37 +14,19 @@ public class PluginManager
    }
      
      
-   /** 
-    * This is the main API. The interface to the core server application - to be used by
-    * plugins 
-    */
-   public interface ServerAPI 
-   {
-      /* Now, what methods do we need here? Other interfaces.
-       * Do we need StationDB? */
-       public StationDB getDB();
-       public Set<String> getChannels(Channel.Type type);
-       public Channel getChannel(String id);
-       public void addChannel(Channel.Type type, String id, Channel ch);
-       public MessageProcessor getMessageProcessor(); /* Move from StationDB */
-       public Properties getConfig();
-       public Map<String, Object> getObjectMap();
-   }
-
-
 
    /**
     * Plugin start/stop interface. All plugins should implement this. 
     */
    public interface Plugin 
    {
-      /** Start the plugin  */
+      /** Start the plugin.  */
        void activate(ServerAPI api);
       
-      /**  Stop the plugin */ 
+      /**  Stop the plugin. */ 
        void deActivate();
        
-      /** Return an arrays of other component (class names) this plugin depends on */
+      /** Return an arrays of other component (class names) this plugin depends on. */
        String[] getDependencies();
    }
    
@@ -61,17 +43,25 @@ public class PluginManager
    /* FIXME: Shorter path to get/put methods */
    public static Map<String, Object> getObjectMap() 
      { return _objects; }
-     
+       
+   /**
+    * set the api. Must be done at startup of server. 
+    * @param a: the server interface. 
+    */    
    public static void setServerApi(ServerAPI a)
      { api = a; }  
      
 
    /**
     *  Register a plugin. 
-    *  1. Instantiate plugin class. 
-    *  2. Check dependencies. A plugin declares what other plugins it depends on. 
+    * <ul>
+    *  <li>Instantiate plugin class.</li> 
+    *  <li> Check dependencies. A plugin declares what other plugins it depends on. 
     *     Use identifiers or simply class  name? Check if those are loaded and
-    *     add and activate if not. throw an exception if not found. 
+    *     add and activate if not. throw an exception if not found.</li>
+    * </ul>
+    * 
+    *  @param cn: Name of plugin. Java class. 
     */
     public static void add(String cn) throws PluginError
     {
@@ -93,7 +83,10 @@ public class PluginManager
           { throw new PluginError("Cannot activate plugin: "+cn, e); }
     }
     
-    
+    /**
+     * Register multiple plugins. 
+     * @param cn: Comma separated list of plugin names (Java class names).
+     */
     public static void addList(String cn) throws PluginError
     {
         String[] plugins = cn.split(",(\\s)*");
