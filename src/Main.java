@@ -9,7 +9,7 @@ import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 
 
-public class Main implements PluginManager.ServerAPI
+public class Main implements ServerAPI
 {
    public static String version = "1.0+dev";
    private static StationDB db = null;
@@ -114,9 +114,10 @@ public class Main implements PluginManager.ServerAPI
            /* Start HTTP server */
            int http_port = Integer.parseInt(_config.getProperty("httpserver.port", "8081"));
 
-           Class cls = Class.forName("no.polaric.aprsd.http.Webserver");
+           Class cls = Class.forName("no.polaric.aprsd.http.HttpServer");
            Constructor con = cls.getConstructors()[0];
-           Object ws = con.newInstance(db, http_port, _config);
+           HttpServer ws = (HttpServer) con.newInstance(db, http_port, _config);
+           
            
            /* API and Plugins */
            PluginManager.setServerApi(new Main());
