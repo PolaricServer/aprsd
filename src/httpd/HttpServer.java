@@ -354,7 +354,7 @@ public abstract class HttpServer extends NanoHTTPD
             UTMRef ref = toUTM(s.getPosition()); 
             if (ref == null) continue; 
                
-            if (!s.visible()) 
+            if (!s.visible() || (!showSarInfo && _sarmode.filter(s))) 
                    out.println("<delete id=\""+fixText(s.getIdent())+"\"/>");
             else {
                synchronized(s) {
