@@ -1,8 +1,11 @@
 Updates to 1.0.1, etc.
 ----------------------
 
+* Extend SAR mode with filter on prefix.
+    DONE.
 * Check for empty position in object input.
 * Fix configurable icon directory. Use Apache for static icon files. 
 * Station get status text from other stations???? Fix?
+* Log user objects or alias changes (identify user??). 
 * [C] Sometimes last update in trail is missing. Fix?
 
