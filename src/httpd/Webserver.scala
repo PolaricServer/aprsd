@@ -227,15 +227,22 @@ package no.polaric.aprsd.http
    def _serveSarMode(hdr: Properties, parms: Properties, out: PrintWriter) : String =
    {
        val prefix = <h2>Søk og redningsmodus</h2>
+       var filter = parms.getProperty("sar_prefix")
        var reason = parms.getProperty("sar_reason")
        val on = parms.getProperty("sar_on")
        
        def fields(hdr: Properties, parms: Properties): NodeSeq =          
            <xml:group>
-           <p>Alias-info bare synlig for innloggete brukere.</p>
+           <p>Alias-info o.l. bare synlig for innloggete brukere.</p>
            <label for="sar_on" class="lleftlab">SAR modus:</label>
            { checkBox("sar_on", _sarmode!=null, TXT("aktivert")) }  
            <br/>
+           
+           <label for="sar_prefix" class="lleftlab">Skjul prefiks:</label>
+           <input id="sar_prefix" name="sar_prefix" width="50" value= 
+             { if ( _sarmode==null) "" else _sarmode.getFilter() }></input>
+           <br/>
+           
            <label for="sar_reason" class="lleftlab">Beskrivelse:</label>
            { if (_sarmode == null)
                 <input id="sar_reason" name="sar_reason" width="50" value={""} ></input>
@@ -254,7 +261,7 @@ package no.polaric.aprsd.http
        {
           AprsPoint.abortWaiters(true);
           if (on != null && "true".equals(on) ) {
-               _sarmode = new SarMode(reason, getAuthUser(hdr));
+               _sarmode = new SarMode(reason, getAuthUser(hdr), filter);
                <h3>Aktivert</h3>
                <p>{reason}</p>
           }
