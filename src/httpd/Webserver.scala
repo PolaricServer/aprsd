@@ -16,9 +16,8 @@ package no.polaric.aprsd.http
 {
 
   class Webserver 
-      ( val db: StationDB,
-        val port : Int,
-        val props : Properties) extends HttpServer(db,port,props)
+      ( val api: ServerAPI,
+        val props : Properties) extends HttpServer2(api,  props)
   {
 
 
@@ -111,11 +110,12 @@ package no.polaric.aprsd.http
    }
 
 
-   private def printHtml(out : PrintWriter, content : Node ) : String =
-   {
+   private def printHtml(res : Response, content : Node ) =
+   {        
+        val out = getWriter(res);
+        res.set("Content-Type", "text/html; charset=utf-8");
         out.println (doctype + Xhtml.toXhtml(content, true, true) )
-        out.flush()
-        "text/html; charset=utf-8"
+        out.close()
    }
    
 
@@ -180,60 +180,66 @@ package no.polaric.aprsd.http
     * Admin interface. 
     * To be developed further...
     */
-   def _serveAdmin(req : Request, out: PrintWriter) : String =
+   def handle_admin(req : Request, res: Response) =
    {   
+       val out = getWriter(res);
        val cmd = req.getParameter("cmd")
        val head = <meta http-equiv="refresh" content="60" />
+       
+       /*  FIXME: Dummy values - should access webserver */
+       val _requests = 0;
+       val _sessions = 0;
+       val _reqNo = 0;
 
        def action(req : Request): NodeSeq =
           if (!authorizedForAdmin(req))
               <h3>Du er ikke autorisert for admin operasjoner</h3>
           else if ("gc".equals(cmd)) {
-              _db.garbageCollect()
+              _api.getDB().garbageCollect()
               <h3>GC, ok</h3>
           }
           else if ("clearobj".equals(cmd)) {
-              _db.getOwnObjects().clear()
+              _api.getDB().getOwnObjects().clear()
               <h3>Clear own objects, ok</h3>
           }
           else if ("clearlinks".equals(cmd)) {
-              _db.getRoutes().clear()
+              _api.getDB().getRoutes().clear()
               <h3>Clear link information, ok</h3>    
           }
           else if ("info".equals(cmd))    
               <h3>Status info for Polaric APRSD</h3>
               <fieldset>
               { simpleLabel("items", "leftlab", "Server kjørt siden:", TXT(""+_time)) }
-              { simpleLabel("items", "leftlab", "Server versjon:", TXT(""+Main.version)) }
-              { simpleLabel("items", "leftlab", "Antall APRS enheter:", TXT(""+_db.nItems())) }
-              { simpleLabel("items", "leftlab", "Antall forbindelser:", TXT(""+_db.getRoutes().nItems())) }
-              { simpleLabel("items", "leftlab", "Egne objekter:", TXT(""+_db.getOwnObjects().nItems())) }   
+              { simpleLabel("items", "leftlab", "Server versjon:", TXT(""+_api.getVersion())) }
+              { simpleLabel("items", "leftlab", "Antall APRS enheter:", TXT(""+_api.getDB().nItems())) }
+              { simpleLabel("items", "leftlab", "Antall forbindelser:", TXT(""+_api.getDB().getRoutes().nItems())) }
+              { simpleLabel("items", "leftlab", "Egne objekter:", TXT(""+_api.getDB().getOwnObjects().nItems())) }   
               { simpleLabel("items", "leftlab", "Antall HTTP klienter nå:", TXT(""+(_requests-1))) }  
               { simpleLabel("items", "leftlab", "Antall besøk (sesjoner):", TXT(""+_sessions)) }
-              { simpleLabel("items", "leftlab", "Antall HTTP forespørsler:", TXT(""+_reqNo)) }   
+              { simpleLabel("items", "leftlab", "Antall HTTP forespørsler:", TXT(""+_reqNo)) }    
               { simpleLabel("freemem", "leftlab", "Brukt minne:", 
                   TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
               <br/>
               { simpleLabel("ch1", "leftlab", "Kanal 1 (APRS-IS): ", 
-                   if (Main.ch1==null) TXT("---") else TXT(""+Main.ch1)) } 
+                   if (_api.getChannel(null)==null) TXT("---") else TXT(""+_api.getChannel(null))) } 
               { simpleLabel("ch2", "leftlab", "Kanal 2 (TNC): ", 
-                   if (Main.ch2==null) TXT("---") else TXT(""+Main.ch2)) }
+                   if (_api.getChannel(null)==null) TXT("---") else TXT(""+_api.getChannel(null))) }
               { simpleLabel("igate", "leftlab", "Igate: ", 
-                   if (Main.igate==null) TXT("---") else TXT(""+Main.igate)) }   
-              { if (Main.rctl != null && !Main.rctl.isEmpty())  
-                   simpleLabel("rctl", "leftlab", "Fjernkontroll: ", TXT(""+Main.rctl)) else null; }     
+                   if (_api.getIgate()==null) TXT("---") else TXT(""+_api.getIgate())) }   
+              { if (_api.getRemoteCtl() != null && !_api.getRemoteCtl().isEmpty())  
+                   simpleLabel("rctl", "leftlab", "Fjernkontroll: ", TXT(""+_api.getRemoteCtl())) else null; }     
                    
               </fieldset>  
               <input type="submit" onclick="window.close()" id="cancel" value="Avbryt"/>
           else
               <h3>Ukjent kommando</h3>
              
-        printHtml (out, htmlBody(req, head, action(req)));    
+        printHtml (res, htmlBody(req, head, action(req)));    
    }
    
    
    
-   def _serveSarMode(req : Request, out: PrintWriter) : String =
+   def handle_sarmode(req : Request, res: Response) =
    {
        val prefix = <h2>Søk og redningsmodus</h2>
        var reason = req.getParameter("sar_reason")
@@ -273,7 +279,7 @@ package no.polaric.aprsd.http
           } 
        }
        
-       printHtml (out, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
+       printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
    }
    
    
@@ -282,7 +288,7 @@ package no.polaric.aprsd.http
     * Delete APRS object.
     */          
 
-   def _serveDeleteObject(req : Request, out: PrintWriter) : String =
+   def handle_deleteobj(req : Request, res: Response) =
    {
        val id = req.getParameter("objid")
        val prefix = <h2>Slett objekt</h2>
@@ -299,19 +305,19 @@ package no.polaric.aprsd.http
               <p>må oppgi 'objid' som parameter</p>;
           }
           else {
-              if (Main.ownobjects.delete(id))
+              if (_api.getDB().getOwnObjects().delete(id))
                   <h3>Objekt slettet!</h3>
               else
                   <h3>Fant ikke objekt: {id}</h3>
           }  
           
-       printHtml (out, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
+       printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
    }          
 
 
 
 
-   def _serveResetInfo(req : Request, out: PrintWriter) : String =
+   def handle_resetinfo(req : Request, res : Response) =
    {
        val id = req.getParameter("objid")
        val prefix = <h2>Nullstill info om stasjon/objekt</h2>
@@ -328,12 +334,12 @@ package no.polaric.aprsd.http
               <p>må oppgi 'objid' som parameter</p>;
           }
           else {
-             val x = _db.getItem(id);
+             val x = _api.getDB().getItem(id);
              if (x != null)
                 x.reset();
              <h3>Info om objekt nullstilt!</h3>
           }  
-       printHtml (out, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
+       printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
    }          
 
 
@@ -342,7 +348,7 @@ package no.polaric.aprsd.http
    /**
     * add or edit APRS object.
     */          
-   def _serveAddObject(req : Request, out: PrintWriter) : String =
+   def handle_addobject(req : Request, res : Response) =
    {
         val pos = getUtmCoord(req, 'W', _utmzone)
         val id = req.getParameter("objid")
@@ -386,7 +392,7 @@ package no.polaric.aprsd.http
                val osym  = req.getParameter("osym")
                val otxt = req.getParameter("descr")
                val perm = req.getParameter("perm");
-               if ( Main.ownobjects.add(id, pos,
+               if ( _api.getDB().getOwnObjects().add(id, pos,
                       if (osymtab==null) '/' else osymtab(0),
                       if (osym==null) 'c' else osym(0),
                       if (otxt==null) "" else otxt,
@@ -399,7 +405,7 @@ package no.polaric.aprsd.http
                   <p>Objekt '{id}' er allerede registrert av noen andre</p>
            };
             
-        printHtml (out, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
+        printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
     }
 
 
@@ -430,16 +436,19 @@ package no.polaric.aprsd.http
     * Presents a status list over registered stations (standard HTML)
     */
    
-   def _serveSearch(req : Request, out: PrintWriter, vfilt: ViewFilter): String =
+   def handle_search(req : Request, res : Response) =
    {
-       var arg = req.getParameter("filter");
+       val filtid = if (_infraonly) "infra"  else req.getParameter("filter")
+       val vfilt = ViewFilter.getFilter(filtid)
+       
+       var arg = req.getParameter("filter")
        if (arg == null) 
            arg  = "__NOCALL__"; 
-       val infra = _infraonly || "infra".equals(arg);
+       val infra = _infraonly || "infra".equals(arg)
        val result: NodeSeq =
          <table>
          {
-            for ( x:AprsPoint <- _db.getAll(arg)
+            for ( x:AprsPoint <- _api.getDB().getAll(arg)
                   if ( vfilt.useObject(x)) ) yield
             {
                val s = if (!x.isInstanceOf[Station]) null
@@ -474,7 +483,7 @@ package no.polaric.aprsd.http
            }
         } 
         </table>;
-        printHtml (out, htmlBody (req, null, result))
+        printHtml (res, htmlBody (req, null, result))
    }
  
 
@@ -517,10 +526,10 @@ package no.polaric.aprsd.http
    /** 
     * Info about station/object (standard HTML)
     */
-   def _serveStation(req : Request, out: PrintWriter): String =
+   def handle_station(req : Request, res : Response) =
    {        
         val id = req.getParameter("id")
-        val x = _db.getItem(id)
+        val x = _api.getDB().getItem(id)
         val s = if (x.isInstanceOf[Station]) x.asInstanceOf[Station] else null
         val obj = if (x.isInstanceOf[AprsObject]) x.asInstanceOf[AprsObject] else null
         val canUpdate = authorizedForUpdate(req)
@@ -538,7 +547,7 @@ package no.polaric.aprsd.http
                 if (items != null) 
                  for (it <- items) yield {
                     i += 1
-                    val xx = _db.getItem(it)
+                    val xx = _api.getDB().getItem(it)
                     val linkable = (xx != null  && xx.visible() && xx.getPosition() != null)
                     <span class={ if (linkable) "link_id" else ""} onclick={
                         if (linkable) 
@@ -658,14 +667,14 @@ package no.polaric.aprsd.http
                 }
              System.out.println("*** ALIAS: "+alias);   
              if (ch)
-                 Main.rctl.sendRequestAll("ALIAS "+x.getIdent()+" "+alias, null);
+                 _api.getRemoteCtl().sendRequestAll("ALIAS "+x.getIdent()+" "+alias, null);
 
              /* Icon setting */
              var icon = req.getParameter("iconselect");
              if ("system".equals(icon)) 
                  icon = null; 
              if (x.setIcon(icon))
-                 Main.rctl.sendRequestAll("ICON "+x.getIdent() + " " +
+                 _api.getRemoteCtl().sendRequestAll("ICON "+x.getIdent() + " " +
                     { if (icon==null) "NULL" else icon }, 
                     null);
             
@@ -673,7 +682,7 @@ package no.polaric.aprsd.http
         }
 
 
-        printHtml (out, htmlBody ( req, null, 
+        printHtml (res, htmlBody ( req, null, 
                                    if (simple) fields(req)
                                    else htmlForm(req, prefix, fields, IF_AUTH(action))))
     }
@@ -687,9 +696,9 @@ package no.polaric.aprsd.http
    /** 
     * Presents a list over last positions and movements (standard HTML)
     */
-   def _serveStationHistory(req : Request, out: PrintWriter): String =
+   def handle_history(req : Request, res : Response) =
    {        
-       val s = _db.getStation(req.getParameter("id"))
+       val s = _api.getDB().getStation(req.getParameter("id"))
        val result: NodeSeq =
           if (s == null)
              <h2>Feil:</h2><p>Fant ikke stasjon</p>;
@@ -726,15 +735,15 @@ package no.polaric.aprsd.http
                }
              </table>
 
-        printHtml(out, htmlBody(req, null, result))
+        printHtml(res, htmlBody(req, null, result))
     } 
   
   
   
 
-    def _serveTrailPoint(req : Request, out: PrintWriter): String =
+    def handle_trailpoint(req : Request, res : Response) =
     {
-       val s = _db.getStation(req.getParameter("id"))
+       val s = _api.getDB().getStation(req.getParameter("id"))
        val index = Integer.parseInt(req.getParameter("index"))
        val h = s.getHistory()
        val item = h.getPoint(index)
@@ -752,7 +761,7 @@ package no.polaric.aprsd.http
          { lSimpleLabel("via",   "lleftlab", "APRS via:", TXT(item.pathinfo))  }
          </div>
          </xml:group>
-       printHtml(out, htmlBody(req, null, result)) 
+       printHtml(res, htmlBody(req, null, result)) 
     }
   
   }
