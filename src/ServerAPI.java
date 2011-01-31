@@ -11,10 +11,23 @@ import java.util.*;
       /* Now, what methods do we need here? Other interfaces.
        * Do we need StationDB? */
        public StationDB getDB();
+       
        public Set<String> getChannels(Channel.Type type);
+       
        public Channel getChannel(String id);
+       
        public void addChannel(Channel.Type type, String id, Channel ch);
-       public MessageProcessor getMessageProcessor(); /* Move from StationDB */
+       
+       public Igate getIgate();
+       
+       public MessageProcessor getMsgProcessor(); /* Move from StationDB */
+       
+       public RemoteCtl getRemoteCtl(); 
+       
        public Properties getConfig();
+       
        public Map<String, Object> getObjectMap();
+       
+       public String getVersion();
    }
+   
