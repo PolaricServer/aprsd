@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2002 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -291,7 +291,7 @@ public static class Status implements Serializable
             return true;
         if (now.getTime() <= _updated.getTime() + _expiretime)  // If expired
             return false;
-        if (!Main.ownobjects.mayExpire(this))
+        if (!_db.getOwnObjects().mayExpire(this))
             return false;
         _db.getRoutes().removeNode(this.getIdent());
         return (_expired = true); 
