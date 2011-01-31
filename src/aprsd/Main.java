@@ -7,6 +7,7 @@ import java.text.*;
 import java.util.concurrent.locks.*; 
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
+import no.polaric.aprsd.http.*;
 
 
 public class Main implements ServerAPI
@@ -32,18 +33,33 @@ public class Main implements ServerAPI
     */
    public StationDB getDB() 
     { return db; }
+   
    public Set<String> getChannels(Channel.Type type)
     { return null; /* TBD */ }
+   
    public Channel getChannel(String id)
     { return null; /* TBD */ }
+   
    public void addChannel(Channel.Type type, String id, Channel ch)
     { }
-   public MessageProcessor getMessageProcessor()
+    
+   public Igate getIgate()
+    { return igate; }
+    
+   public MessageProcessor getMsgProcessor()
     { return db.getMsgProcessor(); /* Move from StationDB */ }
+   
+   public RemoteCtl getRemoteCtl()
+    { return rctl; } 
+   
    public Properties getConfig()
     { return _config; }
+   
    public Map<String, Object> getObjectMap()
     { return PluginManager.getObjectMap(); }
+   
+   public String getVersion()
+    { return version; }
  
  
  
@@ -69,20 +85,23 @@ public class Main implements ServerAPI
            _config.load(fin);
            System.out.println( "*** Polaric APRSD startup ++" );
            
+           /* API */
+           ServerAPI api = new Main();
+           PluginManager.setServerApi(api);
            
            /* Database of stations/objects */
            db  = new StationDBImp(_config); 
            AprsPoint.setDB(db);
 
            /* Start parser and connect it to channel(s) if any */
-           AprsParser p = new AprsParser(db, db.getMsgProcessor());
+           AprsParser p = new AprsParser(api, db.getMsgProcessor());
            if (_config.getProperty("igate.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate IGATE");
                igate = new Igate(_config);
            }
            if (_config.getProperty("inetchannel.on", "false").trim().matches("true|yes"))  {
                System.out.println("*** Activate Internet Channel");
-               ch1 = new InetChannel(_config);
+               ch1 = new InetChannel(api, _config);
                ch1.setReceivers((Channel.Receiver) p, igate); 
                Thread t = new Thread(ch1, "InetChannel");
                t.start(); 
@@ -113,18 +132,14 @@ public class Main implements ServerAPI
            
            /* Start HTTP server */
            int http_port = Integer.parseInt(_config.getProperty("httpserver.port", "8081"));
-
-           Class cls = Class.forName("no.polaric.aprsd.http.HttpServer");
-           Constructor con = cls.getConstructors()[0];
-           HttpServer ws = (HttpServer) con.newInstance(db, http_port, _config);
+           HttpServer ws = new HttpServer(api, http_port, _config);
+           ws.addHandler(new Webserver(api, _config), null);
            
-           
-           /* API and Plugins */
-           PluginManager.setServerApi(new Main());
+           /* Plugins */
            PluginManager.addList(_config.getProperty("plugins", ""));
            
            /* Experimental: This is provided by the DatabasePlugin */
-           dblog = (Database) PluginManager.getObjectMap().get("databaselog");
+           dblog = (Database) api.getObjectMap().get("databaselog");
            
            
            System.out.println( "*** HTTP server ready on port " + http_port);
