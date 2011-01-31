@@ -29,10 +29,12 @@ public class InetChannel extends Channel implements Runnable
     private   boolean     _close = false;
     private   Socket      _sock = null; 
     private   BufferedReader _rder = null;
+    private   ServerAPI   _api;
     
     
-    public InetChannel(Properties config) 
+    public InetChannel(ServerAPI api, Properties config) 
     {
+        _api = api;
         _host = config.getProperty("inetchannel.host", "localhost").trim();
         _port = Integer.parseInt(config.getProperty("inetchannel.port", "14580").trim());
         _user = config.getProperty("inetchannel.user", "").trim().toUpperCase();
@@ -107,7 +109,7 @@ public class InetChannel extends Channel implements Runnable
                System.out.println("*** Connection to APRS server '"+_host+"' established");
                _rder = new BufferedReader(new InputStreamReader(_sock.getInputStream(), _rx_encoding));
                _out = new PrintWriter(new OutputStreamWriter(_sock.getOutputStream(), _tx_encoding));
-               _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+Main.version+"\r\n");
+               _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+_api.getVersion()+"\r\n");
                
                if (_filter.length() > 0)
                    _out.print("# filter "+_filter+ "\r\n"); 
