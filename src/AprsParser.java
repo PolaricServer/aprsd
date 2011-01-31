@@ -43,14 +43,14 @@ public class AprsParser implements Channel.Receiver
        
     // FIXME: Handle ambiguity in latitude ?
      
-    private StationDB _db   = null;
+    private ServerAPI _api   = null;
     private boolean   _log = false;
     private MessageProcessor _msg;
     
 
-    public AprsParser(StationDB db, MessageProcessor msg) 
+    public AprsParser(ServerAPI a, MessageProcessor msg) 
     {
-        _db = db;
+        _api = a;
         _msg = msg;
         _hmsFormat.setTimeZone(TimeZone.getTimeZone("GMT")); 
     }  
@@ -68,15 +68,15 @@ public class AprsParser implements Channel.Receiver
      */
     public void receivePacket(Channel.Packet p, boolean duplicate)
     {
-        if (_db == null)
+        if (_api.getDB() == null)
            return; 
                 
         if (p.report == null || p.report.length() < 1)
             return;
           
-        Station station = _db.getStation(p.from);
+        Station station = _api.getDB().getStation(p.from);
         if (station == null)
-            station = _db.newStation(p.from); 
+            station = _api.getDB().newStation(p.from); 
    
         if (!duplicate) try {    
         switch(p.type)
@@ -145,12 +145,12 @@ public class AprsParser implements Channel.Receiver
         boolean skip = false;
         int n = 0;
         for (i=0; i<=tindex; i++) {
-            Station to = _db.getStation(pp[i]);
+            Station to = _api.getDB().getStation(pp[i]);
             if ( to != null) {
                 n++; 
                 if (!skip) { 
                    skip=false;
-                   _db.getRoutes().addEdge(from.getIdent(), to.getIdent(), !duplicate); 
+                   _api.getDB().getRoutes().addEdge(from.getIdent(), to.getIdent(), !duplicate); 
                 }
                 if (n>1 && i<=tindex) 
                    to.setWideDigi(true); /* Digi is WIDE */
@@ -166,9 +166,9 @@ public class AprsParser implements Channel.Receiver
         if ((plen >= 2) && pp[plen-2].matches("qA.")) 
         {
            if (tindex == -1) {
-               Station to = _db.getStation(pp[plen-1]);
+               Station to = _api.getDB().getStation(pp[plen-1]);
                if (to != null) {
-                   _db.getRoutes().addEdge(s.getIdent(), to.getIdent(), !duplicate);  
+                   _api.getDB().getRoutes().addEdge(s.getIdent(), to.getIdent(), !duplicate);  
                    to.setIgate(true);         
                    /* Igate direct (has not been digipeated) */
                }  
@@ -176,10 +176,10 @@ public class AprsParser implements Channel.Receiver
            else {
                Station last = null;
                if (pp[tindex].matches("(WIDE|TRACE|NOR|SAR).*") && tindex > 0)
-                  last = _db.getStation(pp[tindex-1]);
-               Station x = _db.getStation(pp[plen-1]);
+                  last = _api.getDB().getStation(pp[tindex-1]);
+               Station x = _api.getDB().getStation(pp[plen-1]);
                if (last != null && x != null) {
-                  _db.getRoutes().addEdge(last.getIdent(), x.getIdent(), !duplicate);
+                  _api.getDB().getRoutes().addEdge(last.getIdent(), x.getIdent(), !duplicate);
                   x.setIgate(true);
                   /* Path from last digi to igate */
                }
@@ -233,16 +233,16 @@ public class AprsParser implements Channel.Receiver
         String ident = msg.substring(1,10).trim();
         char op = msg.charAt(10);
         
-        AprsPoint x = _db.getItem(ident+'@'+station.getIdent());      
+        AprsPoint x = _api.getDB().getItem(ident+'@'+station.getIdent());      
         AprsObject obj;
         if (x == null)
-            obj = _db.newObject(station, ident);
+            obj = _api.getDB().newObject(station, ident);
         else 
             obj = (AprsObject) x;
              
         if (op=='*') {
            parseStdAprs(msg.substring(10), obj, true, "");
-           _db.deactivateSimilarObjects(ident, station);
+           _api.getDB().deactivateSimilarObjects(ident, station);
         }
         else {
            obj.kill();
@@ -417,8 +417,8 @@ public class AprsParser implements Channel.Receiver
             log(" COMMENT: "+ comment);
             
             station.update(new Date(), pos, d, speed, altitude, comment, symbol, altsym, pathinfo);  
-            Main.dblog.addPosReport(station.getIdent(), new  Date(), pos, d, speed, 
-                                    altitude, comment, symbol, altsym, pathinfo );
+//            Main.dblog.addPosReport(station.getIdent(), new  Date(), pos, d, speed, 
+//                                    altitude, comment, symbol, altsym, pathinfo );
             return;
     }
 
@@ -643,8 +643,8 @@ public class AprsParser implements Channel.Receiver
                comment = null;
                
             station.update(time, pos, course, speed, (int) altitude, comment, symbol, symtab, pathinfo );
-            Main.dblog.addPosReport(station.getIdent(), time, pos, course, speed, 
-                                    (int) altitude, comment, symbol, symtab, pathinfo );
+ //           Main.dblog.addPosReport(station.getIdent(), time, pos, course, speed, 
+ //                                   (int) altitude, comment, symbol, symtab, pathinfo );
             log("     POS: "+ pos);         
     }
     
