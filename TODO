@@ -3,9 +3,17 @@ Updates to 1.0.1, etc.
 
 * Extend SAR mode with filter on prefix.
     DONE.
+* Automatically propagate SAR mode activation  to other servers.
+
+* Timestamp bug. Fix!
+    DONE (I hope)
+
 * Check for empty position in object input.
 * Fix configurable icon directory. Use Apache for static icon files. 
 * Station get status text from other stations???? Fix?
 * Log user objects or alias changes (identify user??). 
 * [C] Sometimes last update in trail is missing. Fix?
-
+* [C] Allow GPX files to be installed as vector layers.
+    DONE.
+* [C] Welcome text
+    DONE/Started.
