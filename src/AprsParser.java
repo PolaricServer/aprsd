@@ -490,17 +490,28 @@ public class AprsParser implements Channel.Receiver
             System.out.println("*** WARNING: Timestamp format problem: "+dstr+tst);
             return new Date();
          }
-                
+        
+         /* Try to figure out the month and the year of the timestamp. 
+          * if timestamp day number is higher than todays number, the timestamp 
+          * is probably from previous month. If it is january 1st, adjust year
+          * accordingly
+          */
          ts.set(Calendar.YEAR, now.get(Calendar.YEAR));
-         ts.set(Calendar.MONTH, now.get(Calendar.MONTH));
+         ts.set(Calendar.MONTH, now.get(Calendar.MONTH)); 
+         if (day > now.get(Calendar.DAY_OF_MONTH))
+         {      
+               ts.add(Calendar.MONTH, -1);
+               if (now.get(Calendar.MONTH) == Calendar.JANUARY) 
+                  ts.add(Calendar.YEAR, -1);
+         }
          ts.set(Calendar.DAY_OF_MONTH, day);
+         if (ts.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR) 
+             && hour > now.get(Calendar.HOUR_OF_DAY)+2) 
+            ts.add(Calendar.DAY_OF_MONTH, -1);
+            
          ts.set(Calendar.HOUR_OF_DAY, hour);
          ts.set(Calendar.MINUTE, min);
          ts.set(Calendar.SECOND, sec);
-         
-         /* Day numbers after today is assumed to be in the previous month */
-         if (ts.get(Calendar.DAY_OF_MONTH) > now.get(Calendar.DAY_OF_MONTH)) 
-             ts.add(Calendar.MONTH, -1);
              
          return ts.getTime();
     }
