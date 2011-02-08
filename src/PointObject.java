@@ -23,7 +23,7 @@ import java.io.Serializable;
  * Every point has a location, icon and description. 
  */
  
-public abstract class PointObject extends Point
+public abstract class PointObject extends Point, implements Cloneable
 {             
     protected String      _icon; 
     protected String      _description;    
