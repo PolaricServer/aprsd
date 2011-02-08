@@ -19,7 +19,6 @@ public abstract class HttpServer extends NanoHTTPD
    protected  String     _serverurl;
    private    String     _icon, _icondir, _adminuser, _updateusers;
    protected  boolean    _infraonly;
-   protected  SarMode    _sarmode = null;
            
    public static final String _encoding = "UTF-8";
    public static final int _buffer_size = 4096;
@@ -302,7 +301,7 @@ public abstract class HttpServer extends NanoHTTPD
           seq = _seq;
         }
         long client = getSession(parms);
-        boolean showSarInfo = (getAuthUser(header) != null || _sarmode == null);
+        boolean showSarInfo = (getAuthUser(header) != null || Main.sarmode == null);
         
         /* If requested, wait for a state change (see Notifier.java) */
         if (parms.getProperty("wait") != null) 
@@ -320,7 +319,7 @@ public abstract class HttpServer extends NanoHTTPD
         out.println("<meta name=\"adminuser\" value=\""+ authorizedForAdmin(header) + "\"/>");
         out.println("<meta name=\"updateuser\" value=\""+ authorizedForUpdate(header) + "\"/>");
         out.println("<meta name=\"clientses\" value=\""+ client + "\"/>");    
-        out.println("<meta name=\"sarmode\" value=\""+ (_sarmode!=null ? "true" : "false")+"\"/>");    
+        out.println("<meta name=\"sarmode\" value=\""+ (Main.sarmode!=null ? "true" : "false")+"\"/>");    
         
         /* Output signs. A sign is not an APRS object
          * just a small icon and a title. It may be a better idea to do this
@@ -354,7 +353,7 @@ public abstract class HttpServer extends NanoHTTPD
             UTMRef ref = toUTM(s.getPosition()); 
             if (ref == null) continue; 
                
-            if (!s.visible() || (!showSarInfo && _sarmode.filter(s))) 
+            if (!s.visible() || (!showSarInfo && Main.sarmode.filter(s))) 
                    out.println("<delete id=\""+fixText(s.getIdent())+"\"/>");
             else {
                synchronized(s) {
