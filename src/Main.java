@@ -12,14 +12,14 @@ import java.nio.charset.Charset;
 public class Main
 {
    public static String version = "1.0.0+";
-   static StationDB db = null;
+
    public static InetChannel ch1 = null;
    public static TncChannel  ch2 = null;
    public static Igate igate  = null;
    public static OwnObjects ownobjects; 
-   public static RemoteCtl rctl;
-
-
+   public static RemoteCtl  rctl;
+   public static SarMode    sarmode = null;
+   protected static StationDB db = null;
  
    public static void main( String[] args )
    {
