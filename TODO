@@ -4,7 +4,7 @@ Updates to 1.0.1, etc.
 * Extend SAR mode with filter on prefix.
     DONE.
 * Automatically propagate SAR mode activation  to other servers.
-
+    DONE
 * Timestamp bug. Fix!
     DONE (I hope)
 
