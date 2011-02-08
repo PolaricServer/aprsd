@@ -16,14 +16,15 @@ Web Server
      
 * Simplify webserver impl. (esp. Scala part). 
  
-* Make it RESTful? Use RESTlets?
-
+* Make it RESTful? Use RESTlets? It is fundamentally restful already, 
+  but uses POST method. 
 
 
 API, Extensibility
 ------------------
 
-* [C] Javascript API at client side
+* [C] Javascript external API at client side.
+* [C] Javascript plugin arch/API at client side.
 
 * Component API, add components in config.
       DONE. 
@@ -33,13 +34,15 @@ API, Extensibility
 * Jar files in a subdirectory - easier to add extra components
       DONE.
 
+* History.Item as standalone class
+
 
 
 Database
 --------
 
 * Database setup. Collect simple update events in a database. 
-       DONE - IN PROGRESS.
+       DONE.
        
 * Can this be a plugin module? Database stuff should be completely optional in 1.1, 1.2
   etc.. (core database stuff will be part of core P.S. in later releases).
@@ -48,7 +51,7 @@ Database
 * Some experimentation in external programs/plugins? 
         
 * Experimental search functionality/trails - but as external module? 
-
+       DONE.
 
 
 Other
