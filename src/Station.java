@@ -19,7 +19,7 @@ import java.io.Serializable;
   
   
   
-public class Station extends AprsPoint implements Serializable
+public class Station extends AprsPoint implements Serializable, Cloneable
 {
 
 public static class Status implements Serializable
@@ -72,7 +72,9 @@ public static class Status implements Serializable
     public Station(String id)
        { super(null); _callsign = id; }
         
-
+    public Object clone() throws CloneNotSupportedException
+       { return super.clone(); }
+       
     public Set<String> getTrafficFrom()
        {  return _db.getRoutes().getToEdges(getIdent()); }
        
