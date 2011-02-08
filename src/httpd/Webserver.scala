@@ -242,24 +242,31 @@ package no.polaric.aprsd.http
    def handle_sarmode(req : Request, res: Response) =
    {
        val prefix = <h2>Søk og redningsmodus</h2>
+       var filter = req.getParameter("sar_prefix")
        var reason = req.getParameter("sar_reason")
        val on = req.getParameter("sar_on")
        
        def fields(req : Request): NodeSeq =          
            <xml:group>
-           <p>Alias-info bare synlig for innloggete brukere.</p>
+           <p>Alias-info o.l. bare synlig for innloggete brukere.</p>
            <label for="sar_on" class="lleftlab">SAR modus:</label>
-           { checkBox("sar_on", _sarmode!=null, TXT("aktivert")) }  
+           { checkBox("sar_on", api.getSar() !=null, TXT("aktivert")) }  
            <br/>
+           
+           <label for="sar_prefix" class="lleftlab">Skjul prefiks:</label>
+           <input id="sar_prefix" name="sar_prefix" width="50" value= 
+             { if ( api.getSar()==null) "" else api.getSar().getFilter() }></input>
+           <br/>
+           
            <label for="sar_reason" class="lleftlab">Beskrivelse:</label>
-           { if (_sarmode == null)
+           { if (api.getSar() == null)
                 <input id="sar_reason" name="sar_reason" width="50" value={""} ></input>
              else 
                 <xml:group>
-                <label id="sar_reason">{ _sarmode.getReason() }
-                <em> { "("+_sarmode.getUser()+")" } </em></label>
+                <label id="sar_reason">{ api.getSar().getReason() }
+                <em> { "("+api.getSar().getUser()+")" } </em></label>
                 <br/>
-                { simpleLabel("sar_date", "lleftlab", "Aktivert:", TXT(""+_sarmode.getTime())) }
+                { simpleLabel("sar_date", "lleftlab", "Aktivert:", TXT(""+api.getSar().getTime())) }
                 </xml:group>
            }
            </xml:group>     
@@ -269,15 +276,19 @@ package no.polaric.aprsd.http
        {
           AprsPoint.abortWaiters(true);
           if (on != null && "true".equals(on) ) {
-               _sarmode = new SarMode(reason, getAuthUser(req));
+               val filt = if ("".equals(filter)) "NONE" else filter;
+               api.setSar(reason, getAuthUser(req), filter);
+               api.getRemoteCtl().sendRequestAll("SAR "+getAuthUser(req)+" "+filt+" "+reason, null);
                <h3>Aktivert</h3>
                <p>{reason}</p>
           }
           else {   
-               _sarmode = null;
+               api.clearSar();
+               api.getRemoteCtl().sendRequestAll("SAR OFF", null);
                <h3>Avsluttet</h3>
           } 
        }
+            
        
        printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
    }
