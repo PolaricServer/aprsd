@@ -21,10 +21,11 @@ public class SarMode
 { 
     private String _reason;
     private String _user;
+    private String _prefixFilter;
     private Date   _time;
     
-    public SarMode(String r, String u)
-     { _reason = r; _user = u; _time = new Date(); }
+    public SarMode(String r, String u, String filt)
+     { _reason = r; _user = u; _time = new Date(); _prefixFilter = filt.trim().toUpperCase(); }
      
     public String getReason()
        { return _reason; }
@@ -35,6 +36,16 @@ public class SarMode
     public Date getTime() 
        { return _time; }
        
+    public String getFilter()
+       { return _prefixFilter; }
+       
+    public boolean filter(AprsPoint p)
+    {
+       if (_prefixFilter == null || _prefixFilter.equals(""))
+         return false;
+       return (p.getIdent().toUpperCase().matches(_prefixFilter+".*"));
+    }
+    
     public String toString() 
       { return "Aktivert av: "+_user; }
 }
