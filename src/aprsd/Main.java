@@ -12,21 +12,22 @@ import no.polaric.aprsd.http.*;
 
 public class Main implements ServerAPI
 {
-   public static String version = "1.0+dev";
+   public  static String version = "1.0+dev";
    private static StationDB db = null;
-   public static InetChannel ch1 = null;
-   public static TncChannel  ch2 = null;
-   public static Igate igate  = null;
-   public static OwnObjects ownobjects; 
-   public static RemoteCtl rctl;
+   public  static InetChannel ch1 = null;
+   public  static TncChannel  ch2 = null;
+   public static  Igate igate  = null;
+   public static  OwnObjects ownobjects; 
+   public static  RemoteCtl rctl;
+   public static  SarMode  sarmode = null;
    private static Properties _config = new Properties();
-   
+   private static HttpServer ws;
 
    /* Experimental !! 
     * Database interface must be known here. The interface is 
     * implemented by a plugin 
     */
-   public static Database dblog; 
+   public static AprsLog dblog = new AprsLog.Dummy();
    
    /* API interface methods 
     * Should they be here or in a separate class ??
@@ -34,6 +35,12 @@ public class Main implements ServerAPI
    public StationDB getDB() 
     { return db; }
    
+   public AprsLog getAprsLog() 
+    { return dblog; }
+    
+   public void setAprsLog(AprsLog log) 
+    { dblog = log; } 
+       
    public Set<String> getChannels(Channel.Type type)
     { return null; /* TBD */ }
    
@@ -52,6 +59,9 @@ public class Main implements ServerAPI
    public RemoteCtl getRemoteCtl()
     { return rctl; } 
    
+   public void addHttpHandler(Object obj, String prefix)
+    { ws.addHandler(obj, prefix); }
+    
    public Properties getConfig()
     { return _config; }
    
@@ -61,7 +71,16 @@ public class Main implements ServerAPI
    public String getVersion()
     { return version; }
  
+   public SarMode getSar()
+    { return sarmode; }
+    
+   public void setSar(String reason, String src, String filt)
+    { sarmode = new SarMode(reason, src, filt); }
  
+   public void clearSar()
+    { sarmode = null; }
+    
+    
  
    public static void main( String[] args )
    {
@@ -115,7 +134,7 @@ public class Main implements ServerAPI
            } 
            if (_config.getProperty("remotectl.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate Remote Control");
-               rctl = new RemoteCtl(_config, db.getMsgProcessor(), db);
+               rctl = new RemoteCtl(_config, db.getMsgProcessor(), api);
            }
  
            
@@ -132,15 +151,11 @@ public class Main implements ServerAPI
            
            /* Start HTTP server */
            int http_port = Integer.parseInt(_config.getProperty("httpserver.port", "8081"));
-           HttpServer ws = new HttpServer(api, http_port, _config);
+           ws = new HttpServer(api, http_port, _config);
            ws.addHandler(new Webserver(api, _config), null);
            
            /* Plugins */
            PluginManager.addList(_config.getProperty("plugins", ""));
-           
-           /* Experimental: This is provided by the DatabasePlugin */
-           dblog = (Database) api.getObjectMap().get("databaselog");
-           
            
            System.out.println( "*** HTTP server ready on port " + http_port);
            
