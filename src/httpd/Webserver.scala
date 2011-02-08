@@ -235,23 +235,23 @@ package no.polaric.aprsd.http
            <xml:group>
            <p>Alias-info o.l. bare synlig for innloggete brukere.</p>
            <label for="sar_on" class="lleftlab">SAR modus:</label>
-           { checkBox("sar_on", _sarmode!=null, TXT("aktivert")) }  
+           { checkBox("sar_on", Main.sarmode!=null, TXT("aktivert")) }  
            <br/>
            
            <label for="sar_prefix" class="lleftlab">Skjul prefiks:</label>
            <input id="sar_prefix" name="sar_prefix" width="50" value= 
-             { if ( _sarmode==null) "" else _sarmode.getFilter() }></input>
+             { if ( Main.sarmode==null) "" else Main.sarmode.getFilter() }></input>
            <br/>
            
            <label for="sar_reason" class="lleftlab">Beskrivelse:</label>
-           { if (_sarmode == null)
+           { if (Main.sarmode == null)
                 <input id="sar_reason" name="sar_reason" width="50" value={""} ></input>
              else 
                 <xml:group>
-                <label id="sar_reason">{ _sarmode.getReason() }
-                <em> { "("+_sarmode.getUser()+")" } </em></label>
+                <label id="sar_reason">{ Main.sarmode.getReason() }
+                <em> { "("+Main.sarmode.getUser()+")" } </em></label>
                 <br/>
-                { simpleLabel("sar_date", "lleftlab", "Aktivert:", TXT(""+_sarmode.getTime())) }
+                { simpleLabel("sar_date", "lleftlab", "Aktivert:", TXT(""+Main.sarmode.getTime())) }
                 </xml:group>
            }
            </xml:group>     
@@ -261,12 +261,15 @@ package no.polaric.aprsd.http
        {
           AprsPoint.abortWaiters(true);
           if (on != null && "true".equals(on) ) {
-               _sarmode = new SarMode(reason, getAuthUser(hdr), filter);
+               val filt = if ("".equals(filter)) "NONE" else filter;
+               Main.sarmode = new SarMode(reason, getAuthUser(hdr), filter);
+               Main.rctl.sendRequestAll("SAR "+getAuthUser(hdr)+" "+filt+" "+reason, null);
                <h3>Aktivert</h3>
                <p>{reason}</p>
           }
           else {   
-               _sarmode = null;
+               Main.sarmode = null;
+               Main.rctl.sendRequestAll("SAR OFF", null);
                <h3>Avsluttet</h3>
           } 
        }
