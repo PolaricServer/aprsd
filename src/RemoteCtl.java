@@ -50,7 +50,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private Thread _thread;
    
    private MessageProcessor _msg;
-   private StationDB _db;
+   private ServerAPI _api;
 
    public String getParent()
        { return _parent; }
@@ -60,7 +60,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        
    
    private int threadid=0;    
-   public RemoteCtl(Properties config, MessageProcessor mp, StationDB db)
+   public RemoteCtl(Properties config, MessageProcessor mp, ServerAPI api)
    {
        String myCall = config.getProperty("remotectl.mycall", "").trim().toUpperCase();
        if (myCall.length() == 0)
@@ -71,7 +71,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           
        mp.subscribe(myCall, new Subscriber(), true);
        _msg = mp;
-       _db = db;
+       _api = api;
        if (_parent != null) 
             _parent.trim();
        _thread = new Thread(this, "RemoteCtl-"+(threadid++));
@@ -127,7 +127,9 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
          p = doSetAlias(sender, args);
       if (arg[0].equals("ICON"))
          p = doSetIcon(sender, args);
-
+      if (arg[0].equals("SAR"))
+         p = doSetSarMode(sender, args);
+         
        /* If command returned true, propagate the request further 
         * to children and parent, except the originating node.
         */
@@ -144,7 +146,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
 
 
 
-   /* Commands should perhaps be "plugin" modules */
+   /* Commands should perhaps be "plugin" modules or plugin-modules should
+    * be allowed to add commands */
 
    protected boolean doConnect(Station sender, String arg)
    {
@@ -153,6 +156,30 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    }
 
 
+   protected boolean doSetSarMode(Station sender, String args)
+   {
+       if (args == null) {
+          System.out.println("*** WARNING: missing arguments to remote SAR command");
+          return false;
+       }
+       if ("OFF".equals(args.trim())) {
+           System.out.println("*** Clear SAR-mode from "+sender.getIdent());
+           _api.clearSar();
+       }
+       else {      
+           String[] arg = args.split("\\s+", 3);
+           if (arg.length < 3)
+           {
+               System.out.println("*** WARNING: remote SAR command syntax error");
+               return false;
+           }
+           System.out.println("*** Set SAR-mode from "+sender.getIdent());
+           String filter = ("NONE".equals(arg[1]) ? "" : arg[1]);
+           _api.setSar(arg[2], arg[0], filter);
+       }
+       return true;
+   }
+   
 
    protected boolean doSetAlias(Station sender, String args)
    {
@@ -161,10 +188,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           return false;
       }
       
-      System.out.println("*** SET ALIAS from "+sender.getIdent());
+      System.out.println("*** Set ALIAS from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
-      AprsPoint item = _db.getItem(arg[0].trim());
+      AprsPoint item = _api.getDB().getItem(arg[0].trim());
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;
@@ -183,10 +210,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           return false;
       }
       
-      System.out.println("*** SET ICON from "+sender.getIdent());
+      System.out.println("*** Set ICON from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
-      AprsPoint item = _db.getItem(arg[0].trim());
+      AprsPoint item = _api.getDB().getItem(arg[0].trim());
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;
