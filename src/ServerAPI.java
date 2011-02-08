@@ -20,14 +20,26 @@ import java.util.*;
        
        public Igate getIgate();
        
-       public MessageProcessor getMsgProcessor(); /* Move from StationDB */
+       public MessageProcessor getMsgProcessor(); 
+       
+       public void addHttpHandler(Object obj, String prefix);
+       
+       public AprsLog getAprsLog();
+       
+       public void setAprsLog(AprsLog log);
        
        public RemoteCtl getRemoteCtl(); 
        
        public Properties getConfig();
        
-       public Map<String, Object> getObjectMap();
+       public Map<String, Object> getObjectMap(); // Need this?
        
        public String getVersion();
+       
+       public SarMode getSar();
+    
+       public void setSar(String src, String filt, String descr);
+       
+       public void clearSar();
    }
    
