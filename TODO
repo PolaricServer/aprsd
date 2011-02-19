@@ -3,17 +3,48 @@ Updates to 1.0.1, etc.
 
 * Extend SAR mode with filter on prefix.
     DONE.
+    
 * Automatically propagate SAR mode activation  to other servers.
-    DONE
+    DONE.
+    
 * Timestamp bug. Fix!
     DONE (I hope)
 
-* Check for empty position in object input.
-* Fix configurable icon directory. Use Apache for static icon files. 
-* Station get status text from other stations???? Fix?
-* Log user objects or alias changes (identify user??). 
-* [C] Sometimes last update in trail is missing. Fix?
-* [C] Allow GPX files to be installed as vector layers.
+* MIC-E comment. Get it right. 
     DONE.
+    
+* Ignore DDHHMM timestamp in position reports! 
+    DONE.
+    
+* Check for empty position in object input.
+
+* Fix configurable icon directory. Use Apache for static icon files 
+  (from development branch).
+
+* Station get status text from other stations???? Fix?
+
+* Log user objects or alias changes (identify user??). 
+
+* [C] Sometimes last update in trail is missing. Fix?
+
+* [C] Support for GPX files as vector layers.
+    DONE.
+    
 * [C] Welcome text
-    DONE/Started.
+    DONE.
+
+
+Security
+--------
+
+* Fix problem with login.
+    DONE .htaccess to ensure that authentication is done when login. 
+    
+* Check credentials at backend server and KaMap backend or set some cookie?
+  Alternatively, as a very ad hoc solution: Put operations to be protected behind
+  URLs that can be recognized and setup protection through Apache.
+    DONE protect aprsd backend operations.
+
+* Support Dokuwiki authentication. 
+    
+* Additional config file for permissions.
