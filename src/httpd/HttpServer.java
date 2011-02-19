@@ -46,7 +46,7 @@ public abstract class HttpServer extends NanoHTTPD
       _updateusers = config.getProperty("user.update", "").trim();
       _serverurl   = config.getProperty("server.url", "/srv").trim();
       _timezone    = config.getProperty("timezone", "").trim();
-         
+
       int trailage= Integer.parseInt(config.getProperty("map.trail.maxAge", "15").trim());
       History.setMaxAge(trailage * 60 * 1000); 
       int trailpause= Integer.parseInt(config.getProperty("map.trail.maxPause", "10").trim());
@@ -83,7 +83,7 @@ public abstract class HttpServer extends NanoHTTPD
    
    /**
     * Get name of user identified using basic authentication.
-    * (we assume that there is a front end webserver which already 
+    * (OOPS: we assume that there is a front end webserver which already 
     * did the authentication).  
     */ 
    protected final String getAuthUser(Properties header)
@@ -92,9 +92,10 @@ public abstract class HttpServer extends NanoHTTPD
          if (auth==null)
             auth = header.getProperty("Authorization", null);
          if (auth != null) {
-           Base64 b64 = new Base64();
-           byte[] dauth = b64.decode(auth.substring(6));
-           return (new String(dauth)).split(":")[0];
+            Base64 b64 = new Base64();
+            byte[] dauth = b64.decode(auth.substring(6));
+            String[] user = (new String(dauth)).split(":");
+            return user[0];
          }
          return null;
    }
@@ -104,7 +105,6 @@ public abstract class HttpServer extends NanoHTTPD
    protected final boolean authorizedForUpdate(Properties header)
    {
        String user = getAuthUser(header);
-
        if (user == null)
           user="_NOLOGIN_";
        return ( user.matches(_adminuser) ||
@@ -118,7 +118,7 @@ public abstract class HttpServer extends NanoHTTPD
        return (user != null && user.matches(_adminuser)); 
    } 
    
-   
+  
    
    protected int _requests = 0, _reqNo = 0;
 
@@ -149,7 +149,9 @@ public abstract class HttpServer extends NanoHTTPD
          else if ("/search".equals(uri))
              type = _serveSearch(header, parms, out, vfilt);
          else if ("/station".equals(uri))
-             type = _serveStation(header, parms, out);
+             type = serveStation(header, parms, out);
+         else if ("/sec-station".equals(uri))
+             type = sec_serveStation(header, parms, out);    
          else if ("/findstation".equals(uri))
              type = serveFindItem(header, parms, out);
          else if ("/history".equals(uri))
@@ -158,6 +160,8 @@ public abstract class HttpServer extends NanoHTTPD
              type = _serveTrailPoint(header, parms, out);     
          else if ("/mapdata".equals(uri))
              type = serveMapData(header, parms, out, vfilt, filtid);
+         else if ("/sec-mapdata".equals(uri))
+             type = sec_serveMapData(header, parms, out, vfilt, filtid);    
          else if ("/addobject".equals(uri))
              type = _serveAddObject(header, parms, out);
          else if ("/deleteobject".equals(uri))
@@ -185,7 +189,7 @@ public abstract class HttpServer extends NanoHTTPD
    /* Stubs for the server methods that are implemented in Scala. 
     */
    protected abstract String _serveAdmin(Properties header, Properties parms, PrintWriter out);
-   protected abstract String _serveStation(Properties header, Properties parms, PrintWriter out);
+   protected abstract String _serveStation(Properties header, Properties parms, PrintWriter out, boolean  canUpdate);
    protected abstract String _serveAddObject (Properties header, Properties parms, PrintWriter out);
    protected abstract String _serveDeleteObject (Properties header, Properties parms, PrintWriter out);
    protected abstract String _serveResetInfo (Properties header, Properties parms, PrintWriter out);
@@ -213,7 +217,11 @@ public abstract class HttpServer extends NanoHTTPD
         return t; 
    }
    
-   
+  public String serveStation(Properties header, Properties parms, PrintWriter out)
+      {return _serveStation(header, parms, out, false); }
+      
+  public String sec_serveStation(Properties header, Properties parms, PrintWriter out)
+      {return _serveStation(header, parms, out, authorizedForUpdate(header)) ; }    
    
    /**
     * Look up a station and return id, x and y coordinates (separated by commas).
@@ -254,9 +262,11 @@ public abstract class HttpServer extends NanoHTTPD
    }
 
    
+   
    protected String ll2dmString(LatLng llref)
       { return showDMstring(llref.getLatitude())+"N, "+showDMstring(llref.getLongitude())+"E"; }
    
+
 
   protected long _sessions = 0;
   private synchronized long getSession(Properties parms)
@@ -273,13 +283,38 @@ public abstract class HttpServer extends NanoHTTPD
   
    
 
-  private int _seq = 0;
+   private int _seq = 0;
+   
+   /**
+    * Produces XML (Ka-map overlay spec.) for plotting station/symbols/labels on map.   
+    * Secure version. Assume that this is is called only when user is logged in and
+    * authenticated by frontend webserver.
+    */
+   public String sec_serveMapData(Properties header, Properties parms, PrintWriter out, 
+          ViewFilter vfilt, String filt)
+   {
+      boolean showSarInfo = (getAuthUser(header) != null || Main.sarmode == null);
+      return _serveMapData(header, parms, out, vfilt, filt, showSarInfo);
+   }
+   
+   
    
    /**
     * Produces XML (Ka-map overlay spec.) for plotting station/symbols/labels on map.   
     */
    public String serveMapData(Properties header, Properties parms, PrintWriter out, 
           ViewFilter vfilt, String filt)
+   {
+      return _serveMapData(header, parms, out, vfilt, filt, false);
+   }
+   
+   
+   
+   /**
+    * Produces XML (Ka-map overlay spec.) for plotting station/symbols/labels on map.   
+    */
+   public String _serveMapData(Properties header, Properties parms, PrintWriter out, 
+          ViewFilter vfilt, String filt, boolean showSarInfo)
    {  
         UTMRef uleft = null, lright = null;
         if (parms.getProperty("x1") != null) {
@@ -301,7 +336,7 @@ public abstract class HttpServer extends NanoHTTPD
           seq = _seq;
         }
         long client = getSession(parms);
-        boolean showSarInfo = (getAuthUser(header) != null || Main.sarmode == null);
+        
         
         /* If requested, wait for a state change (see Notifier.java) */
         if (parms.getProperty("wait") != null) 
@@ -353,7 +388,7 @@ public abstract class HttpServer extends NanoHTTPD
             UTMRef ref = toUTM(s.getPosition()); 
             if (ref == null) continue; 
                
-            if (!s.visible() || (!showSarInfo && Main.sarmode.filter(s))) 
+            if (!s.visible() || (!showSarInfo && Main.sarmode != null && Main.sarmode.filter(s))) 
                    out.println("<delete id=\""+fixText(s.getIdent())+"\"/>");
             else {
                synchronized(s) {
