@@ -94,7 +94,6 @@ public class SecUtils
             return ((char) (value - 10 + 'a'));
         else
             return ((char) (value + '0'));
-
     }  
     
 }
