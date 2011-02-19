@@ -520,13 +520,13 @@ package no.polaric.aprsd.http
    /** 
     * Info about station/object (standard HTML)
     */
-   def _serveStation(hdr: Properties, parms: Properties, out: PrintWriter): String =
+   def _serveStation(hdr: Properties, parms: Properties, out: PrintWriter, 
+           canUpdate: boolean): String =
    {        
         val id = parms.getProperty("id")
         val x = _db.getItem(id)
         val s = if (x.isInstanceOf[Station]) x.asInstanceOf[Station] else null
         val obj = if (x.isInstanceOf[AprsObject]) x.asInstanceOf[AprsObject] else null
-        val canUpdate = authorizedForUpdate(hdr)
         val edit  =  ( parms.getProperty("edit") != null )
         val simple =  ( parms.getProperty("simple") != null )
         val prefix = null
