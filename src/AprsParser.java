@@ -44,7 +44,6 @@ public class AprsParser implements Channel.Receiver
     // FIXME: Handle ambiguity in latitude ?
      
     private StationDB _db   = null;
-    private boolean   _log = false;
     private MessageProcessor _msg;
     
 
@@ -56,12 +55,6 @@ public class AprsParser implements Channel.Receiver
     }  
        
        
-    private void log(String txt)
-    {
-        if (_log)
-            System.out.println(txt);
-    }
-    
     /**
      * Receive APRS packet. 
      * Duplicate packets are only parsed wrt. path (infrastructure analysis)
@@ -82,41 +75,41 @@ public class AprsParser implements Channel.Receiver
         switch(p.type)
         {
             case '>':
-               log("     Status report");
+               /* Status report */
                parseStatusReport(p.report, station);
                break;
                
             case '!': 
             case '=':
-               log("     Real time position report"); 
+               /* Real time position report */ 
                parseStdAprs(p.report, station, false, p.via);
                break;
               
             case '@':
             case '/': 
-               log("     Timestamped position report");   
+               /* Timestamped position report */   
                parseStdAprs(p.report, station, true, p.via);
                break;
                
             case ';': 
-               log("     Object report");
+               /* Object report */
                parseObjectReport(p.report, station);
                
             case '\'':
             case '`': 
-               log("     Mic-E report");
+               /* Mic-E report */
                parseMicE(p.to, p.report, station, p.via); 
                break;
                
             case ':':
-               log("     Message");
+               /* Message */
                parseMessage(p.report, station);
                break;
                
             default: 
         }
         }catch (NumberFormatException e)
-          { log("     WARNING: Cannot parse number in input. Report string probably malformed"); }
+          { System.out.println("*** WARNING: Cannot parse number in input. Report string probably malformed"); }
         
         parsePath(station, p.via, duplicate);   
     }
@@ -201,7 +194,6 @@ public class AprsParser implements Channel.Receiver
            msgid = msg.substring(i+1, msg.length());
         
         String content = msg.substring(11, (i>=0 ? i : msg.length()));
-        log("     Message: to="+recipient+", content="+content);
         if (_msg != null)
            _msg.incomingMessage(station, recipient, content, msgid);
     }
@@ -218,8 +210,6 @@ public class AprsParser implements Channel.Receiver
            d = parseTimestamp(msg, false);
            msg = msg.substring(7);
         }
-
-        log("     Status Message: "+ msg);
         station.setStatus(d, msg);
     }
     
@@ -384,38 +374,38 @@ public class AprsParser implements Channel.Receiver
             String comment = null;
             if (msg.length() > 9)
             {  
+               char typecode = msg.charAt(9);
                j = msg.indexOf('}', 9);
-                if (j >= 9 + 3) {
+               if (j >= 9 + 3) {
                   altitude = (int)Math.round(((((((msg.charAt(j-3)-33)*91) 
                                                + (msg.charAt(j-2)-33))*91) 
                                                + (msg.charAt(j-1)-33))-10000)*3.28084);
                   if (msg.length() > j) 
-                      comment = msg.substring(j+1);
+                      comment = msg.substring(j+1); 
                }
-               else {
-                  comment = msg.substring(9); 
-                  if (comment.charAt(0) == ']' || comment.charAt(0) == '>') { 
-                      comment = comment.substring(1);
-                      if (comment.length() > 0 && comment.charAt(comment.length() -1) == '=')
-                         comment = comment.substring(0, comment.length()-1);
-                  }
-                  else if (comment.charAt(0) == '\'')
-                         comment = comment.substring(1, comment.length()-1);
-                  if (comment.length() == 0)
-                      comment = null;
-               } 
-            }                
-            
-            
-            log("     POS: "+ pos); 
-            if (altitude > -1)
-               log("ALTITUDE: "+ altitude);
-            if (speed > 0) {
-               log("   SPEED: "+ speed);
-               log("  COURSE: "+ d);
-            }
-            log(" COMMENT: "+ comment);
-            
+               else 
+                  comment = msg.substring(10);
+                  
+               if (typecode==' ');
+               if (typecode==']' || typecode=='>') {
+                  if (comment.length() > 0 && comment.charAt(comment.length() -1) == '=')
+                     comment = comment.substring(0, comment.length()-1);
+               }   
+               else if (typecode=='`' || typecode == '\'') {
+                 if (comment.length() < 2);
+                 else if (typecode=='`' &&  comment.charAt(comment.length() -1)=='_')
+                    comment = comment.substring(0, comment.length()-1);
+                 else
+                    comment = comment.substring(0, comment.length()-2);
+               }
+               else if (altitude == -1)
+                    comment = typecode+comment;
+            }     
+            if (comment != null){
+                comment = comment.trim();   
+                if (comment.length() == 0)
+                   comment = null;
+            }          
             station.update(new Date(), pos, d, speed, altitude, comment, symbol, altsym, pathinfo);  
             return;
     }
@@ -476,14 +466,13 @@ public class AprsParser implements Channel.Receiver
                   return null; /* Timeless timestamp, ugh! */
             }
             else {
-                /* Local time */
                ts = (Calendar) localTime.clone(); 
                _dtgFormat.setCalendar(ts);
             }
             day  = Integer.parseInt(dstr.substring(0,2));
             hour = Integer.parseInt(dstr.substring(2,4));
             min  = Integer.parseInt(dstr.substring(4,6));
-            sec  = 0;
+            sec  = 0; 
          }
          /* Sanity check */
          if (day<1||day>31||hour>24||min>59||sec>59) { 
@@ -500,9 +489,9 @@ public class AprsParser implements Channel.Receiver
          ts.set(Calendar.MONTH, now.get(Calendar.MONTH)); 
          if (day > now.get(Calendar.DAY_OF_MONTH))
          {      
-               ts.add(Calendar.MONTH, -1);
-               if (now.get(Calendar.MONTH) == Calendar.JANUARY) 
-                  ts.add(Calendar.YEAR, -1);
+             ts.add(Calendar.MONTH, -1);
+             if (now.get(Calendar.MONTH) == Calendar.JANUARY) 
+                ts.add(Calendar.YEAR, -1);
          }
          ts.set(Calendar.DAY_OF_MONTH, day);
          if (ts.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR) 
@@ -528,13 +517,12 @@ public class AprsParser implements Channel.Receiver
            long altitude = -1; 
            
            if (timestamp) {
-              time = parseTimestamp(data.substring(1), false);
+              if (data.substring(1).matches("[0-9]{6}h")) 
+                  time = parseTimestamp(data.substring(1), false);   
               data = data.substring(8);
            }
            else
               data = data.substring(1);
-           
-           log("     TIMESTAMP: "+ time);  
            
            double latDeg, lngDeg;
            int course = -1, speed = -1;
@@ -555,10 +543,10 @@ public class AprsParser implements Channel.Receiver
                symbol  = m.group(6).charAt(0);
                comment = m.group(7);
     
-               if (lat.length() < 7 || lng.length() < 8) { 
-                   log("     ERROR: couldnt understand data field: "+data); 
+               if (lat.length() < 7 || lng.length() < 8)
+                   /* ERROR: couldnt understand data field */ 
                    return;        
-               }   
+
                latDeg = Integer.parseInt(lat.substring(0,2)) + Double.parseDouble(lat.substring(2,7))/60;
                if (latNS == 'S')
                   latDeg *= -1;
@@ -593,11 +581,9 @@ public class AprsParser implements Channel.Receiver
                   speed = (int) Math.round(( Math.pow(1.08, csT[1]-33) - 1) * 1.852 );
                }    
             }
-            else { 
-               log("     ERROR: couldnt understand data field: "+data); 
+            else 
+               /* ERROR: couldnt understand data field */ 
                return;        
-            }   
-      
             
             LatLng pos = new LatLng(latDeg, lngDeg);
             if (symbol == '_')
@@ -648,12 +634,11 @@ public class AprsParser implements Channel.Receiver
             }
             if (comment.length() > 0 && comment.charAt(0) == '/') 
                comment = comment.substring(1);  
+            comment = comment.trim();
             if (comment.length() < 1 || comment.equals(" "))
                comment = null;
-               
-            station.update(time, pos, course, speed, (int) altitude, comment, symbol, symtab, pathinfo );
             
-            log("     POS: "+ pos);         
+            station.update(time, pos, course, speed, (int) altitude, comment, symbol, symtab, pathinfo );      
     }
     
     
