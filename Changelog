@@ -81,5 +81,18 @@
 * [C] Fix scrollbar handling on popups.  
 * [C] Scale was missing when reloading at highest scale. Fix.  
 
- 
+
+1.0.1
+-----
+
+* Extend SAR mode to allow filter on prefix. Automatically propagate SAR mode 
+  to other servers.
+* Fix timestamp parsing bug. Ignore DDHHMM timestamp in position 
+  reports.
+* More Mic-E comment cleanups. 
+* [C] Support the use of GPX files as vector map layers.
+* [C] Welcome text. 
+* [Security] Better protection of certain aprsd backend operations through 
+  Apache frontend authentication and access control.
+  
  
