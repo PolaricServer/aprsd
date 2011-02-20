@@ -1,20 +1,5 @@
-Updates to 1.0.1, etc.
+Updates to 1.0.2, etc.
 ----------------------
-
-* Extend SAR mode with filter on prefix.
-    DONE.
-    
-* Automatically propagate SAR mode activation  to other servers.
-    DONE.
-    
-* Timestamp bug. Fix!
-    DONE (I hope)
-
-* MIC-E comment. Get it right. 
-    DONE.
-    
-* Ignore DDHHMM timestamp in position reports! 
-    DONE.
     
 * Check for empty position in object input.
 
@@ -27,23 +12,9 @@ Updates to 1.0.1, etc.
 
 * [C] Sometimes last update in trail is missing. Fix?
 
-* [C] Support for GPX files as vector layers.
-    DONE.
-    
-* [C] Welcome text
-    DONE.
-
 
 Security
 --------
-
-* Fix problem with login.
-    DONE .htaccess to ensure that authentication is done when login. 
-    
-* Check credentials at backend server and KaMap backend or set some cookie?
-  Alternatively, as a very ad hoc solution: Put operations to be protected behind
-  URLs that can be recognized and setup protection through Apache.
-    DONE protect aprsd backend operations.
 
 * Support Dokuwiki authentication. 
     
