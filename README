@@ -1,83 +1,142 @@
 INSTALLATION OF POLARIC-SERVER ON A UBUNTU/DEBIAN LINUX PLATFORM
 
+Version 1.0.1
 
-APRS SERVER (POLARIC-APRSD)
+This is a description how to install the Polaric Server software on 
+a Debian based Linux platform. Polaric Server consists of two main 
+components: The APRS daemon (polaric-aprsd) and the Web application. 
+
+If you are unknown to Linux and Apache system administration, I recommend
+exploring this a little before attempting to install Polaric Server or
+that you get help from a friend. If you plan to put up a server permanently
+on the internet, you should know what you are doing, i.e. you should have
+at least some knowledge on internet security and firewall setup. You will 
+need to login as 'root' to be able to perform the installation. 
+
+
+APRS DAEMON (POLARIC-APRSD)
 ---------------------------
 
-install software packages (Ubuntu or Debian):
-   beep
-   sun-java6-bin (or openjdk 6) - 
-    ( is selected automatically when you install scala-library ).
-   librxtx-java (if you are going to use a TNC on a serial port)
-   scala-library 
-    ( not in Debian Lenny - the package is available in testing/unstable and
+The APRS daemon is a server program that processes APRS data (from/to
+APRS-IS and/or TNC) and presents it to the web-application (or it may
+be set up as an igate). It can function as a backend server for the 
+web-application and can respond to HTTP requests and deliver XML-data or 
+HTML pages. It is written in Java and Scala. 
+
+
+1. System requirements: The following software packages (Ubuntu or Debian) 
+   should be installed:
+   
+   * beep
+   * sun-java6-bin (or openjdk 6) - 
+     (is selected automatically when you install scala-library ).
+   * librxtx-java (if you are going to use a TNC on a serial port)
+   * scala-library 
+     (not in Debian Lenny - the package is available in testing/unstable and
       can be installed on lenny-systems).
     
-Unpack the tarball with the server software in /usr/local/polaric-aprsd
-(in /usr/local/polaric-aprsd - tar zxvf polaric-aprsd.tar.gz)
+2. Create the directory /usr/local/polaric-aprsd (if it does not exist already).
+   Download or copy the tarball (polaric-aprsd.tar.gz) into this directory 
+   and unpack it there (you may remove the tarball afterwards): 
 
-In polaric-aprsd directory run install-script: sh install.sh
-It sets up a startup-script and a logrotate script
+     mkdir /usr/local/polaric-aprsd
+     cd /usr/local/polaric-aprsd
+     tar zxvf polaric-aprsd.tar.gz
+     rm polaric-aprsd.tar.gz
 
-Edit server.ini (see below)
 
+3. In polaric-aprsd directory run install-script. It sets up a startup-script 
+   and a logrotate script: 
 
-(re)start the server: 
-/etc/init.d/polaric-aprsd restart
+     sh install.sh
 
-Remember to restart the server if you change the configuration (server.ini, symbols, etc..)
+4. Edit server.ini (see below) and (re)start the server with the command: 
+ 
+     /etc/init.d/polaric-aprsd restart
+
+Remember to restart the server if you change the configuration (server.ini, 
+symbols, etc..)
 
     
 
-WEB-CLIENT (MAP-SERVICE)
-------------------------
+WEB-APPLICATION (MAP-SERVICE)
+-----------------------------
 
-install software packages (Ubuntu or Debian):
-   apache2
-   php5
-   php5-gd
-   php5-mapscript
+This section describes the intallation of the Web frontend on an Apache
+server. It mainly consists of Javascript code to be run on client, but
+also some PHP scripts to be run on the server. The Apache webserver is 
+also set up as a proxy frontend to the aprs daemon described above.  
+
+1. System requirements: The following software packages (Ubuntu or Debian) 
+   should be installed:
+
+   * apache2
+   * php5
+   * php5-gd
+   * php5-mapscript
     
 
-Apache2 config: 
-   a2enmod proxy
-   a2enmod proxy_http
+2. Edit apache2 config:
+ 
+   Run the following commands to install proxy plugins into Apache:
+      a2enmod proxy
+      a2enmod proxy_http
    
    Add the following to the apache setup, e.g. in /etc/apache2/sites-enabled/000-default
-   or in your virtual domain setup.
+   or in your virtual domain setup:
+   ----------------------------------------------------------------------------------
+      <ProxyMatch "sec-station|sec-mapdata|addobject|deleteobject|resetinfo|sarmode">
+         AuthType Basic
+         AuthName "NRRL sporingstjeneste"
+         AuthUserFile /usr/local/polaric-aprsd/users
+         Require valid-user
+      </ProxyMatch>
    
-   ProxyPass /aprs/srv http://localhost:8081
-   ProxyPass /aprs/srv/* http://localhost:8081
-   ProxyPassReverse /aprs/srv http://localhost:8081
-
-   <Location /aprs/login>
-      AuthType Basic
-      AuthName "NRRL sporingstjeneste"
-      AuthUserFile /usr/local/polaric-aprsd/users
-      Require valid-user
-    </Location>
+      <Files login.php>
+         AuthType Basic
+         AuthName "NRRL sporingstjeneste"
+         AuthUserFile /usr/local/polaric-aprsd/users
+         Require valid-user
+      </Files>
+       
+      ProxyPass /aprs/srv http://localhost:8081
+      ProxyPass /aprs/srv/* http://localhost:8081
+      ProxyPassReverse /aprs/srv http://localhost:8081
+   ----------------------------------------------------------------------------------
    
    If necessary, comment out "Deny from All" in /etc/apache2/mods-enabled/proxy.conf
    
-   (Note: We assume that DocumentRoot is set to /var/www/ and that the aprs
-    web application is installed under /var/www/aprs )
+   Note: We assume that DocumentRoot is set to /var/www/ and that the aprs
+   web application is installed under /var/www/aprs.
+   
+   You should test if login works and in particular, if you really
+   are denied access if you type the wrong passord (see below how
+   you add users).
    
   
-Unpack the tarball containing the web application to /var/www/aprs
-(in /var/www - tar zxvf polaric-webapp.tar.gz)
+2. Download or copy the the tarball (polaric-webapp.tar.gz) containing the 
+   web application to /var/www/aprs and unpack it there: 
+    
+     cd /var/www
+     tar zxvf polaric-webapp.tar.gz
+     rm polaric-webapp.tar.gz
 
-Make sure that the cache directory has the right owner. In /var/www/aprs: 
-    chown www-data.www-data kacache2
+3. Make sure that the cache directory has the right owner. In /var/www/aprs: 
     
-Apache can be restarted with the command
-    apache2ctl restart
+     chown www-data.www-data kacache2
     
     
+4. Apache can be restarted with the command
     
-SERVER SETUP
-------------
+     apache2ctl restart
     
-It is important to edit server.ini before activating the server. And the important 
+    
+    
+    
+APRS DAEMON SETUP
+-----------------
+    
+It is important to edit server.ini before activating the daemon. And the important 
 thing there is the callsign (identifier). This can be set as follows: 
 
 default.mycall = xxxxx 
@@ -119,17 +178,38 @@ and yyy, write
 
 Restart the server to make the changes effective.
 
-By default, all users have access to ka-map maps. This can be restricted if you
-want. See /var/www/aprs/ka-map/config/config.php for the ka-map setup. If 
-this access is restricted you may want to add usernames here too to
-grant access to users.
 
 
-
-CLIENT SETUP
+WEBAPP SETUP
 ------------
 
-Map-layers, default map views and filters can be configured in the file
+Map-layers (except ka-map layers), default map views and filters can be 
+configured in the file:
     /var/www/aprs/mapconfig.js
     
+mapconfig.js is a Javascript file, but even if you don't know Javascript
+very well, it should be fairly self-explanatory wrt. the most important 
+configuration options.  
+
+By default, all users have access to ka-map maps that are stored on the server. This 
+can be somehat restricted if you want. See /var/www/aprs/ka-map/config/config.php 
+for the ka-map setup. If this access is restricted you may want to add usernames here 
+too to grant access to users.
+
+To restrict access, uncomment the line:
+   $oAuth = new kaBasicAuthentication(array ( '__all__' => array(....)));
+
+And edit the inner array list to contain the usernames you want to grant access.
+
+
+
+
+CLIENT START (hvorfor har du ikke skrevet dette noe sted?)
+------------
+Start internett-leseren din (ikke Internet Explorer)
+P� maskinen som kj�rer server-applikasjonene:
+URL: localhost/aprs
+
+P� �vrige maskiner i lokal-nettverket:
+URL: <server-ip-adresse>/aprs (serverens ip-adresse finner du ved � g� til terminal-vinduet p� serveren og skrive kommandoen: ifconfig) 
 
