@@ -28,7 +28,7 @@ HTML pages. It is written in Java and Scala.
    should be installed:
    
    * beep
-   * sun-java6-bin (or openjdk 6) - 
+   * sun-java6-bin (or openjdk 6)  
      (is selected automatically when you install scala-library ).
    * librxtx-java (if you are going to use a TNC on a serial port)
    * scala-library 
@@ -68,7 +68,7 @@ also some PHP scripts to be run on the server. The Apache webserver is
 also set up as a proxy frontend to the aprs daemon described above.  
 
 1. System requirements: The following software packages (Ubuntu or Debian) 
-   should be installed:
+   need to be installed:
 
    * apache2
    * php5
@@ -132,7 +132,6 @@ also set up as a proxy frontend to the aprs daemon described above.
     
     
     
-    
 APRS DAEMON SETUP
 -----------------
     
@@ -187,29 +186,31 @@ Map-layers (except ka-map layers), default map views and filters can be
 configured in the file:
     /var/www/aprs/mapconfig.js
     
-mapconfig.js is a Javascript file, but even if you don't know Javascript
-very well, it should be fairly self-explanatory wrt. the most important 
-configuration options.  
+mapconfig.js is a Javascript file, but even if you don't know Javascript very well, 
+it should be fairly self-explanatory wrt. the most important configuration options.  
 
 By default, all users have access to ka-map maps that are stored on the server. This 
-can be somehat restricted if you want. See /var/www/aprs/ka-map/config/config.php 
+can be somewhat restricted if you want. See /var/www/aprs/ka-map/config/config.php 
 for the ka-map setup. If this access is restricted you may want to add usernames here 
 too to grant access to users.
 
 To restrict access, uncomment the line:
    $oAuth = new kaBasicAuthentication(array ( '__all__' => array(....)));
 
-And edit the inner array list to contain the usernames you want to grant access.
+And edit the inner array-list to contain the usernames you want to grant access.
 
 
 
-
-CLIENT START (hvorfor har du ikke skrevet dette noe sted?)
+CLIENT START 
 ------------
-Start internett-leseren din (ikke Internet Explorer)
-P� maskinen som kj�rer server-applikasjonene:
-URL: localhost/aprs
 
-P� �vrige maskiner i lokal-nettverket:
-URL: <server-ip-adresse>/aprs (serverens ip-adresse finner du ved � g� til terminal-vinduet p� serveren og skrive kommandoen: ifconfig) 
+To access the web-application, start your web-browser and type
+in the url: 
+
+   http://<ip-address-of-server>/aprs
+
+or if the server runs on the same computer:   
+   
+   http://localhost/aprs
+
 
