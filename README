@@ -63,7 +63,7 @@ WEB-APPLICATION (MAP-SERVICE)
 -----------------------------
 
 This section describes the intallation of the Web frontend on an Apache
-server. It mainly consists of Javascript code to be run on client, but
+server. It mainly consists of Javascript code to be run on clients, but
 also some PHP scripts to be run on the server. The Apache webserver is 
 also set up as a proxy frontend to the aprs daemon described above.  
 
@@ -106,7 +106,7 @@ also set up as a proxy frontend to the aprs daemon described above.
    
    If necessary, comment out "Deny from All" in /etc/apache2/mods-enabled/proxy.conf
    
-   Note: We assume that DocumentRoot is set to /var/www/ and that the aprs
+   Note: We assume that DocumentRoot is set to /var/www/ and that the 
    web application is installed under /var/www/aprs.
    
    You should test if login works and in particular, if you really
