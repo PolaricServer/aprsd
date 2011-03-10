@@ -70,7 +70,7 @@ public static class Status implements Serializable
        
        
     public Station(String id)
-       { super(null); _callsign = id; }
+       { super(null); _callsign = id; _trailcolor = _colTab.nextColour(); }
         
     public Object clone() throws CloneNotSupportedException
        { return super.clone(); }
