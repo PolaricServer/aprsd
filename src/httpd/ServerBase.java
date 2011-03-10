@@ -35,7 +35,8 @@ public abstract class ServerBase
            new DateFormatSymbols(new Locale("no")));
    DateFormat tf = new SimpleDateFormat("HH:mm",
            new DateFormatSymbols(new Locale("no")));
-           
+    DateFormat xf = new SimpleDateFormat("yyyyMMddHHmmss",
+           new DateFormatSymbols(new Locale("no")));       
    
    public static Calendar utcTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
    public static Calendar localTime = Calendar.getInstance();
@@ -161,6 +162,33 @@ public abstract class ServerBase
    
    
    
+  protected long _sessions = 0;
+  protected synchronized long getSession(Request req)
+      throws IOException
+  {
+     String s_str  = req.getParameter("clientses");
+     if (s_str != null && s_str.matches("[0-9]+")) {
+        long s_id = Long.parseLong(s_str);
+        if (s_id > 0)
+           return s_id;
+     }
+     _sessions = (_sessions +1) % 2000000000;
+     return _sessions;       
+  }
+   
+   
+   
+   protected void printXmlMetaTags(PrintWriter out, Request req)
+      throws IOException
+   {
+        out.println("<meta name=\"utmzone\" value=\""+ _utmzone + "\"/>");
+        out.println("<meta name=\"login\" value=\""+ getAuthUser(req) + "\"/>");
+        out.println("<meta name=\"adminuser\" value=\""+ authorizedForAdmin(req) + "\"/>");
+        out.println("<meta name=\"updateuser\" value=\""+ authorizedForUpdate(req) + "\"/>"); 
+        out.println("<meta name=\"sarmode\" value=\""+ (_api.getSar() !=null ? "true" : "false")+"\"/>");
+   }
+   
+   
    /**
     * Display a message path between nodes. 
     */
@@ -174,7 +202,7 @@ public abstract class ServerBase
        Iterator<String> it = from.iterator();    
        while (it.hasNext()) 
        {
-            Station p = (Station)_api.getDB().getItem(it.next());
+            Station p = (Station)_api.getDB().getItem(it.next(), null);
             if (p==null || !p.isInside(uleft, lright) || p.expired())
                 continue;
             Reference x = p.getPosition();
@@ -204,6 +232,7 @@ public abstract class ServerBase
        boolean first = true;
        int state = 1;
        UTMRef itx = toUTM(firstpos);  
+       String t = "00000000000000";
        
        for (History.Item it : h) 
        {       
@@ -212,10 +241,12 @@ public abstract class ServerBase
                   out.print(", "); 
               else
                   first = false;   
-              out.println((int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()));
+              out.println( (int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()) +
+                          " " + t);
           }
             
           itx = toUTM(it.getPosition());
+          t = xf.format(it.time);
           if (it.isInside(uleft, lright, 0.7, 0.7))
              state = 2;
           else
@@ -225,7 +256,8 @@ public abstract class ServerBase
              }    
        }
        if (itx != null & state < 3)
-           out.println(", "+ (int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()));
+           out.println(", "+ (int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()) +
+                         " "+t);  // FIXME: get first time
        out.println("   </linestring>");
    }
      
