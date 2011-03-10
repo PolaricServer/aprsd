@@ -17,7 +17,7 @@ package no.polaric.aprsd.http
 
   class Webserver 
       ( val api: ServerAPI,
-        val props : Properties) extends HttpServer2(api,  props)
+        val props : Properties) extends XmlServer(api,  props)
   {
 
 
@@ -345,7 +345,7 @@ package no.polaric.aprsd.http
               <p>må oppgi 'objid' som parameter</p>;
           }
           else {
-             val x = _api.getDB().getItem(id);
+             val x = _api.getDB().getItem(id, null);
              if (x != null)
                 x.reset();
              <h3>Info om objekt nullstilt!</h3>
@@ -532,18 +532,22 @@ package no.polaric.aprsd.http
    
 
 
-
+   def handle_station(req : Request, res : Response)  = 
+       _handle_station(req, res, false)
+       
+   def handle_station_sec(req : Request, res : Response)  = 
+       _handle_station(req, res, authorizedForUpdate(req))
+  
   
    /** 
     * Info about station/object (standard HTML)
     */
-   def handle_station(req : Request, res : Response) =
+   def _handle_station(req : Request, res : Response, canUpdate: boolean) =
    {        
         val id = req.getParameter("id")
-        val x = _api.getDB().getItem(id)
+        val x = _api.getDB().getItem(id, null)
         val s = if (x.isInstanceOf[Station]) x.asInstanceOf[Station] else null
         val obj = if (x.isInstanceOf[AprsObject]) x.asInstanceOf[AprsObject] else null
-        val canUpdate = authorizedForUpdate(req)
         val edit  =  ( req.getParameter("edit") != null )
         val simple =  ( req.getParameter("simple") != null )
         val prefix = null
@@ -558,7 +562,7 @@ package no.polaric.aprsd.http
                 if (items != null) 
                  for (it <- items) yield {
                     i += 1
-                    val xx = _api.getDB().getItem(it)
+                    val xx = _api.getDB().getItem(it, null)
                     val linkable = (xx != null  && xx.visible() && xx.getPosition() != null)
                     <span class={ if (linkable) "link_id" else ""} onclick={
                         if (linkable) 
@@ -709,7 +713,7 @@ package no.polaric.aprsd.http
     */
    def handle_history(req : Request, res : Response) =
    {        
-       val s = _api.getDB().getStation(req.getParameter("id"))
+       val s = _api.getDB().getStation(req.getParameter("id"), null)
        val result: NodeSeq =
           if (s == null)
              <h2>Feil:</h2><p>Fant ikke stasjon</p>;
@@ -754,7 +758,7 @@ package no.polaric.aprsd.http
 
     def handle_trailpoint(req : Request, res : Response) =
     {
-       val s = _api.getDB().getStation(req.getParameter("id"))
+       val s = _api.getDB().getStation(req.getParameter("id"), null)
        val index = Integer.parseInt(req.getParameter("index"))
        val h = s.getHistory()
        val item = h.getPoint(index)
