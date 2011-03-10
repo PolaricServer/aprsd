@@ -30,6 +30,7 @@ public class StationDBImp implements StationDB, Runnable
     private RouteInfo _routes;
     private OwnObjects _ownobj;
     private MessageProcessor _msgProc;
+    private StationDB.Hist _histData = null;
 
     
     public StationDBImp(Properties config)
@@ -45,14 +46,14 @@ public class StationDBImp implements StationDB, Runnable
     
     private static final Runtime s_runtime = Runtime.getRuntime ();
     public static long usedMemory ()
-      { return s_runtime.totalMemory () - s_runtime.freeMemory (); }
+        { return s_runtime.totalMemory () - s_runtime.freeMemory (); }
     
-
+    public void setHistDB(StationDB.Hist d)
+        { _histData = d; }
 
     public int nItems() 
         { return _map.size(); }
-    
-    
+        
     public OwnObjects getOwnObjects()
         { return _ownobj; }
 
@@ -168,14 +169,21 @@ public class StationDBImp implements StationDB, Runnable
         
         
         
-    public AprsPoint getItem(String id)
-       { return _map.get(id); }
-       
-       
-       
-    public synchronized Station getStation(String id)
+    public AprsPoint getItem(String id, Date t)
     { 
-         AprsPoint x = getItem(id);
+       if (t==null)
+          return _map.get(id); 
+       else if (_histData !=null) 
+          return _histData.getItem(id, t); 
+       else 
+          return null;
+     }
+       
+              
+       
+    public synchronized Station getStation(String id, Date t)
+    { 
+         AprsPoint x = getItem(id, t);
          if (x instanceof Station) return (Station) x;
          else return null;
     }   
