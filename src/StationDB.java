@@ -15,94 +15,113 @@
 package no.polaric.aprsd;
 import java.util.List;  
 import uk.me.jstott.jcoord.*;
+import java.util.Date;
 
 /**
  * Interface to database of stations, objects, etc.
  */
 public interface StationDB
 {
-    /** 
-     * Return the number of items. 
-     */
-    public int nItems(); 
+    public interface Hist
+    {
+        /**
+         * Get item. 
+         * @param id: identifier (typically a callsign) of item.
+         * @param t: time of capture, null if realtime
+         */
+        public AprsPoint getItem(String id, Date d);
+    }
     
     
-    /**
-     * Get info on routes. Where APRS packets have travelled.
-     */
-    public RouteInfo getRoutes();
-    
-    
-    /**
-     * Get APRS objects owned by this server. 
-     */
-    public OwnObjects getOwnObjects(); 
-    
-    
-    /**
-     * Get messaging processor.
-     */
-    public MessageProcessor getMsgProcessor();
-    
-    
-    /**
-     * Get item. 
-     * @param id: identifier (typically a callsign) of item.
-     */
-    public AprsPoint getItem(String id);
-    
-    
-    /**
-     * Remove item.
-     * @param id: identifier (typically a callsign) of item.
-     */
-    public void removeItem(String id);
 
 
-    /**
-     * Get an APRS station. 
-     * @param id: identifier (typically a callsign) of item.
-     */    
-    public Station getStation(String id);
+       /** 
+        * Return the number of items. 
+        */
+       public int nItems(); 
     
     
-    /**
-     * Create a new APRS station. 
-     * @param id: identifier (typically a callsign) of item.
-     */
-    public Station newStation(String id);
+       /**
+        * Get info on routes. Where APRS packets have travelled.
+        */
+       public RouteInfo getRoutes();
     
     
-    /**
-     * Create a new APRS object. 
-     * @param owner: identifier (typically a callsign) of owner station.
-     * @param id: identifier of object.
-     */    
-    public AprsObject newObject(Station owner, String id);
+       /**
+        * Get APRS objects owned by this server. 
+        */
+       public OwnObjects getOwnObjects(); 
     
     
-    /**
-     * Deactivate other objects having the given owner and id. 
-     */ 
-    public void deactivateSimilarObjects(String id, Station owner);
+       /**
+        * Get messaging processor.
+        */
+       public MessageProcessor getMsgProcessor();
+    
+       
+        /**
+         * Get item. 
+         * @param id: identifier (typically a callsign) of item.
+         * @param t: time of capture, null if realtime
+         */
+        public AprsPoint getItem(String id, Date d);       
+       
+       
+       /**
+         * Get an APRS station. 
+         * @param id: identifier (typically a callsign) of item.
+         * @param t: time of capture, null if realtime
+         */    
+        public Station getStation(String id, Date d);
+       
+       
+       
+       /**
+        * Remove item.
+        * @param id: identifier (typically a callsign) of item.
+        */
+       public void removeItem(String id);
+
+    
+       /**
+        * Create a new APRS station. 
+        * @param id: identifier (typically a callsign) of item.
+        */
+       public Station newStation(String id);
     
     
-    public List<AprsPoint> getAll(String arg);
+       /**
+        * Create a new APRS object. 
+        * @param owner: identifier (typically a callsign) of owner station.
+        * @param id: identifier of object.
+        */    
+       public AprsObject newObject(Station owner, String id);
     
     
-    /**
-     * Search. Return a list of all items within the given geographical area.
-     */
-    public List<AprsPoint>
+       /**
+        * Deactivate other objects having the given owner and id. 
+        */ 
+       public void deactivateSimilarObjects(String id, Station owner);
+    
+    
+       public List<AprsPoint> getAll(String arg);
+    
+    
+       /**
+        * Search. Return a list of all items within the given geographical area.
+        */
+       public List<AprsPoint>
           search(Reference x1, Reference y1, Reference x2, Reference y2);
    
-   /**
-    * Search. Return a list of all items within the given geographical area.
-    */
-    public List<AprsPoint>
-          search(UTMRef uleft, UTMRef lright);       
+      /**
+       * Search. Return a list of all items within the given geographical area.
+       */
+       public List<AprsPoint>
+             search(UTMRef uleft, UTMRef lright);       
     
-    public void save(); 
-    public void garbageCollect();
-
+    
+       // FIXME: These seems to be implementation specific
+       public void save(); 
+       public void garbageCollect();
+  
 }
