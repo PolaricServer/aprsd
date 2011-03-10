@@ -191,7 +191,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       System.out.println("*** Set ALIAS from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
-      AprsPoint item = _api.getDB().getItem(arg[0].trim());
+      AprsPoint item = _api.getDB().getItem(arg[0].trim(), null);
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;
@@ -213,7 +213,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       System.out.println("*** Set ICON from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
-      AprsPoint item = _api.getDB().getItem(arg[0].trim());
+      AprsPoint item = _api.getDB().getItem(arg[0].trim(), null);
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;
