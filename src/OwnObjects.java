@@ -53,7 +53,7 @@ public class OwnObjects implements Runnable
         
         /* If station identified by mycall is not in database, create it
          */
-        _myself = _db.getStation(_myCall);
+        _myself = _db.getStation(_myCall, null);
         if (_myself == null)
            _myself = _db.newStation(_myCall);
            
@@ -75,7 +75,7 @@ public class OwnObjects implements Runnable
     public synchronized boolean add(String id, Reference pos, char symtab, char sym, 
                         String comment, boolean perm)
     {
-         AprsObject obj = (AprsObject) _db.getItem(id);
+         AprsObject obj = (AprsObject) _db.getItem(id, null);
 
          /* Ignore if object already exists.
           * FIXME: If object exists, we may take over the name, but since
@@ -106,7 +106,7 @@ public class OwnObjects implements Runnable
     public synchronized void clear()
     {
         for (String oid: _ownObjects) {
-           AprsObject obj = (AprsObject) _db.getItem(oid+'@'+_myself.getIdent());
+           AprsObject obj = (AprsObject) _db.getItem(oid+'@'+_myself.getIdent(), null);
            if (obj!=null) {
               sendObjectReport(obj, true);
               obj.kill();
@@ -120,7 +120,7 @@ public class OwnObjects implements Runnable
      */
     public synchronized boolean delete(String id)
     {
-        AprsObject obj = (AprsObject) _db.getItem(id+'@'+_myself.getIdent());
+        AprsObject obj = (AprsObject) _db.getItem(id+'@'+_myself.getIdent(), null);
         if (obj==null)
             return false;
         obj.kill();
@@ -254,7 +254,7 @@ public class OwnObjects implements Runnable
             Thread.sleep(3000);
             synchronized(this) {
               for (String oid: _ownObjects) {
-                 AprsObject obj = (AprsObject) _db.getItem(oid+'@'+_myself.getIdent());
+                 AprsObject obj = (AprsObject) _db.getItem(oid+'@'+_myself.getIdent(), null);
                  sendObjectReport(obj, false);
               }
             }
