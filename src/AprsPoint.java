@@ -23,10 +23,10 @@ import java.io.Serializable;
  */
 public abstract class AprsPoint extends PointObject implements Serializable, Cloneable
 {
-    private   static long     _nonMovingTime = 1000 * 60 * 5;   
-    private   static SymTable _symTab        = new SymTable ("symbols");
-    private   static Notifier _change        = new Notifier();
-    protected static StationDB _db           = null;
+    private   static long      _nonMovingTime = 1000 * 60 * 5;   
+    private   static SymTable  _symTab        = new SymTable ("symbols");
+    private   static Notifier  _change        = new Notifier();
+    protected static StationDB _db    = null;
     
     public AprsPoint(Reference p)
       { super(p); }
