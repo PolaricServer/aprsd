@@ -33,7 +33,6 @@ public class HttpServer implements Container
    }
    
    private    Map<String, _Handler> _handlers = new HashMap<String, _Handler>();        
-   private    HttpServer2 _oldHandler; 
    
    public static final String _encoding = "UTF-8";        
    
