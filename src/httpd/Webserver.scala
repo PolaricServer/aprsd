@@ -274,13 +274,32 @@ package no.polaric.aprsd.http
           } 
        }
        
-       
-       
+             
        printHtml (out, htmlBody (null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action) )))
    }
    
    
-   
+   def _serveSarUrl(hdr: Properties, parms: Properties, out: PrintWriter) : String =
+   {
+       val url = parms.getProperty("url")
+       
+       def action(hdr: Properties, parms: Properties): NodeSeq = 
+       {
+          if (!authorizedForAdmin(hdr) && Main.sarurl != null )  
+              <h3>SAR URL ikke tilgjengelig eller du er ikke autorisert</h3>
+          else {
+              val sarurl = Main.sarurl.create(url)
+              <h1>Kort-URL for søk og redning</h1>
+              <h2><a class="sarurl" href={sarurl}>{sarurl}</a></h2>
+              <p>Gyldig i 1 døgn fra nå</p>
+          }
+       }   
+       printHtml (out, htmlBody(null, action(hdr, parms)));        
+   }
+      
+      
+      
+      
    /**
     * Delete APRS object.
     */          
@@ -302,8 +321,10 @@ package no.polaric.aprsd.http
               <p>må oppgi 'objid' som parameter</p>;
           }
           else {
-              if (Main.ownobjects.delete(id))
+              if (Main.ownobjects.delete(id)) {
+                  System.out.println("*** DELETE OBJECT: '"+id+"' by user '"+getAuthUser(hdr)+"'")
                   <h3>Objekt slettet!</h3>
+              }
               else
                   <h3>Fant ikke objekt: {id}</h3>
           }  
@@ -389,6 +410,7 @@ package no.polaric.aprsd.http
                val osym  = parms.getProperty("osym")
                val otxt = parms.getProperty("descr")
                val perm = parms.getProperty("perm");
+               System.out.println("*** SET OBJECT: '"+id+"' by user '"+getAuthUser(hdr)+"'")
                if ( Main.ownobjects.add(id, pos,
                       if (osymtab==null) '/' else osymtab(0),
                       if (osym==null) 'c' else osym(0),
@@ -659,7 +681,7 @@ package no.polaric.aprsd.http
                 { ch = x.setAlias(null)
                   alias = "NULL"
                 }
-             System.out.println("*** ALIAS: "+alias);   
+             System.out.println("*** ALIAS: '"+alias+"' for '"+x.getIdent()+"' by user '"+getAuthUser(hdr)+"'")
              if (ch)
                  Main.rctl.sendRequestAll("ALIAS "+x.getIdent()+" "+alias, null);
 
@@ -667,10 +689,12 @@ package no.polaric.aprsd.http
              var icon = parms.getProperty("iconselect");
              if ("system".equals(icon)) 
                  icon = null; 
-             if (x.setIcon(icon))
-                 Main.rctl.sendRequestAll("ICON "+x.getIdent() + " " +
+             if (x.setIcon(icon)) {      
+                  System.out.println("*** ICON: for '"+x.getIdent()+"' by user '"+getAuthUser(hdr)+"'")
+                  Main.rctl.sendRequestAll("ICON "+x.getIdent() + " " +
                     { if (icon==null) "NULL" else icon }, 
                     null);
+             }
             
              <h3>Oppdatert</h3>
         }
