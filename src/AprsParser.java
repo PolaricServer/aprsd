@@ -25,6 +25,17 @@ import uk.me.jstott.jcoord.*;
  */
 public class AprsParser implements Channel.Receiver
 { 
+
+    /* Part of station class instead? */
+    private static class PosData {
+       public LatLng pos;
+       public int course = -1;
+       public int speed = -1;
+       public char symbol, symtab;
+       public long altitude = -1; 
+    }
+    
+    
     /* Standard APRS position report format */
     private static Pattern _stdPat = Pattern.compile
        ("(\\d+\\.\\d+)([NS])(\\S)(\\d+\\.\\d+)([EW])(\\S)\\s*(.*)");
@@ -33,8 +44,8 @@ public class AprsParser implements Channel.Receiver
     private static Pattern _wxPat = Pattern.compile
        ("(\\d\\d\\d|...)/(\\d\\d\\d|...)g(\\d\\d\\d|...)t(\\d\\d\\d|...).*");
                 
-    private static DateFormat _dtgFormat = new SimpleDateFormat("ddhhmm");
-    private static DateFormat _hmsFormat = new SimpleDateFormat("hhmmss");
+    private static DateFormat _dtgFormat = new SimpleDateFormat("ddHHmm");
+    private static DateFormat _dhmsFormat = new SimpleDateFormat("dd HH:mm:ss");
     
     // FIXME: These are also defined in HttpServer.java
     public static Calendar utcTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
@@ -45,13 +56,13 @@ public class AprsParser implements Channel.Receiver
      
     private StationDB _db   = null;
     private MessageProcessor _msg;
-    
+ 
 
     public AprsParser(StationDB db, MessageProcessor msg) 
     {
         _db = db;
         _msg = msg;
-        _hmsFormat.setTimeZone(TimeZone.getTimeZone("GMT")); 
+        _dhmsFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }  
        
        
@@ -506,41 +517,86 @@ public class AprsParser implements Channel.Receiver
     }
     
     
+    
+    private PosData parseCompressedPos(String data)
+    {
+          PosData pd = new PosData();
+          double latDeg, lngDeg;
+          pd.symtab = data.charAt(0);
+          pd.symbol = data.charAt(9);
+          byte[] y = data.substring(1,5).getBytes();
+          byte[] x = data.substring(5,9).getBytes();
+          byte[] csT = data.substring(10,13).getBytes();
+          latDeg = 90.0 - (((double)(y[0]-33))*753571 + ((double)(y[1]-33))*8281 + 
+                           ((double)(y[2]-33))*91 + ((double) y[3])-33) / 380926;
+          lngDeg = -180 + (((double)(x[0]-33))*753571 + ((double)(x[1]-33))*8281 + 
+                           ((double)(x[2]-33))*91 + ((double) x[3])-33) / 190463;
+          
+          if (((csT[2]-33) & 0x18) == 0x10) 
+          {
+             /* Altitude */
+             pd.altitude = Math.round( Math.pow(1.002, (csT[0]-33)*91 + (csT[1]-33)));
+             pd.altitude *= 0.3048;
+          }
+          else if (csT[0] >= 0+33 && csT[0] <= 89+33) 
+          { 
+             /* Course/speed */
+             pd.course = (csT[0]-33) * 4;
+             pd.speed = (int) Math.round(( Math.pow(1.08, csT[1]-33) - 1) * 1.852 );
+          } 
+          pd.pos = new LatLng(latDeg, lngDeg);
+          return pd;
+    }
+    
+    
 
-        
+    private void parseExtraReport(String data, AprsPoint station)
+    {
+       Date time = new Date();
+       time = parseTimestamp(data.substring(0), true);
+       PosData pd = parseCompressedPos(data.substring(3));
+       if (Channel._dupCheck.checkTS(station.getIdent(), time))
+            return;
+       station.update(time, pd.pos, pd.course, pd.speed, (int) pd.altitude, "", pd.symbol, pd.symtab, "(EXT)" );
+    }
+    
+    
+    
     /** 
      * Parse standard position data.
      */
     private void parseStdAprs(String data, AprsPoint station, boolean timestamp, String pathinfo)
     {
            Date time = new Date();
-           long altitude = -1; 
-           
+          
            if (timestamp) {
-              if (data.substring(1).matches("[0-9]{6}h")) 
+              if (data.substring(1).matches("[0-9]{6}h.*")) 
                   time = parseTimestamp(data.substring(1), false);   
               data = data.substring(8);
+              /* A duplicate check on timestamp itself */
+              if (Channel._dupCheck.checkTS(station.getIdent(), time))
+                 return;
            }
            else
               data = data.substring(1);
            
            double latDeg, lngDeg;
-           int course = -1, speed = -1;
-           char symbol, symtab;
            String comment;
            
            /*
             * Now, extract position info and comment
             */     
+           PosData pd;
            Matcher m = _stdPat.matcher(data);
            if (m.matches())
            {
+               pd = new PosData();
                String lat     = m.group(1);
                char   latNS   = m.group(2).charAt(0);
-               symtab  = m.group(3).charAt(0);
+               pd.symtab  = m.group(3).charAt(0);
                String lng     = m.group(4);
                char   lngEW   = m.group(5).charAt(0);
-               symbol  = m.group(6).charAt(0);
+               pd.symbol  = m.group(6).charAt(0);
                comment = m.group(7);
     
                if (lat.length() < 7 || lng.length() < 8)
@@ -553,47 +609,26 @@ public class AprsParser implements Channel.Receiver
                lngDeg = Integer.parseInt(lng.substring(0,3)) + Double.parseDouble(lng.substring(3,8))/60;
                if (lngEW == 'W')
                  lngDeg *= -1;
+               pd.pos = new LatLng(latDeg, lngDeg);  
             }
             else if (data.matches("[\\\\/][\\x21-\\x7f]{12}.*"))
              /* Parse compressed position report */
             {
-               symtab = data.charAt(0);
-               symbol = data.charAt(9);
-               byte[] y = data.substring(1,5).getBytes();
-               byte[] x = data.substring(5,9).getBytes();
-               byte[] csT = data.substring(10,13).getBytes();
-               comment = data.substring(13);
-               latDeg = 90.0 - (((double)(y[0]-33))*753571 + ((double)(y[1]-33))*8281 + 
-                                ((double)(y[2]-33))*91 + ((double) y[3])-33) / 380926;
-               lngDeg = -180 + (((double)(x[0]-33))*753571 + ((double)(x[1]-33))*8281 + 
-                                ((double)(x[2]-33))*91 + ((double) x[3])-33) / 190463;
-               
-               if (((csT[2]-33) & 0x18) == 0x10) 
-               {
-                  /* Altitude */
-                  altitude = Math.round( Math.pow(1.002, (csT[0]-33)*91 + (csT[1]-33)));
-                  altitude *= 0.3048;
-               }
-               else if (csT[0] >= 0+33 && csT[0] <= 89+33) 
-               { 
-                  /* Course/speed */
-                  course = (csT[0]-33) * 4;
-                  speed = (int) Math.round(( Math.pow(1.08, csT[1]-33) - 1) * 1.852 );
-               }    
+                pd = parseCompressedPos(data);
+                comment = data.substring(13);
             }
             else 
                /* ERROR: couldnt understand data field */ 
                return;        
             
-            LatLng pos = new LatLng(latDeg, lngDeg);
-            if (symbol == '_')
+            if (pd.symbol == '_')
                 comment = parseWX(comment);
                 
             /* Get course and speed */    
             else if (comment.length() >= 7 && comment.substring(0,7).matches("[0-9]{3}/[0-9]{3}"))
             {
-                course = Integer.parseInt(comment.substring(0,3));
-                speed  = (int) Math.round( Integer.parseInt(comment.substring(4,7))* 1.852);
+                pd.course = Integer.parseInt(comment.substring(0,3));
+                pd.speed  = (int) Math.round( Integer.parseInt(comment.substring(4,7))* 1.852);
                 comment = comment.substring(7);
                 
                 /* Ignore additional Bearing/NRQ fields */
@@ -609,6 +644,10 @@ public class AprsParser implements Channel.Receiver
                int power = (comment.charAt(3)-'0');
                power = power * power; 
                int gain = (comment.charAt(5)-'0');
+               int ht = (int) Math.round(10 * Math.pow(2, (comment.charAt(4)-'0')));
+               int r = (int) Math.round(Math.sqrt(2*ht*Math.sqrt((power/10)*(gain/2))));
+               int rKm = (int) Math.round(r*1.609344);
+               
                String dir;
                switch (comment.charAt(6))
                {
@@ -622,23 +661,41 @@ public class AprsParser implements Channel.Receiver
                   case '8': dir = " N";
                   default : dir = "";
                }
-               comment = comment.substring(7,comment.length()) + " ("+power+" watt, "+gain+" dB "+dir+")"; 
+               comment = comment.substring(7,comment.length()) + " ("+power+" watt, "+gain+" dB"+dir+
+                     (rKm>0 ? " => "+rKm+" km" : "") + ")"; 
             }
+            else if (comment.length() >= 7 && comment.substring(0,7).matches("RNG[0-9]{4}"))
+            {
+               int r = Integer.parseInt(comment.substring(3,7));
+               int rKm = (int) Math.round(r*1.609344);
+               comment = comment.substring(7, comment.length()) + " ("+rKm+" km omni)";
+            }
+            
             
             /* Altitude */
             if (comment.length() >= 9 && comment.substring(0,9).matches("/A=[0-9]{6}"))
             {
-                altitude = Long.parseLong(comment.substring(3,9));
-                altitude *= 0.3048;
+                pd.altitude = Long.parseLong(comment.substring(3,9));
+                pd.altitude *= 0.3048;
                 comment = comment.substring(9, comment.length());
             }
+            
+            /* Extra posreports (experimental) 
+             * Format: "/#" + compressed timestamp + compressed report */
+            while (comment.length() >= 18 && comment.matches("(/\\#.{16})+.*"))
+            {
+                parseExtraReport(comment.substring(2,18), station); 
+                comment = comment.substring(18, comment.length());
+            }
+            
+            
             if (comment.length() > 0 && comment.charAt(0) == '/') 
                comment = comment.substring(1);  
             comment = comment.trim();
             if (comment.length() < 1 || comment.equals(" "))
                comment = null;
             
-            station.update(time, pos, course, speed, (int) altitude, comment, symbol, symtab, pathinfo );      
+            station.update(time, pd.pos, pd.course, pd.speed, (int) pd.altitude, comment, pd.symbol, pd.symtab, pathinfo );      
     }
     
     
