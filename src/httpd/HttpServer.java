@@ -169,10 +169,15 @@ public abstract class HttpServer extends NanoHTTPD
          else if ("/resetinfo".equals(uri))
              type = _serveResetInfo(header, parms, out);    
          else if ("/sarmode".equals(uri))
-             type = _serveSarMode(header, parms, out);        
-         else 
-             return serveFile( uri, header, new File("."), true );
-       
+             type = _serveSarMode(header, parms, out);    
+         else if ("/sarurl".equals(uri))
+             type = _serveSarUrl(header, parms, out);         
+         else {
+             if (uri.matches("/((icons|dicons).*)|(/style\\.css)"))
+                return serveFile( uri, header, new File("."), false );
+             else
+                return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "Error 404, file not found.");
+         }
          InputStream is = new ByteArrayInputStream(os.toByteArray());   // FIXME: this copies buffer content?       
          Response res = new Response(HTTP_OK, type, is);
          res.addHeader("Content-length", "" + is.available()); 
@@ -196,6 +201,7 @@ public abstract class HttpServer extends NanoHTTPD
    protected abstract String _serveSearch (Properties header, Properties parms, PrintWriter out, ViewFilter vf);
    protected abstract String _serveStationHistory (Properties header, Properties parms, PrintWriter out);
    protected abstract String _serveSarMode (Properties header, Properties parms, PrintWriter out);
+   protected abstract String _serveSarUrl (Properties header, Properties parms, PrintWriter out);
    protected abstract String _serveTrailPoint (Properties header, Properties parms, PrintWriter out);
 
     
@@ -305,7 +311,7 @@ public abstract class HttpServer extends NanoHTTPD
    public String serveMapData(Properties header, Properties parms, PrintWriter out, 
           ViewFilter vfilt, String filt)
    {
-      return _serveMapData(header, parms, out, vfilt, filt, false);
+      return _serveMapData(header, parms, out, vfilt, filt, Main.sarmode == null);
    }
    
    
