@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2002 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -218,6 +218,8 @@ public class StationDBImp implements StationDB, Runnable
     public synchronized List<AprsPoint> getAll(String srch)
     {
         LinkedList<AprsPoint> result = new LinkedList();
+        if (srch == null)
+           return result;
         srch = srch.toUpperCase(); 
         for (AprsPoint s: _map.values())
            if (s.getIdent().toUpperCase().contains(srch) ||
