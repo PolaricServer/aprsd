@@ -211,7 +211,6 @@ public static class Status implements Serializable
            {
               /* Time distance in seconds */
               long tdistance = (ts.getTime() - _updated.getTime()) / 1000;          
-                            
               /*
                * If distance/time implies a speed more than a certain limit (500km/h), 
                * ignore the report. But not more than 3 times. Clear history if
