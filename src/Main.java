@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-   public static String version = "1.0.1";
+   public static String version = "1.0.1+";
 
    public static InetChannel ch1 = null;
    public static TncChannel  ch2 = null;
@@ -19,6 +19,7 @@ public class Main
    public static OwnObjects ownobjects; 
    public static RemoteCtl  rctl;
    public static SarMode    sarmode = null;
+   public static SarUrl     sarurl = null;
    protected static StationDB db = null;
  
    public static void main( String[] args )
@@ -74,7 +75,10 @@ public class Main
                System.out.println("*** Activate Remote Control");
                rctl = new RemoteCtl(config, db.getMsgProcessor(), db);
            }
- 
+           if (config.getProperty("sarurl.on", "false").trim().matches("true|yes")) {
+               System.out.println("*** Activate Sar URL");
+               sarurl = new SarUrl(config);
+           }
            
            /* Message processing */
            db.getMsgProcessor().setChannels(ch2, ch1);  
