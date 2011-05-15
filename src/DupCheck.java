@@ -15,6 +15,8 @@
  
 package no.polaric.aprsd;
 import java.util.*;
+import java.text.*;
+
 
 /**
  * Duplicate checking.
@@ -31,7 +33,7 @@ public class DupCheck
         new LinkedHashMap() 
         {
             protected boolean removeEldestEntry(Map.Entry e)
-                { return size() > 1000; }
+                { return size() > 2000; }
         };
     
      
@@ -48,12 +50,28 @@ public class DupCheck
           }
      } 
      
+     
+     private static DateFormat _dhmsFormat = new SimpleDateFormat("ddHHmmss");
+     static {
+        _dhmsFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+     }
+     
+     public synchronized boolean checkTS(String from, Date ts)
+     {
+         String composed = "TIME:" + from + ":"+_dhmsFormat.format(ts);
+         if (_timestamped.containsKey(composed))
+             return true;
+         _timestamped.put(composed, TRUE);
+         return  false;
+     }
+     
+     
      /**
       *  Returns true if packet is a duplicate.
       */
      public synchronized boolean checkPacket(String from, String to, String report)
      {
-         String composed = from+to+report;
+         String composed = from+report;
          if (report == null || report.length() < 1)
             return false;
          switch(report.charAt(0))
