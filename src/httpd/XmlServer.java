@@ -32,13 +32,13 @@ public class XmlServer extends ServerBase
 
       
       int trailage= Integer.parseInt(config.getProperty("map.trail.maxAge", "15").trim());
-      History.setMaxAge(trailage * 60 * 1000); 
+      Trail.setMaxAge(trailage * 60 * 1000); 
       int trailpause= Integer.parseInt(config.getProperty("map.trail.maxPause", "10").trim());
-      History.setMaxPause(trailpause * 60 * 1000);
+      Trail.setMaxPause(trailpause * 60 * 1000);
       int trailage_ext= Integer.parseInt(config.getProperty("map.trail.maxAge.extended", "30").trim());
-      History.setMaxAge_Ext(trailage_ext * 60 * 1000); 
+      Trail.setMaxAge_Ext(trailage_ext * 60 * 1000); 
       int trailpause_ext= Integer.parseInt(config.getProperty("map.trail.maxPause.extended", "20").trim());
-      History.setMaxPause_Ext(trailpause_ext * 60 * 1000);
+      Trail.setMaxPause_Ext(trailpause_ext * 60 * 1000);
    }
 
 
@@ -197,7 +197,7 @@ public class XmlServer extends ServerBase
                   if (vfilt.showIdent(s)) {
                      String style = "lobject";
                      if (s instanceof Station)
-                        style = (!(((Station) s).getHistory().isEmpty()) ? "lmoving" : "lstill");
+                        style = (!(((Station) s).getTrail().isEmpty()) ? "lmoving" : "lstill");
                      if (s.isEmergency())
                         style += " lflash";
                         
@@ -213,7 +213,7 @@ public class XmlServer extends ServerBase
                      out.println("   </label>"); 
                   }
                   if (s instanceof Station) {
-                     History h = ((Station)s).getHistory();
+                     Trail h = ((Station)s).getTrail();
                      Station ss = (Station) s;
                      if (!h.isEmpty())
                         printTrailXml(out, ss.getTrailColor(), ss.getPosition(), h, uleft, lright);
