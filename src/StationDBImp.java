@@ -226,6 +226,8 @@ public class StationDBImp implements StationDB, Runnable
     public synchronized List<AprsPoint> getAll(String srch)
     {
         LinkedList<AprsPoint> result = new LinkedList();
+        if (srch==null)
+           return result;
         srch = srch.toUpperCase(); 
         for (AprsPoint s: _map.values())
            if (s.getIdent().toUpperCase().contains(srch) ||
