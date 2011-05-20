@@ -77,8 +77,8 @@ public abstract class Channel
     private   Receiver     _r1 = null; 
     private   Receiver     _r2 = null;
     protected PrintWriter  _out = null; 
-    
-    private static DupCheck  _dupCheck = new DupCheck();
+
+    public static DupCheck  _dupCheck = new DupCheck();
     public static final String _rx_encoding = "X-UTF-8_with_cp-850_fallback";
     public static final String _tx_encoding = "UTF-8";
 
