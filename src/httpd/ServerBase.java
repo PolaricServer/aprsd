@@ -225,7 +225,7 @@ public abstract class ServerBase
     * Print a history trail of a moving station as a XML linestring object. 
     */
    protected void printTrailXml(PrintWriter out, String[] tcolor, 
-          Reference firstpos, Iterable<History.Item> h, UTMRef uleft, UTMRef lright)
+          Reference firstpos, Iterable<Trail.Item> h, UTMRef uleft, UTMRef lright)
    {
        out.println("   <linestring stroke=\"2\" opacity=\"1.0\" color=\""+ tcolor[0] +"\" color2=\""+ tcolor[1] +"\">");
        
@@ -234,7 +234,7 @@ public abstract class ServerBase
        UTMRef itx = toUTM(firstpos);  
        String t = "00000000000000";
        
-       for (History.Item it : h) 
+       for (Trail.Item it : h) 
        {       
           if (itx != null) {       
               if (!first) 
