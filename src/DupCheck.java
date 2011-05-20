@@ -59,8 +59,9 @@ public class DupCheck
      public synchronized boolean checkTS(String from, Date ts)
      {
          String composed = "TIME:" + from + ":"+_dhmsFormat.format(ts);
-         if (_timestamped.containsKey(composed))
-             return true;
+         if (_timestamped.containsKey(composed)) 
+            return true;
+
          _timestamped.put(composed, TRUE);
          return  false;
      }
