@@ -316,8 +316,10 @@ package no.polaric.aprsd.http
               <p>må oppgi 'objid' som parameter</p>;
           }
           else {
-              if (_api.getDB().getOwnObjects().delete(id))
+              if (_api.getDB().getOwnObjects().delete(id)) {
+                  System.out.println("*** DELETE OBJECT: '"+id+"' by user '"+getAuthUser(req)+"'")
                   <h3>Objekt slettet!</h3>
+              }
               else
                   <h3>Fant ikke objekt: {id}</h3>
           }  
@@ -402,7 +404,8 @@ package no.polaric.aprsd.http
                val osymtab = req.getParameter("osymtab")
                val osym  = req.getParameter("osym")
                val otxt = req.getParameter("descr")
-               val perm = req.getParameter("perm");
+               val perm = req.getParameter("perm")
+               System.out.println("*** SET OBJECT: '"+id+"' by user '"+getAuthUser(request)+"'")
                if ( _api.getDB().getOwnObjects().add(id, pos,
                       if (osymtab==null) '/' else osymtab(0),
                       if (osym==null) 'c' else osym(0),
@@ -465,7 +468,7 @@ package no.polaric.aprsd.http
                val s = if (!x.isInstanceOf[Station]) null
                        else x.asInstanceOf[Station];
 
-               val moving = if (s!=null) !s.getHistory().isEmpty()
+               val moving = if (s!=null) !s.getTrail().isEmpty()
                             else false;
 
                <tr onclick={
@@ -680,7 +683,7 @@ package no.polaric.aprsd.http
                 { ch = x.setAlias(null)
                   alias = "NULL"
                 }
-             System.out.println("*** ALIAS: "+alias);   
+             System.out.println("*** ALIAS: '"+alias+"' for '"+x.getIdent()+"' by user '"+getAuthUser(req)+"'")
              if (ch)
                  _api.getRemoteCtl().sendRequestAll("ALIAS "+x.getIdent()+" "+alias, null);
 
@@ -721,7 +724,7 @@ package no.polaric.aprsd.http
              <table>
                <tr><th>Tidspunkt</th><th>Km/h </th><th>Retn </th><th>Distanse</th><th>APRS via</th></tr>
                {
-                   val h = s.getHistory()
+                   val h = s.getTrail()
                    var x = s.getHItem()
                    var i = 0;
                    for (it <- h.items()) yield {
@@ -760,7 +763,7 @@ package no.polaric.aprsd.http
     {
        val s = _api.getDB().getStation(req.getParameter("id"), null)
        val index = Integer.parseInt(req.getParameter("index"))
-       val h = s.getHistory()
+       val h = s.getTrail()
        val item = h.getPoint(index)
        /* FIXME: Check if valid result */
     
