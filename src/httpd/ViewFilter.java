@@ -69,7 +69,7 @@ public class ViewFilter {
   public static class Moving extends ViewFilter
   {
       public boolean useObject(AprsPoint x)
-         { return ((x instanceof Station) ? !((Station) x).getHistory().isEmpty() : false); }
+         { return ((x instanceof Station) ? !((Station) x).getTrail().isEmpty() : false); }
   }
     
     
