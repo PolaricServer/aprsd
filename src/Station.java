@@ -48,13 +48,13 @@ public static class Status implements Serializable
     /*
      * Attributes of a station record (APRS data)
      */
-    private String      _callsign; 
-    private Status      _status;
-    private int         _course;
-    private int         _speed; 
-    private int         _altitude;
+    private String    _callsign; 
+    private Status    _status;
+    private int       _course;
+    private int       _speed; 
+    private int       _altitude;
        
-    private History     _history = new History(); 
+    private Trail     _trail = new Trail(); 
 
     
     /* 
@@ -118,8 +118,8 @@ public static class Status implements Serializable
          _wdigi = x; }       
     
     
-    public synchronized History.Item getHItem()
-       { return new History.Item(_updated, _position, _speed, _course, ""); }
+    public synchronized Trail.Item getHItem()
+       { return new Trail.Item(_updated, _position, _speed, _course, ""); }
        
        
     public String getIdent()
@@ -141,14 +141,14 @@ public static class Status implements Serializable
     
     public synchronized void reset()
     {  
-        _history = new History();
+        _trail = new Trail();
         _db.getRoutes().removeNode(this.getIdent());
         super.reset(); 
     }
           
     
-    public synchronized History getHistory() 
-        { return _history; }        
+    public synchronized Trail getTrail() 
+        { return _trail; }        
       
    
     public boolean isAutoTrail()
@@ -180,14 +180,14 @@ public static class Status implements Serializable
     {
        if (super.isInside(uleft, lright))
           return true;
-       if (_history == null)
+       if (_trail == null)
           return false;    
        
        /* If part of trace is inside displayed area and the station itself is within a 
         * certain distance from displayed area 
         */
        if (super.isInside(uleft, lright, 1, 1))
-        for (History.Item it : _history) 
+        for (Trail.Item it : _trail) 
           if (it.isInside(uleft, lright))
              return true;
          
@@ -228,7 +228,7 @@ public static class Status implements Serializable
                  return;
               }
               if (_report_ignored >= 2) {
-                 _history.clear();
+                 _trail.clear();
                  _db.getRoutes().removeOldEdges(getIdent(), ts);
                  distance = 0;
               }
@@ -237,7 +237,7 @@ public static class Status implements Serializable
                * history 
                */
                if (tdistance < 0) {
-                   _history.add(ts, newpos, sp, crs, pathinfo);
+                   _trail.add(ts, newpos, sp, crs, pathinfo);
                    System.out.println("*** Old report - update trail");
                    setChanging(); 
                    return;
@@ -252,10 +252,10 @@ public static class Status implements Serializable
             */
            if ( distance > 10)  // Distance threshold. FIXME: Should be configurable
            {   
-               if (getHistory().isEmpty() && _autotrail)
+               if (getTrail().isEmpty() && _autotrail)
                    _trailcolor = _colTab.nextColour();
-               _history.add(_updated, _position, _speed, _course, pathinfo); 
-               _db.getRoutes().removeOldEdges(getIdent(), _history.oldestPoint());
+               _trail.add(_updated, _position, _speed, _course, pathinfo); 
+               _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
                setChanging();
            }
         }
