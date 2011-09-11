@@ -22,13 +22,15 @@ package no.polaric.aprsd.http
 
    
 
-   private def htmlBody (head : NodeSeq, content : NodeSeq) : Node =
+   private def htmlBody (css : boolean, head : NodeSeq, content : NodeSeq) : Node =
    {
         <html>
         <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         { head }
-        <link href="style.css" rel="stylesheet" type="text/css" />
+        { if (css) 
+           <link href="style.css" rel="stylesheet" type="text/css" />  
+          else null }
         </head>
         <body>
           {content} 
@@ -37,16 +39,10 @@ package no.polaric.aprsd.http
    }
    
    
-   private def lSimpleLabel(id:String, cls:String, lbl:String, content: NodeSeq): NodeSeq =
+   private def simpleLabel(id:String, cls:String, lbl:String, content: NodeSeq): NodeSeq =
            <label for={id} class={cls}>{lbl}</label>
            <label id={id}> {content}</label>
           ;
- 
-   private def simpleLabel(id:String, cls:String, lbl:String, content: NodeSeq): NodeSeq =
-           <xml:group>
-           {lSimpleLabel(id,cls,lbl,content)}
-           <br/>
-           </xml:group>; 
  
    private def TXT(t:String): NodeSeq = <xml:group>{t}</xml:group>
    
@@ -220,7 +216,7 @@ package no.polaric.aprsd.http
           else
              <h3>Ukjent kommando</h3>
              
-        printHtml (out, htmlBody(head, action(hdr, parms)));    
+        printHtml (out, htmlBody(true, head, action(hdr, parms)));    
    }
    
    
@@ -275,7 +271,7 @@ package no.polaric.aprsd.http
        }
        
              
-       printHtml (out, htmlBody (null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action) )))
+       printHtml (out, htmlBody (true, null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action) )))
    }
    
    
@@ -285,7 +281,7 @@ package no.polaric.aprsd.http
        
        def action(hdr: Properties, parms: Properties): NodeSeq = 
        {
-          if (!authorizedForAdmin(hdr) && Main.sarurl != null )  
+          if (!authorizedForUpdate(hdr) && Main.sarurl != null )  
               <h3>SAR URL ikke tilgjengelig eller du er ikke autorisert</h3>
           else {
               val sarurl = Main.sarurl.create(url)
@@ -294,7 +290,7 @@ package no.polaric.aprsd.http
               <p>Gyldig i 1 døgn fra nå</p>
           }
        }   
-       printHtml (out, htmlBody(null, action(hdr, parms)));        
+       printHtml (out, htmlBody(false, null, action(hdr, parms)));        
    }
       
       
@@ -329,7 +325,7 @@ package no.polaric.aprsd.http
                   <h3>Fant ikke objekt: {id}</h3>
           }  
           
-       printHtml (out, htmlBody (null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action) )))
+       printHtml (out, htmlBody (true, null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action) )))
    }          
 
 
@@ -357,7 +353,7 @@ package no.polaric.aprsd.http
                 x.reset();
              <h3>Info om objekt nullstilt!</h3>
           }  
-       printHtml (out, htmlBody (null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
+       printHtml (out, htmlBody (true, null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
    }          
 
 
@@ -424,7 +420,7 @@ package no.polaric.aprsd.http
                   <p>Objekt '{id}' er allerede registrert av noen andre</p>
            };
             
-        printHtml (out, htmlBody (null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
+        printHtml (out, htmlBody (true, null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
     }
 
 
@@ -499,7 +495,7 @@ package no.polaric.aprsd.http
            }
         } 
         </table>;
-        printHtml (out, htmlBody (null, result))
+        printHtml (out, htmlBody (false, null, result))
    }
  
 
@@ -581,7 +577,7 @@ package no.polaric.aprsd.http
             <xml:group>  
             <label for="callsign" class="leftlab">Ident:</label>
             <label id="callsign"><b> { x.getIdent().replaceFirst("@.*","") } </b></label>
-            <br/>
+
             { if (!simple)
                  simpleLabel("symbol", "leftlab", "Symbol:",TXT( x.getSymtab()+" "+x.getSymbol())) else null }
             { if (x.getAlias() != null)
@@ -597,11 +593,9 @@ package no.polaric.aprsd.http
             { simpleLabel("pos", "leftlab", "Posisjon (UTM):",
                 if (x.getPosition() != null) showUTM(x.getPosition())
                 else TXT("ikke registrert") ) }
-
             { simpleLabel("posll", "leftlab", "Position (latlong):",
                 if (x.getPosition() != null) TXT( ll2dmString( x.getPosition().toLatLng()))
                 else TXT("ikke registrert") ) }
-            
             { if (s != null && s.getAltitude() >= 0)
                   {simpleLabel("altitude", "leftlab", "Høyde (o/h):", TXT(s.getAltitude() + " m ")) }}
             { if (s != null && s.getSpeed() > 0)
@@ -700,7 +694,7 @@ package no.polaric.aprsd.http
         }
 
 
-        printHtml (out, htmlBody ( null, 
+        printHtml (out, htmlBody ( !simple, null, 
                                    if (simple) fields(hdr, parms)
                                    else htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
     }
@@ -709,7 +703,12 @@ package no.polaric.aprsd.http
 
 
 
-
+  
+    private def cleanPath(txt:String): String = 
+        txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]+(\\-[0-9]+)?\\*?),|(qA.),", "")
+           .replaceAll("\\*", "").replaceAll(",", ", ")
+           
+           
       
    /** 
     * Presents a list over last positions and movements (standard HTML)
@@ -745,19 +744,18 @@ package no.polaric.aprsd.http
                              "%.1f km" format dist
                       }</td>
                       <td> { 
-                        TXT(it.pathinfo
-                         .replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]+(\\-[0-9]+)?\\*?),|(qA.),", "")
-                         .replaceAll("\\*", "").replaceAll(",", ", ")) } </td>
+                        TXT( cleanPath(it.pathinfo)) } </td>
                       </tr>
                    }
                }
              </table>
 
-        printHtml(out, htmlBody(null, result))
+        printHtml(out, htmlBody(false, null, result))
     } 
-  
-  
-  
+ 
+
+    
+    
 
     def _serveTrailPoint(hdr: Properties, parms: Properties, out: PrintWriter): String =
     {
@@ -771,15 +769,14 @@ package no.polaric.aprsd.http
          <xml:group>
          <label for="callsign" class="lleftlab">Ident:</label>
          <label id="callsign"><b> { s.getIdent() } </b></label>
-         <br/> 
          { simpleLabel("time",  "lleftlab", "Tidspunkt:", TXT( df.format(item.time))) }
          { simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )  }
-         { lSimpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course))  }
+         { simpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course))  }
          <div id="traffic">
-         { lSimpleLabel("via",   "lleftlab", "APRS via:", TXT(item.pathinfo))  }
+         { simpleLabel("via",   "lleftlab", "APRS via:", TXT(cleanPath(item.pathinfo)))  }
          </div>
          </xml:group>
-       printHtml(out, htmlBody(null, result)) 
+       printHtml(out, htmlBody(false, null, result)) 
     }
   
   }
