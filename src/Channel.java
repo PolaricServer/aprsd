@@ -12,6 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+
 package no.polaric.aprsd;
 import java.util.*;
 import java.util.regex.*;
@@ -129,7 +130,7 @@ public abstract class Channel
             p.type = p.report.charAt(0);
             
             if (p.type == '}') {
-              /* Special treatment for third-party type. 
+             /* Special treatment for third-party type. 
               * Strip off type character and apply this function recursively
               * on the wrapped message. 
               */
@@ -138,7 +139,7 @@ public abstract class Channel
                   p.thirdparty = true; 
             }
             else if (p.type == ':') 
-               /* Special treatment for message type.
+              /* Special treatment for message type.
                * Extract recipient id
                */
                 p.msgto = p.report.substring(1,9).trim();
@@ -150,8 +151,7 @@ public abstract class Channel
         }
         return null;
     }
-    
-    
+
     /**
      * Process incoming packet. 
      * To be called from subclass. Parses packet, updates heard table, checks for
