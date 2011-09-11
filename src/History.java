@@ -59,6 +59,10 @@ public class History implements Iterable<History.Item>, Serializable
     public boolean isEmpty() 
         { return (_items.size() == 0); }
     
+    public int length()
+        { return _items.size(); }
+        
+    
     public void clear()
         { _items.clear(); }
         
@@ -72,31 +76,41 @@ public class History implements Iterable<History.Item>, Serializable
        else return it.time;
     }
     
+    public static final long mindist = 20;
     
     /**
      * Add a position report to history.
      */
-    public synchronized void add(Date t, Reference p, int sp, int crs, String path)
+    public synchronized boolean add(Date t, Reference p, int sp, int crs, String path)
     { 
         Date now = new Date(); 
         _sum_speed += sp;
+        boolean added = false;
          
         /* New report is newer than the last report - put it first */
-        if ( _items.size() == 0 || t.getTime() >= _items.getFirst().time.getTime()) 
+        if ( _items.size() == 0 || 
+            (t.getTime() >= getFirst().time.getTime() && getFirst().distance(p) > mindist)) {
             _items.addFirst(new Item(t, p, sp, crs, path)); 
-
-        else {       
+            added = true;
+        }
+        else {    
+           Item x=null, prev=null; 
            /* New report is older than the last report - find the right place and put it there */
            ListIterator<Item> it = _items.listIterator();
            while (it.hasNext()) {
-              Item x = it.next();
+              x = it.next();
+              prev = x;
               if (x.time.getTime() < t.getTime())
                  break;
            }
           it.previous();
-          it.add(new Item(t, p, sp, crs, path));
+          if (x.distance(p) > mindist  && prev != null && prev.distance(p) > mindist) {
+             it.add(new Item(t, p, sp, crs, path));
+             added = true;
+          }
        }
        cleanUp(now);
+       return added;
     }
     
 
