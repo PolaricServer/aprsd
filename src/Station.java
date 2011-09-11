@@ -204,8 +204,7 @@ public static class Status implements Serializable
     { 
         if (_position != null && _updated != null)
         { 
-           /* Distance in meters */
-           long distance = Math.round(_position.toLatLng().distance(newpos.toLatLng()) * 1000); 
+            
            
            if (ts != null)
            {
@@ -218,7 +217,7 @@ public static class Status implements Serializable
                * FIXME: speed limit should be configurable.
                */
               if ( _report_ignored < 2 && tdistance > 0 && 
-                    distance/tdistance > (500 * 0.27778)) 
+                    distance(newpos)/tdistance > (500 * 0.27778)) 
               {
                  System.out.println("*** Ignore report moving beyond speed limit (500km/h)");
                  _report_ignored++;
@@ -227,14 +226,12 @@ public static class Status implements Serializable
               if (_report_ignored >= 2) {
                  _history.clear();
                  _db.getRoutes().removeOldEdges(getIdent(), ts);
-                 distance = 0;
               }
               
               /* If report is older than the previous one, just save it in the 
                * history 
                */
-               if (tdistance < 0) {
-                   _history.add(ts, newpos, sp, crs, pathinfo);
+               if (tdistance < 0 && _history.add(ts, newpos, sp, crs, pathinfo)) {
                    System.out.println("*** Old report - update trail");
                    setChanging(); 
                    return;
@@ -244,17 +241,18 @@ public static class Status implements Serializable
                        
            
            /*
-            * If distance is more than a certain threshold, indicate that object is moving/changing, 
+            * If object has moved, indicate that object is moving/changing, 
             * save the previous position.
             */
-           if ( distance > 10)  // Distance threshold. FIXME: Should be configurable
-           {   
-               if (getHistory().isEmpty() && _autotrail)
-                   _trailcolor = _colTab.nextColour();
-               _history.add(_updated, _position, _speed, _course, pathinfo); 
-               _db.getRoutes().removeOldEdges(getIdent(), _history.oldestPoint());
-               setChanging();
+           if (distance(newpos) > History.mindist && 
+               _history.add(_updated, _position, _speed, _course, pathinfo)) 
+           {
+              if (_history.length() == 1 && _autotrail)
+                  _trailcolor = _colTab.nextColour();
+              _db.getRoutes().removeOldEdges(getIdent(), _history.oldestPoint());
+              setChanging();   
            }
+           
         }
         updatePosition(ts, newpos);
         
