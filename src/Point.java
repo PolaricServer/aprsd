@@ -56,6 +56,10 @@ public abstract class Point implements Serializable
     }
     
     
+    public long distance(Reference p)
+       { return Math.round(_position.toLatLng().distance(p.toLatLng()) * 1000); }
+    
+    
     public boolean isInside(UTMRef uleft, UTMRef lright)
        { return isInside(uleft, lright, 0, 0); }
        
