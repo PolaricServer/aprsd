@@ -3,14 +3,64 @@ Updates to 1.0.2, etc.
     
 * Check for empty position in object input.
 
-* Fix configurable icon directory. Use Apache for static icon files 
-  (from development branch).
-
-* Station get status text from other stations???? Fix?
+* [C] Error in parsing map references xxx xxx. Fix. 
+    DONE.
+    
+* Yet another timestamp bug.
+    DONE.
 
 * Log user objects or alias changes (identify user??). 
-
+    DONE.
+    
+* SAR URL. 
+    DONE.
+    
 * [C] Sometimes last update in trail is missing. Fix?
+
+* Update icon when SAR mode is turned off??
+
+* [C] Don't draw trail if it is too small to be visible. Firefox
+  handles such scaled down trails badly. 
+    DONE.
+
+* Better filtering of updates that has movements below a distance threshold
+  (Firefox bug - se above)
+    DONE.
+
+* Fewer lost update notifications to clients
+    DONE.
+
+* [C] Troublesome sizing of popups in Firefrosk. CSS fixes.
+    DONE.
+
+* [C] Compiled (compressed) javascript. 
+    DONE.
+
+
+
+Support for mobile devices
+--------------------------
+
+* Misc. adjustments to make it work, just for viewing...
+    DONE.
+   
+* Initial Droid app.
+    DONE. 
+    
+* Multitouch zoom events. 
+
+* Context menu? 
+    DONE for stations.
+
+* Login and update operations
+
+* Scrollable popups. Alternative solutions?
+    DONE.
+    
+* Station/object search - get it working
+
+* Main menu (in droid app)
+    DONE.
 
 
 Security
