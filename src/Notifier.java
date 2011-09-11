@@ -52,10 +52,9 @@ public class Notifier
             }
             else
                 _waiters.put(id, 0);
-         }    
+         }  
          do {
               try {
-                  Thread.sleep(100);
                   synchronized(this) {
                      wait(found ? _mintime-elapsed : _timeout-elapsed);
                      Integer abort = _waiters.get(id);
@@ -64,18 +63,17 @@ public class Notifier
                          return (abort==1) ? true : false;        
                      }
                      
+                     /* Has there been events inside the interest zone */
+                     found = found || signalledPt == null || uleft == null || 
+                                  signalledPt.isInside(uleft, lright); 
                   } 
-                  /* Wait a little to allow more updates to arrive */
-                  Thread.sleep(500); 
+                  /* End of synchronized block. 
+                   */
               }
               catch (Exception e) {}    
               elapsed = (new Date()).getTime() - wstart;
             
-              /* Has there been events inside the interest zone */
-              synchronized(this) {
-                 found = found || signalledPt == null || uleft == null || 
-                                  signalledPt.isInside(uleft, lright); 
-              }
+
             /* Wait no shorter than _mintime and no longer 
              * than _timeout 
              */
