@@ -25,6 +25,8 @@ public class InetChannel extends Channel implements Runnable
 {
     private   String      _host;
     private   int         _port;
+    private   int         _max_retry;
+    private   long        _retry_time; 
     private   String      _user, _pass, _filter;
     private   boolean     _close = false;
     private   Socket      _sock = null; 
@@ -35,6 +37,8 @@ public class InetChannel extends Channel implements Runnable
     {
         _host = config.getProperty("inetchannel.host", "localhost").trim();
         _port = Integer.parseInt(config.getProperty("inetchannel.port", "14580").trim());
+        _max_retry = Integer.parseInt(config.getProperty("inetchannel.retry", "0").trim());
+        _retry_time = Long.parseLong(config.getProperty("inetchannel.retry.time", "30").trim()) * 60 * 1000; 
         _user = config.getProperty("inetchannel.user", "").trim().toUpperCase();
         if (_user.length() == 0)
            _user = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
@@ -146,11 +150,11 @@ public class InetChannel extends Channel implements Runnable
            if (_close)
                    return;
          
-           if (retry <= MAX_RETRY) 
+           if (retry <= _max_retry || _max_retry == 0) 
                try { 
                    long sleep = 30000 * (long) Math.pow(2, retry);
-                   if (sleep > 7680) 
-                      sleep = 7680; /* Max 2. hours */
+                   if (sleep > _retry_time) 
+                      sleep = _retry_time; /* Default: Max 30 minutes */
                    Thread.sleep(sleep); 
                } 
                catch (Exception e) {} 
