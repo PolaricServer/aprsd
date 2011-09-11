@@ -654,6 +654,7 @@ public class NanoHTTPD
 			FileInputStream fis = new FileInputStream( f );
 			fis.skip( startFrom );
 			Response r = new Response( HTTP_OK, mime, fis );
+			r.addHeader( "Cache-control", "max-age=1209600");
 			r.addHeader( "Content-length", "" + (f.length() - startFrom));
 			r.addHeader( "Content-range", "" + startFrom + "-" +
 						(f.length()-1) + "/" + f.length());
