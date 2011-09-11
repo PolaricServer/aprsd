@@ -96,7 +96,7 @@ public class OwnObjects implements Runnable
             return true;
          }
        
-         System.out.println("WARNING: Object "+sym+" already exists somewhere else");
+         System.out.println("WARNING: Object "+id+" already exists somewhere else");
          return false;
     }
     
