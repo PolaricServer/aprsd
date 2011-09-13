@@ -427,21 +427,21 @@ package no.polaric.aprsd.http
    def _directionIcon(direction:Int): NodeSeq = 
         direction match {
           case x if !(22 until 337 contains x) =>
-              <div><img src= {"srv/dicons/dN.png"}/> N</div>
+              <div><img src= {"www/dicons/dN.png"}/> N</div>
           case x if (22 until 67 contains x) =>
-              <div><img src= {"srv/dicons/dNE.png"}/> NE</div>
+              <div><img src= {"www/dicons/dNE.png"}/> NE</div>
           case x if (67 until 112 contains x) =>
-              <div><img src= {"srv/dicons/dE.png"}/> E</div>
+              <div><img src= {"www/dicons/dE.png"}/> E</div>
           case x if (112 until 157 contains x) =>
-              <div><img src= {"srv/dicons/dSE.png"}/> SE</div>
+              <div><img src= {"www/dicons/dSE.png"}/> SE</div>
           case x if (157 until 202 contains x) =>
-              <div><img src= {"srv/dicons/dS.png"}/> S</div>
+              <div><img src= {"www/dicons/dS.png"}/> S</div>
           case x if (202 until 247 contains x) =>
-              <div><img src= {"srv/dicons/dSW.png"}/> SW</div>
+              <div><img src= {"www/dicons/dSW.png"}/> SW</div>
           case x if (247 until 292 contains x) =>
-              <div><img src= {"srv/dicons/dW.png"}/> W</div>
+              <div><img src= {"www/dicons/dW.png"}/> W</div>
           case x if (292 until 337 contains x) =>
-              <div><img src= {"srv/dicons/dNW.png"}/> NW</div>
+              <div><img src= {"www/dicons/dNW.png"}/> NW</div>
           case _ => null;
       }
 
@@ -476,19 +476,12 @@ package no.polaric.aprsd.http
                }>
           
                <td>{x.getIdent()}</td>
-               <td> {
-                  if (!x.visible())
-                     <div>(foreldet)</div>
-                  else
-                     { if (moving) <img src="srv/dicons/new.gif" width="16" height="16"/>;
-                       if (x.getPosition() != null) showUTM(x.getPosition())
-                       else <div>(ikke registrert)</div> }
-               } </td>
-
-
-               <td> { if (moving && s.getSpeed() > 0)
+               <td> 
+               { if (moving && s.getSpeed() > 0)
                        _directionIcon(s.getCourse()) else 
-                          if (s==null) TXT("obj") else null } </td>
+                          if (s==null) TXT("obj") else null } 
+               </td>
+                          
                <td> { df.format(x.getUpdated()) } </td>
                <td> { if (x.getDescr() != null) x.getDescr() else "" } </td>
                </tr>
