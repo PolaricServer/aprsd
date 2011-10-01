@@ -201,19 +201,16 @@ public static class Status implements Serializable
       
       
         
-    public synchronized void update(Date ts, Reference newpos, int crs, int sp, int alt, 
-                                    String descr, char sym, char altsym, String pathinfo)
+    public synchronized void update(Date ts, AprsHandler.PosData pd, String descr, String pathinfo)
     { 
         if (_position != null && _updated != null)
         { 
-           /* Distance in meters */
-           long distance = Math.round(_position.toLatLng().distance(newpos.toLatLng()) * 1000); 
+            
            
            if (ts != null)
            {
               /* Time distance in seconds */
               long tdistance = (ts.getTime() - _updated.getTime()) / 1000;          
-                            
               /*
                * If distance/time implies a speed more than a certain limit (500km/h), 
                * ignore the report. But not more than 3 times. Clear history if
@@ -221,7 +218,7 @@ public static class Status implements Serializable
                * FIXME: speed limit should be configurable.
                */
               if ( _report_ignored < 2 && tdistance > 0 && 
-                    distance/tdistance > (500 * 0.27778)) 
+                    distance(pd.pos)/tdistance > (500 * 0.27778)) 
               {
                  System.out.println("*** Ignore report moving beyond speed limit (500km/h)");
                  _report_ignored++;
@@ -230,14 +227,12 @@ public static class Status implements Serializable
               if (_report_ignored >= 2) {
                  _trail.clear();
                  _db.getRoutes().removeOldEdges(getIdent(), ts);
-                 distance = 0;
               }
               
               /* If report is older than the previous one, just save it in the 
                * history 
                */
-               if (tdistance < 0) {
-                   _trail.add(ts, newpos, sp, crs, pathinfo);
+               if (tdistance < 0 && _trail.add(ts, pd.pos, pd.speed, pd.course, pathinfo)) {
                    System.out.println("*** Old report - update trail");
                    setChanging(); 
                    return;
@@ -247,23 +242,24 @@ public static class Status implements Serializable
                        
            
            /*
-            * If distance is more than a certain threshold, indicate that object is moving/changing, 
+            * If object has moved, indicate that object is moving/changing, 
             * save the previous position.
             */
-           if ( distance > 10)  // Distance threshold. FIXME: Should be configurable
-           {   
-               if (getTrail().isEmpty() && _autotrail)
-                   _trailcolor = _colTab.nextColour();
-               _trail.add(_updated, _position, _speed, _course, pathinfo); 
-               _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
-               setChanging();
+           if (distance(pd.pos) > Trail.mindist && 
+               _trail.add(_updated, _position, _speed, _course, pathinfo)) 
+           {
+              if (_trail.length() == 1 && _autotrail)
+                  _trailcolor = _colTab.nextColour();
+              _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
+              setChanging();   
            }
+           
         }
-        updatePosition(ts, newpos);
+        updatePosition(ts, pd.pos);
         
-        _speed = sp;
-        _course = crs;
-        _altitude = alt;
+        _speed = pd.speed;
+        _course = pd.course;
+        _altitude = (int) pd.altitude;
        
         setDescr(descr); 
         
@@ -272,17 +268,16 @@ public static class Status implements Serializable
             setChanging();
         }
         
-        if (sym != _symbol || altsym != _altsym)
+        if (pd.symbol != _symbol || pd.symtab != _altsym)
         {
-            _symbol = sym;
-            _altsym = altsym;
+            _symbol = pd.symbol;
+            _altsym = pd.symtab;
             setChanging();
         }
         
         isChanging(); 
     }
     
-
 
     
     
