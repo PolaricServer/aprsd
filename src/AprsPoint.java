@@ -24,7 +24,7 @@ import java.io.Serializable;
 public abstract class AprsPoint extends PointObject implements Serializable
 {
     private static long     _nonMovingTime = 1000 * 60 * 5;   
-    private static SymTable _symTab        = new SymTable ("symbols");
+    private static SymTable _symTab        = new SymTable (Main.confdir+"/symbols");
     private static Notifier _change        = new Notifier();
     protected static StationDB _db         = null;
     
