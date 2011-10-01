@@ -1,0 +1,26 @@
+#!/bin/sh
+set -e
+INIFILE=/etc/polaric-aprsd/server.ini
+
+# Source debconf library.
+. /usr/share/debconf/confmodule
+
+
+case "$1" in
+    configure|reconfigure)
+        db_get polaric-aprsd/callsign
+        sed -e "s/default\.mycall = .*/default\.mycall = $RET/" $INIFILE > $INIFILE.tmp
+        mv $INIFILE.tmp $INIFILE
+        db_stop
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "$0 called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+#DEBHELPER#
