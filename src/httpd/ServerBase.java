@@ -227,22 +227,25 @@ public abstract class ServerBase
    protected void printTrailXml(PrintWriter out, String[] tcolor, 
           Reference firstpos, Iterable<Trail.Item> h, UTMRef uleft, UTMRef lright)
    {
-       out.println("   <linestring stroke=\"2\" opacity=\"1.0\" color=\""+ tcolor[0] +"\" color2=\""+ tcolor[1] +"\">");
+       //  out.println("   <linestring stroke=\"2\" opacity=\"1.0\" color=\""+ tcolor[0] +"\" color2=\""+ tcolor[1] +"\">");
        
        boolean first = true;
-       int state = 1;
+       int state = 1, n = 0;
        UTMRef itx = toUTM(firstpos);  
        String t = "00000000000000";
        
        for (Trail.Item it : h) 
        {       
+          if (n==0)
+              out.println("   <linestring stroke=\"2\" opacity=\"1.0\" color=\""+ tcolor[0] +"\" color2=\""+ tcolor[1] +"\">");     
+       
           if (itx != null) {       
               if (!first) 
                   out.print(", "); 
               else
                   first = false;   
               out.println( (int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()) +
-                          " " + t);
+                          " " + t);           
           }
             
           itx = toUTM(it.getPosition());
@@ -254,11 +257,18 @@ public abstract class ServerBase
                 state = 3; 
                 break;
              }    
+       
+          if (n++ > 100) {
+              n = 0;
+              out.println("   </linestring>");
+          }
+       
        }
-       if (itx != null & state < 3)
+       if (itx != null && state < 3)
            out.println(", "+ (int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()) +
                          " "+t);  // FIXME: get first time
-       out.println("   </linestring>");
+       if (n > 0) 
+          out.println("   </linestring>");
    }
      
 }
