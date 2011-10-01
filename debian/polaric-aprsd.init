@@ -1,0 +1,153 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          polaric-aprsd
+# Required-Start:    $network $local_fs $remote_fs $time
+# Required-Stop:     $remote_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+### END INIT INFO
+
+# FIXME: use JSVC for startup. See Jetty init script
+       
+       DESC="Polaric APRSD"
+       NAME=polaric-aprsd         
+       JLIB=/usr/share/java
+  CLASSPATH=$JLIB/jcoord-polaric.jar:$JLIB/polaric-aprsd.jar:$JLIB/utf8-with-fallback-polaric.jar:$JLIB/RXTXcomm.jar:$JLIB/scala-library.jar
+SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB0:/dev/ttyUSB1:/dev/ttyACM0:/dev/ttyACM1
+      FLAGS=-Djava.net.preferIPv4Stack=true
+    LOGFILE=/var/log/polaric/aprsd.log
+    INIFILE=/etc/polaric-aprsd/server.ini
+       JAVA=java
+       
+  
+    PIDFILE=/var/run/$NAME.pid
+ SCRIPTNAME=/etc/init.d/$NAME
+ POLARIC_SHUTDOWN=30
+
+
+if [ `id -u` -ne 0 ]; then
+        echo "You need root privileges to run this script"
+        exit 1
+fi
+
+# Read configuration variable file if it is present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
+
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+. /lib/lsb/init-functions
+
+if [ -r /etc/default/rcS ]; then
+        . /etc/default/rcS
+fi
+
+
+
+
+case "$1" in 
+   start) 
+         log_daemon_msg "Starting $DESC"
+         if start-stop-daemon --test --start --pidfile "$PIDFILE" --user root \
+                 --startas "$JAVA" >/dev/null; then
+              $JAVA -Xverify:none -server $SERIALPORTS $FLAGS -cp $CLASSPATH \
+              -Dconfdir=/etc/polaric-aprsd -Ddatadir=/var/lib/polaric -Dwebdir=/usr/share/polaric \
+              no.polaric.aprsd.Main $INIFILE >> $LOGFILE  2>&1 &
+             echo $! > $PIDFILE
+             sleep 2
+             
+             if [ -e /etc/apache2/sites-enabled/aprs ]; then
+                 apache2ctl restart > /dev/null 2>&1 || true
+             fi
+             
+             # beep -f 800 -n -f 1100 -n -f 1500
+             log_daemon_msg " started."
+
+             sleep 1
+             if start-stop-daemon --test --start --pidfile "$PIDFILE" \
+                    --startas "$JAVA" >/dev/null; then
+                log_end_msg 1
+             else
+                log_end_msg 0
+             fi
+
+         else
+             log_warning_msg "(already running)."
+             log_end_msg 0
+             exit 1
+         fi
+         ;;
+   
+   stop)
+         log_daemon_msg "Stopping $DESC"
+         
+         if start-stop-daemon --quiet --test --start --pidfile "$PIDFILE" \
+                --startas "$JAVA" > /dev/null; then
+                if [ -x "$PIDFILE" ]; then
+                        log_warning_msg "(not running but $PIDFILE exists)."
+                else
+                        log_warning_msg "(not running)."
+                fi
+         else
+                start-stop-daemon --quiet --stop \
+                        --pidfile "$PIDFILE"  \
+                        --startas "$JAVA" > /dev/null
+
+                while ! start-stop-daemon --quiet --test --start \
+                          --pidfile "$PIDFILE" \
+                          --startas "$JAVA" > /dev/null; do 
+                        sleep 1
+                        log_progress_msg "."
+                        POLARIC_SHUTDOWN=`expr $POLARIC_SHUTDOWN - 1` || true
+                        if [ $POLARIC_SHUTDOWN -eq 0 ]; then
+                                log_progress_msg " (killing) "
+                                start-stop-daemon --stop --signal 9 --oknodo \
+                                        --quiet --pidfile "$PIDFILE"
+                        fi
+                done
+                log_daemon_msg " stopped"
+                log_end_msg 0
+         fi
+         ;;
+         
+         
+  status)
+        if start-stop-daemon --quiet --test --start --pidfile "$PIDFILE" \
+                 --startas "$JAVA" > /dev/null; then
+
+                if [ -f "$PIDFILE" ]; then
+                    log_success_msg "$DESC is not running, but pid file exists."
+                        exit 1
+                else
+                    log_success_msg "$DESC is not running."
+                        exit 3
+                fi
+        else
+                log_success_msg "$DESC is running with pid `cat $PIDFILE`"
+        fi
+        ;;         
+        
+  restart|force-reload)
+        if ! start-stop-daemon --quiet --test --start --pidfile "$PIDFILE" \
+                --startas "$JAVA" > /dev/null; then
+                $0 stop $*
+                sleep 1
+        fi
+        $0 start $*
+        ;;
+
+  try-restart)
+        if start-stop-daemon --quiet --test --start --pidfile "$PIDFILE" \
+                --startas "$JAVA" > /dev/null; then
+                $0 start $*
+        fi
+        ;;        
+        
+  
+   *)
+      echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" 
+      exit 3
+      ;;
+   
+esac
+exit 0
