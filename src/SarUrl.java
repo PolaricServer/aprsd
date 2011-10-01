@@ -40,6 +40,9 @@ public class SarUrl implements Runnable
     public SarUrl(Properties config)
     {
         _file = config.getProperty("sarurl.file", "sarurl.txt");
+        if (_file.charAt(0) != '/')
+           _file = Main.datadir+"/"+_file;
+           
         Thread t = new Thread(this, "SarUrlWriter");
         t.start(); 
     }
