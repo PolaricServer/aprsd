@@ -1,7 +1,0 @@
-#!/bin/bash
-DIR=/usr/local/polaric-aprsd
-if [ -e /usr/local/polaric-aprsd/users ]; then
-  htpasswd $DIR/users $1
-else
-  htpasswd -c $DIR/users $1
-fi
