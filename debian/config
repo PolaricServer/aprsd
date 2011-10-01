@@ -1,0 +1,13 @@
+ 
+#!/bin/sh -e
+
+INIFILE=/etc/polaric-aprsd/server.ini
+
+# Source debconf library.
+. /usr/share/debconf/confmodule
+	 
+	 
+# Enter callsign
+db_input high polaric-aprsd/callsign || true
+db_go
+
