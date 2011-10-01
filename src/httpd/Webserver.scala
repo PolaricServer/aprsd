@@ -259,13 +259,15 @@ package no.polaric.aprsd.http
           if (on != null && "true".equals(on) ) {
                val filt = if ("".equals(filter)) "NONE" else filter;
                Main.sarmode = new SarMode(reason, getAuthUser(hdr), filter);
-               Main.rctl.sendRequestAll("SAR "+getAuthUser(hdr)+" "+filt+" "+reason, null);
+               if (Main.rctl != null) 
+                  Main.rctl.sendRequestAll("SAR "+getAuthUser(hdr)+" "+filt+" "+reason, null);
                <h3>Aktivert</h3>
                <p>{reason}</p>
           }
           else {   
                Main.sarmode = null;
-               Main.rctl.sendRequestAll("SAR OFF", null);
+               if (Main.rctl != null) 
+                   Main.rctl.sendRequestAll("SAR OFF", null);
                <h3>Avsluttet</h3>
           } 
        }
@@ -499,7 +501,7 @@ package no.polaric.aprsd.http
     */
    def iconSelect(s: AprsPoint): NodeSeq =
    {
-       val icondir = new File("./icons");
+       val icondir = new File(_icondir);
        
        val flt = new FilenameFilter()
            { def accept(dir:File, f: String): boolean = f.matches(".*\\.(png|gif|jpg)") } 
@@ -669,7 +671,7 @@ package no.polaric.aprsd.http
                   alias = "NULL"
                 }
              System.out.println("*** ALIAS: '"+alias+"' for '"+x.getIdent()+"' by user '"+getAuthUser(hdr)+"'")
-             if (ch)
+             if (ch && Main.rctl != null)
                  Main.rctl.sendRequestAll("ALIAS "+x.getIdent()+" "+alias, null);
 
              /* Icon setting */
@@ -677,10 +679,11 @@ package no.polaric.aprsd.http
              if ("system".equals(icon)) 
                  icon = null; 
              if (x.setIcon(icon)) {      
-                  System.out.println("*** ICON: for '"+x.getIdent()+"' by user '"+getAuthUser(hdr)+"'")
-                  Main.rctl.sendRequestAll("ICON "+x.getIdent() + " " +
-                    { if (icon==null) "NULL" else icon }, 
-                    null);
+                  System.out.println("*** ICON: for '"+x.getIdent()+"' by user '"+getAuthUser(hdr)+"'")   
+                  if (Main.rctl != null) 
+                     Main.rctl.sendRequestAll("ICON "+x.getIdent() + " " +
+                        { if (icon==null) "NULL" else icon }, 
+                         null);
              }
             
              <h3>Oppdatert</h3>
