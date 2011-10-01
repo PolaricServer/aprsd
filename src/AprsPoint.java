@@ -194,8 +194,7 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
     }
         
         
-    public abstract void update(Date ts, Reference newpos, int crs, int sp, int alt, 
-                                String descr, char sym, char altsym, String pathinfo);        
+    public abstract void update(Date ts, AprsHandler.PosData pd, String descr, String pathinfo);        
         
     public abstract boolean expired();
     public boolean visible() { return !expired(); }
