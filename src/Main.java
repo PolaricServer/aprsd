@@ -11,16 +11,20 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-   public static String version = "1.0.1+";
+   public static String version = "1.0.2beta1";
 
-   public static InetChannel ch1 = null;
-   public static TncChannel  ch2 = null;
-   public static Igate igate  = null;
-   public static OwnObjects ownobjects; 
-   public static RemoteCtl  rctl;
-   public static SarMode    sarmode = null;
-   public static SarUrl     sarurl = null;
+   public static String       confdir, datadir, webdir; 
+   public static InetChannel  ch1 = null;
+   public static TncChannel   ch2 = null;
+   public static Igate        igate  = null;
+   public static OwnObjects   ownobjects; 
+   public static RemoteCtl    rctl;
+   public static SarMode      sarmode = null;
+   public static SarUrl       sarurl = null;
    protected static StationDB db = null;
+ 
+ 
+ 
  
    public static void main( String[] args )
    {
@@ -29,6 +33,7 @@ public class Main
            System.out.println("Usage: Daemon <config-file>");
            
         Properties config = new Properties();
+        Properties sysconfig = System.getProperties();
           
         Runtime.getRuntime().addShutdownHook( new Thread() 
              {
@@ -45,6 +50,10 @@ public class Main
            FileInputStream fin = new FileInputStream(args[0]);
            config.load(fin);
            System.out.println( "*** Polaric APRSD startup" );
+           
+           confdir = sysconfig.getProperty("confdir", ".");
+           datadir = sysconfig.getProperty("datadir", ".");
+           webdir = sysconfig.getProperty("webdir", datadir);
            
            
            /* Database of stations/objects */
