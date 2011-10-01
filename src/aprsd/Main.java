@@ -27,7 +27,7 @@ public class Main implements ServerAPI
     * Database interface must be known here. The interface is 
     * implemented by a plugin 
     */
-   public static AprsLog dblog = new AprsLog.Dummy();
+   public static AprsHandler dblog = new AprsHandler.Dummy();
    
    /* API interface methods 
     * Should they be here or in a separate class ??
@@ -35,10 +35,10 @@ public class Main implements ServerAPI
    public StationDB getDB() 
     { return db; }
    
-   public AprsLog getAprsLog() 
+   public AprsHandler getAprsHandler() 
     { return dblog; }
     
-   public void setAprsLog(AprsLog log) 
+   public void setAprsHandler(AprsHandler log) 
     { dblog = log; } 
        
    public Set<String> getChannels(Channel.Type type)
