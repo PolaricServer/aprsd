@@ -17,107 +17,13 @@ package no.polaric.aprsd.http
 
   class Webserver 
       ( val api: ServerAPI,
-        val props : Properties) extends XmlServer(api,  props)
+        val props : Properties) extends XmlServer(api,  props) with ServerUtils
   {
 
 
-   val doctype = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN \">";
    val _time = new Date();
 
-
-   private def htmlBody (req: Request, head : NodeSeq, content : NodeSeq) : Node =
-        if (req.getParameter("ajax") == null)           
-            <html>
-            <head>
-            <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-            { head }
-            <link href={_wfiledir+"/style.css"} rel="stylesheet" type="text/css" />
-            </head>
-            <body>
-            {content} 
-            </body>
-            </html>
-       
-       else
-           <xml:group> { content } </xml:group>
-    
-   
-   
-   private def lSimpleLabel(id:String, cls:String, lbl:String, content: NodeSeq): NodeSeq =
-           <label for={id} class={cls}>{lbl}</label>
-           <label id={id}> {content}</label>
-          ;
  
-   private def simpleLabel(id:String, cls:String, lbl:String, content: NodeSeq): NodeSeq =
-           <xml:group>
-           {lSimpleLabel(id,cls,lbl,content)}
-           <br/>
-           </xml:group>; 
- 
-   private def TXT(t:String): NodeSeq = <xml:group>{t}</xml:group>
-   
-   
-   private def checkBox(id:String, check: Boolean, t: NodeSeq): NodeSeq =
-          <input type="checkbox" name={id} id={id}
-             checked= {if (check) "checked" else null:String}
-             value="true">
-          {t}
-          </input>
-
-
-  /**
-   * Modify a function to execute only if user is authorized for update. 
-   * Runs original function if authorized. Return error message if not. 
-   */
-  private def IF_AUTH( func: (Request) => NodeSeq ) 
-                    : (Request) => NodeSeq = 
-  {
-      def wrapper(req : Request) : NodeSeq =
-        if (authorizedForUpdate(req))
-           func(req)
-        else
-           <h2>Du er ikke autorisert for denne operasjonen</h2>
-      
-      wrapper
-  }
-
-
-   /**
-    * Generic HTML form method.
-    * Field content and action to be performed are given as function-arguments
-    */
-   private def htmlForm( req    : Request,
-                         prefix : NodeSeq,
-                         fields : (Request) => NodeSeq,
-                         action : (Request) => NodeSeq ) : NodeSeq =
-   {
-        if (req.getParameter("update") != null) 
-           <div><script source="javascript">setTimeout('window.close()', 2000);</script>
-           { action(req) }
-           </div>;
-        
-        else
-
-           <form action="" method="post">
-           { prefix }
-           <fieldset>
-              { fields(req) }
-           </fieldset>
-
-           <input type="submit" onclick="window.close()" id="cancel" value="Avbryt"/>
-           <input type="submit" name="update" id="update" value="Oppdater"/>
-           </form>
-   }
-
-
-   private def printHtml(res : Response, content : Node ) =
-   {        
-        val out = getWriter(res);
-        res.set("Content-Type", "text/html; charset=utf-8");
-        out.println (doctype + Xhtml.toXhtml(content, true, true) )
-        out.close()
-   }
-   
 
    /**
     * Exctract UTM reference from request parameters.
@@ -406,9 +312,10 @@ package no.polaric.aprsd.http
                val otxt = req.getParameter("descr")
                val perm = req.getParameter("perm")
                System.out.println("*** SET OBJECT: '"+id+"' by user '"+getAuthUser(request)+"'")
-               if ( _api.getDB().getOwnObjects().add(id, pos,
-                      if (osymtab==null) '/' else osymtab(0),
-                      if (osym==null) 'c' else osym(0),
+               if ( _api.getDB().getOwnObjects().add(id, 
+                      new AprsHandler.PosData( pos,
+                        if (osymtab==null) '/' else osymtab(0),
+                        if (osym==null) 'c' else osym(0)) ,
                       if (otxt==null) "" else otxt,
                       "true".equals(perm) ))
                   
@@ -583,7 +490,7 @@ package no.polaric.aprsd.http
             <xml:group>  
             <label for="callsign" class="leftlab">Ident:</label>
             <label id="callsign"><b> { x.getIdent().replaceFirst("@.*","") } </b></label>
-            <br/>
+
             { if (!simple)
                  simpleLabel("symbol", "leftlab", "Symbol:",TXT( x.getSymtab()+" "+x.getSymbol())) else null }
             { if (x.getAlias() != null)
@@ -599,11 +506,11 @@ package no.polaric.aprsd.http
             { simpleLabel("pos", "leftlab", "Posisjon (UTM):",
                 if (x.getPosition() != null) showUTM(x.getPosition())
                 else TXT("ikke registrert") ) }
-
+ 
             { simpleLabel("posll", "leftlab", "Position (latlong):",
                 if (x.getPosition() != null) TXT( ll2dmString( x.getPosition().toLatLng()))
                 else TXT("ikke registrert") ) }
-            
+
             { if (s != null && s.getAltitude() >= 0)
                   {simpleLabel("altitude", "leftlab", "Høyde (o/h):", TXT(s.getAltitude() + " m ")) }}
             { if (s != null && s.getSpeed() > 0)
@@ -707,7 +614,11 @@ package no.polaric.aprsd.http
       
 
 
-
+ 
+    private def cleanPath(txt:String): String = 
+        txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]+(\\-[0-9]+)?\\*?),|(qA.),", "")
+           .replaceAll("\\*", "").replaceAll(",", ", ")
+           
 
 
       
@@ -745,9 +656,7 @@ package no.polaric.aprsd.http
                              "%.1f km" format dist
                       }</td>
                       <td> { 
-                        TXT(it.pathinfo
-                         .replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]+(\\-[0-9]+)?\\*?),|(qA.),", "")
-                         .replaceAll("\\*", "").replaceAll(",", ", ")) } </td>
+                        TXT( cleanPath(it.pathinfo)) } </td>
                       </tr>
                    }
                }
@@ -771,12 +680,11 @@ package no.polaric.aprsd.http
          <xml:group>
          <label for="callsign" class="lleftlab">Ident:</label>
          <label id="callsign"><b> { s.getIdent() } </b></label>
-         <br/> 
          { simpleLabel("time",  "lleftlab", "Tidspunkt:", TXT( df.format(item.time))) }
          { simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )  }
-         { lSimpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course))  }
+         { simpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course))  }
          <div id="traffic">
-         { lSimpleLabel("via",   "lleftlab", "APRS via:", TXT(item.pathinfo))  }
+         { simpleLabel("via",   "lleftlab", "APRS via:", TXT( cleanPath(item.pathinfo)))  }
          </div>
          </xml:group>
        printHtml(res, htmlBody(req, null, result)) 
