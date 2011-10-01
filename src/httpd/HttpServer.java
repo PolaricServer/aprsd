@@ -17,7 +17,8 @@ public abstract class HttpServer extends NanoHTTPD
    protected  char       _utmlatzone;
    private    String     _timezone;
    protected  String     _serverurl;
-   private    String     _icon, _icondir, _adminuser, _updateusers;
+   protected  String     _icondir;
+   private    String     _icon, _adminuser, _updateusers;
    protected  boolean    _infraonly;
            
    public static final String _encoding = "UTF-8";
@@ -41,6 +42,8 @@ public abstract class HttpServer extends NanoHTTPD
       _utmlatzone  = config.getProperty("map.utm.latzone", "W").charAt(0);
       _icon        = config.getProperty("map.icon.default", "sym.gif").trim();
       _icondir     = config.getProperty("map.icon.dir", "icons").trim();
+      if (_icondir.charAt(0) != '/')
+         _icondir = Main.webdir+"/"+_icondir;
       _infraonly   = config.getProperty("map.infraonly", "false").trim().matches("true|yes");
       _adminuser   = config.getProperty("user.admin","admin").trim();
       _updateusers = config.getProperty("user.update", "").trim();
@@ -95,7 +98,7 @@ public abstract class HttpServer extends NanoHTTPD
             Base64 b64 = new Base64();
             byte[] dauth = b64.decode(auth.substring(6));
             String[] user = (new String(dauth)).split(":");
-            return user[0];
+            return (user.length == 0 ? null : user[0]);
          }
          return null;
    }
@@ -174,7 +177,7 @@ public abstract class HttpServer extends NanoHTTPD
              type = _serveSarUrl(header, parms, out);         
          else {
              if (uri.matches("/((icons|dicons).*)|(/style\\.css)"))
-                return serveFile( uri, header, new File("."), false );
+                return serveFile( uri, header, new File(Main.webdir), false );
              else
                 return new Response(HTTP_NOTFOUND, MIME_PLAINTEXT, "Error 404, file not found.");
          }
