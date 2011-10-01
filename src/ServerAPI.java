@@ -24,9 +24,9 @@ import java.util.*;
        
        public void addHttpHandler(Object obj, String prefix);
        
-       public AprsLog getAprsLog();
+       public AprsHandler getAprsHandler();
        
-       public void setAprsLog(AprsLog log);
+       public void setAprsHandler(AprsHandler log);
        
        public RemoteCtl getRemoteCtl(); 
        
