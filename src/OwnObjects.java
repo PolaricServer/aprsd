@@ -72,7 +72,7 @@ public class OwnObjects implements Runnable
     /**
      * Add an object.
      */  
-    public synchronized boolean add(String id, Reference pos, char symtab, char sym, 
+    public synchronized boolean add(String id, AprsHandler.PosData pos,
                         String comment, boolean perm)
     {
          AprsObject obj = (AprsObject) _db.getItem(id, null);
@@ -89,14 +89,14 @@ public class OwnObjects implements Runnable
                 id = id.substring(0,9);
             _myself.setUpdated(new Date());
             obj = _db.newObject(_myself, id);
-            obj.update(new Date(), pos, 0, 0, 0, comment, sym, symtab,  "");
+            obj.update(new Date(), pos, comment,  "");
             obj.setTimeless(perm);
             _ownObjects.add(id);
             sendObjectReport(obj, false);
             return true;
          }
        
-         System.out.println("WARNING: Object "+sym+" already exists somewhere else");
+         System.out.println("WARNING: Object "+id+" already exists somewhere else");
          return false;
     }
     
