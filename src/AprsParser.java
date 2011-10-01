@@ -26,15 +26,6 @@ import uk.me.jstott.jcoord.*;
 public class AprsParser implements Channel.Receiver
 { 
 
-    /* Part of station class instead? */
-    private static class PosData {
-       public LatLng pos;
-       public int course = -1;
-       public int speed = -1;
-       public char symbol, symtab;
-       public long altitude = -1; 
-    }
-
     /* Standard APRS position report format */
     private static Pattern _stdPat = Pattern.compile
        ("(\\d+\\.\\d+)([NS])(\\S)(\\d+\\.\\d+)([EW])(\\S)\\s*(.*)");
@@ -121,7 +112,7 @@ public class AprsParser implements Channel.Receiver
         }catch (NumberFormatException e)
           { System.out.println("*** WARNING: Cannot parse number in input. Report string probably malformed"); }
         
-        _api.getAprsLog().logAprsPacket(new Date(), p.from, p.to, p.via, p.report);
+        _api.getAprsHandler().handlePacket(new Date(), p.from, p.to, p.via, p.report);
         parsePath(station, p.via, duplicate);   
     }
 
@@ -262,7 +253,7 @@ public class AprsParser implements Channel.Receiver
     {
             int j, k;
             Double pos_lat, pos_long; 
-
+            AprsHandler.PosData pd = new AprsHandler.PosData();
 
             if (toField.length() < 6 || msg.length() < 9) 
                 return;
@@ -341,8 +332,8 @@ public class AprsParser implements Channel.Receiver
             pos_lat = d + m/60.0 + s/6000.0;
             if (!north) pos_lat *= -1.0;
                     
-	    char symbol = msg.charAt(7);
-	    char altsym = msg.charAt(8);
+	    pd.symbol = msg.charAt(7);
+	    pd.symtab = msg.charAt(8);
                
             // Parse the longitude
             d = msg.charAt(1)-28;
@@ -365,7 +356,7 @@ public class AprsParser implements Channel.Receiver
             pos_long = d + m/60.0 + s/6000.0;
             if (west) pos_long *= -1.0;
 
-            LatLng pos = new LatLng(pos_lat, pos_long);
+            pd.pos = new LatLng(pos_lat, pos_long);
                     
             // Parse the Speed/Course (s/d)
             m = msg.charAt(5)-28;  // DC+28
@@ -379,16 +370,17 @@ public class AprsParser implements Channel.Receiver
             // Specification decoding method
             if (s>=800) s -= 800;
             if (d>=400) d -= 400;
+            pd.course = d;
             
-            int speed = (int) Math.round(s * 1.852);          // Km / h   
-            int altitude = -1; 
+            pd.speed = (int) Math.round(s * 1.852);          // Km / h   
+            pd.altitude = -1; 
             String comment = null;
             if (msg.length() > 9)
             {  
                char typecode = msg.charAt(9);
                j = msg.indexOf('}', 9);
                if (j >= 9 + 3) {
-                  altitude = (int)Math.round(((((((msg.charAt(j-3)-33)*91) 
+                  pd.altitude = (int)Math.round(((((((msg.charAt(j-3)-33)*91) 
                                                + (msg.charAt(j-2)-33))*91) 
                                                + (msg.charAt(j-1)-33))-10000)*3.28084);
                   if (msg.length() > j) 
@@ -409,7 +401,7 @@ public class AprsParser implements Channel.Receiver
                  else
                     comment = comment.substring(0, comment.length()-2);
                }
-               else if (altitude == -1)
+               else if (pd.altitude == -1)
                     comment = typecode+comment;
             }     
             if (comment != null){
@@ -419,9 +411,11 @@ public class AprsParser implements Channel.Receiver
             }     
             System.out.println("*** MIC-E COMMENT: "+comment);
             
-            _api.getAprsLog().logPosReport( station.getIdent(), 
-                 new Date(), pos, d, speed, altitude, comment, symbol, altsym, pathinfo );
-            station.update(new Date(), pos, d, speed, altitude, comment, symbol, altsym, pathinfo); 
+            
+            
+            _api.getAprsHandler().handlePosReport( station.getIdent(), 
+                 new Date(), pd, comment, pathinfo );
+            station.update(new Date(), pd, comment, pathinfo); 
             return;
     }
 
@@ -524,9 +518,9 @@ public class AprsParser implements Channel.Receiver
     
     
     
-    private PosData parseCompressedPos(String data)
+    private AprsHandler.PosData parseCompressedPos(String data)
     {
-          PosData pd = new PosData();
+          AprsHandler.PosData pd = new AprsHandler.PosData();
           double latDeg, lngDeg;
           pd.symtab = data.charAt(0);
           pd.symbol = data.charAt(9);
@@ -560,13 +554,12 @@ public class AprsParser implements Channel.Receiver
     {
        Date time = new Date();
        time = parseTimestamp(data.substring(0), true);
-       PosData pd = parseCompressedPos(data.substring(3));
+       AprsHandler.PosData pd = parseCompressedPos(data.substring(3));
        if (Channel._dupCheck.checkTS(station.getIdent(), time))
             return;
             
-       _api.getAprsLog().logPosReport( station.getIdent(), 
-            time, pd.pos, pd.course, pd.speed, (int) pd.altitude, "", pd.symbol, pd.altsym, "(EXT)" );
-       station.update(time, pd.pos, pd.course, pd.speed, (int) pd.altitude, "", pd.symbol, pd.symtab, "(EXT)" );
+       _api.getAprsHandler().handlePosReport( station.getIdent(), time, pd, "", "(EXT)" );
+       station.update(time, pd, "", "(EXT)" );
     }
     
     
@@ -576,138 +569,136 @@ public class AprsParser implements Channel.Receiver
      */
     private void parseStdAprs(String data, AprsPoint station, boolean timestamp, String pathinfo)
     {
-           Date time = new Date();
-          
-           if (timestamp) {
-              if (data.substring(1).matches("[0-9]{6}h.*")) 
-                  time = parseTimestamp(data.substring(1), false);   
-              data = data.substring(8);
-              /* A duplicate check on timestamp itself */
-              if (Channel._dupCheck.checkTS(station.getIdent(), time))
-                 return;
-           }
-           else
-              data = data.substring(1);
-           
-           double latDeg, lngDeg;
-           String comment;
-           
-           /*
-            * Now, extract position info and comment
-            */     
-           PosData pd;
-           Matcher m = _stdPat.matcher(data);
-           if (m.matches())
-           {
-               pd = new PosData();
-               String lat     = m.group(1);
-               char   latNS   = m.group(2).charAt(0);
-               pd.symtab  = m.group(3).charAt(0);
-               String lng     = m.group(4);
-               char   lngEW   = m.group(5).charAt(0);
-               pd.symbol  = m.group(6).charAt(0);
-               comment = m.group(7);
+         Date time = new Date();
+         
+         if (timestamp) {
+            if (data.substring(1).matches("[0-9]{6}h.*")) 
+                time = parseTimestamp(data.substring(1), false);   
+            data = data.substring(8);
+            /* A duplicate check on timestamp itself */
+            if (Channel._dupCheck.checkTS(station.getIdent(), time))
+               return;
+         }
+         else
+            data = data.substring(1);
+         
+         double latDeg, lngDeg;
+         String comment;
+         
+         /*
+          * Now, extract position info and comment
+          */     
+         AprsHandler.PosData pd;
+         Matcher m = _stdPat.matcher(data);
+         if (m.matches())
+         {
+             pd = new AprsHandler.PosData();
+             String lat     = m.group(1);
+             char   latNS   = m.group(2).charAt(0);
+             pd.symtab  = m.group(3).charAt(0);
+             String lng     = m.group(4);
+             char   lngEW   = m.group(5).charAt(0);
+             pd.symbol  = m.group(6).charAt(0);
+             comment = m.group(7);
     
-               if (lat.length() < 7 || lng.length() < 8)
-                   /* ERROR: couldnt understand data field */ 
-                   return;        
+             if (lat.length() < 7 || lng.length() < 8)
+                 /* ERROR: couldnt understand data field */ 
+                 return;        
 
-               latDeg = Integer.parseInt(lat.substring(0,2)) + Double.parseDouble(lat.substring(2,7))/60;
-               if (latNS == 'S')
-                  latDeg *= -1;
-               lngDeg = Integer.parseInt(lng.substring(0,3)) + Double.parseDouble(lng.substring(3,8))/60;
-               if (lngEW == 'W')
-                 lngDeg *= -1;
-               pd.pos = new LatLng(latDeg, lngDeg);  
-            }
-            else if (data.matches("[\\\\/][\\x21-\\x7f]{12}.*"))
-             /* Parse compressed position report */
-            {
-                pd = parseCompressedPos(data);
-                comment = data.substring(13);
-            }
-            else 
-               /* ERROR: couldnt understand data field */ 
-               return;        
-            
-            if (pd.symbol == '_')
-                comment = parseWX(comment);
-                
-            /* Get course and speed */    
-            else if (comment.length() >= 7 && comment.substring(0,7).matches("[0-9]{3}/[0-9]{3}"))
-            {
-                pd.course = Integer.parseInt(comment.substring(0,3));
-                pd.speed  = (int) Math.round( Integer.parseInt(comment.substring(4,7))* 1.852);
-                comment = comment.substring(7);
-                
-                /* Ignore additional Bearing/NRQ fields */
-                if (comment.length() >= 8 && comment.substring(0,8).matches("/[0-9]{3}/[0-9]{3}"))
-                   comment = comment.substring(8);
-                else if (comment.length() >= 8 && comment.substring(0,8).matches("/(\\.\\.\\./\\.\\.\\.)"))
-                   /* Ignore */ ;
-            } 
-            else if (comment.length() >= 7 && comment.substring(0,7).matches("/(\\.\\.\\./\\.\\.\\.)"))
-                /* ignore */ ;
-            else if (comment.length() >= 7 && comment.substring(0,7).matches("PHG[0-9]{4}"))
-            {
-               int power = (comment.charAt(3)-'0');
-               power = power * power; 
-               int gain = (comment.charAt(5)-'0');
-               int ht = (int) Math.round(10 * Math.pow(2, (comment.charAt(4)-'0')));
-               int r = (int) Math.round(Math.sqrt(2*ht*Math.sqrt((power/10)*(gain/2))));
-               int rKm = (int) Math.round(r*1.609344);
-               
-               String dir;
-               switch (comment.charAt(6))
-               {
-                  case '1': dir = " NE";
-                  case '2': dir = " E";
-                  case '3': dir = " SE";
-                  case '4': dir = " S";
-                  case '5': dir = " SW";
-                  case '6': dir = " W";
-                  case '7': dir = " NW";
-                  case '8': dir = " N";
-                  default : dir = "";
-               }
-               comment = comment.substring(7,comment.length()) + " ("+power+" watt, "+gain+" dB"+dir+
-                     (rKm>0 ? " => "+rKm+" km" : "") + ")"; 
-            }
-            else if (comment.length() >= 7 && comment.substring(0,7).matches("RNG[0-9]{4}"))
-            {
-               int r = Integer.parseInt(comment.substring(3,7));
-               int rKm = (int) Math.round(r*1.609344);
-               comment = comment.substring(7, comment.length()) + " ("+rKm+" km omni)";
-            }
-            
-            
-            /* Altitude */
-            if (comment.length() >= 9 && comment.substring(0,9).matches("/A=[0-9]{6}"))
-            {
-                pd.altitude = Long.parseLong(comment.substring(3,9));
-                pd.altitude *= 0.3048;
-                comment = comment.substring(9, comment.length());
-            }
-            
-            /* Extra posreports (experimental) 
-             * Format: "/#" + compressed timestamp + compressed report */
-            while (comment.length() >= 18 && comment.matches("(/\\#.{16})+.*"))
-            {
-                parseExtraReport(comment.substring(2,18), station); 
-                comment = comment.substring(18, comment.length());
-            }
-            
-            
-            if (comment.length() > 0 && comment.charAt(0) == '/') 
-               comment = comment.substring(1);  
-            comment = comment.trim();
-            if (comment.length() < 1 || comment.equals(" "))
-               comment = null;
-               
-            _api.getAprsLog().logPosReport( station.getIdent(), 
-               time, pd.pos, pd.course, pd.speed, (int) pd.altitude, comment, pd.symbol, pd.altsym, pathinfo );
-
-            station.update(time, pd.pos, pd.course, pd.speed, (int) pd.altitude, comment, pd.symbol, pd.symtab, pathinfo );      
+             latDeg = Integer.parseInt(lat.substring(0,2)) + Double.parseDouble(lat.substring(2,7))/60;
+             if (latNS == 'S')
+                latDeg *= -1;
+             lngDeg = Integer.parseInt(lng.substring(0,3)) + Double.parseDouble(lng.substring(3,8))/60;
+             if (lngEW == 'W')
+               lngDeg *= -1;
+             pd.pos = new LatLng(latDeg, lngDeg);  
+          }
+          else if (data.matches("[\\\\/][\\x21-\\x7f]{12}.*"))
+           /* Parse compressed position report */
+          {
+              pd = parseCompressedPos(data);
+              comment = data.substring(13);
+          }
+          else 
+             /* ERROR: couldnt understand data field */ 
+             return;        
+          
+          if (pd.symbol == '_')
+              comment = parseWX(comment);
+              
+          /* Get course and speed */    
+          else if (comment.length() >= 7 && comment.substring(0,7).matches("[0-9]{3}/[0-9]{3}"))
+          {
+              pd.course = Integer.parseInt(comment.substring(0,3));
+              pd.speed  = (int) Math.round( Integer.parseInt(comment.substring(4,7))* 1.852);
+              comment = comment.substring(7);
+              
+              /* Ignore additional Bearing/NRQ fields */
+              if (comment.length() >= 8 && comment.substring(0,8).matches("/[0-9]{3}/[0-9]{3}"))
+                 comment = comment.substring(8);
+              else if (comment.length() >= 8 && comment.substring(0,8).matches("/(\\.\\.\\./\\.\\.\\.)"))
+                 /* Ignore */ ;
+          } 
+          else if (comment.length() >= 7 && comment.substring(0,7).matches("/(\\.\\.\\./\\.\\.\\.)"))
+              /* ignore */ ;
+          else if (comment.length() >= 7 && comment.substring(0,7).matches("PHG[0-9]{4}"))
+          {
+             int power = (comment.charAt(3)-'0');
+             power = power * power; 
+             int gain = (comment.charAt(5)-'0');
+             int ht = (int) Math.round(10 * Math.pow(2, (comment.charAt(4)-'0')));
+             int r = (int) Math.round(Math.sqrt(2*ht*Math.sqrt((power/10)*(gain/2))));
+             int rKm = (int) Math.round(r*1.609344);
+             
+             String dir;
+             switch (comment.charAt(6))
+             {
+                case '1': dir = " NE";
+                case '2': dir = " E";
+                case '3': dir = " SE";
+                case '4': dir = " S";
+                case '5': dir = " SW";
+                case '6': dir = " W";
+                case '7': dir = " NW";
+                case '8': dir = " N";
+                default : dir = "";
+             }
+             comment = comment.substring(7,comment.length()) + " ("+power+" watt, "+gain+" dB"+dir+
+                   (rKm>0 ? " => "+rKm+" km" : "") + ")"; 
+          }
+          else if (comment.length() >= 7 && comment.substring(0,7).matches("RNG[0-9]{4}"))
+          {
+             int r = Integer.parseInt(comment.substring(3,7));
+             int rKm = (int) Math.round(r*1.609344);
+             comment = comment.substring(7, comment.length()) + " ("+rKm+" km omni)";
+          }
+          
+          
+          /* Altitude */
+          if (comment.length() >= 9 && comment.substring(0,9).matches("/A=[0-9]{6}"))
+          {
+              pd.altitude = Long.parseLong(comment.substring(3,9));
+              pd.altitude *= 0.3048;
+              comment = comment.substring(9, comment.length());
+          }
+          
+          /* Extra posreports (experimental) 
+           * Format: "/#" + compressed timestamp + compressed report */
+          while (comment.length() >= 18 && comment.matches("(/\\#.{16})+.*"))
+          {
+              parseExtraReport(comment.substring(2,18), station); 
+              comment = comment.substring(18, comment.length());
+          }
+          
+          
+          if (comment.length() > 0 && comment.charAt(0) == '/') 
+             comment = comment.substring(1);  
+          comment = comment.trim();
+          if (comment.length() < 1 || comment.equals(" "))
+             comment = null;
+             
+          _api.getAprsHandler().handlePosReport( station.getIdent(), time, pd, comment, pathinfo );
+          station.update(time, pd, comment, pathinfo );      
     }
     
     
