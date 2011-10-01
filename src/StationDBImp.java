@@ -35,6 +35,9 @@ public class StationDBImp implements StationDB, Runnable
     public StationDBImp(Properties config)
     {
         _file = config.getProperty("stations.file", "stations.dat");
+        if (_file.charAt(0) != '/')
+           _file = Main.datadir+"/"+_file;
+           
         _ownobj = new OwnObjects(config, this); 
         _msgProc = new MessageProcessor(config);
         restore();
