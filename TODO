@@ -11,7 +11,7 @@ Web Server
   framework" http://www.simpleframework.org can be a good candidate. 
      DONE. 
 
-* Use Apache for all static files. 
+* Use Apache frontend for all static files. 
      DONE.
      
 * Simplify webserver impl. (esp. Scala part). 
@@ -34,7 +34,8 @@ API, Extensibility
 * Jar files in a subdirectory - easier to add extra components
       DONE.
 
-* History.Item as standalone class
+* History.Item as standalone class. Trail
+      DONE.
 
 
 
@@ -54,15 +55,8 @@ Database
        DONE.
 
 
-Other
+Other. 
 -----
-
-* [C] Some touch screen awareness to make it just a little 
-      usable for mobile devices?
-      
-      STARTED (1.0b6) - mapped some touch events to mouse events.
-      Can now pan map and zoom via buttons on top, but this is 
-      slow on Ipad. Zoom gesture does not work yet. 
 
 * Allow a dynamic number of data channels to be configured. 
   Not just two. 
@@ -85,5 +79,7 @@ Other
 * More flexible logging?
 
 * Traffic load statistics (per station). 
+
+* Search - and - change alias/icon
 
  
