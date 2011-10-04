@@ -91,7 +91,8 @@ public abstract class ServerBase
          if (auth != null) {
            Base64 b64 = new Base64();
            byte[] dauth = b64.decode(auth.substring(6));
-           return (new String(dauth)).split(":")[0];
+           String[] user = (new String(dauth)).split(":");
+           return (user.length == 0 ? null : user[0]);
          }
          return null;
    }
