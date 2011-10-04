@@ -44,8 +44,12 @@ public class ViewFilter {
   public static class Tracking extends ViewFilter
   {  
        public boolean showIdent(AprsPoint x)
-           { return _map.get("moving").useObject(x) || (!x.isLabelHidden() && (x.getSymtab() != '/' || x.getSymbol() != '_') && x.getSymbol() != '-' && 
-                    x.getSymbol() != '&' && !_map.get("infra").useObject(x)); }
+           { return _map.get("moving").useObject(x) || 
+                    (!x.isLabelHidden() && 
+                    (x.getSymtab() != '/' || x.getSymbol() != '_') && 
+                     x.getSymbol() != '-' && 
+                     x.getSymbol() != '&' && !(x instanceof AprsObject) && 
+                     !_map.get("infra").useObject(x)); }
   }
   
   
