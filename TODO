@@ -1,12 +1,9 @@
-Updates to 1.0.2, etc.
+Updates to 1.0.3, etc.
 ----------------------
     
 * Check for empty position in object input.
-    
-* [C] Sometimes last update in trail is missing. Fix?
-
 * Update icon when SAR mode is turned off??
-
+* [C] Sometimes last update in trail is missing. Fix?
 
 
 Support for mobile devices
@@ -21,6 +18,4 @@ Support for mobile devices
 Security
 --------
 
-* Support Dokuwiki authentication. 
-    
 * Additional config file for permissions.
