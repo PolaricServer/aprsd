@@ -95,4 +95,19 @@
 * [Security] Better protection of certain aprsd backend operations through 
   Apache frontend authentication and access control.
   
- 
+
+1.0.2
+-----
+
+* [C] Error in parsing map references xxx xxx. Fix. 
+* Yet another timestamp bug.
+* Log user objects or alias changes (identify user??). 
+* SAR URL. 
+* [C] Don't draw trail if it is too small to be visible. Firefox
+  handles such scaled down trails badly. 
+* Better filtering of updates that has movements below a distance threshold
+  (Firefox bug - se above)
+* Fewer lost update notifications to clients
+* [C] Troublesome sizing of popups in Firefrosk. CSS fixes.
+* [C] Compiled (compressed) javascript. 
+* [C] Basic support for mobile devices. Droid app
