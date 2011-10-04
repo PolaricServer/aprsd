@@ -1,4 +1,10 @@
-polaric-aprsd (0.99+1.0.2beta1) unstable; urgency=low
+polaric-aprsd (0.99+1.0.2beta2) stable; urgency=low
+
+  * Documentation + issue with view filters 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Mon, 03 Oct 2011 23:19:13 +0200
+
+polaric-aprsd (0.99+1.0.2beta1) stable; urgency=low
 
   * Initial Release.
 
