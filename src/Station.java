@@ -36,7 +36,8 @@ public static class Status implements Serializable
      * and notifications
      */
     private static long _expiretime    = 1000 * 60 * 60;    // Default: 1 hour
-    private static ColourTable _colTab = new ColourTable (Main.confdir+"/trailcolours");
+    private static ColourTable _colTab = 
+      new ColourTable (System.getProperties().getProperty("confdir", ".")+"/trailcolours");
         
     public static long getExpiretime()
        { return _expiretime; }
