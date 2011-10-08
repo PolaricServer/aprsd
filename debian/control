@@ -3,7 +3,7 @@ Section: hamradio
 Priority: optional
 Maintainer: Øyvind hanssen <ohanssen@acm.org>
 Build-Depends: debhelper (>= 8.0.0), default-jdk (>= 1.6)|sun-java6-jdk, scala (<< 2.8)
-Standards-Version: 3.9.1
+Standards-Version: 3.9.2
 Homepage: http://hans.priv.no/la7eca
 
 Package: polaric-aprsd
