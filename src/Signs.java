@@ -7,7 +7,8 @@ import uk.me.jstott.jcoord.*;
 
 public class Signs 
 {
-    private static Signs _signs = new Signs(Main.confdir+"/signs");
+    private static Signs _signs = 
+       new Signs(System.getProperties().getProperty("confdir", ".")+"/signs");
     
     public static class Item extends PointObject {
         public long _maxScale;
