@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-   public static String version = "1.0.2beta2";
+   public static String version = "1.0.2";
 
    public static String       confdir, datadir, webdir; 
    public static InetChannel  ch1 = null;
