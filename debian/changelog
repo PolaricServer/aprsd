@@ -1,3 +1,9 @@
+polaric-aprsd (1.0.2) stable; urgency=low
+
+  * Read config file 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 09 Oct 2011 01:00:20 +0200
+
 polaric-aprsd (0.99+1.0.2beta2) stable; urgency=low
 
   * Documentation + issue with view filters 
