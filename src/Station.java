@@ -68,6 +68,7 @@ public static class Status implements Serializable
     private int         _report_ignored = 0;
     private boolean     _igate, _wdigi;
     private Date        _infra_updated = null;
+    private Channel     _source;
        
        
     public Station(String id)
@@ -98,6 +99,14 @@ public static class Status implements Serializable
             _infra_updated.getTime() + 1000*60*60*24 < now.getTime())
           _igate = _wdigi = false; 
     } 
+    
+    
+    public void setSource(Channel src)
+       { _source = src; }
+   
+    public Channel getSource()
+       { return _source; }
+       
     
     public boolean isIgate()
        { expireInfra(); 
