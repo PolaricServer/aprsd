@@ -25,9 +25,25 @@ public abstract class Channel
 {
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      private LinkedHashMap<String, Date> _heard = new LinkedHashMap();
-   
+     protected boolean _restrict = false;
+     protected String _style = "";
+     
      public enum Type {inet, radio};
      
+     
+     protected void _init(Properties config, String prefix) 
+     {
+        _restrict = config.getProperty(prefix+".restrict", "false").trim().matches("true|yes");
+        _style = config.getProperty(prefix+".style", "").trim();
+     }
+     
+     
+     public String getStyle() 
+        { return _style; }
+        
+    public boolean isRestricted()
+        { return _restrict; }
+        
      
      private void removeOldHeardEntries()
      {
@@ -50,7 +66,7 @@ public abstract class Channel
         public String from, to, msgto, via, report; 
         public char type; 
         public boolean thirdparty = false; 
-        Channel source;
+        public Channel source;
         @Override public Packet clone() 
             { try { return (Packet) super.clone();}
               catch (Exception e) {return null; } 
@@ -74,8 +90,7 @@ public abstract class Channel
      * Perhaps we should use a list of receivers in a later version, but for now
      * two is sufficient: A parser and an igate.
      */
-    private   Receiver     _r1 = null; 
-    private   Receiver     _r2 = null;
+    private List<Receiver> _rcv = new LinkedList<Receiver>(); 
     protected PrintWriter  _out = null; 
 
     public static DupCheck  _dupCheck = new DupCheck();
@@ -107,11 +122,14 @@ public abstract class Channel
     
     /**
      * Configure receivers. 
-     * Each channel can have up to two receivers (subscribers). 
      */
-    public void setReceivers(Receiver r1, Receiver r2)
-       { _r1 = r1; _r2 = r2; }
-           
+    public void addReceiver(Receiver r)
+       { if (r != null) _rcv.add(r); }
+    
+    public void removeReceiver(Receiver r)
+       { if (r != null) _rcv.remove(r); }
+    
+    
     
     /**
      * Convert text string to packet structure. 
@@ -168,10 +186,8 @@ public abstract class Channel
        _heard.put(p.from, new Date());
 
        dup = _dupCheck.checkPacket(p.from, p.to, p.report);
-       if (_r1 != null) 
-           _r1.receivePacket(p, dup);
-       if (_r2 != null)
-           _r2.receivePacket(p, dup);
+       for (Receiver r: _rcv)
+           r.receivePacket(p, dup);
        
     }
     
