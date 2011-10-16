@@ -71,7 +71,8 @@ public class AprsParser implements Channel.Receiver
         Station station = _api.getDB().getStation(p.from, null);
         if (station == null)
             station = _api.getDB().newStation(p.from); 
-   
+        station.setSource(p.source);
+        
         if (!duplicate) try {    
         switch(p.type)
         {
