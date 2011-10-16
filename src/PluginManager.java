@@ -89,6 +89,8 @@ public class PluginManager
      */
     public static void addList(String cn) throws PluginError
     {
+        if ("".equals(cn))
+           return;
         String[] plugins = cn.split(",(\\s)*");
         for (String x : plugins)
            add(x);
