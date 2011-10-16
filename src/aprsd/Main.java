@@ -12,9 +12,10 @@ import no.polaric.aprsd.http.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "1.0+dev";
+   public  static String version = "1.1alpha1";
    private static StationDB db = null;
    public  static InetChannel ch1 = null;
+   public  static InetChannel chx = null;
    public  static TncChannel  ch2 = null;
    public static  Igate igate  = null;
    public static  OwnObjects ownobjects; 
@@ -23,6 +24,8 @@ public class Main implements ServerAPI
    private static Properties _config = new Properties();
    private static HttpServer ws;
 
+   
+   
    /* Experimental !! 
     * Database interface must be known here. The interface is 
     * implemented by a plugin 
@@ -96,6 +99,7 @@ public class Main implements ServerAPI
                      if (db  != null) db.save(); 
                      if (ch1 != null) ch1.close();
                      if (ch2 != null) ch2.close();
+                     if (chx != null) chx.close();
                    } 
              });
              
@@ -114,21 +118,24 @@ public class Main implements ServerAPI
 
            /* Start parser and connect it to channel(s) if any */
            AprsParser p = new AprsParser(api, db.getMsgProcessor());
-           if (_config.getProperty("igate.on", "false").trim().matches("true|yes")) {
-               System.out.println("*** Activate IGATE");
-               igate = new Igate(_config);
-           }
            if (_config.getProperty("inetchannel.on", "false").trim().matches("true|yes"))  {
                System.out.println("*** Activate Internet Channel");
-               ch1 = new InetChannel(api, _config);
-               ch1.setReceivers((Channel.Receiver) p, igate); 
+               ch1 = new InetChannel(api, _config, "inetchannel");
+               ch1.addReceiver(p);
                Thread t = new Thread(ch1, "InetChannel");
+               t.start(); 
+           }
+           if (_config.getProperty("extrachannel.on", "false").trim().matches("true|yes"))  {
+               System.out.println("*** Activate EXTRA Internet Channel");
+               chx = new InetChannel(api, _config, "extrachannel");
+               chx.addReceiver(p); 
+               Thread t = new Thread(chx, "InetChannel");
                t.start(); 
            }
            if (_config.getProperty("tncchannel.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate TNC Channel");
                ch2 = new TncChannel(_config);
-               ch2.setReceivers((Channel.Receiver) p, igate);
+               ch2.addReceiver(p);
                Thread t = new Thread(ch2, "TncChannel");
                t.start(); 
            } 
@@ -141,10 +148,16 @@ public class Main implements ServerAPI
            /* Message processing */
            db.getMsgProcessor().setChannels(ch2, ch1);  
 
-           /* Igate */  
-           if (igate != null)
+           /* Igate */            
+           if (_config.getProperty("igate.on", "false").trim().matches("true|yes")) {
+               System.out.println("*** Activate IGATE");
+               igate = new Igate(_config);
                igate.setChannels(ch2, ch1);
-
+               ch1.addReceiver(igate); 
+               ch2.addReceiver(igate);
+           }
+           
+           
            /* APRS objects */
            ownobjects = db.getOwnObjects(); 
            ownobjects.setChannels(ch2, ch1); 
