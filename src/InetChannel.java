@@ -31,17 +31,24 @@ public class InetChannel extends Channel implements Runnable
     private   BufferedReader _rder = null;
     private   ServerAPI   _api;
     
-    
-    public InetChannel(ServerAPI api, Properties config) 
+
+
+
+
+    public InetChannel(ServerAPI api, Properties config, String prefix) 
     {
+        if (prefix==null)
+           prefix = "inetchannel"; 
+        _init(config, prefix);
         _api = api;
-        _host = config.getProperty("inetchannel.host", "localhost").trim();
-        _port = Integer.parseInt(config.getProperty("inetchannel.port", "14580").trim());
-        _user = config.getProperty("inetchannel.user", "").trim().toUpperCase();
+        
+        _host = config.getProperty(prefix+".host", "localhost").trim();
+        _port = Integer.parseInt(config.getProperty(prefix+".port", "14580").trim());
+        _user = config.getProperty(prefix+".user", "").trim().toUpperCase();
         if (_user.length() == 0)
            _user = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
-        _pass = config.getProperty("inetchannel.pass", "-1").trim();
-        _filter = config.getProperty("inetchannel.filter", ""); 
+        _pass = config.getProperty(prefix+".pass", "-1").trim();
+        _filter = config.getProperty(prefix+".filter", ""); 
     }
  
  
