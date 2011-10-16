@@ -207,7 +207,9 @@ public class XmlServer extends ServerBase
                         if (s instanceof Station && ((Station)s).isWideDigi())
                            style += " wdigi";
                      }
-                                                   
+                     if (s instanceof Station)
+                         style += " "+((Station)s).getSource().getStyle();
+                     
                      out.println("   <label style=\""+style+"\">");
                      out.println("       "+fixText(s.getDisplayId(showSarInfo)));
                      out.println("   </label>"); 
