@@ -13,10 +13,12 @@ CALL=NOCALL
 if [ -e $INIFILE ]; then
   sed -n -e "/default\.mycall.*/p" $INIFILE | sed "s/default\.mycall\ *=\ *//" > /tmp/$$
   read CALL < /tmp/$$
-  db_set polaric-aprsd/callsign $CALL
+  if [ "$CALL" != "NOCALL" ]; then
+    db_set polaric-aprsd/callsign $CALL
+  fi
 fi
 
 # Enter callsign
 db_input high polaric-aprsd/callsign || true
-db_go
+db_go || true
 
