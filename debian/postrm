@@ -8,6 +8,11 @@ case "$1" in
     ;;
 
     purge)
+       if id polaric > /dev/null 2>&1 ; then
+           deluser --quiet polaric || true
+           delgroup --quiet --only-if-empty polaric || true
+       fi
+       
        if [ -d "/var/log/polaric" ]; then
           rm -R /var/log/polaric 
        fi
@@ -16,7 +21,7 @@ case "$1" in
        fi
     ;;
 
-    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+    upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
         # Nothing to do here
     ;;
 
