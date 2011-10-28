@@ -152,7 +152,7 @@ public class InetChannel extends Channel implements Runnable
          
            if (retry <= _max_retry || _max_retry == 0) 
                try { 
-                   long sleep = 30000 * (long) Math.pow(2, retry);
+                   long sleep = 30000 * (long) retry;
                    if (sleep > _retry_time) 
                       sleep = _retry_time; /* Default: Max 30 minutes */
                    Thread.sleep(sleep); 
