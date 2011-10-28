@@ -18,7 +18,14 @@ import java.util.*;
 
 
 public class ViewFilter {
+ 
+ protected boolean isSymbol(AprsPoint x, char sym, char symtab)
+     { return x.getSymbol() == sym && (symtab == '*' || x.getSymtab() == symtab); }
   
+  protected boolean isNumberSym(AprsPoint x)
+     { return x.getSymbol() >= '0' && x.getSymbol() <= '9' && x.getSymtab() == '/'; }
+     
+     
   public boolean useObject(AprsPoint x)
        { return true; } 
        
@@ -41,15 +48,37 @@ public class ViewFilter {
   }
   
   
+  
+  public static class Tracking2 extends ViewFilter
+  {  
+       public boolean showIdent(AprsPoint x)
+           { return !(x instanceof AprsObject) || 
+                    ( !isSymbol(x, 'j', '\\')    &&
+                      !isSymbol(x, 'n', '\\'))   
+                      ||
+                    ( !((AprsObject)x).getOwner().getIdent().equals("LA1FTA-14") && 
+                      !((AprsObject)x).getOwner().getIdent().equals("LA4JAA-2")) ;   }
+              
+           
+  }
+  
+
+   
   public static class Tracking extends ViewFilter
   {  
        public boolean showIdent(AprsPoint x)
-           { return _map.get("moving").useObject(x) || 
-                    (!x.isLabelHidden() && 
-                    (x.getSymtab() != '/' || x.getSymbol() != '_') && 
-                     x.getSymbol() != '-' && 
-                     x.getSymbol() != '&' && !(x instanceof AprsObject) && 
-                     !_map.get("infra").useObject(x)); }
+           { return !x.isLabelHidden() &&                       /* Not explicitly hidden AND */
+                    ( _map.get("moving").useObject(x) ||        /* moving, OR ... */
+                      isSymbol(x, '!', '*') || isSymbol(x, '\'', '*') || isSymbol(x, 'R', '/') ||
+                      isSymbol(x, '(', '*') || isSymbol(x, '*', '/')  || isSymbol(x, '+', '/') ||
+                      isSymbol(x, ',', '/') || isSymbol(x, ':', '/')  || isSymbol(x, '<', '/') ||
+                      isSymbol(x, '>', '*') || isSymbol(x, 'F', '/')  || isSymbol(x, 'P', '/') ||
+                      isSymbol(x, 'U', '*') || isSymbol(x, 'X', '*')  || isSymbol(x, 'Y', '/') ||
+                      isSymbol(x, '[', '/') || isSymbol(x, '^', '*')  || isSymbol(x, 'a', '/') ||
+                      isSymbol(x, 'b', '/') || isSymbol(x, 'c', '/')  || isSymbol(x, 'e', '/') ||
+                      isSymbol(x, 'f', '/') || isSymbol(x, 'f', '/')  || isSymbol(x, 'k', '*') ||
+                      isSymbol(x, 'p', '/') || isSymbol(x, 's', '/')  || isSymbol(x, 'u', '*') ||
+                      isSymbol(x, 'v', '*') ); }
   }
   
   
@@ -89,6 +118,7 @@ public class ViewFilter {
   static {
       _map.put("all", new ViewFilter());
       _map.put("track", new Tracking());
+      _map.put("track2", new Tracking2());
       _map.put("le", new Callsign("LE.*"));
       _map.put("infra", new Infra("LD.*"));
       _map.put("ainfra", new Infra(null));
