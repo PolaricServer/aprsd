@@ -84,38 +84,40 @@ public class Main implements ServerAPI
     { sarmode = null; }
     
     
- 
-   public static void main( String[] args )
+    
+   private ServerAPI api;
+   
+   public void init(String[] args) 
+      // Here open configuration files, create a trace file, create ServerSockets, Threads
    {
         /* Get properties from configfile */
         if (args.length < 1)
            System.out.println("Usage: Daemon <config-file>");
-          
-        Runtime.getRuntime().addShutdownHook( new Thread() 
-             {
-                public void run() 
-                   { 
-                     System.out.println("*** Polaric APRSD shutdown"); 
-                     if (db  != null) db.save(); 
-                     if (ch1 != null) ch1.close();
-                     if (ch2 != null) ch2.close();
-                     if (chx != null) chx.close();
-                   } 
-             });
              
         try {
            FileInputStream fin = new FileInputStream(args[0]);
            _config.load(fin);
-           System.out.println( "*** Polaric APRSD startup ++" );
            
            /* API */
-           ServerAPI api = new Main();
+           api = new Main();
            PluginManager.setServerApi(api);
            
            /* Database of stations/objects */
            db  = new StationDBImp(_config); 
            AprsPoint.setDB(db);
-
+        }
+        catch( Exception ioe )
+        {
+             System.err.println( "*** Couldn't init server:\n");
+             ioe.printStackTrace(System.err);
+        }
+    }
+    
+    
+    public void start()
+      // Start the Thread, accept incoming connections   
+    {
+        try {
            /* Start parser and connect it to channel(s) if any */
            AprsParser p = new AprsParser(api, db.getMsgProcessor());
            if (_config.getProperty("inetchannel.on", "false").trim().matches("true|yes"))  {
@@ -177,9 +179,27 @@ public class Main implements ServerAPI
         catch( Exception ioe )
         {
              System.err.println( "*** Couldn't start server:\n");
-             ioe.printStackTrace(System.err);
-             System.exit( -1 );
+             ioe.printStackTrace(System.err);;
         }
         
    }
+  
+
+    
+    public void stop()
+      // Inform the Thread to terminate the run(), close the ServerSockets
+    {
+         System.out.println("*** Polaric APRSD shutdown"); 
+         if (db  != null) db.save(); 
+         if (ch1 != null) ch1.close();
+         if (ch2 != null) ch2.close();
+         if (chx != null) chx.close();
+    }
+    
+    
+    
+    public void destroy()
+      // Destroy any object created in init()
+   {}
+   
 }
