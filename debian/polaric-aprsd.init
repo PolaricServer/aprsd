@@ -12,14 +12,16 @@
        DESC="Polaric APRSD"
        NAME=polaric-aprsd         
        JLIB=/usr/share/java
-  CLASSPATH=$JLIB/jcoord-polaric.jar:$JLIB/polaric-aprsd.jar:$JLIB/utf8-with-fallback-polaric.jar:$JLIB/RXTXcomm.jar:$JLIB/scala-library.jar
+       PLUGINS=/etc/polaric-aprsd/plugins
+  CLASSPATH=$JLIB/commons-daemon.jar:$JLIB/simple.jar:$JLIB/jcoord-polaric.jar:$JLIB/polaric-aprsd.jar:$JLIB/utf8-with-fallback-polaric.jar:$JLIB/RXTXcomm.jar:$JLIB/scala-library.jar:$PLUGINS/*
 SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB0:/dev/ttyUSB1:/dev/ttyACM0:/dev/ttyACM1
       FLAGS=-Djava.net.preferIPv4Stack=true
     LOGFILE=/var/log/polaric/aprsd.log
     INIFILE=/etc/polaric-aprsd/server.ini
        JAVA=java
-       
-  
+       JSVC=jsvc
+  JAVA_HOME=/usr/lib/jvm/java-6-sun
+       USER=polaric
     PIDFILE=/var/run/$NAME.pid
  SCRIPTNAME=/etc/init.d/$NAME
  POLARIC_SHUTDOWN=30
@@ -50,10 +52,11 @@ case "$1" in
          log_daemon_msg "Starting $DESC"
          if start-stop-daemon --test --start --pidfile "$PIDFILE" --user root \
                  --startas "$JAVA" >/dev/null; then
-              $JAVA -Xverify:none -server $SERIALPORTS $FLAGS -cp $CLASSPATH \
+              
+              $JSVC -Xverify:none $SERIALPORTS $FLAGS -cp $CLASSPATH -pidfile $PIDFILE -java-home $JAVA_HOME \
+              -user $USER -outfile $LOGFILE -errfile $LOGFILE \
               -Dconfdir=/etc/polaric-aprsd -Ddatadir=/var/lib/polaric -Dwebdir=/usr/share/polaric \
               no.polaric.aprsd.Main $INIFILE >> $LOGFILE  2>&1 &
-             echo $! > $PIDFILE
              sleep 2
              
              if [ -e /etc/apache2/sites-enabled/aprs ]; then
