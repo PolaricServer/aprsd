@@ -35,7 +35,7 @@ public static class Status implements Serializable
      * Static variables and functions to control expire timeouts 
      * and notifications
      */
-    private static long _expiretime    = 1000 * 60 * 60;    // Default: 1 hour
+    private static long _expiretime    = 1000 * 60 * 60 * 2;    // Default: 2 hour
     private static ColourTable _colTab = 
       new ColourTable (System.getProperties().getProperty("confdir", ".")+"/trailcolours");
         
