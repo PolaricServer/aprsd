@@ -7,7 +7,18 @@ INIFILE=/etc/polaric-aprsd/server.ini
 
 
 case "$1" in
+
     configure|reconfigure)
+        if [ "$1" == "configure" ] ; then
+           if ! id polaric > /dev/null 2>&1 ; then
+               adduser --quiet --system --home /var/lib/polaric --no-create-home \
+                   --group --disabled-password --shell /bin/false \
+                   polaric
+           fi
+           chown -R polaric:adm /var/log/polaric /var/lib/polaric
+           chmod 750 /var/log/polaric
+        fi  
+        
         db_get polaric-aprsd/callsign
         sed -e "s/default\.mycall = .*/default\.mycall = $RET/" $INIFILE > $INIFILE.tmp
         mv $INIFILE.tmp $INIFILE
