@@ -37,6 +37,7 @@ public abstract class HttpServer extends NanoHTTPD
    public HttpServer(StationDB db, int port, Properties config) throws IOException
    {
       super(port); 
+      ViewFilter.init(config);
       _db=db; 
       _utmzone     = Integer.parseInt(config.getProperty("map.utm.zone", "33").trim());
       _utmlatzone  = config.getProperty("map.utm.latzone", "W").charAt(0);
