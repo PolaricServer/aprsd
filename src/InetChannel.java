@@ -89,12 +89,11 @@ public class InetChannel extends Channel implements Runnable
     /**
      * Main thread - connects to APRS-IS server and awaits incoming packets. 
      */
-    static final int MAX_RETRY = 10;  
     public void run()
     {
         int retry = 0;
                
-        while (retry <= MAX_RETRY) 
+        while (true) 
         { 
            try {
                _sock = new Socket(_host, _port);
@@ -158,6 +157,7 @@ public class InetChannel extends Channel implements Runnable
                    Thread.sleep(sleep); 
                } 
                catch (Exception e) {} 
+           else break;
         }
         System.out.println("*** Couldn't connect to APRS server '"+_host+"' - giving up");        
     }
