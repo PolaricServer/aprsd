@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 INIFILE=/etc/polaric-aprsd/server.ini
 
@@ -14,6 +14,7 @@ case "$1" in
                adduser --quiet --system --home /var/lib/polaric --no-create-home \
                    --group --disabled-password --shell /bin/false \
                    polaric
+               usermod -G dialout polaric
            fi
            chown -R polaric:adm /var/log/polaric /var/lib/polaric
            chmod 750 /var/log/polaric
