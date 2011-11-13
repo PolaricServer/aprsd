@@ -17,7 +17,7 @@ case "$1" in
                usermod -G dialout polaric
            fi
            chown -R polaric:adm /var/log/polaric /var/lib/polaric
-           chmod 750 /var/log/polaric
+           chmod 755 /var/log/polaric
         fi  
         
         db_get polaric-aprsd/callsign
