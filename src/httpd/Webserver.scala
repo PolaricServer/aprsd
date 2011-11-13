@@ -558,7 +558,7 @@ package no.polaric.aprsd.http
                     val linkable = (xx != null  && xx.visible() && xx.getPosition() != null)
                     <span class={ if (linkable) "link_id" else ""} onclick={
                         if (linkable) 
-                           "findAndShowStation('" + xx.getIdent() + "')"
+                           "findStation('" + xx.getIdent() + "', true)"
                         else "" }> {it + " " } </span>
                 }
                 else null;
