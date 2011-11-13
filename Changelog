@@ -111,3 +111,18 @@
 * [C] Troublesome sizing of popups in Firefrosk. CSS fixes.
 * [C] Compiled (compressed) javascript. 
 * [C] Basic support for mobile devices. Droid app
+* Debian packages
+
+
+1.0.3
+-----
+
+* Better "sporing" view filters. Two variants. 
+* More active retry when network is down. 
+* Retry of TNC serial port to  make it more robust?
+* URL in 'signs'
+* Run as non-root user!! Run with jsvc
+* Fix error in logrotate script
+* LD_LIBRARY_PATH for librxtx-java (serial communication)
+
+
