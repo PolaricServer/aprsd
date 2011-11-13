@@ -71,7 +71,7 @@ case "$1" in
          if start-stop-daemon --test --start --pidfile "$PIDFILE" --user root \
                  --startas "$JAVA" >/dev/null; then
               
-              $JSVC -Xverify:none $SERIALPORTS $FLAGS -cp $CLASSPATH -pidfile $PIDFILE -java-home $JAVA_HOME \
+              $JSVC -Xverify:none $SERIALPORTS $FLAGS -cp $CLASSPATH -pidfile $PIDFILE  \
               -user $USER -outfile $LOGFILE -errfile $LOGFILE \
               -Dconfdir=/etc/polaric-aprsd -Ddatadir=/var/lib/polaric -Dwebdir=/usr/share/polaric \
               no.polaric.aprsd.Main $INIFILE >> $LOGFILE  2>&1 &
