@@ -1,5 +1,5 @@
  
-/usr/local/polaric-aprsd/logs/aprsd.log{
+/var/log/polaric/aprsd.log{
         weekly
         missingok
         rotate 52
