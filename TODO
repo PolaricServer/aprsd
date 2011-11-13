@@ -1,9 +1,31 @@
-Updates to 1.0.3, etc.
+Updates to 1.0.4, etc.
 ----------------------
     
 * Check for empty position in object input.
+
 * Update icon when SAR mode is turned off??
+
 * [C] Sometimes last update in trail is missing. Fix?
+
+* Some convenience scripts. Restart, clean maps, ... 
+
+* [C] Fix bug - search result doesn't work, and other..
+    DONE.
+
+* Fix traffic-to/traffic-from linking
+    DONE.
+
+
+Packaging related
+-----------------
+     
+* [C] Configurable index page (in /etc), css, etc... 
+  Implement in PHP. 
+    DONE.
+    
+* [C] Put web-app another place than /var/www  ?? 
+* Server won't stop when shutting down machine? 
+
 
 
 Support for mobile devices
@@ -13,9 +35,3 @@ Support for mobile devices
 * Multitouch zoom events. 
 * Login and update operations
 
-
-
-Security
---------
-
-* Additional config file for permissions.
