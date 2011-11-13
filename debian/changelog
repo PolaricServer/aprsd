@@ -1,3 +1,15 @@
+polaric-aprsd (1.0.3+) stable; urgency=low
+
+  * Testing 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sat, 12 Nov 2011 17:14:28 +0100
+
+polaric-aprsd (1.0.3) stable; urgency=low
+
+  * Run with jsvc as non-root user + more (see other changelog file) 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 06 Nov 2011 18:01:01 +0100
+
 polaric-aprsd (1.0.2-1) stable; urgency=low
 
   * Fix a problem with configuration 
