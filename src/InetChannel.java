@@ -131,7 +131,6 @@ public class InetChannel extends Channel implements Runnable
            catch (java.net.ConnectException e)
            {
                 System.out.println("*** APRS server '"+_host+"' : "+e.getMessage());
-                retry++; 
            }
            catch (java.net.SocketTimeoutException e)
            {
@@ -141,14 +140,14 @@ public class InetChannel extends Channel implements Runnable
            {   
                 System.out.println("*** APRS server '"+_host+"' : "+e); 
                 e.printStackTrace(System.out);
-                retry += 2;
            }
            finally 
              { _close(); }
         
            if (_close)
                    return;
-         
+          
+           retry++;
            if (retry <= _max_retry || _max_retry == 0) 
                try { 
                    long sleep = 30000 * (long) retry;
