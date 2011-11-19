@@ -78,7 +78,7 @@ public class ViewFilter {
                       isSymbol(x, 'b', '/') || isSymbol(x, 'c', '/')  || isSymbol(x, 'e', '/') ||
                       isSymbol(x, 'f', '/') || isSymbol(x, 'f', '/')  || isSymbol(x, 'k', '*') ||
                       isSymbol(x, 'p', '/') || isSymbol(x, 's', '/')  || isSymbol(x, 'u', '*') ||
-                      isSymbol(x, 'v', '*') ); }
+                      isSymbol(x, 'v', '*') || isSymbol(x, 'j', '/') ); }
   }
   
   
