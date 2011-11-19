@@ -150,13 +150,16 @@ public class Main implements ServerAPI
            /* Message processing */
            db.getMsgProcessor().setChannels(ch2, ch1);  
 
-           /* Igate */            
+           /* Igate.
+            * FIXME:  Should create igate object also if not on. Always or create a new 
+            * config property. Note that if inetchannel or tncchannel does not exist, 
+            * igate will not activate. Should those channels always be created????
+            */            
            if (_config.getProperty("igate.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate IGATE");
                igate = new Igate(_config);
                igate.setChannels(ch2, ch1);
-               ch1.addReceiver(igate); 
-               ch2.addReceiver(igate);
+               igate.activate(this);
            }
            
            
