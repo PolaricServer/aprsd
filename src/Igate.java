@@ -23,12 +23,13 @@ import uk.me.jstott.jcoord.*;
 /**
  * Igate - Gateway between RF channel and internet channel.
  */
-public class Igate implements Channel.Receiver
+public class Igate implements Channel.Receiver, ManagedObject
 { 
     private Channel _inetChan, _rfChan;
     private boolean _allowRf;
     private String  _myCall; /* Move this ? */
     private long    _msgcnt = 0; 
+    private boolean _active = false;
     
     public Igate(Properties config) 
     {
@@ -38,11 +39,45 @@ public class Igate implements Channel.Receiver
            _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
     }  
        
+       
+    /**
+     * Start the service.    
+     * @param a: the server interface. 
+     */
+    public synchronized void activate(ServerAPI a) {
+         /* Activating means subscribing to traffic from the two channels */
+         if (_inetChan != null && _rfChan != null) {
+            _inetChan.addReceiver(this); 
+            _rfChan.addReceiver(this);
+            _active = true;
+         }
+         else
+            /* FIXME: Should perhaps throw exception here? */
+            System.out.println("*** WARNING: Cannot activate igate, channel(s) not set");
+    }
+   
+   
+    /** stop the service. */
+    public synchronized void deActivate() {
+         _inetChan.removeReceiver(this); 
+         _rfChan.removeReceiver(this);
+         _active = false;
+    }
+    
+   
+    /** Return true if service is running. */
+    public boolean isActive()
+       { return _active; }
+    
+    
+    
+    
     /**
      * Configure the igate with the channels to gate between. 
-     * must be one RF channel and one APRS-IS channel.
+     * must be one RF channel and one APRS-IS channel. Note that the igate cannot 
+     * be activated before these are properly set. 
      */   
-    public void setChannels(Channel rf, Channel inet)
+    public synchronized void setChannels(Channel rf, Channel inet)
     {
         _inetChan = inet;
         _rfChan = rf; 
@@ -110,7 +145,7 @@ public class Igate implements Channel.Receiver
     /**
      * Receive and gate an APRS packet.
      */
-    public void receivePacket(Channel.Packet p, boolean dup)
+    public synchronized void receivePacket(Channel.Packet p, boolean dup)
     {
         if (dup)
            return;
