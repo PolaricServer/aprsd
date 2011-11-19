@@ -23,14 +23,18 @@ import gnu.io.*;
  * TNC channel. For devices in TNC2 compatible mode.
  */
  
-public class TncChannel extends Channel implements Runnable
+public class TncChannel extends Channel implements Runnable, Serializable
 {
-    private  String _portName; 
-    private  int _baud;
-    private  BufferedReader _in;
-    private  SerialPort _serialPort;
-    private String  _myCall; /* Move this ? */
-    private boolean _close = false;
+    private  String  _portName; 
+    private  int     _baud;
+    private  String  _myCall; /* Move this ? */
+    
+    transient private  boolean        _close = false;    
+    transient private  int            _max_retry;
+    transient private  long           _retry_time;   
+    transient private  BufferedReader _in;
+    transient private  SerialPort     _serialPort;
+
     
     
     public TncChannel(Properties config) 
@@ -39,10 +43,16 @@ public class TncChannel extends Channel implements Runnable
         if (_myCall.length() == 0)
            _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();  
         
+        _max_retry = Integer.parseInt(config.getProperty("tncchannel.retry", "0").trim());
+        _retry_time = Long.parseLong(config.getProperty("tncchannel.retry.time", "30").trim()) * 60 * 1000; 
+        
         _portName = config.getProperty("tncchannel.port", "/dev/ttyS0").trim();
         _baud= Integer.parseInt(config.getProperty("tncchannel.baud", "9600").trim());
-        
+        System.setProperty("gnu.io.rxtx.SerialPorts", "/dev/ttyACM0");
     }
+ 
+ 
+ 
  
  
  
@@ -150,10 +160,24 @@ public class TncChannel extends Channel implements Runnable
     
     public void run()
     {
+        int retry = 0;             
+        while (true) 
+        {
+           if (retry <= _max_retry || _max_retry == 0) 
+               try { 
+                   long sleep = 30000 * (long) retry;
+                   if (sleep > _retry_time) 
+                      sleep = _retry_time; /* Default: Max 30 minutes */
+                   Thread.sleep(sleep); 
+               } 
+               catch (Exception e) {break;} 
+           else break;
+        
            try {
+               System.out.println("*** Initialize TNC on "+_portName);
                _serialPort = connect();
                if (_serialPort == null)
-                   return; /* Throw exception instead? Move to constructor? */
+                   continue; 
                    
                _in = new BufferedReader(new InputStreamReader(_serialPort.getInputStream(), _rx_encoding));
                _out = new PrintWriter(new OutputStreamWriter(_serialPort.getOutputStream(), _tx_encoding));
@@ -166,20 +190,28 @@ public class TncChannel extends Channel implements Runnable
                       receivePacket(inp, false);
                    }
                    catch (java.io.IOException e) {
-                      if (_close) { System.out.println("*** Stopping TNC thread"); return; } 
+                      if (_close) { System.out.println("*** Stopping TNC thread"); break; } 
                       else continue;             
                    }
                }
            }
            catch(NoSuchPortException e)
            {
-                System.out.println("*** ERROR: serial port " + _portName + " not found");
+                System.out.println("*** WARNING: serial port " + _portName + " not found");
+                e.printStackTrace(System.out);
            }
            catch(Exception e)
            {   
                 e.printStackTrace(System.out); 
            }  
+           retry++;     
+           
+        }
+        System.out.println("*** Couldn't connect to TNC on'"+_portName+"' - giving up");
      }
+
+
+
 
     public String toString() { return "TNC on " + _portName+", "+_baud+" baud]"; }
 
