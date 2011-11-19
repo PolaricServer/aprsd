@@ -21,15 +21,18 @@ import java.util.*;
 /**
  * Internet channel. Connect to APRS-IS server. 
  */
-public class InetChannel extends Channel implements Runnable
+public class InetChannel extends Channel implements Runnable, Serializable
 {
     private   String      _host;
     private   int         _port;
     private   String      _user, _pass, _filter;
     private   boolean     _close = false;
-    private   Socket      _sock = null; 
-    private   BufferedReader _rder = null;
-    private   ServerAPI   _api;
+    
+    transient private   int         _max_retry;
+    transient private   long        _retry_time;   
+    transient private   Socket      _sock = null; 
+    transient private   BufferedReader _rder = null;
+    transient private   ServerAPI   _api;
     
 
 
@@ -44,6 +47,8 @@ public class InetChannel extends Channel implements Runnable
         
         _host = config.getProperty(prefix+".host", "localhost").trim();
         _port = Integer.parseInt(config.getProperty(prefix+".port", "14580").trim());
+        _max_retry = Integer.parseInt(config.getProperty(prefix+".retry", "0").trim());
+        _retry_time = Long.parseLong(config.getProperty(prefix+".retry.time", "30").trim()) * 60 * 1000; 
         _user = config.getProperty(prefix+".user", "").trim().toUpperCase();
         if (_user.length() == 0)
            _user = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
@@ -94,12 +99,10 @@ public class InetChannel extends Channel implements Runnable
     /**
      * Main thread - connects to APRS-IS server and awaits incoming packets. 
      */
-    static final int MAX_RETRY = 10;  
     public void run()
     {
-        int retry = 0;
-               
-        while (retry <= MAX_RETRY) 
+        int retry = 0;             
+        while (true) 
         { 
            try {
                _sock = new Socket(_host, _port);
@@ -109,7 +112,7 @@ public class InetChannel extends Channel implements Runnable
                {
                    System.out.println("*** Connection to APRS server '"+_host+"' failed");
                    retry++;
-                   continue; 
+                   continue; // WHATS GOING ON HERE?
                }
                
                retry = 0; 
@@ -137,7 +140,6 @@ public class InetChannel extends Channel implements Runnable
            catch (java.net.ConnectException e)
            {
                 System.out.println("*** APRS server '"+_host+"' : "+e.getMessage());
-                retry++; 
            }
            catch (java.net.SocketTimeoutException e)
            {
@@ -147,22 +149,23 @@ public class InetChannel extends Channel implements Runnable
            {   
                 System.out.println("*** APRS server '"+_host+"' : "+e); 
                 e.printStackTrace(System.out);
-                retry += 2;
            }
            finally 
              { _close(); }
         
            if (_close)
                    return;
-         
-           if (retry <= MAX_RETRY) 
+                   
+           retry++;
+           if (retry <= _max_retry || _max_retry == 0) // MOVE THIS TO TOP OF LOOP
                try { 
-                   long sleep = 30000 * (long) Math.pow(2, retry);
-                   if (sleep > 7680) 
-                      sleep = 7680; /* Max 2. hours */
+                   long sleep = 30000 * (long) retry;
+                   if (sleep > _retry_time) 
+                      sleep = _retry_time; /* Default: Max 30 minutes */
                    Thread.sleep(sleep); 
                } 
                catch (Exception e) {} 
+           else break;
         }
         System.out.println("*** Couldn't connect to APRS server '"+_host+"' - giving up");        
     }
