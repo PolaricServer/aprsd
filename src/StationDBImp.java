@@ -107,7 +107,6 @@ public class StationDBImp implements StationDB, Runnable
           while (true)
           { 
               AprsPoint st = (AprsPoint) ifs.readObject(); 
-              System.out.println("        Read object: "+st.getIdent() );
               _map.put(st.getIdent(), st);
           }
 
