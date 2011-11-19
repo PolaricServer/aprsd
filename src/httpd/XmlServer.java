@@ -155,15 +155,18 @@ public class XmlServer extends ServerBase
             UTMRef ref = toUTM(s.getPosition()); 
             if (ref == null || !s.visible(scale) || !s.isInside(uleft, lright))
                 continue;
+            String href = s.getUrl() == null ? "" : "href=\"" + s.getUrl() + "\"";
             String title = s.getDescr() == null ? "" : "title=\"" + fixText(s.getDescr()) + "\"";
-            String icon = _wfiledir +"/icons/"+ s.getIcon();    
+            String icon = _wfiledir + "/icons/"+ s.getIcon();    
            
             out.println("<point id=\"__sign" + (i++) + "\" x=\""
                          + (int) Math.round(ref.getEasting()) + "\" y=\"" + (int) Math.round(ref.getNorthing())+ "\" " 
-                         + title+">");
+                         + href + " " + title+">");
             out.println("   <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
             out.println("</point>");    
-        }        
+        }                
+         
+         
         
         /* Output APRS objects */
         for (AprsPoint s: _api.getDB().search(uleft, lright)) 
