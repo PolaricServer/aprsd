@@ -12,6 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+ 
 package no.polaric.aprsd;
 import java.util.*;
 import java.util.regex.*;
@@ -21,12 +22,14 @@ import se.raek.charset.*;
 /**
  * Channel for sending/receiving APRS data. 
  */
-public abstract class Channel
+public abstract class Channel implements Serializable
 {
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
-     private LinkedHashMap<String, Date> _heard = new LinkedHashMap();
+     transient private LinkedHashMap<String, Date> _heard = new LinkedHashMap();
      protected boolean _restrict = false;
-     protected String _style = "";
+     protected String _style;
+     protected String _ident; 
+         // FIXME: A channel needs an identifier. 
      
      public enum Type {inet, radio};
      
@@ -34,14 +37,25 @@ public abstract class Channel
      protected void _init(Properties config, String prefix) 
      {
         _restrict = config.getProperty(prefix+".restrict", "false").trim().matches("true|yes");
-        _style = config.getProperty(prefix+".style", "").trim();
+        _style = config.getProperty(prefix+".style", null); 
+        _ident = config.getProperty(prefix+".ident", null); 
+       
+       if (_ident==null)
+           _ident = prefix;
+       else
+           _ident.trim();
+           
+       if (_style==null)
+           _style = _ident;
+       else
+          _style.trim();
      }
      
      
      public String getStyle() 
         { return _style; }
         
-    public boolean isRestricted()
+     public boolean isRestricted()
         { return _restrict; }
         
      
@@ -90,12 +104,13 @@ public abstract class Channel
      * Perhaps we should use a list of receivers in a later version, but for now
      * two is sufficient: A parser and an igate.
      */
-    private List<Receiver> _rcv = new LinkedList<Receiver>(); 
-    protected PrintWriter  _out = null; 
+    transient private List<Receiver> _rcv = new LinkedList<Receiver>(); 
+    transient protected PrintWriter  _out = null; 
 
     public static DupCheck  _dupCheck = new DupCheck();
     public static final String _rx_encoding = "X-UTF-8_with_cp-850_fallback";
     public static final String _tx_encoding = "UTF-8";
+
 
     /**
       * Returns true if call is heard.
@@ -105,6 +120,7 @@ public abstract class Channel
          removeOldHeardEntries();
          return _heard.containsKey(call);
      }
+         
          
    /**
      * Number of stations heard.
@@ -127,7 +143,7 @@ public abstract class Channel
        { if (r != null) _rcv.add(r); }
     
     public void removeReceiver(Receiver r)
-       { if (r != null) _rcv.remove(r); }
+       { if (r != null) _rcv.remove(r); }   
     
     
     
@@ -149,7 +165,7 @@ public abstract class Channel
             p.type = p.report.charAt(0);
             
             if (p.type == '}') {
-              /* Special treatment for third-party type. 
+             /* Special treatment for third-party type. 
               * Strip off type character and apply this function recursively
               * on the wrapped message. 
               */
@@ -164,8 +180,10 @@ public abstract class Channel
                 p.msgto = p.report.substring(1,9).trim();
 
             /* Remove first comma in path */
-            else if (p.via != null && p.via.length() > 0)
-               p.via = p.via.substring(1).trim();
+            p.via = p.via.trim();
+            while (p.via != null && p.via.length() > 0 && p.via.charAt(0) == ',')
+                  p.via = p.via.substring(1);
+
             return p;
         }
         return null;
