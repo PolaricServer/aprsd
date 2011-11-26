@@ -1,19 +1,49 @@
 Updates to 1.0.4, etc.
 ----------------------
-    
-* Check for empty position in object input.
 
 * Update icon when SAR mode is turned off??
-
-* [C] Sometimes last update in trail is missing. Fix?
-
-* Some convenience scripts. Restart, clean maps, ... 
 
 * [C] Fix bug - search result doesn't work, and other..
     DONE.
 
 * Fix traffic-to/traffic-from linking
     DONE.
+
+* Heard on channel. Register digi-path as well.
+    DONE.
+    
+* Igating and sending of messages on RF: Use some digi-path (reverse of heard path) 
+    DONE. 
+    
+* TNC init commands. Make TNC channel more robust.... 
+    DONE.
+    
+* Try to support per packet setting of digi path in TNC channel?
+    DONE.
+
+* Indicate source channel in packet log. 
+
+* Object reports. Check if channels are available. Configurable digi-path
+  for transmitting on RF. 
+    DONE.
+
+
+
+Updates to 1.0.5, etc..
+-----------------------
+
+* [C] Sometimes last update in trail is missing. Fix?
+
+* Support position
+
+* Use position to decide if object report should be sent on RF. 
+
+* Manage own objects. List, delete. Does deleting work?
+
+* Activate/deactivate igate from webapp.
+
+* KISS TNC support. 
+
 
 
 Packaging related
@@ -24,8 +54,13 @@ Packaging related
     DONE.
     
 * [C] Put web-app another place than /var/www  ?? 
-* Server won't stop when shutting down machine? 
 
+* Server won't stop when shutting down machine? Related to TNC. 
+    PARTLY SOLVED (see below).
+    
+* FIX init script kill process properly when server won't shut down. 
+  Now, it seems to just restart and waiting in script never end. 
+  
 
 
 Support for mobile devices
@@ -34,4 +69,5 @@ Support for mobile devices
 * Context menu outside stations. 
 * Multitouch zoom events. 
 * Login and update operations
+* Fix dynamic update. 
 
