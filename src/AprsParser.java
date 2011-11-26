@@ -558,7 +558,6 @@ public class AprsParser implements Channel.Receiver
        if (Channel._dupCheck.checkTS(station.getIdent(), time))
             return;
        
-       System.out.println("   "+station.getIdent()+": EXTRAREPORT: "+time);
        station.update(time, pd.pos, pd.course, pd.speed, (int) pd.altitude, "", pd.symbol, pd.symtab, "(EXT)" );
     }
     
@@ -696,7 +695,6 @@ public class AprsParser implements Channel.Receiver
             comment = comment.trim();
             if (comment.length() < 1 || comment.equals(" "))
                comment = null;
-            System.out.println("   "+station.getIdent()+": "+time);
             station.update(time, pd.pos, pd.course, pd.speed, (int) pd.altitude, comment, pd.symbol, pd.symtab, pathinfo );      
     }
     
