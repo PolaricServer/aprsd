@@ -49,6 +49,7 @@ install: polaric-aprsd.jar
 	install -m 644 icons/signs/*.png icons/signs/*.gif $(INSTALL_WEB)/icons/signs
 	install -m 644 dicons/*.png $(INSTALL_WEB)/dicons
 	install -m 644 style.css $(INSTALL_WEB)
+	install -m 755 restart-server $(INSTALL_BIN)
 
 
 aprs: $(LIBDIR)
