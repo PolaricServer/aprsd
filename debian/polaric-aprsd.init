@@ -72,9 +72,9 @@ case "$1" in
                  --startas "$JAVA" >/dev/null; then
               
               $JSVC -Xverify:none $SERIALPORTS $FLAGS -cp $CLASSPATH -pidfile $PIDFILE  \
-              -user $USER -outfile $LOGFILE -errfile $LOGFILE \
-              -Dconfdir=/etc/polaric-aprsd -Ddatadir=/var/lib/polaric -Dwebdir=/usr/share/polaric \
-              no.polaric.aprsd.Main $INIFILE >> $LOGFILE  2>&1 &
+                 -user $USER -outfile $LOGFILE -errfile $LOGFILE \
+                 -Dconfdir=/etc/polaric-aprsd -Ddatadir=/var/lib/polaric -Dwebdir=/usr/share/polaric \
+                 no.polaric.aprsd.Main $INIFILE >> $LOGFILE  2>&1 &
              sleep 2
              
              if [ -e /etc/apache2/sites-enabled/aprs ]; then
@@ -110,10 +110,10 @@ case "$1" in
                         log_warning_msg "(not running)."
                 fi
          else
-                start-stop-daemon --quiet --stop \
-                        --pidfile "$PIDFILE"  \
-                        --startas "$JAVA" > /dev/null
-
+               $JSVC -cp $CLASSPATH -pidfile "$PIDFILE" -stop -pidfile "$PIDFILE" \
+                     -user $USER -outfile $LOGFILE -errfile $LOGFILE \
+                     no.polaric.aprsd.Main $INIFILE >> $LOGFILE  2>&1 &  
+                                    
                 while ! start-stop-daemon --quiet --test --start \
                           --pidfile "$PIDFILE" \
                           --startas "$JAVA" > /dev/null; do 
@@ -124,6 +124,10 @@ case "$1" in
                                 log_progress_msg " (killing) "
                                 start-stop-daemon --stop --signal 9 --oknodo \
                                         --quiet --pidfile "$PIDFILE"
+                                sleep 2
+                                start-stop-daemon --quiet --stop \
+                                        --pidfile "$PIDFILE"  \
+                                        --startas "$JAVA" > /dev/null
                         fi
                 done
                 log_daemon_msg " stopped"
