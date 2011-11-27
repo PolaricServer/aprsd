@@ -47,6 +47,10 @@ public class InetChannel extends Channel implements Runnable
     }
  
  
+    @Override public String getShortDescr()
+       { return "IS"; }
+       
+       
     /**
      * Send a packet to APRS-IS.
      */ 
@@ -84,7 +88,14 @@ public class InetChannel extends Channel implements Runnable
        } catch (Exception e) {}  
     }
     
-   
+    
+    
+    @Override protected void regHeard(Packet p)
+    {
+        if (p.via.matches(".*(TCPIP\\*|TCPXX\\*).*"))
+           _heard.put(p.from, new Heard(new Date(), p.via));
+    }
+    
     
     /**
      * Main thread - connects to APRS-IS server and awaits incoming packets. 
@@ -118,10 +129,8 @@ public class InetChannel extends Channel implements Runnable
                while (!_close) 
                {
                    String inp = _rder.readLine(); 
-                   if (inp != null) {
-                      System.out.println(new Date() + ":  "+inp);
+                   if (inp != null) 
                       receivePacket(inp, false);
-                   }
                    else {   
                       System.out.println("*** Disconnected from APRS server '"+_host+"'");
                       break; 
