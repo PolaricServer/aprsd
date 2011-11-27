@@ -27,7 +27,7 @@ public class TncChannel extends Channel implements Runnable
     private  String  _portName; 
     private  int     _baud;
     private  String  _myCall; /* Move this ? */
-    private  String  _pathCmd, _unproto = "APRS"; 
+    private  String  _pathCmd, _unproto = Main.toaddr; 
     
     private  boolean        _close = false;
     private  boolean        _noBreak = false; 
