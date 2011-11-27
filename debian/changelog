@@ -1,8 +1,8 @@
-polaric-aprsd (1.0.3+) stable; urgency=low
+polaric-aprsd (1.0.4) stable; urgency=low
 
-  * Testing 
+  * Several changes (see changelog): Igate, TncChannel,...  
 
- -- Øyvind hanssen <ohanssen@acm.org>  Sat, 12 Nov 2011 17:14:28 +0100
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 27 Nov 2011 13:55:33 +0100
 
 polaric-aprsd (1.0.3) stable; urgency=low
 
