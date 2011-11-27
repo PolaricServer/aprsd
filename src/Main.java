@@ -11,8 +11,9 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-    public static String version = "1.0.3+";
-
+    public static String version = "1.0.4";
+    public static String toaddr  = "APPS10";
+    
     public static String       confdir, datadir, webdir; 
     public static InetChannel  ch1 = null;
     public static TncChannel   ch2 = null;
