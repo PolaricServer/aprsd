@@ -1,0 +1,8 @@
+#
+# Commands to be sent to the TNC at startup.
+# Note that MYCALL is generated automatically by the software, 
+# so it is not necessary here. 
+#
+UNPROTO WIDE1-1
+ECHO ON
+MONITOR ON
