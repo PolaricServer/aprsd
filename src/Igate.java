@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,14 +29,19 @@ public class Igate implements Channel.Receiver
     private boolean _allowRf;
     private String  _myCall; /* Move this ? */
     private long    _msgcnt = 0; 
-    
+    private String  _defaultPath, _alwaysRf;
+        
+        
     public Igate(Properties config) 
     {
         _allowRf = config.getProperty("igate.rfgate.allow", "true").trim().matches("true|yes");
         _myCall = config.getProperty("igate.mycall", "").trim().toUpperCase();
+        _defaultPath = config.getProperty("message.rfpath", "WIDE1-1").trim();
+        _alwaysRf = config.getProperty("message.alwaysRf", "").trim();
         if (_myCall.length() == 0)
            _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
     }  
+       
        
     /**
      * Configure the igate with the channels to gate between. 
@@ -62,21 +67,22 @@ public class Igate implements Channel.Receiver
            return;
             
        _msgcnt++;
-       System.out.println("*** GATED TO INTERNET");
+       System.out.println("*** Gated to internet");
        p.via += (",qAR,"+_myCall);
        if (_inetChan != null) 
            _inetChan.sendPacket(p);
-       
     }
 
     
+
     /**
      * Gate packet (from internet) to RF.
      */
     private void gate_to_rf(Channel.Packet p)
     {
-       if (    /* Receiver heard on RF */
-              ( _rfChan.heard(p.to) || (p.msgto!= null && _rfChan.heard(p.msgto)))
+       if (  /* Receiver heard on RF */
+              ( _rfChan.heard(p.to) || (p.msgto!= null && 
+                 (_rfChan.heard(p.msgto) || p.msgto.matches(_alwaysRf))))
                 
             && /* Sender NOT heard on RF */
                ! _rfChan.heard(p.from)
@@ -85,18 +91,30 @@ public class Igate implements Channel.Receiver
                ( ! _inetChan.heard(p.to)  && !( p.msgto!=null && _inetChan.heard(p.msgto)))
                
             && /* No TCPXX, NOGATE, or RFONLY in header */
-               ! p.via.matches(".*((TCP[A-Z0-9]{2})|NOGATE|RFONLY|NO_TX).*") )
+               ! p.via.matches(".*((TCPXX)|NOGATE|RFONLY|NO_TX).*") ) 
        {        
-          System.out.println("*** GATED TO RF");
+          System.out.println("*** Gated to RF");
+        
+          /* Now, get a proper path for the packet. 
+           * If possible, a reverse of the path last heard from the recipient.
+           */
+          String path = _rfChan.heardPath(p.msgto); 
+          p.via_orig = p.via;
+          if (path == null) 
+             // null means not heard at all
+             p.via = _defaultPath;
+          else
+             p.via = Channel.getReversePath(path); 
+                   
           _rfChan.sendPacket(p);
        } 
-    }
+    }    
+    
     
     
     /**
      * Respond to query be sending a capabilities report. 
-     * For now, we only respond to queries on the RF channel. Should we include
-     * internet side as well???
+     * For now, we only respond to queries on the RF channel.
      */
     private void answer_query()
     {
