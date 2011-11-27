@@ -205,7 +205,7 @@ public class OwnObjects implements Runnable
        String id = (obj.getIdent().replaceFirst("@.*","") + "         ").substring(0,9);
        Channel.Packet p = new Channel.Packet();
        p.from = _myCall;
-       p.to = "APRS";
+       p.to = Main.toaddr;
        p.type = ';';
      
        /* Set digi path when transmitting on RF channels. By default
