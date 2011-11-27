@@ -22,6 +22,7 @@ Updates to 1.0.4, etc.
     DONE.
 
 * Indicate source channel in packet log. 
+    DONE.
 
 * Object reports. Check if channels are available. Configurable digi-path
   for transmitting on RF. 
