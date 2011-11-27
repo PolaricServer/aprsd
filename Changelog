@@ -126,3 +126,20 @@
 * LD_LIBRARY_PATH for librxtx-java (serial communication)
 
 
+1.0.4
+-----
+* [C] Fix bug - search result and other didn't work.
+* [C] Configurable index page (in /etc), css, etc... Implement in PHP. 
+* Fix traffic-to/traffic-from linking
+* Improve igating and sending of messages on RF. 
+  Use digi-path (reverse of heard path) when sending on RF.   
+* TNC init commands. Make TNC channel more robust.... 
+* Support per packet setting of digi path in TNC channel?
+* Server sometimes wouldn't stop when using RF channel. Fix.  
+* Packet log. Indicate source channel + some other small improvements.
+* Object reports. Check if channels are available. Configurable digi-path
+  for transmitting on RF. 
+ 
+      
+
+
