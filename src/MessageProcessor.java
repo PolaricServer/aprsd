@@ -237,7 +237,7 @@ public class MessageProcessor implements Runnable
    {
        Channel.Packet p = new Channel.Packet();
        p.from = _myCall;
-       p.to = "APRS";
+       p.to = Main.toaddr;
        p.msgto = recipient;
        /* Need to set p.via, and differently for the two channels */
        p.type = ':';
