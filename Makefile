@@ -41,7 +41,7 @@ install: polaric-aprsd.jar
 	install -d $(INSTALL_WEB)/icons $(INSTALL_WEB)/icons/signs $(INSTALL_WEB)/dicons
 	install -d $(INSTALL_DATA)
 	install -m 755 -d $(INSTALL_LOG)
-	install -m 644 server.ini $(INSTALL_CONFIG)
+	install -m 644 server.ini init.tnc $(INSTALL_CONFIG)
 	install -m 644 symbols $(INSTALL_CONFIG)
 	install -m 644 trailcolours $(INSTALL_CONFIG)
 	install -m 644 *.jar $(INSTALL_JAR)
