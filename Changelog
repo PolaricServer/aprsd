@@ -81,5 +81,65 @@
 * [C] Fix scrollbar handling on popups.  
 * [C] Scale was missing when reloading at highest scale. Fix.  
 
+
+1.0.1
+-----
+
+* Extend SAR mode to allow filter on prefix. Automatically propagate SAR mode 
+  to other servers.
+* Fix timestamp parsing bug. Ignore DDHHMM timestamp in position 
+  reports.
+* More Mic-E comment cleanups. 
+* [C] Support the use of GPX files as vector map layers.
+* [C] Welcome text. 
+* [Security] Better protection of certain aprsd backend operations through 
+  Apache frontend authentication and access control.
+  
+
+1.0.2
+-----
+
+* [C] Error in parsing map references xxx xxx. Fix. 
+* Yet another timestamp bug.
+* Log user objects or alias changes (identify user??). 
+* SAR URL. 
+* [C] Don't draw trail if it is too small to be visible. Firefox
+  handles such scaled down trails badly. 
+* Better filtering of updates that has movements below a distance threshold
+  (Firefox bug - se above)
+* Fewer lost update notifications to clients
+* [C] Troublesome sizing of popups in Firefrosk. CSS fixes.
+* [C] Compiled (compressed) javascript. 
+* [C] Basic support for mobile devices. Droid app
+* Debian packages
+
+
+1.0.3
+-----
+
+* Better "sporing" view filters. Two variants. 
+* More active retry when network is down. 
+* Retry of TNC serial port to  make it more robust?
+* URL in 'signs'
+* Run as non-root user!! Run with jsvc
+* Fix error in logrotate script
+* LD_LIBRARY_PATH for librxtx-java (serial communication)
+
+
+1.0.4
+-----
+* [C] Fix bug - search result and other didn't work.
+* [C] Configurable index page (in /etc), css, etc... Implement in PHP. 
+* Fix traffic-to/traffic-from linking
+* Improve igating and sending of messages on RF. 
+  Use digi-path (reverse of heard path) when sending on RF.   
+* TNC init commands. Make TNC channel more robust.... 
+* Support per packet setting of digi path in TNC channel?
+* Server sometimes wouldn't stop when using RF channel. Fix.  
+* Packet log. Indicate source channel + some other small improvements.
+* Object reports. Check if channels are available. Configurable digi-path
+  for transmitting on RF. 
  
- 
+      
+
+

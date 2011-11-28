@@ -1,0 +1,35 @@
+polaric-aprsd (1.0.4) stable; urgency=low
+
+  * Several changes (see changelog): Igate, TncChannel,...  
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 27 Nov 2011 13:55:33 +0100
+
+polaric-aprsd (1.0.3) stable; urgency=low
+
+  * Run with jsvc as non-root user + more (see other changelog file) 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 06 Nov 2011 18:01:01 +0100
+
+polaric-aprsd (1.0.2-1) stable; urgency=low
+
+  * Fix a problem with configuration 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 09 Oct 2011 20:14:22 +0200
+
+polaric-aprsd (1.0.2) stable; urgency=low
+
+  * Read config file 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 09 Oct 2011 01:00:20 +0200
+
+polaric-aprsd (0.99+1.0.2beta2) stable; urgency=low
+
+  * Documentation + issue with view filters 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Mon, 03 Oct 2011 23:19:13 +0200
+
+polaric-aprsd (0.99+1.0.2beta1) stable; urgency=low
+
+  * Initial Release.
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Tue, 25 Sep 2011 21:46:20 +0200

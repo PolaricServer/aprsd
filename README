@@ -1,95 +1,95 @@
 INSTALLATION OF POLARIC-SERVER ON A UBUNTU/DEBIAN LINUX PLATFORM
 
+Version 1.0.2 beta1
 
-APRS SERVER (POLARIC-APRSD)
----------------------------
+(Note, it is a beta-test - aimed at users with some experience with
+Linux and the Polaric system. Please report bugs). 
 
-install software packages (Ubuntu or Debian):
-   beep
-   sun-java6-bin (or openjdk 6) - 
-    ( is selected automatically when you install scala-library ).
-   librxtx-java (if you are going to use a TNC on a serial port)
-   scala-library 
-    ( not in Debian Lenny - the package is available in testing/unstable and
-      can be installed on lenny-systems).
+This is a description how to install the Polaric Server software on 
+a Debian based Linux platform. Polaric Server consists of two main 
+components: The APRS daemon (polaric-aprsd) and the Web application. 
+
+If you are unknown to Linux and Apache system administration, I recommend
+exploring this a little before attempting to install Polaric Server or
+that you get help from a friend. If you plan to put up a server permanently
+on the internet, you should know what you are doing, i.e. you should have
+at least some knowledge on internet security and firewall setup. You will 
+need to login as 'root' to be able to perform the installation. 
+
+
+
+POLARIC DEBIAN REPOSITORY
+-------------------------
+
+Work is in progress to offer Debian packages to help you install the software. 
+First you need to add the following to the list of Debian repositories in
+/etc/apt/sources.list
+
+   deb http://aprs.no/debian-rep binary/
+
+This should work on the Debian 'stable' ('squeeze' or 'lenny') distribution and most
+Ubuntu distributions. If you use Debian 'unstable', 'testing' or a Ubuntu that
+is based on 'unstable', you can do the following to ensure that you get the 
+right version of the scala-library (2.7.7). 
+
+   Download 'http://aprs.no/debian-rep/pin-scala' and save the file under
+   '/etc/apt/preferences.d' directory
+
+
+INSTALLING THE APPLICATION
+--------------------------
+
+To install the Polaric Server you can install the web-application component
+as follows. It will automatically include other needed components. 
+
+    apt-get install polaric-webapp
     
-Unpack the tarball with the server software in /usr/local/polaric-aprsd
-(in /usr/local/polaric-aprsd - tar zxvf polaric-aprsd.tar.gz)
+And your application should be installed and ready for use. You will get a basic 
+installation where users has access to stored (KaMap) maps without logging in. 
+Users has to log in to add or change APRS information. You have to add usernames
+/passwords, and grant access to allow users to log in (see below). 
 
-In polaric-aprsd directory run install-script: sh install.sh
-It sets up a startup-script and a logrotate script
+If you want to use the server as a online internet service (beyond a single LAN)
+I recommend that you change the Apache configuration to use virtual domains and 
+SSL (for login).  
 
-Edit server.ini (see below)
 
 
-(re)start the server: 
-/etc/init.d/polaric-aprsd restart
+INSTALLING THE APRS DAEMON (POLARIC-APRSD)
+------------------------------------------
 
-Remember to restart the server if you change the configuration (server.ini, symbols, etc..)
+The APRS daemon is a server program that processes APRS data (from/to
+APRS-IS and/or TNC) and presents it to the web-application (or it may
+be set up as an igate). It can function as a backend server for the 
+web-application and can respond to HTTP requests and deliver XML-data or 
+HTML pages. 
+
+If you install the web-application (see above) the aprs-daemon will be 
+included automatically. You may install it as a standalone program as
+well. 
+
+To install separately:
+    apt-get install polaric-aprsd
+
+The installation program will will ask you for your callsign and then start 
+the daemon. To check that it works, take a look at the log file:
+
+    tail -f /var/log/polaric/aprsd.log
+
+You will see new APRS messages arrive, if things are ok. Type q to quit. 
+
 
     
-
-WEB-CLIENT (MAP-SERVICE)
-------------------------
-
-install software packages (Ubuntu or Debian):
-   apache2
-   php5
-   php5-gd
-   php5-mapscript
+APRS DAEMON SETUP
+-----------------
     
+The configuration files are located in /etc/polaric-aprsd. 
+You can customize your aprs daemon to your needs by editing the file 'server.ini'
 
-Apache2 config: 
-   a2enmod proxy
-   a2enmod proxy_http
-   
-   Add the following to the apache setup, e.g. in /etc/apache2/sites-enabled/000-default
-   or in your virtual domain setup.
-   
-   ProxyPass /aprs/srv http://localhost:8081
-   ProxyPass /aprs/srv/* http://localhost:8081
-   ProxyPassReverse /aprs/srv http://localhost:8081
-
-   <Location /aprs/login>
-      AuthType Basic
-      AuthName "NRRL sporingstjeneste"
-      AuthUserFile /usr/local/polaric-aprsd/users
-      Require valid-user
-    </Location>
-   
-   If necessary, comment out "Deny from All" in /etc/apache2/mods-enabled/proxy.conf
-   
-   (Note: We assume that DocumentRoot is set to /var/www/ and that the aprs
-    web application is installed under /var/www/aprs )
-   
-  
-Unpack the tarball containing the web application to /var/www/aprs
-(in /var/www - tar zxvf polaric-webapp.tar.gz)
-
-Make sure that the cache directory has the right owner. In /var/www/aprs: 
-    chown www-data.www-data kacache2
-    
-Apache can be restarted with the command
-    apache2ctl restart
-    
-    
-    
-SERVER SETUP
-------------
-    
-It is important to edit server.ini before activating the server. And the important 
-thing there is the callsign (identifier). This can be set as follows: 
-
-default.mycall = xxxxx 
-(where xxxxx is your callsign)
-
-It is possible to set separate callsigns (identifiers) for the internet-channel, 
-the TNC channel, for objects and messages, but usually not necessary. 
-
-To connect to an APRS-IS server, edit the 'inetchannel.host', 'inetchannel.port' 
-and 'inetchannel.pass' fields and set 'inetchannel.on = true'. You also have 
-to set the correct passcode ('inetchannel.pass') to be allowed to send data 
-to APRS-IS.
+To configure the connection to an APRS-IS server, edit the 'inetchannel.host', 
+'inetchannel.port' and 'inetchannel.pass' fields and set 'inetchannel.on = true'. 
+You also have to set the correct passcode ('inetchannel.pass') to be allowed to 
+send data  to APRS-IS.
 
 To use a TNC, you need to set 'tncchannel.port' to the correct device name. 
 The set the baudrate, use 'tncchannel.baud'. An old fashioned serial 
@@ -97,15 +97,23 @@ port is usually /dev/ttyS0 (corresponds to COM1 in Windows). A USB to serial
 converter is typically /dev/ttyUSB0 or /dev/ttyACM0. This will depend on your 
 system and TNC setup.
 
+The server can be restarted by calling
+
+   /etc/init.d/polaric-aprsd restart
+
+To just stop it say 'stop' instead of restart, to just start it say 'start',
+to see if it is running, say 'status'. This script is automatically run 
+when the system starts or stops, so typically you need it only for restarting
+when configuration is changed..
+
 (some more documentation can be found here: http://hans.priv.no/la7eca/?id=aprsd)
-
-
     
+
 ADDING USERS
 ------------
     
-To add a user 'la3t' go to the directory /usr/local/polaric-aprsd and type
-   ./polaric-passwd la3t
+To add a user 'la3t' type the command
+   polaric-passwd la3t
        
 or whatever username you choose. You will be asked to choose a password.
 Edit server.ini and put the username in the 'user.update' field and if you want the
@@ -118,18 +126,44 @@ and yyy, write
   user.update = xxx|yyy
 
 Restart the server to make the changes effective.
-
-By default, all users have access to ka-map maps. This can be restricted if you
-want. See /var/www/aprs/ka-map/config/config.php for the ka-map setup. If 
-this access is restricted you may want to add usernames here too to
-grant access to users.
+  /etc/init.d/polaric-aprsd restart
 
 
 
-CLIENT SETUP
+WEBAPP SETUP
 ------------
 
-Map-layers, default map views and filters can be configured in the file
-    /var/www/aprs/mapconfig.js
+Map-layers (except ka-map layers), default map views and filters can be 
+configured in the file:
+    /etc/polaric-webapp/mapconfig.js
     
+mapconfig.js is a Javascript file, but even if you don't know Javascript very well, 
+it should be fairly self-explanatory wrt. the most important configuration options.  
 
+By default, all users have access to ka-map maps that are stored on the server. This 
+can be somewhat restricted if you want. See '/etc/polaric-webapp/kamap-config.php' 
+for the ka-map setup. If this access is restricted you may want to add usernames here 
+too to grant access to users. You may also change resolution levels (for KaMap maps) 
+in this file. 
+
+To restrict access, uncomment the line:
+   $oAuth = new kaBasicAuthentication(array ( '__all__' => array(....)));
+
+And edit the inner array-list to contain the usernames you want to grant access.
+
+
+
+CLIENT START 
+------------
+
+To access the web-application, start your web-browser and type
+in the url: 
+
+   http://<ip-address-of-server>/aprs
+
+or if the server runs on the same computer:   
+   
+   http://localhost/aprs
+
+
+73 de LA7ECA

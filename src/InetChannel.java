@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,42 +21,36 @@ import java.util.*;
 /**
  * Internet channel. Connect to APRS-IS server. 
  */
-public class InetChannel extends Channel implements Runnable, Serializable
+public class InetChannel extends Channel implements Runnable
 {
     private   String      _host;
     private   int         _port;
+    private   int         _max_retry;
+    private   long        _retry_time; 
     private   String      _user, _pass, _filter;
     private   boolean     _close = false;
+    private   Socket      _sock = null; 
+    private   BufferedReader _rder = null;
     
-    transient private   int         _max_retry;
-    transient private   long        _retry_time;   
-    transient private   Socket      _sock = null; 
-    transient private   BufferedReader _rder = null;
-    transient private   ServerAPI   _api;
     
-
-
-
-
-    public InetChannel(ServerAPI api, Properties config, String prefix) 
+    public InetChannel(Properties config) 
     {
-        if (prefix==null)
-           prefix = "inetchannel"; 
-        _init(config, prefix);
-        _api = api;
-        
-        _host = config.getProperty(prefix+".host", "localhost").trim();
-        _port = Integer.parseInt(config.getProperty(prefix+".port", "14580").trim());
-        _max_retry = Integer.parseInt(config.getProperty(prefix+".retry", "0").trim());
-        _retry_time = Long.parseLong(config.getProperty(prefix+".retry.time", "30").trim()) * 60 * 1000; 
-        _user = config.getProperty(prefix+".user", "").trim().toUpperCase();
+        _host = config.getProperty("inetchannel.host", "localhost").trim();
+        _port = Integer.parseInt(config.getProperty("inetchannel.port", "14580").trim());
+        _max_retry = Integer.parseInt(config.getProperty("inetchannel.retry", "0").trim());
+        _retry_time = Long.parseLong(config.getProperty("inetchannel.retry.time", "30").trim()) * 60 * 1000; 
+        _user = config.getProperty("inetchannel.user", "").trim().toUpperCase();
         if (_user.length() == 0)
            _user = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
-        _pass = config.getProperty(prefix+".pass", "-1").trim();
-        _filter = config.getProperty(prefix+".filter", ""); 
+        _pass = config.getProperty("inetchannel.pass", "-1").trim();
+        _filter = config.getProperty("inetchannel.filter", ""); 
     }
  
  
+    @Override public String getShortDescr()
+       { return "IS"; }
+       
+       
     /**
      * Send a packet to APRS-IS.
      */ 
@@ -94,14 +88,22 @@ public class InetChannel extends Channel implements Runnable, Serializable
        } catch (Exception e) {}  
     }
     
-   
+    
+    
+    @Override protected void regHeard(Packet p)
+    {
+        if (p.via.matches(".*(TCPIP\\*|TCPXX\\*).*"))
+           _heard.put(p.from, new Heard(new Date(), p.via));
+    }
+    
     
     /**
      * Main thread - connects to APRS-IS server and awaits incoming packets. 
      */
     public void run()
     {
-        int retry = 0;             
+        int retry = 0;
+               
         while (true) 
         { 
            try {
@@ -112,14 +114,14 @@ public class InetChannel extends Channel implements Runnable, Serializable
                {
                    System.out.println("*** Connection to APRS server '"+_host+"' failed");
                    retry++;
-                   continue; // WHATS GOING ON HERE?
+                   continue; 
                }
                
                retry = 0; 
                System.out.println("*** Connection to APRS server '"+_host+"' established");
                _rder = new BufferedReader(new InputStreamReader(_sock.getInputStream(), _rx_encoding));
                _out = new PrintWriter(new OutputStreamWriter(_sock.getOutputStream(), _tx_encoding));
-               _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+_api.getVersion()+"\r\n");
+               _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+Main.version+"\r\n");
                
                if (_filter.length() > 0)
                    _out.print("# filter "+_filter+ "\r\n"); 
@@ -127,10 +129,8 @@ public class InetChannel extends Channel implements Runnable, Serializable
                while (!_close) 
                {
                    String inp = _rder.readLine(); 
-                   if (inp != null) {
-                      System.out.println(new Date() + ":  "+inp);
+                   if (inp != null) 
                       receivePacket(inp, false);
-                   }
                    else {   
                       System.out.println("*** Disconnected from APRS server '"+_host+"'");
                       break; 
@@ -155,9 +155,9 @@ public class InetChannel extends Channel implements Runnable, Serializable
         
            if (_close)
                    return;
-                   
+          
            retry++;
-           if (retry <= _max_retry || _max_retry == 0) // MOVE THIS TO TOP OF LOOP
+           if (retry <= _max_retry || _max_retry == 0) 
                try { 
                    long sleep = 30000 * (long) retry;
                    if (sleep > _retry_time) 

@@ -52,7 +52,7 @@ public class Notifier
             }
             else
                 _waiters.put(id, 0);
-         }    
+         }  
          do {
               try {
                   synchronized(this) {
@@ -62,14 +62,17 @@ public class Notifier
                          _waiters.put(id, 0);
                          return (abort==1) ? true : false;        
                      }
-                                 
+                     
                      /* Has there been events inside the interest zone */
                      found = found || signalledPt == null || uleft == null || 
                                   signalledPt.isInside(uleft, lright); 
                   } 
+                  /* End of synchronized block. 
+                   */
               }
               catch (Exception e) {}    
               elapsed = (new Date()).getTime() - wstart;
+            
 
             /* Wait no shorter than _mintime and no longer 
              * than _timeout 

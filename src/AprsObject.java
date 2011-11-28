@@ -81,15 +81,16 @@ public class AprsObject extends AprsPoint implements Serializable
     }
     
     
-    public synchronized void update(Date ts, AprsHandler.PosData pd, String descr, String pathinfo)
+    public synchronized void update(Date ts, Reference newpos, int crs, int sp, int alt, 
+                                    String descr, char sym, char altsym, String pathinfo)
     { 
          /* Should try to share code with Station class ?*/
-         if (_symbol != pd.symbol || _altsym != pd.symtab || 
-              (_position == null && pd.pos != null))
+         if (_symbol != sym || _altsym != altsym || 
+              (_position == null && newpos != null))
             setChanging();
 
           if (_position != null && _updated != null) {
-              long distance = Math.round(_position.toLatLng().distance(pd.pos.toLatLng()) * 1000);  
+              long distance = Math.round(_position.toLatLng().distance(newpos.toLatLng()) * 1000);  
               if (distance > 10)
                  setChanging();
           }
@@ -97,10 +98,10 @@ public class AprsObject extends AprsPoint implements Serializable
             setTimeless(true);
             ts = new Date();
          }
-         updatePosition(ts, pd.pos);        
+         updatePosition(ts, newpos);        
          setDescr(descr); 
-         _symbol = pd.symbol; 
-         _altsym = pd.symtab;
+         _symbol = sym; 
+         _altsym = altsym;
          _killed = false;  
     }
     

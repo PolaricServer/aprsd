@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2002 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,14 +30,13 @@ public class StationDBImp implements StationDB, Runnable
     private RouteInfo _routes;
     private OwnObjects _ownobj;
     private MessageProcessor _msgProc;
-    private StationDB.Hist _histData = null;
 
     
     public StationDBImp(Properties config)
     {
         _file = config.getProperty("stations.file", "stations.dat");
         if (_file.charAt(0) != '/')
-           _file = System.getProperties().getProperty("datadir", ".")+"/"+_file;
+           _file = Main.datadir+"/"+_file;
            
         _ownobj = new OwnObjects(config, this); 
         _msgProc = new MessageProcessor(config);
@@ -49,14 +48,14 @@ public class StationDBImp implements StationDB, Runnable
     
     private static final Runtime s_runtime = Runtime.getRuntime ();
     public static long usedMemory ()
-        { return s_runtime.totalMemory () - s_runtime.freeMemory (); }
+      { return s_runtime.totalMemory () - s_runtime.freeMemory (); }
     
-    public void setHistDB(StationDB.Hist d)
-        { _histData = d; }
+
 
     public int nItems() 
         { return _map.size(); }
-        
+    
+    
     public OwnObjects getOwnObjects()
         { return _ownobj; }
 
@@ -171,21 +170,14 @@ public class StationDBImp implements StationDB, Runnable
         
         
         
-    public AprsPoint getItem(String id, Date t)
-    { 
-       if (t==null)
-          return _map.get(id); 
-       else if (_histData !=null) 
-          return _histData.getItem(id, t); 
-       else 
-          return null;
-     }
+    public AprsPoint getItem(String id)
+       { return _map.get(id); }
        
-              
        
-    public synchronized Station getStation(String id, Date t)
+       
+    public synchronized Station getStation(String id)
     { 
-         AprsPoint x = getItem(id, t);
+         AprsPoint x = getItem(id);
          if (x instanceof Station) return (Station) x;
          else return null;
     }   
@@ -228,7 +220,7 @@ public class StationDBImp implements StationDB, Runnable
     public synchronized List<AprsPoint> getAll(String srch)
     {
         LinkedList<AprsPoint> result = new LinkedList();
-        if (srch==null)
+        if (srch == null)
            return result;
         srch = srch.toUpperCase(); 
         for (AprsPoint s: _map.values())

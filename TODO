@@ -1,85 +1,37 @@
---------------------------
-Preparations for V.2.0 M.0
-Version 1.1, etc. 
---------------------------
 
- 
-Web Server
-----------
- 
-* Replace HTTP server (efficiency, extensibility). The "Simple 
-  framework" http://www.simpleframework.org can be a good candidate. 
-     DONE. 
+Updates to 1.0.5, etc..
+-----------------------
 
-* Use Apache frontend for all static files. 
-     DONE.
-     
-* Simplify webserver impl. (esp. Scala part). 
- 
-* Make it RESTful? Use RESTlets? It is fundamentally restful already, 
-  but uses POST method. 
+* [C] Sometimes last update in trail is missing. Fix?
 
+* Support position, beaconing of posreport and statusreport?
 
-API, Extensibility
-------------------
+* Use position to decide if object report should be sent on RF. 
 
-* [C] Javascript external API at client side.
-* [C] Javascript plugin arch/API at client side.
+* Manage own objects. List, delete. Does deleting work?
 
-* Component API, add components in config.
-      DONE. 
+* Activate/deactivate igate from webapp.
 
-* Framework for web-interface extensions in Scala. 
-
-* Jar files in a subdirectory - easier to add extra components
-      DONE.
-
-* History.Item as standalone class. Trail
-      DONE.
+* KISS TNC support. 
 
 
 
-Database
---------
-
-* Database setup. Collect simple update events in a database. 
-       DONE.
-       
-* Can this be a plugin module? Database stuff should be completely optional in 1.1, 1.2
-  etc.. (core database stuff will be part of core P.S. in later releases).
-       DONE.
-       
-* Some experimentation in external programs/plugins? 
-        
-* Experimental search functionality/trails - but as external module? 
-       DONE.
-
-
-Other. 
------
-
-* Allow a dynamic number of data channels to be configured. 
-  Not just two. 
-
-* Allow objects with certain attributes (like input channel, callsign) to 
-  be visible only for logged in users.  
-
-* Change class hierarchy to support other types of position objects, 
-  not just plain APRS. 
-      STARTED.
-  
-* AIS objects and input channel.
+Packaging related
+-----------------
     
-* Additions to search function?
+* [C] Put web-app another place than /var/www  ?? 
+    
+* FIX init script kill process properly when server won't shut down. 
+  Now, it seems to just restart and waiting in script never end. 
+    NEED MORE TESTING. 
   
-* Permissions (objects, other)? Sender id? Consider simple user profile support? 
 
-* More configurable view profiles?  
 
-* More flexible logging?
+Support for mobile devices
+--------------------------
 
-* Traffic load statistics (per station). 
+* Context menu outside stations. 
+* Multitouch zoom events. 
+* Login and update operations
+* Fix dynamic update. 
 
-* Search - and - change alias/icon
-
- 

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2002 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import java.io.Serializable;
   
   
   
-public class Station extends AprsPoint implements Serializable, Cloneable
+public class Station extends AprsPoint implements Serializable
 {
 
 public static class Status implements Serializable
@@ -35,9 +35,8 @@ public static class Status implements Serializable
      * Static variables and functions to control expire timeouts 
      * and notifications
      */
-    private static long _expiretime    = 1000 * 60 * 60 * 2;    // Default: 2 hour
-    private static ColourTable _colTab = 
-      new ColourTable (System.getProperties().getProperty("confdir", ".")+"/trailcolours");
+    private static long _expiretime    = 1000 * 60 * 60 *2;    // Default: 2 hour
+    private static ColourTable _colTab = new ColourTable (Main.confdir+"/trailcolours");
         
     public static long getExpiretime()
        { return _expiretime; }
@@ -49,13 +48,13 @@ public static class Status implements Serializable
     /*
      * Attributes of a station record (APRS data)
      */
-    private String    _callsign; 
-    private Status    _status;
-    private int       _course;
-    private int       _speed; 
-    private int       _altitude;
+    private String      _callsign; 
+    private Status      _status;
+    private int         _course;
+    private int         _speed; 
+    private int         _altitude;
        
-    private Trail     _trail = new Trail(); 
+    private History     _history = new History(); 
 
     
     /* 
@@ -68,15 +67,12 @@ public static class Status implements Serializable
     private int         _report_ignored = 0;
     private boolean     _igate, _wdigi;
     private Date        _infra_updated = null;
-    private Channel     _source;
        
        
     public Station(String id)
-       { super(null); _callsign = id; _trailcolor = _colTab.nextColour(); }
+       { super(null); _callsign = id; }
         
-    public Object clone() throws CloneNotSupportedException
-       { return super.clone(); }
-       
+
     public Set<String> getTrafficFrom()
        {  return _db.getRoutes().getToEdges(getIdent()); }
        
@@ -100,14 +96,6 @@ public static class Status implements Serializable
           _igate = _wdigi = false; 
     } 
     
-    
-    public void setSource(Channel src)
-       { _source = src; }
-   
-    public Channel getSource()
-       { return _source; }
-       
-    
     public boolean isIgate()
        { expireInfra(); 
          return _igate; }
@@ -128,8 +116,8 @@ public static class Status implements Serializable
          _wdigi = x; }       
     
     
-    public synchronized Trail.Item getHItem()
-       { return new Trail.Item(_updated, _position, _speed, _course, ""); }
+    public synchronized History.Item getHItem()
+       { return new History.Item(_updated, _position, _speed, _course, ""); }
        
        
     public String getIdent()
@@ -151,14 +139,14 @@ public static class Status implements Serializable
     
     public synchronized void reset()
     {  
-        _trail = new Trail();
+        _history = new History();
         _db.getRoutes().removeNode(this.getIdent());
         super.reset(); 
     }
           
     
-    public synchronized Trail getTrail() 
-        { return _trail; }        
+    public synchronized History getHistory() 
+        { return _history; }        
       
    
     public boolean isAutoTrail()
@@ -190,14 +178,14 @@ public static class Status implements Serializable
     {
        if (super.isInside(uleft, lright))
           return true;
-       if (_trail == null)
+       if (_history == null)
           return false;    
        
        /* If part of trace is inside displayed area and the station itself is within a 
         * certain distance from displayed area 
         */
        if (super.isInside(uleft, lright, 1, 1))
-        for (Trail.Item it : _trail) 
+        for (History.Item it : _history) 
           if (it.isInside(uleft, lright))
              return true;
          
@@ -211,7 +199,8 @@ public static class Status implements Serializable
       
       
         
-    public synchronized void update(Date ts, AprsHandler.PosData pd, String descr, String pathinfo)
+    public synchronized void update(Date ts, Reference newpos, int crs, int sp, int alt, 
+                                    String descr, char sym, char altsym, String pathinfo)
     { 
         if (_position != null && _updated != null)
         { 
@@ -228,21 +217,21 @@ public static class Status implements Serializable
                * FIXME: speed limit should be configurable.
                */
               if ( _report_ignored < 2 && tdistance > 0 && 
-                    distance(pd.pos)/tdistance > (500 * 0.27778)) 
+                    distance(newpos)/tdistance > (500 * 0.27778)) 
               {
                  System.out.println("*** Ignore report moving beyond speed limit (500km/h)");
                  _report_ignored++;
                  return;
               }
               if (_report_ignored >= 2) {
-                 _trail.clear();
+                 _history.clear();
                  _db.getRoutes().removeOldEdges(getIdent(), ts);
               }
               
               /* If report is older than the previous one, just save it in the 
                * history 
                */
-               if (tdistance < 0 && _trail.add(ts, pd.pos, pd.speed, pd.course, pathinfo)) {
+               if (tdistance < 0 && _history.add(ts, newpos, sp, crs, pathinfo)) {
                    System.out.println("*** Old report - update trail");
                    setChanging(); 
                    return;
@@ -255,21 +244,21 @@ public static class Status implements Serializable
             * If object has moved, indicate that object is moving/changing, 
             * save the previous position.
             */
-           if (distance(pd.pos) > Trail.mindist && 
-               _trail.add(_updated, _position, _speed, _course, pathinfo)) 
+           if (distance(newpos) > History.mindist && 
+               _history.add(_updated, _position, _speed, _course, pathinfo)) 
            {
-              if (_trail.length() == 1 && _autotrail)
+              if (_history.length() == 1 && _autotrail)
                   _trailcolor = _colTab.nextColour();
-              _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
+              _db.getRoutes().removeOldEdges(getIdent(), _history.oldestPoint());
               setChanging();   
            }
            
         }
-        updatePosition(ts, pd.pos);
+        updatePosition(ts, newpos);
         
-        _speed = pd.speed;
-        _course = pd.course;
-        _altitude = (int) pd.altitude;
+        _speed = sp;
+        _course = crs;
+        _altitude = alt;
        
         setDescr(descr); 
         
@@ -278,16 +267,17 @@ public static class Status implements Serializable
             setChanging();
         }
         
-        if (pd.symbol != _symbol || pd.symtab != _altsym)
+        if (sym != _symbol || altsym != _altsym)
         {
-            _symbol = pd.symbol;
-            _altsym = pd.symtab;
+            _symbol = sym;
+            _altsym = altsym;
             setChanging();
         }
         
         isChanging(); 
     }
     
+
 
     
     

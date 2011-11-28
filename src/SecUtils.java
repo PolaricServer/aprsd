@@ -25,6 +25,32 @@ import com.mindprod.base64.Base64;
  
 public class SecUtils
 {
+   private static SecureRandom _rand = null;
+
+    static {
+       try {
+          _rand = SecureRandom.getInstance("SHA1PRNG");
+       }
+       catch (Exception e) {
+          System.out.println("Login: couldnt create random generator");
+       }
+    }
+
+ 
+    /**
+     * Generate a random key. 
+     */   
+    public final static byte[] getKey(int size)
+    {
+        if (size < 1)
+	    return null; // OOPS: Is this secure? 
+        
+	byte[] k = new byte[size];
+	_rand.nextBytes(k);
+	return k;
+    }
+    
+
     /**
      * Compute a MD5 hash from the text. Text can be given as
      * an array of bytes, a string or both. A string will be converted
@@ -60,7 +86,7 @@ public class SecUtils
      * the Base 64 method.
      */
     public final static String digestB64(String txt, int n)
-    {
+    { 
        Base64 b64 = new Base64();
        String d = b64.encode(digest(null, txt));
        return d.substring(0,n); 
@@ -94,7 +120,6 @@ public class SecUtils
             return ((char) (value - 10 + 'a'));
         else
             return ((char) (value + '0'));
-
     }  
     
 }

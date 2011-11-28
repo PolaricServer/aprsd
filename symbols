@@ -9,37 +9,39 @@
 /# star-0.gif
 /' airplane.png
 /^ airplane.png
-/& diamond-G.png 
+/& diamond-G.png
 D& diamond-G.png
-\& diamond-I.gif 
+\& diamond-I.gif
 R& diamond-R.gif
 I& diamond-I.gif
 // sym08.gif
 \/ sym08.gif
-/+ sym02.png 
-/- home.png 
+/+ sym02.png
+/- home.png
 /_ wx.gif
 \_ wx.gif
 /> car.gif
-/K home.png 
 \L lighthouse.png
 /P car-police.gif
 /R car.gif
 /U bus.gif
 /K h-school.gif
-\K sym00.gif
+/* snowmobile.png
+/x xastir.png
+/; campground.png
 /a hospital.gif
 \a sym06.gif
 /c orient.gif
-\j workzone.png
 /j car.gif
+\j workzone.png
 /k car.gif
 \k car-van.gif
 /o home.png
+\o eoc.png
 /y home.png
 \! 00-emergency.gif
 \# star.gif
-\- home.png 
+\- home.png
 \> car.gif
 4> car-4.gif
 5> car-5.gif
@@ -84,4 +86,6 @@ L# star-L.gif
 \8 c-8.png
 \9 c-9.png
 #
+
+
 

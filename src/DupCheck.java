@@ -18,7 +18,6 @@ import java.util.*;
 import java.text.*;
 
 
-
 /**
  * Duplicate checking.
  */
@@ -60,8 +59,9 @@ public class DupCheck
      public synchronized boolean checkTS(String from, Date ts)
      {
          String composed = "TIME:" + from + ":"+_dhmsFormat.format(ts);
-         if (_timestamped.containsKey(composed))
-             return true;
+         if (_timestamped.containsKey(composed)) 
+            return true;
+
          _timestamped.put(composed, TRUE);
          return  false;
      }
@@ -72,7 +72,7 @@ public class DupCheck
       */
      public synchronized boolean checkPacket(String from, String to, String report)
      {
-         String composed = from+to+report;
+         String composed = from+report;
          if (report == null || report.length() < 1)
             return false;
          switch(report.charAt(0))

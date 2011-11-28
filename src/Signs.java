@@ -7,9 +7,7 @@ import uk.me.jstott.jcoord.*;
 
 public class Signs 
 {
-    private static Signs _signs = 
-       new Signs(System.getProperties().getProperty("confdir", ".")+"/signs");
-    
+    private static Signs _signs = new Signs(Main.confdir+"/signs");
     
     public static class Item extends PointObject {
         public long _maxScale;
@@ -20,26 +18,24 @@ public class Signs
           
         public String getUrl()
           { return _url; }
-        
+
         public Item (Reference r, long sc, String ic, String url, String txt)
           { super(r);  _maxScale = sc; _icon = ic; _url = url; _description = txt; 
             if (_url.matches("-|null|none")) 
-                 _url = null; }   
+                 _url = null; }
     }
-    
     
     private BufferedReader  _rd;
     private StringTokenizer _next;
     private List<Item> _list = new ArrayList();
-    
-    
+  
     /**
      * Read signs file.
      * Format of each line: 
      * UTM-zone, UTM-easting, UTM-northing, max-scale, icon-filename, URL, description.
      * Example:  
      *    33W, 123456, 1234567, 30000, symbol.gif, http://mysite.net, This is my site 
-     */  
+     */
     protected Signs(String file) 
     {
         try {
@@ -64,14 +60,17 @@ public class Signs
                                                x[0].charAt(2),
                                                easting, northing);
                    Item it = new Item(pos, scale, x[4], x[5], x[6]);
+                   for (int i=7; i<x.length; i++)
+                       if (x[i] != null)
+                           x[6] = x[6] + ", "+x[i];
+                           
                    _list.add(it);
                }
             }     
         }
         catch (Exception e) 
             { System.out.println("SIGNLIST WARNING: "+e); }
-    }     
-     
+    } 
 
     public static List<Item> getList() { return _signs._list; }
 }

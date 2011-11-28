@@ -23,7 +23,7 @@ import java.io.Serializable;
  * Every point has a location
  */
  
-public abstract class Point implements Serializable,  Cloneable
+public abstract class Point implements Serializable
 {             
     protected Reference   _position;
       

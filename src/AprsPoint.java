@@ -21,12 +21,12 @@ import java.io.Serializable;
 /**
  * APRS geographical point.
  */
-public abstract class AprsPoint extends PointObject implements Serializable, Cloneable
+public abstract class AprsPoint extends PointObject implements Serializable
 {
-    private   static long      _nonMovingTime = 1000 * 60 * 5;   
-    private   static SymTable  _symTab        = new SymTable (System.getProperties().getProperty("confdir", ".")+"/symbols");
-    private   static Notifier  _change        = new Notifier();
-    protected static StationDB _db    = null;
+    private static long     _nonMovingTime = 1000 * 60 * 5;   
+    private static SymTable _symTab        = new SymTable (Main.confdir+"/symbols");
+    private static Notifier _change        = new Notifier();
+    protected static StationDB _db         = null;
     
     public AprsPoint(Reference p)
       { super(p); }
@@ -194,7 +194,8 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
     }
         
         
-    public abstract void update(Date ts, AprsHandler.PosData pd, String descr, String pathinfo);        
+    public abstract void update(Date ts, Reference newpos, int crs, int sp, int alt, 
+                                String descr, char sym, char altsym, String pathinfo);        
         
     public abstract boolean expired();
     public boolean visible() { return !expired(); }

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ public class OwnObjects implements Runnable
 { 
     private Channel         _inetChan, _rfChan;
     private boolean         _allowRf;
+    private String          _pathRf;
     private int             _txPeriod;
     private String          _myCall, _file;
     private StationDB       _db;
@@ -43,6 +44,7 @@ public class OwnObjects implements Runnable
     public OwnObjects(Properties config, StationDB db) 
     {
         _allowRf = config.getProperty("objects.rfgate.allow", "false").trim().matches("true|yes");
+        _pathRf = config.getProperty("objects.rfgate.path", "").trim(); 
         _myCall = config.getProperty("objects.mycall", "").trim().toUpperCase();
         if (_myCall.length() == 0)
            _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
@@ -53,7 +55,7 @@ public class OwnObjects implements Runnable
         
         /* If station identified by mycall is not in database, create it
          */
-        _myself = _db.getStation(_myCall, null);
+        _myself = _db.getStation(_myCall);
         if (_myself == null)
            _myself = _db.newStation(_myCall);
            
@@ -68,19 +70,20 @@ public class OwnObjects implements Runnable
        
     public int nItems() 
         { return _ownObjects.size(); }
+        
     
     /**
      * Add an object.
      */  
-    public synchronized boolean add(String id, AprsHandler.PosData pos,
+    public synchronized boolean add(String id, Reference pos, char symtab, char sym, 
                         String comment, boolean perm)
     {
-         AprsObject obj = (AprsObject) _db.getItem(id, null);
+         AprsObject obj = (AprsObject) _db.getItem(id);
 
          /* Ignore if object already exists.
           * FIXME: If object exists, we may take over the name, but since
           * these objects arent just local, we should ask the user first, if this is
-          * intendeed. For now we only take over our own, if forceupdate = true
+          * intended. For now we only take over our own, if forceupdate = true
           */
          if (obj == null || !obj.visible() ||
              (_forceUpdate && (_ownObjects.contains(id) || obj.getOwner() == _myself)))
@@ -89,7 +92,7 @@ public class OwnObjects implements Runnable
                 id = id.substring(0,9);
             _myself.setUpdated(new Date());
             obj = _db.newObject(_myself, id);
-            obj.update(new Date(), pos, comment,  "");
+            obj.update(new Date(), pos, 0, 0, 0, comment, sym, symtab,  "");
             obj.setTimeless(perm);
             _ownObjects.add(id);
             sendObjectReport(obj, false);
@@ -106,7 +109,7 @@ public class OwnObjects implements Runnable
     public synchronized void clear()
     {
         for (String oid: _ownObjects) {
-           AprsObject obj = (AprsObject) _db.getItem(oid+'@'+_myself.getIdent(), null);
+           AprsObject obj = (AprsObject) _db.getItem(oid+'@'+_myself.getIdent());
            if (obj!=null) {
               sendObjectReport(obj, true);
               obj.kill();
@@ -120,7 +123,7 @@ public class OwnObjects implements Runnable
      */
     public synchronized boolean delete(String id)
     {
-        AprsObject obj = (AprsObject) _db.getItem(id+'@'+_myself.getIdent(), null);
+        AprsObject obj = (AprsObject) _db.getItem(id+'@'+_myself.getIdent());
         if (obj==null)
             return false;
         obj.kill();
@@ -202,8 +205,16 @@ public class OwnObjects implements Runnable
        String id = (obj.getIdent().replaceFirst("@.*","") + "         ").substring(0,9);
        Channel.Packet p = new Channel.Packet();
        p.from = _myCall;
-       p.to = "APRS";
+       p.to = Main.toaddr;
        p.type = ';';
+     
+       /* Set digi path when transmitting on RF channels. By default
+        * it is local (no digi). FIXME: This should maybe be done by the 
+        * igate/router in later versions. 
+        */
+       if (chan == _rfChan)
+          p.via = _pathRf;
+       
        /* Should type char be part of report ? */
        p.report = ";" + id + (delete ? "_" : "*") 
                    + posReport((obj.isTimeless() ? null : obj.getUpdated()), obj.getPosition(), obj.getSymbol(), obj.getSymtab())
@@ -216,9 +227,17 @@ public class OwnObjects implements Runnable
 
     protected void sendObjectReport(AprsObject obj, boolean delete)
     {
-        sendObjectReport(_inetChan, obj, delete);
-        if (_allowRf)
+        /* Send object report on aprs-is */
+        if (_inetChan != null) 
+            sendObjectReport(_inetChan, obj, delete);
+            
+        /* Send object report on RF, if appropriate */
+        if (_allowRf && _rfChan != null)
             sendObjectReport(_rfChan, obj, delete);
+        /* FIXME: Should only tx on rf if object is local. The problem is that
+         * we don't know our position. Maybe this decision should be moved to 
+         * the igate/router as well!
+         */
     }
     
     
@@ -254,7 +273,7 @@ public class OwnObjects implements Runnable
             Thread.sleep(3000);
             synchronized(this) {
               for (String oid: _ownObjects) {
-                 AprsObject obj = (AprsObject) _db.getItem(oid+'@'+_myself.getIdent(), null);
+                 AprsObject obj = (AprsObject) _db.getItem(oid+'@'+_myself.getIdent());
                  sendObjectReport(obj, false);
               }
             }

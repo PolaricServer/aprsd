@@ -50,7 +50,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private Thread _thread;
    
    private MessageProcessor _msg;
-   private ServerAPI _api;
+   private StationDB _db;
 
    public String getParent()
        { return _parent; }
@@ -60,7 +60,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        
    
    private int threadid=0;    
-   public RemoteCtl(Properties config, MessageProcessor mp, ServerAPI api)
+   public RemoteCtl(Properties config, MessageProcessor mp, StationDB db)
    {
        String myCall = config.getProperty("remotectl.mycall", "").trim().toUpperCase();
        if (myCall.length() == 0)
@@ -71,7 +71,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           
        mp.subscribe(myCall, new Subscriber(), true);
        _msg = mp;
-       _api = api;
+       _db = db;
        if (_parent != null) 
             _parent.trim();
        _thread = new Thread(this, "RemoteCtl-"+(threadid++));
@@ -164,7 +164,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        }
        if ("OFF".equals(args.trim())) {
            System.out.println("*** Clear SAR-mode from "+sender.getIdent());
-           _api.clearSar();
+           Main.sarmode = null;
        }
        else {      
            String[] arg = args.split("\\s+", 3);
@@ -175,7 +175,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
            }
            System.out.println("*** Set SAR-mode from "+sender.getIdent());
            String filter = ("NONE".equals(arg[1]) ? "" : arg[1]);
-           _api.setSar(arg[2], arg[0], filter);
+           Main.sarmode = new SarMode(arg[2], arg[0], filter);
        }
        return true;
    }
@@ -191,7 +191,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       System.out.println("*** Set ALIAS from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
-      AprsPoint item = _api.getDB().getItem(arg[0].trim(), null);
+      AprsPoint item = _db.getItem(arg[0].trim());
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;
@@ -213,7 +213,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       System.out.println("*** Set ICON from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
-      AprsPoint item = _api.getDB().getItem(arg[0].trim(), null);
+      AprsPoint item = _db.getItem(arg[0].trim());
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;

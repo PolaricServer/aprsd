@@ -22,7 +22,7 @@ import java.io.Serializable;
  * Movement history of APRS stations. A history has a certain maximum length with
  * respect to time span. 
  */  
-public class Trail implements Iterable<Trail.Item>, Serializable
+public class History implements Iterable<History.Item>, Serializable
 {
     /**
      * History item. It is a geographical point with timestamp and some additional info.
@@ -58,9 +58,10 @@ public class Trail implements Iterable<Trail.Item>, Serializable
     
     public boolean isEmpty() 
         { return (_items.size() == 0); }
-        
-    public int length() 
+    
+    public int length()
         { return _items.size(); }
+        
     
     public void clear()
         { _items.clear(); }
@@ -75,8 +76,7 @@ public class Trail implements Iterable<Trail.Item>, Serializable
        else return it.time;
     }
     
-    
-    public static final long mindist = 15;
+    public static final long mindist = 20;
     
     /**
      * Add a position report to history.

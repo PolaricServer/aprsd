@@ -18,10 +18,14 @@ import java.util.*;
 
 
 public class ViewFilter {
-  
+ 
   protected boolean isSymbol(AprsPoint x, char sym, char symtab)
      { return x.getSymbol() == sym && (symtab == '*' || x.getSymtab() == symtab); }
-  
+ 
+  protected boolean matchSymbol(AprsPoint x, String regex)
+     { String s = ""+x.getSymtab() + x.getSymbol(); 
+       return regex.matches(s); }
+       
   protected boolean isNumberSym(AprsPoint x)
      { return x.getSymbol() >= '0' && x.getSymbol() <= '9' && x.getSymtab() == '/'; }
      
@@ -46,20 +50,24 @@ public class ViewFilter {
         public boolean useObject(AprsPoint x)
           { return x.getIdent().matches(_call); }
   }
- 
- 
+  
   
   
   public static class Tracking2 extends ViewFilter
   {  
+       private String _senderMatch;
+       
+       public Tracking2() 
+       {
+           _senderMatch = _config.getProperty("filter.roadmsg.senders", "LA4JAA-2|LA1FTA-14").trim();
+       }
+       
        public boolean showIdent(AprsPoint x)
            { return !(x instanceof AprsObject) || 
-                    ( !isSymbol(x, 'j', '\\')    &&
-                      !isSymbol(x, 'n', '\\'))   
-                      ||
-                    ( !((AprsObject)x).getOwner().getIdent().equals("LA1FTA-14") && 
-                      !((AprsObject)x).getOwner().getIdent().equals("LA4JAA-2")) ;   }      
-           
+                    !( (isSymbol(x, 'j', '\\') ||
+                        isSymbol(x, 'n', '\\')) 
+                      &&
+                      ((AprsObject)x).getOwner().getIdent().matches(_senderMatch) ) ;   }
   }
   
 
@@ -102,11 +110,13 @@ public class ViewFilter {
   public static class Moving extends ViewFilter
   {
       public boolean useObject(AprsPoint x)
-         { return ((x instanceof Station) ? !((Station) x).getTrail().isEmpty() : false); }
+         { return ((x instanceof Station) ? !((Station) x).getHistory().isEmpty() : false); }
   }
     
     
   private static Map<String, ViewFilter> _map = new HashMap();
+  protected static Properties _config; 
+  
   public static ViewFilter getFilter(String id)
   {
      ViewFilter x  = _map.get(id);
@@ -115,7 +125,11 @@ public class ViewFilter {
      return x;
   }    
   
-  static {
+  public static void init(Properties c)
+  {   
+      if (_config != null) 
+         return;
+       _config = c; 
       _map.put("all", new ViewFilter());
       _map.put("track", new Tracking());
       _map.put("track2", new Tracking2());
