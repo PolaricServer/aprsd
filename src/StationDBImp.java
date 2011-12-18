@@ -190,6 +190,12 @@ public class StationDBImp implements StationDB, Runnable
         return st;
     }
     
+    
+    public synchronized void addStation(Station s)
+        { _map.put(s.getIdent(), s); }
+        
+        
+    
     /** 
      * Create a new APRS object.
      * Note that an object is in this database identified by 'ident@owner'
