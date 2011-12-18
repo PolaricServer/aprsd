@@ -87,6 +87,8 @@ public class MessageProcessor implements Runnable
    private String     _myCall; /* Move this ? */
    private Thread     _thread;
    private String     _key;
+   private String     _defaultPath;
+   private String     _alwaysRf;
    private int        _threadid;
     
    private static String getNextId()
@@ -102,6 +104,8 @@ public class MessageProcessor implements Runnable
        if (_myCall.length() == 0)
            _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
        _key = config.getProperty("message.auth.key", "NOKEY").trim();
+       _defaultPath = config.getProperty("message.rfpath", "WIDE1-1").trim();
+       _alwaysRf = config.getProperty("message.alwaysRf", "").trim();
        _thread = new Thread(this, "MessageProcessor-"+(threadid++));
        _thread.start();
    }  
@@ -201,9 +205,8 @@ public class MessageProcessor implements Runnable
       String message = (recipient+ "         ").substring(0,9) + ":" + text + mac
                        + (msgid != null ? "{"+msgid : "");
       if (acked)
-         _outgoing.put(msgid, new OutMessage(msgid, recipient, message, not));
-                             
-      sendPacket(message);       
+         _outgoing.put(msgid, new OutMessage(msgid, recipient, message, not));                      
+      sendPacket(message, recipient);       
    }
    
    
@@ -221,7 +224,7 @@ public class MessageProcessor implements Runnable
    {
       sendPacket( (recipient+ "         ").substring(0,9) + ":"
                        + (accept ? "ack" : "rej")
-                       + msgid );
+                       + msgid, recipient );
    }
 
 
@@ -229,27 +232,39 @@ public class MessageProcessor implements Runnable
    /**
     * Encode and send an APRS message packet.
     */
-   private void sendPacket(String message)
+   private void sendPacket(String message, String recipient)
    {
        Channel.Packet p = new Channel.Packet();
        p.from = _myCall;
        p.to = "APRS";
+       p.msgto = recipient;
        /* Need to set p.via, and differently for the two channels */
        p.type = ':';
        p.report = ":"+message;
        
+       /* See also Igate gate_to_rf !! Try to share code? */
        boolean sentOnRf = false;
-       if (_rfChan != null) {
-          /* Note, if myCall does not match TNC call, it will 
-           * be sent as third party packet 
+       if (_rfChan != null &&
+           /* if recipient is heard on RF and NOT on the internet */
+           (_rfChan.heard(recipient)   &&
+            !_rfChan.heard(recipient)) || 
+            recipient.matches(_alwaysRf))
+       {
+          /* Now, get a proper path for the packet. 
+           * If possible, a reverse of the path last heard from the recipient.
            */
-          p.via = "";
+          String path = _rfChan.heardPath(recipient); 
+          if (path == null)
+             p.via = _defaultPath;
+          else
+             p.via = Channel.getReversePath(path); 
+         
           _rfChan.sendPacket(p);
           sentOnRf = true;
        }
        if (_inetChan != null) {
           /* If already sent on rf, emulate a igate. Perhaps we
-           * should not send it on internet. FIXME: _myCall.
+           * should not send it on internet? FIXME: _myCall.
            */
           p.via = sentOnRf ? "qAR,"+_myCall : "TCPIP";
           _inetChan.sendPacket(p);
@@ -295,7 +310,7 @@ public class MessageProcessor implements Runnable
                       _outgoing.remove(m.msgid);
                    }
                    else {
-                      sendPacket(m.message);
+                      sendPacket(m.message, m.recipient);
                       m.time = t;
                       m.retry_cnt++;
                    } 
