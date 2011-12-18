@@ -38,6 +38,8 @@ public interface StationDB
     public Station newStation(String id);
     
     public AprsObject newObject(Station owner, String id);
+   
+    public void addStation(Station s);
     
     public void deactivateSimilarObjects(String id, Station owner);
     
