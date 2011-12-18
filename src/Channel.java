@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,22 @@ import java.util.regex.*;
 import java.io.*;
 import se.raek.charset.*;
 
+
 /**
  * Channel for sending/receiving APRS data. 
  */
 public abstract class Channel implements Serializable
 {
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
-     transient private LinkedHashMap<String, Date> _heard = new LinkedHashMap();
+     transient protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap();
+        
+     protected static class Heard {
+         public Date time; 
+         public String path;
+         public Heard(Date t, String p)
+           { time = t; path = p;}
+     }
+         
      protected boolean _restrict = false;
      protected String _style;
      protected String _ident; 
@@ -61,10 +70,10 @@ public abstract class Channel implements Serializable
      
      private void removeOldHeardEntries()
      {
-          Iterator<Date> it = _heard.values().iterator();
+          Iterator<Heard> it = _heard.values().iterator();
           Date now = new Date();
           while (it.hasNext()) {
-              Date x = it.next();
+              Date x = it.next().time;
               if (now.getTime() > x.getTime() + HRD_TIMEOUT)
                  it.remove();
               else
@@ -121,7 +130,43 @@ public abstract class Channel implements Serializable
          return _heard.containsKey(call);
      }
          
-         
+  
+    public String heardPath(String call)
+     {
+         Heard x = _heard.get(call);
+         if (x==null)
+            return null;
+         else
+            return x.path;
+     }
+     
+     
+    public static String getReversePath(String path)
+    {
+       String result = "";
+       Stack<String> st = new Stack<String>();
+       String[] p = path.split(",");
+       boolean dflag = false;
+       for(String x : p) {       
+          if (x.length() < 1)
+             break;
+          if (x.charAt(x.length()-1) == '*') {
+             x = x.substring(0, x.length()-1);
+             dflag = true;
+          }
+          else if (dflag) 
+             break;
+          if (!x.matches("(WIDE|TRACE|NOR|SAR|(TCP[A-Z0-9]{2})|NOGATE|RFONLY|NO_TX).*")) 
+             st.push(x);   
+       }
+       if (dflag) 
+          while (!st.empty())
+            result += (st.pop() + ",");
+       return result.length() == 0 ? "" : result.substring(0,result.length()-1);
+    }    
+    
+    
+     
    /**
      * Number of stations heard.
      */     
@@ -172,15 +217,18 @@ public abstract class Channel implements Serializable
                p = string2packet(p.report.substring(1));
                if (p != null)
                   p.thirdparty = true; 
+               else
+                  return null;
             }
             else if (p.type == ':') 
-               /* Special treatment for message type.
+              /* Special treatment for message type.
                * Extract recipient id
                */
                 p.msgto = p.report.substring(1,9).trim();
 
             /* Remove first comma in path */
-            p.via = p.via.trim();
+            if (p.via != null) 
+                  p.via = p.via.trim();
             while (p.via != null && p.via.length() > 0 && p.via.charAt(0) == ',')
                   p.via = p.via.substring(1);
 
@@ -190,23 +238,32 @@ public abstract class Channel implements Serializable
     }
     
     
+
+    protected abstract void regHeard(Packet p);
+    
+    
+    
     /**
      * Process incoming packet. 
      * To be called from subclass. Parses packet, updates heard table, checks for
      * duplicates and if all is ok, deliver packet to receivers.
      */
     protected void receivePacket(String packet, boolean dup)
-    {
+    { 
+       if (packet == null || packet.length() < 1)
+          return;
+       System.out.println(new Date() + ":  "+packet);    
        Packet p = string2packet(packet);
        if (p == null)
-          return;
+          return;  
        p.source = this;
-       _heard.put(p.from, new Date());
-
        dup = _dupCheck.checkPacket(p.from, p.to, p.report);
+       if (!dup) {
+          regHeard(p);
+          System.out.println("*** REVERSE: "+getReversePath(p.via));
+       }
        for (Receiver r: _rcv)
            r.receivePacket(p, dup);
-       
     }
     
     public String toString() {return "Channel"; }
