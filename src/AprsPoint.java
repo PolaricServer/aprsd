@@ -67,7 +67,12 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
        
     public char getSymtab()
        { return _altsym;}
-    
+       
+    public void setSymbol(char s)
+       { _symbol = s; }
+   
+    public void setSymtab(char s)
+       { _altsym = s; }
        
     public String getIcon()
     { 
@@ -176,7 +181,7 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
            * When station has not changed position or other properties for xx minutes, 
            * it is regarded as not moving. 
            */
-          if (_changing && _updated.getTime() > _lastChanged.getTime() + _nonMovingTime) {
+          if (_changing && (new Date()).getTime() > _lastChanged.getTime() + _nonMovingTime) {
                _change.signal(this);
                return (_changing = false);
           }
@@ -185,7 +190,7 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
     
     
     
-    protected void updatePosition(Date ts, Reference newpos)
+    public void updatePosition(Date ts, Reference newpos)
     {
          if (_position == null)
          setChanging();
