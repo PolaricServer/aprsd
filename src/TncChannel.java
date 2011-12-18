@@ -98,7 +98,7 @@ public class TncChannel extends Channel implements Runnable
           }
           catch (Exception e) {}
           
-       if (p.thirdparty || (p.to != null && !p.to.equals(_myCall)))
+       if (p.thirdparty || (p.from != null && !p.from.equals(_myCall)))
            _out.print(
              "}" + p.from + ">" + p.to +
                 ((p.via_orig != null && p.via_orig.length() > 0) ? ","+p.via_orig : "") +
