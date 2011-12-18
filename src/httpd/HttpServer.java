@@ -150,6 +150,8 @@ public abstract class HttpServer extends NanoHTTPD
          ViewFilter vfilt = ViewFilter.getFilter(filtid);
          if ("/admin".equals(uri))
              type = _serveAdmin(header, parms, out);   
+         else if ("/setownpos".equals(uri))
+             type = _serveSetOwnPos(header, parms, out);
          else if ("/search".equals(uri))
              type = _serveSearch(header, parms, out, vfilt);
          else if ("/station".equals(uri))
@@ -198,6 +200,7 @@ public abstract class HttpServer extends NanoHTTPD
    /* Stubs for the server methods that are implemented in Scala. 
     */
    protected abstract String _serveAdmin(Properties header, Properties parms, PrintWriter out);
+   protected abstract String _serveSetOwnPos(Properties header, Properties parms, PrintWriter out);
    protected abstract String _serveStation(Properties header, Properties parms, PrintWriter out, boolean  canUpdate);
    protected abstract String _serveAddObject (Properties header, Properties parms, PrintWriter out);
    protected abstract String _serveDeleteObject (Properties header, Properties parms, PrintWriter out);
@@ -275,7 +278,7 @@ public abstract class HttpServer extends NanoHTTPD
    
    protected String ll2dmString(LatLng llref)
       { return showDMstring(llref.getLatitude())+"N, "+showDMstring(llref.getLongitude())+"E"; }
-   
+      // FIXME: Check if it is NE or SW
 
 
   protected long _sessions = 0;
@@ -355,7 +358,8 @@ public abstract class HttpServer extends NanoHTTPD
                 out.flush();
                 return "text/xml; charset=utf-8";
             }
-                
+        
+        long tstart = (new Date()).getTime();        
         /* XML header with meta information */           
         out.println("<overlay seq=\""+_seq+"\"" +
             (filt==null ? ""  : " view=\"" + filt + "\"") + ">");
@@ -387,8 +391,9 @@ public abstract class HttpServer extends NanoHTTPD
             out.println("</point>");    
         }        
         
+        List<AprsPoint> ddd = _db.search(uleft, lright);
         /* Output APRS objects */
-        for (AprsPoint s: _db.search(uleft, lright)) 
+        for (AprsPoint s: ddd) 
         {
         
             if (s.getPosition() == null)
