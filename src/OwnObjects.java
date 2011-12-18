@@ -36,7 +36,7 @@ public class OwnObjects implements Runnable
     private StringTokenizer _next;
     private Set<String>     _ownObjects = new LinkedHashSet<String>();
     private Thread          _thread;
-    private Station	    _myself;
+    private Station         _myself;
     private boolean         _forceUpdate;
     private int              _tid;
     
@@ -198,48 +198,34 @@ public class OwnObjects implements Runnable
     /**
      * send object report on the given channel.
      */
-    protected void sendObjectReport(Channel chan, AprsObject obj, boolean delete)
+    protected void sendObjectReport(AprsObject obj, boolean delete)
     {
-       if (chan == null)
-          return;
        String id = (obj.getIdent().replaceFirst("@.*","") + "         ").substring(0,9);
        Channel.Packet p = new Channel.Packet();
        p.from = _myCall;
        p.to = Main.toaddr;
        p.type = ';';
-     
-       /* Set digi path when transmitting on RF channels. By default
-        * it is local (no digi). FIXME: This should maybe be done by the 
-        * igate/router in later versions. 
-        */
-       if (chan == _rfChan)
-          p.via = _pathRf;
        
        /* Should type char be part of report ? */
        p.report = ";" + id + (delete ? "_" : "*") 
                    + posReport((obj.isTimeless() ? null : obj.getUpdated()), obj.getPosition(), obj.getSymbol(), obj.getSymtab())
                    + obj.getDescr(); 
        System.out.println("*** OBJECTREPORT SEND: "+ p.from+">"+p.to+":"+p.report);
-       chan.sendPacket(p);
-    }
-
-
-
-    protected void sendObjectReport(AprsObject obj, boolean delete)
-    {
-        /* Send object report on aprs-is */
-        if (_inetChan != null) 
-            sendObjectReport(_inetChan, obj, delete);
+       
+       /* Send object report on aprs-is */
+       if (_inetChan != null) 
+           _inetChan.sendPacket(p);
             
-        /* Send object report on RF, if appropriate */
-        if (_allowRf && _rfChan != null)
-            sendObjectReport(_rfChan, obj, delete);
-        /* FIXME: Should only tx on rf if object is local. The problem is that
-         * we don't know our position. Maybe this decision should be moved to 
-         * the igate/router as well!
-         */
+       /* Send object report on RF, if appropriate */
+       p.via = _pathRf;
+       if (_allowRf && _rfChan != null)
+           _rfChan.sendPacket(p);
+       /* FIXME: Should only tx on rf if object is local. We can do this only 
+        * if we know our position. Maybe this decision should be moved to 
+        * the igate/router as well!
+        */
     }
-    
+
     
     void save(ObjectOutput ofs)
     { 
