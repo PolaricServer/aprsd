@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-    public static String version = "1.0.4";
+    public static String version = "1.0.4+";
     public static String toaddr  = "APPS10";
     
     public static String       confdir, datadir, webdir; 
@@ -26,6 +26,7 @@ public class Main
  
     private static Properties config; 
     private static Properties sysconfig;
+    public static OwnPosition ownpos = null; 
     
     
     
@@ -92,6 +93,10 @@ public class Main
                  sarurl = new SarUrl(config);
              }
            
+             ownpos = new OwnPosition(config);
+             ownpos.setChannels(ch2, ch1);
+             db.addStation(ownpos); 
+             
              /* Message processing */
              db.getMsgProcessor().setChannels(ch2, ch1);  
 
