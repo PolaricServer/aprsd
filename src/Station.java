@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2002 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,6 +72,10 @@ public static class Status implements Serializable
     public Station(String id)
        { super(null); _callsign = id; }
         
+    
+    protected void setId(String id)
+       { _callsign = id; }
+       
 
     public Set<String> getTrafficFrom()
        {  return _db.getRoutes().getToEdges(getIdent()); }
