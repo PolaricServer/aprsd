@@ -218,8 +218,55 @@ package no.polaric.aprsd.http
              
         printHtml (out, htmlBody(true, head, action(hdr, parms)));    
    }
+
+
+   /**
+    * set own position
+    */          
+   def _serveSetOwnPos(hdr: Properties, parms: Properties, out: PrintWriter) : String =
+   {
+        val pos = getUtmCoord(parms, 'W', _utmzone)
+        val prefix = <h2>Legge inn egen posisjon</h2>
+        val p = Main.ownpos
+       
+        /* Fields to be filled in */
+        def fields(hdr: Properties, parms: Properties): NodeSeq =
+           <xml:group>
+          
+            <label for="objsym" class="lleftlab">Symbol:</label>
+            <input id="osymtab" name="osymtab" type="text" size="1" maxlength="1" value={ ""+p.getSymtab() }/>
+            <input id="osym" name="osym" type="text" size="1" maxlength="1" value={ ""+p.getSymbol() } />
+            <br/>      
+            <label for="utmz" class="lleftlab">Pos (UTM): </label>
+            {  if (pos==null)
+                  utmForm('W', 34)
+               else
+                  showUTM(pos)
+            }
+            </xml:group>
+             
+             
+        /* Action. To be executed when user hits 'submit' button */
+        def action(hdr: Properties, parms: Properties): NodeSeq = {
+               if (!authorizedForAdmin(hdr))
+                  <h3>Du er ikke autorisert for admin operasjoner</h3>
+               else {
+                  val osymtab = parms.getProperty("osymtab")
+                  val osym  = parms.getProperty("osym")
+                  System.out.println("*** SET OWN POS by user '"+getAuthUser(hdr)+"'")
+                  p.updatePosition(new Date(), pos, 
+                      if (osymtab==null) '/' else osymtab(0), if (osym==null) 'c' else osym(0))
+                  
+                 <h2>Posisjon registrert</h2>
+                 <p>pos={showUTM(pos) }</p>
+              }
+           };
+            
+        printHtml (out, htmlBody (true, null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
+    }   
    
-   
+
+
    def _serveSarMode(hdr: Properties, parms: Properties, out: PrintWriter) : String =
    {
        val prefix = <h2>Søk og redningsmodus</h2>
