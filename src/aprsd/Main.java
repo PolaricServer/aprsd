@@ -19,6 +19,7 @@ public class Main implements ServerAPI
    public  static TncChannel  ch2 = null;
    public static  Igate igate  = null;
    public static  OwnObjects ownobjects; 
+   public static  OwnPosition ownpos = null; 
    public static  RemoteCtl rctl;
    public static  SarMode  sarmode = null;
    private static Properties _config = new Properties();
@@ -162,6 +163,9 @@ public class Main implements ServerAPI
                igate.activate(this);
            }
            
+           ownpos = new OwnPosition(config);
+           ownpos.setChannels(ch2, ch1);
+           db.addStation(ownpos); 
            
            /* APRS objects */
            ownobjects = db.getOwnObjects(); 
