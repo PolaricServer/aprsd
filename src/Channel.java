@@ -183,6 +183,8 @@ public abstract class Channel
      */
     protected Packet string2packet(String packet)
     {
+        if (packet == null || packet.length() < 10)
+           return null;
         Matcher m = _ppat.matcher(packet);
         if (m.matches())
         {
@@ -200,9 +202,12 @@ public abstract class Channel
               * Strip off type character and apply this function recursively
               * on the wrapped message. 
               */
-               p = string2packet(p.report.substring(1));
-               if (p != null)
-                  p.thirdparty = true; 
+               p = string2packet(p.report.substring(1, p.report.length()));
+               if (p != null) 
+                   p.thirdparty = true; 
+               else
+                   return null;
+               
             }
             else if (p.type == ':') 
               /* Special treatment for message type.
@@ -210,8 +215,10 @@ public abstract class Channel
                */
                 p.msgto = p.report.substring(1,9).trim();
 
+
             /* Remove first comma in path */
-            p.via = p.via.trim();
+            if (p.via != null) 
+                  p.via = p.via.trim();
             while (p.via != null && p.via.length() > 0 && p.via.charAt(0) == ',')
                   p.via = p.via.substring(1);
 
