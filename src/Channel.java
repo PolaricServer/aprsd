@@ -209,13 +209,13 @@ public abstract class Channel
                    return null;
                
             }
-            else if (p.type == ':') 
-              /* Special treatment for message type.
-               * Extract recipient id
+            else if (p.type == ':' || p.type == ';') 
+              /* Special treatment for message type or object
+               * Extract recipient/object id
                */
-                p.msgto = p.report.substring(1,9).trim();
-
-
+                p.msgto = p.report.substring(1,10).trim();
+           
+                
             /* Remove first comma in path */
             if (p.via != null) 
                   p.via = p.via.trim();
