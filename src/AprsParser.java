@@ -245,10 +245,8 @@ public class AprsParser implements Channel.Receiver
            parseStdAprs(msg.substring(10), obj, true, "");
            _db.deactivateSimilarObjects(ident, station);
         }
-        else {
+        else 
            obj.kill();
-           System.out.println("   OBJECT KILL: id="+ident+", op="+op);
-        }
     }
     
     
