@@ -29,6 +29,7 @@ public class OwnObjects implements Runnable
     private Channel         _inetChan, _rfChan;
     private boolean         _allowRf;
     private String          _pathRf;
+    private int             _rangeRf;
     private int             _txPeriod;
     private String          _myCall, _file;
     private StationDB       _db;
@@ -45,6 +46,8 @@ public class OwnObjects implements Runnable
     {
         _allowRf = config.getProperty("objects.rfgate.allow", "false").trim().matches("true|yes");
         _pathRf = config.getProperty("objects.rfgate.path", "").trim(); 
+        _rangeRf = Integer.parseInt(config.getProperty("objects.rfgate.range", "0").trim());
+        
         _myCall = config.getProperty("objects.mycall", "").trim().toUpperCase();
         if (_myCall.length() == 0)
            _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
@@ -218,14 +221,21 @@ public class OwnObjects implements Runnable
             
        /* Send object report on RF, if appropriate */
        p.via = _pathRf;
-       if (_allowRf && _rfChan != null)
+       if (_allowRf && _rfChan != null && object_in_range(obj, _rangeRf))
            _rfChan.sendPacket(p);
-       /* FIXME: Should only tx on rf if object is local. We can do this only 
-        * if we know our position. Maybe this decision should be moved to 
-        * the igate/router as well!
-        */
     }
 
+
+
+    private boolean object_in_range(AprsObject obj, int range)
+    {
+        if (Main.ownpos == null && Main.ownpos.getPosition() == null)
+            return true;
+        return (obj.distance(Main.ownpos) < range*1000);
+    }
+    
+    
+    
     
     void save(ObjectOutput ofs)
     { 
