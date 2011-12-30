@@ -68,7 +68,7 @@ public class Main
              AprsParser p = new AprsParser(db, db.getMsgProcessor());
              if (config.getProperty("igate.on", "false").trim().matches("true|yes")) {
                  System.out.println("*** Activate IGATE");
-                 igate = new Igate(config);
+                 igate = new Igate(config, db);
              }
              if (config.getProperty("inetchannel.on", "false").trim().matches("true|yes"))  {
                  System.out.println("*** Activate Internet Channel");
