@@ -90,14 +90,14 @@ public class TncChannel extends Channel implements Runnable
              _sem.acquire();
              getCommandPrompt();
              _unproto = unproto;
-             sendCommand(_out, _pathCmd + " " + unproto+"\r");
-             _out.print("k\r");
-             _out.flush();
+             sendCommand(_out, _pathCmd + " " + unproto);
+             sendCommand(_out, "k");
              _sem.release();
-             Thread.sleep(100);
+             Thread.sleep(200);
           }
           catch (Exception e) {}
-          
+       
+       System.out.println("*** Send packet");
        if (p.thirdparty || (p.from != null && !p.from.equals(_myCall)))
            _out.print(
              "}" + p.from + ">" + p.to +
@@ -186,7 +186,7 @@ public class TncChannel extends Channel implements Runnable
       Thread.sleep(50);
       _out.print("\r");
       _out.flush();
-      Thread.sleep(150);
+      Thread.sleep(200);
       while (_in.ready()) 
          line += (char) _in.read();
       
@@ -208,9 +208,7 @@ public class TncChannel extends Channel implements Runnable
           _out.print("\r");
           Thread.sleep(200); 
           initCommands(_initfile, _out);
-          _out.print("k\r"); 
-          _out.flush();
-          Thread.sleep(200);
+          sendCommand(_out, "k"); 
         }
         catch (Exception e) 
            { System.out.println("*** Error: initTnc: "+e); }
