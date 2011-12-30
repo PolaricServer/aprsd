@@ -23,7 +23,7 @@ import java.util.concurrent.*;
  */
 public class SarUrl implements Runnable
 {
-    private String     _file;
+    private String     _file, _proto;
     private boolean   _hasChanged = false; 
     private List<Item> _mapping = new ArrayList();
     private long _timeLimit = 1000  * 60 * 60  * 24;
@@ -40,6 +40,7 @@ public class SarUrl implements Runnable
     public SarUrl(Properties config)
     {
         _file = config.getProperty("sarurl.file", "sarurl.txt");
+        _proto = config.getProperty("sarurl.protocol", "https");
         if (_file.charAt(0) != '/')
            _file = Main.datadir+"/"+_file;
            
@@ -63,7 +64,7 @@ public class SarUrl implements Runnable
              _mapping.add( new Item(key, target, new Date()) );  
           }
           saveMap();
-          return "https://"+host+"/sar-"+key; 
+          return _proto + "://"+host+"/sar-"+key; 
        } 
        catch (IOException e)
         {return null;}
