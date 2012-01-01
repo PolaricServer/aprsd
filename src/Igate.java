@@ -40,9 +40,9 @@ public class Igate implements Channel.Receiver
         _allowRf = config.getProperty("igate.rfgate.allow", "true").trim().matches("true|yes");
         _gateObj = config.getProperty("igate.rfgate.objects", "false").trim().matches("true|yes");
         _pathObj = config.getProperty("objects.rfgate.path", "").trim(); 
-        _rangeObj = Integer.parseInt(config.getProperty("objects.rfgate.range", "0").trim());
+        _rangeObj = Integer.parseInt(config.getProperty("objects.rfgate.range", "60").trim());
         _myCall = config.getProperty("igate.mycall", "").trim().toUpperCase();
-        _defaultPath = config.getProperty("message.rfpath", "WIDE1-1").trim();
+        _defaultPath = config.getProperty("message.rfpath", "").trim();
         _alwaysRf = config.getProperty("message.alwaysRf", "").trim();
         if (_myCall.length() == 0)
            _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
