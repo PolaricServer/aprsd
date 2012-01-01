@@ -104,7 +104,7 @@ public class MessageProcessor implements Runnable
        if (_myCall.length() == 0)
            _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
        _key = config.getProperty("message.auth.key", "NOKEY").trim();
-       _defaultPath = config.getProperty("message.rfpath", "WIDE1-1").trim();
+       _defaultPath = config.getProperty("message.rfpath", "").trim();
        _alwaysRf = config.getProperty("message.alwaysRf", "").trim();
        _thread = new Thread(this, "MessageProcessor-"+(threadid++));
        _thread.start();
