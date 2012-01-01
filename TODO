@@ -1,48 +1,24 @@
-
-Updates to 1.0.5, etc..
+ 
+Updates to 1.0.6, etc..
 -----------------------
 
 * [C] Sometimes last update in trail is missing. Fix?
 
-* Support position, beaconing of posreport and statusreport?
-     DONE.
-
-* Use position to decide if object report should be sent on RF. 
-
 * Manage own objects. List, delete. Does deleting work?
-
-* Activate/deactivate igate from webapp and/or APRS message.
-
+     
 * KISS TNC support. 
 
-* [C] PHP warnings and grab.cur
-    DONE
-
-* SAR URL - work with Chrome etc?
-
-* [C] SAR URL - deactivate menu
-
-* Configurable lifetime for SAR URL
-
-* Fix bug: Sends as thirdparty packet on RF even if not necessary. 
-    DONE.
-
-* Performance tuning??
+* Simple messaging
 
 
 
 Packaging related
 -----------------
-    
-* Distribute signs file
 
 * Support SAR URL in apache setup. 
 
 * [C] Put web-app another place than /var/www  ?? 
     
-* FIX init script: kill process properly when server won't shut down. 
-  Now, it seems to just restart and waiting in script never end. 
-    NEED MORE TESTING. 
   
 
 
@@ -51,6 +27,6 @@ Support for mobile devices
 
 * Context menu outside stations. 
 * Multitouch zoom events. 
-* Login and update operations
+* Login and update operations. SAR code. 
 * Fix dynamic update. 
 
