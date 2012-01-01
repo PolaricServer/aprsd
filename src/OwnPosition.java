@@ -51,8 +51,8 @@ public class OwnPosition extends Station implements Runnable
         _allowRf  = config.getProperty("ownposition.tx.allowrf", "false").trim().matches("true|yes");
         _pathRf   = config.getProperty("ownposition.tx.rfpath", "WIDE1-1").trim(); 
         _comment  = config.getProperty("ownposition.tx.comment", "").trim();
-        _maxPause = Integer.parseInt(config.getProperty("ownposition.tx.maxpause", "600").trim());
-        _minPause = Integer.parseInt(config.getProperty("ownposition.tx.minpause", "120").trim());
+        _maxPause = Integer.parseInt(config.getProperty("ownposition.tx.maxpause", "900").trim());
+        _minPause = Integer.parseInt(config.getProperty("ownposition.tx.minpause", "180").trim());
         if (_minPause == 0)
            _minPause = _maxPause; 
            
