@@ -149,14 +149,14 @@ package no.polaric.aprsd.http
     /**
     * set own position
     */          
-   def handle_setownpos(hdr: Properties, parms: Properties, out: PrintWriter) : String =
+   def handle_setownpos(req : Request, res: Response, out: PrintWriter) =
    {
-        val pos = getUtmCoord(parms, 'W', _utmzone)
+        val pos = getUtmCoord(req, 'W', _utmzone)
         val prefix = <h2>Legge inn egen posisjon</h2>
-        val p = Main.ownpos
+        val p = api.getOwnPos()
        
         /* Fields to be filled in */
-        def fields(hdr: Properties, parms: Properties): NodeSeq =
+        def fields(req : Request): NodeSeq =
            <xml:group>
           
             <label for="objsym" class="lleftlab">Symbol:</label>
@@ -173,13 +173,13 @@ package no.polaric.aprsd.http
              
              
         /* Action. To be executed when user hits 'submit' button */
-        def action(hdr: Properties, parms: Properties): NodeSeq = {
-               if (!authorizedForAdmin(hdr))
+        def action(req : Request): NodeSeq = {
+               if (!authorizedForAdmin(req))
                   <h3>Du er ikke autorisert for admin operasjoner</h3>
                else {
-                  val osymtab = parms.getProperty("osymtab")
-                  val osym  = parms.getProperty("osym")
-                  System.out.println("*** SET OWN POS by user '"+getAuthUser(hdr)+"'")
+                  val osymtab = req.getParameter("osymtab")
+                  val osym  = req.getParameter("osym")
+                  System.out.println("*** SET OWN POS by user '"+getAuthUser(req)+"'")
                   p.updatePosition(new Date(), pos, 
                       if (osymtab==null) '/' else osymtab(0), if (osym==null) 'c' else osym(0))
                   
@@ -188,7 +188,7 @@ package no.polaric.aprsd.http
               }
            };
             
-        printHtml (out, htmlBody (true, null, htmlForm(hdr, parms, prefix, fields, IF_AUTH(action))))
+        printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
     }   
      
    
