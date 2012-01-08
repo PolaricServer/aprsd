@@ -27,7 +27,7 @@ public class OwnPosition extends Station implements Runnable
 {
     transient private Channel    _inetChan, _rfChan;
     transient private Thread     _thread;
-    transient private StationDB  _db;
+    transient private ServerAPI  _api;
     transient private int        _tid;
     transient private boolean    _txOn, _allowRf;
     transient private String     _pathRf, _comment;
@@ -37,9 +37,12 @@ public class OwnPosition extends Station implements Runnable
     
     
     
-    public OwnPosition(Properties config) 
+    public OwnPosition(ServerAPI api) 
     {
-        super(null);      
+        super(null);     
+        Properties config = api.getConfig();
+        _api = api;
+        
         String ownpos = config.getProperty("ownposition.pos", "").trim(); 
         String myCall = config.getProperty("ownposition.mycall", "").trim().toUpperCase();
         if (myCall.length() == 0)
@@ -127,7 +130,7 @@ public class OwnPosition extends Station implements Runnable
     {
        Channel.Packet p = new Channel.Packet();
        p.from = getIdent();
-       p.to = Main.toaddr;
+       p.to = _api.getToAddr();
        p.type = '/';
        
        /* Should type char be part of report ? */
@@ -152,7 +155,7 @@ public class OwnPosition extends Station implements Runnable
     
     public synchronized void updatePosition(Date t, Reference pos, char symtab, char symbol)
     {
-          update(new Date(), pos, -1, -1, -1, null, symbol, symtab, null);
+          update(new Date(),new AprsHandler.PosData(pos, symbol, symtab), "", "");
           timeSinceReport = 0;
           sendPosReport();
     }
