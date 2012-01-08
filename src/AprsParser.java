@@ -410,7 +410,6 @@ public class AprsParser implements Channel.Receiver
                 if (comment.length() == 0)
                    comment = null;
             }     
-            System.out.println("*** MIC-E COMMENT: "+comment);
             
             
             
