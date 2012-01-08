@@ -29,38 +29,36 @@ public class OwnObjects implements Runnable
     private Channel         _inetChan, _rfChan;
     private boolean         _allowRf;
     private String          _pathRf;
+    private int             _rangeRf;
     private int             _txPeriod;
     private String          _myCall, _file;
-    private StationDB       _db;
+    private ServerAPI       _api;
     private BufferedReader  _rd;
     private StringTokenizer _next;
     private Set<String>     _ownObjects = new LinkedHashSet<String>();
     private Thread          _thread;
-    private Station	    _myself;
     private boolean         _forceUpdate;
     private int              _tid;
     
     
-    public OwnObjects(Properties config, StationDB db) 
+    public OwnObjects(ServerAPI api) 
     {
+        Properties config = api.getConfig();
+        _api = api;
+        
         _allowRf = config.getProperty("objects.rfgate.allow", "false").trim().matches("true|yes");
         _pathRf = config.getProperty("objects.rfgate.path", "").trim(); 
+        _rangeRf = Integer.parseInt(config.getProperty("objects.rfgate.range", "0").trim());
+        
         _myCall = config.getProperty("objects.mycall", "").trim().toUpperCase();
         if (_myCall.length() == 0)
            _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
            
         _txPeriod = Integer.parseInt(config.getProperty("objects.transmit.period", "0").trim());
         _forceUpdate = config.getProperty("objects.forceupdate", "false").trim().matches("true|yes");
-        _db = db;
         
-        /* If station identified by mycall is not in database, create it
-         */
-        _myself = _db.getStation(_myCall, null);
-        if (_myself == null)
-           _myself = _db.newStation(_myCall);
            
-        /* Should not expire as long as we have objects */
-           
+        /* Should not expire as long as we have objects */        
          if (_txPeriod > 0) {
             _thread = new Thread(this, "OwnObjects-"+(_tid++));
             _thread.start();
@@ -77,7 +75,7 @@ public class OwnObjects implements Runnable
     public synchronized boolean add(String id, AprsHandler.PosData pos,
                         String comment, boolean perm)
     {
-         AprsObject obj = (AprsObject) _db.getItem(id, null);
+         AprsObject obj = (AprsObject) _api.getDB().getItem(id, null);
 
          /* Ignore if object already exists.
           * FIXME: If object exists, we may take over the name, but since
@@ -85,12 +83,12 @@ public class OwnObjects implements Runnable
           * intendeed. For now we only take over our own, if forceupdate = true
           */
          if (obj == null || !obj.visible() ||
-             (_forceUpdate && (_ownObjects.contains(id) || obj.getOwner() == _myself)))
+             (_forceUpdate && (_ownObjects.contains(id) || obj.getOwner() == _api.getOwnPos())))
          {
             if (id.length() > 9)
                 id = id.substring(0,9);
-            _myself.setUpdated(new Date());
-            obj = _db.newObject(_myself, id);
+            _api.getOwnPos().setUpdated(new Date());
+            obj = _api.getDB().newObject(_api.getOwnPos(), id);
             obj.update(new Date(), pos, comment,  "");
             obj.setTimeless(perm);
             _ownObjects.add(id);
@@ -108,7 +106,7 @@ public class OwnObjects implements Runnable
     public synchronized void clear()
     {
         for (String oid: _ownObjects) {
-           AprsObject obj = (AprsObject) _db.getItem(oid+'@'+_myself.getIdent(), null);
+           AprsObject obj = (AprsObject) _api.getDB().getItem(oid+'@'+_api.getOwnPos().getIdent(), null);
            if (obj!=null) {
               sendObjectReport(obj, true);
               obj.kill();
@@ -122,7 +120,7 @@ public class OwnObjects implements Runnable
      */
     public synchronized boolean delete(String id)
     {
-        AprsObject obj = (AprsObject) _db.getItem(id+'@'+_myself.getIdent(), null);
+        AprsObject obj = (AprsObject) _api.getDB().getItem(id+'@'+_api.getOwnPos().getIdent(), null);
         if (obj==null)
             return false;
         obj.kill();
@@ -147,7 +145,7 @@ public class OwnObjects implements Runnable
     
     public synchronized boolean mayExpire(Station s)
     {
-        return (s != _myself) || _ownObjects.isEmpty();
+        return (s != _api.getOwnPos()) || _ownObjects.isEmpty();
     }        
             
     
@@ -201,7 +199,7 @@ public class OwnObjects implements Runnable
        String id = (obj.getIdent().replaceFirst("@.*","") + "         ").substring(0,9);
        Channel.Packet p = new Channel.Packet();
        p.from = _myCall;
-       p.to = Main.toaddr;
+       p.to = _api.getToAddr();
        p.type = ';';
        
        /* Should type char be part of report ? */
@@ -216,13 +214,19 @@ public class OwnObjects implements Runnable
             
        /* Send object report on RF, if appropriate */
        p.via = _pathRf;
-       if (_allowRf && _rfChan != null)
+       if (_allowRf && _rfChan != null && object_in_range(obj, _rangeRf))
            _rfChan.sendPacket(p);
-       /* FIXME: Should only tx on rf if object is local. We can do this only 
-        * if we know our position. Maybe this decision should be moved to 
-        * the igate/router as well!
-        */
     }
+    
+    
+    
+    private boolean object_in_range(AprsObject obj, int range)
+    {
+        if (_api.getOwnPos() == null && _api.getOwnPos().getPosition() == null)
+            return true;
+        return (obj.distance(_api.getOwnPos()) < range*1000);
+    }
+    
     
     
     void save(ObjectOutput ofs)
@@ -257,7 +261,7 @@ public class OwnObjects implements Runnable
             Thread.sleep(3000);
             synchronized(this) {
               for (String oid: _ownObjects) {
-                 AprsObject obj = (AprsObject) _db.getItem(oid+'@'+_myself.getIdent(), null);
+                 AprsObject obj = (AprsObject) _api.getDB().getItem(oid+'@'+_api.getOwnPos().getIdent(), null);
                  sendObjectReport(obj, false);
               }
             }
