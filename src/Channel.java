@@ -18,6 +18,8 @@ import java.util.*;
 import java.util.regex.*;
 import java.io.*;
 import se.raek.charset.*;
+import java.text.*;
+
 
 
 /**
@@ -86,7 +88,7 @@ public abstract class Channel implements Serializable
      *  APRS packet.
      */ 
     public static class Packet implements Cloneable {
-        public String from, to, msgto, via, report; 
+        public String from, to, msgto, via, via_orig, report; 
         public char type; 
         public boolean thirdparty = false; 
         public Channel source;
@@ -108,7 +110,11 @@ public abstract class Channel implements Serializable
     private static Pattern _ppat = Pattern.compile
        ("([\\w\\-]+)>([\\w\\-]+)(((,[\\w\\-]+\\*?))*):(.*)");
 
-
+    
+    private DateFormat df = new SimpleDateFormat("dd MMM yyyy HH:mm:ss",
+           new DateFormatSymbols(new Locale("no")));
+           
+           
     /* 
      * Perhaps we should use a list of receivers in a later version, but for now
      * two is sufficient: A parser and an igate.
@@ -120,7 +126,9 @@ public abstract class Channel implements Serializable
     public static final String _rx_encoding = "X-UTF-8_with_cp-850_fallback";
     public static final String _tx_encoding = "UTF-8";
 
-
+    public abstract String getShortDescr(); 
+    
+    
     /**
       * Returns true if call is heard.
       */
@@ -220,7 +228,7 @@ public abstract class Channel implements Serializable
                else
                   return null;
             }
-            else if (p.type == ':') 
+            else if (p.type == ':' || p.type == ';') 
               /* Special treatment for message type.
                * Extract recipient id
                */
@@ -251,17 +259,17 @@ public abstract class Channel implements Serializable
     protected void receivePacket(String packet, boolean dup)
     { 
        if (packet == null || packet.length() < 1)
-          return;
-       System.out.println(new Date() + ":  "+packet);    
+          return; 
+       System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+packet);
        Packet p = string2packet(packet);
        if (p == null)
           return;  
        p.source = this;
        dup = _dupCheck.checkPacket(p.from, p.to, p.report);
-       if (!dup) {
+       if (!dup) 
+          /* Register heard, only for first instance of packet, not duplicates */
           regHeard(p);
-          System.out.println("*** REVERSE: "+getReversePath(p.via));
-       }
+
        for (Receiver r: _rcv)
            r.receivePacket(p, dup);
     }
