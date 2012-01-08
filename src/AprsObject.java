@@ -78,6 +78,7 @@ public class AprsObject extends AprsPoint implements Serializable
         if (!_killed)
             setChanging();
         _killed = false;  
+        _owner.setUpdated(new Date());
     }
     
     
@@ -103,6 +104,7 @@ public class AprsObject extends AprsPoint implements Serializable
          _symbol = sym; 
          _altsym = altsym;
          _killed = false;  
+         _owner.setUpdated(new Date());
     }
     
     
