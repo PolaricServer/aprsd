@@ -62,6 +62,11 @@ public abstract class Channel
             { try { return (Packet) super.clone();}
               catch (Exception e) {return null; } 
             }
+        public String toString()
+            { String v = (via_orig != null ? via_orig : via); 
+              return from+">"+to +
+                (v != null ? ","+v : "") + ":" + report;
+            }
     }
     
     
@@ -221,7 +226,6 @@ public abstract class Channel
                   p.via = p.via.trim();
             while (p.via != null && p.via.length() > 0 && p.via.charAt(0) == ',')
                   p.via = p.via.substring(1);
-
             return p;
         }
         return null;
