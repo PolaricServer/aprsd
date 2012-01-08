@@ -38,10 +38,11 @@ public class InetChannel extends Channel implements Runnable, Serializable
 
 
 
-    public InetChannel(ServerAPI api, Properties config, String prefix) 
+    public InetChannel(ServerAPI api, String prefix) 
     {
         if (prefix==null)
            prefix = "inetchannel"; 
+        Properties config = api.getConfig();
         _init(config, prefix);
         _api = api;
         
