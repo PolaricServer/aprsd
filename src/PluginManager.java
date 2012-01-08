@@ -18,7 +18,7 @@ public class PluginManager
    /**
     * Plugin start/stop interface. All plugins should implement this. 
     */
-   public interface Plugin 
+   public interface Plugin /* FIXME: extends Managed */
    {
       /** Start the plugin.  */
        void activate(ServerAPI api);
