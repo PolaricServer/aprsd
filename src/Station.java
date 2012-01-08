@@ -76,6 +76,11 @@ public static class Status implements Serializable
         
     public Object clone() throws CloneNotSupportedException
        { return super.clone(); }
+                      
+    
+    protected void setId(String id)
+       { _callsign = id; }
+       
        
     public Set<String> getTrafficFrom()
        {  return _db.getRoutes().getToEdges(getIdent()); }
