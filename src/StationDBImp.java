@@ -33,13 +33,14 @@ public class StationDBImp implements StationDB, Runnable
     private StationDB.Hist _histData = null;
 
     
-    public StationDBImp(Properties config)
+    public StationDBImp(ServerAPI api)
     {
+        Properties config = api.getConfig();
         _file = config.getProperty("stations.file", "stations.dat");
         if (_file.charAt(0) != '/')
            _file = System.getProperties().getProperty("datadir", ".")+"/"+_file;
            
-        _ownobj = new OwnObjects(config, this); 
+        _ownobj = new OwnObjects(api); 
         _msgProc = new MessageProcessor(config);
         restore();
         Thread t = new Thread(this, "StationDBImp");
@@ -197,7 +198,12 @@ public class StationDBImp implements StationDB, Runnable
         _map.put(id, st); 
         return st;
     }
-    
+        
+        
+    public synchronized void addStation(Station s)
+        { _map.put(s.getIdent(), s); }
+        
+        
     /** 
      * Create a new APRS object.
      * Note that an object is in this database identified by 'ident@owner'
