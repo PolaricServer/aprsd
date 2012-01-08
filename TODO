@@ -3,6 +3,64 @@ Preparations for V.2.0 M.0
 Version 1.1, etc. 
 --------------------------
 
+
+* Client customisation in /etc/polaric-webapp directory (stylesheets)
+     DONE
+     
+* Index.html -> index.php (make it more dynamic)
+     DONE
+
+Channels
+--------
+* Start experimenting with more than two channels
+     DONE
+     
+* List of listeners to channel, not just two
+     DONE
+     
+* Attributes to channels (from configuration) - style and access
+     DONE 
+
+* Proper naming of channels. 
+     STARTED
+
+* More generic way to add and configure extra channels in config.
+
+* Associate source channels to stations. 
+     DONE
+     
+* Style attributes to clients
+     DONE
+     
+* Access control and visibility to clients
+
+* Serialisation of channels? IMPORTANT - FILE SAVING IS BROKEN! 
+     DONE
+
+* Flexible Gate for routing packets to and between channels? igate --> router
+
+* Router specification
+
+* Server channel framework (a simple APRS-IS?)
+
+* Javax25 (linux kernel) channel. Experiment with soundcard modem. 
+     
+* Channel code in separate subpackage / subdirectory
+
+     
+
+Mobile servers
+--------------
+
+* Support position. Manually. Object RF TX decision based on pos. Consider for version 1.0.5. 
+
+* Support GPS (NMEA stream)
+
+* Tracker module (builtin or special plugin??)
+
+* Configuration parameter to activate mobility support. Indicate in XML (meta tag). 
+     
+
  
 Web Server
 ----------
@@ -20,11 +78,12 @@ Web Server
   but uses POST method. 
 
 
+
 API, Extensibility
 ------------------
 
 * [C] Javascript external API at client side.
-* [C] Javascript plugin arch/API at client side.
+* [C] Javascript plugin arch/API at client side (may need index file to be php).
 
 * Component API, add components in config.
       DONE. 
@@ -54,15 +113,27 @@ Database
 * Experimental search functionality/trails - but as external module? 
        DONE.
 
+* [C] Fix/improve GUI for trail search
+
+* Implement mission support - Server side
+       STARTED
+
+* [C] Implement experimental mission GUI and start testing
+
+
 
 Other. 
 -----
 
+* Check out Google Web toolkit: Java->js compiler
+
 * Allow a dynamic number of data channels to be configured. 
   Not just two. 
+      STARTED (See above)
 
 * Allow objects with certain attributes (like input channel, callsign) to 
-  be visible only for logged in users.  
+  be visible only for logged in users. 
+      STARTED
 
 * Change class hierarchy to support other types of position objects, 
   not just plain APRS. 
