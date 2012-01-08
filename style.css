@@ -3,6 +3,8 @@ body {background: #cfd5cc; }
 th { text-align: left; }
 a {text-decoration: none}
 
+div.trblock, label {display: block; overflow: hidden; }
+
 td {
     padding-left: 0.5em; 
     padding-right: 0.5em;
