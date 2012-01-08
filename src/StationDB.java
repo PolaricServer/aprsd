@@ -89,7 +89,12 @@ public interface StationDB
         */
        public Station newStation(String id);
     
-    
+        /**
+        * Add an existing APRS station. 
+        * @param s: existing station
+        */
+       public void addStation(Station s);
+        
        /**
         * Create a new APRS object. 
         * @param owner: identifier (typically a callsign) of owner station.
