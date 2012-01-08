@@ -30,11 +30,15 @@ import java.util.*;
        
        public RemoteCtl getRemoteCtl(); 
        
+       public OwnPosition getOwnPos(); 
+       
        public Properties getConfig();
        
        public Map<String, Object> getObjectMap(); // Need this?
        
        public String getVersion();
+       
+       public String getToAddr();
        
        public SarMode getSar();
     
