@@ -37,7 +37,7 @@ public class History implements Iterable<History.Item>, Serializable
     }
     
     private static long _maxAge = 1000 * 60 * 15;          // Max age of a history item (default 30 minutes) 
-    private static long _maxPause = 1000 * 60 * 10;        // History removed if no movement within this thime (15 minutes) 
+    private static long _maxPause = 1000 * 60 * 10;        // History removed if no movement within this time (15 minutes) 
     private static long _maxAge_ext = 1000 * 60 * 30;      // Max age of a history item - extended
     private static long _maxPause_ext = 1000 * 60 * 20;     
         
