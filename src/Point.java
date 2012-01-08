@@ -54,7 +54,11 @@ public abstract class Point implements Serializable,  Cloneable
         }
         catch (Exception e) { return false; }
     }
-    
+      
+      
+    public long distance (Point p)
+      { return distance(p._position); }
+      
     
     public long distance(Reference p)
        { return Math.round(_position.toLatLng().distance(p.toLatLng()) * 1000); }
