@@ -191,6 +191,7 @@ public abstract class AprsPoint extends PointObject implements Serializable
     
     
     
+    
     public void updatePosition(Date ts, Reference newpos)
     {
          if (_position == null)
