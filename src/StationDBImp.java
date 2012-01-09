@@ -163,7 +163,11 @@ public class StationDBImp implements StationDB, Runnable
     
     
     public synchronized void removeItem(String id)
-    {   
+    {      
+           String[] idd = id.split("@");
+           if (_ownobj.myCall().equals(idd[1]))
+                 _ownobj.delete(idd[0]);
+           
            _map.remove(id);
            _hasChanged = true; 
     }
@@ -206,6 +210,7 @@ public class StationDBImp implements StationDB, Runnable
         _map.put(id+'@'+owner.getIdent(), st); 
         return st;
     }
+    
     
     /**
      * Deactivate objects having the same name. 
