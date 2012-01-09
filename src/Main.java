@@ -11,10 +11,10 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-    public static String version = "1.0.5";
+    public static String version = "1.0.5+";
     public static String toaddr  = "APPS10";
     
-    public static String       confdir, datadir, webdir; 
+    public static String       confdir, datadir, webdir, logdir; 
     public static InetChannel  ch1 = null;
     public static TncChannel   ch2 = null;
     public static Igate        igate  = null;
@@ -44,6 +44,7 @@ public class Main
             config.load(fin);
             System.out.println( "*** Polaric APRSD startup" );
            
+            logdir  = sysconfig.getProperty("logdir", ".");
             confdir = sysconfig.getProperty("confdir", ".");
             datadir = sysconfig.getProperty("datadir", ".");
             webdir  = sysconfig.getProperty("webdir", datadir);
