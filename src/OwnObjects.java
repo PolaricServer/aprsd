@@ -39,7 +39,7 @@ public class OwnObjects implements Runnable
     private Thread          _thread;
     private Station         _myself;
     private boolean         _forceUpdate;
-    private int              _tid;
+    private int             _tid;
     
     
     public OwnObjects(Properties config, StationDB db) 
@@ -74,7 +74,10 @@ public class OwnObjects implements Runnable
     public int nItems() 
         { return _ownObjects.size(); }
         
-    
+    public String myCall()
+        {return _myself.getIdent(); }
+        
+        
     /**
      * Add an object.
      */  
@@ -270,12 +273,12 @@ public class OwnObjects implements Runnable
             synchronized(this) {
               for (String oid: _ownObjects) {
                  AprsObject obj = (AprsObject) _db.getItem(oid+'@'+_myself.getIdent());
-                 sendObjectReport(obj, false);
+                 if (obj != null) 
+                     sendObjectReport(obj, false);
               }
             }
-                 
             Thread.sleep(_txPeriod * 1000 - 3000);
-         } catch (Exception e) {}
+         } catch (Exception e) { System.out.println("*** OWNOBJECTS THREAD: "+e); }
        }
     }
    
