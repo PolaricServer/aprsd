@@ -32,6 +32,7 @@ public class Igate implements Channel.Receiver
     private String    _defaultPath, _pathObj, _alwaysRf;
     private int       _rangeObj;
     private StationDB _db;    
+    private Logfile   _log;
         
         
     public Igate(Properties config, StationDB db) 
@@ -46,6 +47,7 @@ public class Igate implements Channel.Receiver
         _alwaysRf = config.getProperty("message.alwaysRf", "").trim();
         if (_myCall.length() == 0)
            _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
+       _log = new Logfile(config, "igate", "igate.log");
     }  
        
        
@@ -74,6 +76,8 @@ public class Igate implements Channel.Receiver
             
        _msgcnt++;
        System.out.println("*** Gated to internet");
+       _log.log(" [" + _rfChan.getShortDescr() + ">" + _inetChan.getShortDescr() + "] " + p);
+       
        p.via += (",qAR,"+_myCall);
        if (_inetChan != null) 
            _inetChan.sendPacket(p);
@@ -104,18 +108,22 @@ public class Igate implements Channel.Receiver
        )    
        {        
           System.out.println("*** Gated to RF");
-        
+         _log.log(" [" + _inetChan.getShortDescr() + ">" + _rfChan.getShortDescr() + "] " 
+               + p + (p.thirdparty ? " (was thirdparty)" : ""));
+         
           /* Now, get a proper path for the packet. 
            * For messages, if possible, a reverse of the path last heard from the recipient.
            */
-          String path = _rfChan.heardPath(p.msgto); 
+          String path = _rfChan.heardPath(p.msgto);
           p.via_orig = p.via;
           p.via = _defaultPath;
           if (p.type == ';' && _pathObj != null)
              p.via = _pathObj;
           if (p.type == ':' && path != null) 
              p.via = Channel.getReversePath(path); 
-                   
+          
+          p.to = Main.toaddr;
+          _log.add("*** Path = '"+p.to+" VIA "+p.via+"' ");
           _rfChan.sendPacket(p);
        } 
     }    
