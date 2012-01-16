@@ -43,7 +43,7 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
     protected static boolean changeOf(String x, String y)
        { return x != y || (x != null && !x.equals(y)); }   
          
-    public static void setDB(StationDB db) 
+    public static void setDB(StationDB db)
        { _db = db; }   
          
     protected char        _symbol; 
