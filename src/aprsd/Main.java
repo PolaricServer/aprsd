@@ -13,7 +13,7 @@ import no.polaric.aprsd.http.*;
 public class Main implements ServerAPI
 {
    public  static String version = "1.1alpha1";
-   public static String toaddr  = "APPS10";
+   public static String toaddr  = "APPS11";
    
    private static StationDB db = null;
    public  static InetChannel ch1 = null;
@@ -108,7 +108,7 @@ public class Main implements ServerAPI
            _config.load(fin);
            
            /* API */
-           api = new Main();
+           api = this; // new Main();
            PluginManager.setServerApi(api);
            
            /* Database of stations/objects */
@@ -127,6 +127,7 @@ public class Main implements ServerAPI
       // Start the Thread, accept incoming connections   
     {
         try {
+             
            /* Start parser and connect it to channel(s) if any */
            AprsParser p = new AprsParser(api, db.getMsgProcessor());
            if (_config.getProperty("inetchannel.on", "false").trim().matches("true|yes"))  {
@@ -166,7 +167,7 @@ public class Main implements ServerAPI
             */            
            if (_config.getProperty("igate.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate IGATE");
-               igate = new Igate(_config);
+               igate = new Igate(api);
                igate.setChannels(ch2, ch1);
                igate.activate(this);
            }
