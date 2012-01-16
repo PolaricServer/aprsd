@@ -64,7 +64,7 @@ public interface StationDB
          * @param id: identifier (typically a callsign) of item.
          * @param t: time of capture, null if realtime
          */
-        public AprsPoint getItem(String id, Date d);       
+        public AprsPoint getItem(String id, Date t);       
        
        
        /**
