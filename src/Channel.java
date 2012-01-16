@@ -96,6 +96,11 @@ public abstract class Channel implements Serializable
             { try { return (Packet) super.clone();}
               catch (Exception e) {return null; } 
             }
+        public String toString()
+         { String v = (via_orig != null ? via_orig : via); 
+           return from+">" + to +
+             (v != null ? "," + v : "") + ":" + report; 
+         }
     }
     
     
@@ -274,7 +279,7 @@ public abstract class Channel implements Serializable
            r.receivePacket(p, dup);
     }
     
-    public String toString() {return "Channel"; }
+    public String toString() { return "Channel"; }
     
 }
 
