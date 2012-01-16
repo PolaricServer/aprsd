@@ -28,7 +28,7 @@ INSTALL_CONFIG = $(DESTDIR)/etc/polaric-aprsd
 ##################################################
     LIBDIR = _lib
  JAVAFLAGS =
- PACKAGES  = core httpd scala aprsd
+ PACKAGES  = core util httpd scala aprsd
 
 
 
@@ -66,22 +66,28 @@ $(CLASSDIR):
 $(LIBDIR):
 	mkdir $(LIBDIR)
 
-
+.PHONY : util
+util: 
+	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/util/*.java 
+	
+	
+.PHONY : core
+core: util
+	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/*.java 
+	
+	
 .PHONY : aprsd
 aprsd: 
 	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/aprsd/*.java 
 	
-	
-.PHONY : core
-core: 
-	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/*.java 
 
 .PHONY : httpd
-httpd: 
+httpd: core
 	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/httpd/*.java 
 	
+	
 .PHONY : scala
-scala:            
+scala: core           
 	scalac -d $(TDIR) -classpath $(LIBDIR):$(CLASSPATH) src/httpd/*.scala
 
 	
