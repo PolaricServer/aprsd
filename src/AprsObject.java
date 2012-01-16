@@ -78,6 +78,7 @@ public class AprsObject extends AprsPoint implements Serializable
         if (!_killed)
             setChanging();
         _killed = false;  
+        _owner.setUpdated(new Date());
     }
     
     
@@ -102,14 +103,17 @@ public class AprsObject extends AprsPoint implements Serializable
          _symbol = pd.symbol; 
          _altsym = pd.symtab;
          _killed = false;  
+         _owner.setUpdated(new Date());
     }
     
     
     public synchronized boolean expired() 
        { return _owner.expired(); }
        
+       
     public synchronized boolean visible()
        { return !_killed && !expired(); }
+       
        
     public void kill()
     {
