@@ -25,27 +25,32 @@ import uk.me.jstott.jcoord.*;
  */
 public class Igate implements Channel.Receiver, ManagedObject
 { 
-    private Channel _inetChan, _rfChan;
-    private boolean _allowRf, _gateObj;
-    private String  _myCall; /* Move this ? */
-    private long    _msgcnt = 0; 
-    private boolean _active = false;
-    private String  _defaultPath, _pathObj, _alwaysRf;
-    private int     _rangeObj;
-  
+    private Channel  _inetChan, _rfChan;
+    private boolean  _allowRf, _gateObj;
+    private String   _myCall; /* Move this ? */
+    private long     _msgcnt = 0; 
+    private boolean  _active = false;
+    private String   _defaultPath, _pathObj, _alwaysRf;
+    private int      _rangeObj;
+    private Logfile  _log;
+    private ServerAPI   _api;
     
-    public Igate(Properties config) 
+    
+    public Igate(ServerAPI api) 
     {
+        Properties config = api.getConfig();
+        _api = api;
+    
         _allowRf = config.getProperty("igate.rfgate.allow", "true").trim().matches("true|yes");
         _gateObj = config.getProperty("igate.rfgate.objects", "false").trim().matches("true|yes");
         _pathObj = config.getProperty("objects.rfgate.path", "").trim(); 
         _rangeObj = Integer.parseInt(config.getProperty("objects.rfgate.range", "0").trim());
         _myCall = config.getProperty("igate.mycall", "").trim().toUpperCase();
         _defaultPath = config.getProperty("message.rfpath", "WIDE1-1").trim();
-        _alwaysRf = config.getProperty("message.alwaysRf", "").trim();
-        
+        _alwaysRf = config.getProperty("message.alwaysRf", "").trim();       
         if (_myCall.length() == 0)
-           _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
+           _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();      
+       _log = new Logfile(config, "igate", "igate.log");   
     }  
        
        
@@ -93,13 +98,6 @@ public class Igate implements Channel.Receiver, ManagedObject
     }
     
     
-    public void sendPacket(Channel.Packet p)
-    {
-    }
-    
-    
-    
-    
     
     
     /**
@@ -116,6 +114,8 @@ public class Igate implements Channel.Receiver, ManagedObject
             
        _msgcnt++;
        System.out.println("*** Gated to internet");
+       _log.log(" [" + _rfChan.getShortDescr() + ">" + _inetChan.getShortDescr() + "] " + p);       
+       
        p.via += (",qAR,"+_myCall);
        if (_inetChan != null) 
            _inetChan.sendPacket(p);
@@ -146,7 +146,9 @@ public class Igate implements Channel.Receiver, ManagedObject
        )    
        {        
           System.out.println("*** Gated to RF");
-        
+          _log.log(" [" + _inetChan.getShortDescr() + ">" + _rfChan.getShortDescr() + "] " 
+               + p + (p.thirdparty ? " (was thirdparty)" : ""));
+               
           /* Now, get a proper path for the packet. 
            * For messages, if possible, a reverse of the path last heard from the recipient.
            */
@@ -157,7 +159,9 @@ public class Igate implements Channel.Receiver, ManagedObject
              p.via = _pathObj;
           if (p.type == ':' && path != null) 
              p.via = Channel.getReversePath(path); 
-                   
+             
+          p.to = _api.getToAddr();
+          _log.add("*** Path = '"+p.to+" VIA "+p.via+"' ");                   
           _rfChan.sendPacket(p);
        } 
     }
@@ -167,12 +171,12 @@ public class Igate implements Channel.Receiver, ManagedObject
     private boolean object_in_range(Channel.Packet p, int range)
     {
        /* We assume that object's position is already parsed and in database. */
-       if (Main.ownpos == null && Main.ownpos.getPosition() == null)
+       if (_api.getOwnPos() == null && _api.getOwnPos().getPosition() == null)
             return true;
-       AprsPoint obj = _db.getItem(p.msgto);
+       AprsPoint obj = _api.getDB().getItem(p.msgto, null);
        if (obj == null)
             return false;
-       return (obj.distance(Main.ownpos) < range*1000);
+       return (obj.distance(_api.getOwnPos()) < range*1000);
     }
          
 
