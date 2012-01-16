@@ -31,7 +31,7 @@ public class OwnObjects implements Runnable
     private String          _pathRf;
     private int             _rangeRf;
     private int             _txPeriod;
-    private String          _myCall, _file;
+    private String          _file;
     private ServerAPI       _api;
     private BufferedReader  _rd;
     private StringTokenizer _next;
@@ -49,11 +49,6 @@ public class OwnObjects implements Runnable
         _allowRf = config.getProperty("objects.rfgate.allow", "false").trim().matches("true|yes");
         _pathRf = config.getProperty("objects.rfgate.path", "").trim(); 
         _rangeRf = Integer.parseInt(config.getProperty("objects.rfgate.range", "0").trim());
-        
-        _myCall = config.getProperty("objects.mycall", "").trim().toUpperCase();
-        if (_myCall.length() == 0)
-           _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
-           
         _txPeriod = Integer.parseInt(config.getProperty("objects.transmit.period", "0").trim());
         _forceUpdate = config.getProperty("objects.forceupdate", "false").trim().matches("true|yes");
         
@@ -68,6 +63,8 @@ public class OwnObjects implements Runnable
        
     public int nItems() 
         { return _ownObjects.size(); }
+    
+    
     
     /**
      * Add an object.
@@ -198,7 +195,7 @@ public class OwnObjects implements Runnable
     {
        String id = (obj.getIdent().replaceFirst("@.*","") + "         ").substring(0,9);
        Channel.Packet p = new Channel.Packet();
-       p.from = _myCall;
+       p.from = _api.getOwnPos().getIdent();
        p.to = _api.getToAddr();
        p.type = ';';
        
@@ -267,7 +264,7 @@ public class OwnObjects implements Runnable
             }
                  
             Thread.sleep(_txPeriod * 1000 - 3000);
-         } catch (Exception e) {}
+         } catch (Exception e) { System.out.println("*** OWNOBJECTS THREAD: "+e); }
        }
     }
    
