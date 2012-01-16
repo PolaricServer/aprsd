@@ -37,6 +37,7 @@ public class TncChannel extends Channel implements Runnable
     transient private  OutputStream   _ostream;
     transient private  SerialPort     _serialPort;
     transient private  Semaphore      _sem = new Semaphore(1, true);
+    transient private  Logfile        _log; 
     
     private static final String _initfile = System.getProperties().getProperty("confdir", ".")+"/init.tnc";
     
@@ -55,6 +56,7 @@ public class TncChannel extends Channel implements Runnable
         _baud= Integer.parseInt(config.getProperty("tncchannel.baud", "9600").trim());
         _noBreak = config.getProperty("tncchannel.nobreak", "false").trim().matches("true|yes");
         // FIXME: set gnu.io.rxtx.SerialPorts property here instead of in startup script
+        _log = new Logfile(config, "tncchannel", "rf.log");
     }
  
  
@@ -98,12 +100,16 @@ public class TncChannel extends Channel implements Runnable
              Thread.sleep(100);
           }
           catch (Exception e) {}
-          
-       if (p.thirdparty || (p.from != null && !p.from.equals(_myCall)))
+        
+       _log.log(" [>" + this.getShortDescr() + "] " + p);
+       
+       if (p.thirdparty || (p.from != null && !p.from.equals(_myCall))) {
+           _log.add("*** TX path = '"+unproto+"'"); 
            _out.print(
              "}" + p.from + ">" + p.to +
                 ((p.via_orig != null && p.via_orig.length() > 0) ? ","+p.via_orig : "") +
                 ":" + p.report + "\r" );
+       }
        else 
            _out.print(p.report+"\r");
        _out.flush();    
