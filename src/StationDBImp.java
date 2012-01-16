@@ -31,10 +31,12 @@ public class StationDBImp implements StationDB, Runnable
     private OwnObjects _ownobj;
     private MessageProcessor _msgProc;
     private StationDB.Hist _histData = null;
+    private ServerAPI _api; 
 
     
     public StationDBImp(ServerAPI api)
     {
+        _api = api;
         Properties config = api.getConfig();
         _file = config.getProperty("stations.file", "stations.dat");
         if (_file.charAt(0) != '/')
@@ -166,6 +168,10 @@ public class StationDBImp implements StationDB, Runnable
     
     public synchronized void removeItem(String id)
     {   
+            String[] idd = id.split("@");
+           if (_api.getOwnPos().getIdent().equals(idd[1]))
+                 _ownobj.delete(idd[0]);
+                 
            _map.remove(id);
            _hasChanged = true; 
     }
