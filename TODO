@@ -4,55 +4,33 @@ Version 1.1, etc.
 --------------------------
 
 
-* Client customisation in /etc/polaric-webapp directory (stylesheets)
-     DONE
-     
-* Index.html -> index.php (make it more dynamic)
-     DONE
 
 Channels
 --------
-* Start experimenting with more than two channels
-     DONE
-     
-* List of listeners to channel, not just two
-     DONE
-     
-* Attributes to channels (from configuration) - style and access
-     DONE 
 
 * Proper naming of channels. 
      STARTED
 
 * More generic way to add and configure extra channels in config.
-
-* Associate source channels to stations. 
-     DONE
-     
-* Style attributes to clients
-     DONE
      
 * Access control and visibility to clients
-
-* Serialisation of channels? IMPORTANT - FILE SAVING IS BROKEN! 
-     DONE
-
+     
+* Channel code in separate subpackage / subdirectory: 
+    - Move out Channel, InetChannel, TncChannel and DupCheck. 
+    - Rename Channel to ChannelBase
+    - Channel interface in core
+    
 * Flexible Gate for routing packets to and between channels? igate --> router
-
-* Router specification
+    - Router specification?
 
 * Server channel framework (a simple APRS-IS?)
 
-* Javax25 (linux kernel) channel. Experiment with soundcard modem. 
-     
-* Channel code in separate subpackage / subdirectory
 
      
 
 Mobile servers
 --------------
 
-* Support position. Manually. Object RF TX decision based on pos. Consider for version 1.0.5. 
 
 * Support GPS (NMEA stream)
 
