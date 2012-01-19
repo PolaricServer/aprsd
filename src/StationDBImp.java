@@ -169,7 +169,7 @@ public class StationDBImp implements StationDB, Runnable
     public synchronized void removeItem(String id)
     {   
             String[] idd = id.split("@");
-           if (_api.getOwnPos().getIdent().equals(idd[1]))
+           if (idd.length > 1 && _api.getOwnPos().getIdent().equals(idd[1]))
                  _ownobj.delete(idd[0]);
                  
            _map.remove(id);
