@@ -2,3 +2,14 @@
 -----------
  
 Initial plugin architecture, try to factor out things..
+
+* Some hacks to channel framework
+* Replace HTTP server (efficiency, extensibility). The "Simple 
+  framework" http://www.simpleframework.org 
+* Use Apache frontend for all static files. 
+* Component API, add components in config.
+* Jar files in a subdirectory - easier to add extra components?
+* History.Item as standalone class. Trail
+
+
+ 
