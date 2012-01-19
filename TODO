@@ -4,6 +4,8 @@ Version 1.1, etc.
 --------------------------
 
 
+* Messaging
+
 
 Channels
 --------
@@ -25,12 +27,12 @@ Channels
 
 * Server channel framework (a simple APRS-IS?)
 
+* KISS TNC support
 
      
 
 Mobile servers
 --------------
-
 
 * Support GPS (NMEA stream)
 
@@ -42,18 +44,8 @@ Mobile servers
  
 Web Server
 ----------
- 
-* Replace HTTP server (efficiency, extensibility). The "Simple 
-  framework" http://www.simpleframework.org can be a good candidate. 
-     DONE. 
 
-* Use Apache frontend for all static files. 
-     DONE.
-     
 * Simplify webserver impl. (esp. Scala part). 
- 
-* Make it RESTful? Use RESTlets? It is fundamentally restful already, 
-  but uses POST method. 
 
 
 
@@ -63,16 +55,7 @@ API, Extensibility
 * [C] Javascript external API at client side.
 * [C] Javascript plugin arch/API at client side (may need index file to be php).
 
-* Component API, add components in config.
-      DONE. 
-
 * Framework for web-interface extensions in Scala. 
-
-* Jar files in a subdirectory - easier to add extra components
-      DONE.
-
-* History.Item as standalone class. Trail
-      DONE.
 
 
 
@@ -103,8 +86,6 @@ Database
 Other. 
 -----
 
-* Check out Google Web toolkit: Java->js compiler
-
 * Allow a dynamic number of data channels to be configured. 
   Not just two. 
       STARTED (See above)
@@ -126,6 +107,7 @@ Other.
 * More configurable view profiles?  
 
 * More flexible logging?
+    STARTED (also in 1.0)
 
 * Traffic load statistics (per station). 
 
