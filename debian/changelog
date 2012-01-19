@@ -1,3 +1,9 @@
+polaric-aprsd (1.0.5+) stable; urgency=low
+
+  * Testing 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Wed, 04 Jan 2012 22:54:13 +0100
+
 polaric-aprsd (1.0.5) stable; urgency=low
 
   * Several changes (see changelog): Own position, object igating, ... 
