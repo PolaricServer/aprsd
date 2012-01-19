@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,9 @@ import java.util.*;
 public class RemoteCtl implements Runnable, MessageProcessor.Notification
 {
 
+   /**
+    * Subscriber - object that subscribes to messages.
+    */
    protected class Subscriber implements MessageProcessor.MessageHandler
    {
       public boolean handleMessage(Station sender, String text)
@@ -51,6 +54,9 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    
    private MessageProcessor _msg;
    private StationDB _db;
+   private Logfile   _log;
+    
+   private LinkedHashMap<String, String> _cmds = new LinkedHashMap(); 
 
    public String getParent()
        { return _parent; }
@@ -66,6 +72,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        if (myCall.length() == 0)
            myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
        _parent = config.getProperty("remotectl.connect", null);
+       _log = new Logfile(config, "remotectl", "remotectl.log");
        if (_parent != null) 
           _parent = _parent.trim().toUpperCase();
           
@@ -88,12 +95,18 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       _children.remove(id);
    }
    
+   
+   
    /** 
     * Send request to given destination.
     */
    public void sendRequest(String dest, String text)
-     { _msg.sendMessage(dest, text, true, true, this); }
+   { 
+      _msg.sendMessage(dest, text, true, true, this);
+      _log.log(" [> "+dest+"] "+text);
+   }
 
+     
      
    /**
     * Send request to all. To parent and children servers. 
@@ -101,16 +114,51 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */  
    public void sendRequestAll(String text, String except)
    {
+      int n = 0;
       if (_parent != null && !_parent.equals(except))
-         _msg.sendMessage(_parent, text, true, true, this);
+        { _msg.sendMessage(_parent, text, true, true, this); n++; }
       for (String r: getChildren() )
          if (!r.equals(except))
-            _msg.sendMessage(r, text, true, true, this);
+            { _msg.sendMessage(r, text, true, true, this); n++; }
+    
+      if (n>0)
+         _log.log(" [> ALL("+n+")] " + text + (except==null||n==0 ? "" : " -- (not to "+except+")" ));
+      storeRequest(text);
+   }
+
+
+
+   private void storeRequest(String text)
+   {
+     /* Log last update to each item */
+     String[] arg = text.split("\\s+", 3);
+     String prefix = arg[0], suffix = null;
+  
+     if (arg[0].matches("ALIAS|ICON")) {
+         prefix = prefix + " " + arg[1];
+         suffix = arg[2];
+     }
+     else if (arg[0].matches("SAR"))
+         suffix = arg[1] + (arg.length > 2 ? " " + arg[2] : "");
+     else
+         return;
+     _cmds.remove(prefix);
+     if (!suffix.matches("NULL|OFF"))
+         _cmds.put(prefix, suffix);
+   }
+   
+
+
+   private void playbackLog(String dest)
+   {
+       for (Map.Entry<String, String> entry: _cmds.entrySet())
+          sendRequest(dest, entry.getKey()+" "+entry.getValue());
    }
 
 
    /**
     * Process the request.
+    * This is called by the message subscriber. 
     * Return false if request is rejected.
     */
    protected boolean processRequest(Station sender, String text)
@@ -123,24 +171,27 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       boolean p = false;    
       if (arg[0].equals("CON"))
          p = doConnect(sender, args);
-      if (arg[0].equals("ALIAS"))
-         p = doSetAlias(sender, args);
-      if (arg[0].equals("ICON"))
-         p = doSetIcon(sender, args);
-      if (arg[0].equals("SAR"))
-         p = doSetSarMode(sender, args);
          
-       /* If command returned true, propagate the request further 
+      /* Fail if not CON and connected */
+      else if ((_parent == null || !_parent.equals(sender.getIdent())) 
+            && !_children.containsKey(sender.getIdent())) 
+          p = false;        
+      else if (arg[0].equals("ALIAS"))
+          p = doSetAlias(sender, args);
+      else if (arg[0].equals("ICON"))
+          p = doSetIcon(sender, args);
+      else if (arg[0].equals("SAR"))
+          p = doSetSarMode(sender, args);
+           
+      /* If command returned true, propagate the request further 
         * to children and parent, except the originating node.
         */
-      if (p)
-         sendRequestAll(text, sender.getIdent());
-
-       /* If the originating node is not parent,
-        * add it to children list.
-        */
-      if (_parent == null || !_parent.equals(sender.getIdent()))
-         _children.put(sender.getIdent(), new Date());  
+      _log.log(" [< "+sender.getIdent()+"] "+text+ (p ? " -- OK" : " -- FAILED"));
+      if (!p)
+         return false;
+     
+      storeRequest(text);
+      sendRequestAll(text, sender.getIdent());
       return true;
    }
 
@@ -152,8 +203,19 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doConnect(Station sender, String arg)
    {
       System.out.println("*** CONNECT from "+sender.getIdent());
-      return false;
+     
+      /* If not connected already, add sender to children list.
+        */
+      if ((_parent == null || !_parent.equals(sender.getIdent())) 
+               && !_children.containsKey(sender.getIdent())) 
+      {
+           _log.add("*** Playback command log");
+           playbackLog(sender.getIdent());
+      }
+      _children.put(sender.getIdent(), new Date());
+      return true;
    }
+   
 
 
    protected boolean doSetSarMode(Station sender, String args)
@@ -181,6 +243,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    }
    
 
+
    protected boolean doSetAlias(Station sender, String args)
    {
       if (args == null) {
@@ -189,17 +252,19 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       }
       
       System.out.println("*** Set ALIAS from "+sender.getIdent());
-      String[] arg = args.split("\\s+", 2);
+      String[] arg = args.split("\\s+", 3);
       
       AprsPoint item = _db.getItem(arg[0].trim());
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;
-         
-      if (item != null)
-        item.setAlias(arg[1]);
+      
+      if (item == null)
+          item = newItem(arg[0].trim());   
+      item.setAlias(arg[1]);
       return true;
    }
+      
       
 
    /* Note: These two methods are almost identical */
@@ -211,18 +276,34 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       }
       
       System.out.println("*** Set ICON from "+sender.getIdent());
-      String[] arg = args.split("\\s+", 2);
+      String[] arg = args.split("\\s+", 3);
       
       AprsPoint item = _db.getItem(arg[0].trim());
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;
          
-      if (item != null)
-        item.setIcon(arg[1]);
+      if (item == null)
+          item = newItem(arg[0].trim());
+      item.setIcon(arg[1].trim());
       return true;
    } 
        
+       
+   private AprsPoint newItem(String ident)
+   {
+       String[] x = ident.split("@");
+       if (x.length >= 2) {
+           Station s = _db.getStation(x[1].trim()); 
+           if (s == null)
+              s = _db.newStation(x[1].trim());
+           return _db.newObject(s, x[0].trim()); 
+       }
+       else
+           return _db.newStation(ident);
+   }
+   
+   
        
    public boolean isEmpty() 
        { return _parent == null && _children.size() == 0; }    
@@ -244,7 +325,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    {
       while (true) 
       try {
-         Thread.sleep(5000);
+         Thread.sleep(20000);
          while (true) {
             if (_parent != null) {
                System.out.println("*** RemoteCtl: Send CON: "+_parent);
@@ -252,10 +333,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             }
             
             for (String x : getChildren()) 
-                if (_children.get(x).getTime() + 1800000 <= (new Date()).getTime()) 
+                if (_children.get(x).getTime() + 1800000 <= (new Date()).getTime()) {
+                   _log.add("*** "+x+" disconnected (timeout)");
                    _children.remove(x);
-            
-            Thread.sleep(600000);
+                }
+            Thread.sleep(900000);
          }
       } catch (Exception e) {}
    } 
