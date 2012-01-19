@@ -16,8 +16,14 @@
   CLASSPATH=$JLIB/commons-daemon.jar:$JLIB/simple.jar:$JLIB/jcoord-polaric.jar:$JLIB/polaric-aprsd.jar:$JLIB/utf8-with-fallback-polaric.jar:$JLIB/RXTXcomm.jar:$JLIB/scala-library.jar:$PLUGINS/*
 SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB0:/dev/ttyUSB1:/dev/ttyACM0:/dev/ttyACM1
       FLAGS=-Djava.net.preferIPv4Stack=true
-    LOGFILE=/var/log/polaric/aprsd.log
-    INIFILE=/etc/polaric-aprsd/server.ini
+    
+     LOGDIR=/var/log/polaric
+    CONFDIR=/etc/polaric-aprsd
+     WEBDIR=/usr/share/polaric
+    DATADIR=/var/lib/polaric  
+    LOGFILE=$LOGDIR/aprsd.log
+    INIFILE=$CONFDIR/server.ini
+    
        JAVA=java
        JSVC=jsvc
        USER=polaric
@@ -73,7 +79,7 @@ case "$1" in
               
               $JSVC -Xverify:none $SERIALPORTS $FLAGS -cp $CLASSPATH -pidfile $PIDFILE  \
                  -user $USER -outfile $LOGFILE -errfile $LOGFILE \
-                 -Dconfdir=/etc/polaric-aprsd -Ddatadir=/var/lib/polaric -Dwebdir=/usr/share/polaric \
+                 -Dconfdir=$CONFDIR -Ddatadir=$DATADIR -Dwebdir=$WEBDIR -Dlogdir=$LOGDIR \
                  no.polaric.aprsd.Main $INIFILE >> $LOGFILE  2>&1 &
              sleep 2
              
