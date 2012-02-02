@@ -4,12 +4,30 @@ Updates to 1.0.6, etc..
 
 * [C] Sometimes last update in trail is missing. Fix?
 
-* Manage own objects. List, delete. Does deleting work?
+* Own objects are not completely deleted on expire. Fix.
+  (delete id in _ownObjects Set, send message). 
+    DONE.
+
+* ownobjects.txperiod - default value other than 0
+
+* Re-sending of own objects does not work. Fix. 
+    DONE.
+
+* Igating to RF: Use to-addr of original packet? Fix. 
+    DONE.
+     
+* Tactical info synchronisation - resend to servers that are joining later
+    DONE.
      
 * KISS TNC support. 
 
 * Simple messaging
 
+* Separate log files for remotectl, igate and tnc channel
+    DONE.
+
+* [C] Debug mode to use source js files instead of compiled files. 
+    DONE.
 
 
 Packaging related
@@ -26,7 +44,12 @@ Support for mobile devices
 --------------------------
 
 * Context menu outside stations. 
-* Multitouch zoom events. 
-* Login and update operations. SAR code. 
-* Fix dynamic update. 
+* Multitouch zoom events.
+* Temporary zoom or move when touching screen in drag-mode. Fix.
+* Remove top menu on second touch of the button.
+* Login and update operations.
+* SAR code. 
+* Fix dynamic update (??)
+
+
 
