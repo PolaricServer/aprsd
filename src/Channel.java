@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -239,33 +239,37 @@ public abstract class Channel
     protected abstract void regHeard(Packet p);
     
            
-           
-           
-    /**
+     /**
      * Process incoming packet. 
      * To be called from subclass. Parses packet, updates heard table, checks for
      * duplicates and if all is ok, deliver packet to receivers.
      */
     protected void receivePacket(String packet, boolean dup)
-    {             
+    { 
        if (packet == null || packet.length() < 1)
-          return;
-       System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+packet);    
+          return; 
+       System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+packet);
        Packet p = string2packet(packet);
+       receivePacket(p, dup);
+    }
+    
+    
+    protected void receivePacket(Packet p, boolean dup)
+    {      
        if (p == null)
-          return;  
+          return; 
        p.source = this;
        dup = _dupCheck.checkPacket(p.from, p.to, p.report);
        if (!dup) 
           /* Register heard, only for first instance of packet, not duplicates */
           regHeard(p);
-       
+          
        if (_r1 != null) 
            _r1.receivePacket(p, dup);
        if (_r2 != null)
            _r2.receivePacket(p, dup);
-       
-    }
+    }          
+           
     
     public String toString() {return "Channel"; }
     
