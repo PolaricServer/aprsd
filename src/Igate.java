@@ -162,7 +162,7 @@ public class Igate implements Channel.Receiver
      */
     public void receivePacket(Channel.Packet p, boolean dup)
     {
-        if (dup)
+        if (dup || Main.ownpos.getIdent().equals(p.msgto))
            return;
         if (p.source == _rfChan) {
            if (p.report.matches("\\?IGATE\\?.*"))
