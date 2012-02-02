@@ -168,10 +168,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
          return false;
          
       String args = (arg.length==1 ? null : arg[1]);
-      boolean p = false;    
-      if (arg[0].equals("CON"))
+      boolean p = false, propagate = true;
+      if (arg[0].equals("CON")) {
          p = doConnect(sender, args);
-         
+         propagate = false;
+      }   
       /* Fail if not CON and connected */
       else if ((_parent == null || !_parent.equals(sender.getIdent())) 
             && !_children.containsKey(sender.getIdent())) 
@@ -183,7 +184,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       else if (arg[0].equals("SAR"))
           p = doSetSarMode(sender, args);
            
-      /* If command returned true, propagate the request further 
+       /* If command returned true, propagate the request further 
         * to children and parent, except the originating node.
         */
       _log.log(" [< "+sender.getIdent()+"] "+text+ (p ? " -- OK" : " -- FAILED"));
@@ -191,7 +192,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
          return false;
      
       storeRequest(text);
-      sendRequestAll(text, sender.getIdent());
+      if (propagate) 
+         sendRequestAll(text, sender.getIdent());
       return true;
    }
 
@@ -252,7 +254,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       }
       
       System.out.println("*** Set ALIAS from "+sender.getIdent());
-      String[] arg = args.split("\\s+", 3);
+      String[] arg = args.split("\\s+", 2);
       
       AprsPoint item = _db.getItem(arg[0].trim());
       arg[1] = arg[1].trim();
@@ -276,7 +278,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       }
       
       System.out.println("*** Set ICON from "+sender.getIdent());
-      String[] arg = args.split("\\s+", 3);
+      String[] arg = args.split("\\s+", 2);
       
       AprsPoint item = _db.getItem(arg[0].trim());
       arg[1] = arg[1].trim();
