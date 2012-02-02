@@ -80,7 +80,7 @@ public class Main
              }
              if (config.getProperty("tncchannel.on", "false").trim().matches("true|yes")) {
                  System.out.println("*** Activate TNC Channel");
-                 ch2 = new TncChannel(config);
+                 ch2 = new Tnc2Channel(config);
                  ch2.setReceivers((Channel.Receiver) p, igate);
                  Thread t = new Thread(ch2, "TncChannel");
                  t.start(); 
