@@ -503,6 +503,7 @@ package no.polaric.aprsd.http
    def _serveSearch(hdr: Properties, parms: Properties, out: PrintWriter, vfilt: ViewFilter): String =
    {
        var arg = parms.getProperty("filter");
+       var mob = parms.getProperty("mobile");
        if (arg == null) 
            arg  = "__NOCALL__"; 
        val infra = _infraonly || "infra".equals(arg);
@@ -532,7 +533,9 @@ package no.polaric.aprsd.http
                </td>
                           
                <td> { df.format(x.getUpdated()) } </td>
-               <td> { if (x.getDescr() != null) x.getDescr() else "" } </td>
+               { if (!"true".equals(mob)) 
+                  <td> { if (x.getDescr() != null) x.getDescr() else "" } </td> 
+                 else null }
                </tr>
            }
         } 
@@ -748,7 +751,7 @@ package no.polaric.aprsd.http
 
   
     private def cleanPath(txt:String): String = 
-        txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]+(\\-[0-9]+)?\\*?),|(qA.),", "")
+        txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]+(\\-[0-9]+)?\\*?),?|(qA.),?", "")
            .replaceAll("\\*", "").replaceAll(",", ", ")
            
            
@@ -764,7 +767,7 @@ package no.polaric.aprsd.http
              <h2>Feil:</h2><p>Fant ikke stasjon</p>;
           else
              <table>
-               <tr><th>Tidspunkt</th><th>Km/h </th><th>Retn </th><th>Distanse</th><th>APRS via</th></tr>
+               <tr><th>Tid</th><th>Km/h </th><th>Retn </th><th>Distanse</th><th>APRS via</th></tr>
                {
                    val h = s.getHistory()
                    var x = s.getHItem()
@@ -812,7 +815,7 @@ package no.polaric.aprsd.http
          <xml:group>
          <label for="callsign" class="lleftlab">Ident:</label>
          <label id="callsign"><b> { s.getIdent() } </b></label>
-         { simpleLabel("time",  "lleftlab", "Tidspunkt:", TXT( df.format(item.time))) }
+         { simpleLabel("time",  "lleftlab", "Tid:", TXT( df.format(item.time))) }
          { simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )  }
          { simpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course))  }
          <div id="traffic">
