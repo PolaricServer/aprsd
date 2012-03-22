@@ -23,7 +23,8 @@ import java.io.Serializable;
  */
 public class AprsObject extends AprsPoint implements Serializable
 {
-
+    private static long _expiretime    = 1000 * 60 * 60 * 3;    // Default: 3 hour
+    
     /*
      * Attributes of object/item record (APRS data)
      */
@@ -109,7 +110,8 @@ public class AprsObject extends AprsPoint implements Serializable
     
     
     public synchronized boolean expired() 
-       { return _owner.expired(); }
+       { Date now = new Date(); 
+         return (_owner.expired() || now.getTime() > _updated.getTime() + _expiretime) ; }
        
     public synchronized boolean visible()
        { return !_killed && !expired(); }
