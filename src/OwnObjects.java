@@ -52,7 +52,7 @@ public class OwnObjects implements Runnable
         if (_myCall.length() == 0)
            _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
            
-        _txPeriod = Integer.parseInt(config.getProperty("objects.transmit.period", "0").trim());
+        _txPeriod = Integer.parseInt(config.getProperty("objects.transmit.period", "360").trim());
         _forceUpdate = config.getProperty("objects.forceupdate", "false").trim().matches("true|yes");
         _db = db;
         
