@@ -153,4 +153,21 @@
 * Somewhat more robust shutdown of server. 
 * Distribute signs file
    
-
+1.0.6
+-----
+* Own objects are not completely deleted on expire. Fix.
+* ownobjects.txperiod - default value other than 0
+* Re-sending of own objects does not work. Fix. 
+* Igating to RF: Use to-addr of original packet? Fix. 
+* Tactical info synchronisation - resend to servers that are joining later
+* Separate log files for remotectl, igate and tnc channel
+* Don't igate messages to self. 
+* Expire of objects. Also use updated-time of object itself. 
+* Proper removing of WIDEn-n in via field when received from RF
+* [C] Debug mode to use source js files instead of compiled files. 
+  (need to get source and manually copy to web-server-area)
+* [C] KaMap: Auto-fix ownership of cache. Fix autoremoving of blank/gray/black tiles. 
+* [C] Shorter cache expire time for javascript and css (3 days)
+* [C] Upgrade to openlayers 2.11
+* [Mobile] Various fixes to mobile version/app. Various adjustments to screen size: 
+  menu-bar, search lists, pictures, popups. Context menu outside stations. etc.. 
