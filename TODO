@@ -9,7 +9,8 @@ Updates to 1.0.6, etc..
     DONE.
 
 * ownobjects.txperiod - default value other than 0
-
+    DONE.
+    
 * Re-sending of own objects does not work. Fix. 
     DONE.
 
@@ -20,6 +21,7 @@ Updates to 1.0.6, etc..
     DONE.
      
 * KISS TNC support. 
+    IN PROGRESS. NEEDS TESTING.
 
 * Simple messaging
 
@@ -27,7 +29,31 @@ Updates to 1.0.6, etc..
     DONE.
 
 * [C] Debug mode to use source js files instead of compiled files. 
+  (need to get source and manually copy to web-server-area)
     DONE.
+
+* Don't igate messages to self. 
+     DONE.
+
+* Duplicate remotectl instances? Root node sends CON? (bug introduced after last release?)
+     DONE.
+
+* Expire of objects. Also use updated-time of object itself. 
+     DONE.
+
+* Proper removing of WIDEn-n in via field when received from RF?????
+     DONE. 
+
+* [C] KaMap: Auto-fix ownership of cache. Fix autoremoving of blank/gray/black tiles. 
+     DONE.
+
+* [C] Upgrade to openlayers 2.11
+     DONE.
+     
+* [C] Increase/decrease label font size. 
+
+* [C] Limit picture box width. 
+
 
 
 Packaging related
@@ -43,12 +69,25 @@ Packaging related
 Support for mobile devices
 --------------------------
 
+* Adjustments to scale box?
+
+* Post it to Android Market
+    DONE.
+
+* Various adjustments to screen size: menu-bar, search lists, pictures, popups. etc.. 
+    DONE.
+
+* Various fixes to mobile version/app. 
+    DONE.
+    
 * Context menu outside stations. 
+    DONE.
+    
 * Multitouch zoom events.
-* Temporary zoom or move when touching screen in drag-mode. Fix.
-* Remove top menu on second touch of the button.
-* Login and update operations.
-* SAR code. 
+
+* GPS tracking (for Android devices) 
+
+* Login and update operations. SAR code. 
 * Fix dynamic update (??)
 
 
