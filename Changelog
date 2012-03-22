@@ -145,10 +145,10 @@
 -----
 * [C] PHP warnings and grab.cur
 * [C] SAR URL - deactivate menu
-* Support position, beaconing of posreport and statusreport?
+* Support position, beaconing of posreport?
 * Igating of objects. Use position (if available) to decide if object report should be sent/igated on RF. 
 * Fix bug: Sends as thirdparty packet on RF even if not necessary. 
-* Hiding of trails/labels and tracked object: Save in browser session.
+* [C] Hiding of trails/labels and tracked object: Save in browser session.
 * Hack KaMap to get it work with mapscript 6.0
 * Somewhat more robust shutdown of server. 
 * Distribute signs file
