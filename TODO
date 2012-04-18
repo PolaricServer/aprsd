@@ -6,12 +6,27 @@ Updates to 1.0.6, etc..
      
 * KISS TNC support. 
     IN PROGRESS. NEEDS TESTING.
+    
+* GPS support.
 
 * Simple messaging
      
 * [C] Increase/decrease label font size. 
 
 * [C] Limit picture box width. 
+
+* [C] Get rid of URLNormalize in kaXmlOverlay
+      DONE. 
+
+*  Expired trails don't automatically disappear from map. Fix?
+      DONE.
+      
+*  QR code in SAR URL box. 
+
+*  URL parameters for selecting views. Override personal preferences?
+
+*  [C] add_Gpx_Layer does not work. FIX!
+       DONE.
 
 
 
@@ -20,8 +35,6 @@ Packaging related
 
 * Support SAR URL in apache setup. 
 
-* [C] Put web-app another place than /var/www  ?? 
-    
   
 
 
@@ -29,10 +42,16 @@ Support for mobile devices
 --------------------------
 
 * Adjustments to scale box?
+     DONE.
 
 * Multitouch zoom events.
 
-* GPS tracking (for Android devices) 
+* GPS tracking (for Android/Phonegap devices) 
+     DONE. 
+
+* Settings save/restore for Android/Phonegap devices. 
+
+* Improve offline caching of map fragments. 
 
 * Login and update operations. SAR code. 
 * Fix dynamic update (??)
