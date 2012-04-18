@@ -165,8 +165,8 @@ public abstract class AprsPoint extends PointObject implements Serializable
     public synchronized void setChanging()
     {
          _changing = true;
-         _lastChanged = _updated;  
-        _change.signal(this); 
+         _lastChanged = new Date();  
+         _change.signal(this); 
     }
            
       
@@ -186,10 +186,14 @@ public abstract class AprsPoint extends PointObject implements Serializable
                _change.signal(this);
                return (_changing = false);
           }
+          if (!_changing) 
+               checkForChanges(); 
+          
           return _changing; 
     }
     
     
+    protected void checkForChanges() {} 
     
     
     public void updatePosition(Date ts, Reference newpos)
