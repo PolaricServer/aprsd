@@ -37,13 +37,13 @@ public class History implements Iterable<History.Item>, Serializable
     }
     
     private static long _maxAge = 1000 * 60 * 15;          // Max age of a history item (default 30 minutes) 
-    private static long _maxPause = 1000 * 60 * 10;        // History removed if no movement within this time (15 minutes) 
+    private static long _maxPause = 1000 * 60 * 10;        // History removed if no movement within this time (10 minutes) 
     private static long _maxAge_ext = 1000 * 60 * 30;      // Max age of a history item - extended
     private static long _maxPause_ext = 1000 * 60 * 20;     
         
-    
     private LinkedList<Item> _items = new LinkedList();
     private boolean _extended;
+    private boolean _itemsExpired; 
     private int _sum_speed = 0;
     
     public static void setMaxAge(long a)
@@ -56,15 +56,21 @@ public class History implements Iterable<History.Item>, Serializable
        { _maxPause_ext = p; }
         
     
+    public boolean itemsExpired() 
+        { cleanUp(new Date()); 
+          if (_itemsExpired) {_itemsExpired = false; return true; }
+          else { return false; } 
+        }
+        
     public boolean isEmpty() 
         { return (_items.size() == 0); }
     
     public int length()
         { return _items.size(); }
         
-    
     public void clear()
         { _items.clear(); }
+        
         
     /**
      * Get the time of the oldest item in history.
@@ -146,11 +152,13 @@ public class History implements Iterable<History.Item>, Serializable
         { 
             _items.clear(); 
             _sum_speed = 0;
+            _itemsExpired = true; 
             return; 
         }
         while (!isEmpty() && (_items.getLast().time.getTime() + (ext ? _maxAge_ext : _maxAge)) < now.getTime()) {
            _sum_speed -= _items.getLast().speed;
            _items.removeLast();
+           _itemsExpired = true; 
         }
     }
     
