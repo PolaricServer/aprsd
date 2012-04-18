@@ -152,7 +152,14 @@ public static class Status implements Serializable
     public synchronized History getHistory() 
         { return _history; }        
       
+      
+    protected void checkForChanges()
+    { 
+        if (_history.itemsExpired()) 
+           setChanging(); 
+    }
    
+    
     public boolean isAutoTrail()
        { return _autotrail; }  
     
