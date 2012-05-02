@@ -22,24 +22,17 @@ import java.util.concurrent.Semaphore;
  * TNC channel. For devices in TNC2 compatible mode.
  */
  
-public class TncChannel extends Channel implements Runnable
+public abstract class TncChannel extends Channel implements Runnable
 {
-    private  String  _portName; 
-    private  int     _baud;
-    private  String  _myCall; /* Move this ? */
-    
-    transient private  String         _pathCmd, _unproto;   
-    transient private  boolean        _close = false;
-    transient private  boolean        _noBreak = false; 
-    transient private  int            _max_retry;
-    transient private  long           _retry_time;   
-    transient private  BufferedReader _in;
-    transient private  OutputStream   _ostream;
-    transient private  SerialPort     _serialPort;
-    transient private  Semaphore      _sem = new Semaphore(1, true);
-    transient private  Logfile        _log; 
-    
-    private static final String _initfile = System.getProperties().getProperty("confdir", ".")+"/init.tnc";
+    private   String  _portName; 
+    private   int     _baud;
+    protected String  _myCall; /* Move this ? */
+      
+    transient private   int          _max_retry;
+    transient private   long         _retry_time;   
+    transient protected SerialPort   _serialPort;
+    transient private   Semaphore    _sem = new Semaphore(1, true);
+    transient protected Logfile      _log; 
     
  
     public TncChannel(ServerAPI api) 
@@ -47,20 +40,17 @@ public class TncChannel extends Channel implements Runnable
         Properties config = api.getConfig();
         _myCall = config.getProperty("tncchannel.mycall", "").trim().toUpperCase();
         if (_myCall.length() == 0)
-           _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();  
-        _unproto = api.getToAddr();       
+           _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();       
         _max_retry = Integer.parseInt(config.getProperty("tncchannel.retry", "0").trim());
         _retry_time = Long.parseLong(config.getProperty("tncchannel.retry.time", "30").trim()) * 60 * 1000; 
-        _pathCmd = config.getProperty("tncchannel.pathcommand", "UNPROTO").trim();
         _portName = config.getProperty("tncchannel.port", "/dev/ttyS0").trim();
         _baud= Integer.parseInt(config.getProperty("tncchannel.baud", "9600").trim());
-        _noBreak = config.getProperty("tncchannel.nobreak", "false").trim().matches("true|yes");
         // FIXME: set gnu.io.rxtx.SerialPorts property here instead of in startup script
         _log = new Logfile(config, "tncchannel", "rf.log");
     }
- 
- 
- 
+  
+  
+  
     @Override protected void regHeard(Packet p) 
     {
         _heard.put(p.from, new Heard(new Date(), p.via));
@@ -72,50 +62,8 @@ public class TncChannel extends Channel implements Runnable
     @Override public String getShortDescr()
        { return "RF"; }
  
-    /**
-     * Send packet on RF. 
-     * The generic sendPacket method is not fully supported on TNC2 interface. 
-     * If receiver callsign is not null and match TNC callsign, or explicitly 
-     * requested, we use third party format.
-     *
-     * However, we try to change UNPROTO path, if requested but note that
-     * the method for doing that is not the most reliable and efficient:
-     * Break out of converse mode and try to send command to TNC.
-     */ 
-     
-    public synchronized void sendPacket(Packet p)
-    {
-       if (_out == null)
-          return;
-       String unproto = p.to + (p.via != null && p.via.length()>0 ? " VIA "+p.via : "");
-       if (!_unproto.equals(unproto))
-          try {
-             _sem.acquire();
-             getCommandPrompt();
-             _unproto = unproto;
-             sendCommand(_out, _pathCmd + " " + unproto+"\r");
-             _out.print("k\r");
-             _out.flush();
-             _sem.release();
-             Thread.sleep(100);
-          }
-          catch (Exception e) {}
-        
-       _log.log(" [>" + this.getShortDescr() + "] " + p);
-       
-       if (p.thirdparty || (p.from != null && !p.from.equals(_myCall))) {
-           _log.add("*** TX path = '"+unproto+"'"); 
-           _out.print(
-             "}" + p.from + ">" + p.to +
-                ((p.via_orig != null && p.via_orig.length() > 0) ? ","+p.via_orig : "") +
-                ":" + p.report + "\r" );
-       }
-       else 
-           _out.print(p.report+"\r");
-       _out.flush();    
-    }
+
    
-    
 
     /**
      * Setup the serial port
@@ -145,104 +93,10 @@ public class TncChannel extends Channel implements Runnable
     }
    
    
-   
-   /**
-    * Send init commands to TNC. 
-    * Get commands from init.tnc file and add a MYCALL command at the end. 
-    */
-   private void initCommands(String file, PrintWriter out) throws Exception
-    {
-        BufferedReader rd = new BufferedReader(new FileReader(file));
-        while (rd.ready())
-        {
-            String line = rd.readLine();
-            if (!line.startsWith("#")) 
-                sendCommand(_out, line);
-            sendCommand(_out,"MYCALL "+_myCall);
-        }    
-    }   
-   
-   
-   
-   /**
-    * Send a command to TNC.
-    */
-   private void sendCommand(PrintWriter out, String line) throws Exception
-   {
-         out.print(line+"\r");
-         out.flush(); 
-         Thread.sleep(300);
-         while (_in.ready()) 
-             _in.read();
-   }
-   
-   
-   
-   /**
-    * Send a break or ctrl-c to TNC to return it to command mode. 
-    */
-   private void getCommandPrompt() throws Exception
-   {     
-      String line = "";
-      if (_noBreak) {
-         _ostream.write(3);
-         _ostream.flush();
-      }
-      else
-         _serialPort.sendBreak(3);
-      Thread.sleep(50);
-      _out.print("\r");
-      _out.flush();
-      Thread.sleep(150);
-      while (_in.ready()) 
-         line += (char) _in.read();
-      
-      if (line.contains("cmd:"))
-         System.out.println("*** TNC in command mode");
-      else
-         System.out.println("*** Warning: Cannot get command prompt from TNC");
-   }
-   
-   
-   
-   /**
-    * Init the TNC - set it to converse mode
-    */
-    private synchronized void initTnc()
-    {
-        try {
-          getCommandPrompt();
-          _out.print("\r");
-          Thread.sleep(200); 
-          initCommands(_initfile, _out);
-          _out.print("k\r"); 
-          _out.flush();
-          Thread.sleep(200);
-        }
-        catch (Exception e) 
-           { System.out.println("*** Error: initTnc: "+e); }
-    }
     
     
-    
-    /**
-     * Close down the channel. 
-     */
-    public void close() 
-    { 
-       System.out.println("*** Closing TNC channel");
-       try {  
-         _close = true;
-          Thread.sleep(3000);
-         getCommandPrompt();
-         if (_out != null) _out.close(); 
-         if (_in != null) _in.close(); 
-       }
-       catch (Exception e) {}
-       if (_serialPort != null) _serialPort.close(); 
-    }
-       
-       
+    public abstract void close();   
+    protected abstract void receiveLoop() throws Exception;
        
        
     public void run()
@@ -265,23 +119,7 @@ public class TncChannel extends Channel implements Runnable
                _serialPort = connect();
                if (_serialPort == null)
                    continue; 
-                   
-               _in = new BufferedReader(new InputStreamReader(_serialPort.getInputStream(), _rx_encoding));
-               _out = new PrintWriter(new OutputStreamWriter(_serialPort.getOutputStream(), _tx_encoding));
-               _ostream = _serialPort.getOutputStream();
-               
-               initTnc();
-               while (!_close) 
-               {
-                   _sem.acquire(); 
-                   try {
-                      String inp = _in.readLine();
-                      receivePacket(inp, false);
-                   }
-                   catch (java.io.IOException e) {}   
-                   _sem.release();
-                   Thread.yield();
-               }
+               receiveLoop();
            }
            catch(NoSuchPortException e)
            {
