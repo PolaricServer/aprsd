@@ -49,7 +49,7 @@ public class OwnObjects implements Runnable
         _allowRf = config.getProperty("objects.rfgate.allow", "false").trim().matches("true|yes");
         _pathRf = config.getProperty("objects.rfgate.path", "").trim(); 
         _rangeRf = Integer.parseInt(config.getProperty("objects.rfgate.range", "0").trim());
-        _txPeriod = Integer.parseInt(config.getProperty("objects.transmit.period", "0").trim());
+        _txPeriod = Integer.parseInt(config.getProperty("objects.transmit.period", "360").trim());
         _forceUpdate = config.getProperty("objects.forceupdate", "false").trim().matches("true|yes");
         
            
