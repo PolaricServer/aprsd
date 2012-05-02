@@ -249,7 +249,7 @@ public abstract class HttpServer extends NanoHTTPD
           int i = ident.lastIndexOf('-');
           if (i > -1)    
              ident = ident.substring(0, i);
-          List<AprsPoint> l = _db.getAll(ident);
+          List<AprsPoint> l = _db.getAllPrefix(ident);
           if (l.size() > 0)
               s = l.get(0);
        }
