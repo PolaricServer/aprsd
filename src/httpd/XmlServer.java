@@ -57,7 +57,7 @@ public class XmlServer extends ServerBase
           int i = ident.lastIndexOf('-');
           if (i > -1)    
              ident = ident.substring(0, i);
-          List<AprsPoint> l = _api.getDB().getAll(ident);
+          List<AprsPoint> l = _api.getDB().getAllPrefix(ident);
           if (l.size() > 0)
               s = l.get(0);
        }
