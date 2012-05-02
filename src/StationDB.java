@@ -111,7 +111,10 @@ public interface StationDB
     
        public List<AprsPoint> getAll(String arg);
     
-    
+       public List<AprsPoint> getAllPrefix(String arg);
+        
+        
+        
        /**
         * Search. Return a list of all items within the given geographical area.
         */
