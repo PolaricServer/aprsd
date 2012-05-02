@@ -45,6 +45,8 @@ public interface StationDB
     
     public List<AprsPoint> getAll(String arg);
     
+    public List<AprsPoint> getAllPrefix(String arg);
+    
     public List<AprsPoint>
           search(Reference x1, Reference y1, Reference x2, Reference y2);
     
