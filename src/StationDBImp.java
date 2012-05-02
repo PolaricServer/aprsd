@@ -35,6 +35,8 @@ public class StationDBImp implements StationDB, Runnable
     public StationDBImp(Properties config)
     {
         _file = config.getProperty("stations.file", "stations.dat");
+        int exptime = Integer.parseInt(config.getProperty("aprs.expiretime", "60").trim());
+        Station.setExpiretime(exptime * 60 * 1000);
         if (_file.charAt(0) != '/')
            _file = Main.datadir+"/"+_file;
            
@@ -227,6 +229,19 @@ public class StationDBImp implements StationDB, Runnable
     }
     
     
+    public synchronized List<AprsPoint> getAllPrefix(String srch)
+    {
+        LinkedList<AprsPoint> result = new LinkedList();
+        if (srch == null)
+           return result;
+        srch = srch.toUpperCase(); 
+        for (AprsPoint s: _map.values())
+           if (s.getIdent().toUpperCase().startsWith(srch) ) 
+               result.add(s);
+        return result;  
+    }    
+        
+        
         
     public synchronized List<AprsPoint> getAll(String srch)
     {
