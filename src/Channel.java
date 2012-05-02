@@ -267,8 +267,14 @@ public abstract class Channel implements Serializable
           return; 
        System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+packet);
        Packet p = string2packet(packet);
+       receivePacket(p, dup);
+    }
+    
+    
+    protected void receivePacket(Packet p, boolean dup)
+    {      
        if (p == null)
-          return;  
+          return; 
        p.source = this;
        dup = _dupCheck.checkPacket(p.from, p.to, p.report);
        if (!dup) 
@@ -278,6 +284,7 @@ public abstract class Channel implements Serializable
        for (Receiver r: _rcv)
            r.receivePacket(p, dup);
     }
+    
     
     public String toString() { return "Channel"; }
     
