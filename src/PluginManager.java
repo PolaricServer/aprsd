@@ -44,6 +44,7 @@ public class PluginManager
    public static Map<String, Object> getObjectMap() 
      { return _objects; }
        
+
    /**
     * set the api. Must be done at startup of server. 
     * @param a: the server interface. 
