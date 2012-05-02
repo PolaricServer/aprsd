@@ -69,8 +69,11 @@ public static class Status implements Serializable
     private Date        _infra_updated = null;
        
        
-    public Station(String id)
-       { super(null); _callsign = id; }
+    public Station(String id) 
+    {
+        super(null); 
+        _callsign = id; 
+    }
         
     
     protected void setId(String id)
