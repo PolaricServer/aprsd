@@ -103,7 +103,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    public void sendRequest(String dest, String text)
    { 
       _msg.sendMessage(dest, text, true, true, this);
-      _log.log(" [> "+dest+"] "+text);}
+      _log.log(" [> "+dest+"] "+text);
    }
    
      
@@ -241,6 +241,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    }
    
 
+
    protected boolean doSetAlias(Station sender, String args)
    {
       if (args == null) {
@@ -249,9 +250,9 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       }
       
       System.out.println("*** Set ALIAS from "+sender.getIdent());
-      String[] arg = args.split("\\s+", 3);
+      String[] arg = args.split("\\s+", 2);
       
-      AprsPoint item = _db.getItem(arg[0].trim());
+      AprsPoint item = _api.getDB().getItem(arg[0].trim(), null);
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;
@@ -263,6 +264,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    }
       
 
+
    /* Note: These two methods are almost identical */
    protected boolean doSetIcon(Station sender, String args)
    {
@@ -272,9 +274,9 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       }
       
       System.out.println("*** Set ICON from "+sender.getIdent());
-      String[] arg = args.split("\\s+", 3);
+      String[] arg = args.split("\\s+", 2);
       
-      AprsPoint item = _db.getItem(arg[0].trim());
+      AprsPoint item = _api.getDB().getItem(arg[0].trim(), null);
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;
@@ -285,24 +287,27 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       return true;
    } 
        
-       
+
+
    private AprsPoint newItem(String ident)
    {
        String[] x = ident.split("@");
        if (x.length >= 2) {
-           Station s = _db.getStation(x[1].trim()); 
+           Station s = _api.getDB().getStation(x[1].trim(), null); 
            if (s == null)
-              s = _db.newStation(x[1].trim());
-           return _db.newObject(s, x[0].trim()); 
+              s = _api.getDB().newStation(x[1].trim());
+           return _api.getDB().newObject(s, x[0].trim()); 
        }
        else
-           return _db.newStation(ident);
+           return _api.getDB().newStation(ident);
    }
    
-   
+
+
    public boolean isEmpty() 
        { return _parent == null && _children.size() == 0; }    
-   
+
+
    
    public String toString() {
       String res = (_parent==null ? "" : _parent);
@@ -311,7 +316,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       return res; 
    }
    
-   
+
+
    /* 
     * Thread to refresh connection to "parent" every 15 minutes. 
     * Parent removes a child if its timestamp is older than 30 minutes.
