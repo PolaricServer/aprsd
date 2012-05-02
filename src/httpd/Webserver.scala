@@ -413,6 +413,7 @@ package no.polaric.aprsd.http
        val vfilt = ViewFilter.getFilter(filtid)
        
        var arg = req.getParameter("filter")
+       var mob = req.getParameter("mobile");
        if (arg == null) 
            arg  = "__NOCALL__"; 
        val infra = _infraonly || "infra".equals(arg)
@@ -449,7 +450,9 @@ package no.polaric.aprsd.http
                        _directionIcon(s.getCourse()) else 
                           if (s==null) TXT("obj") else null } </td>
                <td> { df.format(x.getUpdated()) } </td>
-               <td> { if (x.getDescr() != null) x.getDescr() else "" } </td>
+               { if (!"true".equals(mob)) 
+                  <td> { if (x.getDescr() != null) x.getDescr() else "" } </td> 
+                 else null }
                </tr>
            }
         } 
@@ -664,10 +667,10 @@ package no.polaric.aprsd.http
       
 
 
- 
+  
     private def cleanPath(txt:String): String = 
-        txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]+(\\-[0-9]+)?\\*?),|(qA.),", "")
-           .replaceAll("\\*", "").replaceAll(",", ", ")
+        txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]+(\\-[0-9]+)?\\*?),?|(qA.),?", "")
+           .replaceAll("\\*", "").replaceAll(",", ", ")   
            
 
 
@@ -730,7 +733,7 @@ package no.polaric.aprsd.http
          <xml:group>
          <label for="callsign" class="lleftlab">Ident:</label>
          <label id="callsign"><b> { s.getIdent() } </b></label>
-         { simpleLabel("time",  "lleftlab", "Tidspunkt:", TXT( df.format(item.time))) }
+         { simpleLabel("time",  "lleftlab", "Tid:", TXT( df.format(item.time))) }
          { simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )  }
          { simpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course))  }
          <div id="traffic">
