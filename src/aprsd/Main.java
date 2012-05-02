@@ -12,7 +12,7 @@ import no.polaric.aprsd.http.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "1.1alpha1";
+   public  static String version = "1.1alpha2";
    public static String toaddr  = "APPS11";
    
    private static StationDB db = null;
@@ -146,7 +146,7 @@ public class Main implements ServerAPI
            }
            if (_config.getProperty("tncchannel.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate TNC Channel");
-               ch2 = new TncChannel(api);
+               ch2 = new Tnc2Channel(api);
                ch2.addReceiver(p);
                Thread t = new Thread(ch2, "TncChannel");
                t.start(); 
