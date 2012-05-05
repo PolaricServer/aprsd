@@ -1,5 +1,5 @@
  
-Updates to 1.0.6, etc..
+Updates to 1.0.8, etc..
 -----------------------
 
 * [C] Sometimes last update in trail is missing. Fix?
@@ -15,39 +15,12 @@ Updates to 1.0.6, etc..
 
 * [C] Limit picture box width. 
 
-* [C] Get rid of URLNormalize in kaXmlOverlay
-      DONE. 
-
-*  Expired trails don't automatically disappear from map. Fix?
-      DONE.
-      
-*  QR code in SAR URL box. 
-
-*  [C] add_Gpx_Layer does not work. FIX!
-       DONE.
+* QR code in SAR URL box. 
 
 * [C] Canvas trouble with IE and OpenLayers. FIX. 
        WONTFIX. 
 
-* [C] Overlay not re-loaded after switching map base-layer. FIX. 
-       DONE.
-
-* [C] Popup (native) placement and focus. Tidy code. 
-       DONE. 
-       
-* [C] URL parameter to separate different instances of webapp. 
-       DONE.
-       
-* [C] API for iframe embedding. 
-       DONE. 
-       
-* It should be possible to lookup objects by id only, not owner. 
-       DONE (search on prefix) 
-
 * Link on signs. Open in new tab, or window, or containing frame?
-
-* Configurable expire time for APRS stations
-       DONE
 
 
 
@@ -62,13 +35,7 @@ Packaging related
 Support for mobile devices
 --------------------------
 
-* Adjustments to scale box?
-     DONE.
-
 * Multitouch zoom events.
-
-* GPS tracking (for Android/Phonegap devices) 
-     DONE. 
 
 * Settings save/restore for Android/Phonegap devices. 
 
