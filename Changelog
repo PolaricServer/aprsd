@@ -171,3 +171,16 @@
 * [C] Upgrade to openlayers 2.11
 * [Mobile] Various fixes to mobile version/app. Various adjustments to screen size: 
   menu-bar, search lists, pictures, popups. Context menu outside stations. etc.. 
+
+1.0.7
+-----
+* Expired trails didn't automatically disappear from map. Fixed.
+* Lookup of objects is by id only (prefix match), not object owner.
+* Configurable expire time for APRS stations
+* [C] add_Gpx_Layer did not work. Fixed.
+* [C] Overlay not re-loaded after switching map base-layer. Fixed.
+* [C] Popup (native) placement and focus. Some code tidying.
+* [C] URL parameter to separate different instances of webapp.
+* [C] API for iframe embedding.
+* [Mobile] Adjustments to scale box.
+* [Mobile] GPS tracking (for Android/Phonegap devices)
