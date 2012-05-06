@@ -1,8 +1,8 @@
-polaric-aprsd (1.0.6+) stable; urgency=low
+polaric-aprsd (1.0.7) stable; urgency=low
 
-  * Testing 
+  * Some small fixes... 
 
- -- Øyvind hanssen <ohanssen@acm.org>  Thu, 05 Apr 2012 01:11:30 +0200
+ -- Øyvind hanssen <ohanssen@acm.org>  Sat, 05 May 2012 18:25:44 +0200
 
 polaric-aprsd (1.0.6) stable; urgency=low
 
