@@ -468,26 +468,27 @@ package no.polaric.aprsd.http
     */
    def iconSelect(s: AprsPoint): NodeSeq =
    {
-       val icondir = new File("./www/icons");
-       
+       val webdir = System.getProperties().getProperty("webdir", ".")
+       val icondir = new File(webdir+"/icons")
+      
        val flt = new FilenameFilter()
            { def accept(dir:File, f: String): boolean = f.matches(".*\\.(png|gif|jpg)") } 
        val cmp = new Comparator[File] ()
            { def compare (f1: File, f2: File) : int = f1.getName().compareTo(f2.getName()) } 
        
        val files = icondir.listFiles(flt);
-       Arrays.sort(files, cmp);
-          
        <div id="iconselect">    
        <input type="radio" name="iconselect" value="system"
                    checked={if (s.iconIsNull()) "checked" else null:String }>Automatisk</input>
-       { if (files != null)
+       { if (files != null) {
+           Arrays.sort(files, cmp);
            for (f:File <- files) yield
               <input type="radio" name="iconselect" value={f.getName()}
                   checked={if (!s.iconIsNull() && f.getName().equals(s.getIcon())) "checked"
                            else null:String}>
               <img src={_wfiledir+"/icons/"+f.getName()} width="22" height="22" />&nbsp;
               </input>
+         }
          else null
        }
        </div>
@@ -644,14 +645,14 @@ package no.polaric.aprsd.http
                   alias = "NULL"
                 }
              System.out.println("*** ALIAS: '"+alias+"' for '"+x.getIdent()+"' by user '"+getAuthUser(req)+"'")
-             if (ch)
+             if (ch && _api.getRemoteCtl() != null)
                  _api.getRemoteCtl().sendRequestAll("ALIAS "+x.getIdent()+" "+alias, null);
 
              /* Icon setting */
              var icon = req.getParameter("iconselect");
              if ("system".equals(icon)) 
                  icon = null; 
-             if (x.setIcon(icon))
+             if (x.setIcon(icon) && _api.getRemoteCtl() != null )
                  _api.getRemoteCtl().sendRequestAll("ICON "+x.getIdent() + " " +
                     { if (icon==null) "NULL" else icon }, 
                     null);
