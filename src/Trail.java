@@ -44,6 +44,7 @@ public class Trail implements Iterable<Trail.Item>, Serializable
     
     private LinkedList<Item> _items = new LinkedList();
     private boolean _extended;
+    private boolean _itemsExpired; 
     private int _sum_speed = 0;
     
     public static void setMaxAge(long a)
@@ -53,9 +54,15 @@ public class Trail implements Iterable<Trail.Item>, Serializable
     public static void setMaxAge_Ext(long a)
        { _maxAge_ext = a; }
     public static void setMaxPause_Ext(long p)
-       { _maxPause_ext = p; }
-        
+       { _maxPause_ext = p; }    
+ 
     
+    public boolean itemsExpired() 
+        { cleanUp(new Date()); 
+          if (_itemsExpired) {_itemsExpired = false; return true; }
+          else { return false; } 
+        } 
+ 
     public boolean isEmpty() 
         { return (_items.size() == 0); }
         
@@ -146,11 +153,13 @@ public class Trail implements Iterable<Trail.Item>, Serializable
         { 
             _items.clear(); 
             _sum_speed = 0;
+            _itemsExpired = true; 
             return; 
         }
         while (!isEmpty() && (_items.getLast().time.getTime() + (ext ? _maxAge_ext : _maxAge)) < now.getTime()) {
            _sum_speed -= _items.getLast().speed;
            _items.removeLast();
+           _itemsExpired = true; 
         }
     }
     
