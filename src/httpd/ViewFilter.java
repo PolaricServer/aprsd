@@ -46,8 +46,7 @@ public class ViewFilter {
         public boolean useObject(AprsPoint x)
           { return x.getIdent().matches(_call); }
   }
- 
- 
+  
   
   
   public static class Tracking2 extends ViewFilter
@@ -62,7 +61,7 @@ public class ViewFilter {
            
   }
   
-
+  
    
   public static class Tracking extends ViewFilter
   {  
