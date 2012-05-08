@@ -37,7 +37,7 @@ public interface AprsHandler
 
 
     /**
-     * Dummy handler class. Does nothing. 
+     * Dummy Aprs handler class. Does nothing. 
      */
     public class Dummy implements AprsHandler 
     {
