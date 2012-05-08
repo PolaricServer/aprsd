@@ -97,7 +97,7 @@ public class HttpServer implements Container
        try {
          String uri = req.getTarget().replaceAll("\\?.*", ""); 
          long time = System.currentTimeMillis();
-         resp.set("Server", "Polaric Server 1.0+dev");
+         resp.set("Server", "Polaric Server 1.1");
          resp.setDate("Date", time);
          resp.setDate("Last-Modified", time); 
          resp.set("Content-Type", "text/html; charset=utf-8");
@@ -111,6 +111,7 @@ public class HttpServer implements Container
             out.println("<html><body>Unknown service: "+uri+"</body></html>");
             resp.setCode(404); 
             resp.setText("Not found");
+            out.close();
          }
        }
        catch (Throwable e) 
