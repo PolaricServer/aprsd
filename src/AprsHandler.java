@@ -14,6 +14,7 @@ public interface AprsHandler
 
     public static class PosData {
        public Reference pos;
+       public int ambiguity  = 0; 
        public int course = -1;
        public int speed = -1;
        public char symbol, symtab;
