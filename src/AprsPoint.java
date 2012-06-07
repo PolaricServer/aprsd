@@ -48,6 +48,7 @@ public abstract class AprsPoint extends PointObject implements Serializable
          
     protected char        _symbol; 
     protected char        _altsym; 
+    protected int         _ambiguity = 0;
     private   String      _alias;  
     protected boolean     _changing = false; 
     protected Date        _updated = new Date(), _lastChanged;
@@ -71,8 +72,11 @@ public abstract class AprsPoint extends PointObject implements Serializable
     public void setSymbol(char s)
        { _symbol = s; }
    
-   public void setSymtab(char s)
+    public void setSymtab(char s)
        { _altsym = s; }
+           
+    public int getAmbiguity()
+       { return _ambiguity; }
        
        
     public String getIcon()
@@ -196,16 +200,17 @@ public abstract class AprsPoint extends PointObject implements Serializable
     protected void checkForChanges() {} 
     
     
-    public void updatePosition(Date ts, Reference newpos)
+    public void updatePosition(Date ts, Reference newpos, int ambiguity)
     {
          if (_position == null)
              setChanging();
          _updated = (ts == null ? new Date() : ts);   
          _position = newpos;
+         _ambiguity = ambiguity;
     }
         
         
-    public abstract void update(Date ts, Reference newpos, int crs, int sp, int alt, 
+    public abstract void update(Date ts, Reference newpos, int ambg, int crs, int sp, int alt, 
                                 String descr, char sym, char altsym, String pathinfo);        
         
     public abstract boolean expired();
