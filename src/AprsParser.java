@@ -29,16 +29,16 @@ public class AprsParser implements Channel.Receiver
     /* Part of station class instead? */
     private static class PosData {
        public LatLng pos;
+       public int ambiguity = 0;
        public int course = -1;
        public int speed = -1;
        public char symbol, symtab;
        public long altitude = -1; 
     }
     
-    
     /* Standard APRS position report format */
     private static Pattern _stdPat = Pattern.compile
-       ("(\\d+\\.\\d+)([NS])(\\S)(\\d+\\.\\d+)([EW])(\\S)\\s*(.*)");
+       ("((\\d|\\s)+\\.(\\d|\\s)+)([NS])(\\S)((\\d|\\s)+\\.(\\d|\\s)+)([EW])(\\S)\\s*(.*)");    
 
     /* Weather report format */
     private static Pattern _wxPat = Pattern.compile
@@ -388,7 +388,7 @@ public class AprsParser implements Channel.Receiver
                if (j >= 9 + 3) {
                   altitude = (int)Math.round(((((((msg.charAt(j-3)-33)*91) 
                                                + (msg.charAt(j-2)-33))*91) 
-                                               + (msg.charAt(j-1)-33))-10000)*3.28084);
+                                               + (msg.charAt(j-1)-33))-10000));
                   if (msg.length() > j) 
                       comment = msg.substring(j+1); 
                }
@@ -408,14 +408,14 @@ public class AprsParser implements Channel.Receiver
                     comment = comment.substring(0, comment.length()-2);
                }
                else if (altitude == -1)
-                    comment = typecode+comment;
+                    comment = typecode + comment;
             }     
             if (comment != null){
                 comment = comment.trim();   
                 if (comment.length() == 0)
                    comment = null;
             }          
-            station.update(new Date(), pos, d, speed, altitude, comment, symbol, altsym, pathinfo);  
+            station.update(new Date(), pos, 0, d, speed, altitude, comment, symbol, altsym, pathinfo);  
             return;
     }
 
@@ -556,7 +556,7 @@ public class AprsParser implements Channel.Receiver
        if (Channel._dupCheck.checkTS(station.getIdent(), time))
             return;
        
-       station.update(time, pd.pos, pd.course, pd.speed, (int) pd.altitude, "", pd.symbol, pd.symtab, "(EXT)" );
+       station.update(time, pd.pos, 0, pd.course, pd.speed, (int) pd.altitude, "", pd.symbol, pd.symtab, "(EXT)" );
     }
     
     
@@ -591,16 +591,26 @@ public class AprsParser implements Channel.Receiver
            {
                pd = new PosData();
                String lat     = m.group(1);
-               char   latNS   = m.group(2).charAt(0);
-               pd.symtab  = m.group(3).charAt(0);
-               String lng     = m.group(4);
-               char   lngEW   = m.group(5).charAt(0);
-               pd.symbol  = m.group(6).charAt(0);
-               comment = m.group(7);
-    
-               if (lat.length() < 7 || lng.length() < 8)
-                   /* ERROR: couldnt understand data field */ 
-                   return;        
+               char   latNS   = m.group(4).charAt(0);
+               pd.symtab  = m.group(5).charAt(0);
+               String lng     = m.group(6);
+               char   lngEW   = m.group(9).charAt(0);
+               pd.symbol  = m.group(10).charAt(0);
+               comment = m.group(11);
+             
+               if (lat.charAt(6) == ' ') {
+                  pd.ambiguity = 1; 
+                  if (lat.charAt(2) == ' ')
+                    pd.ambiguity = 4; 
+                  else if (lat.charAt(3) == ' ')
+                    pd.ambiguity = 3; 
+                  else if (lat.charAt(5) == ' ')
+                    pd.ambiguity = 2;
+               } 
+               lat = lat.replaceFirst(" ", "5");
+               lng = lng.replaceFirst(" ", "5");
+               lat = lat.replaceAll(" ", "0");
+               lng = lng.replaceAll(" ", "0");
 
                latDeg = Integer.parseInt(lat.substring(0,2)) + Double.parseDouble(lat.substring(2,7))/60;
                if (latNS == 'S')
@@ -693,7 +703,7 @@ public class AprsParser implements Channel.Receiver
             comment = comment.trim();
             if (comment.length() < 1 || comment.equals(" "))
                comment = null;
-            station.update(time, pd.pos, pd.course, pd.speed, (int) pd.altitude, comment, pd.symbol, pd.symtab, pathinfo );      
+            station.update(time, pd.pos, pd.ambiguity, pd.course, pd.speed, (int) pd.altitude, comment, pd.symbol, pd.symtab, pathinfo );      
     }
     
     
