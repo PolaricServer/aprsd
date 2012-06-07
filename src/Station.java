@@ -68,7 +68,7 @@ public static class Status implements Serializable
     private int         _report_ignored = 0;
     private boolean     _igate, _wdigi;
     private Date        _infra_updated = null;
-    private Channel     _source;
+    private Source      _source;
        
        
     public Station(String id)
@@ -106,10 +106,10 @@ public static class Status implements Serializable
     } 
     
     
-    public void setSource(Channel src)
+    public void setSource(Source src)
        { _source = src; }
    
-    public Channel getSource()
+    public Source getSource()
        { return _source; }
        
     
@@ -165,6 +165,14 @@ public static class Status implements Serializable
     public synchronized Trail getTrail() 
         { return _trail; }        
       
+      
+      
+    protected void checkForChanges()
+    { 
+        if (_trail.itemsExpired()) 
+           setChanging(); 
+    }     
+   
    
     public boolean isAutoTrail()
        { return _autotrail; }  
@@ -270,7 +278,7 @@ public static class Status implements Serializable
            }
            
         }
-        updatePosition(ts, pd.pos);
+        updatePosition(ts, pd.pos, pd.ambiguity);
         
         _speed = pd.speed;
         _course = pd.course;
