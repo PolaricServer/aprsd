@@ -213,7 +213,7 @@ public static class Status implements Serializable
       
       
         
-    public synchronized void update(Date ts, Reference newpos, int crs, int sp, int alt, 
+    public synchronized void update(Date ts, Reference newpos, int ambg, int crs, int sp, int alt, 
                                     String descr, char sym, char altsym, String pathinfo)
     { 
         if (_position != null && _updated != null)
@@ -268,7 +268,7 @@ public static class Status implements Serializable
            }
            
         }
-        updatePosition(ts, newpos);
+        updatePosition(ts, newpos, ambg);
         
         _speed = sp;
         _course = crs;
