@@ -22,8 +22,22 @@ Updates to 1.0.8, etc..
 
 * Link on signs. Open in new tab, or window, or containing frame?
 
+* [C] Elevation profile from kartverket WPS? 
+
+* Support position with ambiguity. 
+      DONE (for uncompressed packets).
+
+* Show height and movement info (bugfix). 
+      DONE
+      
+* Altitude from mic-e packets was given in feet. Fix. 
+      DONE
+
+* [C] KaMap tile rendering and caching fixes. 
+      DONE
 
 
+      
 Packaging related
 -----------------
 
@@ -36,7 +50,14 @@ Support for mobile devices
 --------------------------
 
 * Multitouch zoom events.
+    DONE.
 
+* GPS pos icon: Not always removed from map. Does not re-appear when turned on again. Fix.
+    DONE. 
+    
+* Speed display (status/pos field can switch by touching to displaying speed in bigger fonts)
+    DONE.
+    
 * Settings save/restore for Android/Phonegap devices. 
 
 * Improve offline caching of map fragments. 
