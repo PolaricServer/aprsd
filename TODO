@@ -7,11 +7,15 @@ Version 1.1, etc.
 * Messaging
 
 
-Channels
---------
+Channels/Sources
+----------------
 
 * Proper naming of channels. 
      STARTED
+
+* All geo-points should have getSource()?
+
+* Filters based on getSource. Experiment.  
 
 * More generic way to add and configure extra channels in config.
      
@@ -23,13 +27,18 @@ Channels
     - Channel interface in core
     
 * Flexible Gate for routing packets to and between channels? igate --> router
-    - Router specification?
-
-* Server channel framework (a simple APRS-IS?)
+    - Router specification? Router framework?
+    - Allow translation between protocols? Pluggable modules. 
 
 * KISS TNC support
+     STARTED. NEEDS TESTING.
 
-     
+* Receive positions from clients (mobile app). This is both a source and a web-service?
+  Separate plugin? 
+  
+* [C] Elevation profile from kartverket WPS? 
+   
+   
 
 Mobile servers
 --------------
@@ -42,8 +51,8 @@ Mobile servers
      
 
  
-Web Server
-----------
+Web Service
+-----------
 
 * Simplify webserver impl. (esp. Scala part). 
 
@@ -59,27 +68,31 @@ API, Extensibility
 
 
 
-Database
---------
+Database plugin
+---------------
 
 * Database setup. Collect simple update events in a database. 
        DONE.
        
 * Can this be a plugin module? Database stuff should be completely optional in 1.1, 1.2
-  etc.. (core database stuff will be part of core P.S. in later releases).
+  etc.. (maybe core database stuff will be part of core P.S. in later releases).
        DONE.
        
+* Move to PostgreSQL 9.1 and PostGIS 2.0
+
 * Some experimentation in external programs/plugins? 
         
 * Experimental search functionality/trails - but as external module? 
        DONE.
 
-* [C] Fix/improve GUI for trail search
+* [C] Fix/improve GUI for trail search 
+
+* [C] API functions for trail search. Test with iframe. 
 
 * Implement mission support - Server side
        STARTED
 
-* [C] Implement experimental mission GUI and start testing
+* [C] Implement experimental mission GUI (or maybe just an API) and start testing
 
 
 
@@ -90,8 +103,8 @@ Other.
   Not just two. 
       STARTED (See above)
 
-* Allow objects with certain attributes (like input channel, callsign) to 
-  be visible only for logged in users. 
+* Allow objects with certain attributes (like source, callsign) to 
+  be visible only for logged in users. Note: Should this be part of a filter framework?
       STARTED
 
 * Change class hierarchy to support other types of position objects, 
@@ -104,7 +117,7 @@ Other.
   
 * Permissions (objects, other)? Sender id? Consider simple user profile support? 
 
-* More configurable view profiles?  
+* More configurable view profiles?  Filter framework? Scripting?
 
 * More flexible logging?
     STARTED (also in 1.0)
