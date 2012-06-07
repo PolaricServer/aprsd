@@ -83,7 +83,7 @@ public class AprsObject extends AprsPoint implements Serializable
     }
     
     
-    public synchronized void update(Date ts, Reference newpos, int crs, int sp, int alt, 
+    public synchronized void update(Date ts, Reference newpos, int ambg, int crs, int sp, int alt, 
                                     String descr, char sym, char altsym, String pathinfo)
     { 
          /* Should try to share code with Station class ?*/
@@ -100,7 +100,7 @@ public class AprsObject extends AprsPoint implements Serializable
             setTimeless(true);
             ts = new Date();
          }
-         updatePosition(ts, newpos);        
+         updatePosition(ts, newpos, ambg);        
          setDescr(descr); 
          _symbol = sym; 
          _altsym = altsym;
