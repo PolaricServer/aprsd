@@ -28,7 +28,7 @@ public class AprsParser implements Channel.Receiver
 
     /* Standard APRS position report format */
     private static Pattern _stdPat = Pattern.compile
-       ("(\\d+\\.\\d+)([NS])(\\S)(\\d+\\.\\d+)([EW])(\\S)\\s*(.*)");
+       ("((\\d|\\s)+\\.(\\d|\\s)+)([NS])(\\S)((\\d|\\s)+\\.(\\d|\\s)+)([EW])(\\S)\\s*(.*)");
 
     /* Weather report format */
     private static Pattern _wxPat = Pattern.compile
@@ -594,17 +594,27 @@ public class AprsParser implements Channel.Receiver
          {
              pd = new AprsHandler.PosData();
              String lat     = m.group(1);
-             char   latNS   = m.group(2).charAt(0);
-             pd.symtab  = m.group(3).charAt(0);
-             String lng     = m.group(4);
-             char   lngEW   = m.group(5).charAt(0);
-             pd.symbol  = m.group(6).charAt(0);
-             comment = m.group(7);
-    
-             if (lat.length() < 7 || lng.length() < 8)
-                 /* ERROR: couldnt understand data field */ 
-                 return;        
-
+             char   latNS   = m.group(4).charAt(0);
+             pd.symtab  = m.group(5).charAt(0);
+             String lng     = m.group(6);
+             char   lngEW   = m.group(9).charAt(0);
+             pd.symbol  = m.group(10).charAt(0);
+             comment = m.group(11);
+             
+             if (lat.charAt(6) == ' ') {
+                 pd.ambiguity = 1; 
+                 if (lat.charAt(2) == ' ')
+                   pd.ambiguity = 4; 
+                 else if (lat.charAt(3) == ' ')
+                   pd.ambiguity = 3; 
+                 else if (lat.charAt(5) == ' ')
+                   pd.ambiguity = 2;
+             } 
+             lat = lat.replaceFirst(" ", "5");
+             lng = lng.replaceFirst(" ", "5");
+             lat = lat.replaceAll(" ", "0");
+             lng = lng.replaceAll(" ", "0");
+             
              latDeg = Integer.parseInt(lat.substring(0,2)) + Double.parseDouble(lat.substring(2,7))/60;
              if (latNS == 'S')
                 latDeg *= -1;
