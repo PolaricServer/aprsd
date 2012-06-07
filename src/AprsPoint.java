@@ -48,6 +48,7 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
          
     protected char        _symbol; 
     protected char        _altsym; 
+    protected int         _ambiguity = 0;
     private   String      _alias;  
     protected boolean     _changing = false; 
     protected Date        _updated = new Date(), _lastChanged;
@@ -81,7 +82,10 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
        return _symTab.getIcon(_symbol, _altsym);
     }           
     
-    
+    public int getAmbiguity()
+       { return _ambiguity; }
+       
+       
     public abstract String getIdent();
 
     public String getDisplayId(boolean usealias)
@@ -185,7 +189,7 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
                _change.signal(this);
                return (_changing = false);
           }
-           if (!_changing) 
+          if (!_changing) 
                checkForChanges(); 
           return _changing; 
     }
@@ -194,12 +198,13 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
     protected void checkForChanges() {} 
     
     
-    public void updatePosition(Date ts, Reference newpos)
+    public void updatePosition(Date ts, Reference newpos, int ambiguity)
     {
          if (_position == null)
              setChanging();
          _updated = (ts == null ? new Date() : ts);   
          _position = newpos;
+         _ambiguity = ambiguity;
     }
         
         
