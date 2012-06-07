@@ -99,7 +99,7 @@ public class AprsObject extends AprsPoint implements Serializable
             setTimeless(true);
             ts = new Date();
          }
-         updatePosition(ts, pd.pos);        
+         updatePosition(ts, pd.pos, pd.ambiguity);        
          setDescr(descr); 
          _symbol = pd.symbol; 
          _altsym = pd.symtab;
