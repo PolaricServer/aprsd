@@ -640,11 +640,15 @@ package no.polaric.aprsd.http
                 else TXT("ikke registrert") ) }
             { simpleLabel("posll", "leftlab", "Position (latlong):",
                 if (x.getPosition() != null) TXT( ll2dmString( x.getPosition().toLatLng()))
-                else TXT("ikke registrert") ) }
+                else TXT("ikke registrert") ) }        
+            { if (x != null && x.getAmbiguity() > 0)
+                  simpleLabel("ambg", "leftlab", "Unøyaktighet:", 
+                     TXT( "± "+0.01 * Math.pow(10, x.getAmbiguity())/2 + " minutter" )) else null}
+                
             { if (s != null && s.getAltitude() >= 0)
-                  {simpleLabel("altitude", "leftlab", "Høyde (o/h):", TXT(s.getAltitude() + " m ")) }}
+                  simpleLabel("altitude", "leftlab", "Høyde (o/h):", TXT(s.getAltitude() + " m ")) else null}
             { if (s != null && s.getSpeed() > 0)
-                  {simpleLabel("cspeed", "leftlab", "Bevegelse:", _directionIcon(s.getCourse())) }}
+                  simpleLabel("cspeed", "leftlab", "Bevegelse:", _directionIcon(s.getCourse())) else null}
 
             { simpleLabel("hrd", "leftlab", "Sist rapportert:", TXT( df.format(x.getUpdated()))) }
             
