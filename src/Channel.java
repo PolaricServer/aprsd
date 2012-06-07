@@ -25,7 +25,7 @@ import java.text.*;
 /**
  * Channel for sending/receiving APRS data. 
  */
-public abstract class Channel implements Serializable
+public abstract class Channel extends Source implements Serializable
 {
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      transient protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap();
@@ -37,37 +37,6 @@ public abstract class Channel implements Serializable
            { time = t; path = p;}
      }
          
-     protected boolean _restrict = false;
-     protected String _style;
-     protected String _ident; 
-         // FIXME: A channel needs an identifier. 
-     
-     public enum Type {inet, radio};
-     
-     
-     protected void _init(Properties config, String prefix) 
-     {
-        _restrict = config.getProperty(prefix+".restrict", "false").trim().matches("true|yes");
-        _style = config.getProperty(prefix+".style", null); 
-        _ident = config.getProperty(prefix+".ident", null); 
-       
-       if (_ident==null)
-           _ident = prefix;
-       else
-           _ident.trim();
-           
-       if (_style==null)
-           _style = _ident;
-       else
-          _style.trim();
-     }
-     
-     
-     public String getStyle() 
-        { return _style; }
-        
-     public boolean isRestricted()
-        { return _restrict; }
         
      
      private void removeOldHeardEntries()
@@ -131,8 +100,6 @@ public abstract class Channel implements Serializable
     public static final String _rx_encoding = "X-UTF-8_with_cp-850_fallback";
     public static final String _tx_encoding = "UTF-8";
 
-    public abstract String getShortDescr(); 
-    
     
     /**
       * Returns true if call is heard.
