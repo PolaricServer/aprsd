@@ -35,7 +35,13 @@ public class OwnPosition extends Station implements Runnable
     
     private final static int _trackTime = 10;
     
-    
+    private class LocalSource extends Source
+     {
+         public LocalSource(Properties config, String prefix)
+            { _style="own"; _init(config, prefix); }
+         public String getShortDescr() 
+            { return "OWN"; }
+     }
     
     public OwnPosition(ServerAPI api) 
     {
@@ -43,6 +49,7 @@ public class OwnPosition extends Station implements Runnable
         Properties config = api.getConfig();
         _api = api;
         
+        setSource(new LocalSource(config, "ownposition"));
         String ownpos = config.getProperty("ownposition.pos", "").trim(); 
         String myCall = config.getProperty("ownposition.mycall", "").trim().toUpperCase();
         if (myCall.length() == 0)
@@ -63,7 +70,7 @@ public class OwnPosition extends Station implements Runnable
         if (pp.length == 3) {
            Reference p = new UTMRef(Double.parseDouble(pp[1]), Double.parseDouble(pp[2]), pp[0].charAt(2), 
                       Integer.parseInt( pp[0].substring(0,2)));
-           updatePosition(new Date(), p);
+           updatePosition(new Date(), p, 0);
            System.out.println("*** Own Position: "+p);
         }
         setId(myCall);
