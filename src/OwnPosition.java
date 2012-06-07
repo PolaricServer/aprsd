@@ -60,7 +60,7 @@ public class OwnPosition extends Station implements Runnable
         if (pp.length == 3) {
            Reference p = new UTMRef(Double.parseDouble(pp[1]), Double.parseDouble(pp[2]), pp[0].charAt(2), 
                       Integer.parseInt( pp[0].substring(0,2)));
-           updatePosition(new Date(), p);
+           updatePosition(new Date(), p, 0);
            System.out.println("*** Own Position: "+p);
         }
         setId(myCall);
@@ -152,7 +152,7 @@ public class OwnPosition extends Station implements Runnable
     
     public synchronized void updatePosition(Date t, Reference pos, char symtab, char symbol)
     {
-          update(new Date(), pos, -1, -1, -1, null, symbol, symtab, null);
+          update(new Date(), pos, 0, -1, -1, -1, null, symbol, symtab, null);
           timeSinceReport = 0;
           sendPosReport();
     }
