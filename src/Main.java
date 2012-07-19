@@ -11,7 +11,7 @@ import java.nio.charset.Charset;
 
 public class Main
 {
-    public static String version = "1.0.7+";
+    public static String version = "1.0.8+";
     public static String toaddr  = "APPS10";
     
     public static String       confdir, datadir, webdir, logdir; 
@@ -93,8 +93,13 @@ public class Main
                  System.out.println("*** Activate Sar URL");
                  sarurl = new SarUrl(config);
              }
-           
-             ownpos = new OwnPosition(config);
+             if (config.getProperty("ownposition.gps.on", "false").trim().matches("true|yes")) {
+                 System.out.println("*** Activate GPS");
+                 ownpos = new GpsPosition(config);
+             }
+             else
+                 ownpos = new OwnPosition(config);
+    
              ownpos.setChannels(ch2, ch1);
              db.addStation(ownpos); 
              
