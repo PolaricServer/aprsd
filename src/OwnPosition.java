@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,13 +25,13 @@ import uk.me.jstott.jcoord.*;
  */
 public class OwnPosition extends Station implements Runnable
 {
-    transient private Channel    _inetChan, _rfChan;
-    transient private Thread     _thread;
-    transient private StationDB  _db;
-    transient private int        _tid;
-    transient private boolean    _txOn, _allowRf;
-    transient private String     _pathRf, _comment;
-    transient private int        _maxPause, _minPause;
+    transient private   Channel    _inetChan, _rfChan;
+    transient private   Thread     _thread;
+    transient private   StationDB  _db;
+    transient private   int        _tid;
+    transient private   boolean    _txOn, _allowRf;
+    transient protected String     _pathRf, _comment;
+    transient protected int        _maxPause, _minPause;
     
     private final static int _trackTime = 10;
     
@@ -51,7 +51,7 @@ public class OwnPosition extends Station implements Runnable
         _allowRf  = config.getProperty("ownposition.tx.allowrf", "false").trim().matches("true|yes");
         _pathRf   = config.getProperty("ownposition.tx.rfpath", "WIDE1-1").trim(); 
         _comment  = config.getProperty("ownposition.tx.comment", "").trim();
-        _maxPause = Integer.parseInt(config.getProperty("ownposition.tx.maxpause", "900").trim());
+        _maxPause = Integer.parseInt(config.getProperty("ownposition.tx.maxpause", "600").trim());
         _minPause = Integer.parseInt(config.getProperty("ownposition.tx.minpause", "180").trim());
         if (_minPause == 0)
            _minPause = _maxPause; 
@@ -64,6 +64,9 @@ public class OwnPosition extends Station implements Runnable
            System.out.println("*** Own Position: "+p);
         }
         setId(myCall);
+        setAltitude(-1);
+        _description = _comment;
+
            
         if (_txOn) {
            _thread = new Thread(this, "OwnPosition-"+(_tid++));
@@ -101,13 +104,17 @@ public class OwnPosition extends Station implements Runnable
        int deg = (int) Math.floor(ll);
        float minx = ll - deg;
        if (ll < 0 && minx != 0.0) 
-          minx = 1 - minx; // is this correct. Check code in PT as well?
+          minx = 1 - minx; 
+         /* FIXME: is this correct? Check code in PT as well? */
           
        float mins = ((float) Math.round( minx * 60 * 100)) / 100;
        return String.format("%0"+ndeg+"d%05.2f", deg, mins);  
    }  
    
    
+    /**
+     * Encode position for use in APRS. 
+     */
     protected String encodePos()
     {
         LatLng pos = getPosition().toLatLng();
@@ -121,7 +128,7 @@ public class OwnPosition extends Station implements Runnable
     
        
    /**
-     * send object report on the given channel.
+     * Send APRS position report on the given channel.
      */
     protected void sendPosReport()
     {
@@ -148,17 +155,34 @@ public class OwnPosition extends Station implements Runnable
     }
 
     
-    int timeSinceReport = 0;
+    protected int _timeSinceReport = 0;
     
+
+    /**
+     * Manual update of position. 
+     * To be called from user interface. 
+     */
     public synchronized void updatePosition(Date t, Reference pos, char symtab, char symbol)
     {
-          update(new Date(), pos, 0, -1, -1, -1, null, symbol, symtab, null);
-          timeSinceReport = 0;
+          update(new Date(), pos, -1, -1, -1, -1, _comment, symbol, symtab, null);
+          _timeSinceReport = 0;
           sendPosReport();
     }
 
-    
-    
+
+    /**
+     * Returns true if its time to send an APRS update. 
+     * Can be overridden in subclasses to do advanced tracking, smart beaconing, etc..
+     */
+    protected boolean should_update () 
+    {
+       int t = Math.min(_maxPause, 120); 
+       t = Math.max(_minPause, t); 
+       return (isChanging() && _timeSinceReport >= t); 
+    }
+
+
+    /* Main thread */
     public void run() 
     {
        /* 
@@ -170,10 +194,10 @@ public class OwnPosition extends Station implements Runnable
          try {  
             Thread.sleep(_trackTime * 1000);
             synchronized (this) {
-              timeSinceReport += _trackTime;
-              if (getPosition() != null  && 
-                  (timeSinceReport >= _maxPause || (isChanging() && timeSinceReport >= _minPause))) {
-                 timeSinceReport = 0;
+              _timeSinceReport += _trackTime;
+              if ( getPosition() != null  && 
+                    (_timeSinceReport >= _maxPause || should_update())) {
+                 _timeSinceReport = 0;
                  sendPosReport();
               }
            }    
@@ -182,5 +206,9 @@ public class OwnPosition extends Station implements Runnable
          }
        }
     }
+
+
+
+
 }
 
