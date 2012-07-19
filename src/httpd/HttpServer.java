@@ -307,8 +307,8 @@ public abstract class HttpServer extends NanoHTTPD
    public String sec_serveMapData(Properties header, Properties parms, PrintWriter out, 
           ViewFilter vfilt, String filt)
    {
-      boolean showSarInfo = (getAuthUser(header) != null || Main.sarmode == null);
-      return _serveMapData(header, parms, out, vfilt, filt, showSarInfo);
+      /* FIXME: All that are logged in are allowed to see SAR info. Is this too liberal? */
+      return _serveMapData(header, parms, out, vfilt, filt, true);
    }
    
    
@@ -318,7 +318,7 @@ public abstract class HttpServer extends NanoHTTPD
     */
    public String serveMapData(Properties header, Properties parms, PrintWriter out, 
           ViewFilter vfilt, String filt)
-   {
+   {     
       return _serveMapData(header, parms, out, vfilt, filt, Main.sarmode == null);
    }
    
