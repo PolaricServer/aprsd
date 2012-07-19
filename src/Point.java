@@ -25,6 +25,10 @@ import java.io.Serializable;
  
 public abstract class Point implements Serializable
 {             
+    public static final float KNOTS2KMH = (float) 1.853;
+    public static final float KNOTS2MPS = (float) 0.5148;
+    public static final float FEET2M = (float) 3.2898;
+
     protected Reference   _position;
       
     public Point (Reference p)
@@ -68,5 +72,17 @@ public abstract class Point implements Serializable
        
     public Reference getPosition ()   
        { return _position; } 
+
+
+    /**
+     * Return true if the difference in course between crs and prev is greater than limit. 
+     * All arguments given in degrees 
+     */
+    public static boolean course_change(int crs, int prev, int limit)
+    {
+        return ( (Math.abs(crs - prev) > limit) &&
+           Math.min (Math.abs((crs-360) - prev), Math.abs(crs - (prev-360))) > limit);
+    }
+
 
 }
