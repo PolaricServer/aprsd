@@ -187,8 +187,11 @@ public static class Status implements Serializable
        { return _altitude; }
     
 
+    public void setAltitude(int a) 
+       { _altitude = a; }
    
-    public boolean isInside(UTMRef uleft, UTMRef lright) 
+
+    @override public boolean isInside(UTMRef uleft, UTMRef lright) 
     {
        if (super.isInside(uleft, lright))
           return true;
@@ -261,10 +264,10 @@ public static class Status implements Serializable
            if (distance(newpos) > History.mindist && 
                _history.add(_updated, _position, _speed, _course, pathinfo)) 
            {
-              if (_history.length() == 1 && _autotrail)
+               if (_history.length() == 1 && _autotrail)
                   _trailcolor = _colTab.nextColour();
-              _db.getRoutes().removeOldEdges(getIdent(), _history.oldestPoint());
-              setChanging();   
+               _db.getRoutes().removeOldEdges(getIdent(), _history.oldestPoint());
+               setChanging();   
            }
            
         }
@@ -281,10 +284,10 @@ public static class Status implements Serializable
             setChanging();
         }
         
-        if (sym != _symbol || altsym != _altsym)
+        if (sym != 0 && altsym != 0 && (sym != _symbol || altsym != _altsym))
         {
-            _symbol = sym;
-            _altsym = altsym;
+            if (sym != 0) _symbol = sym;
+            if (altsym != 0) _altsym = altsym;
             setChanging();
         }
         
