@@ -184,3 +184,14 @@
 * [C] API for iframe embedding.
 * [Mobile] Adjustments to scale box.
 * [Mobile] GPS tracking (for Android/Phonegap devices)
+
+1.0.8
+-----
+* Support position with ambiguity (for uncompressed packets).
+* Show height and movement info (bugfix). 
+* Altitude from mic-e packets was given in feet. Fix. 
+* [C] KaMap tile rendering and caching fixes. 
+* [Mobile] Multitouch zoom events.
+* [Mobile] GPS pos icon: Not always removed from map. Does not re-appear when turned on again. Fix.
+* [Mobile] Speed display (status/pos field can switch by touching to displaying speed in bigger fonts).
+
