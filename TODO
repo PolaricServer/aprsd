@@ -7,35 +7,36 @@ Updates to 1.0.8, etc..
 * KISS TNC support. 
     IN PROGRESS. NEEDS TESTING.
     
-* GPS support.
+* GPS support. Tracking. 
+    DONE.
 
 * Simple messaging
      
 * [C] Increase/decrease label font size. 
+    DONE.
 
 * [C] Limit picture box width. 
 
 * QR code in SAR URL box. 
 
 * [C] Canvas trouble with IE and OpenLayers. FIX. 
-       WONTFIX. 
+       WONT FIX. 
 
 * Link on signs. Open in new tab, or window, or containing frame?
 
 * [C] Elevation profile from kartverket WPS? 
 
-* Support position with ambiguity. 
-      DONE (for uncompressed packets).
+* [C] Simple info from statkart WPS
+      DONE.
 
-* Show height and movement info (bugfix). 
-      DONE
+* [C] WX forecast from met.no
+      DONE. Needs some debugging.
       
-* Altitude from mic-e packets was given in feet. Fix. 
-      DONE
-
-* [C] KaMap tile rendering and caching fixes. 
-      DONE
-
+* [C] Change label font size from within application. 
+      DONE.
+      
+* [C] Popup z-index adjustments... (small fix)
+      DONE.
 
       
 Packaging related
@@ -48,21 +49,13 @@ Packaging related
 
 Support for mobile devices
 --------------------------
-
-* Multitouch zoom events.
-    DONE.
-
-* GPS pos icon: Not always removed from map. Does not re-appear when turned on again. Fix.
-    DONE. 
-    
-* Speed display (status/pos field can switch by touching to displaying speed in bigger fonts)
-    DONE.
     
 * Settings save/restore for Android/Phonegap devices. 
 
 * Improve offline caching of map fragments. 
 
 * Login and update operations. SAR code. 
+
 * Fix dynamic update (??)
 
 
