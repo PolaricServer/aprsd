@@ -24,6 +24,8 @@ Updates to 1.0.8, etc..
 
 * Link on signs. Open in new tab, or window, or containing frame?
 
+* Better search for stations/objects. Advanced search? Keep window?
+
 * [C] Elevation profile from kartverket WPS? 
 
 * [C] Simple info from statkart WPS
@@ -37,6 +39,7 @@ Updates to 1.0.8, etc..
       
 * [C] Popup z-index adjustments... (small fix)
       DONE.
+      
 
       
 Packaging related
@@ -49,14 +52,12 @@ Packaging related
 
 Support for mobile devices
 --------------------------
-    
-* Settings save/restore for Android/Phonegap devices. 
 
 * Improve offline caching of map fragments. 
 
 * Login and update operations. SAR code. 
 
-* Fix dynamic update (??)
+* Screen blink, etc, on Android 4. Fix?
 
 
 
