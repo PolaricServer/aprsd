@@ -9,6 +9,9 @@ INIFILE=/etc/polaric-aprsd/server.ini
 case "$1" in
 
     configure|reconfigure)
+        if [ -e "/etc/cron.daily/polaric-aprsd" ]; then
+           rm -R /etc/cron.daily/polaric-aprsd
+        fi
         if [ "$1" == "configure" ] ; then
            if ! id polaric > /dev/null 2>&1 ; then
                adduser --quiet --system --home /var/lib/polaric --no-create-home \
