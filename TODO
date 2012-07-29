@@ -19,9 +19,6 @@ Updates to 1.0.8, etc..
 
 * QR code in SAR URL box. 
 
-* [C] Canvas trouble with IE and OpenLayers. FIX. 
-       WONT FIX. 
-
 * Link on signs. Open in new tab, or window, or containing frame?
 
 * Better search for stations/objects. Advanced search? Keep window?
@@ -32,7 +29,7 @@ Updates to 1.0.8, etc..
       DONE.
 
 * [C] WX forecast from met.no
-      DONE. Needs some debugging.
+      DONE.
       
 * [C] Change label font size from within application. 
       DONE.
@@ -59,5 +56,10 @@ Support for mobile devices
 
 * Screen blink, etc, on Android 4. Fix?
 
+* Direction pointer in speed display mode
+    DONE.
+    
+* Power management: prevent device from going dark.
+    DONE.
 
 
