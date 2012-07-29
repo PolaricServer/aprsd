@@ -20,7 +20,7 @@ INSTALL_CONFIG = $(DESTDIR)/etc/polaric-aprsd
    INSTALL_WEB = $(DESTDIR)/usr/share/polaric
  INSTALL_DATA  = $(DESTDIR)/var/lib/polaric
    INSTALL_LOG = $(DESTDIR)/var/log/polaric
-
+  INSTALL_SUDO = $(DESTDIR)/etc/sudoers.d
 
 ##################################################
 ##  things below should not be changed
@@ -40,6 +40,7 @@ install: polaric-aprsd.jar
 	install -d $(INSTALL_JAR)
 	install -d $(INSTALL_WEB)/icons $(INSTALL_WEB)/icons/signs $(INSTALL_WEB)/dicons
 	install -d $(INSTALL_DATA)
+	install -d $(INSTALL_SUDO)
 	install -m 755 -d $(INSTALL_LOG)
 	install -m 644 server.ini init.tnc $(INSTALL_CONFIG)
 	install -m 644 symbols $(INSTALL_CONFIG)
@@ -51,6 +52,8 @@ install: polaric-aprsd.jar
 	install -m 644 dicons/*.png $(INSTALL_WEB)/dicons
 	install -m 644 style.css $(INSTALL_WEB)
 	install -m 755 restart-server $(INSTALL_BIN)
+	cp sudoers.d $(INSTALL_SUDO)/polaric-aprsd
+	chmod 644 $(INSTALL_SUDO)/polaric-aprsd
 
 
 aprs: $(LIBDIR)
