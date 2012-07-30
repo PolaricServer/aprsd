@@ -17,6 +17,7 @@ import java.util.*;
 import java.io.*;
 import uk.me.jstott.jcoord.*; 
 import java.util.concurrent.*;
+import java.util.regex.*;
  
 /**
  * In-memory implementation of StationDB.
@@ -249,9 +250,15 @@ public class StationDBImp implements StationDB, Runnable
         if (srch == null)
            return result;
         srch = srch.toUpperCase(); 
+        if (srch.matches("REG:.*"))
+           srch = srch.substring(4);
+        else {
+           srch = srch.replaceAll("\\.", Matcher.quoteReplacement("\\."));
+           srch = srch.replaceAll("\\*", Matcher.quoteReplacement("(\\S*)"));
+        }
         for (AprsPoint s: _map.values())
-           if (s.getIdent().toUpperCase().contains(srch) ||
-               s.getDescr().toUpperCase().contains(srch) ) 
+           if  (s.getIdent().toUpperCase().matches(srch) ||
+               s.getDescr().toUpperCase().matches("(.*\\s+)?\\(?("+srch+")\\)?\\,?(\\s+.*)?") ) 
                result.add(s);
         return result;
     }
