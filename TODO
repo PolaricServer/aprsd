@@ -18,7 +18,8 @@ Updates to 1.0.8, etc..
 
 * Link on signs. Open in new tab, or window, or containing frame?
 
-* Better search for stations/objects. Advanced search? Keep window?
+* Better search for stations/objects. Wildcards, regex...
+      DONE. 
 
 * [C] Elevation profile from kartverket WPS? 
 
