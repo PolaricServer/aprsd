@@ -172,7 +172,13 @@ public class Main implements ServerAPI
                igate.activate(this);
            }
            
-           ownpos = new OwnPosition(api);
+           if (_config.getProperty("ownposition.gps.on", "false").trim().matches("true|yes")) {
+               System.out.println("*** Activate GPS");
+               ownpos = new GpsPosition(api);
+           }
+           else
+               ownpos = new OwnPosition(api);
+
            ownpos.setChannels(ch2, ch1);
            db.addStation(ownpos); 
            
