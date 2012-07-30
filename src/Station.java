@@ -198,8 +198,11 @@ public static class Status implements Serializable
        { return _altitude; }
     
 
+    public void setAltitude(int a)
+       { _altitude = a; }
+
    
-    public boolean isInside(UTMRef uleft, UTMRef lright) 
+    @Override public boolean isInside(UTMRef uleft, UTMRef lright) 
     {
        if (super.isInside(uleft, lright))
           return true;
@@ -291,10 +294,10 @@ public static class Status implements Serializable
             setChanging();
         }
         
-        if (pd.symbol != _symbol || pd.symtab != _altsym)
+        if (pd.symbol != 0 && pd.symtab != 0 && (pd.symbol != _symbol || pd.symtab != _altsym))
         {
-            _symbol = pd.symbol;
-            _altsym = pd.symtab;
+            if (pd.symbol != 0)  _symbol = pd.symbol;
+            if (pd.symtab != 0)  _altsym = pd.symtab;
             setChanging();
         }
         
