@@ -94,6 +94,10 @@ public class Trail implements Iterable<Trail.Item>, Serializable
         _sum_speed += sp;
         boolean added = false;
          
+        if (length() > 0 && "(GPS)".equals(path) && Math.abs(crs - getFirst().course) < 20 &&
+                 t.getTime() < getFirst().time.getTime() + 30000)
+           return added;
+
         /* New report is newer than the last report - put it first */
         if ( _items.size() == 0 || 
             (t.getTime() >= getFirst().time.getTime() && getFirst().distance(p) > mindist)) {
