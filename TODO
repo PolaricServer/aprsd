@@ -37,7 +37,9 @@ Channels/Sources
   Separate plugin? 
   
 * [C] Elevation profile from kartverket WPS? 
-   
+
+* [C] Info for point (elevation, etc) from kartverket WPS
+      DONE.
    
 
 Mobile servers
