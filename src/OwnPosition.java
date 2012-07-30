@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,13 +25,13 @@ import uk.me.jstott.jcoord.*;
  */
 public class OwnPosition extends Station implements Runnable
 {
-    transient private Channel    _inetChan, _rfChan;
-    transient private Thread     _thread;
-    transient private ServerAPI  _api;
-    transient private int        _tid;
-    transient private boolean    _txOn, _allowRf;
-    transient private String     _pathRf, _comment;
-    transient private int        _maxPause, _minPause;
+    transient private  Channel    _inetChan, _rfChan;
+    transient private  Thread     _thread;
+    transient private  ServerAPI  _api;
+    transient private  int        _tid;
+    transient private  boolean    _txOn, _allowRf;
+    transient protected String    _pathRf, _comment;
+    transient protected int       _maxPause, _minPause;
     
     private final static int _trackTime = 10;
     
@@ -74,6 +74,8 @@ public class OwnPosition extends Station implements Runnable
            System.out.println("*** Own Position: "+p);
         }
         setId(myCall);
+        setAltitude(-1);
+        _description = _comment;
            
         if (_txOn) {
            _thread = new Thread(this, "OwnPosition-"+(_tid++));
@@ -111,13 +113,15 @@ public class OwnPosition extends Station implements Runnable
        int deg = (int) Math.floor(ll);
        float minx = ll - deg;
        if (ll < 0 && minx != 0.0) 
-          minx = 1 - minx; // is this correct. Check code in PT as well?
+          minx = 1 - minx; // FIXME: is this correct. Check code in PT as well?
           
        float mins = ((float) Math.round( minx * 60 * 100)) / 100;
        return String.format("%0"+ndeg+"d%05.2f", deg, mins);  
    }  
    
-   
+   /**
+    * Encode position for use in APRS.
+    */
     protected String encodePos()
     {
         LatLng pos = getPosition().toLatLng();
@@ -131,7 +135,7 @@ public class OwnPosition extends Station implements Runnable
     
        
    /**
-     * send object report on the given channel.
+     * Send APRS position report on the given channel.
      */
     protected void sendPosReport()
     {
@@ -158,17 +162,34 @@ public class OwnPosition extends Station implements Runnable
     }
 
     
-    int timeSinceReport = 0;
+    protected int _timeSinceReport = 0;
     
+    /**
+     * Manual update of position.
+     * To be called from user interface. 
+     */
     public synchronized void updatePosition(Date t, Reference pos, char symtab, char symbol)
     {
-          update(new Date(),new AprsHandler.PosData(pos, symbol, symtab), "", "");
-          timeSinceReport = 0;
+          update(new Date(),new AprsHandler.PosData(pos, symbol, symtab), _comment, "");
+          _timeSinceReport = 0;
           sendPosReport();
     }
 
     
     
+    /**
+     * Returns true if its time to send an APRS update. 
+     * Can be overridden in subclasses to do advanced tracking, smart beaconing, etc..
+     */
+    protected boolean should_update () 
+    {
+       int t = Math.min(_maxPause, 120); 
+       t = Math.max(_minPause, t); 
+       return (isChanging() && _timeSinceReport >= t); 
+    }
+
+
+
     public void run() 
     {
        /* 
@@ -180,10 +201,10 @@ public class OwnPosition extends Station implements Runnable
          try {  
             Thread.sleep(_trackTime * 1000);
             synchronized (this) {
-              timeSinceReport += _trackTime;
+              _timeSinceReport += _trackTime;
               if (getPosition() != null  && 
-                  (timeSinceReport >= _maxPause || (isChanging() && timeSinceReport >= _minPause))) {
-                 timeSinceReport = 0;
+                  (_timeSinceReport >= _maxPause || should_update())) {
+                 _timeSinceReport = 0;
                  sendPosReport();
               }
            }    
