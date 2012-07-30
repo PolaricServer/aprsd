@@ -101,24 +101,43 @@ public class Tnc2Channel extends TncChannel implements Runnable
     */
    private void getCommandPrompt() throws Exception
    {     
-      String line = "";
-      if (_noBreak) {
-         _ostream.write(3);
-         _ostream.flush();
-      }
-      else
-         _serialPort.sendBreak(3);
-      Thread.sleep(50);
-      _out.print("\r");
-      _out.flush();
-      Thread.sleep(150);
-      while (_in.ready()) 
-         line += (char) _in.read();
+      boolean reset_retry = false; 
+      while (true) {
+         String line = "";
+         if (_noBreak) {
+            _ostream.write(3);
+            _ostream.flush();
+         }
+         else
+            _serialPort.sendBreak(3);
+         
+         if (reset_retry) {
+            Thread.sleep(2000); 
+            _out.print("RESET\r");
+            _out.flush(); 
+         }
+         
+         Thread.sleep(50);
+         _out.print("\r");
+         _out.flush();
+         Thread.sleep(150);
+         while (_in.ready()) 
+            line += (char) _in.read();
       
-      if (line.contains("cmd:"))
-         System.out.println("*** TNC in command mode");
-      else
-         System.out.println("*** Warning: Cannot get command prompt from TNC");
+         if (line.contains("cmd:"))
+            System.out.println("*** TNC in command mode");
+         else 
+            if (reset_retry) {
+                System.out.println("*** Warning: Cannot get command prompt from TNC. Giving up"); 
+                reset_retry = false;
+            }
+            else {
+                System.out.println("*** Cannot get command prompt from TNC. Trying a RESET"); 
+                reset_retry = true; 
+                continue; 
+            }
+         return;
+      }        
    }   
    
    
