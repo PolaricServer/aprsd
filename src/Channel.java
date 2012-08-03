@@ -54,6 +54,10 @@ public abstract class Channel
      *  APRS packet.
      */ 
     public static class Packet implements Cloneable {
+    
+        /* If packet is gated or routed elsewhere, the original via
+         * can be saved in via_orig 
+         */
         public String from, to, msgto, via, via_orig, report; 
         public char type; 
         public boolean thirdparty = false; 
@@ -248,7 +252,7 @@ public abstract class Channel
     { 
        if (packet == null || packet.length() < 1)
           return; 
-       System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+packet);
+//       System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+packet);
        Packet p = string2packet(packet);
        receivePacket(p, dup);
     }
@@ -259,6 +263,7 @@ public abstract class Channel
        if (p == null)
           return; 
        p.source = this;
+       System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+p);
        dup = _dupCheck.checkPacket(p.from, p.to, p.report);
        if (!dup) 
           /* Register heard, only for first instance of packet, not duplicates */
