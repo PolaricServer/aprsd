@@ -195,3 +195,17 @@
 * [Mobile] GPS pos icon: Not always removed from map. Does not re-appear when turned on again. Fix.
 * [Mobile] Speed display (status/pos field can switch by touching to displaying speed in bigger fonts).
 
+1.0.9
+-----
+* KISS TNC support. 
+* Some small fixes to >RF igating. 
+* GPS support. Tracking. 
+* Better search for stations/objects. Wildcards, regex...
+* [C] Simple info from statkart WPS (1)
+* [C] Simple WX forecast from met.no (1))
+* [C] Change label font size from within application. 
+* [C] Popup z-index adjustments... (small fix)
+* [Mobile] Direction pointer in speed display mode
+* [Mobile] Power management: prevent device from going dark.
+
+      (1) Needs additional setup of Web server. 
