@@ -3,12 +3,6 @@ Updates to 1.0.8, etc..
 -----------------------
 
 * [C] Sometimes last update in trail is missing. Fix?
-     
-* KISS TNC support. 
-    IN PROGRESS. NEEDS TESTING.
-    
-* GPS support. Tracking. 
-    DONE.
 
 * Simple messaging
      
@@ -18,22 +12,8 @@ Updates to 1.0.8, etc..
 
 * Link on signs. Open in new tab, or window, or containing frame?
 
-* Better search for stations/objects. Wildcards, regex...
-      DONE. 
-
 * [C] Elevation profile from kartverket WPS? 
 
-* [C] Simple info from statkart WPS
-      DONE.
-
-* [C] WX forecast from met.no
-      DONE.
-      
-* [C] Change label font size from within application. 
-      DONE.
-      
-* [C] Popup z-index adjustments... (small fix)
-      DONE.
       
 
       
@@ -54,10 +34,6 @@ Support for mobile devices
 
 * Screen blink, etc, on Android 4. Fix?
 
-* Direction pointer in speed display mode
-    DONE.
-    
-* Power management: prevent device from going dark.
-    DONE.
+
 
 
