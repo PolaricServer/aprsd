@@ -79,8 +79,15 @@ public class Main
                  t.start(); 
              }
              if (config.getProperty("tncchannel.on", "false").trim().matches("true|yes")) {
-                 System.out.println("*** Activate TNC Channel");
-                 ch2 = new Tnc2Channel(config);
+                 System.out.print("*** Activate TNC Channel:");
+                 if (config.getProperty("tncchannel.mode", "tnc2").trim().matches("KISS|kiss")) {
+                    System.out.println(" KISS mode");
+                    ch2 = new KissTncChannel(config);
+                 }
+                 else {
+                    System.out.println(" TNC2 mode");
+                    ch2 = new Tnc2Channel(config);
+                 }
                  ch2.setReceivers((Channel.Receiver) p, igate);
                  Thread t = new Thread(ch2, "TncChannel");
                  t.start(); 
