@@ -122,7 +122,11 @@ public class Igate implements Channel.Receiver
           if (p.type == ':' && path != null) 
              p.via = Channel.getReversePath(path); 
           
+          p.report = Channel.thirdPartyReport(p, "TCPIP,"+_myCall+"*");
+          p.from = _myCall;
           p.to = Main.toaddr;
+          p.thirdparty = true; 
+         
           _log.add("*** Path = '"+p.to+" VIA "+p.via+"' ");
           _rfChan.sendPacket(p);
        } 
