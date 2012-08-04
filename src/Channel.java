@@ -67,9 +67,9 @@ public abstract class Channel
               catch (Exception e) {return null; } 
             }
         public String toString()
-            { String v = (via_orig != null ? via_orig : via); 
+            {  
               return from+">"+to +
-                (v != null ? ","+v : "") + ":" + report;
+                ((via != null && via.length()>0) ? ","+via : "") + ":" + report;
             }
     }
     
@@ -157,6 +157,20 @@ public abstract class Channel
           while (!st.empty())
             result += (st.pop() + ",");
        return result.length() == 0 ? "" : result.substring(0,result.length()-1);
+    }
+    
+    
+    
+    public static String thirdPartyReport(Packet p)
+      { return thirdPartyReport(p, null); }
+      
+    public static String thirdPartyReport(Packet p, String path)
+    { 
+       if (path == null) 
+          path = ((p.via_orig != null && p.via_orig.length() > 0) ? ","+p.via_orig : "");
+       else 
+          path = ","+path; 
+       return "}" + p.from + ">" + p.to + path + ":" + p.report + "\r";
     }
     
     
@@ -252,7 +266,6 @@ public abstract class Channel
     { 
        if (packet == null || packet.length() < 1)
           return; 
-//       System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+packet);
        Packet p = string2packet(packet);
        receivePacket(p, dup);
     }
