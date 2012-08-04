@@ -69,7 +69,6 @@ public abstract class TncChannel extends Channel implements Runnable
      */
     private SerialPort connect () throws Exception
     {
-        System.out.println("Serial port: "+_portName);
         CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(_portName);
         if ( portIdentifier.isCurrentlyOwned() )
             System.out.println("*** ERROR: Port "+ _portName + " is currently in use");
@@ -92,7 +91,6 @@ public abstract class TncChannel extends Channel implements Runnable
     }
    
    
-    
     
     public abstract void close();   
     protected abstract void receiveLoop() throws Exception;
