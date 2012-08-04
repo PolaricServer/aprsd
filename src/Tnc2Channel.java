@@ -49,8 +49,8 @@ public class Tnc2Channel extends TncChannel implements Runnable
     /**
      * Send packet on RF. 
      * The generic sendPacket method is not fully supported on TNC2 interface. 
-     * If receiver callsign is not null and match TNC callsign, or explicitly 
-     * requested, we use third party format.
+     * If receiver callsign is not null and do not match TNC callsign, we use 
+     * third party format.
      *
      * However, we try to change UNPROTO path, if requested but note that
      * the method for doing that is not the most reliable and efficient:
@@ -61,6 +61,7 @@ public class Tnc2Channel extends TncChannel implements Runnable
     {
        if (_out == null)
           return;
+          
        String unproto = p.to + (p.via != null && p.via.length()>0 ? " VIA "+p.via : "");
        if (!_unproto.equals(unproto))
           try {
@@ -77,12 +78,9 @@ public class Tnc2Channel extends TncChannel implements Runnable
         
        _log.log(" [>" + this.getShortDescr() + "] " + p);
        
-       if (p.thirdparty || (p.from != null && !p.from.equals(_myCall))) {
-           _log.add("*** TX path = '"+unproto+"'"); 
-           _out.print(
-             "}" + p.from + ">" + p.to +
-                ((p.via_orig != null && p.via_orig.length() > 0) ? ","+p.via_orig : "") +
-                ":" + p.report + "\r" );
+       if (p.from != null && !p.from.equals(_myCall)) {
+           _log.add("*** Force third party format. TX path = '"+unproto+"'"); 
+           _out.print(thirdPartyReport(p));
        }
        else 
            _out.print(p.report+"\r");
@@ -98,25 +96,44 @@ public class Tnc2Channel extends TncChannel implements Runnable
     */
    private void getCommandPrompt() throws Exception
    {     
-      String line = "";
-      if (_noBreak) {
-         _ostream.write(3);
-         _ostream.flush();
-      }
-      else
-         _serialPort.sendBreak(3);
-      Thread.sleep(50);
-      _out.print("\r");
-      _out.flush();
-      Thread.sleep(150);
-      while (_in.ready()) 
-         line += (char) _in.read();
+      boolean reset_retry = false; 
+      while (true) {
+         String line = "";
+         if (_noBreak) {
+            _ostream.write(3);
+            _ostream.flush();
+         }
+         else
+            _serialPort.sendBreak(3);
+         
+         if (reset_retry) {
+            Thread.sleep(2000); 
+            _out.print("RESET\r");
+            _out.flush(); 
+         }
+         
+         Thread.sleep(50);
+         _out.print("\r");
+         _out.flush();
+         Thread.sleep(150);
+         while (_in.ready()) 
+            line += (char) _in.read();
       
-      if (line.contains("cmd:"))
-         System.out.println("*** TNC in command mode");
-      else
-         System.out.println("*** Warning: Cannot get command prompt from TNC");
-   }   
+         if (line.contains("cmd:"))
+            System.out.println("*** TNC in command mode");
+         else 
+            if (reset_retry) {
+                System.out.println("*** Warning: Cannot get command prompt from TNC. Giving up"); 
+                reset_retry = false;
+            }
+            else {
+                System.out.println("*** Cannot get command prompt from TNC. Trying a RESET"); 
+                reset_retry = true; 
+                continue; 
+            }
+         return;
+      } 
+   }  
    
    
    
