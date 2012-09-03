@@ -78,34 +78,34 @@ public class AprsParser implements Channel.Receiver
         {
             case '>':
                /* Status report */
-               parseStatusReport(p.report, station);
+               parseStatusReport(p.source, p.report, station);
                break;
                
             case '!': 
             case '=':
                /* Real time position report */ 
-               parseStdAprs(p.report, station, false, p.via);
+               parseStdAprs(p.source, p.report, station, false, p.via);
                break;
               
             case '@':
             case '/': 
                /* Timestamped position report */   
-               parseStdAprs(p.report, station, true, p.via);
+               parseStdAprs(p.source, p.report, station, true, p.via);
                break;
                
             case ';': 
                /* Object report */
-               parseObjectReport(p.report, station);
+               parseObjectReport(p.source, p.report, station);
                
             case '\'':
             case '`': 
                /* Mic-E report */
-               parseMicE(p.to, p.report, station, p.via); 
+               parseMicE(p.source, p.to, p.report, station, p.via); 
                break;
                
             case ':':
                /* Message */
-               parseMessage(p.report, station);
+               parseMessage(p.source, p.report, station);
                break;
                
             default: 
@@ -113,7 +113,7 @@ public class AprsParser implements Channel.Receiver
         }catch (NumberFormatException e)
           { System.out.println("*** WARNING: Cannot parse number in input. Report string probably malformed"); }
         
-        _api.getAprsHandler().handlePacket(new Date(), p.from, p.to, p.via, p.report);
+        _api.getAprsHandler().handlePacket(p.source, new Date(), p.from, p.to, p.via, p.report);
         parsePath(station, p.via, duplicate);   
     }
 
@@ -188,7 +188,7 @@ public class AprsParser implements Channel.Receiver
     /**
      * Parse APRS message.
      */
-    private void parseMessage(String msg, Station station)
+    private void parseMessage(Source src, String msg, Station station)
     {
         String msgid = null;
         String recipient = msg.substring(1,9).trim();
@@ -199,13 +199,14 @@ public class AprsParser implements Channel.Receiver
         String content = msg.substring(11, (i>=0 ? i : msg.length()));
         if (_msg != null)
            _msg.incomingMessage(station, recipient, content, msgid);
+        _api.getAprsHandler().handleMessage(src, new Date(), station.getIdent(), recipient, content);   
     }
 
 
     /**
      * Parse APRS status report.
      */
-    private void parseStatusReport(String msg, Station station)
+    private void parseStatusReport(Source src, String msg, Station station)
     {
         Date d = null;
         msg = msg.substring(1);
@@ -213,6 +214,7 @@ public class AprsParser implements Channel.Receiver
            d = parseTimestamp(msg, false);
            msg = msg.substring(7);
         }
+        _api.getAprsHandler().handleStatus(src, d, msg);
         station.setStatus(d, msg);
     }
     
@@ -221,7 +223,7 @@ public class AprsParser implements Channel.Receiver
     /**
      * Parse APRS object report.
      */
-    private void parseObjectReport(String msg, Station station)
+    private void parseObjectReport(Source src, String msg, Station station)
     {
         String ident = msg.substring(1,10).trim();
         char op = msg.charAt(10);
@@ -234,7 +236,7 @@ public class AprsParser implements Channel.Receiver
             obj = (AprsObject) x;
              
         if (op=='*') {
-           parseStdAprs(msg.substring(10), obj, true, "");
+           parseStdAprs(src, msg.substring(10), obj, true, "");
            _api.getDB().deactivateSimilarObjects(ident, station);
         }
         else {
@@ -250,7 +252,7 @@ public class AprsParser implements Channel.Receiver
      * Parse mic-e data.
      * Based on http://www.aprs-is.net/javAPRS/mice_parser.htm
      */
-    private void parseMicE (String toField, String msg, AprsPoint station, String pathinfo) 
+    private void parseMicE (Source src, String toField, String msg, AprsPoint station, String pathinfo) 
     {
             int j, k;
             Double pos_lat, pos_long; 
@@ -383,7 +385,7 @@ public class AprsParser implements Channel.Receiver
                if (j >= 9 + 3) {
                   pd.altitude = (int)Math.round(((((((msg.charAt(j-3)-33)*91) 
                                                + (msg.charAt(j-2)-33))*91) 
-                                               + (msg.charAt(j-1)-33))-10000)*3.28084);
+                                               + (msg.charAt(j-1)-33))-10000));
                   if (msg.length() > j) 
                       comment = msg.substring(j+1); 
                }
@@ -413,8 +415,8 @@ public class AprsParser implements Channel.Receiver
             
             
             
-            _api.getAprsHandler().handlePosReport( station.getIdent(), 
-                 new Date(), pd, comment, pathinfo );
+            _api.getAprsHandler().handlePosReport(src, station.getIdent(), 
+                   new Date(), pd, comment, pathinfo );
             station.update(new Date(), pd, comment, pathinfo); 
             return;
     }
@@ -550,7 +552,7 @@ public class AprsParser implements Channel.Receiver
     
     
 
-    private void parseExtraReport(String data, AprsPoint station)
+    private void parseExtraReport(Source src, String data, AprsPoint station)
     {
        Date time = new Date();
        time = parseTimestamp(data.substring(0), true);
@@ -558,7 +560,7 @@ public class AprsParser implements Channel.Receiver
        if (Channel._dupCheck.checkTS(station.getIdent(), time))
             return;
             
-       _api.getAprsHandler().handlePosReport( station.getIdent(), time, pd, "", "(EXT)" );
+       _api.getAprsHandler().handlePosReport(src, station.getIdent(), time, pd, "", "(EXT)" );
        station.update(time, pd, "", "(EXT)" );
     }
     
@@ -567,7 +569,7 @@ public class AprsParser implements Channel.Receiver
     /** 
      * Parse standard position data.
      */
-    private void parseStdAprs(String data, AprsPoint station, boolean timestamp, String pathinfo)
+    private void parseStdAprs(Source src, String data, AprsPoint station, boolean timestamp, String pathinfo)
     {
          Date time = new Date();
          
@@ -696,7 +698,7 @@ public class AprsParser implements Channel.Receiver
            * Format: "/#" + compressed timestamp + compressed report */
           while (comment.length() >= 18 && comment.matches("(/\\#.{16})+.*"))
           {
-              parseExtraReport(comment.substring(2,18), station); 
+              parseExtraReport(src, comment.substring(2,18), station); 
               comment = comment.substring(18, comment.length());
           }
           
@@ -707,7 +709,7 @@ public class AprsParser implements Channel.Receiver
           if (comment.length() < 1 || comment.equals(" "))
              comment = null;
              
-          _api.getAprsHandler().handlePosReport( station.getIdent(), time, pd, comment, pathinfo );
+          _api.getAprsHandler().handlePosReport(src, station.getIdent(), time, pd, comment, pathinfo );
           station.update(time, pd, comment, pathinfo );      
     }
     
