@@ -674,9 +674,8 @@ package no.polaric.aprsd.http
 
   
     private def cleanPath(txt:String): String = 
-        txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]+(\\-[0-9]+)?\\*?),?|(qA.),?", "")
+        txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]*(\\-[0-9]+)?\\*?),?|(qA.),?", "")
            .replaceAll("\\*", "").replaceAll(",", ", ")   
-           
 
 
       
