@@ -38,13 +38,13 @@ public class Tnc2Channel extends TncChannel implements Runnable
 
     
     
-    public Tnc2Channel(ServerAPI api) 
+    public Tnc2Channel(ServerAPI api, String id) 
     {
-       super(api);
+       super(api, id);
        Properties config = api.getConfig();
       _unproto = api.getToAddr();  
-      _pathCmd = config.getProperty("tncchannel.pathcommand", "UNPROTO").trim();  
-      _noBreak = config.getProperty("tncchannel.nobreak", "false").trim().matches("true|yes");
+      _pathCmd = config.getProperty("channel."+id+".pathcommand", "UNPROTO").trim();  
+      _noBreak = config.getProperty("channel."+id+".nobreak", "false").trim().matches("true|yes");
     }
  
  
@@ -52,8 +52,8 @@ public class Tnc2Channel extends TncChannel implements Runnable
     /**
      * Send packet on RF. 
      * The generic sendPacket method is not fully supported on TNC2 interface. 
-     * If receiver callsign is not null and match TNC callsign, or explicitly 
-     * requested, we use third party format.
+     * If receiver callsign is not null and do not match TNC callsign, we use 
+     * third party format.
      *
      * However, we try to change UNPROTO path, if requested but note that
      * the method for doing that is not the most reliable and efficient:
@@ -80,12 +80,9 @@ public class Tnc2Channel extends TncChannel implements Runnable
         
        _log.log(" [>" + this.getShortDescr() + "] " + p);
        
-       if (p.thirdparty || (p.from != null && !p.from.equals(_myCall))) {
-           _log.add("*** TX path = '"+unproto+"'"); 
-           _out.print(
-             "}" + p.from + ">" + p.to +
-                ((p.via_orig != null && p.via_orig.length() > 0) ? ","+p.via_orig : "") +
-                ":" + p.report + "\r" );
+       if (p.from != null && !p.from.equals(_myCall)) {
+           _log.add("*** Force third party format. TX path = '"+unproto+"'"); 
+           _out.print(thirdPartyReport(p));
        }
        else 
            _out.print(p.report+"\r");
