@@ -35,13 +35,18 @@ public class OwnPosition extends Station implements Runnable
     
     private final static int _trackTime = 10;
     
+    
+    
     private class LocalSource extends Source
      {
-         public LocalSource(Properties config, String prefix)
-            { _style="own"; _init(config, prefix); }
+         public LocalSource(Properties config, String prefix, String id)
+            { _style="own"; _init(config, prefix, "ownposition"); }
          public String getShortDescr() 
             { return "OWN"; }
      }
+    
+    
+    
     
     public OwnPosition(ServerAPI api) 
     {
@@ -49,7 +54,7 @@ public class OwnPosition extends Station implements Runnable
         Properties config = api.getConfig();
         _api = api;
         
-        setSource(new LocalSource(config, "ownposition"));
+        setSource(new LocalSource(config, "localsrc", "ownposition"));
         String ownpos = config.getProperty("ownposition.pos", "").trim(); 
         String myCall = config.getProperty("ownposition.mycall", "").trim().toUpperCase();
         if (myCall.length() == 0)
