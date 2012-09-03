@@ -27,14 +27,14 @@ public interface AprsHandler
     }
 
 
-    public void handlePosReport(String sender, Date ts, PosData newpos,  
+    public void handlePosReport(Source s, String sender, Date ts, PosData newpos,  
             String descr, String pathinfo);
     
-    public void handleStatus(Date ts, String msg, String pathinfo);
+    public void handleStatus(Source s, Date ts, String msg);
                                    
-    public void handleMessage(Date ts, String src, String dest, String msg);
+    public void handleMessage(Source s, Date ts, String src, String dest, String msg);
     
-    public void handlePacket(Date ts, String src, String dest, String path, String txt);
+    public void handlePacket(Source s, Date ts, String src, String dest, String path, String txt);
 
 
     /**
@@ -42,11 +42,11 @@ public interface AprsHandler
      */
     public class Dummy implements AprsHandler 
     {
-       public void handlePosReport(String sender, Date ts, PosData newpos,  
+       public void handlePosReport(Source s, String sender, Date ts, PosData newpos,  
                String descr, String pathinfo) {};
-       public void handleStatus(Date ts, String msg, String pathinfo) {};                               
-       public void handleMessage(Date ts, String src, String dest, String msg) {}
-       public void handlePacket(Date ts, String src, String dest, String path, String txt) {}
+       public void handleStatus(Source s, Date ts, String msg) {};                               
+       public void handleMessage(Source s, Date ts, String src, String dest, String msg) {}
+       public void handlePacket(Source s, Date ts, String src, String dest, String path, String txt) {}
     }     
 }
  
