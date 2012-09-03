@@ -36,24 +36,22 @@ public abstract class Source implements Serializable
      public enum Type {inet, radio, local};
      
      
-     protected void _init(Properties config, String prefix) 
+     protected void _init(Properties config, String prefix, String id) 
      {
-        _restrict = config.getProperty(prefix+".restrict", "false").trim().matches("true|yes");
-        _style = config.getProperty(prefix+".style", _style); 
-        _ident = config.getProperty(prefix+".ident", _ident); 
-       
-       if (_ident==null)
-           _ident = prefix;
-       else
-           _ident.trim();
+        _restrict = config.getProperty(prefix+"."+id+".restrict", "false").trim().matches("true|yes");
+        _style = config.getProperty(prefix+"."+id+".style", _style); 
+        _ident = id;
            
-       if (_style==null)
+        if (_style==null)
            _style = _ident;
-       else
-          _style.trim();
+        else
+           _style.trim();
      }
      
      
+     public String getIdent()
+        { return _ident; }
+        
      public String getStyle() 
         { return _style; }
         
