@@ -24,9 +24,10 @@ import java.util.concurrent.Semaphore;
  
 public class KissTncChannel extends TncChannel
 {
-   protected static final byte FTYPE_UI = 0; // HUSK  RIKTIGE VERDIER HER
-   protected static final byte PID_APRS = 0;
+   protected static final byte FTYPE_UI  = (byte) 0x03; 
+   protected static final byte PID_APRS  = (byte) 0xF0;
    protected static final byte FLAG_LAST = (byte) 0x01;
+   protected static final byte FLAG_DIGI = (byte) 0x80;
    protected static final byte ASCII_SPC = (byte) 0x20;
    protected static final byte FEND  = (byte) 0xC0;
    protected static final byte FESC  = (byte) 0xDB;
@@ -36,41 +37,54 @@ public class KissTncChannel extends TncChannel
    private InputStream _istream; 
    private OutputStream _ostream;
    private boolean _close = false; 
+  
     
    protected static class Addr {
       String addr;
-      boolean last;
-      public Addr(String a, boolean l)
-        { addr=a; last=l; }
+      byte flags; 
+      public boolean last() 
+        { return (flags & FLAG_LAST) != 0; }
+      public boolean digipeated()
+        { return (flags & FLAG_DIGI) != 0; }
+      public Addr(String a, byte f)
+        { addr=a; flags=f; }
    }
+
  
    protected static class Frame_End extends Throwable
    {}
    
+   protected static class Timeout extends Throwable
+   {}
     
     
-    public KissTncChannel(ServerAPI api) 
+    public KissTncChannel(ServerAPI api, String id) 
     {
-       super(api);
+       super(api, id);
        Properties config = api.getConfig();
     }
     
     
     
+
     /**
      * Send packet on RF. 
      */ 
     public synchronized void sendPacket(Packet p)
     {
+        _log.log(" [>" + this.getShortDescr() + "] " + p);
         try {
            /* Start of frame. KISS command = data */
            sendFend(); 
-           sendByte(0); 
+           sendByte((byte) 0); 
        
            /* AX.25 UI Header */
-           String[] digis = p.via.split(",");
+           String[] digis = new String[0]; 
+           if (p.via.length() > 0) 
+               digis = p.via.split(","); 
+
            encodeAddr(p.to, false);
-           encodeAddr(p.from, digis.length>0);
+           encodeAddr(p.from, digis.length==0);
            int n = 0;
            for (String d : digis)
               encodeAddr(d, ++n >= digis.length); 
@@ -115,47 +129,53 @@ public class KissTncChannel extends TncChannel
         
         while (!_close) 
         {
-            Packet p = _receivePacket();
-            receivePacket(p, false);
-            Thread.yield();
+           try { 
+               Packet p = _receivePacket();
+               receivePacket(p, false);
+           }
+           catch (Timeout e) {}
+           Thread.yield();
         }
     }
     
     
     
-    private Packet _receivePacket()
+    private Packet _receivePacket() throws Timeout
     {
         Packet p = new Packet();
+        p.report = p.via = ""; 
         boolean complete = false;
+     
         while (true) {
            try {
-               receiveByte();
+               if (receiveByte() != 0)  
+                  continue;
                Addr a = decodeAddr();
-               p.from = a.addr; 
+               p.to = a.addr; 
                a = decodeAddr();
-               p.to = a.addr;
-               while (!a.last) {
+               p.from = a.addr;
+               while (!a.last()) {
                   a = decodeAddr();
-                  p.via += a.addr;
-                  if (!a.last)
+                  p.via = p.via + a.addr + (a.digipeated() ? "*" : "");
+                  if (!a.last()) 
                      p.via += ",";
                } 
 
                if (receiveByte() == FTYPE_UI && receiveByte() == PID_APRS)
                   complete = true;
                while (true)
-                  p.report += (char) receiveByte(); // CONVERT TO UNICODE?
+                  p.report += (char) receiveByte(); 
            
            }
            catch (Frame_End e) {
-              if (complete)
-                return p;
+              if (complete) 
+                 return p;        
            }
-           catch (IOException e) { /* ERRROR */ }
+           catch (Exception e) { }
         }
     }
     
-   
+
    
    /**
     * Encode AX25 address field (callsign).
@@ -163,60 +183,58 @@ public class KissTncChannel extends TncChannel
     private void encodeAddr(String addr, boolean last) throws IOException
     {
         byte ssid = 0;
-        if (addr.charAt(addr.length()-2) == '-') {
-            ssid = (byte) addr.charAt(addr.length()-1);
-            addr = addr.substring(0,addr.length()-2); 
+        if (addr.contains("-")) {
+            ssid = (byte) Integer.parseInt(addr.substring(addr.indexOf('-')+1));
+            addr = addr.substring(0,addr.indexOf('-')); 
         }
+        
         byte[] b = addr.getBytes();
         byte flags = (last ? FLAG_LAST : 0);
         int i=6;
         for (byte c : b) {
            i--;
-           sendByte(c << 1);
+           sendByte((byte) (c << 1));
         }
         for (int j=0; j<i; j++)
-           sendByte(ASCII_SPC << 1);
-        sendByte(((ssid & 0x0F) << 1) | (flags & 0x81) | 0x60 );
+           sendByte((byte) (ASCII_SPC << 1));
+        sendByte((byte)(((ssid & 0x0F) << 1) | (flags & 0x81) | 0x60) );
     }
-
 
 
    /**
     * Decode AX25 address field (callsign).
     */
-    private Addr decodeAddr() throws IOException, Frame_End
+    private Addr decodeAddr() throws IOException, Frame_End, Timeout
     {
         byte x;
         String result = "";
-        
         for (int i=0; i<6; i++)
         {
-           x = receiveByte();
-           x >>= 1;
+           x = (byte)((receiveByte() & 0xfe) >>> 1);
            if (x != ASCII_SPC)
               result += (char) x;  
         }
-        
         x = receiveByte();
-        int ssid = (x & 0x1E) >> 1; 
-        int flags = x & 0x81 & FLAG_LAST;
-        return new Addr(result + (ssid>0 ? "-"+ssid : ""), flags!=0 );
+        byte ssid = (byte) ((x & 0x1E) >>> 1); 
+        byte flags = (byte) (x & 0x81);
+        return new Addr(result + (ssid>0 ? "-"+ssid : ""), flags );
     }
     
     
-    
+
    /**
     * Send byte according to the SLIP/KISS protocol.
     */
-    private void sendByte(int x) throws IOException
+    private void sendByte(byte x) throws IOException
     {
        if (x==FEND)
           { _ostream.write(FESC); _ostream.write(TFEND); }
        else if (x==FESC)
           { _ostream.write(FESC); _ostream.write(TFESC); }
        else
-           _ostream.write((byte) x);
+            _ostream.write(x);
     }
+    
     
     
    /**
@@ -224,32 +242,37 @@ public class KissTncChannel extends TncChannel
     * i.e. a FEND character is sent..
     */
     private void sendFend() throws IOException
-       {_ostream.write(FEND); }
+       { _ostream.write(FEND); }
     
     
    /**
     * Receive byte according to the SLIP/KISS protocol.
     * Throws an exception Frame_End when receiving a FEND. 
     */
-    private byte receiveByte() throws IOException, Frame_End
+    private byte receiveByte() throws IOException, Frame_End, Timeout
     {
        boolean escaped = true;
        while (true) {
-          byte x = (byte) _istream.read();
-          if (x == FEND)
+          int x = _istream.read();
+          if (x == -1)
+             throw new Timeout();    
+          if ((byte) x == FEND)
              throw new Frame_End();
-          else if (x == FESC) 
-             escaped = true; 
-          else if (escaped)
-             if (x==TFEND) 
-                return FEND; 
-             else if (x==TFESC)
-                return FESC;
-             else
-                escaped = false;
-         else
-            return x;
-      }
+          
+          if ((byte) x == FESC) 
+             escaped = true;
+          else  {
+             if (escaped) {
+                if ((byte) x==TFEND) 
+                   return FEND; 
+                else if ((byte) x==TFESC)
+                   return FESC;
+                else
+                   escaped = false;
+             } 
+             return (byte) x;  
+         }
+      }   
    }
        
 }
