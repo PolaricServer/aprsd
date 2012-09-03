@@ -26,7 +26,7 @@ public class Main implements ServerAPI
    public static  SarMode  sarmode = null;
    private static Properties _config = new Properties();
    private static HttpServer ws;
-
+   private static Channel.Manager _chanManager = new Channel.Manager();
    
    
    /* Experimental !! 
@@ -127,30 +127,43 @@ public class Main implements ServerAPI
       // Start the Thread, accept incoming connections   
     {
         try {
-             
-           /* Start parser and connect it to channel(s) if any */
+
+          /* Start parser and connect it to channel(s) if any */
            AprsParser p = new AprsParser(api, db.getMsgProcessor());
-           if (_config.getProperty("inetchannel.on", "false").trim().matches("true|yes"))  {
-               System.out.println("*** Activate Internet Channel");
-               ch1 = new InetChannel(api, "inetchannel");
-               ch1.addReceiver(p);
-               Thread t = new Thread(ch1, "InetChannel");
-               t.start(); 
+
+           /*
+            * default channel setup: one named aprsis type APRSIS and one named tnc type TNC2
+            */
+           _chanManager.addClass("APRSIS", "no.polaric.aprsd.InetChannel");
+           _chanManager.addClass("TNC2", "no.polaric.aprsd.Tnc2Channel");
+           _chanManager.addClass("KISS", "no.polaric.aprsd.KissTncChannel");
+           
+           String[] channelns = {"aprsis", "tnc"};
+           if (_config.getProperty("channel.aprsis.type", "").trim().equals(""))
+              _config.setProperty("channel.aprsis.type", "APRSIS"); 
+           if (_config.getProperty("channel.tnc.type", "").trim().equals(""))
+              _config.setProperty("channel.aprsis.type", "TNC2");  
+           
+           String[] c = _config.getProperty("channels", "").trim().split(",(\\s*)");
+           if (c.length > 0)
+             channelns = c; 
+           
+           int i = 0;
+           Channel[] ch = new Channel[channelns.length];
+           for (String chan: channelns) {
+                if (_config.getProperty("channel."+chan+".on", "true").trim().matches("true|yes"))  {
+                    /* Define and activate channel */
+                    String type = _config.getProperty("channel."+chan+".type", "").trim();
+                    ch[i] = _chanManager.newInstance(api, type, chan);
+                    if (ch[i] != null)
+                       ch[i].addReceiver(p);
+                    else
+                       System.out.println("ERROR: Couldn't instantiate channel '"+chan+"' for type: "+type);
+                    i++;
+                }
            }
-           if (_config.getProperty("extrachannel.on", "false").trim().matches("true|yes"))  {
-               System.out.println("*** Activate EXTRA Internet Channel");
-               chx = new InetChannel(api, "extrachannel");
-               chx.addReceiver(p); 
-               Thread t = new Thread(chx, "InetChannel");
-               t.start(); 
-           }
-           if (_config.getProperty("tncchannel.on", "false").trim().matches("true|yes")) {
-               System.out.println("*** Activate TNC Channel");
-               ch2 = new Tnc2Channel(api);
-               ch2.addReceiver(p);
-               Thread t = new Thread(ch2, "TncChannel");
-               t.start(); 
-           } 
+
+           
            if (_config.getProperty("remotectl.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate Remote Control");
                rctl = new RemoteCtl(_config, db.getMsgProcessor(), api);
@@ -158,45 +171,51 @@ public class Main implements ServerAPI
  
            
            /* Message processing */
-           db.getMsgProcessor().setChannels(ch2, ch1);  
+           db.getMsgProcessor().setChannels(ch[2], ch[1]);  
 
            /* Igate.
-            * FIXME:  Should create igate object also if not on. Always or create a new 
-            * config property. Note that if inetchannel or tncchannel does not exist, 
+            * FIXME:  Should create igate object also if not on to allow it to be 
+            * activated by a remote command. Note that if inetchannel or tncchannel does not exist, 
             * igate will not activate. Should those channels always be created????
-            */            
+            */     
+           String[] ichans = _config.getProperty("igate.channels", "aprsis,tnc").trim().split(",(\\s*)");
+           Channel ch1 = (ichans.length > 0 ? _chanManager.get(ichans[0]) : null);
+           Channel ch2 = (ichans.length > 1  ? _chanManager.get(ichans[1]) : null);       
+           
            if (_config.getProperty("igate.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate IGATE");
                igate = new Igate(api);
                igate.setChannels(ch2, ch1);
                igate.activate(this);
            }
-           
-           if (_config.getProperty("ownposition.gps.on", "false").trim().matches("true|yes")) {
+          
+          /* Message processing */
+           db.getMsgProcessor().setChannels(ch[2], ch[1]);  
+          
+          /* Own position */
+          if (_config.getProperty("ownposition.gps.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate GPS");
                ownpos = new GpsPosition(api);
            }
            else
                ownpos = new OwnPosition(api);
 
-           ownpos.setChannels(ch2, ch1);
+           ownpos.setChannels(ch[2], ch[1]);
            db.addStation(ownpos); 
            
            /* APRS objects */
            ownobjects = db.getOwnObjects(); 
-           ownobjects.setChannels(ch2, ch1); 
+           ownobjects.setChannels(ch[2], ch[1]); 
            
            /* Start HTTP server */
            int http_port = Integer.parseInt(_config.getProperty("httpserver.port", "8081"));
            ws = new HttpServer(api, http_port, _config);
            ws.addHandler(new Webserver(api, _config), null);
-           
+           System.out.println( "*** HTTP server ready on port " + http_port);
+             
            /* Plugins */
            PluginManager.addList(_config.getProperty("plugins", ""));
-           
-           System.out.println( "*** HTTP server ready on port " + http_port);
-           
-           
+            
         }
         catch( Exception ioe )
         {
