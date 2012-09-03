@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import java.util.regex.*;
 import java.io.*;
 import se.raek.charset.*;
 import java.text.*;
-
+import java.lang.reflect.Constructor; 
 
 
 /**
@@ -30,6 +30,46 @@ public abstract class Channel extends Source implements Serializable
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      transient protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap();
         
+
+
+
+
+     /**
+      * Abstract factory for Channel objects. 
+      */
+
+     public static class Manager {
+         private HashMap<String, String> _classes = new HashMap();
+         private HashMap<String, Channel> _instances = new HashMap();
+         
+         
+         public void addClass(String tname, String cls)
+         {
+            _classes.put(tname, cls);
+         }
+
+         public Channel newInstance(ServerAPI api, String tname, String id)
+         {
+            try {
+               String cname = _classes.get(tname); 
+               if (cname == null)
+                  return null; // Or throw exception??
+               Class<Channel> cls = (Class<Channel>) Class.forName(cname);
+               Constructor<Channel> constr = (Constructor<Channel>) cls.getConstructors()[0];
+               return constr.newInstance(api, id);
+            }
+            catch (Exception e) {
+               return null; 
+            }
+         }
+         
+         public Channel get(String id)
+           { return _instances.get(id); }
+     }
+
+
+
+
      protected static class Heard {
          public Date time; 
          public String path;
@@ -57,19 +97,32 @@ public abstract class Channel extends Source implements Serializable
      *  APRS packet.
      */ 
     public static class Packet implements Cloneable {
-        public String from, to, msgto, via, via_orig, report; 
+
+        /* If packet is gated or routed elsewhere, the original via
+         * can be saved in via_orig. If it is a thirdparty packet, more
+         * info about source packet is in from_orig and to_orig.
+         */
+        public String from, to, msgto, via, report; 
+        public String from_orig, to_orig, via_orig; 
         public char type; 
         public boolean thirdparty = false; 
         public Channel source;
+
         @Override public Packet clone() 
             { try { return (Packet) super.clone();}
               catch (Exception e) {return null; } 
             }
         public String toString()
-         { String v = (via_orig != null ? via_orig : via); 
-           return from+">" + to +
-             (v != null ? "," + v : "") + ":" + report; 
-         }
+            {  
+              String msg = from+">"+to +
+                   ((via != null && via.length()>0) ? ","+via : "") + ":" + report;
+                   
+              if (thirdparty)
+                 return from_orig+">"+to_orig +
+                   ((via_orig != null && via_orig.length()>0) ? ","+via_orig : "") + ":}" + msg;
+              else     
+                 return msg; 
+            }
     }
     
     
@@ -146,6 +199,20 @@ public abstract class Channel extends Source implements Serializable
     }    
     
     
+    
+    public static String thirdPartyReport(Packet p)
+      { return thirdPartyReport(p, null); }
+      
+    public static String thirdPartyReport(Packet p, String path)
+    { 
+       if (path == null) 
+          path = ((p.via_orig != null && p.via_orig.length() > 0) ? ","+p.via_orig : "");
+       else 
+          path = ","+path; 
+       return "}" + p.from + ">" + p.to + path + ":" + p.report + "\r";
+    }
+       
+       
      
    /**
      * Number of stations heard.
@@ -176,13 +243,14 @@ public abstract class Channel extends Source implements Serializable
      * Convert text string to packet structure. 
      */
     private Packet string2packet(String packet)
-    {
+    {      
+        packet = packet.replace('\uffff', ' ');
         Matcher m = _ppat.matcher(packet);
         if (m.matches())
         {
             Packet p = new Packet();
-            p.from = m.group(1).trim().toUpperCase();
-            p.to   = m.group(2).trim().toUpperCase();
+            p.from_orig = p.from = m.group(1).trim().toUpperCase();
+            p.to_orig = p.to = m.group(2).trim().toUpperCase();
             p.via  = m.group(3);
             p.report  = m.group(m.groupCount());
             if (p.report.length() == 0)
@@ -195,8 +263,8 @@ public abstract class Channel extends Source implements Serializable
               * on the wrapped message. 
               */
                p = string2packet(p.report.substring(1));
-               if (p != null)
-                  p.thirdparty = true; 
+               if (p != null) 
+                  p.thirdparty = true;
                else
                   return null;
             }
@@ -232,10 +300,10 @@ public abstract class Channel extends Source implements Serializable
     { 
        if (packet == null || packet.length() < 1)
           return; 
-       System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+packet);
        Packet p = string2packet(packet);
        receivePacket(p, dup);
     }
+    
     
     
     protected void receivePacket(Packet p, boolean dup)
@@ -243,6 +311,7 @@ public abstract class Channel extends Source implements Serializable
        if (p == null)
           return; 
        p.source = this;
+       System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+p);
        dup = _dupCheck.checkPacket(p.from, p.to, p.report);
        if (!dup) 
           /* Register heard, only for first instance of packet, not duplicates */
