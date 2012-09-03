@@ -33,20 +33,25 @@ public abstract class TncChannel extends Channel implements Runnable
     transient protected SerialPort   _serialPort;
     transient private   Semaphore    _sem = new Semaphore(1, true);
     transient protected Logfile      _log; 
+    transient private   Thread       _thread;
+    
     
  
-    public TncChannel(ServerAPI api) 
+    public TncChannel(ServerAPI api, String id) 
     {
         Properties config = api.getConfig();
-        _myCall = config.getProperty("tncchannel.mycall", "").trim().toUpperCase();
+        _init(config, "channel", id);
+        _myCall = config.getProperty("channel."+id+".mycall", "").trim().toUpperCase();
         if (_myCall.length() == 0)
            _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();       
-        _max_retry = Integer.parseInt(config.getProperty("tncchannel.retry", "0").trim());
-        _retry_time = Long.parseLong(config.getProperty("tncchannel.retry.time", "30").trim()) * 60 * 1000; 
-        _portName = config.getProperty("tncchannel.port", "/dev/ttyS0").trim();
-        _baud= Integer.parseInt(config.getProperty("tncchannel.baud", "9600").trim());
+        _max_retry = Integer.parseInt(config.getProperty("channel."+id+".retry", "0").trim());
+        _retry_time = Long.parseLong(config.getProperty("channel."+id+".retry.time", "30").trim()) * 60 * 1000; 
+        _portName = config.getProperty("channel."+id+".port", "/dev/ttyS0").trim();
+        _baud= Integer.parseInt(config.getProperty("channel."+id+".baud", "9600").trim());
         // FIXME: set gnu.io.rxtx.SerialPorts property here instead of in startup script
-        _log = new Logfile(config, "tncchannel", "rf.log");
+        _log = new Logfile(config, id, "rf.log");
+        _thread = new Thread(this, "channel."+id);
+        _thread.start();
     }
   
   
@@ -70,7 +75,6 @@ public abstract class TncChannel extends Channel implements Runnable
      */
     private SerialPort connect () throws Exception
     {
-        System.out.println("Serial port: "+_portName);
         CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(_portName);
         if ( portIdentifier.isCurrentlyOwned() )
             System.out.println("*** ERROR: Port "+ _portName + " is currently in use");
