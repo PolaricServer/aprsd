@@ -33,28 +33,28 @@ public class InetChannel extends Channel implements Runnable, Serializable
     transient private   Socket      _sock = null; 
     transient private   BufferedReader _rder = null;
     transient private   ServerAPI   _api;
-    
+    transient private   Thread      _thread;
 
 
 
 
-    public InetChannel(ServerAPI api, String prefix) 
+    public InetChannel(ServerAPI api, String id) 
     {
-        if (prefix==null)
-           prefix = "inetchannel"; 
         Properties config = api.getConfig();
-        _init(config, prefix);
+        _init(config, "channel", id);
         _api = api;
         
-        _host = config.getProperty(prefix+".host", "localhost").trim();
-        _port = Integer.parseInt(config.getProperty(prefix+".port", "14580").trim());
-        _max_retry = Integer.parseInt(config.getProperty(prefix+".retry", "0").trim());
-        _retry_time = Long.parseLong(config.getProperty(prefix+".retry.time", "30").trim()) * 60 * 1000; 
-        _user = config.getProperty(prefix+".user", "").trim().toUpperCase();
+        _host = config.getProperty("channel."+id+".host", "localhost").trim();
+        _port = Integer.parseInt(config.getProperty("channel."+id+".port", "14580").trim());
+        _max_retry = Integer.parseInt(config.getProperty("channel."+id+".retry", "0").trim());
+        _retry_time = Long.parseLong(config.getProperty("channel."+id+".retry.time", "30").trim()) * 60 * 1000; 
+        _user = config.getProperty("channel."+id+".user", "").trim().toUpperCase();
         if (_user.length() == 0)
            _user = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
-        _pass = config.getProperty(prefix+".pass", "-1").trim();
-        _filter = config.getProperty(prefix+".filter", ""); 
+        _pass = config.getProperty("channel."+id+".pass", "-1").trim();
+        _filter = config.getProperty("channel."+id+".filter", ""); 
+        _thread = new Thread(this, "channel."+id);
+        _thread.start();
     }
  
 
