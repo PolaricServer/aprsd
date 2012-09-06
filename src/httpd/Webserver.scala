@@ -126,10 +126,15 @@ package no.polaric.aprsd.http
               { simpleLabel("freemem", "leftlab", "Brukt minne:", 
                   TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
               <br/>
-              { simpleLabel("ch1", "leftlab", "Kanal 1 (APRS-IS): ", 
-                   if (_api.getChannel(null)==null) TXT("---") else TXT(""+_api.getChannel(null))) } 
-              { simpleLabel("ch2", "leftlab", "Kanal 2 (TNC): ", 
-                   if (_api.getChannel(null)==null) TXT("---") else TXT(""+_api.getChannel(null))) }
+         
+              { var i = 0; 
+                for ( x:String <- _api.getChanManager().getKeys()) yield
+                 {  val ch = api.getChanManager().get(x); 
+                    i += 1;
+                    simpleLabel("chan_"+ch.getIdent(), "leftlab", "Kanal "+i+" ("+ch.getShortDescr()+"):", TXT(ch.getIdent())) } 
+              }
+
+                   
               { simpleLabel("igate", "leftlab", "Igate: ", 
                    if (_api.getIgate()==null) TXT("---") else TXT(""+_api.getIgate())) }   
               { if (_api.getRemoteCtl() != null && !_api.getRemoteCtl().isEmpty())  
@@ -727,24 +732,31 @@ package no.polaric.aprsd.http
 
     def handle_trailpoint(req : Request, res : Response) =
     {
-       val s = _api.getDB().getStation(req.getParameter("id"), null)
-       val index = Integer.parseInt(req.getParameter("index"))
-       val h = s.getTrail()
-       val item = h.getPoint(index)
+       val time = xf.parse(req.getParameter("time"))
+       val ident = req.getParameter("id")
+       val item = _api.getDB().getTrailPoint(ident, time)
        /* FIXME: Check if valid result */
-    
-       val result : NodeSeq =
-         <xml:group>
-         <label for="callsign" class="lleftlab">Ident:</label>
-         <label id="callsign"><b> { s.getIdent() } </b></label>
-         { simpleLabel("time",  "lleftlab", "Tid:", TXT( df.format(item.time))) }
-         { simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )  }
-         { simpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course))  }
-         <div id="traffic">
-         { simpleLabel("via",   "lleftlab", "APRS via:", TXT( cleanPath(item.pathinfo)))  }
-         </div>
-         </xml:group>
-       printHtml(res, htmlBody(req, null, result)) 
+       
+       val result : NodeSeq = 
+          if (item == null)
+            <xml:group>
+            TXT("Fant ikke info: "+ident)
+            </xml:group>
+          else
+            <xml:group>
+            <label for="callsign" class="lleftlab">Ident:</label>
+            <label id="callsign"><b> { ident } </b></label>
+            { simpleLabel("time",  "lleftlab", "Tid:", TXT( df.format(item.time))) }
+            { simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )  }
+            { simpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course))  }
+            <div id="traffic">
+            { if (item.pathinfo != null) 
+                 simpleLabel("via",   "lleftlab", "APRS via:", TXT( cleanPath(item.pathinfo)))
+              else null }
+            </div>
+            </xml:group>
+      
+      printHtml(res, htmlBody(req, null, result)) 
     }
   
   }
