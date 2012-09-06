@@ -135,6 +135,21 @@ public class Trail implements Iterable<Trail.Item>, Serializable
 
     public Item getPoint(int index)
        { return _items.get(index-1); }
+       
+       
+       
+    public Item getPointAt(Date t)
+    {
+        ListIterator<Item> it = _items.listIterator();
+        Item x; 
+        while (it.hasNext()) {
+            x = it.next();
+            if (t.getTime()-1000 < x.time.getTime() && t.getTime()+1000 > x.time.getTime())
+              return x; 
+        }
+        return null;
+    }
+    
     
 
     public Iterator<Item> iterator()
