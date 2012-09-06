@@ -22,7 +22,7 @@ import java.util.concurrent.*;
  * In-memory implementation of StationDB.
  * Data is saved to a file. Periodically and when program ends.
  */
-public class StationDBImp implements StationDB, Runnable
+public class StationDBImp implements StationDB, StationDB.Hist, Runnable
 {
     private SortedMap<String, AprsPoint> _map = new ConcurrentSkipListMap();
     private String     _file;
@@ -55,10 +55,40 @@ public class StationDBImp implements StationDB, Runnable
     private static final Runtime s_runtime = Runtime.getRuntime ();
     public static long usedMemory ()
         { return s_runtime.totalMemory () - s_runtime.freeMemory (); }
+
     
     public void setHistDB(StationDB.Hist d)
         { _histData = d; }
 
+        
+            
+    public AprsPoint getItem(String id, Date t)
+    { 
+       if (t==null)
+          return _map.get(id); 
+       else if (_histData !=null) 
+          return _histData.getItem(id, t); 
+       else 
+          return null;
+     }
+       
+       
+    public Trail.Item getTrailPoint(String src, java.util.Date t)
+    {
+        Station st = getStation(src, null);
+        if (st != null) {
+           Trail.Item x = st.getTrail().getPointAt(t);
+           if (x != null)
+              return x;
+        }
+        System.out.println("*** getTrailPunkt: QUERY DB");
+        if (_histData != null)
+           return _histData.getTrailPoint(src, t);
+        return null;
+    }
+   
+   
+   
     public int nItems() 
         { return _map.size(); }
         
@@ -178,19 +208,7 @@ public class StationDBImp implements StationDB, Runnable
            _hasChanged = true; 
     }
         
-        
-        
-    public AprsPoint getItem(String id, Date t)
-    { 
-       if (t==null)
-          return _map.get(id); 
-       else if (_histData !=null) 
-          return _histData.getItem(id, t); 
-       else 
-          return null;
-     }
-       
-              
+                
        
     public synchronized Station getStation(String id, Date t)
     { 
