@@ -37,10 +37,12 @@ public abstract class Channel extends Source implements Serializable
      /**
       * Abstract factory for Channel objects. 
       */
+      
+     /* FIXME: Consider writing the interface spec */
 
      public static class Manager {
-         private HashMap<String, String> _classes = new HashMap();
-         private HashMap<String, Channel> _instances = new HashMap();
+         private HashMap<String, String>  _classes = new HashMap();
+         private HashMap<String, Channel> _instances = new LinkedHashMap();
          
          
          public void addClass(String tname, String cls)
@@ -56,12 +58,19 @@ public abstract class Channel extends Source implements Serializable
                   return null; // Or throw exception??
                Class<Channel> cls = (Class<Channel>) Class.forName(cname);
                Constructor<Channel> constr = (Constructor<Channel>) cls.getConstructors()[0];
-               return constr.newInstance(api, id);
+               Channel  c = constr.newInstance(api, id);
+               _instances.put(id, c);
+               return c;
             }
             catch (Exception e) {
                return null; 
             }
          }
+         
+         
+         public Set<String> getKeys()
+           { return _instances.keySet(); }
+           
          
          public Channel get(String id)
            { return _instances.get(id); }
