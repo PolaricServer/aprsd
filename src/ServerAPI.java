@@ -12,11 +12,7 @@ import java.util.*;
        * Do we need StationDB? */
        public StationDB getDB();
        
-       public Set<String> getChannels(Channel.Type type);
-       
-       public Channel getChannel(String id);
-       
-       public void addChannel(Channel.Type type, String id, Channel ch);
+       public Channel.Manager getChanManager(); 
        
        public Igate getIgate();
        
