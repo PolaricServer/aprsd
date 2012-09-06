@@ -20,7 +20,7 @@ import java.util.Date;
 /**
  * Interface to database of stations, objects, etc.
  */
-public interface StationDB
+public interface StationDB 
 {
     public interface Hist
     {
@@ -30,11 +30,23 @@ public interface StationDB
          * @param t: time of capture, null if realtime
          */
         public AprsPoint getItem(String id, Date d);
+        public Trail.Item getTrailPoint(String src, java.util.Date t);
     }
     
     
 
-
+        /**
+         * Get item. 
+         * @param id: identifier (typically a callsign) of item.
+         * @param t: time of capture, null if realtime
+         */
+        public AprsPoint getItem(String id, Date d);
+        
+        public Trail.Item getTrailPoint(String src, java.util.Date t);
+        
+        
+        
+        
        /** 
         * Return the number of items. 
         */
@@ -58,13 +70,6 @@ public interface StationDB
         */
        public MessageProcessor getMsgProcessor();
     
-       
-        /**
-         * Get item. 
-         * @param id: identifier (typically a callsign) of item.
-         * @param t: time of capture, null if realtime
-         */
-        public AprsPoint getItem(String id, Date t);       
        
        
        /**
