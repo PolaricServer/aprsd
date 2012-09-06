@@ -35,7 +35,7 @@ public abstract class ServerBase
            new DateFormatSymbols(new Locale("no")));
    DateFormat tf = new SimpleDateFormat("HH:mm",
            new DateFormatSymbols(new Locale("no")));
-    DateFormat xf = new SimpleDateFormat("yyyyMMddHHmmss",
+   DateFormat xf = new SimpleDateFormat("yyyyMMddHHmmss",
            new DateFormatSymbols(new Locale("no")));       
    
    public static Calendar utcTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
