@@ -47,15 +47,9 @@ public class Main implements ServerAPI
    public void setAprsHandler(AprsHandler log) 
     { dblog = log; } 
        
-   public Set<String> getChannels(Channel.Type type)
-    { return null; /* TBD */ }
-   
-   public Channel getChannel(String id)
-    { return null; /* TBD */ }
-   
-   public void addChannel(Channel.Type type, String id, Channel ch)
-    { }
-    
+   public Channel.Manager getChanManager()
+    { return _chanManager; }
+  
    public Igate getIgate()
     { return igate; }
     
@@ -128,6 +122,18 @@ public class Main implements ServerAPI
     {
         try {
 
+                   
+           /* Start HTTP server */
+           int http_port = Integer.parseInt(_config.getProperty("httpserver.port", "8081"));
+           ws = new HttpServer(api, http_port, _config);
+           ws.addHandler(new Webserver(api, _config), null);
+           System.out.println( "*** HTTP server ready on port " + http_port);
+             
+           /* Plugins */
+           PluginManager.addList(_config.getProperty("plugins", ""));
+        
+        
+        
           /* Start parser and connect it to channel(s) if any */
            AprsParser p = new AprsParser(api, db.getMsgProcessor());
 
@@ -206,15 +212,7 @@ public class Main implements ServerAPI
            /* APRS objects */
            ownobjects = db.getOwnObjects(); 
            ownobjects.setChannels(ch[2], ch[1]); 
-           
-           /* Start HTTP server */
-           int http_port = Integer.parseInt(_config.getProperty("httpserver.port", "8081"));
-           ws = new HttpServer(api, http_port, _config);
-           ws.addHandler(new Webserver(api, _config), null);
-           System.out.println( "*** HTTP server ready on port " + http_port);
-             
-           /* Plugins */
-           PluginManager.addList(_config.getProperty("plugins", ""));
+
             
         }
         catch( Exception ioe )
