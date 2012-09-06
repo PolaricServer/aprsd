@@ -72,7 +72,7 @@ public class AprsParser implements Channel.Receiver
         if (station == null)
             station = _api.getDB().newStation(p.from); 
         station.setSource(p.source);
-        
+        Date rtime = new Date(); 
         if (!duplicate) try {    
         switch(p.type)
         {
@@ -113,7 +113,7 @@ public class AprsParser implements Channel.Receiver
         }catch (NumberFormatException e)
           { System.out.println("*** WARNING: Cannot parse number in input. Report string probably malformed"); }
         
-        _api.getAprsHandler().handlePacket(p.source, new Date(), p.from, p.to, p.via, p.report);
+        _api.getAprsHandler().handlePacket(p.source, rtime, p.from, p.to, p.via, p.report);
         parsePath(station, p.via, duplicate);   
     }
 
