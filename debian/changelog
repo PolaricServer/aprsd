@@ -1,4 +1,10 @@
-polaric-aprsd (1.0.9) UNRELEASED; urgency=low
+polaric-aprsd (1.0.9+) UNRELEASED; urgency=low
+
+  * Testing 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Mon, 27 Aug 2012 21:47:08 +0200
+
+polaric-aprsd (1.0.9) stable; urgency=low
 
   * Add KISS TNC support	 
   * Add support for GPS
