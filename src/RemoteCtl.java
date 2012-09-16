@@ -49,8 +49,9 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     * position. 
     */
    private Map<String, Date> _children = new HashMap<String, Date>();
-   private String _parent;
-   private Thread _thread;
+   private String  _parent;
+   private boolean _parentCon = false; 
+   private Thread  _thread;
    
    private MessageProcessor _msg;
    private StationDB _db;
@@ -90,9 +91,19 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    public void reportFailure(String id)
    {
       System.out.println("*** WARNING: Failed to deliver message to: "+id);
-      if (id.equals(_parent))
-         _parent = null;
+      if (id.equals(_parent)) {
+          _parentCon = false;
+          _log.log(" *** Connection to parent: "+id+ " failed");
+      }
       _children.remove(id);
+   }
+   
+   public void reportSuccess(String id)
+   {
+      if (!_parentCon && id.equals(_parent)) {
+          _log.log(" *** Connection to parent: "+id+ " established");
+          _parentCon = true;
+      }
    }
    
    
@@ -173,8 +184,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
          p = doConnect(sender, args);
          propagate = false;
       }   
-      /* Fail if not CON and connected */
-      else if ((_parent == null || !_parent.equals(sender.getIdent())) 
+      /* Fail if not CON and not connected */
+      else if ((!_parentCon || !sender.getIdent().equals(_parent)) 
             && !_children.containsKey(sender.getIdent())) 
           p = false;        
       else if (arg[0].equals("ALIAS"))
@@ -204,20 +215,19 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
 
    protected boolean doConnect(Station sender, String arg)
    {
-      System.out.println("*** CONNECT from "+sender.getIdent());
-     
       /* If not connected already, add sender to children list.
         */
-      if ((_parent == null || !_parent.equals(sender.getIdent())) 
-               && !_children.containsKey(sender.getIdent())) 
+      if ((!_parentCon || !sender.getIdent().equals(_parent)) 
+               && !_children.containsKey(sender.getIdent()))       
       {
-           _log.add("*** Playback command log");
+           _log.add(" *** Connection from child: "+sender.getIdent()+" established");
+           if (!_cmds.isEmpty())
+              _log.add(" *** Playback command log");
            playbackLog(sender.getIdent());
       }
       _children.put(sender.getIdent(), new Date());
       return true;
-   }
-   
+   }   
 
 
    protected boolean doSetSarMode(Station sender, String args)
@@ -284,10 +294,12 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;
+      else 
+         arg[1] = arg[1].trim();
          
       if (item == null)
           item = newItem(arg[0].trim());
-      item.setIcon(arg[1].trim());
+      item.setIcon(arg[1]);
       return true;
    } 
        
@@ -311,8 +323,9 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        { return _parent == null && _children.size() == 0; }    
    
    
+   
    public String toString() {
-      String res = (_parent==null ? "" : _parent);
+      String res = (_parent==null || !_parentCon ? "" : _parent);
       for (String x : getChildren())
           res += " "+x;  
       return res; 
@@ -336,7 +349,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             
             for (String x : getChildren()) 
                 if (_children.get(x).getTime() + 1800000 <= (new Date()).getTime()) {
-                   _log.add("*** "+x+" disconnected (timeout)");
+                   _log.add(" *** "+x+" disconnected (timeout)");
                    _children.remove(x);
                 }
             Thread.sleep(900000);
