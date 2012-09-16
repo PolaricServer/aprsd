@@ -128,6 +128,7 @@ public class KissTncChannel extends TncChannel
         {
            try { 
                Packet p = _receivePacket();
+               checkReport(p);
                receivePacket(p, false);
            }
            catch (Timeout e) {}
