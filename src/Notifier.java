@@ -44,11 +44,14 @@ public class Notifier
          long wstart = (new Date()).getTime();
          long elapsed = 0;
          boolean found = false;
+         boolean noAbort = false;
+                  
          synchronized (this) {
             /* Abort any other waiter having the same id  */
             if (_waiters.containsKey(id)) {
                 _waiters.put(id, 2);
                 notifyAll();
+                noAbort = true; 
             }
             else
                 _waiters.put(id, 0);
@@ -58,11 +61,14 @@ public class Notifier
                   synchronized(this) {
                      wait(found ? _mintime-elapsed : _timeout-elapsed);
                      Integer abort = _waiters.get(id);
-                     if (abort != null && abort > 0) {
-                         _waiters.put(id, 0);
+                     if (abort != null && abort > 0 && !noAbort) {
+                         if (abort == 1) 
+                            _waiters.remove(id);
+                         else
+                            _waiters.put(id, 0);
                          return (abort==1) ? true : false;        
                      }
-                                 
+                     noAbort = false; 
                      /* Has there been events inside the interest zone */
                      found = found || signalledPt == null || uleft == null || 
                                   signalledPt.isInside(uleft, lright); 
