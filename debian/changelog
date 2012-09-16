@@ -1,8 +1,11 @@
-polaric-aprsd (1.0.9+) UNRELEASED; urgency=low
+polaric-aprsd (1.0.10) stable; urgency=low
 
-  * Testing 
+  * Fix parsing of KISS TNC packets.
+  * Fix bug that caused loss of updating (in SAR mode)
+  * Improvements to remote control (mostly logging)
+  * Fix logging of third party reports.  
 
- -- Øyvind hanssen <ohanssen@acm.org>  Mon, 27 Aug 2012 21:47:08 +0200
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 16 Sep 2012 16:29:33 +0200
 
 polaric-aprsd (1.0.9) stable; urgency=low
 

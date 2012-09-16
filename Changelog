@@ -209,3 +209,15 @@
 * [Mobile] Power management: prevent device from going dark.
 
       (1) Needs additional setup of Web server. 
+      
+      
+1.0.10  
+------
+* How to display (and igate) third party reports? 
+* KISS TNC packets not properly parsed for local display. Fix. 
+* Updating sometimes stop (when activating SAR mode). Fix. 
+* Improve remote control logging... 
+* [C] SAR-mode icon. Use green colour to indicate when we have access.
+* [Mobile] Use SAR key to get access to SAR mode info (for use with aprs.no).
+
+

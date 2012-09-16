@@ -1,4 +1,0 @@
-#!/bin/bash
-export SUDO_ASKPASS=/usr/bin/ssh-askpass
-sleep 1
-sudo -A /etc/init.d/polaric-aprsd restart 

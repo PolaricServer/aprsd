@@ -13,25 +13,11 @@ Updates to 1.0.9, etc..
 * Link on signs. Open in new tab, or window, or containing frame?
 
 * [C] Elevation profile from kartverket WPS? 
-
-* How to display (and igate) third party reports? 
-     DONE
       
 * Alternative units for distance and speed (miles, knots)
 
 * [C] Keyboard shortcuts for changing font size, etc?
 
-* KISS TNC packets not properly parsed for local display. Fix. 
-     DONE.
-     
-* Updating sometimes stop (when activating SAR mode). Fix. 
-     DONE. 
-     
-* [C] SAR-mode icon. Use green colour to indicate when we have access. 
-     DONE.
-     
-* Improve remote control logging... 
-     DONE.
 
 
       
@@ -56,7 +42,5 @@ Support for mobile devices
 
 * GPS pos icon disappears in Android 4. Fix.
 
-* [C] Use SAR key to get access to SAR mode info.
-      DONE. 
 
 
