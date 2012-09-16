@@ -336,6 +336,8 @@ package no.polaric.aprsd.http
               val sarurl = Main.sarurl.create(url)
               <h1>Kort-URL for søk og redning</h1>
               <h2><a class="sarurl" href={sarurl}>{sarurl}</a></h2>
+              <h1>Nøkkel:</h1>
+              <h2 class="sarurl">{SarUrl.getKey(sarurl)}</h2>
               <p>Gyldig i 1 døgn fra nå</p>
           }
        }   
@@ -753,10 +755,10 @@ package no.polaric.aprsd.http
 
 
 
-  
     private def cleanPath(txt:String): String = 
-        txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]+(\\-[0-9]+)?\\*?),?|(qA.),?", "")
+        txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]*(\\-[0-9]+)?\\*?),?|(qA.),?", "")
            .replaceAll("\\*", "").replaceAll(",", ", ")
+           
            
            
       
