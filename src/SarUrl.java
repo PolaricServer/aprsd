@@ -48,6 +48,11 @@ public class SarUrl implements Runnable
         t.start(); 
     }
     
+    public static String getKey(String url)
+    {
+       String[] s = url.split("sar-");
+       return s[1];
+    }
     
     public String create(String target)
     {
