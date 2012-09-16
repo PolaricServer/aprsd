@@ -1,0 +1,10 @@
+ 
+/var/log/polaric/*.log {
+        weekly
+        missingok
+        rotate 52
+        postrotate
+                /etc/init.d/polaric-aprsd restart > /dev/null
+        endscript
+        compress
+}

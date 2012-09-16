@@ -1,0 +1,12 @@
+ 
+Template: polaric-aprsd/callsign 
+Type: string
+Default: NOCALL
+Description: What is your callsign?
+ When connecting to APRS-IS (or when sending out information), you need to identify yourself
+ with a unique identifier. This should normally be your amateur radio callsign (possibly 
+ with a ssid).
+ .
+ This is the minimum needed information to get the daemon up running. It will connect to
+ aprs.no (IS server) using this identifier and start receiving data. Please edit
+ /etc/polaric-aprsd/server.ini to suit your needs. 

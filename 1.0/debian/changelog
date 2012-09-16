@@ -1,0 +1,75 @@
+polaric-aprsd (1.0.9+) UNRELEASED; urgency=low
+
+  * Testing 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Mon, 27 Aug 2012 21:47:08 +0200
+
+polaric-aprsd (1.0.9) stable; urgency=low
+
+  * Add KISS TNC support	 
+  * Add support for GPS
+  * Updates to search function
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sat, 04 Aug 2012 22:06:18 +0200
+
+polaric-aprsd (1.0.8) stable; urgency=low
+
+  * Pos ambiguity for uncompressed reports 
+  * Show height and movement info (bugfix). 
+  * Altitude from mic-e packets was given in feet. Fix.  
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Thu, 07 Jun 2012 20:04:32 +0200
+
+polaric-aprsd (1.0.7) stable; urgency=low
+
+  * Some small fixes... 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sat, 05 May 2012 18:25:44 +0200
+
+polaric-aprsd (1.0.6) stable; urgency=low
+
+  * Several changes (see changelog): Logfiles, bug fixes 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Thu, 22 Mar 2012 21:52:54 +0100
+
+polaric-aprsd (1.0.5) stable; urgency=low
+
+  * Several changes (see changelog): Own position, object igating, ... 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 01 Jan 2012 17:56:44 +0100
+
+polaric-aprsd (1.0.4) stable; urgency=low
+
+  * Several changes (see changelog): Igate, TncChannel,...  
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 27 Nov 2011 13:55:33 +0100
+
+polaric-aprsd (1.0.3) stable; urgency=low
+
+  * Run with jsvc as non-root user + more (see other changelog file) 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 06 Nov 2011 18:01:01 +0100
+
+polaric-aprsd (1.0.2-1) stable; urgency=low
+
+  * Fix a problem with configuration 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 09 Oct 2011 20:14:22 +0200
+
+polaric-aprsd (1.0.2) stable; urgency=low
+
+  * Read config file 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 09 Oct 2011 01:00:20 +0200
+
+polaric-aprsd (0.99+1.0.2beta2) stable; urgency=low
+
+  * Documentation + issue with view filters 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Mon, 03 Oct 2011 23:19:13 +0200
+
+polaric-aprsd (0.99+1.0.2beta1) stable; urgency=low
+
+  * Initial Release.
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Tue, 25 Sep 2011 21:46:20 +0200

@@ -1,0 +1,26 @@
+#
+# Commands to be sent to the TNC at startup.
+# Note that MYCALL and UNPROTO are generated automatically by the software, 
+# so they are not necessary here. 
+#
+# This example works ok for a Tiny2 TNC
+#
+
+INTFACE TERMINAL
+ECHO OFF
+MCOM OFF
+MSTAMP OFF
+PASSALL OFF
+MRPT ON
+XMITOK ON
+FILTER ON
+CD SOFTWARE
+NEWMODE OFF
+BEACON EVERY 0
+UNPROTO APRS VIA WIDE1-1
+HEADERLN OFF
+DIGI OFF
+HID OFF
+PACLEN 0
+SCREENL 0
+MONITOR ON
