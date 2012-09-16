@@ -1,5 +1,5 @@
  
-Updates to 1.0.8, etc..
+Updates to 1.0.9, etc..
 -----------------------
 
 * [C] Sometimes last update in trail is missing. Fix?
@@ -14,7 +14,25 @@ Updates to 1.0.8, etc..
 
 * [C] Elevation profile from kartverket WPS? 
 
+* How to display (and igate) third party reports? 
+     DONE
       
+* Alternative units for distance and speed (miles, knots)
+
+* [C] Keyboard shortcuts for changing font size, etc?
+
+* KISS TNC packets not properly parsed for local display. Fix. 
+     DONE.
+     
+* Updating sometimes stop (when activating SAR mode). Fix. 
+     DONE. 
+     
+* [C] SAR-mode icon. Use green colour to indicate when we have access. 
+     DONE.
+     
+* Improve remote control logging... 
+     DONE.
+
 
       
 Packaging related
@@ -30,10 +48,15 @@ Support for mobile devices
 
 * Improve offline caching of map fragments. 
 
-* Login and update operations. SAR code. 
+* Login and update operations.
 
 * Screen blink, etc, on Android 4. Fix?
 
+* Webcam popup does not disappear in Android 4. Fix?
 
+* GPS pos icon disappears in Android 4. Fix.
+
+* [C] Use SAR key to get access to SAR mode info.
+      DONE. 
 
 
