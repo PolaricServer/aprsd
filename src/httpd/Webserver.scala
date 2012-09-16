@@ -131,7 +131,8 @@ package no.polaric.aprsd.http
                 for ( x:String <- _api.getChanManager().getKeys()) yield
                  {  val ch = api.getChanManager().get(x); 
                     i += 1;
-                    simpleLabel("chan_"+ch.getIdent(), "leftlab", "Kanal "+i+" ("+ch.getShortDescr()+"):", TXT(ch.getIdent())) } 
+                    simpleLabel("chan_"+ch.getIdent(), 
+                     "leftlab", "Kanal '"+ch.getIdent()+"' ("+ch.getShortDescr()+"):", TXT(ch.toString())) } 
               }
 
                    
