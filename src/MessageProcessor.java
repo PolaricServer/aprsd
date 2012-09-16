@@ -35,10 +35,11 @@ public class MessageProcessor implements Runnable
    }
 
    /**
-    * Interface for reporting failure in delivering messages.
+    * Interface for reporting success or failure in delivering messages.
     */
    public interface Notification {
       public void reportFailure(String id);
+      public void reportSuccess(String id);
    }
 
    /**
@@ -129,10 +130,14 @@ public class MessageProcessor implements Runnable
       if (_myCall.equals(recipient) && text.matches("(ack|rej).+")) {
          msgid = text.substring(3, text.length());
          
-         /* notify recipient about negative result? */
+         /* notify recipient about result? */
          OutMessage m = _outgoing.get(msgid);
-         if (text.matches("(rej).+") && m != null && m.not != null)
-             m.not.reportFailure(m.recipient);
+         if (m != null && m.not != null) {
+            if (text.matches("(rej).+"))
+               m.not.reportFailure(m.recipient);
+            else
+               m.not.reportSuccess(m.recipient);
+         }
          _outgoing.remove(msgid);   
          return;
       } 
