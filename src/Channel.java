@@ -56,9 +56,11 @@ public abstract class Channel
     public static class Packet implements Cloneable {
     
         /* If packet is gated or routed elsewhere, the original via
-         * can be saved in via_orig 
+         * can be saved in via_orig. If it is a thirdparty packet, more
+         * info about source packet is in from_orig and to_orig.
          */
-        public String from, to, msgto, via, via_orig, report; 
+        public String from, to, msgto, via, report; 
+        public String from_orig, to_orig, via_orig; 
         public char type; 
         public boolean thirdparty = false; 
         Channel source;
@@ -68,8 +70,14 @@ public abstract class Channel
             }
         public String toString()
             {  
-              return from+">"+to +
-                ((via != null && via.length()>0) ? ","+via : "") + ":" + report;
+              String msg = from+">"+to +
+                   ((via != null && via.length()>0) ? ","+via : "") + ":" + report;
+                   
+              if (thirdparty)
+                 return from_orig+">"+to_orig +
+                   ((via_orig != null && via_orig.length()>0) ? ","+via_orig : "") + ":}" + msg;
+              else     
+                 return msg; 
             }
     }
     
@@ -206,38 +214,23 @@ public abstract class Channel
      */
     protected Packet string2packet(String packet)
     {
+        packet = packet.replace('\uffff', ' ');
         if (packet == null || packet.length() < 10)
            return null;
         Matcher m = _ppat.matcher(packet);
         if (m.matches())
         {
             Packet p = new Packet();
-            p.from = m.group(1).trim().toUpperCase();
-            p.to   = m.group(2).trim().toUpperCase();
+            p.from_orig = p.from = m.group(1).trim().toUpperCase();
+            p.to_orig = p.to = m.group(2).trim().toUpperCase();
+            
             p.via  = m.group(3);
             p.report  = m.group(m.groupCount());
-            if (p.report.length() == 0)
-               return null;
-            p.type = p.report.charAt(0);
             
-            if (p.type == '}') {
-             /* Special treatment for third-party type. 
-              * Strip off type character and apply this function recursively
-              * on the wrapped message. 
-              */
-               p = string2packet(p.report.substring(1, p.report.length()));
-               if (p != null) 
-                   p.thirdparty = true; 
-               else
-                   return null;
-               
-            }
-            else if (p.type == ':' || p.type == ';') 
-              /* Special treatment for message type or object
-               * Extract recipient/object id
-               */
-                p.msgto = p.report.substring(1,10).trim();
-           
+            /* Do some preliminary parsing of report */
+            p = checkReport(p); 
+            if (p==null)
+               return null; 
                 
             /* Remove first comma in path */
             if (p.via != null) 
@@ -249,7 +242,36 @@ public abstract class Channel
         return null;
     }
 
-
+    
+    
+    protected Packet checkReport(Packet p) 
+    {   
+         p.report = p.report.replace('\uffff', ' ');
+         if (p.report.length() <= 1)
+            return null;
+         p.type = p.report.charAt(0); 
+         
+         if (p.type == '}') {
+            /* Special treatment for third-party type. 
+             * Strip off type character and apply this function recursively
+             * on the wrapped message. 
+             */
+             p = string2packet(p.report.substring(1, p.report.length()));
+             if (p != null) 
+                p.thirdparty = true; 
+             else
+                return null;
+               
+          }
+          else if (p.type == ':' || p.type == ';') 
+             /* Special treatment for message type or object
+              * Extract recipient/object id
+              */
+             p.msgto = p.report.substring(1,10).trim();
+         return p;
+    }
+    
+    
 
     /**
      * Register a station as heard (or not) based on its packet.
