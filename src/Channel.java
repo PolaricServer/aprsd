@@ -248,50 +248,68 @@ public abstract class Channel extends Source implements Serializable
     
     
     
+    
+     
     /**
      * Convert text string to packet structure. 
      */
-    private Packet string2packet(String packet)
-    {      
+    protected Packet string2packet(String packet)
+    {
         packet = packet.replace('\uffff', ' ');
+        if (packet == null || packet.length() < 10)
+           return null;
         Matcher m = _ppat.matcher(packet);
         if (m.matches())
         {
             Packet p = new Packet();
             p.from_orig = p.from = m.group(1).trim().toUpperCase();
             p.to_orig = p.to = m.group(2).trim().toUpperCase();
+            
             p.via  = m.group(3);
             p.report  = m.group(m.groupCount());
-            if (p.report.length() == 0)
-               return null;
-            p.type = p.report.charAt(0);
             
-            if (p.type == '}') {
-             /* Special treatment for third-party type. 
-              * Strip off type character and apply this function recursively
-              * on the wrapped message. 
-              */
-               p = string2packet(p.report.substring(1));
-               if (p != null) 
-                  p.thirdparty = true;
-               else
-                  return null;
-            }
-            else if (p.type == ':' || p.type == ';') 
-              /* Special treatment for message type.
-               * Extract recipient id
-               */
-                p.msgto = p.report.substring(1,9).trim();
-
+            /* Do some preliminary parsing of report */
+            p = checkReport(p); 
+            if (p==null)
+               return null; 
+                
             /* Remove first comma in path */
             if (p.via != null) 
                   p.via = p.via.trim();
             while (p.via != null && p.via.length() > 0 && p.via.charAt(0) == ',')
                   p.via = p.via.substring(1);
-
             return p;
         }
         return null;
+    }
+
+    
+    
+    protected Packet checkReport(Packet p) 
+    {   
+         p.report = p.report.replace('\uffff', ' ');
+         if (p.report.length() <= 1)
+            return null;
+         p.type = p.report.charAt(0); 
+         
+         if (p.type == '}') {
+            /* Special treatment for third-party type. 
+             * Strip off type character and apply this function recursively
+             * on the wrapped message. 
+             */
+             p = string2packet(p.report.substring(1, p.report.length()));
+             if (p != null) 
+                p.thirdparty = true; 
+             else
+                return null;
+               
+          }
+          else if (p.type == ':' || p.type == ';') 
+             /* Special treatment for message type or object
+              * Extract recipient/object id
+              */
+             p.msgto = p.report.substring(1,10).trim();
+         return p;
     }
     
     
