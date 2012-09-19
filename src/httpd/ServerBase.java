@@ -228,8 +228,6 @@ public abstract class ServerBase
    protected void printTrailXml(PrintWriter out, String[] tcolor, 
           Reference firstpos, Iterable<Trail.Item> h, UTMRef uleft, UTMRef lright)
    {
-       //  out.println("   <linestring stroke=\"2\" opacity=\"1.0\" color=\""+ tcolor[0] +"\" color2=\""+ tcolor[1] +"\">");
-       
        boolean first = true;
        int state = 1, n = 0;
        UTMRef itx = toUTM(firstpos);  
@@ -237,9 +235,9 @@ public abstract class ServerBase
        
        for (Trail.Item it : h) 
        {       
-          if (n==0)
+          if (n==0) 
               out.println("   <linestring stroke=\"2\" opacity=\"1.0\" color=\""+ tcolor[0] +"\" color2=\""+ tcolor[1] +"\">");     
-       
+  
           if (itx != null) {       
               if (!first) 
                   out.print(", "); 
@@ -249,8 +247,6 @@ public abstract class ServerBase
                           " " + t);           
           }
             
-          itx = toUTM(it.getPosition());
-          t = xf.format(it.time);
           if (it.isInside(uleft, lright, 0.7, 0.7))
              state = 2;
           else
@@ -262,6 +258,10 @@ public abstract class ServerBase
           if (n++ > 100) {
               n = 0;
               out.println("   </linestring>");
+          }
+          else {
+              itx = toUTM(it.getPosition());
+              t = xf.format(it.time);
           }
        
        }
