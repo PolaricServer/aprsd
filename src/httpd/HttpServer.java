@@ -19,12 +19,13 @@ import com.mindprod.base64.Base64;
 import java.util.concurrent.locks.*; 
 
 
-public class HttpServer implements Container
+public class HttpServer implements Container, ServerAPI.ServerStats
 {
-   
+  
    protected  ServerAPI  _api;
    protected  String     _serverurl;
    protected  boolean    _infraonly;
+   protected int _requests = 0, _reqNo = 0;
    
    private static class _Handler {
      public Object obj; 
@@ -35,8 +36,8 @@ public class HttpServer implements Container
    private    Map<String, _Handler> _handlers = new HashMap<String, _Handler>();        
    
    public static final String _encoding = "UTF-8";        
-   
-   
+      
+      
    
    
    public HttpServer(ServerAPI api, int port, Properties config) throws IOException
@@ -51,7 +52,11 @@ public class HttpServer implements Container
       connection.connect(address);
    }
    
-  
+   
+   public int getClients() {return _requests; }
+   public int getReq() { return _reqNo; }
+   
+   
    
    /**
     * Adds a HTTP handler. Go through methods. All public methods that starts with 'handle_' are 
@@ -79,9 +84,7 @@ public class HttpServer implements Container
          }
    }
    
-   
-   
-   protected int _requests = 0, _reqNo = 0;
+
 
    /** 
     * Generic HTTP serve method. Dispatches to other methods based on uri
@@ -97,7 +100,7 @@ public class HttpServer implements Container
        try {
          String uri = req.getTarget().replaceAll("\\?.*", ""); 
          long time = System.currentTimeMillis();
-         resp.set("Server", "Polaric Server 1.1");
+         resp.set("Server", "Polaric APRSD 1.1");
          resp.setDate("Date", time);
          resp.setDate("Last-Modified", time); 
          resp.set("Content-Type", "text/html; charset=utf-8");
