@@ -1,23 +1,50 @@
---------------------------
-Preparations for V.2.0 M.0
-Version 1.1, etc. 
---------------------------
+
+READY FOR APRS.NO AND V.1.1
+---------------------------
+
+* SAR mode indication
+     DONE.
+
+* Config of  DEFAULT inet and RF channel
+     DONE.
+     
+* Fix status display
+     DONE.
+
+* 'Undefined' in menu lists. Fix.
 
 
-* Messaging
+* Test 
+    - Remote control: Alias, icon, SAR mode, playback
+    - Own objects: Add, delete
+    - TNC
+    - Igating
+    - SAR URL and SAR key
+    - Map reference search
+    - Iframe mode and API
+    - Mobile mode
+    - Will server work with mobile app 1.0? 
+    - KaMap rendering
+    - IE? 
+   
+    
+    
+    
 
-
+    
 Channels/Sources
 ----------------
 
 * Proper naming of channels. 
-     STARTED
+     DONE.
 
 * All geo-points should have getSource()?
+     DONE.
 
 * Filters based on getSource. Experiment.  
 
 * More generic way to add and configure extra channels in config.
+     DONE.
      
 * Access control and visibility to clients
      
@@ -30,27 +57,15 @@ Channels/Sources
     - Router specification? Router framework?
     - Allow translation between protocols? Pluggable modules. 
 
-* KISS TNC support
-     STARTED. NEEDS TESTING.
+* Soundmodem plugin
+     STARTED.
 
 * Receive positions from clients (mobile app). This is both a source and a web-service?
   Separate plugin? 
   
 * [C] Elevation profile from kartverket WPS? 
 
-* [C] Info for point (elevation, etc) from kartverket WPS
-      DONE.
    
-
-Mobile servers
---------------
-
-* Support GPS (NMEA stream)
-
-* Tracker module (builtin or special plugin??)
-
-* Configuration parameter to activate mobility support. Indicate in XML (meta tag). 
-     
 
  
 Web Service
@@ -64,7 +79,9 @@ API, Extensibility
 ------------------
 
 * [C] Javascript external API at client side.
+
 * [C] Javascript plugin arch/API at client side (may need index file to be php).
+      DONE (simple) 
 
 * Framework for web-interface extensions in Scala. 
 
@@ -73,37 +90,30 @@ API, Extensibility
 Database plugin
 ---------------
 
-* Database setup. Collect simple update events in a database. 
-       DONE.
-       
-* Can this be a plugin module? Database stuff should be completely optional in 1.1, 1.2
-  etc.. (maybe core database stuff will be part of core P.S. in later releases).
-       DONE.
-       
-* Move to PostgreSQL 9.1 and PostGIS 2.0
-
-* Some experimentation in external programs/plugins? 
-        
-* Experimental search functionality/trails - but as external module? 
-       DONE.
+* Move to PostgreSQL 9.1
+       DONE.  
 
 * [C] Fix/improve GUI for trail search 
-
+       DONE.
+       
 * [C] API functions for trail search. Test with iframe. 
 
 * Implement mission support - Server side
        STARTED
 
-* [C] Implement experimental mission GUI (or maybe just an API) and start testing
 
 
 
 Other. 
 -----
 
+* Messaging
+
+* Web config plugin
+
 * Allow a dynamic number of data channels to be configured. 
   Not just two. 
-      STARTED (See above)
+      DONE. (See above)
 
 * Allow objects with certain attributes (like source, callsign) to 
   be visible only for logged in users. Note: Should this be part of a filter framework?
@@ -121,11 +131,7 @@ Other.
 
 * More configurable view profiles?  Filter framework? Scripting?
 
-* More flexible logging?
-    STARTED (also in 1.0)
-
 * Traffic load statistics (per station). 
 
-* Search - and - change alias/icon
 
  
