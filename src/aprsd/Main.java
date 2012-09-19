@@ -17,7 +17,6 @@ public class Main implements ServerAPI
    
    private static StationDB db = null;
    public  static InetChannel ch1 = null;
-   public  static InetChannel chx = null;
    public  static TncChannel  ch2 = null;
    public static  Igate igate  = null;
    public static  OwnObjects ownobjects; 
@@ -64,6 +63,9 @@ public class Main implements ServerAPI
    
    public void addHttpHandler(Object obj, String prefix)
     { ws.addHandler(obj, prefix); }
+    
+   public ServerAPI.ServerStats getHttps()
+    { return ws; } 
     
    public Properties getConfig()
     { return _config; }
@@ -155,6 +157,7 @@ public class Main implements ServerAPI
              channelns = c; 
            
            int i = 0;
+           
            Channel[] ch = new Channel[channelns.length];
            for (String chan: channelns) {
                 if (_config.getProperty("channel."+chan+".on", "true").trim().matches("true|yes"))  {
@@ -174,29 +177,34 @@ public class Main implements ServerAPI
                System.out.println("*** Activate Remote Control");
                rctl = new RemoteCtl(_config, db.getMsgProcessor(), api);
            }
- 
-           
-           /* Message processing */
-           db.getMsgProcessor().setChannels(ch[2], ch[1]);  
+  
+  
+           /* 
+            * Default channels
+            */
+           String ch_inet_name = _config.getProperty("channel.default.inet", "aprsis").trim(); 
+           String ch_rf_name = _config.getProperty("channel.default.rf", "tnc").trim();
+           Channel ch1 = (ch_inet_name.length() > 0 ? _chanManager.get(ch_inet_name) : null);
+           Channel ch2 = (ch_rf_name.length() > 0  ? _chanManager.get(ch_rf_name) : null);          
 
            /* Igate.
             * FIXME:  Should create igate object also if not on to allow it to be 
             * activated by a remote command. Note that if inetchannel or tncchannel does not exist, 
             * igate will not activate. Should those channels always be created????
             */     
-           String[] ichans = _config.getProperty("igate.channels", "aprsis,tnc").trim().split(",(\\s*)");
-           Channel ch1 = (ichans.length > 0 ? _chanManager.get(ichans[0]) : null);
-           Channel ch2 = (ichans.length > 1  ? _chanManager.get(ichans[1]) : null);       
-           
            if (_config.getProperty("igate.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate IGATE");
                igate = new Igate(api);
                igate.setChannels(ch2, ch1);
                igate.activate(this);
            }
+           
+          /* FIXME: There should be a way to set default inet and RF channels (in ChannelManager?)
+           * For now, we use the channels given in igate.channels.
+           */
           
           /* Message processing */
-           db.getMsgProcessor().setChannels(ch[2], ch[1]);  
+           db.getMsgProcessor().setChannels(ch2, ch1);  
           
           /* Own position */
           if (_config.getProperty("ownposition.gps.on", "false").trim().matches("true|yes")) {
@@ -206,12 +214,12 @@ public class Main implements ServerAPI
            else
                ownpos = new OwnPosition(api);
 
-           ownpos.setChannels(ch[2], ch[1]);
+           ownpos.setChannels(ch2, ch1);
            db.addStation(ownpos); 
            
            /* APRS objects */
            ownobjects = db.getOwnObjects(); 
-           ownobjects.setChannels(ch[2], ch[1]); 
+           ownobjects.setChannels(ch2, ch1); 
 
             
         }
@@ -232,7 +240,6 @@ public class Main implements ServerAPI
          if (db  != null) db.save(); 
          if (ch1 != null) ch1.close();
          if (ch2 != null) ch2.close();
-         if (chx != null) chx.close();
     }
     
     
