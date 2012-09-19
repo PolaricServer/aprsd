@@ -8,6 +8,11 @@ import java.util.*;
     */
    public interface ServerAPI 
    {
+      public interface ServerStats {
+         public int getClients();
+         public int getReq();
+      }
+   
       /* Now, what methods do we need here? Other interfaces.
        * Do we need StationDB? */
        public StationDB getDB();
@@ -17,6 +22,8 @@ import java.util.*;
        public Igate getIgate();
        
        public MessageProcessor getMsgProcessor(); 
+       
+       public ServerStats getHttps();
        
        public void addHttpHandler(Object obj, String prefix);
        
