@@ -91,11 +91,7 @@ package no.polaric.aprsd.http
        val out = getWriter(res);
        val cmd = req.getParameter("cmd")
        val head = <meta http-equiv="refresh" content="60" />
-       
-       /*  FIXME: Dummy values - should access webserver */
-       val _requests = 0;
-       val _sessions = 0;
-       val _reqNo = 0;
+
 
        def action(req : Request): NodeSeq =
           if (!authorizedForAdmin(req))
@@ -120,9 +116,8 @@ package no.polaric.aprsd.http
               { simpleLabel("items", "leftlab", "Antall APRS enheter:", TXT(""+_api.getDB().nItems())) }
               { simpleLabel("items", "leftlab", "Antall forbindelser:", TXT(""+_api.getDB().getRoutes().nItems())) }
               { simpleLabel("items", "leftlab", "Egne objekter:", TXT(""+_api.getDB().getOwnObjects().nItems())) }   
-              { simpleLabel("items", "leftlab", "Antall HTTP klienter nå:", TXT(""+(_requests-1))) }  
-              { simpleLabel("items", "leftlab", "Antall besøk (sesjoner):", TXT(""+_sessions)) }
-              { simpleLabel("items", "leftlab", "Antall HTTP forespørsler:", TXT(""+_reqNo)) }    
+              { simpleLabel("items", "leftlab", "Antall HTTP klienter nå:", TXT(""+(_api.getHttps().getClients()-1))) }  
+              { simpleLabel("items", "leftlab", "Antall HTTP forespørsler:", TXT(""+(_api.getHttps().getReq()))) }    
               { simpleLabel("freemem", "leftlab", "Brukt minne:", 
                   TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
               <br/>
@@ -261,7 +256,7 @@ package no.polaric.aprsd.http
     * Delete APRS object.
     */          
 
-   def handle_deleteobj(req : Request, res: Response) =
+   def handle_deleteobject(req : Request, res: Response) =
    {
        val id = req.getParameter("objid")
        val prefix = <h2>Slett objekt</h2>
