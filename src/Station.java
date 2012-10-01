@@ -48,6 +48,7 @@ public static class Status implements Serializable
     /*
      * Attributes of a station record (APRS data)
      */
+    private String      _pathinfo;  
     private String      _callsign; 
     private Status      _status;
     private int         _course;
@@ -79,7 +80,11 @@ public static class Status implements Serializable
     protected void setId(String id)
        { _callsign = id; }
        
-
+       
+    public String getPathInfo()
+       { return _pathinfo; }
+       
+       
     public Set<String> getTrafficFrom()
        {  return _db.getRoutes().getToEdges(getIdent()); }
        
@@ -262,7 +267,7 @@ public static class Status implements Serializable
             * save the previous position.
             */
            if (distance(newpos) > History.mindist && 
-               _history.add(_updated, _position, _speed, _course, pathinfo)) 
+               _history.add(_updated, _position, _speed, _course, _pathinfo)) 
            {
                if (_history.length() == 1 && _autotrail)
                   _trailcolor = _colTab.nextColour();
@@ -276,7 +281,8 @@ public static class Status implements Serializable
         _speed = sp;
         _course = crs;
         _altitude = alt;
-       
+        _pathinfo = pathinfo;
+        
         setDescr(descr); 
         
         if (_expired) {
