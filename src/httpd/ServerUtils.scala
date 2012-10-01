@@ -34,6 +34,11 @@ package no.polaric.aprsd.http
            <label for={id} class={cls}>{lbl}</label>
            <label id={id}> {content}</label>
           ;
+       private def simpleLabel(id:String, cls:String, lbl:String, title:String, content: NodeSeq): NodeSeq =  
+           <label for={id} title={title} class={cls}>{lbl}</label>
+           <label id={id}> {content}</label>
+          ;
+          
           
        protected def TXT(t:String): NodeSeq = <xml:group>{t}</xml:group>
    
