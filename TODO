@@ -8,10 +8,15 @@ READY FOR APRS.NO AND V.1.1
 * Config of  DEFAULT inet and RF channel
      DONE.
      
-* Fix status display
+* Fix status display (server stats)
      DONE.
 
 * 'Undefined' in menu lists. Fix.
+     DONE
+     
+* Support clean "upgrading" from 1.0 series in installation scripts
+
+* Plugins in status display
 
 
 * Test 
@@ -92,6 +97,13 @@ Database plugin
 
 * Move to PostgreSQL 9.1
        DONE.  
+
+* Add possibility to use 'current' or 'now' or open end time for trail search, or 
+  to quickly update search with current end-time. 
+
+* [C] Save trail searches in case of browser restart. 
+
+* Consider saving searches in database for later reference -> This is equivalent missions!!
 
 * [C] Fix/improve GUI for trail search 
        DONE.
