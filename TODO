@@ -1,8 +1,6 @@
  
-Updates to 1.0.9, etc..
+Updates to 1.0.10, etc..
 -----------------------
-
-* [C] Sometimes last update in trail is missing. Fix?
 
 * Simple messaging
      
@@ -18,9 +16,13 @@ Updates to 1.0.9, etc..
 
 * [C] Keyboard shortcuts for changing font size, etc?
 
+* [C] Popup doesnt go away if opened in lower right corner. Fix. 
+      DONE.
+
+* Check sudo script
 
 
-      
+
 Packaging related
 -----------------
 
