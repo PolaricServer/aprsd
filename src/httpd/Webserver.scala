@@ -43,6 +43,11 @@ package no.polaric.aprsd.http
            <label for={id} class={cls}>{lbl}</label>
            <label id={id}> {content}</label>
           ;
+   private def simpleLabel(id:String, cls:String, lbl:String, title:String, content: NodeSeq): NodeSeq =  
+           <label for={id} title={title} class={cls}>{lbl}</label>
+           <label id={id}> {content}</label>
+          ;
+
  
    private def TXT(t:String): NodeSeq = <xml:group>{t}</xml:group>
    
@@ -594,7 +599,10 @@ package no.polaric.aprsd.http
         val obj = if (x.isInstanceOf[AprsObject]) x.asInstanceOf[AprsObject] else null
         val edit  =  ( parms.getProperty("edit") != null )
         val simple =  ( parms.getProperty("simple") != null )
-        val prefix = null
+        val prefix = null       
+        val pathinfo = if (s != null && s.getPathInfo() != null && s.getPathInfo().length() > 1) 
+                           cleanPath(s.getPathInfo()) else null
+        
         if (obj != null)
             obj.update();
 
@@ -634,7 +642,7 @@ package no.polaric.aprsd.http
             { if (x.getDescr() != null && x.getDescr().length() > 0)
                  simpleLabel("descr", "leftlab", "Beskrivelse:", TXT(x.getDescr())) else null}
             { if (s != null && s.getStatus() != null)
-                 simpleLabel("status", "leftlab", "Status:",
+                 simpleLabel("status", "leftlab", "Status:", "Sist mottatte APRS statusmelding",
                       TXT ( s.getStatus().text + " [" + df.format(s.getStatus().time)+"]"))  else null}
       
             { simpleLabel("pos", "leftlab", "Posisjon (UTM):",
@@ -652,7 +660,10 @@ package no.polaric.aprsd.http
             { if (s != null && s.getSpeed() > 0)
                   simpleLabel("cspeed", "leftlab", "Bevegelse:", _directionIcon(s.getCourse())) else null}
 
-            { simpleLabel("hrd", "leftlab", "Sist rapportert:", TXT( df.format(x.getUpdated()))) }
+            { simpleLabel("hrd", "leftlab", "Sist rapportert:", "Tidspunkt for siste mottatte APRS rapport", TXT( df.format(x.getUpdated()))) }
+                              
+            { if (pathinfo != null) simpleLabel("via", "leftlab", "Via:", "Hvilken rute siste APRS rapport har tatt", TXT(pathinfo)) else null }
+            
             
             { var txt = "";
               if (s != null) {
@@ -666,11 +677,11 @@ package no.polaric.aprsd.http
             { if (simple)        
                <div id="traffic">
                   { if (s != null && s.isInfra() )
-                     {  <label for="hrds" class="leftlab">Trafikk fra:</label>
+                     {  <label for="hrds" title="Hvem denne node har mottatt trafikk fra siste døgn" class="leftlab">Trafikk fra:</label>
                         <label id="hrds"> { itemList(s.getTrafficFrom()) } </label> } else null }
                
                   { if (s != null && s.getTrafficTo != null && !s.getTrafficTo.isEmpty)
-                     {  <label for="hrd" class="leftlab">Trafikk til:</label>
+                     {  <label for="hrd" title="Hvem som har mottatt trafikk fra denne node siste døgn" class="leftlab">Trafikk til:</label>
                         <label id="hrd"> { itemList(s.getTrafficTo()) } </label> } else null }
                </div>
                else null                    
