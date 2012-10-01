@@ -61,7 +61,7 @@ public static class Status implements Serializable
     /* 
      * Other variables (presentation, storage, etc.)
      */
-
+    private String      _pathinfo; 
     private String[]    _trailcolor = new String[] {"dddddd", "ff0000"};
     private boolean     _autotrail = true;
     private boolean     _expired = false; 
@@ -81,6 +81,8 @@ public static class Status implements Serializable
     protected void setId(String id)
        { _callsign = id; }
        
+    public String getPathInfo()
+       { return _pathinfo; }
        
     public Set<String> getTrafficFrom()
        {  return _db.getRoutes().getToEdges(getIdent()); }
@@ -272,7 +274,7 @@ public static class Status implements Serializable
             * save the previous position.
             */
            if (distance(pd.pos) > Trail.mindist && 
-               _trail.add(_updated, _position, _speed, _course, pathinfo)) 
+               _trail.add(_updated, _position, _speed, _course, _pathinfo)) 
            {
               if (_trail.length() == 1 && _autotrail)
                   _trailcolor = _colTab.nextColour();
@@ -286,6 +288,7 @@ public static class Status implements Serializable
         _speed = pd.speed;
         _course = pd.course;
         _altitude = (int) pd.altitude;
+        _pathinfo = pathinfo; 
        
         setDescr(descr); 
         
