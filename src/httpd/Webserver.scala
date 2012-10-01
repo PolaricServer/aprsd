@@ -516,6 +516,10 @@ package no.polaric.aprsd.http
         val edit  =  ( req.getParameter("edit") != null )
         val simple =  ( req.getParameter("simple") != null )
         val prefix = null
+        val pathinfo = if (s != null && s.getPathInfo() != null && 
+                           s.getPathInfo().length() > 1) 
+                               cleanPath(s.getPathInfo()) else null
+                         
         if (obj != null)
             obj.update();
 
@@ -555,7 +559,7 @@ package no.polaric.aprsd.http
             { if (x.getDescr() != null && x.getDescr().length() > 0)
                  simpleLabel("descr", "leftlab", "Beskrivelse:", TXT(x.getDescr())) else null}
             { if (s != null && s.getStatus() != null)
-                 simpleLabel("status", "leftlab", "Status:",
+                 simpleLabel("status", "leftlab", "Status:", "Sist mottatte APRS statusmelding",
                       TXT ( s.getStatus().text + " [" + df.format(s.getStatus().time)+"]"))  else null}
       
             { simpleLabel("pos", "leftlab", "Posisjon (UTM):",
@@ -575,8 +579,12 @@ package no.polaric.aprsd.http
             { if (s != null && s.getSpeed() > 0)
                   simpleLabel("cspeed", "leftlab", "Bevegelse:", _directionIcon(s.getCourse())) else null }
 
-            { simpleLabel("hrd", "leftlab", "Sist rapportert:", TXT( df.format(x.getUpdated()))) }
-            
+            { simpleLabel("hrd", "leftlab", "Sist rapportert:", "Tidspunkt for siste mottatte APRS rapport",
+                  TXT( df.format(x.getUpdated()))) }
+                  
+            { if (pathinfo != null) simpleLabel("via", "leftlab", "Via:", "Hvilken rute siste APRS rapport har tatt", 
+                     TXT(pathinfo)) else null }
+                  
             { var txt = "";
               if (s != null) {
                  if (s.isIgate()) txt += "IGATE "; 
