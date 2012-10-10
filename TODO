@@ -1,5 +1,5 @@
  
-Updates to 1.0.10, etc..
+Updates to 1.0.11, etc..
 -----------------------
 
 * Simple messaging
@@ -39,8 +39,6 @@ Support for mobile devices
 * Login and update operations.
 
 * Screen blink, etc, on Android 4. Fix?
-
-* Webcam popup does not disappear in Android 4. Fix?
 
 * GPS pos icon disappears in Android 4. Fix.
 
