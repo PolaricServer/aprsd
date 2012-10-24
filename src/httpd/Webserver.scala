@@ -235,13 +235,16 @@ package no.polaric.aprsd.http
           if (on != null && "true".equals(on) ) {
                val filt = if ("".equals(filter)) "NONE" else filter;
                api.setSar(reason, getAuthUser(req), filter);
-               api.getRemoteCtl().sendRequestAll("SAR "+getAuthUser(req)+" "+filt+" "+reason, null);
+               if (api.getRemoteCtl() != null)
+                   api.getRemoteCtl().sendRequestAll("SAR "+getAuthUser(req)+" "+filt+" "+reason, null);
+               
                <h3>Aktivert</h3>
                <p>{reason}</p>
           }
           else {   
                api.clearSar();
-               api.getRemoteCtl().sendRequestAll("SAR OFF", null);
+               if (api.getRemoteCtl() != null)
+                  api.getRemoteCtl().sendRequestAll("SAR OFF", null);
                <h3>Avsluttet</h3>
           } 
        }
@@ -252,13 +255,36 @@ package no.polaric.aprsd.http
    
    
    
+   
+   def handle_sarurl(req : Request, res: Response) =
+   {
+       val url = req.getParameter("url")
+       
+       def action(req : Request): NodeSeq = 
+       {
+          if (!authorizedForUpdate(req) && api.getSarUrl() != null )  
+              <h3>SAR URL ikke tilgjengelig eller du er ikke autorisert</h3>
+          else {
+              val sarurl = api.getSarUrl().create(url)
+              <h1>Kort-URL for søk og redning</h1>
+              <h2><a class="sarurl" href={sarurl}>{sarurl}</a></h2>
+              <h1>Nøkkel:</h1>
+              <h2 class="sarurl">{SarUrl.getKey(sarurl)}</h2>
+              <p>Gyldig i 1 døgn fra nå</p>
+          }
+       }   
+       printHtml (res, htmlBody(req, null, action(req)));        
+   }
+   
+   
+   
    /**
     * Delete APRS object.
     */          
 
    def handle_deleteobject(req : Request, res: Response) =
    {
-       val id = req.getParameter("objid")
+       val id = req.getParameter("objid").replaceFirst("@.*", "")
        val prefix = <h2>Slett objekt</h2>
        
        def fields(req : Request): NodeSeq =
@@ -437,17 +463,8 @@ package no.polaric.aprsd.http
                }>
           
                <td>{x.getIdent()}</td>
-               <td> {
-                  if (!x.visible())
-                     <div>(foreldet)</div>
-                  else
-                     { if (moving) <img src="srv/dicons/new.gif" width="16" height="16"/>;
-                       if (x.getPosition() != null) showUTM(x.getPosition())
-                       else <div>(ikke registrert)</div> }
-               } </td>
-
-
-               <td> { if (moving && s.getSpeed() > 0)
+               <td> 
+               { if (moving && s.getSpeed() > 0)
                        _directionIcon(s.getCourse()) else 
                           if (s==null) TXT("obj") else null } </td>
                <td> { df.format(x.getUpdated()) } </td>
