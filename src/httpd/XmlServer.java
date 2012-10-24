@@ -80,8 +80,8 @@ public class XmlServer extends ServerBase
    public void handle_mapdata_sec(Request req, Response res) 
        throws IOException
    {
-      boolean showSarInfo = (getAuthUser(req) != null || _api.getSar() == null);
-      _handle_mapdata(req, res, showSarInfo);
+      /* FIXME: All that are logged in are allowed to see SAR info. Is this too liberal? */
+      _handle_mapdata(req, res, true);
    }
    
    
