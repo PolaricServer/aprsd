@@ -15,21 +15,31 @@ READY FOR APRS.NO AND V.1.1
      DONE
      
 * Support clean "upgrading" from 1.0 series in installation scripts
+     OK
+
+* Fix kamap log-file ownership and permissions! SECURITY! 
+     DONE.
+
+* Active infrastructure doesn't work? Fix.
+     DONE.
 
 * Plugins in status display
+     Postpone to later. 
 
+* Activate SAR URL generation
+     DONE.
 
 * Test 
-    - Remote control: Alias, icon, SAR mode, playback
-    - Own objects: Add, delete
+    - Remote control: Alias, icon, SAR mode, playback => OK
+    - Own objects: Add, delete => FIXED OK. 
     - TNC
     - Igating
-    - SAR URL and SAR key
-    - Map reference search
+    - SAR URL and SAR key => FIXED OK.
+    - Map reference search => OK
     - Iframe mode and API
-    - Mobile mode
-    - Will server work with mobile app 1.0? 
-    - KaMap rendering
+    - Mobile mode => OK
+    - Will server work with mobile app 1.0? => OK
+    - KaMap rendering => OK
     - IE? 
    
     
@@ -100,7 +110,8 @@ Database plugin
 
 * Add possibility to use 'current' or 'now' or open end time for trail search, or 
   to quickly update search with current end-time. 
-
+       DONE.
+       
 * [C] Save trail searches in case of browser restart. 
 
 * Consider saving searches in database for later reference -> This is equivalent missions!!
@@ -118,6 +129,8 @@ Database plugin
 
 Other. 
 -----
+
+* Autodiscovery of servers on local network
 
 * Messaging
 
