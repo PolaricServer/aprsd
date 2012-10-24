@@ -26,7 +26,7 @@ public class Main implements ServerAPI
    private static Properties _config = new Properties();
    private static HttpServer ws;
    private static Channel.Manager _chanManager = new Channel.Manager();
-   
+   private static SarUrl sarurl;
    
    /* Experimental !! 
     * Database interface must be known here. The interface is 
@@ -79,6 +79,9 @@ public class Main implements ServerAPI
    public String getToAddr()
     { return toaddr; }
  
+   public SarUrl getSarUrl()
+    { return sarurl; }
+    
    public SarMode getSar()
     { return sarmode; }
     
@@ -177,7 +180,11 @@ public class Main implements ServerAPI
                System.out.println("*** Activate Remote Control");
                rctl = new RemoteCtl(_config, db.getMsgProcessor(), api);
            }
-  
+            
+           if (_config.getProperty("sarurl.on", "false").trim().matches("true|yes")) {
+               System.out.println("*** Activate Sar URL");
+               sarurl = new SarUrl(_config);
+           }
   
            /* 
             * Default channels
