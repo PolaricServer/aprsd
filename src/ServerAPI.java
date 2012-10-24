@@ -43,6 +43,8 @@ import java.util.*;
        
        public String getToAddr();
        
+       public SarUrl getSarUrl();
+       
        public SarMode getSar();
     
        public void setSar(String src, String filt, String descr);
