@@ -407,24 +407,24 @@ package no.polaric.aprsd.http
     }
 
 
-   def _directionIcon(direction:Int): NodeSeq = 
+   def _directionIcon(direction:Int, fprefix: String): NodeSeq = 
         direction match {
           case x if !(22 until 337 contains x) =>
-              <div><img src= {_wfiledir+"/dicons/dN.png"}/> N</div>
+              <div><img src= {fprefix+"/dicons/dN.png"}/> N</div>
           case x if (22 until 67 contains x) =>
-              <div><img src= {_wfiledir+"/dicons/dNE.png"}/> NE</div>
+              <div><img src= {fprefix+"/dicons/dNE.png"}/> NE</div>
           case x if (67 until 112 contains x) =>
-              <div><img src= {_wfiledir+"/dicons/dE.png"}/> E</div>
+              <div><img src= {fprefix+"/dicons/dE.png"}/> E</div>
           case x if (112 until 157 contains x) =>
-              <div><img src= {_wfiledir+"/dicons/dSE.png"}/> SE</div>
+              <div><img src= {fprefix+"/dicons/dSE.png"}/> SE</div>
           case x if (157 until 202 contains x) =>
-              <div><img src= {_wfiledir+"/dicons/dS.png"}/> S</div>
+              <div><img src= {fprefix+"/dicons/dS.png"}/> S</div>
           case x if (202 until 247 contains x) =>
-              <div><img src= {_wfiledir+"/dicons/dSW.png"}/> SW</div>
+              <div><img src= {fprefix+"/dicons/dSW.png"}/> SW</div>
           case x if (247 until 292 contains x) =>
-              <div><img src= {_wfiledir+"/dicons/dW.png"}/> W</div>
+              <div><img src= {fprefix+"/dicons/dW.png"}/> W</div>
           case x if (292 until 337 contains x) =>
-              <div><img src= {_wfiledir+"/dicons/dNW.png"}/> NW</div>
+              <div><img src= {fprefix+"/dicons/dNW.png"}/> NW</div>
           case _ => null;
       }
 
@@ -465,7 +465,7 @@ package no.polaric.aprsd.http
                <td>{x.getIdent()}</td>
                <td> 
                { if (moving && s.getSpeed() > 0)
-                       _directionIcon(s.getCourse()) else 
+                       _directionIcon(s.getCourse(), fprefix(req)) else 
                           if (s==null) TXT("obj") else null } </td>
                <td> { df.format(x.getUpdated()) } </td>
                { if (!"true".equals(mob)) 
@@ -484,7 +484,7 @@ package no.polaric.aprsd.http
    /**
     * Selection of icon. List available icons. 
     */
-   def iconSelect(s: AprsPoint): NodeSeq =
+   def iconSelect(s: AprsPoint, fprefix: String): NodeSeq =
    {
        val webdir = System.getProperties().getProperty("webdir", ".")
        val icondir = new File(webdir+"/icons")
@@ -504,7 +504,7 @@ package no.polaric.aprsd.http
               <input type="radio" name="iconselect" value={f.getName()}
                   checked={if (!s.iconIsNull() && f.getName().equals(s.getIcon())) "checked"
                            else null:String}>
-              <img src={_wfiledir+"/icons/"+f.getName()} width="22" height="22" />&nbsp;
+              <img src={fprefix+"/icons/"+f.getName()} width="22" height="22" />&nbsp;
               </input>
          }
          else null
@@ -594,7 +594,7 @@ package no.polaric.aprsd.http
             { if (s != null && s.getAltitude() >= 0)
                   simpleLabel("altitude", "leftlab", "Høyde (o/h):", TXT(s.getAltitude() + " m ")) else null }
             { if (s != null && s.getSpeed() > 0)
-                  simpleLabel("cspeed", "leftlab", "Bevegelse:", _directionIcon(s.getCourse())) else null }
+                  simpleLabel("cspeed", "leftlab", "Bevegelse:", _directionIcon(s.getCourse(), fprefix(req))) else null }
 
             { simpleLabel("hrd", "leftlab", "Sist rapportert:", "Tidspunkt for siste mottatte APRS rapport",
                   TXT( df.format(x.getUpdated()))) }
@@ -643,7 +643,7 @@ package no.polaric.aprsd.http
                   <input id="nalias" name="nalias" width="10"
                          value={ if (x.getAlias()==null) "" else x.getAlias()} ></input>
                   <br/>
-                  { iconSelect(x) }
+                  { iconSelect(x, fprefix(req)) }
                   </div>
                else null        
             }
@@ -721,6 +721,8 @@ package no.polaric.aprsd.http
                    val h = s.getTrail()
                    var x = s.getHItem()
                    var i = 0;
+                   var fp = _wfiledir /* FIXME FIXME fprefix(req) */
+                   
                    for (it <- h.items()) yield {
                       i += 1
                       val arg = "'"+s.getIdent()+"', "+i
@@ -729,7 +731,7 @@ package no.polaric.aprsd.http
                           onclick = {"histList_click("+arg+");"} >
                       <td> { tf.format(x.time) } </td>
                       <td> { if (x.speed >= 0) x.speed.toString else "" } </td>
-                      <td> { if (x.speed > 0) _directionIcon(x.course) else ""} </td>
+                      <td> { if (x.speed > 0) _directionIcon(x.course, fp) else ""} </td>
                       <td>{
                          val dist = x.getPosition().toLatLng().distance(it.getPosition().toLatLng())
                          x = it;
@@ -769,7 +771,7 @@ package no.polaric.aprsd.http
             <label id="callsign"><b> { ident } </b></label>
             { simpleLabel("time",  "lleftlab", "Tid:", TXT( df.format(item.time))) }
             { simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )  }
-            { simpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course))  }
+            { simpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course, fprefix(req)))  }
             <div id="traffic">
             { if (item.pathinfo != null) 
                  simpleLabel("via",   "lleftlab", "APRS via:", TXT( cleanPath(item.pathinfo)))
