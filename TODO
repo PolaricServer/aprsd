@@ -1,66 +1,25 @@
 
-READY FOR APRS.NO AND V.1.1
+V.1.1 beta 3 or towards 1.1
 ---------------------------
 
-* SAR mode indication
-     DONE.
-
-* Config of  DEFAULT inet and RF channel
-     DONE.
-     
-* Fix status display (server stats)
-     DONE.
-
-* 'Undefined' in menu lists. Fix.
-     DONE
-     
-* Support clean "upgrading" from 1.0 series in installation scripts
-     OK
-
-* Fix kamap log-file ownership and permissions! SECURITY! 
-     DONE.
-
-* Active infrastructure doesn't work? Fix.
-     DONE.
-
 * Plugins in status display
-     Postpone to later. 
-
-* Activate SAR URL generation
-     DONE.
 
 * Test 
-    - Remote control: Alias, icon, SAR mode, playback => OK
-    - Own objects: Add, delete => FIXED OK. 
     - TNC
     - Igating
-    - SAR URL and SAR key => FIXED OK.
-    - Map reference search => OK
     - Iframe mode and API
-    - Mobile mode => OK
-    - Will server work with mobile app 1.0? => OK
-    - KaMap rendering => OK
     - IE? 
    
     
     
-    
+   
 
     
 Channels/Sources
 ----------------
 
-* Proper naming of channels. 
-     DONE.
-
-* All geo-points should have getSource()?
-     DONE.
-
 * Filters based on getSource. Experiment.  
 
-* More generic way to add and configure extra channels in config.
-     DONE.
-     
 * Access control and visibility to clients
      
 * Channel code in separate subpackage / subdirectory: 
@@ -105,19 +64,9 @@ API, Extensibility
 Database plugin
 ---------------
 
-* Move to PostgreSQL 9.1
-       DONE.  
-
-* Add possibility to use 'current' or 'now' or open end time for trail search, or 
-  to quickly update search with current end-time. 
-       DONE.
-       
 * [C] Save trail searches in case of browser restart. 
 
 * Consider saving searches in database for later reference -> This is equivalent missions!!
-
-* [C] Fix/improve GUI for trail search 
-       DONE.
        
 * [C] API functions for trail search. Test with iframe. 
 
@@ -135,10 +84,6 @@ Other.
 * Messaging
 
 * Web config plugin
-
-* Allow a dynamic number of data channels to be configured. 
-  Not just two. 
-      DONE. (See above)
 
 * Allow objects with certain attributes (like source, callsign) to 
   be visible only for logged in users. Note: Should this be part of a filter framework?
