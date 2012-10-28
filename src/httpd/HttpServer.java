@@ -99,6 +99,11 @@ public class HttpServer implements Container, ServerAPI.ServerStats
        
        try {
          String uri = req.getTarget().replaceAll("\\?.*", ""); 
+         
+         /* For compatibility. Temporary fix */
+         uri = uri.replaceFirst("sec-mapdata", "mapdata_sec");
+         uri = uri.replaceFirst("sec-station", "station_sec");
+         
          long time = System.currentTimeMillis();
          resp.set("Server", "Polaric APRSD 1.1");
          resp.setDate("Date", time);
