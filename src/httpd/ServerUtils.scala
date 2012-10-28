@@ -19,7 +19,7 @@ package no.polaric.aprsd.http
             <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
             { head }
-            <link href={_wfiledir+"/style.css"} rel="stylesheet" type="text/css" />
+            <link href={ fprefix(req)+"/style.css"} rel="stylesheet" type="text/css" />
             </head>
             <body>
             {content} 
@@ -30,10 +30,17 @@ package no.polaric.aprsd.http
            <xml:group> { content } </xml:group>
 
 
+           
+       protected def fprefix(req: Request) : String = 
+           if ((req.getParameter("ajax") == null)) "/"+_wfiledir else _wfiledir 
+
+      
+      
        protected def simpleLabel(id:String, cls:String, lbl:String, content: NodeSeq): NodeSeq =
            <label for={id} class={cls}>{lbl}</label>
            <label id={id}> {content}</label>
           ;
+          
        protected def simpleLabel(id:String, cls:String, lbl:String, title:String, content: NodeSeq): NodeSeq =  
            <label for={id} title={title} class={cls}>{lbl}</label>
            <label id={id}> {content}</label>
