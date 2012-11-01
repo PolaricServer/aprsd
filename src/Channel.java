@@ -157,6 +157,7 @@ public abstract class Channel extends Source implements Serializable
      */
     transient private List<Receiver> _rcv = new LinkedList<Receiver>(); 
     transient protected PrintWriter  _out = null; 
+    protected String _rfilter = null;
 
     public static DupCheck  _dupCheck = new DupCheck();
     public static final String _rx_encoding = "X-UTF-8_with_cp-850_fallback";
@@ -328,7 +329,9 @@ public abstract class Channel extends Source implements Serializable
        if (packet == null || packet.length() < 1)
           return; 
        Packet p = string2packet(packet);
-       receivePacket(p, dup);
+       
+       if (_rfilter != null && !_rfilter.equals("") && packet.matches(_rfilter))
+          receivePacket(p, dup);
     }
     
     
@@ -337,6 +340,7 @@ public abstract class Channel extends Source implements Serializable
     {      
        if (p == null)
           return; 
+
        p.source = this;
        System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+p);
        dup = _dupCheck.checkPacket(p.from, p.to, p.report);
