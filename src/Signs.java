@@ -71,7 +71,21 @@ public class Signs
         catch (Exception e) 
             { System.out.println("SIGNLIST WARNING: "+e); }
     }     
-     
+    
+    
+    
+    public static List<Item>
+          search(UTMRef uleft, UTMRef lright)
+    {
+         if (uleft==null || lright==null)
+            return _signs._list;
+            
+         LinkedList<Item> result = new LinkedList();
+         for (Item s: _signs._list)
+            if (s.isInside(uleft, lright))
+                result.add(s);
+        return result;
+    }
 
     public static List<Item> getList() { return _signs._list; }
 }
