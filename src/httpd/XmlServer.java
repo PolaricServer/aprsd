@@ -96,6 +96,7 @@ public class XmlServer extends ServerBase
    }
    
    
+   
    /**
     * Produces XML (Ka-map overlay spec.) for plotting station/symbols/labels on map.   
     */
@@ -150,7 +151,7 @@ public class XmlServer extends ServerBase
          * in map-layers instead?
          */
         int i=0;
-        for (Signs.Item s: Signs.getList())
+        for (Signs.Item s: Signs.search(uleft, lright))
         {
             UTMRef ref = toUTM(s.getPosition()); 
             if (ref == null || !s.visible(scale) || !s.isInside(uleft, lright))
