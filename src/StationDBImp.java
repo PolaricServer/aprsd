@@ -244,6 +244,8 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
         return st;
     }
     
+    
+    
     /**
      * Deactivate objects having the same name. 
      */
@@ -312,38 +314,6 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
          for (AprsPoint s: _map.values())
             if (s.isInside(uleft, lright))
                 result.add(s);
-        return result;
-    }
-    
-    
-          
-    /**
-     * Search. Return list of stations within the polygon (rectangle) defined by
-     *, p1, p2, p3 and p4. 
-     */               
-    public synchronized List<AprsPoint>
-          search(Reference p1, Reference p2, Reference p3, Reference p4)
-    {
-        LinkedList<AprsPoint> result = new LinkedList();
-        LatLng pp1 = p1.toLatLng();
-        LatLng pp2 = p2.toLatLng();
-        LatLng pp3 = p3.toLatLng();
-        LatLng pp4 = p4.toLatLng();
-     
-        for (AprsPoint s: _map.values())
-        {
-           LatLng ss = s.getPosition().toLatLng();
-           
-           if 
-           (((ss.getLng() - pp1.getLng())*(pp2.getLat() - pp1.getLat())  -  (ss.getLat() - pp1.getLat())*(pp2.getLng() - pp1.getLng()) > 0)  
-           &&
-           ((ss.getLng() - pp2.getLng())*(pp3.getLat() - pp2.getLat())  -  (ss.getLat() - pp2.getLat())*(pp3.getLng() - pp2.getLng()) > 0)
-           && 
-           ((ss.getLng() - pp3.getLng())*(pp4.getLat() - pp3.getLat())  -  (ss.getLat() - pp3.getLat())*(pp4.getLng() - pp3.getLng()) > 0)
-           &&  
-           ((ss.getLng() - pp4.getLng())*(pp1.getLat() - pp4.getLat())  -  (ss.getLat() - pp4.getLat())*(pp1.getLng() - pp4.getLng()) > 0))
-              result.add(s);
-        }
         return result;
     }
     
