@@ -120,6 +120,14 @@ package no.polaric.aprsd.http
               { simpleLabel("items", "leftlab", "Antall HTTP forespørsler:", TXT(""+(_api.getHttps().getReq()))) }    
               { simpleLabel("freemem", "leftlab", "Brukt minne:", 
                   TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
+                            
+              {  var i=0;
+                 for (x <- PluginManager.getPlugins()) yield {
+                    i+=1;
+                    simpleLabel("", "leftlab", if (i<=1) "Plugin modul: " else "", 
+                         TXT(x.getDescr())); 
+                 }
+              }    
               <br/>
          
               { var i = 0; 
@@ -130,7 +138,7 @@ package no.polaric.aprsd.http
                      "leftlab", "Kanal '"+ch.getIdent()+"' ("+ch.getShortDescr()+"):", TXT(ch.toString())) } 
               }
 
-                   
+              
               { simpleLabel("igate", "leftlab", "Igate: ", 
                    if (_api.getIgate()==null) TXT("---") else TXT(""+_api.getIgate())) }   
               { if (_api.getRemoteCtl() != null && !_api.getRemoteCtl().isEmpty())  
