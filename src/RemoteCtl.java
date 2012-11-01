@@ -178,9 +178,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
          return false;
          
       String args = (arg.length==1 ? null : arg[1]);
-      boolean p = false;    
-      if (arg[0].equals("CON"))
+      boolean p = false, propagate = true;    
+      if (arg[0].equals("CON")) {
          p = doConnect(sender, args);
+         propagate = false;
+      }
          
       /* Fail if not CON and not connected */
       else if ((!_parentCon || !sender.getIdent().equals(_parent)) 
@@ -200,8 +202,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       if (!p)
          return false;
      
-      storeRequest(text);
-      sendRequestAll(text, sender.getIdent());
+      if (propagate){
+         storeRequest(text);
+         sendRequestAll(text, sender.getIdent());
+      }
       return true;
    }
 
