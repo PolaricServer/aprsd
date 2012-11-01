@@ -2,7 +2,11 @@
 V.1.1 beta 3 or towards 1.1
 ---------------------------
 
+* Duplicate connections to parent server? Fix. 
+     DONE.
+     
 * Plugins in status display
+     DONE.
 
 * Test 
     - TNC
@@ -11,8 +15,6 @@ V.1.1 beta 3 or towards 1.1
     - IE? 
    
     
-    
-   
 
     
 Channels/Sources
@@ -47,6 +49,11 @@ Web Service
 
 * Simplify webserver impl. (esp. Scala part). 
 
+* XML support for a collection of points (without anything else). something a la <linestring>?
+  
+* [C] XML support for a displaying a collection of points (without anything else).
+
+
 
 
 API, Extensibility
@@ -71,17 +78,27 @@ Database plugin
 * [C] API functions for trail search. Test with iframe. 
 
 * Implement mission support - Server side
-       STARTED
+     STARTED
 
+* Activate and test GIST indexing for positions. Indexing for trail search. 
+     DONE.
 
+* Fix error where lat/long components are swapped. 
+     DONE.
+     
+* Implement search for positions through a given node.
+     STARTED.
+     
+* Implement simple geo-objects (signs). 
+     STARTED.
 
 
 Other. 
 -----
 
-* Autodiscovery of servers on local network
+* App: Autodiscovery of servers on local network
 
-* Messaging
+* Messaging - a plugin? 
 
 * Web config plugin
 
