@@ -21,13 +21,16 @@ public class PluginManager
    public interface Plugin /* FIXME: extends Managed */
    {
       /** Start the plugin.  */
-       void activate(ServerAPI api);
+       public void activate(ServerAPI api);
       
       /**  Stop the plugin. */ 
-       void deActivate();
+       public void deActivate();
        
       /** Return an arrays of other component (class names) this plugin depends on. */
-       String[] getDependencies();
+       public String[] getDependencies();
+       
+       /** Return a description of plugin */
+       public String getDescr();
    }
    
   
@@ -44,7 +47,17 @@ public class PluginManager
    public static Map<String, Object> getObjectMap() 
      { return _objects; }
        
+           
+   public static Plugin[] getPlugins()
+      { Object[] x = _plugins.values().toArray(); 
+        Plugin[] y = new Plugin[x.length];
+        int i = 0;
+        for (Object p: x)
+          y[i] = (Plugin) x[i++];
+        return y;
+      }
 
+      
    /**
     * set the api. Must be done at startup of server. 
     * @param a: the server interface. 
@@ -83,6 +96,7 @@ public class PluginManager
         catch (Exception e)
           { throw new PluginError("Cannot activate plugin: "+cn, e); }
     }
+    
     
     /**
      * Register multiple plugins. 
