@@ -53,6 +53,7 @@ public class InetChannel extends Channel implements Runnable, Serializable
            _user = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
         _pass = config.getProperty("channel."+id+".pass", "-1").trim();
         _filter = config.getProperty("channel."+id+".filter", ""); 
+        _rfilter  = config.getProperty("channel."+id+".rfilter", ""); 
         _thread = new Thread(this, "channel."+id);
         _thread.start();
     }
