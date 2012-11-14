@@ -3,6 +3,8 @@ import scala.xml._
 import org.simpleframework.transport.connect.Connection
 import org.simpleframework.transport.connect.SocketConnection
 import org.simpleframework.http._
+import uk.me.jstott.jcoord._
+
 
 
 package no.polaric.aprsd.http 
@@ -116,6 +118,66 @@ package no.polaric.aprsd.http
        }
   
 
+  
+   /**
+    * Exctract UTM reference from request parameters.
+    *   x and y: coordinates relative to mapserver UTM zone
+    *   utmz: UTM zone (optional)
+    *   utmnz: UTM zone letter (optional)
+    *   returns UTM reference. Null if not possible to construct a correct
+    *   UTM reference from the given parameters.
+    */
+   protected def getUtmCoord(req : Request, nzone: Char, zone: Int) : UTMRef =
+   {
+        val x = req.getParameter("x")
+        val y = req.getParameter("y")
+        var utmz = req.getParameter("utmz")
+        var utmnz = req.getParameter("utmnz")
+        try {
+           if (x != null && y != null)
+               new UTMRef( x.toDouble, y.toDouble,
+                   if (utmnz==null) 'W' else utmnz(0),
+                   if (utmz==null) _utmzone else utmz.toInt )  /* FIXME: Lat zone */
+           else
+               null
+        }
+        catch {
+           case e: Exception => println("*** Warning: "+e); null }
+   }
+
+
+   
+   /** 
+    * Print reference as UTM reference. 
+    */
+   protected def showUTM(ref: Reference) : NodeSeq =
+      try {
+         val sref = ref.toLatLng().toUTMRef().toString()
+         <span class="utmref">
+         {sref.substring(0,5)}<span class="kartref">{
+           sref.substring(5,8)}</span>{sref.substring(8,13)}<span class="kartref">{
+           sref.substring(13,16)}</span>{sref.substring(16)}
+         </span>  
+      }
+      catch {
+          case e:Exception => Text("(ugyldig posisjon)")
+      }
+  
+  
+     
+   
+   /**
+    * HTML form elements (fields) for entering a UTM reference.
+    */
+   protected def utmForm(nzone: Char, zone: Int) : NodeSeq =
+       <input id="utmz" name="utmz" type="text" size="2" maxlength="2" value={zone.toString} />
+       <input id="utmnz" name="utmnz" type="text" size="1" maxlength="1" value={nzone.toString} />
+       <input id="utmx" name="x" type="text" size="6" maxlength="6"/>
+       <input id="utmy" name="y" type="text" size="7" maxlength="7"/>;
+
+
+
+  
   }
 
 }
