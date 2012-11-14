@@ -43,14 +43,12 @@ public class OwnObjects implements Runnable
     
     public OwnObjects(ServerAPI api) 
     {
-        Properties config = api.getConfig();
         _api = api;
-        
-        _allowRf = config.getProperty("objects.rfgate.allow", "false").trim().matches("true|yes");
-        _pathRf = config.getProperty("objects.rfgate.path", "").trim(); 
-        _rangeRf = Integer.parseInt(config.getProperty("objects.rfgate.range", "0").trim());
-        _txPeriod = Integer.parseInt(config.getProperty("objects.transmit.period", "360").trim());
-        _forceUpdate = config.getProperty("objects.forceupdate", "false").trim().matches("true|yes");
+        _allowRf     = api.getBoolProperty("objects.rfgate.allow", false);
+        _pathRf      = api.getProperty("objects.rfgate.path", ""); 
+        _rangeRf     = api.getIntProperty("objects.rfgate.range", 0);
+        _txPeriod    = api.getIntProperty("objects.transmit.period", 360);
+        _forceUpdate = api.getBoolProperty("objects.forceupdate", false);
         
            
         /* Should not expire as long as we have objects */        
