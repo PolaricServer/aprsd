@@ -42,16 +42,17 @@ public abstract class ServerBase
    public static Calendar localTime = Calendar.getInstance();
    
    
-   public ServerBase(ServerAPI api, Properties config) throws IOException
+   
+   public ServerBase(ServerAPI api) throws IOException
    {
       _api=api; 
-      _utmzone     = Integer.parseInt(config.getProperty("map.utm.zone", "33").trim());
-      _utmlatzone  = config.getProperty("map.utm.latzone", "W").charAt(0);
-      _wfiledir    = config.getProperty("map.web.dir", "/aprsd").trim();
-      _infraonly   = config.getProperty("map.infraonly", "false").trim().matches("true|yes");
-      _timezone    = config.getProperty("timezone", "").trim();
-      _adminuser   = config.getProperty("user.admin","admin").trim();
-      _updateusers = config.getProperty("user.update", "").trim();
+      _utmzone     = api.getIntProperty("map.utm.zone", 33);
+      _utmlatzone  = api.getProperty("map.utm.latzone", "W").charAt(0);
+      _wfiledir    = api.getProperty("map.web.dir", "/aprsd");
+      _infraonly   = api.getBoolProperty("map.infraonly", false);
+      _timezone    = api.getProperty("timezone", "");
+      _adminuser   = api.getProperty("user.admin","admin");
+      _updateusers = api.getProperty("user.update", "");
                 
       TimeZone.setDefault(null);
       if (_timezone.length() > 1) {
