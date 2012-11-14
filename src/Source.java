@@ -36,9 +36,9 @@ public abstract class Source implements Serializable
      public enum Type {inet, radio, local};
      
      
-     protected void _init(Properties config, String prefix, String id) 
+     protected void _init(ServerAPI config, String prefix, String id) 
      {
-        _restrict = config.getProperty(prefix+"."+id+".restrict", "false").trim().matches("true|yes");
+        _restrict = config.getBoolProperty(prefix+"."+id+".restrict", false);
         _style = config.getProperty(prefix+"."+id+".style", _style); 
         _ident = id;
            
