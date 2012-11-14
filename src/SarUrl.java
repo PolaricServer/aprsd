@@ -37,10 +37,10 @@ public class SarUrl implements Runnable
     }
     
     
-    public SarUrl(Properties config)
+    public SarUrl(ServerAPI api)
     {
-        _file = config.getProperty("sarurl.file", "sarurl.txt");
-        _proto = config.getProperty("sarurl.protocol", "https");
+        _file = api.getProperty("sarurl.file", "sarurl.txt");
+        _proto = api.getProperty("sarurl.protocol", "https");
         if (_file.charAt(0) != '/')
            _file =  System.getProperties().getProperty("datadir", ".") + "/" + _file;
            
