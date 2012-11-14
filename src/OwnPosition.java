@@ -39,8 +39,8 @@ public class OwnPosition extends Station implements Runnable
     
     private class LocalSource extends Source
      {
-         public LocalSource(Properties config, String prefix, String id)
-            { _style="own"; _init(config, prefix, "ownposition"); }
+         public LocalSource(ServerAPI api, String prefix, String id)
+            { _style="own"; _init(api, prefix, "ownposition"); }
          public String getShortDescr() 
             { return "OWN"; }
      }
@@ -51,23 +51,22 @@ public class OwnPosition extends Station implements Runnable
     public OwnPosition(ServerAPI api) 
     {
         super(null);     
-        Properties config = api.getConfig();
         _api = api;
         
-        setSource(new LocalSource(config, "localsrc", "ownposition"));
-        String ownpos = config.getProperty("ownposition.pos", "").trim(); 
-        String myCall = config.getProperty("ownposition.mycall", "").trim().toUpperCase();
+        setSource(new LocalSource(api, "localsrc", "ownposition"));
+        String ownpos = api.getProperty("ownposition.pos", ""); 
+        String myCall = api.getProperty("ownposition.mycall", "").toUpperCase();
         if (myCall.length() == 0)
-           myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
-        String sym = config.getProperty("ownposition.symbol", "/.").trim(); 
+           myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();
+        String sym = api.getProperty("ownposition.symbol", "/."); 
         setSymtab(sym.charAt(0));
         setSymbol(sym.charAt(1));
-        _txOn     = config.getProperty("ownposition.tx.on", "false").trim().matches("true|yes");        
-        _allowRf  = config.getProperty("ownposition.tx.allowrf", "false").trim().matches("true|yes");
-        _pathRf   = config.getProperty("ownposition.tx.rfpath", "WIDE1-1").trim(); 
-        _comment  = config.getProperty("ownposition.tx.comment", "").trim();
-        _maxPause = Integer.parseInt(config.getProperty("ownposition.tx.maxpause", "600").trim());
-        _minPause = Integer.parseInt(config.getProperty("ownposition.tx.minpause", "120").trim());
+        _txOn     = api.getBoolProperty("ownposition.tx.on", false);        
+        _allowRf  = api.getBoolProperty("ownposition.tx.allowrf", false);
+        _pathRf   = api.getProperty("ownposition.tx.rfpath", "WIDE1-1"); 
+        _comment  = api.getProperty("ownposition.tx.comment", "");
+        _maxPause = api.getIntProperty("ownposition.tx.maxpause", 600);
+        _minPause = api.getIntProperty("ownposition.tx.minpause", 120);
         if (_minPause == 0)
            _minPause = _maxPause; 
            
