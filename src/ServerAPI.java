@@ -37,6 +37,12 @@ import java.util.*;
        
        public Properties getConfig();
        
+       public String getProperty (String pn, String dval); 
+       
+       public boolean getBoolProperty (String pn, boolean dval);
+       
+       public int getIntProperty (String pn, int dval);
+              
        public Map<String, Object> getObjectMap(); // Need this?
        
        public String getVersion();
