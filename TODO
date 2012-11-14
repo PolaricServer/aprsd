@@ -8,6 +8,12 @@ V.1.1 beta 3 or towards 1.1
 * Plugins in status display
      DONE.
 
+* Look at httpd/ServerBase.java: Can config parameters be made static to reduce 
+  redundant storage when there are multiple instances? 
+
+* Configuration support. E.g. parsing boolean values. 
+  api.getConfig - direct access to parameter.
+
 * Test 
     - TNC
     - Igating
@@ -36,6 +42,8 @@ Channels/Sources
 * Soundmodem plugin
      STARTED.
 
+* AIS plugin
+
 * Receive positions from clients (mobile app). This is both a source and a web-service?
   Separate plugin? 
   
@@ -46,8 +54,6 @@ Channels/Sources
  
 Web Service
 -----------
-
-* Simplify webserver impl. (esp. Scala part). 
 
 * XML support for a collection of points (without anything else). something a la <linestring>?
   
