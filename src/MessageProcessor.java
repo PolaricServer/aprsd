@@ -101,15 +101,15 @@ public class MessageProcessor implements Runnable
    }
 
    private int threadid=0;
-   public MessageProcessor(Properties config)
+   public MessageProcessor(ServerAPI api)
    {
-       _myCall = config.getProperty("message.mycall", "").trim().toUpperCase();
+       _myCall = api.getProperty("message.mycall", "").toUpperCase();
        if (_myCall.length() == 0)
-           _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
-       _key = config.getProperty("message.auth.key", "NOKEY").trim();
-       _defaultPath = config.getProperty("message.rfpath", "WIDE1-1").trim();
-       _alwaysRf = config.getProperty("message.alwaysRf", "").trim();
-       _thread = new Thread(this, "MessageProcessor-"+(threadid++));
+           _myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();
+       _key         = api.getProperty("message.auth.key", "NOKEY");
+       _defaultPath = api.getProperty("message.rfpath", "WIDE1-1");
+       _alwaysRf    = api.getProperty("message.alwaysRf", "");
+       _thread  = new Thread(this, "MessageProcessor-"+(threadid++));
        _thread.start();
    }  
        
