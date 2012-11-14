@@ -41,10 +41,9 @@ public class Tnc2Channel extends TncChannel implements Runnable
     public Tnc2Channel(ServerAPI api, String id) 
     {
        super(api, id);
-       Properties config = api.getConfig();
       _unproto = api.getToAddr();  
-      _pathCmd = config.getProperty("channel."+id+".pathcommand", "UNPROTO").trim();  
-      _noBreak = config.getProperty("channel."+id+".nobreak", "false").trim().matches("true|yes");
+      _pathCmd = api.getProperty("channel."+id+".pathcommand", "UNPROTO");  
+      _noBreak = api.getBoolProperty("channel."+id+".nobreak", false);
     }
  
  
