@@ -23,38 +23,37 @@ import java.util.*;
  */
 public class InetChannel extends Channel implements Runnable, Serializable
 {
-    private   String      _host;
-    private   int         _port;
-    private   String      _user, _pass, _filter;
-    private   boolean     _close = false;
+    private  String   _host;
+    private  int      _port;
+    private  String   _user, _pass, _filter;
+    private  boolean  _close = false;
     
-    transient private   int         _max_retry;
-    transient private   long        _retry_time;   
-    transient private   Socket      _sock = null; 
-    transient private   BufferedReader _rder = null;
-    transient private   ServerAPI   _api;
-    transient private   Thread      _thread;
+    transient private  int            _max_retry;
+    transient private  long           _retry_time;   
+    transient private  Socket         _sock = null; 
+    transient private  BufferedReader _rder = null;
+    transient private  ServerAPI      _api;
+    transient private  Thread         _thread;
 
 
 
 
     public InetChannel(ServerAPI api, String id) 
     {
-        Properties config = api.getConfig();
-        _init(config, "channel", id);
+        _init(api, "channel", id);
         _api = api;
         
-        _host = config.getProperty("channel."+id+".host", "localhost").trim();
-        _port = Integer.parseInt(config.getProperty("channel."+id+".port", "14580").trim());
-        _max_retry = Integer.parseInt(config.getProperty("channel."+id+".retry", "0").trim());
-        _retry_time = Long.parseLong(config.getProperty("channel."+id+".retry.time", "30").trim()) * 60 * 1000; 
-        _user = config.getProperty("channel."+id+".user", "").trim().toUpperCase();
+        _host = api.getProperty("channel."+id+".host", "localhost");
+        _port = api.getIntProperty("channel."+id+".port", 14580);
+        _max_retry  = api.getIntProperty("channel."+id+".retry", 0);
+        _retry_time = Long.parseLong(api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
+        _user = api.getProperty("channel."+id+".user", "").toUpperCase();
         if (_user.length() == 0)
-           _user = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
-        _pass = config.getProperty("channel."+id+".pass", "-1").trim();
-        _filter = config.getProperty("channel."+id+".filter", ""); 
-        _rfilter  = config.getProperty("channel."+id+".rfilter", ""); 
-        _thread = new Thread(this, "channel."+id);
+           _user = api.getProperty("default.mycall", "NOCALL").toUpperCase();
+        _pass     = api.getProperty("channel."+id+".pass", "-1");
+        _filter   = api.getProperty("channel."+id+".filter", ""); 
+        _rfilter  = api.getProperty("channel."+id+".rfilter", ""); 
+        _thread   = new Thread(this, "channel."+id);
         _thread.start();
     }
  
@@ -81,6 +80,7 @@ public class InetChannel extends Channel implements Runnable, Serializable
         }      
     }
     
+    
     private void _close()
     {
        try { 
@@ -90,6 +90,7 @@ public class InetChannel extends Channel implements Runnable, Serializable
           Thread.sleep(500);
        } catch (Exception e) {}
     }
+    
     
     public void close()
     {
