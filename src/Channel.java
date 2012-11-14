@@ -330,8 +330,9 @@ public abstract class Channel extends Source implements Serializable
           return; 
        Packet p = string2packet(packet);
        
-       if (_rfilter != null && !_rfilter.equals("") && packet.matches(_rfilter))
-          receivePacket(p, dup);
+       if (_rfilter != null && !_rfilter.equals("") && !packet.matches(_rfilter))
+          return; 
+       receivePacket(p, dup);
     }
     
     
