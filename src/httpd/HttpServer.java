@@ -40,11 +40,11 @@ public class HttpServer implements Container, ServerAPI.ServerStats
       
    
    
-   public HttpServer(ServerAPI api, int port, Properties config) throws IOException
+   public HttpServer(ServerAPI api, int port) throws IOException
    {
       _api=api; 
-      _infraonly   = config.getProperty("map.infraonly", "false").trim().matches("true|yes");
-      _serverurl   = config.getProperty("server.url", "/srv").trim();
+      _infraonly   = api.getConfig().getProperty("map.infraonly", "false").trim().matches("true|yes");
+      _serverurl   = api.getConfig().getProperty("server.url", "/srv").trim();
       
       /* Configure this web container */
       Connection connection = new SocketConnection(this);
