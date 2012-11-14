@@ -25,19 +25,18 @@ public class XmlServer extends ServerBase
    private String _adminuser, _updateusers;
    private int _seq = 0;
    
-   public XmlServer(ServerAPI api, Properties config) throws IOException
+   public XmlServer(ServerAPI api) throws IOException
    {
-      super(api, config);
-      _icon = config.getProperty("map.icon.default", "sym.gif").trim();
-
+      super(api);
+      _icon = api.getProperty("map.icon.default", "sym.gif");
       
-      int trailage= Integer.parseInt(config.getProperty("map.trail.maxAge", "15").trim());
+      int trailage = api.getIntConfig().getProperty("map.trail.maxAge", 15);
       Trail.setMaxAge(trailage * 60 * 1000); 
-      int trailpause= Integer.parseInt(config.getProperty("map.trail.maxPause", "10").trim());
+      int trailpause = api.getIntConfig().getProperty("map.trail.maxPause", 10);
       Trail.setMaxPause(trailpause * 60 * 1000);
-      int trailage_ext= Integer.parseInt(config.getProperty("map.trail.maxAge.extended", "30").trim());
+      int trailage_ext = api.getIntConfig().getProperty("map.trail.maxAge.extended", 30);
       Trail.setMaxAge_Ext(trailage_ext * 60 * 1000); 
-      int trailpause_ext= Integer.parseInt(config.getProperty("map.trail.maxPause.extended", "20").trim());
+      int trailpause_ext = api.getIntProperty("map.trail.maxPause.extended", 20);
       Trail.setMaxPause_Ext(trailpause_ext * 60 * 1000);
    }
 
@@ -151,7 +150,7 @@ public class XmlServer extends ServerBase
          * in map-layers instead?
          */
         int i=0;
-        for (Signs.Item s: Signs.search(uleft, lright))
+        for (Signs.Item s: Signs.search(scale, uleft, lright))
         {
             UTMRef ref = toUTM(s.getPosition()); 
             if (ref == null || !s.visible(scale) || !s.isInside(uleft, lright))
