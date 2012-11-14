@@ -38,19 +38,18 @@ public class Igate implements Channel.Receiver, ManagedObject
     
     public Igate(ServerAPI api) 
     {
-        Properties config = api.getConfig();
         _api = api;
     
-        _allowRf = config.getProperty("igate.rfgate.allow", "true").trim().matches("true|yes");
-        _gateObj = config.getProperty("igate.rfgate.objects", "false").trim().matches("true|yes");
-        _pathObj = config.getProperty("objects.rfgate.path", "").trim(); 
-        _rangeObj = Integer.parseInt(config.getProperty("objects.rfgate.range", "0").trim());
-        _myCall = config.getProperty("igate.mycall", "").trim().toUpperCase();
-        _defaultPath = config.getProperty("message.rfpath", "WIDE1-1").trim();
-        _alwaysRf = config.getProperty("message.alwaysRf", "").trim();       
+        _allowRf     = api.getBoolProperty("igate.rfgate.allow", true);
+        _gateObj     = api.getBoolProperty("igate.rfgate.objects", false);
+        _pathObj     = api.getProperty("objects.rfgate.path", ""); 
+        _rangeObj    = api.getIntProperty("objects.rfgate.range", 0);
+        _myCall      = api.getProperty("igate.mycall", "").trim().toUpperCase();
+        _defaultPath = api.getProperty("message.rfpath", "WIDE1-1");
+        _alwaysRf    = api.getProperty("message.alwaysRf", "");       
         if (_myCall.length() == 0)
-           _myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();      
-       _log = new Logfile(config, "igate", "igate.log");   
+           _myCall   = api.getProperty("default.mycall", "NOCALL").toUpperCase();      
+        _log         = new Logfile(api, "igate", "igate.log");   
     }  
        
        
