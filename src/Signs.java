@@ -11,6 +11,17 @@ public class Signs
        new Signs(System.getProperties().getProperty("confdir", ".")+"/signs");
     
     
+    /**
+     * Interface for searching in a database external to this class. 
+     */
+    public interface ExtDb {
+        public Iterable<Item> search(long scale, UTMRef uleft, UTMRef lright);
+    }
+    
+    
+     /**
+     * Sign item. A pointobject plus scale and url.
+     */
     public static class Item extends PointObject {
         public long _maxScale;
         public String _url;
@@ -31,6 +42,7 @@ public class Signs
     private BufferedReader  _rd;
     private StringTokenizer _next;
     private List<Item> _list = new ArrayList();
+    private ExtDb _extdb = null;
     
     
     /**
@@ -73,16 +85,23 @@ public class Signs
     }     
     
     
+    public static void setExtDb(ExtDb x)
+       { _signs._extdb = x; }
+       
+       
     
-    public static List<Item>
-          search(UTMRef uleft, UTMRef lright)
+    public static Iterable<Item>
+          search(long scale, UTMRef uleft, UTMRef lright)
     {
+         if (_signs._extdb != null)
+            return _signs._extdb.search(scale, uleft, lright); 
+            
          if (uleft==null || lright==null)
             return _signs._list;
-            
+         
          LinkedList<Item> result = new LinkedList();
          for (Item s: _signs._list)
-            if (s.isInside(uleft, lright))
+            if (s.visible(scale) && s.isInside(uleft, lright))
                 result.add(s);
         return result;
     }
