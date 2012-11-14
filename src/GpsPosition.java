@@ -93,14 +93,13 @@ public class GpsPosition extends OwnPosition
     public GpsPosition(ServerAPI api) 
     {
         super(api);    
-        Properties config = api.getConfig();
-        _portName = config.getProperty("ownposition.gps.port", "/dev/ttyS1").trim();
-        _baud= Integer.parseInt(config.getProperty("ownposition.gps.baud", "9600").trim());
-        _minDist = Integer.parseInt(config.getProperty("ownposition.tx.mindist", "150").trim());
-        _turnLimit = Integer.parseInt(config.getProperty("ownposition.tx.turnlimit", "30").trim());
-        _max_retry = Integer.parseInt(config.getProperty("ownposition.gps.retry", "0").trim());
-        _retry_time = Long.parseLong(config.getProperty("ownposition.gps.retry.time", "30").trim()) * 60 * 1000;         
-        _adjustClock = config.getProperty("ownposition.gps.on", "false").trim().matches("true|yes");
+        _portName = api.getProperty("ownposition.gps.port", "/dev/ttyS1");
+        _baud = api.getIntProperty("ownposition.gps.baud", 9600);
+        _minDist = api.getIntProperty("ownposition.tx.mindist", 150);
+        _turnLimit = api.getIntProperty("ownposition.tx.turnlimit", 30);
+        _max_retry = api.getIntProperty("ownposition.gps.retry", 0);
+        _retry_time = Long.parseLong(api.getProperty("ownposition.gps.retry.time", "30")) * 60 * 1000;         
+        _adjustClock = api.getBoolProperty("ownposition.gps.on", false); 
         _gpsParser = new GpsParser(); 
         _gpsParser.start();
     }
