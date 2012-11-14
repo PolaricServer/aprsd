@@ -40,15 +40,14 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     public StationDBImp(ServerAPI api)
     {
         _api = api;
-        Properties config = api.getConfig();
-        _file = config.getProperty("stations.file", "stations.dat");
-        int exptime = Integer.parseInt(config.getProperty("aprs.expiretime", "60").trim());
+        _file = api.getProperty("stations.file", "stations.dat");
+        int exptime = api.getIntProperty("aprs.expiretime", 60);
         Station.setExpiretime(exptime * 60 * 1000);
         if (_file.charAt(0) != '/')
            _file = System.getProperties().getProperty("datadir", ".")+"/"+_file;
            
         _ownobj = new OwnObjects(api); 
-        _msgProc = new MessageProcessor(config);
+        _msgProc = new MessageProcessor(api);
         restore();
         Thread t = new Thread(this, "StationDBImp");
         t.start(); 
