@@ -68,13 +68,13 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        
    
    private int threadid=0;    
-   public RemoteCtl(Properties config, MessageProcessor mp, ServerAPI api)
+   public RemoteCtl(ServerAPI api, MessageProcessor mp)
    {
-       String myCall = config.getProperty("remotectl.mycall", "").trim().toUpperCase();
+       String myCall = api.getProperty("remotectl.mycall", "").toUpperCase();
        if (myCall.length() == 0)
-           myCall = config.getProperty("default.mycall", "NOCALL").trim().toUpperCase();
-       _parent = config.getProperty("remotectl.connect", null);
-       _log = new Logfile(config, "remotectl", "remotectl.log");
+           myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();
+       _parent = api.getProperty("remotectl.connect", null);
+       _log = new Logfile(api, "remotectl", "remotectl.log");
        if (_parent != null) 
           _parent = _parent.trim().toUpperCase();
           
