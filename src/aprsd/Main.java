@@ -69,7 +69,17 @@ public class Main implements ServerAPI
     
    public Properties getConfig()
     { return _config; }
+          
+   public String getProperty(String pname, String dvalue)
+    { return _config.getProperty(pname, dvalue).trim(); }
    
+   public boolean getBoolProperty(String pname, boolean dvalue)
+    { return _config.getProperty(pname, (dvalue  ? "true" : "false"))
+                 .trim().matches("TRUE|true|YES|yes"); } 
+                 
+   public int getIntProperty(String pname, int dvalue)
+    {  return Integer.parseInt(_config.getProperty(pname, ""+dvalue).trim()); }
+           
    public Map<String, Object> getObjectMap()
     { return PluginManager.getObjectMap(); }
    
@@ -130,8 +140,8 @@ public class Main implements ServerAPI
                    
            /* Start HTTP server */
            int http_port = Integer.parseInt(_config.getProperty("httpserver.port", "8081"));
-           ws = new HttpServer(api, http_port, _config);
-           ws.addHandler(new Webserver(api, _config), null);
+           ws = new HttpServer(api, http_port);
+           ws.addHandler(new Webserver(api), null);
            System.out.println( "*** HTTP server ready on port " + http_port);
              
            /* Plugins */
@@ -178,12 +188,12 @@ public class Main implements ServerAPI
            
            if (_config.getProperty("remotectl.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate Remote Control");
-               rctl = new RemoteCtl(_config, db.getMsgProcessor(), api);
+               rctl = new RemoteCtl(api, db.getMsgProcessor());
            }
             
            if (_config.getProperty("sarurl.on", "false").trim().matches("true|yes")) {
                System.out.println("*** Activate Sar URL");
-               sarurl = new SarUrl(_config);
+               sarurl = new SarUrl(api);
            }
   
            /* 
