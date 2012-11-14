@@ -30,11 +30,11 @@ public class XmlServer extends ServerBase
       super(api);
       _icon = api.getProperty("map.icon.default", "sym.gif");
       
-      int trailage = api.getIntConfig().getProperty("map.trail.maxAge", 15);
+      int trailage = api.getIntProperty("map.trail.maxAge", 15);
       Trail.setMaxAge(trailage * 60 * 1000); 
-      int trailpause = api.getIntConfig().getProperty("map.trail.maxPause", 10);
+      int trailpause = api.getIntProperty("map.trail.maxPause", 10);
       Trail.setMaxPause(trailpause * 60 * 1000);
-      int trailage_ext = api.getIntConfig().getProperty("map.trail.maxAge.extended", 30);
+      int trailage_ext = api.getIntProperty("map.trail.maxAge.extended", 30);
       Trail.setMaxAge_Ext(trailage_ext * 60 * 1000); 
       int trailpause_ext = api.getIntProperty("map.trail.maxPause.extended", 20);
       Trail.setMaxPause_Ext(trailpause_ext * 60 * 1000);
