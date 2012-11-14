@@ -15,10 +15,10 @@ public class Logfile
        new DateFormatSymbols(new Locale("no")));
     
     
-    public Logfile(Properties config, String configname, String logfile) 
+    public Logfile(ServerAPI api, String configname, String logfile) 
     {     
        try {
-          _log = config.getProperty(configname+".log.on", "true").trim().matches("true|yes");
+          _log = api.getBoolProperty(configname+".log.on", true);
           if (_log) {
              String f = System.getProperties().getProperty("logdir", ".")+"/"+logfile;
              _out = new PrintWriter(new FileOutputStream(f, true));
