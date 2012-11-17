@@ -26,7 +26,7 @@ public class PluginManager
       /**  Stop the plugin. */ 
        public void deActivate();
        
-      /** Return an arrays of other component (class names) this plugin depends on. */
+      /** Return an array of other component (class names) this plugin depends on. */
        public String[] getDependencies();
        
        /** Return a description of plugin */
@@ -47,7 +47,8 @@ public class PluginManager
    public static Map<String, Object> getObjectMap() 
      { return _objects; }
        
-           
+   
+   /** Get interfaces of all registered plugins. */
    public static Plugin[] getPlugins()
       { Object[] x = _plugins.values().toArray(); 
         Plugin[] y = new Plugin[x.length];
@@ -60,7 +61,7 @@ public class PluginManager
       
    /**
     * set the api. Must be done at startup of server. 
-    * @param a: the server interface. 
+    * @param a the server interface. 
     */    
    public static void setServerApi(ServerAPI a)
      { api = a; }  
@@ -75,7 +76,7 @@ public class PluginManager
     *     add and activate if not. throw an exception if not found.</li>
     * </ul>
     * 
-    *  @param cn: Name of plugin. Java class. 
+    *  @param cn Name of plugin. Java class. 
     */
     public static void add(String cn) throws PluginError
     {
@@ -100,7 +101,7 @@ public class PluginManager
     
     /**
      * Register multiple plugins. 
-     * @param cn: Comma separated list of plugin names (Java class names).
+     * @param cn Comma separated list of plugin names (Java class names).
      */
     public static void addList(String cn) throws PluginError
     {
