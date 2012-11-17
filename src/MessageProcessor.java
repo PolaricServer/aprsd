@@ -125,6 +125,10 @@ public class MessageProcessor implements Runnable
    /**
     * Process incoming message.
     * Called by APRS Parser
+    * @param sender Station that sent the message.
+    * @param recipient Destination address.
+    * @param text Content of the message.
+    * @param msgid Message ident.
     */
    public synchronized void incomingMessage
       (Station sender, String recipient, String text, String msgid)
@@ -170,9 +174,9 @@ public class MessageProcessor implements Runnable
 
    /**
     * Subscribe to message delivery service.
-    * @param recipient: Ident of the recipient. 
-    * @param handler: The message handler interface of the recipient (used to deliver message)
-    * @param verify: If true - verify authenticicy of message by using MAC scheme. 
+    * @param recipient Ident of the recipient. 
+    * @param handler The message handler interface of the recipient (used to deliver message)
+    * @param verify If true - verify authenticicy of message by using MAC scheme. 
     */
    public void subscribe(String recipient, MessageHandler handler, boolean verify)
       { _subscribers.put(recipient, new Subscriber(handler, verify)); }
@@ -196,6 +200,12 @@ public class MessageProcessor implements Runnable
     * recipient-id, message and the message-id. The MAC is prefixed with a # and is
     * placed at the end of the message (before the message id). We Base64 encode the MAC
     * and use the first 8 bytes of it.
+    *
+    * @param recipient Destination address of message
+    * @param text Content of message
+    * @param acked Set to true to indicate that we expect an ack message
+    * @param authenticated Set to true to generate a MAC (see above)
+    * @param not Interface to which to send a notification of success/failure.
     */  
    public synchronized void sendMessage(String recipient, String text,
                        boolean acked, boolean authenticated, Notification not)
