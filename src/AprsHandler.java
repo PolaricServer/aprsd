@@ -11,7 +11,9 @@ import uk.me.jstott.jcoord.*;
  
 public interface AprsHandler
 {
-
+    /**
+     * Information typically associated with an APRS position report.
+     */
     public static class PosData {
        public Reference pos;
        public int ambiguity  = 0; 
@@ -19,6 +21,7 @@ public interface AprsHandler
        public int speed = -1;
        public char symbol, symtab;
        public long altitude = -1; 
+       
        public PosData () {}
        public PosData (Reference p, char sym, char stab)
           {pos=p; symbol=sym; symtab=stab; }
