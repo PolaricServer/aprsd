@@ -64,8 +64,8 @@ public class HttpServer implements Container, ServerAPI.ServerStats
     * is derived from the method name after the 'handle_' prefix. Nothing else is assumed 
     * of the handler class.
     *
-    * @param o: Handler object
-    * @param prefix: Prefix of the url target part. If null, no prefix will be assumed. 
+    * @param o : Handler object
+    * @param prefix : Prefix of the url target part. If null, no prefix will be assumed. 
     */
    public void addHandler(Object o, String prefix)
    { 
