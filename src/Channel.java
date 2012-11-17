@@ -45,11 +45,23 @@ public abstract class Channel extends Source implements Serializable
          private HashMap<String, Channel> _instances = new LinkedHashMap();
          
          
+         /**
+          * Register a channel class. 
+          * @param tname A short name for the class/type.
+          * @param cls The full name of the class.
+          */
          public void addClass(String tname, String cls)
          {
             _classes.put(tname, cls);
          }
 
+         
+         /**
+          * Instantiate a channel.
+          * @param api
+          * @param tname A short name for the type. See addClass method.
+          * @param id A short name for the channel instance to allow later lookup.  
+          */
          public Channel newInstance(ServerAPI api, String tname, String id)
          {
             try {
@@ -63,22 +75,31 @@ public abstract class Channel extends Source implements Serializable
                return c;
             }
             catch (Exception e) {
+               e.printStackTrace(System.out);
                return null; 
             }
          }
          
          
+         /**
+          * Get the full set of channel names. Keys for lookup.
+          */
          public Set<String> getKeys()
            { return _instances.keySet(); }
            
-         
+           
+         /**
+          * Look up a channel from a name.
+          */
          public Channel get(String id)
            { return _instances.get(id); }
      }
 
 
 
-
+     /**
+      * Information about APRS packet heard on the channel. 
+      */ 
      protected static class Heard {
          public Date time; 
          public String path;
@@ -135,10 +156,15 @@ public abstract class Channel extends Source implements Serializable
     }
     
     
+
     /**
      * Interface for receivers of APRS packets.
      */
     public interface Receiver {
+        /** Receive an APRS packet. 
+         * @param p Packet content.
+         * @param dup Set to true to indicate that this packet is a duplicate.
+         */
         public void receivePacket(Channel.Packet p, boolean dup);
     }
     
@@ -165,7 +191,7 @@ public abstract class Channel extends Source implements Serializable
 
     
     /**
-      * Returns true if call is heard.
+      * Returns true if callsign is heard on the channel.
       */
     public boolean heard(String call)
      {
@@ -174,6 +200,9 @@ public abstract class Channel extends Source implements Serializable
      }
          
   
+    /**
+     * Returns the path (digipeater) of the last heard packet from the given callsign.
+     */
     public String heardPath(String call)
      {
          Heard x = _heard.get(call);
@@ -183,7 +212,9 @@ public abstract class Channel extends Source implements Serializable
             return x.path;
      }
      
-     
+    /**
+     * Reverse the order of the elements of the path. 
+     */ 
     public static String getReversePath(String path)
     {
        String result = "";
@@ -210,9 +241,20 @@ public abstract class Channel extends Source implements Serializable
     
     
     
+   /**
+    * Return a string that presents a packet as a third party report. 
+    */
     public static String thirdPartyReport(Packet p)
       { return thirdPartyReport(p, null); }
       
+
+      
+    /**
+     * Return a string that presents a packet as a third party report. 
+     * @param p The packet
+     * @param path Digi-path to be used in the thirdparty report. If null, we will 
+     *     use the path of the original packet. 
+     */
     public static String thirdPartyReport(Packet p, String path)
     { 
        if (path == null) 
@@ -285,7 +327,10 @@ public abstract class Channel extends Source implements Serializable
     }
 
     
-    
+    /**
+     * Do some preliminary parsing of report part of the packet. 
+     * Rreturn null if report is invalid. 
+     */
     protected Packet checkReport(Packet p) 
     {   
          p.report = p.report.replace('\uffff', ' ');
@@ -322,7 +367,10 @@ public abstract class Channel extends Source implements Serializable
     /**
      * Process incoming packet. 
      * To be called from subclass. Parses packet, updates heard table, checks for
-     * duplicates and if all is ok, deliver packet to receivers.
+     * duplicates and if all is ok, deliver packet to receivers. It also applies
+     * an optional receive filter. 
+     * @param packet String representation of packet. 
+     * @param dup True if packet is known to be a duplicate.
      */
     protected void receivePacket(String packet, boolean dup)
     { 
@@ -336,7 +384,13 @@ public abstract class Channel extends Source implements Serializable
     }
     
     
-    
+    /**
+     * Process incoming packet. 
+     * To be called from subclass. Parses packet, updates heard table, checks for
+     * duplicates and if all is ok, deliver packet to receivers.
+     * @param packet Pre-parsed packet.
+     * @param dup True if packet is known to be a duplicate.
+     */
     protected void receivePacket(Packet p, boolean dup)
     {      
        if (p == null)
