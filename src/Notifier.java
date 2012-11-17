@@ -34,10 +34,10 @@ public class Notifier
     
     /**
      * Wait for an event to happen within the given geographical area. 
-     * @param uleft: Upper left corner of the area.
-     * @param lright: Lower right corner of the area. 
-     * @param id: Identity of the waiter thread. Assumed to be a unique number. 
-     *            Other waiters with the same id will be aborted.
+     * @param uleft Upper left corner of the area.
+     * @param lright Lower right corner of the area. 
+     * @param id Identity of the waiter thread. Assumed to be a unique number. 
+     *           Other waiters with the same id will be aborted.
      */
     public boolean waitSignal(UTMRef uleft, UTMRef lright, long id)
     {
