@@ -71,7 +71,8 @@ public class Main implements ServerAPI
     { return _config; }
           
    public String getProperty(String pname, String dvalue)
-    { return _config.getProperty(pname, dvalue).trim(); }
+    { String x = _config.getProperty(pname, dvalue); 
+      return (x == null ? x : x.trim()); }
    
    public boolean getBoolProperty(String pname, boolean dvalue)
     { return _config.getProperty(pname, (dvalue  ? "true" : "false"))
@@ -139,13 +140,13 @@ public class Main implements ServerAPI
 
                    
            /* Start HTTP server */
-           int http_port = Integer.parseInt(_config.getProperty("httpserver.port", "8081"));
+           int http_port = getIntProperty("httpserver.port", 8081);
            ws = new HttpServer(api, http_port);
            ws.addHandler(new Webserver(api), null);
            System.out.println( "*** HTTP server ready on port " + http_port);
              
            /* Plugins */
-           PluginManager.addList(_config.getProperty("plugins", ""));
+           PluginManager.addList(getProperty("plugins", ""));
         
         
         
@@ -160,12 +161,12 @@ public class Main implements ServerAPI
            _chanManager.addClass("KISS", "no.polaric.aprsd.KissTncChannel");
            
            String[] channelns = {"aprsis", "tnc"};
-           if (_config.getProperty("channel.aprsis.type", "").trim().equals(""))
+           if (getProperty("channel.aprsis.type", "").equals(""))
               _config.setProperty("channel.aprsis.type", "APRSIS"); 
-           if (_config.getProperty("channel.tnc.type", "").trim().equals(""))
+           if (getProperty("channel.tnc.type", "").equals(""))
               _config.setProperty("channel.aprsis.type", "TNC2");  
            
-           String[] c = _config.getProperty("channels", "").trim().split(",(\\s*)");
+           String[] c = getProperty("channels", "").split(",(\\s*)");
            if (c.length > 0)
              channelns = c; 
            
@@ -173,25 +174,26 @@ public class Main implements ServerAPI
            
            Channel[] ch = new Channel[channelns.length];
            for (String chan: channelns) {
-                if (_config.getProperty("channel."+chan+".on", "true").trim().matches("true|yes"))  {
+                if (getBoolProperty("channel."+chan+".on", true))  {
+                
                     /* Define and activate channel */
-                    String type = _config.getProperty("channel."+chan+".type", "").trim();
+                    String type = getProperty("channel."+chan+".type", "");
                     ch[i] = _chanManager.newInstance(api, type, chan);
                     if (ch[i] != null)
                        ch[i].addReceiver(p);
                     else
-                       System.out.println("ERROR: Couldn't instantiate channel '"+chan+"' for type: "+type);
+                       System.out.println("*** ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
                     i++;
                 }
            }
 
            
-           if (_config.getProperty("remotectl.on", "false").trim().matches("true|yes")) {
+           if (getBoolProperty("remotectl.on", false)) {
                System.out.println("*** Activate Remote Control");
                rctl = new RemoteCtl(api, db.getMsgProcessor());
            }
             
-           if (_config.getProperty("sarurl.on", "false").trim().matches("true|yes")) {
+           if (getBoolProperty("sarurl.on", false)) {
                System.out.println("*** Activate Sar URL");
                sarurl = new SarUrl(api);
            }
@@ -199,8 +201,8 @@ public class Main implements ServerAPI
            /* 
             * Default channels
             */
-           String ch_inet_name = _config.getProperty("channel.default.inet", "aprsis").trim(); 
-           String ch_rf_name = _config.getProperty("channel.default.rf", "tnc").trim();
+           String ch_inet_name = getProperty("channel.default.inet", "aprsis"); 
+           String ch_rf_name = getProperty("channel.default.rf", "tnc");
            Channel ch1 = (ch_inet_name.length() > 0 ? _chanManager.get(ch_inet_name) : null);
            Channel ch2 = (ch_rf_name.length() > 0  ? _chanManager.get(ch_rf_name) : null);          
 
@@ -209,7 +211,7 @@ public class Main implements ServerAPI
             * activated by a remote command. Note that if inetchannel or tncchannel does not exist, 
             * igate will not activate. Should those channels always be created????
             */     
-           if (_config.getProperty("igate.on", "false").trim().matches("true|yes")) {
+           if (getBoolProperty("igate.on", false)) {
                System.out.println("*** Activate IGATE");
                igate = new Igate(api);
                igate.setChannels(ch2, ch1);
@@ -224,7 +226,7 @@ public class Main implements ServerAPI
            db.getMsgProcessor().setChannels(ch2, ch1);  
           
           /* Own position */
-          if (_config.getProperty("ownposition.gps.on", "false").trim().matches("true|yes")) {
+          if (getBoolProperty("ownposition.gps.on", false)) {
                System.out.println("*** Activate GPS");
                ownpos = new GpsPosition(api);
            }
