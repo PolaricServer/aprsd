@@ -55,7 +55,7 @@ public class Igate implements Channel.Receiver, ManagedObject
        
     /**
      * Start the service.    
-     * @param a: the server interface. 
+     * @param a : the server interface. 
      */
     public synchronized void activate(ServerAPI a) {
          /* Activating means subscribing to traffic from the two channels */
