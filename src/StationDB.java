@@ -26,23 +26,24 @@ public interface StationDB
     {
         /**
          * Get item. 
-         * @param id: identifier (typically a callsign) of item.
-         * @param t: time of capture, null if realtime
+         * @param id identifier (typically a callsign) of item.
+         * @param d time of capture, null if realtime
          */
         public AprsPoint getItem(String id, Date d);
+        
+        /**
+         * Get trail point. 
+         * @param src identifier (typically a callsign) of station owning trail.
+         * @param t time of capture
+         */
         public Trail.Item getTrailPoint(String src, java.util.Date t);
     }
     
     
 
-        /**
-         * Get item. 
-         * @param id: identifier (typically a callsign) of item.
-         * @param t: time of capture, null if realtime
-         */
-        public AprsPoint getItem(String id, Date d);
+      public AprsPoint getItem(String id, Date d);
         
-        public Trail.Item getTrailPoint(String src, java.util.Date t);
+      public Trail.Item getTrailPoint(String src, java.util.Date t);
         
         
         
@@ -74,8 +75,8 @@ public interface StationDB
        
        /**
          * Get an APRS station. 
-         * @param id: identifier (typically a callsign) of item.
-         * @param t: time of capture, null if realtime
+         * @param id identifier (typically a callsign) of item.
+         * @param d time of capture, null if realtime.
          */    
         public Station getStation(String id, Date d);
        
@@ -83,27 +84,29 @@ public interface StationDB
        
        /**
         * Remove item.
-        * @param id: identifier (typically a callsign) of item.
+        * @param id identifier (typically a callsign) of item.
         */
        public void removeItem(String id);
 
     
        /**
         * Create a new APRS station. 
-        * @param id: identifier (typically a callsign) of item.
+        * @param id identifier (typically a callsign) of item.
         */
        public Station newStation(String id);
     
+    
         /**
         * Add an existing APRS station. 
-        * @param s: existing station
+        * @param s existing station
         */
        public void addStation(Station s);
         
+        
        /**
         * Create a new APRS object. 
-        * @param owner: identifier (typically a callsign) of owner station.
-        * @param id: identifier of object.
+        * @param owner identifier (typically a callsign) of owner station.
+        * @param id identifier of object.
         */    
        public AprsObject newObject(Station owner, String id);
     
