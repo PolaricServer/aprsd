@@ -1,6 +1,6 @@
 
-V.1.1 beta 3 or towards 1.1
----------------------------
+V.1.1 
+-----
 
 * Duplicate connections to parent server? Fix. 
      DONE.
@@ -72,6 +72,7 @@ API, Extensibility
 ------------------
 
 * [C] Javascript external API at client side.
+      DONE (simple)
 
 * [C] Javascript plugin arch/API at client side (may need index file to be php).
       DONE (simple) 
