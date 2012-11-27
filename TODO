@@ -16,10 +16,13 @@ Updates to 1.0.11, etc..
 
 * [C] Keyboard shortcuts for changing font size, etc?
 
-* [C] Popup doesnt go away if opened in lower right corner. Fix. 
+* [C] Popup doesn't go away if opened in lower right corner. Fix. 
       DONE.
 
 * Check sudo script
+
+* Fix kamap log-file ownership and permissions! SECURITY!
+      DONE.
 
 
 
