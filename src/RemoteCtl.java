@@ -202,9 +202,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       if (!p)
          return false;
      
-      storeRequest(text);
-      if (propagate) 
+      if (propagate) {
+         storeRequest(text);
          sendRequestAll(text, sender.getIdent());
+      }
       return true;
    }
 
