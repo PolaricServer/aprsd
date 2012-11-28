@@ -1,0 +1,18 @@
+polaric-aprsd (1.0.99+1.1-beta3) UNRELEASED; urgency=low
+
+  * Fix some small issues 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Wed, 31 Oct 2012 20:30:30 +0100
+
+polaric-aprsd (1.0.99+1.1-beta2) unstable; urgency=low
+
+  * Fix some issues - ready to deploy on aprs.no? 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Wed, 24 Oct 2012 21:40:31 +0200
+
+polaric-aprsd (1.0.99+1.1-beta1) unstable; urgency=low
+
+  * Stabilize  for release.. 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Wed, 14 Oct 2012 23:09:19 +0200
+
