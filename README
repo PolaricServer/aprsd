@@ -1,135 +1,33 @@
-INSTALLATION OF POLARIC-SERVER ON A UBUNTU/DEBIAN LINUX PLATFORM
+POLARIC APRSD
+
+The "Polaric Server" which is mainly a web based service to present APRS 
+tracking information on maps and where the information is updated at real-
+time. It is originally targeted for use by radio amateurs in voluntary search
+and rescue service in Norway. It consists of a web application and a server 
+program (APRS daemon). 
+ 
+The APRS daemon gathers data from a TNC or APRS-IS or both. It can present 
+and manipulate the information through a simple HTTP service. The daemon can 
+also be set up as an igate (internet gateway) and can be installed 
+independently of the web app. 
 
 
-APRS SERVER (POLARIC-APRSD)
----------------------------
+SYSTEM REQUIREMENTS
 
-install software packages (Ubuntu or Debian):
-   beep
-   sun-java6-bin (or openjdk 6) - 
-    ( is selected automatically when you install scala-library ).
-   librxtx-java (if you are going to use a TNC on a serial port)
-   scala-library 
-    ( not in Debian Lenny - the package is available in testing/unstable and
-      can be installed on lenny-systems).
-    
-Unpack the tarball with the server software in /usr/local/polaric-aprsd
-(in /usr/local/polaric-aprsd - tar zxvf polaric-aprsd.tar.gz)
-
-In polaric-aprsd directory run install-script: sh install.sh
-It sets up a startup-script and a logrotate script
-
-Edit server.ini (see below)
+Linux/Java platform. We support installation packages for Debian/Ubuntu. 
+It shouldn't be too hard to port it to e.g. Windows if anyone wants to 
+do it. 
 
 
-(re)start the server: 
-/etc/init.d/polaric-aprsd restart
+INSTALLATION
 
-Remember to restart the server if you change the configuration (server.ini, symbols, etc..)
+We provide Debian files for the stable branch (and soon the development branch 
+as well). For information on getting started on a Debian/Ubuntu platform please 
+see: http://aprs.no/dokuwiki/doku.php?id=installation
 
-    
+Build from the source is done by a plain old makefile. Yes I know :)
+Maybe I move to Maven a little later. 
 
-WEB-CLIENT (MAP-SERVICE)
-------------------------
-
-install software packages (Ubuntu or Debian):
-   apache2
-   php5
-   php5-gd
-   php5-mapscript
-    
-
-Apache2 config: 
-   a2enmod proxy
-   a2enmod proxy_http
-   
-   Add the following to the apache setup, e.g. in /etc/apache2/sites-enabled/000-default
-   or in your virtual domain setup.
-   
-   ProxyPass /aprs/srv http://localhost:8081
-   ProxyPass /aprs/srv/* http://localhost:8081
-   ProxyPassReverse /aprs/srv http://localhost:8081
-
-   <Location /aprs/login>
-      AuthType Basic
-      AuthName "NRRL sporingstjeneste"
-      AuthUserFile /usr/local/polaric-aprsd/users
-      Require valid-user
-    </Location>
-   
-   If necessary, comment out "Deny from All" in /etc/apache2/mods-enabled/proxy.conf
-   
-   (Note: We assume that DocumentRoot is set to /var/www/ and that the aprs
-    web application is installed under /var/www/aprs )
-   
-  
-Unpack the tarball containing the web application to /var/www/aprs
-(in /var/www - tar zxvf polaric-webapp.tar.gz)
-
-Make sure that the cache directory has the right owner. In /var/www/aprs: 
-    chown www-data.www-data kacache2
-    
-Apache can be restarted with the command
-    apache2ctl restart
-    
-    
-    
-SERVER SETUP
-------------
-    
-It is important to edit server.ini before activating the server. And the important 
-thing there is the callsign (identifier). This can be set as follows: 
-
-default.mycall = xxxxx 
-(where xxxxx is your callsign)
-
-It is possible to set separate callsigns (identifiers) for the internet-channel, 
-the TNC channel, for objects and messages, but usually not necessary. 
-
-To connect to an APRS-IS server, edit the 'inetchannel.host', 'inetchannel.port' 
-and 'inetchannel.pass' fields and set 'inetchannel.on = true'. You also have 
-to set the correct passcode ('inetchannel.pass') to be allowed to send data 
-to APRS-IS.
-
-To use a TNC, you need to set 'tncchannel.port' to the correct device name. 
-The set the baudrate, use 'tncchannel.baud'. An old fashioned serial 
-port is usually /dev/ttyS0 (corresponds to COM1 in Windows). A USB to serial 
-converter is typically /dev/ttyUSB0 or /dev/ttyACM0. This will depend on your 
-system and TNC setup.
-
-(some more documentation can be found here: http://hans.priv.no/la7eca/?id=aprsd)
-
-
-    
-ADDING USERS
-------------
-    
-To add a user 'la3t' go to the directory /usr/local/polaric-aprsd and type
-   ./polaric-passwd la3t
-       
-or whatever username you choose. You will be asked to choose a password.
-Edit server.ini and put the username in the 'user.update' field and if you want the
-user to have full administrator rights, add it to the 'user.admin' field.
-   user.update = la3t
-   
-The values of 'user.update' and 'user.admin' are regular expressions, so you can
-set it up to recognize many users. For instance, to allow two users to update: xxx 
-and yyy, write 
-  user.update = xxx|yyy
-
-Restart the server to make the changes effective.
-
-By default, all users have access to ka-map maps. This can be restricted if you
-want. See /var/www/aprs/ka-map/config/config.php for the ka-map setup. If 
-this access is restricted you may want to add usernames here too to
-grant access to users.
-
-
-
-CLIENT SETUP
-------------
-
-Map-layers, default map views and filters can be configured in the file
-    /var/www/aprs/mapconfig.js
-    
+More documentation on the project can be found here: 
+http://aprs.no/dokuwiki/doku.php?id=polaricserver
 
