@@ -31,21 +31,46 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
     public AprsPoint(Reference p)
       { super(p); }
       
+      
+    /** 
+     * Abort all waiters. See Notifier class. 
+     * @param retval Return value: true=ok, false=was aborted.
+     */
     public static void abortWaiters(boolean retval)
       { _change.abortAll(retval); }
       
+      
+    /**
+     * Wait for change of state. Blocks calling thread until any object changes. 
+     *
+     * @param clientid Unique numbe for calling thread.
+     * @return true=ok, false=was aborted.
+     */
     public static boolean waitChange(long clientid)
        { return waitChange(null, null, clientid); }
        
+       
+     /**
+     * Wait for change of state within an area. Blocks calling thread until any object
+     * inside the specified area changes. 
+     *
+     * @param uleft Upper left corner of the rectangular area of interest.
+     * @param lright Lower right corner of the rectangular area of interest.
+     * @param clientid Unique numbe for calling thread.
+     * @return true=ok, false=was aborted.
+     */
     public static boolean waitChange(UTMRef uleft, UTMRef lright, long clientid) 
        { return _change.waitSignal(uleft, lright, clientid); } 
 
+       
     protected static boolean changeOf(String x, String y)
        { return x != y || (x != null && !x.equals(y)); }   
-         
+       
+       
     public static void setDB(StationDB db)
        { _db = db; }   
-         
+       
+       
     protected char        _symbol; 
     protected char        _altsym; 
     protected int         _ambiguity = 0;
@@ -87,16 +112,27 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
        
        
     public abstract String getIdent();
-
-    public String getDisplayId(boolean usealias)
-       { return (usealias && _alias != null) ? _alias : getIdent().replaceFirst("@.*",""); }    
-    
-    public String getDisplayId()
-       { return getDisplayId(true); }
        
        
     public String getAlias()
        { return _alias; }
+       
+    
+    /** 
+     * Get identifier for display on map. 
+     * returns callsign or alias. 
+     * @param usealias If true, return alias instead of callsign if set. 
+     */
+    public String getDisplayId(boolean usealias)
+       { return (usealias && _alias != null) ? _alias : getIdent().replaceFirst("@.*",""); }    
+    
+    
+    /** 
+     * Get identifier for display on map. 
+     * returns callsign or alias. 
+     */
+    public String getDisplayId()
+       { return getDisplayId(true); }
                
         
     public synchronized void reset()
@@ -145,7 +181,10 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
     public boolean isPersistent()
        { return _persistent; }
        
-       
+    /**
+     * Set object to be persistent. I.e. it is not deleted by garbage collection
+     * even if expired. 
+     */
     public void setPersistent(boolean p)
        { _persistent = p; }
     
@@ -198,6 +237,13 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
     protected void checkForChanges() {} 
     
     
+    /**
+     * Update position of the object. 
+     *
+     * @param ts Timestamp (time of update). If null, the object will be timeless/permanent.
+     * @param newpos Position coordinates.
+     * @param ambiguity 
+     */    
     public void updatePosition(Date ts, Reference newpos, int ambiguity)
     {
          if (_position == null)
@@ -208,8 +254,25 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
     }
         
         
-    public abstract void update(Date ts, AprsHandler.PosData pd, String descr, String pathinfo);        
+    /**
+     * Manual update of position. 
+     *
+     * @param ts Timestamp (time of update). If null, the object will be timeless/permanent.
+     * @param pd Position data (position, symbol, ambiguity, etc..)
+     * @param descr Comment field. 
+     * @param path Digipeater path of containing packet. 
+     */    
+    public abstract void update(Date ts, AprsHandler.PosData pd, String descr, String path);        
         
+        
+    /** 
+     * Return true if object has expired. 
+     */    
     public abstract boolean expired();
+    
+   
+    /**
+     * Return false if object should not be visible on maps. If it has expired.
+     */
     public boolean visible() { return !expired(); }
 }

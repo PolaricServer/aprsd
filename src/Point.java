@@ -36,16 +36,20 @@ public abstract class Point implements Serializable,  Cloneable
           
     
     /**
-     * Test if position is inside of the rectangular area defined by uleft (upper left corner)
+     * Test if position is inside of a rectangular area. The area is defined by uleft (upper left corner)
      * and lright (lower right corner). Assume that uleft and lright are within the same
      * UTM zone. 
+     * @param uleft Upper left corner of the area. 
+     * @param lright Lower right corner of the area. 
+     * @param xext Percentage with which to extend the search area in x direction.
+     * @param yext Percentage with which to extend the search area in y direction.
      */          
     public boolean isInside(UTMRef uleft, UTMRef lright, double xext, double yext)
     {
         if (uleft == null || lright == null)
            return false; 
         
-        double xoff  = xext * (lright.getEasting()  - uleft.getEasting());
+        double xoff  = xext * (lright.getEasting() - uleft.getEasting());
         double yoff = yext * (lright.getNorthing() - uleft.getNorthing());
     
          /* FIXME: Add lat zone as well */
@@ -60,16 +64,30 @@ public abstract class Point implements Serializable,  Cloneable
     }
       
       
+     /**
+     * Test if position is inside of a rectangular area. The area is defined by uleft (upper left corner)
+     * and lright (lower right corner). Assume that uleft and lright are within the same
+     * UTM zone. 
+     * @param uleft Upper left corner of the area. 
+     * @param lright Lower right corner of the area. 
+     */
+    public boolean isInside(UTMRef uleft, UTMRef lright)
+       { return isInside(uleft, lright, 0, 0); }
+
+       
+    /** 
+     * Return distance (in meters) from another point. 
+     */
     public long distance (Point p)
       { return distance(p._position); }
       
-    
+      
+     /** 
+     * Return distance (in meters) from a reference. 
+     */
     public long distance(Reference p)
        { return Math.round(_position.toLatLng().distance(p.toLatLng()) * 1000); }
     
-    
-    public boolean isInside(UTMRef uleft, UTMRef lright)
-       { return isInside(uleft, lright, 0, 0); }
 
        
     public Reference getPosition ()   

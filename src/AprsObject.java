@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,14 +66,26 @@ public class AprsObject extends AprsPoint implements Serializable
        { return _owner; }
        
        
+    /**
+     * Set the object to be timeless/permanent. If true it allows other
+     * permanent objects o exist with the same name...
+     *
+     * @param p Set to true if we want the object to be timeless/permanent.
+     */
     public void setTimeless(boolean p)
        { _timeless = p; }
        
        
+    /**
+     * Return true if object is timeless/permanent.
+     */
     public boolean isTimeless()
        { return _timeless; }
        
        
+    /**
+     *  Set object to updated (with new timestamp).
+     */
     public synchronized void update()
     {  
         if (!_killed)
@@ -83,7 +95,15 @@ public class AprsObject extends AprsPoint implements Serializable
     }
     
     
-    public synchronized void update(Date ts, AprsHandler.PosData pd, String descr, String pathinfo)
+    /**
+     * Update position of the object. 
+     *
+     * @param ts Timestamp (time of update). If null, the object will be timeless/permanent.
+     * @param pd Position data (position, symbol, ambiguity, etc..)
+     * @param descr Comment field. 
+     * @param path Digipeater path of containing packet. 
+     */
+    public synchronized void update(Date ts, AprsHandler.PosData pd, String descr, String path)
     { 
          /* Should try to share code with Station class ?*/
          if (_symbol != pd.symbol || _altsym != pd.symtab || 
@@ -107,15 +127,27 @@ public class AprsObject extends AprsPoint implements Serializable
          _owner.setUpdated(new Date());
     }
     
+    
+    /** 
+     * Return true if object has expired. 
+     */ 
     public synchronized boolean expired() 
        { Date now = new Date(); 
          return _owner.expired() || now.getTime() > (_updated.getTime() + _expiretime) ; }
     
        
+    /**
+     * Return false if object should not be visible on maps. If it has expired
+     * or if it has been killed.
+     */
+    @Override
     public synchronized boolean visible()
        { return !_killed && !expired(); }
        
        
+    /**
+     * Kill the object. Mark it for removal.
+     */
     public void kill()
     {
         _killed = true;

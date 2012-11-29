@@ -329,7 +329,7 @@ public abstract class Channel extends Source implements Serializable
     
     /**
      * Do some preliminary parsing of report part of the packet. 
-     * Rreturn null if report is invalid. 
+     * Return null if report is invalid. 
      */
     protected Packet checkReport(Packet p) 
     {   

@@ -87,7 +87,11 @@ public class OwnPosition extends Station implements Runnable
         }
     }
     
-    
+    /**
+     * Set channels for APRS position updates. 
+     *  @param rfc RF channel (radio)
+     *  @param ic  Internet channel (APRS-IS)
+     */
     public synchronized void setChannels(Channel rfc, Channel ic)
     {
        _inetChan = ic; 
@@ -95,7 +99,8 @@ public class OwnPosition extends Station implements Runnable
     }
     
     
-    @Override public synchronized boolean expired()
+    @Override 
+    public synchronized boolean expired()
        { return false; }
        
        
@@ -168,10 +173,16 @@ public class OwnPosition extends Station implements Runnable
     
     protected int _timeSinceReport = 0;
     
+    
     /**
-     * Manual update of position.
-     * To be called from user interface. 
+     * Manual update of position. To be called from user interface. 
+     *
+     * @param ts Timestamp (time of update). If null, the object will be timeless/permanent.
+     * @param pd Position data (position, symbol, ambiguity, etc..)
+     * @param descr Comment field. 
+     * @param path Digipeater path of containing packet. 
      */
+    @Override
     public synchronized void updatePosition(Date t, Reference pos, char symtab, char symbol)
     {
           update(new Date(),new AprsHandler.PosData(pos, symbol, symtab), _comment, "");

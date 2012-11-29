@@ -1,4 +1,18 @@
-
+/* 
+ * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+ 
+ 
 package no.polaric.aprsd;
 import no.polaric.aprsd.*;
 import java.util.*;
@@ -29,14 +43,50 @@ public interface AprsHandler
           {pos=p; course=crs; speed=sp; symbol=sym; symtab=stab; }   
     }
 
-
+    /**
+     * Handle APRS position report.
+     * @param s Source channel.
+     * @param sender Callsign of sender.
+     * @param ts Timestamp
+     * @param newpos The updated position
+     * @param descr Comment field
+     * @param path Path (digipeaters) of containing packet. 
+     */
     public void handlePosReport(Source s, String sender, Date ts, PosData newpos,  
-            String descr, String pathinfo);
+            String descr, String path);
     
+    
+    /**
+     * Handle APRS status report.
+     * @param s Source channel.
+     * @param ts Timestamp.
+     * @param msg Status message.
+     */
     public void handleStatus(Source s, Date ts, String msg);
-                                   
+       
+       
+    /**
+     * Handle APRS message.
+     * @param s Source channel.
+     * @param ts Timestamp
+     * @param src Callsign of sender.
+     * @param dest Callsign of destination.
+     * @param msg Message text.
+     */
     public void handleMessage(Source s, Date ts, String src, String dest, String msg);
     
+    
+    
+    /**
+     * Handle raw APRS packet. This is called in addition to specific reports to allow
+     * handlers to log packets for instance. 
+     * @param s Source channel.
+     * @param ts Timestamp
+     * @param src Callsign of sender.
+     * @param dest Callsign of destination.   
+     * @param path Path (digipeaters) of containing packet.   
+     * @param txt Packet text.
+     */
     public void handlePacket(Source s, Date ts, String src, String dest, String path, String txt);
 
 
