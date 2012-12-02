@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ public class Igate implements Channel.Receiver, ManagedObject
        
     /**
      * Start the service.    
-     * @param a : the server interface. 
+     * @param a The server interface. 
      */
     public synchronized void activate(ServerAPI a) {
          /* Activating means subscribing to traffic from the two channels */
@@ -89,6 +89,8 @@ public class Igate implements Channel.Receiver, ManagedObject
      * Configure the igate with the channels to gate between. 
      * must be one RF channel and one APRS-IS channel. Note that the igate cannot 
      * be activated before these are properly set. 
+     * @param rf RF channel.
+     * @param inet Internet channel (APRS-IS).
      */   
     public synchronized void setChannels(Channel rf, Channel inet)
     {

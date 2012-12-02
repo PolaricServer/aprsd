@@ -182,7 +182,6 @@ public class OwnPosition extends Station implements Runnable
      * @param descr Comment field. 
      * @param path Digipeater path of containing packet. 
      */
-    @Override
     public synchronized void updatePosition(Date t, Reference pos, char symtab, char symbol)
     {
           update(new Date(),new AprsHandler.PosData(pos, symbol, symtab), _comment, "");
