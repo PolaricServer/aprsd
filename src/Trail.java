@@ -22,18 +22,17 @@ import java.io.Serializable;
  * Movement history of APRS stations. A history has a certain maximum length with
  * respect to time span. 
  */  
-public class Trail implements Iterable<Trail.Item>, Serializable
+public class Trail implements Iterable<TPoint>, Serializable
 {
     /**
      * History item. It is a geographical point with timestamp and some additional info.
      */
-    public static class Item extends Point {
-       public Date time; 
+    public static class Item extends TPoint {
        public int speed;
        public int course; 
        public String pathinfo;
        public Item(Date t, Reference p, int sp, int crs, String path)
-         { super(p); time = t; speed = sp; course = crs; pathinfo = path;} 
+         { super(t, p); speed = sp; course = crs; pathinfo = path;} 
     }
     
     private static long _maxAge = 1000 * 60 * 15;          // Max age of a history item (default 30 minutes) 
@@ -42,7 +41,7 @@ public class Trail implements Iterable<Trail.Item>, Serializable
     private static long _maxPause_ext = 1000 * 60 * 20;     
         
     
-    private LinkedList<Item> _items = new LinkedList();
+    private LinkedList<TPoint> _items = new LinkedList();
     private boolean _extended;
     private boolean _itemsExpired; 
     private int _sum_speed = 0;
@@ -77,13 +76,14 @@ public class Trail implements Iterable<Trail.Item>, Serializable
      */
     public Date oldestPoint()
     {
-       Item it =_items.peekLast();
+       TPoint it =_items.peekLast();
        if (it == null) return null;
-       else return it.time;
+       else return it.getTS();
     }
     
     
     public static final long mindist = 15;
+    
     
     /**
      * Add a position report to history.
@@ -95,23 +95,23 @@ public class Trail implements Iterable<Trail.Item>, Serializable
         boolean added = false;
          
         if (length() > 0 && "(GPS)".equals(path) && Math.abs(crs - getFirst().course) < 20 &&
-                 t.getTime() < getFirst().time.getTime() + 30000)
+                 t.getTime() < getFirst().getTS().getTime() + 30000)
            return added;
 
         /* New report is newer than the last report - put it first */
         if ( _items.size() == 0 || 
-            (t.getTime() >= getFirst().time.getTime() && getFirst().distance(p) > mindist)) {
+            (t.getTime() >= getFirst().getTS().getTime() && getFirst().distance(p) > mindist)) {
             _items.addFirst(new Item(t, p, sp, crs, path)); 
             added = true;
         }
         else {    
-           Item x=null, prev=null; 
+           TPoint x=null, prev=null; 
            /* New report is older than the last report - find the right place and put it there */
-           ListIterator<Item> it = _items.listIterator();
+           ListIterator<TPoint> it = _items.listIterator();
            while (it.hasNext()) {
               x = it.next();
               prev = x;
-              if (x.time.getTime() < t.getTime())
+              if (x.getTS().getTime() < t.getTime())
                  break;
            }
           it.previous();
@@ -124,41 +124,44 @@ public class Trail implements Iterable<Trail.Item>, Serializable
        return added;
     }
     
-
-    public List<Item> items()
+    
+    public List<TPoint> points()
        { return _items; }
        
-       
     public Item getFirst()
-       { return _items.getFirst(); }  
+       { return (Item) _items.getFirst(); }  
 
-
+       
+    public Item getLast()
+       { return (Item) _items.getLast(); } 
+       
+       
     public Item getPoint(int index)
-       { return _items.get(index-1); }
+       { return (Item) _items.get(index-1); }
        
        
        
     public Item getPointAt(Date t)
     {
-        ListIterator<Item> it = _items.listIterator();
-        Item x; 
+        ListIterator<TPoint> it = _items.listIterator();
+        TPoint x; 
         while (it.hasNext()) {
             x = it.next();
-            if (t.getTime()-1000 < x.time.getTime() && t.getTime()+1000 > x.time.getTime())
-              return x; 
+            if (t.getTime()-1000 < x.getTS().getTime() && t.getTime()+1000 > x.getTS().getTime())
+              return (Item) x; 
         }
         return null;
     }
     
     
-
-    public Iterator<Item> iterator()
+    public Iterator<TPoint> iterator()
     {
        cleanUp(new Date()); 
        return _items.iterator();
-    }
-    
+    }  
 
+    
+    
     /**
      * Remove the oldest entries in history.
      */
@@ -168,15 +171,15 @@ public class Trail implements Iterable<Trail.Item>, Serializable
            return;
         boolean ext = ((_sum_speed / _items.size()) < 15);
         
-        if ((_items.getFirst().time.getTime() + (ext ? _maxPause_ext : _maxPause)) < now.getTime() )
+        if ((_items.getFirst().getTS().getTime() + (ext ? _maxPause_ext : _maxPause)) < now.getTime() )
         { 
             _items.clear(); 
             _sum_speed = 0;
             _itemsExpired = true; 
             return; 
         }
-        while (!isEmpty() && (_items.getLast().time.getTime() + (ext ? _maxAge_ext : _maxAge)) < now.getTime()) {
-           _sum_speed -= _items.getLast().speed;
+        while (!isEmpty() && (_items.getLast().getTS().getTime() + (ext ? _maxAge_ext : _maxAge)) < now.getTime()) {
+           _sum_speed -= getLast().speed;
            _items.removeLast();
            _itemsExpired = true; 
         }

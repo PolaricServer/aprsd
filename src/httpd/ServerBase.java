@@ -223,18 +223,19 @@ public abstract class ServerBase
    }
    
    
+   
    /** 
     * Print a history trail of a moving station as a XML linestring object. 
     */
    protected void printTrailXml(PrintWriter out, String[] tcolor, 
-          Reference firstpos, Iterable<Trail.Item> h, UTMRef uleft, UTMRef lright)
+          Reference firstpos, Iterable<TPoint> h, UTMRef uleft, UTMRef lright)
    {
        boolean first = true;
        int state = 1, n = 0;
        UTMRef itx = toUTM(firstpos);  
        String t = "00000000000000";
        
-       for (Trail.Item it : h) 
+       for (TPoint it : h) 
        {       
           if (n==0) 
               out.println("   <linestring stroke=\"2\" opacity=\"1.0\" color=\""+ tcolor[0] +"\" color2=\""+ tcolor[1] +"\">");     
@@ -262,7 +263,10 @@ public abstract class ServerBase
           }
           else {
               itx = toUTM(it.getPosition());
-              t = xf.format(it.time);
+              if (it.getTS() == null) 
+                 t = "0";
+              else
+                 t = xf.format(it.getTS());
           }
        
        }

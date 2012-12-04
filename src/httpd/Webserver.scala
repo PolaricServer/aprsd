@@ -673,25 +673,25 @@ package no.polaric.aprsd.http
                    var i = 0;
                    var fp = _wfiledir /* FIXME FIXME fprefix(req) */
                    
-                   for (it <- h.items()) yield {
+                   for (it <- h.points()) yield {
                       i += 1
                       val arg = "'"+s.getIdent()+"', "+i
                       <tr onmouseover={"histList_hover("+arg+");"} 
                           onmouseout={"histList_hout("+arg+");"}
                           onclick = {"histList_click("+arg+");"} >
-                      <td> { tf.format(x.time) } </td>
+                      <td> { tf.format(x.getTS()) } </td>
                       <td> { if (x.speed >= 0) x.speed.toString else "" } </td>
                       <td> { if (x.speed > 0) _directionIcon(x.course, fp) else ""} </td>
-                      <td>{
+                      <td> {
                          val dist = x.getPosition().toLatLng().distance(it.getPosition().toLatLng())
-                         x = it;
+                         x = it.asInstanceOf[Trail.Item];
                          if (dist < 1)
                              "%3d m" format Math.round(dist*1000)
                          else
                              "%.1f km" format dist
                       }</td>
                       <td> { 
-                        TXT( cleanPath(it.pathinfo)) } </td>
+                        TXT( cleanPath(x.pathinfo)) } </td>
                       </tr>
                    }
                }
@@ -719,7 +719,7 @@ package no.polaric.aprsd.http
             <xml:group>
             <label for="callsign" class="lleftlab">Ident:</label>
             <label id="callsign"><b> { ident } </b></label>
-            { simpleLabel("time",  "lleftlab", "Tid:", TXT( df.format(item.time))) }
+            { simpleLabel("time",  "lleftlab", "Tid:", TXT( df.format(item.getTS()))) }
             { simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )  }
             { simpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course, fprefix(req)))  }
             <div id="traffic">

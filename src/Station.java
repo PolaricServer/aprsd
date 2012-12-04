@@ -215,7 +215,7 @@ public static class Status implements Serializable
         * certain distance from displayed area 
         */
        if (super.isInside(uleft, lright, 1, 1))
-        for (Trail.Item it : _trail) 
+        for (TPoint it : _trail) 
           if (it.isInside(uleft, lright))
              return true;
          
