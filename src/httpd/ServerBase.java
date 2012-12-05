@@ -224,21 +224,43 @@ public abstract class ServerBase
    
    
    
+   
+    protected void printTrailXml(PrintWriter out, String[] tcolor, 
+          Reference firstpos, Iterable<TPoint> h, UTMRef uleft, UTMRef lright)  
+    {
+        String pre  = "   <linestring stroke=\"2\" opacity=\"1.0\" color=\""+ tcolor[0] +"\" color2=\""+ tcolor[1] +"\">";
+        String post = "   </linestring>";     
+        printPoints(out, pre, post, firstpos, h, uleft, lright); 
+    }
+    
+    
+    
+    protected void printPointCloud(PrintWriter out, String color, 
+          Iterable<TPoint> h, UTMRef uleft, UTMRef lright)  
+    {
+        String pre  = "   <pointcloud opacity=\"0.6\" color2=\""+color+"\">";
+        String post = "   </pointcloud>";    
+        printPoints(out, pre, post, null, h, uleft, lright);
+    }   
+   
+   
+   
+   
    /** 
     * Print a history trail of a moving station as a XML linestring object. 
     */
-   protected void printTrailXml(PrintWriter out, String[] tcolor, 
+   protected void printPoints(PrintWriter out, String pre, String post, 
           Reference firstpos, Iterable<TPoint> h, UTMRef uleft, UTMRef lright)
    {
        boolean first = true;
        int state = 1, n = 0;
-       UTMRef itx = toUTM(firstpos);  
+       UTMRef itx = (firstpos == null ? null :  toUTM(firstpos));  
        String t = "00000000000000";
        
        for (TPoint it : h) 
        {       
           if (n==0) 
-              out.println("   <linestring stroke=\"2\" opacity=\"1.0\" color=\""+ tcolor[0] +"\" color2=\""+ tcolor[1] +"\">");     
+              out.println( pre );     
   
           if (itx != null) {       
               if (!first) 
@@ -259,7 +281,7 @@ public abstract class ServerBase
        
           if (n++ > 100) {
               n = 0;
-              out.println("   </linestring>");
+              out.println(post);
           }
           else {
               itx = toUTM(it.getPosition());
@@ -274,7 +296,7 @@ public abstract class ServerBase
            out.println(", "+ (int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()) +
                          " "+t);  // FIXME: get first time
        if (n > 0) 
-          out.println("   </linestring>");
+          out.println(post);
    }
      
 }
