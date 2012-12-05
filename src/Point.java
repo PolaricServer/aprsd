@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import java.io.Serializable;
  * Every point has a location
  */
  
-public abstract class Point implements Serializable,  Cloneable
+public class Point implements Serializable,  Cloneable
 {             
     public static final float KNOTS2KMH = (float) 1.853;
     public static final float KNOTS2MPS = (float) 0.5148;
@@ -103,4 +103,7 @@ public abstract class Point implements Serializable,  Cloneable
         return ( (Math.abs(crs - prev) > limit) &&
            Math.min (Math.abs((crs-360) - prev), Math.abs(crs - (prev-360))) > limit);
     }
+
 }
+
+
