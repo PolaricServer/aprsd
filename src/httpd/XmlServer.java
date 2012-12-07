@@ -188,12 +188,14 @@ public class XmlServer extends ServerBase
                   if (ref == null) continue; 
                   
                   String title = s.getDescr() == null ? "" 
-                             : "title=\"[" + fixText(s.getIdent()) + "] " + fixText(s.getDescr()) + "\"";
+                             : " title=\"[" + fixText(s.getIdent()) + "] " + fixText(s.getDescr()) + "\"";
+                  String flags = " flags=\"a" + (s.isInfra() ? "i" : "") + "\"";
+
                   String icon = _wfiledir + "/icons/"+ (s.getIcon() != null ? s.getIcon() : _icon);    
                 
                   out.println("<point id=\""+fixText(s.getIdent())+"\" x=\""
-                               + (int) Math.round(ref.getEasting()) + "\" y=\"" + (int) Math.round(ref.getNorthing())+ "\" " 
-                               + title + (s.isChanging() ? " redraw=\"true\"" : "") +
+                               + (int) Math.round(ref.getEasting()) + "\" y=\"" + (int) Math.round(ref.getNorthing())+ "\"" 
+                               + title + flags + (s.isChanging() ? " redraw=\"true\"" : "") +
                                ((s instanceof AprsObject) && _api.getDB().getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""))  ? " own=\"true\"":"") +">");
                   out.println("   <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
         
