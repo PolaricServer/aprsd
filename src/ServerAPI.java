@@ -49,6 +49,13 @@ import java.util.*;
        public void addHttpHandler(Object obj, String prefix);
        
        
+       /** Add HTTP handlers (webservices).
+        * @param class  Class name. 
+        * @param prefix Optional URL prefix for services of this object. 
+        */
+       public void addHttpHandlerCls(String cn, String prefix);
+       
+       
        /** Get APRS incoming packet handler object. */
        public AprsHandler getAprsHandler();
        

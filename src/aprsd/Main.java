@@ -63,6 +63,17 @@ public class Main implements ServerAPI
    
    public void addHttpHandler(Object obj, String prefix)
     { ws.addHandler(obj, prefix); }
+
+   public void addHttpHandlerCls(String cn, String prefix)
+    {
+       try{
+          Class cls = Class.forName(cn); 
+          Constructor[] cc = cls.getConstructors();
+          ws.addHandler(cc[0].newInstance(this), prefix);
+       }
+       catch (Exception e)
+        { System.out.println("*** WARNING: cannot instantiate class: "+e); }
+    }
     
    public ServerAPI.ServerStats getHttps()
     { return ws; } 
