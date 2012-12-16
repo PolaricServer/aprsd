@@ -16,6 +16,7 @@ import java.util.*;
       /* Now, what methods do we need here? Other interfaces.
        * Do we need StationDB? */
        
+       
        /** Get data interface. */
        public StationDB getDB();
        
@@ -100,7 +101,7 @@ import java.util.*;
        /** Generic dictionary of objects. 
         * Plugins may use this to exchange references to interfaces to their services. 
         */
-       public Map<String, Object> getObjectMap();
+       public Map<String, Object> properties();
        
        
        /** Get software version. */

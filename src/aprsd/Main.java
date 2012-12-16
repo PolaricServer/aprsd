@@ -92,8 +92,8 @@ public class Main implements ServerAPI
    public int getIntProperty(String pname, int dvalue)
     {  return Integer.parseInt(_config.getProperty(pname, ""+dvalue).trim()); }
            
-   public Map<String, Object> getObjectMap()
-    { return PluginManager.getObjectMap(); }
+   public Map<String, Object> properties()
+    { return PluginManager.properties(); }
    
    public String getVersion()
     { return version; }

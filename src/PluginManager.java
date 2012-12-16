@@ -39,13 +39,13 @@ public class PluginManager
    private static Map<String, Plugin> _plugins = new HashMap<String, Plugin>();
     
     /* Name-Object map (objects posted by plugin to be used by core or other plugins) */
-   private static Map<String, Object> _objects = new HashMap<String, Object>();
+   private static Map<String, Object> _properties = new HashMap<String, Object>();
    
    private static ServerAPI api;
 
    /* FIXME: Shorter path to get/put methods */
-   public static Map<String, Object> getObjectMap() 
-     { return _objects; }
+   public static Map<String, Object> properties() 
+     { return _properties; }
        
    
    /** Get interfaces of all registered plugins. */
