@@ -1,4 +1,5 @@
-
+import java.util._
+import java.io._
 import scala.xml._
 import org.simpleframework.transport.connect.Connection
 import org.simpleframework.transport.connect.SocketConnection
@@ -177,6 +178,42 @@ package no.polaric.aprsd.http
 
 
 
+
+   /**
+    * Selection of icon. List available icons. 
+    * @param s object to select icon for (see what is already selected)
+    * @param fprefix  file system prefix for icon files
+    */
+   def iconSelect(s: AprsPoint, fprefix: String): NodeSeq =
+   {
+       val fsprefix = if (fprefix.charAt(0) == '/') fprefix.substring(1,fprefix.length()) 
+                      else fprefix 
+       val icondir = new File(fsprefix)
+       val flt = new FilenameFilter()
+           { def accept(dir:File, f: String): boolean = f.matches(".*\\.(png|gif|jpg)") } 
+       val cmp = new Comparator[File] ()
+           { def compare (f1: File, f2: File) : int = f1.getName().compareTo(f2.getName()) } 
+       
+       val files = icondir.listFiles(flt);
+       <div id="iconselect">    
+       { if (s != null)
+         <input type="radio" name="iconselect" value="system"
+                   checked={if (s.iconIsNull()) "checked" else null:String }>Automatisk</input>
+       }            
+       { if (files != null) {
+           Arrays.sort(files, cmp);
+           for (f:File <- files) yield
+              <input type="radio" name="iconselect" value={f.getName()}
+                  checked={if (s != null && !s.iconIsNull() && f.getName().equals(s.getIcon())) "checked"
+                           else null:String}>
+              <img src={fprefix+f.getName()} width="22" height="22" />&nbsp;
+              </input>
+         }
+         else null
+       }
+       </div>
+    }
+   
   
   }
 

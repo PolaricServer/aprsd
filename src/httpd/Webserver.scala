@@ -431,38 +431,6 @@ package no.polaric.aprsd.http
 
 
 
-   /**
-    * Selection of icon. List available icons. 
-    */
-   def iconSelect(s: AprsPoint, fprefix: String): NodeSeq =
-   {
-       val webdir = System.getProperties().getProperty("webdir", ".")
-       val icondir = new File(webdir+"/icons")
-      
-       val flt = new FilenameFilter()
-           { def accept(dir:File, f: String): boolean = f.matches(".*\\.(png|gif|jpg)") } 
-       val cmp = new Comparator[File] ()
-           { def compare (f1: File, f2: File) : int = f1.getName().compareTo(f2.getName()) } 
-       
-       val files = icondir.listFiles(flt);
-       <div id="iconselect">    
-       <input type="radio" name="iconselect" value="system"
-                   checked={if (s.iconIsNull()) "checked" else null:String }>Automatisk</input>
-       { if (files != null) {
-           Arrays.sort(files, cmp);
-           for (f:File <- files) yield
-              <input type="radio" name="iconselect" value={f.getName()}
-                  checked={if (!s.iconIsNull() && f.getName().equals(s.getIcon())) "checked"
-                           else null:String}>
-              <img src={fprefix+"/icons/"+f.getName()} width="22" height="22" />&nbsp;
-              </input>
-         }
-         else null
-       }
-       </div>
-    }
-   
-
 
    def handle_station(req : Request, res : Response)  = 
        _handle_station(req, res, false)
@@ -593,7 +561,7 @@ package no.polaric.aprsd.http
                   <input id="nalias" name="nalias" width="10"
                          value={ if (x.getAlias()==null) "" else x.getAlias()} ></input>
                   <br/>
-                  { iconSelect(x, fprefix(req)) }
+                  { iconSelect(x, fprefix(req)+"/icons/") }
                   </div>
                else null        
             }
