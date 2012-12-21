@@ -153,7 +153,7 @@ public class XmlServer extends ServerBase
         for (Signs.Item s: Signs.search(scale, uleft, lright))
         {
             UTMRef ref = toUTM(s.getPosition()); 
-            if (ref == null || !s.visible(scale) || !s.isInside(uleft, lright))
+            if (ref == null)
                 continue;
             String href = s.getUrl() == null ? "" : "href=\"" + s.getUrl() + "\"";
             String title = s.getDescr() == null ? "" : "title=\"" + fixText(s.getDescr()) + "\"";

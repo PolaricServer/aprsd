@@ -16,6 +16,7 @@ public class Signs
      */
     public interface ExtDb {
         public Iterable<Item> search(long scale, UTMRef uleft, UTMRef lright);
+        public void close(); 
     }
     
     
@@ -90,21 +91,34 @@ public class Signs
        
        
     
-    public static Iterable<Item>
+    public static synchronized Iterable<Item>
           search(long scale, UTMRef uleft, UTMRef lright)
     {
-         if (_signs._extdb != null)
-            return _signs._extdb.search(scale, uleft, lright); 
-            
          if (uleft==null || lright==null)
             return _signs._list;
-         
+          
+          
          LinkedList<Item> result = new LinkedList();
          for (Item s: _signs._list)
             if (s.visible(scale) && s.isInside(uleft, lright))
                 result.add(s);
-        return result;
+        
+         if (_signs._extdb != null) {
+            /* Copy items from database resultset. This may be a little
+             * inefficient, so consider to support returning the resultset directly. 
+             * However, this allows us to mix it with signs from static file rather easily.
+             */
+            for (Item s: _signs._extdb.search(scale, uleft, lright)) 
+               result.add(s);
+            
+            _signs._extdb.close();   
+         }
+         return result;
     }
 
-    public static List<Item> getList() { return _signs._list; }
+    
+    public static List<Item> getList() 
+        { return _signs._list; }
+    
+
 }
