@@ -1,8 +1,8 @@
-polaric-aprsd (1.0.99+1.1-beta3) UNRELEASED; urgency=low
+polaric-aprsd (1.0.99+1.1-beta3) unstable; urgency=low
 
-  * Fix some small issues 
+  * Further hacking. Move to git.  
 
- -- Øyvind hanssen <ohanssen@acm.org>  Wed, 31 Oct 2012 20:30:30 +0100
+ -- Øyvind hanssen <ohanssen@acm.org>  Fri, 28 Dec 2012 01:05:53 +0100
 
 polaric-aprsd (1.0.99+1.1-beta2) unstable; urgency=low
 

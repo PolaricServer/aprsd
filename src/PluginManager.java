@@ -18,14 +18,8 @@ public class PluginManager
    /**
     * Plugin start/stop interface. All plugins should implement this. 
     */
-   public interface Plugin /* FIXME: extends Managed */
+   public interface Plugin extends ManagedObject 
    {
-      /** Start the plugin.  */
-       public void activate(ServerAPI api);
-      
-      /**  Stop the plugin. */ 
-       public void deActivate();
-       
       /** Return an array of other component (class names) this plugin depends on. */
        public String[] getDependencies();
        
@@ -113,3 +107,4 @@ public class PluginManager
     }
     
 }
+

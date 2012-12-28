@@ -145,10 +145,9 @@ public class Main implements ServerAPI
     
     
     public void start()
-      // Start the Thread, accept incoming connections   
     {
         try {
-
+           properties().put("API", this);
                    
            /* Start HTTP server */
            int http_port = getIntProperty("httpserver.port", 8081);

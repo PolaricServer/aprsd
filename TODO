@@ -8,25 +8,41 @@ V.1.1
 * Plugins in status display
      DONE.
 
-* Look at httpd/ServerBase.java: Can config parameters be made static to reduce 
-  redundant storage when there are multiple instances? 
-
-* Configuration support. E.g. parsing boolean values. 
-  api.getConfig - direct access to parameter.
-     DONE.
-
 * Support for run-time changes to config and re-loading config in configurable classes 
   and objects. 
   
 * Support for persistence of config overrides. 
 
 * Test 
-    - TNC
-    - Igating
     - Iframe mode and API
     - IE? 
    
-    
+* -java-home => -home (jsvc)  -- Check also 1.0 branch
+
+
+
+Configuration support
+---------------------
+
+* Configuration support. E.g. parsing boolean values. 
+  api.getConfig - direct access to parameter.
+     DONE.
+     
+* Make a list of class <-> parameter relationships
+     DONE.
+     
+* Consider per-use reading of parameters
+     
+* Look at httpd/ServerBase.java: Can some config parameters be made static
+  to reduce redundant storage when there are multiple instances? 
+
+* Make channel classes and other relevant classes implement 
+  ManagedObject interface. 
+
+* Support for run-time overrides to config parameters.
+  
+* Support for persistence of config overrides. 
+
 
     
 Channels/Sources
@@ -80,30 +96,6 @@ API, Extensibility
 * Framework for web-interface extensions in Scala. 
 
 
-
-Database plugin
----------------
-
-* [C] Save trail searches in case of browser restart. 
-
-* Consider saving searches in database for later reference -> This is equivalent missions!!
-       
-* [C] API functions for trail search. Test with iframe. 
-
-* Implement mission support - Server side
-     STARTED
-
-* Activate and test GIST indexing for positions. Indexing for trail search. 
-     DONE.
-
-* Fix error where lat/long components are swapped. 
-     DONE.
-     
-* Implement search for positions through a given node.
-     STARTED.
-     
-* Implement simple geo-objects (signs). 
-     STARTED.
 
 
 Other. 
