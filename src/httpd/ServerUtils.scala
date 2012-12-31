@@ -182,13 +182,17 @@ package no.polaric.aprsd.http
    /**
     * Selection of icon. List available icons. 
     * @param s object to select icon for (see what is already selected)
-    * @param fprefix  file system prefix for icon files
+    * @param wprefix  web prefix 
+    * @param fprefix for icon files (relative to wprefix)
     */
-   def iconSelect(s: AprsPoint, fprefix: String): NodeSeq =
+   def iconSelect(s: AprsPoint, wprefix: String, fprefix: String): NodeSeq =
    {
+       val webdir = System.getProperties().getProperty("webdir", ".")
        val fsprefix = if (fprefix.charAt(0) == '/') fprefix.substring(1,fprefix.length()) 
                       else fprefix 
-       val icondir = new File(fsprefix)
+       System.out.println("ICONDIR="+webdir+"/"+fsprefix);
+       val icondir = new File(webdir+"/"+fsprefix)
+       
        val flt = new FilenameFilter()
            { def accept(dir:File, f: String): boolean = f.matches(".*\\.(png|gif|jpg)") } 
        val cmp = new Comparator[File] ()
@@ -206,7 +210,7 @@ package no.polaric.aprsd.http
               <input type="radio" name="iconselect" value={f.getName()}
                   checked={if (s != null && !s.iconIsNull() && f.getName().equals(s.getIcon())) "checked"
                            else null:String}>
-              <img src={fprefix+f.getName()} width="22" height="22" />&nbsp;
+              <img src={wprefix+fprefix+f.getName()} width="22" height="22" />&nbsp;
               </input>
          }
          else null

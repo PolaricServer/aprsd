@@ -561,7 +561,7 @@ package no.polaric.aprsd.http
                   <input id="nalias" name="nalias" width="10"
                          value={ if (x.getAlias()==null) "" else x.getAlias()} ></input>
                   <br/>
-                  { iconSelect(x, fprefix(req)+"/icons/") }
+                  { iconSelect(x, fprefix(req), "/icons/") }
                   </div>
                else null        
             }
