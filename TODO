@@ -1,23 +1,37 @@
 
-V.1.1 
------
+V.1.1 (januar 2013)
+-------------------
+
+First development release. Early january. 
 
 * Duplicate connections to parent server? Fix. 
      DONE.
      
 * Plugins in status display
      DONE.
-
-* Support for run-time changes to config and re-loading config in configurable classes 
-  and objects. 
-  
-* Support for persistence of config overrides. 
-
-* Test 
-    - Iframe mode and API
-    - IE? 
    
-* -java-home => -home (jsvc)  -- Check also 1.0 branch
+* Polaric Droid should now be based on 1.1. 
+
+
+
+V.1.2 (februar 2013)
+--------------------
+
+* Implement and test configuration support (complete list below). Config plugin prototype. 
+
+
+
+V.1.3 (march 2013)
+------------------
+
+GoOpen conference! 
+
+
+V.1.4 (april 2013)
+------------------
+
+NRRL dagene.
+
 
 
 
@@ -78,9 +92,10 @@ Web Service
 -----------
 
 * XML support for a collection of points (without anything else). something a la <linestring>?
-  
+       DONE (pointcloud)
+       
 * [C] XML support for a displaying a collection of points (without anything else).
-
+       DONE (pointcloud)
 
 
 
@@ -100,6 +115,10 @@ API, Extensibility
 
 Other. 
 -----
+
+* Import from GPX files (to layers?)
+
+* Export to GPX files 
 
 * App: Autodiscovery of servers on local network
 
@@ -122,8 +141,5 @@ Other.
 * Permissions (objects, other)? Sender id? Consider simple user profile support? 
 
 * More configurable view profiles?  Filter framework? Scripting?
-
-* Traffic load statistics (per station). 
-
 
  
