@@ -1,39 +1,4 @@
 
-V.1.1 (januar 2013)
--------------------
-
-First development release. Early january. 
-
-* Duplicate connections to parent server? Fix. 
-     DONE.
-     
-* Plugins in status display
-     DONE.
-   
-* Move to OpenLayers 2.12
-     DONE.
-     
-* [M] Polaric Droid should now be based on 1.1. 
-     DONE.
-   
-* Weather forecast day name bug?
-     DONE.
-
-* [M] Hide overlay when pinch-zooming. 
-     DONE. 
-
-* [M] Alternative CSS for map layer selection. 
-     DONE. Not complete. 
-
-* Show/hide signs when zooming. Fix. 
-     DONE.
-
-* [M] Style adjustments for "siste bevegelser" etc.. 
-     DONE.
-
-
-
-
 V.1.2 (february 2013)
 --------------------
 
