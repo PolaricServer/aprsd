@@ -10,14 +10,44 @@ First development release. Early january.
 * Plugins in status display
      DONE.
    
-* Polaric Droid should now be based on 1.1. 
+* Move to OpenLayers 2.12
+     DONE.
+     
+* [M] Polaric Droid should now be based on 1.1. 
+     DONE.
+   
+* Weather forecast day name bug?
+     DONE.
+
+* [M] Hide overlay when pinch-zooming. 
+     DONE. 
+
+* [M] Alternative CSS for map layer selection. 
+     DONE. Not complete. 
+
+* Show/hide signs when zooming. Fix. 
+     DONE.
+
+* [M] Style adjustments for "siste bevegelser" etc.. 
+     DONE.
 
 
 
-V.1.2 (februar 2013)
+
+V.1.2 (february 2013)
 --------------------
 
 * Implement and test configuration support (complete list below). Config plugin prototype. 
+
+* [M] Better styling of forms for mobile. Consider JQuery mobile.
+
+* [M] Remove rubber-zoom button? Something more useful?
+
+* [M] Adjust CSS for scale/status box for mobile.
+
+* Use OL offline tile caching.
+
+* Allow channels to be visible for logged in or SAR users only. 
 
 
 
