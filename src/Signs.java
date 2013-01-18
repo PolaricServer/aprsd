@@ -24,17 +24,21 @@ public class Signs
      * Sign item. A pointobject plus scale and url.
      */
     public static class Item extends PointObject {
-        public long _maxScale;
-        public String _url;
+        private int _id;
+        private long _maxScale;
+        private String _url;
         
         public boolean visible(long scale)
           { return scale <= _maxScale; }
           
+        public int getId() 
+          { return _id; }
+          
         public String getUrl()
           { return _url; }
         
-        public Item (Reference r, long sc, String ic, String url, String txt)
-          { super(r);  _maxScale = sc; _icon = ic; _url = url; _description = txt; 
+        public Item (int i, Reference r, long sc, String ic, String url, String txt)
+          { super(r);  _id = i; _maxScale = sc; _icon = ic; _url = url; _description = txt; 
             if (_url.matches("-|null|none")) 
                  _url = null; }   
     }
@@ -76,7 +80,7 @@ public class Signs
                    Reference pos = new UTMRef( Integer.parseInt( x[0].substring(0,2)), 
                                                x[0].charAt(2),
                                                easting, northing);
-                   Item it = new Item(pos, scale, x[4], x[5], x[6]);
+                   Item it = new Item(-1, pos, scale, x[4], x[5], x[6]);
                    _list.add(it);
                }
             }     

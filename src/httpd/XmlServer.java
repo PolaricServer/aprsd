@@ -159,7 +159,7 @@ public class XmlServer extends ServerBase
             String title = s.getDescr() == null ? "" : "title=\"" + fixText(s.getDescr()) + "\"";
             String icon = _wfiledir + "/icons/"+ s.getIcon();    
            
-            out.println("<point id=\"__sign" + (i++) + "\" x=\""
+            out.println("<point id=\""+ (s.getId() < 0 ? "__sign" + (i++) : "__"+s.getId()) + "\" x=\""
                          + (int) Math.round(ref.getEasting()) + "\" y=\"" + (int) Math.round(ref.getNorthing())+ "\" " 
                          + href + " " + title+">");
             out.println("   <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
