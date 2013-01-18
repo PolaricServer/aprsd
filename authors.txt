@@ -1,0 +1,3 @@
+oivindh = Øyvind Hanssen <ohanssen@acm.org>
+la7eca = Øyvind Hanssen <ohanssen@acm.org>
+ohanssen = Øyvind Hanssen <ohanssen@acm.org>
