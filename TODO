@@ -10,7 +10,7 @@ V.1.2 (february 2013)
 
 * [M] Adjust CSS for scale/status box for mobile.
 
-* Use OL offline tile caching.
+* [C] Use OL offline tile caching.
 
 * Allow channels to be visible for logged in or SAR users only. 
 
