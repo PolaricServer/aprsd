@@ -483,7 +483,7 @@ package no.polaric.aprsd.http
         def fields(req : Request): NodeSeq =
             <xml:group>  
             <label for="callsign" class="leftlab">Ident:</label>
-            <label id="callsign"><b> { x.getIdent().replaceFirst("@.*","") } </b></label>
+            <label id="callsign"><b> { if (x.getIdent != null) x.getIdent().replaceFirst("@.*","") else "" } </b></label>
 
             { if (!simple)
                  simpleLabel("symbol", "leftlab", "Symbol:",TXT( x.getSymtab()+" "+x.getSymbol())) else null }

@@ -99,15 +99,12 @@ public class HttpServer implements Container, ServerAPI.ServerStats
        
        try {
          String uri = req.getTarget().replaceAll("\\?.*", ""); 
-         
          /* For compatibility. Temporary fix */
          uri = uri.replaceFirst("sec-mapdata", "mapdata_sec");
          uri = uri.replaceFirst("sec-station", "station_sec");
          
-         long time = System.currentTimeMillis();
+         long stime = System.currentTimeMillis();
          resp.set("Server", "Polaric APRSD 1.1");
-         resp.setDate("Date", time);
-         resp.setDate("Last-Modified", time); 
          resp.set("Content-Type", "text/html; charset=utf-8");
          
          _Handler h = _handlers.get(uri);
@@ -121,9 +118,18 @@ public class HttpServer implements Container, ServerAPI.ServerStats
             resp.setText("Not found");
             out.close();
          }
+         
+         long time = System.currentTimeMillis();  
+         long t = time - stime;
+
+     //    System.out.println("*** HTTP HANDLE: ["+ t +" ms]: " + 
+     //          req.getTarget()+ (req.getForm().get("wait") != null ? "  WAIT=TRUE" : ""));
+         resp.setDate("Date", time);
+         resp.setDate("Last-Modified", time);
+         
        }
        catch (Throwable e) 
-          { System.out.println("*** HTTP REQ exception: "+e.getMessage());
+          { System.out.println("*** HTTP REQ exception: "+e);
             e.printStackTrace(System.out); } 
        finally {
           synchronized(this) { _requests--; } }
