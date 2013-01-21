@@ -185,33 +185,37 @@ package no.polaric.aprsd.http
     * @param wprefix  web prefix 
     * @param fprefix for icon files (relative to wprefix)
     */
-   def iconSelect(s: AprsPoint, wprefix: String, fprefix: String): NodeSeq =
+   def iconSelect(s: PointObject, wprefix: String, fprefix: String): NodeSeq =
    {
        val webdir = System.getProperties().getProperty("webdir", ".")
        val fsprefix = if (fprefix.charAt(0) == '/') fprefix.substring(1,fprefix.length()) 
                       else fprefix 
-       System.out.println("ICONDIR="+webdir+"/"+fsprefix);
+
        val icondir = new File(webdir+"/"+fsprefix)
        
        val flt = new FilenameFilter()
            { def accept(dir:File, f: String): boolean = f.matches(".*\\.(png|gif|jpg)") } 
        val cmp = new Comparator[File] ()
            { def compare (f1: File, f2: File) : int = f1.getName().compareTo(f2.getName()) } 
-       
-       val files = icondir.listFiles(flt);
+       val files = icondir.listFiles(flt); 
+
        <div id="iconselect">    
-       { if (s != null)
-         <input type="radio" name="iconselect" value="system"
-                   checked={if (s.iconIsNull()) "checked" else null:String }>Automatisk</input>
+       {  if (s != null && s.isInstanceOf[AprsPoint])  
+            <xml:group>
+            <input type="radio" name="iconselect" value="system"
+                   checked={if (s.iconIsNull()) "checked" else null:String } /> Automatisk 
+            </xml:group>
+          else null
        }            
        { if (files != null) {
-           Arrays.sort(files, cmp);
-           for (f:File <- files) yield
+           Arrays.sort(files, cmp)
+           for (f:File <- files) yield {
+              <xml:group>
               <input type="radio" name="iconselect" value={f.getName()}
-                  checked={if (s != null && !s.iconIsNull() && f.getName().equals(s.getIcon())) "checked"
-                           else null:String}>
+                  checked={ if (s != null && !s.iconIsNull() && f.getName().equals(s.getIcon())) "checked" else null:String } />
               <img src={wprefix+fprefix+f.getName()} width="22" height="22" />&nbsp;
-              </input>
+              </xml:group> 
+           }
          }
          else null
        }

@@ -191,6 +191,8 @@ public class OwnObjects implements Runnable
      */
     protected void sendObjectReport(AprsObject obj, boolean delete)
     {
+       if (obj.getPosition() == null)
+         return;
        String id = (obj.getIdent().replaceFirst("@.*","") + "         ").substring(0,9);
        Channel.Packet p = new Channel.Packet();
        p.from = _api.getOwnPos().getIdent();
@@ -262,7 +264,7 @@ public class OwnObjects implements Runnable
             }
                  
             Thread.sleep(_txPeriod * 1000 - 3000);
-         } catch (Exception e) { System.out.println("*** OWNOBJECTS THREAD: "+e); }
+         } catch (Exception e) { System.out.println("*** OWNOBJECTS THREAD: "+e); e.printStackTrace(System.out); }
        }
     }
    

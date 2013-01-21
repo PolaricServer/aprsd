@@ -234,7 +234,8 @@ package no.polaric.aprsd.http
 
    def handle_deleteobject(req : Request, res: Response) =
    {
-       val id = req.getParameter("objid").replaceFirst("@.*", "")
+       var id = req.getParameter("objid")
+       id = if (id != null) id.replaceFirst("@.*", "") else null
        val prefix = <h2>Slett objekt</h2>
        
        def fields(req : Request): NodeSeq =

@@ -24,15 +24,18 @@ public class Signs
      * Sign item. A pointobject plus scale and url.
      */
     public static class Item extends PointObject {
-        private int _id;
-        private long _maxScale;
-        private String _url;
+        protected int _id;
+        protected long _maxScale;
+        protected String _url;
         
         public boolean visible(long scale)
           { return scale <= _maxScale; }
           
         public int getId() 
           { return _id; }
+          
+        public long getScale()
+          { return _maxScale; }
           
         public String getUrl()
           { return _url; }
