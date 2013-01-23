@@ -64,7 +64,7 @@ public class XmlServer extends ServerBase
           UTMRef xpos = toUTM(s.getPosition()); 
           out.println(s.getIdent()+","+ (long) Math.round(xpos.getEasting()) + "," + (long) Math.round(xpos.getNorthing()));   
        }
-       res.set("Content-Type", "text/csv; charset=utf-8");
+       res.setValue("Content-Type", "text/csv; charset=utf-8");
        out.close();
    }
    
@@ -105,10 +105,10 @@ public class XmlServer extends ServerBase
         PrintWriter out = getWriter(res);
         String filt = _infraonly ? "infra" : req.getParameter("filter");
         ViewFilter vfilt = ViewFilter.getFilter(filt);
-        res.set("Content-Type", "text/xml; charset=utf-8");
+        res.setValue("Content-Type", "text/xml; charset=utf-8");
                 
         UTMRef uleft = null, lright = null;
-        Form parms = req.getForm();
+        Query parms = req.getQuery();
         if (parms.get("x1") != null) {
           long x1 = Long.parseLong( parms.get("x1") );
           long x2 = Long.parseLong( parms.get("x2") );

@@ -3,9 +3,12 @@ package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
 
 import org.simpleframework.http.core.Container;
+import org.simpleframework.transport.Server;
+import org.simpleframework.http.core.ContainerServer;
 import org.simpleframework.transport.connect.Connection;
 import org.simpleframework.transport.connect.SocketConnection;
-import org.simpleframework.http.*;
+import org.simpleframework.http.Request;
+import org.simpleframework.http.Response;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.io.PrintStream;
@@ -47,7 +50,8 @@ public class HttpServer implements Container, ServerAPI.ServerStats
       _serverurl   = api.getProperty("server.url", "/srv");
       
       /* Configure this web container */
-      Connection connection = new SocketConnection(this);
+      Server srv = new ContainerServer(this, 16); 
+      Connection connection = new SocketConnection(srv);
       SocketAddress address = new InetSocketAddress(port);
       connection.connect(address);
    }
@@ -104,8 +108,8 @@ public class HttpServer implements Container, ServerAPI.ServerStats
          uri = uri.replaceFirst("sec-station", "station_sec");
          
          long stime = System.currentTimeMillis();
-         resp.set("Server", "Polaric APRSD 1.1");
-         resp.set("Content-Type", "text/html; charset=utf-8");
+         resp.setValue("Server", "Polaric APRSD 1.1");
+         resp.setValue("Content-Type", "text/html; charset=utf-8");
          
          _Handler h = _handlers.get(uri);
          if (h != null) 
@@ -115,7 +119,7 @@ public class HttpServer implements Container, ServerAPI.ServerStats
             PrintWriter out =  new PrintWriter(new OutputStreamWriter(os, _encoding));
             out.println("<html><body>Unknown service: "+uri+"</body></html>");
             resp.setCode(404); 
-            resp.setText("Not found");
+            resp.setDescription("Not found");
             out.close();
          }
          
