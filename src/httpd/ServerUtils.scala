@@ -113,7 +113,7 @@ package no.polaric.aprsd.http
        protected def printHtml(res : Response, content : Node ) =
        {        
             val out = getWriter(res);
-            res.set("Content-Type", "text/html; charset=utf-8");
+            res.setValue("Content-Type", "text/html; charset=utf-8");
             out.println (doctype + Xhtml.toXhtml(content, true, true) )
             out.close()
        }

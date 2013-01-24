@@ -1,23 +1,24 @@
 
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
-
 import org.simpleframework.http.core.Container;
+import org.simpleframework.transport.Server;
+import org.simpleframework.http.core.ContainerServer;
 import org.simpleframework.transport.connect.Connection;
 import org.simpleframework.transport.connect.SocketConnection;
-import org.simpleframework.http.*;
+import org.simpleframework.http.Request;
+import org.simpleframework.http.Response;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.io.PrintStream;
 import java.lang.reflect.*;
-
 import uk.me.jstott.jcoord.*;
 import java.util.*;
 import java.io.*;
 import java.text.*;
 import com.mindprod.base64.Base64;
 import java.util.concurrent.locks.*; 
-
+import java.util.concurrent.*;
 
 public class HttpServer implements Container, ServerAPI.ServerStats
 {
@@ -27,17 +28,70 @@ public class HttpServer implements Container, ServerAPI.ServerStats
    protected  boolean    _infraonly;
    protected int _requests = 0, _reqNo = 0;
    
+   
    private static class _Handler {
-     public Object obj; 
-     public Method method;
-     _Handler(Object o, Method m) {obj = o; method = m; }
+      public Object obj; 
+      public Method method;
+      _Handler(Object o, Method m) {obj = o; method = m; }
    }
    
-   private    Map<String, _Handler> _handlers = new HashMap<String, _Handler>();        
+   private       Map<String, _Handler> _handlers = new HashMap<String, _Handler>();        
+   private final Executor executor;
+
+   public  static final String _encoding = "UTF-8";        
+
    
-   public static final String _encoding = "UTF-8";        
-      
-      
+   
+   private class Task implements Runnable {
+       private final Response resp;
+       private final Request req;
+       
+       public Task(Request rq, Response rs) {
+          resp = rs;
+          req = rq;
+       }
+
+       public void run() {
+         int reqNo;
+         synchronized (HttpServer.this) {
+            _requests++; _reqNo++;
+            reqNo = _reqNo;
+         }
+       
+         try {
+            String uri = req.getTarget().replaceAll("\\?.*", ""); 
+            /* For compatibility. Temporary fix */
+            uri = uri.replaceFirst("sec-mapdata", "mapdata_sec");
+            uri = uri.replaceFirst("sec-station", "station_sec");
+         
+            resp.setValue("Server", "Polaric APRSD 1.1");
+            resp.setValue("Content-Type", "text/html; charset=utf-8");
+         
+            _Handler h = _handlers.get(uri);
+            if (h != null) 
+               h.method.invoke(h.obj, req, resp);
+            else {
+               OutputStream os = resp.getOutputStream();
+               PrintWriter out =  new PrintWriter(new OutputStreamWriter(os, _encoding));
+               out.println("<html><body>Unknown service: "+uri+"</body></html>");
+               resp.setCode(404); 
+               resp.setDescription("Not found");
+               out.close();
+            }
+         
+            long time = System.currentTimeMillis();  
+            resp.setDate("Date", time);
+            resp.setDate("Last-Modified", time);
+         }
+         catch (Throwable e) 
+            { System.out.println("*** HTTP REQ exception: "+e);
+              e.printStackTrace(System.out); } 
+         finally {
+            synchronized(HttpServer.this) { _requests--; } }
+      }
+   } // Task
+   
+   
    
    
    public HttpServer(ServerAPI api, int port) throws IOException
@@ -47,13 +101,25 @@ public class HttpServer implements Container, ServerAPI.ServerStats
       _serverurl   = api.getProperty("server.url", "/srv");
       
       /* Configure this web container */
-      Connection connection = new SocketConnection(this);
+      Server srv = new ContainerServer(this, 12); 
+      Connection connection = new SocketConnection(srv);
       SocketAddress address = new InetSocketAddress(port);
       connection.connect(address);
+      executor = Executors.newCachedThreadPool();
    }
    
    
+   
+   /** 
+    * Number of client requests in progress.
+    */
    public int getClients() {return _requests; }
+  
+  
+  
+   /**
+    * Total number of requests since startup.
+    */
    public int getReq() { return _reqNo; }
    
    
@@ -88,51 +154,19 @@ public class HttpServer implements Container, ServerAPI.ServerStats
 
    /** 
     * Generic HTTP serve method. Dispatches to other methods based on uri
+    * @param req Request object
+    * @param resp Response object
     */
    public void handle (Request req, Response resp)
    {
-       int reqNo;
-       synchronized (this) {
-         _requests++; _reqNo++;
-         reqNo = _reqNo;
-       }
-       
-       try {
-         String uri = req.getTarget().replaceAll("\\?.*", ""); 
-         /* For compatibility. Temporary fix */
-         uri = uri.replaceFirst("sec-mapdata", "mapdata_sec");
-         uri = uri.replaceFirst("sec-station", "station_sec");
-         
-         long stime = System.currentTimeMillis();
-         resp.set("Server", "Polaric APRSD 1.1");
-         resp.set("Content-Type", "text/html; charset=utf-8");
-         
-         _Handler h = _handlers.get(uri);
-         if (h != null) 
-            h.method.invoke(h.obj, req, resp);
-         else {
-            OutputStream os = resp.getOutputStream();
-            PrintWriter out =  new PrintWriter(new OutputStreamWriter(os, _encoding));
-            out.println("<html><body>Unknown service: "+uri+"</body></html>");
-            resp.setCode(404); 
-            resp.setText("Not found");
-            out.close();
-         }
-         
-         long time = System.currentTimeMillis();  
-         long t = time - stime;
-
-     //    System.out.println("*** HTTP HANDLE: ["+ t +" ms]: " + 
-     //          req.getTarget()+ (req.getForm().get("wait") != null ? "  WAIT=TRUE" : ""));
-         resp.setDate("Date", time);
-         resp.setDate("Last-Modified", time);
-         
-       }
-       catch (Throwable e) 
-          { System.out.println("*** HTTP REQ exception: "+e);
-            e.printStackTrace(System.out); } 
-       finally {
-          synchronized(this) { _requests--; } }
+       /* Use the fixed internal threadpool for low loads and start new threads
+        * when load is over 8. 
+        */
+       Task task = new Task(req, resp);
+       if (_requests > 8) 
+           executor.execute(task);
+       else
+           task.run();
    }
    
 }
