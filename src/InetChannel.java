@@ -34,14 +34,19 @@ public class InetChannel extends Channel implements Runnable, Serializable
     transient private  BufferedReader _rder = null;
     transient private  ServerAPI      _api;
     transient private  Thread         _thread;
+    transient private int            _chno;
+    
+    private static int _next_chno = 0;
+    
 
 
-
-
+    
     public InetChannel(ServerAPI api, String id) 
     {
         _init(api, "channel", id);
         _api = api;
+        _chno = _next_chno;
+        _next_chno++;
         
         _host = api.getProperty("channel."+id+".host", "localhost");
         _port = api.getIntProperty("channel."+id+".port", 14580);
@@ -59,7 +64,7 @@ public class InetChannel extends Channel implements Runnable, Serializable
  
 
     @Override public String getShortDescr()
-       { return "IS"; }
+       { return "is"+_chno; }
        
         
     /**

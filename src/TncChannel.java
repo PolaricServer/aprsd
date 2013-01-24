@@ -34,12 +34,18 @@ public abstract class TncChannel extends Channel implements Runnable
     transient private   Semaphore    _sem = new Semaphore(1, true);
     transient protected Logfile      _log; 
     transient private   Thread       _thread;
+    transient private   int          _chno;
+    
+    private static int _next_chno = 0;
     
     
  
     public TncChannel(ServerAPI api, String id) 
     {
         _init(api, "channel", id);
+        _chno = _next_chno;
+        _next_chno++;
+        
         _myCall = api.getProperty("channel."+id+".mycall", "").toUpperCase();
         if (_myCall.length() == 0)
            _myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();       
@@ -64,7 +70,7 @@ public abstract class TncChannel extends Channel implements Runnable
  
     
     @Override public String getShortDescr()
-       { return "RF"; }
+       { return "rf"+_chno; }
  
 
    

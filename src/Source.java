@@ -48,16 +48,33 @@ public abstract class Source implements Serializable
            _style.trim();
      }
      
-     
+     /**
+      * Return an identifier name. 
+      */
      public String getIdent()
         { return _ident; }
         
+        
+     /**
+      * Return a CSS class to use for labels for objects originating from this channel.
+      * This is set in the x.x.style property in config
+      */
      public String getStyle() 
         { return _style; }
         
+        
+     /**
+      * Return true if channel has the x.x.restrict property set to true in config.
+      */
      public boolean isRestricted()
         { return _restrict; }
         
+        
+    /** 
+     * Return a short (3 character) descriptor for channel. 
+     * The first two should normally indicate the type of the channel (e.g. RF), the last character 
+     * should typically be a number.
+     */
     public abstract String getShortDescr(); 
     
 }
