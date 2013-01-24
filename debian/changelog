@@ -1,8 +1,9 @@
-polaric-aprsd (1.1+) UNRELEASED; urgency=low
+polaric-aprsd (1.1.1) unstable; urgency=low
 
-  * Hack 
+  * Fix several bugs related to icons/sign editing  
+  * Fix problem related to scalability of HTTP server
 
- -- Øyvind hanssen <ohanssen@acm.org>  Fri, 18 Jan 2013 22:14:49 +0100
+ -- Øyvind hanssen <ohanssen@acm.org>  Fri, 25 Jan 2013 00:27:19 +0100
 
 polaric-aprsd (1.1) unstable; urgency=low
 

@@ -1,15 +1,14 @@
-1.1 alpha 1
------------
- 
-Initial plugin architecture, try to factor out things..
+CHANGES SINCE RELEASE 1.1.
+-------------------------
 
-* Some hacks to channel framework
-* Replace HTTP server (efficiency, extensibility). The "Simple 
-  framework" http://www.simpleframework.org 
-* Use Apache frontend for all static files. 
-* Component API, add components in config.
-* Jar files in a subdirectory - easier to add extra components?
-* History.Item as standalone class. Trail
+V.1.1.1
+-------
+
+* Move to simpleframework v.5
+* Fix problems w/scalability of HTTP server to handle service handlers blocking for a time. 
+* Short labels for channels. Add numbering.
+* Some bugfixes, mostly related to icons and signs. . 
+ 
 
 
  
