@@ -1,3 +1,9 @@
+polaric-aprsd (1.1.1+) UNRELEASED; urgency=low
+
+  * Move to java 7 + more hacking 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Sun, 03 Feb 2013 23:17:11 +0100
+
 polaric-aprsd (1.1.1) unstable; urgency=low
 
   * Fix several bugs related to icons/sign editing  

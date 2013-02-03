@@ -25,7 +25,7 @@ SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB
     
        JAVA=java
        JSVC=jsvc
-  JAVA_HOME=/usr/lib/jvm/java-6-sun
+  JAVA_HOME=/usr/lib/jvm/java-7-openjdk-i386
        USER=polaric
     PIDFILE=/var/run/$NAME.pid
  SCRIPTNAME=/etc/init.d/$NAME
@@ -51,25 +51,22 @@ fi
 
 # The first existing directory is used for JAVA_HOME 
 # Should contain a list of space separated directories  
-# (this piece borrowed from jetty debian inst).
 JDK_DIRS="
           /usr/lib/jvm/default-java \
-          /usr/lib/jvm/java-6-sun \
           /usr/lib/jvm/java-7-sun \
-          /usr/lib/jvm/java-6-openjdk \
-          /usr/lib/jvm/java-7-openjdk \
-          /usr/lib/j2sdk1.6-sun \
+          /usr/lib/jvm/java-7-openjdk-i386 \
          "
 
+
 # Look for the right JVM to use
+# FIXME: This does not work??
 for jdir in $JDK_DIRS; do
-        if [ -d "$jdir" -a -z "${JAVA_HOME}" ]; then
+        if [ -d "$jdir" ]; then
                 JAVA_HOME="$jdir"
         fi
 done
 export JAVA_HOME
 export LD_LIBRARY_PATH=/usr/lib/jni
-
 
 
 

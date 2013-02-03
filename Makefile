@@ -8,7 +8,7 @@
   CLASSDIR = classes
  CLASSPATH = jcoord-polaric.jar:utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:simple.jar
 # INSTALLDIR = /usr/local/polaric-aprsd
-     JAVAC = javac -target 1.6
+     JAVAC = javac -target 1.7
        JAR = jar
 
 # Review (and if necessary) change these if you are going to 
