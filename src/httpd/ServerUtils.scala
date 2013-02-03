@@ -187,6 +187,11 @@ package no.polaric.aprsd.http
     */
    def iconSelect(s: PointObject, wprefix: String, fprefix: String): NodeSeq =
    {
+       def fmatch(x: String, y: String): boolean = {
+          val yy = y.substring(y.lastIndexOf("/")+1)
+          (x.equals(y) || x.equals(yy)) 
+       }
+       
        val webdir = System.getProperties().getProperty("webdir", ".")
        val fsprefix = if (fprefix.charAt(0) == '/') fprefix.substring(1,fprefix.length()) 
                       else fprefix 
@@ -212,7 +217,7 @@ package no.polaric.aprsd.http
            for (f:File <- files) yield {
               <xml:group>
               <input type="radio" name="iconselect" value={f.getName()}
-                  checked={ if (s != null && !s.iconIsNull() && f.getName().equals(s.getIcon())) "checked" else null:String } />
+                  checked={ if (s != null && !s.iconIsNull() && fmatch(f.getName(), s.getIcon())) "checked" else null:String } />
               <img src={wprefix+fprefix+f.getName()} width="22" height="22" />&nbsp;
               </xml:group> 
            }
