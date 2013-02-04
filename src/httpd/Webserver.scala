@@ -2,7 +2,7 @@ import java.util._
 import java.io._
 import uk.me.jstott.jcoord._
 import scala.xml._
-import scala.collection.jcl.Conversions._
+import scala.collection.JavaConversions._
 import no.polaric.aprsd._
 import org.simpleframework.http.core.Container
 import org.simpleframework.transport.connect.Connection
@@ -443,7 +443,7 @@ package no.polaric.aprsd.http
    /** 
     * Info about station/object (standard HTML)
     */
-   def _handle_station(req : Request, res : Response, canUpdate: boolean) =
+   def _handle_station(req : Request, res : Response, canUpdate: Boolean) =
    {        
         val id = req.getParameter("id")
         val x = _api.getDB().getItem(id, null)

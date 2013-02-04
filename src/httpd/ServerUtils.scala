@@ -5,7 +5,7 @@ import org.simpleframework.transport.connect.Connection
 import org.simpleframework.transport.connect.SocketConnection
 import org.simpleframework.http._
 import uk.me.jstott.jcoord._
-
+import no.polaric.aprsd._
 
 
 package no.polaric.aprsd.http 
@@ -114,7 +114,7 @@ package no.polaric.aprsd.http
        {        
             val out = getWriter(res);
             res.setValue("Content-Type", "text/html; charset=utf-8");
-            out.println (doctype + Xhtml.toXhtml(content, true, true) )
+            out.println (doctype + Xhtml.toXhtml(content) )
             out.close()
        }
   
@@ -187,7 +187,7 @@ package no.polaric.aprsd.http
     */
    def iconSelect(s: PointObject, wprefix: String, fprefix: String): NodeSeq =
    {
-       def fmatch(x: String, y: String): boolean = {
+       def fmatch(x: String, y: String): Boolean = {
           val yy = y.substring(y.lastIndexOf("/")+1)
           (x.equals(y) || x.equals(yy)) 
        }
@@ -199,9 +199,9 @@ package no.polaric.aprsd.http
        val icondir = new File(webdir+"/"+fsprefix)
        
        val flt = new FilenameFilter()
-           { def accept(dir:File, f: String): boolean = f.matches(".*\\.(png|gif|jpg)") } 
+           { def accept(dir:File, f: String): Boolean = f.matches(".*\\.(png|gif|jpg)") } 
        val cmp = new Comparator[File] ()
-           { def compare (f1: File, f2: File) : int = f1.getName().compareTo(f2.getName()) } 
+           { def compare (f1: File, f2: File) : Int = f1.getName().compareTo(f2.getName()) } 
        val files = icondir.listFiles(flt); 
 
        <div id="iconselect">    
