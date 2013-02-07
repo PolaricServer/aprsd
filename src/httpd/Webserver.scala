@@ -53,13 +53,13 @@ package no.polaric.aprsd.http
           else if ("info".equals(cmd))    
               <h3>Status info for Polaric APRSD</h3>
               <fieldset>
-              { simpleLabel("items", "leftlab", "Server kjørt siden:", TXT(""+_time)) }
-              { simpleLabel("items", "leftlab", "Server versjon:", TXT(""+_api.getVersion())) }
-              { simpleLabel("items", "leftlab", "Antall APRS enheter:", TXT(""+_api.getDB().nItems())) }
-              { simpleLabel("items", "leftlab", "Antall forbindelser:", TXT(""+_api.getDB().getRoutes().nItems())) }
-              { simpleLabel("items", "leftlab", "Egne objekter:", TXT(""+_api.getDB().getOwnObjects().nItems())) }   
-              { simpleLabel("items", "leftlab", "Antall HTTP klienter nå:", TXT(""+(_api.getHttps().getClients()-1))) }  
-              { simpleLabel("items", "leftlab", "Antall HTTP forespørsler:", TXT(""+(_api.getHttps().getReq()))) }    
+              { simpleLabel("items", "leftlab", "Server kjørt siden:", TXT(""+_time)) ++
+                simpleLabel("items", "leftlab", "Server versjon:", TXT(""+_api.getVersion())) ++ 
+                simpleLabel("items", "leftlab", "Antall APRS enheter:", TXT(""+_api.getDB().nItems())) ++
+                simpleLabel("items", "leftlab", "Antall forbindelser:", TXT(""+_api.getDB().getRoutes().nItems())) ++
+                simpleLabel("items", "leftlab", "Egne objekter:", TXT(""+_api.getDB().getOwnObjects().nItems())) ++   
+                simpleLabel("items", "leftlab", "Antall HTTP klienter nå:", TXT(""+(_api.getHttps().getClients()-1))) ++  
+                simpleLabel("items", "leftlab", "Antall HTTP forespørsler:", TXT(""+(_api.getHttps().getReq()))) }    
               { simpleLabel("freemem", "leftlab", "Brukt minne:", 
                   TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
                             
@@ -108,11 +108,11 @@ package no.polaric.aprsd.http
        
         /* Fields to be filled in */
         def fields(req : Request): NodeSeq =
-           <xml:group>
-          
+            <xml:group>
             <label for="objsym" class="lleftlab">Symbol:</label>
-            <input id="osymtab" name="osymtab" type="text" size="1" maxlength="1" value={ ""+p.getSymtab() }/>
-            <input id="osym" name="osym" type="text" size="1" maxlength="1" value={ ""+p.getSymbol() } />
+            { textInput("osymtab", 1, 1, ""+p.getSymtab()) }
+            { textInput("osym", 1, 1, ""+p.getSymbol()) }
+              
             <br/>      
             <label for="utmz" class="lleftlab">Pos (UTM): </label>
             {  if (pos==null)
@@ -121,7 +121,7 @@ package no.polaric.aprsd.http
                   showUTM(pos)
             }
             </xml:group>
-             
+           ;  
              
         /* Action. To be executed when user hits 'submit' button */
         def action(req : Request): NodeSeq = {
@@ -135,9 +135,9 @@ package no.polaric.aprsd.http
                       if (osymtab==null) '/' else osymtab(0), if (osym==null) 'c' else osym(0))
                   
                  <h2>Posisjon registrert</h2>
-                 <p>pos={showUTM(pos) }</p>
+                 <p>pos={ showUTM(pos) }</p>
               }
-           };
+        };
             
         printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
     }   
@@ -161,13 +161,13 @@ package no.polaric.aprsd.http
            <br/>
            
            <label for="sar_prefix" class="lleftlab">Skjul prefiks:</label>
-           <input id="sar_prefix" name="sar_prefix" width="50" value= 
-             { if ( api.getSar()==null) "" else api.getSar().getFilter() }></input>
+           { textInput("sar_prefix", 50, 50,
+               if ( api.getSar()==null) "" else api.getSar().getFilter() ) }
            <br/>
            
            <label for="sar_reason" class="lleftlab">Beskrivelse:</label>
            { if (api.getSar() == null)
-                <input id="sar_reason" name="sar_reason" width="50" value={""} ></input>
+                textInput("sar_reason", 50, 50, "")
              else 
                 <xml:group>
                 <label id="sar_reason">{ api.getSar().getReason() }
@@ -239,9 +239,12 @@ package no.polaric.aprsd.http
        val prefix = <h2>Slett objekt</h2>
        
        def fields(req : Request): NodeSeq =
+           <xml:group>
            <label for="objid" class="lleftlab">Objekt ID:</label>
-           <input id="objid" name="objid" type="text" size="9" maxlength="9"
-              value={if (id==null) "" else id.replaceFirst("@.*", "")} />;
+           { textInput("objid", 9, 9, 
+                if (id==null) "" else id.replaceFirst("@.*", "") ) }
+           </xml:group>
+           ;
       
       
        def action(req : Request): NodeSeq =
@@ -257,6 +260,7 @@ package no.polaric.aprsd.http
               else
                   <h3>Fant ikke objekt: {id}</h3>
           }  
+          ;
           
        printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
    }          
@@ -273,7 +277,7 @@ package no.polaric.aprsd.http
            <label for="objid" class="lleftlab">Objekt ID:</label>
            <input id="objid" name="objid" type="text" size="9" maxlength="9"
               value={if (id==null) "" else id} />;
-      
+           ;
       
        def action(req : Request): NodeSeq =
           if (id == null) {
@@ -285,7 +289,9 @@ package no.polaric.aprsd.http
              if (x != null)
                 x.reset();
              <h3>Info om objekt nullstilt!</h3>
-          }  
+          } 
+          ;
+          
        printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
    }          
 
@@ -326,7 +332,8 @@ package no.polaric.aprsd.http
             {checkBox("perm", false, TXT("Tidløs (Permanent)"))}
             </div>
             </xml:group>
-             
+            ;
+            
              
         /* Action. To be executed when user hits 'submit' button */
         def action(request : Request): NodeSeq =
@@ -339,11 +346,12 @@ package no.polaric.aprsd.http
                val osym  = req.getParameter("osym")
                val otxt = req.getParameter("descr")
                val perm = req.getParameter("perm")
+               
                System.out.println("*** SET OBJECT: '"+id+"' by user '"+getAuthUser(request)+"'")
                if ( _api.getDB().getOwnObjects().add(id, 
                       new AprsHandler.PosData( pos,
-                        if (osymtab==null) '/' else osymtab(0),
-                        if (osym==null) 'c' else osym(0)) ,
+                         if (osymtab==null) '/' else osymtab(0),
+                         if (osym==null) 'c' else osym(0)) ,
                       if (otxt==null) "" else otxt,
                       "true".equals(perm) ))
                   
@@ -352,7 +360,8 @@ package no.polaric.aprsd.http
                else
                   <h2>Kan ikke registreres</h2>
                   <p>Objekt '{id}' er allerede registrert av noen andre</p>
-           };
+            }
+            ;
             
         printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
     }
@@ -435,9 +444,12 @@ package no.polaric.aprsd.http
 
    def handle_station(req : Request, res : Response)  = 
        _handle_station(req, res, false)
+       ;
        
    def handle_station_sec(req : Request, res : Response)  = 
        _handle_station(req, res, authorizedForUpdate(req))
+       ;
+  
   
   
    /** 
@@ -477,7 +489,7 @@ package no.polaric.aprsd.http
                 else null;
              }
              </div>
-        
+             ;
         
         
         /* Fields to be filled in */
@@ -548,26 +560,25 @@ package no.polaric.aprsd.http
             { if (edit && canUpdate)
                   <div>
                   <br/>
-                  <label for="hidelabel" class="leftlab">Innstillinger:</label>
-                  {checkBox("hidelabel", x.isLabelHidden(), TXT("Skjul ID"))}
-                  {checkBox("pers", x.isPersistent(), TXT("Varig lagring"))}
+                  { label("hidelabel", "leftlab", "Innstillinger:") ++
+                    checkBox("hidelabel", x.isLabelHidden(), TXT("Skjul ID")) ++
+                    checkBox("pers", x.isPersistent(), TXT("Varig lagring")) }
                   <br/>
                   { if (s != null)
-                       <xml:group>
-                       <label for="newcolor" class="leftlab">Spor:</label>
-                       { checkBox("newcolor", false, TXT("Finn ny Farge")) }
-                       </xml:group> else null}
+                        label("newcolor", "leftlab", "Spor:") ++ 
+                        checkBox("newcolor", false, TXT("Finn ny Farge"))
+                    else null }
                   <br/>   
                   <label for="nalias" class="leftlab">Ny alias:</label>
-                  <input id="nalias" name="nalias" width="10"
-                         value={ if (x.getAlias()==null) "" else x.getAlias()} ></input>
+                  { textInput("nalias", 10, 10, 
+                        if (x.getAlias()==null) "" else x.getAlias()) }
                   <br/>
                   { iconSelect(x, fprefix(req), "/icons/") }
                   </div>
                else null        
-            }
-                          
-            </xml:group> ;
+            }              
+            </xml:group> 
+            ;
 
 
 
@@ -621,7 +632,7 @@ package no.polaric.aprsd.http
     private def cleanPath(txt:String): String = 
         txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]*(\\-[0-9]+)?\\*?,?)|(qA.),?", "")
            .replaceAll("\\*", "").replaceAll(",+|(, )+", ", ")   
-
+        ;
 
       
    /** 
@@ -688,9 +699,9 @@ package no.polaric.aprsd.http
             <xml:group>
             <label for="callsign" class="lleftlab">Ident:</label>
             <label id="callsign"><b> { ident } </b></label>
-            { simpleLabel("time",  "lleftlab", "Tid:", TXT( df.format(item.getTS()))) }
-            { simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )  }
-            { simpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course, fprefix(req)))  }
+            { simpleLabel("time",  "lleftlab", "Tid:", TXT( df.format(item.getTS()))) ++
+              simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )  ++
+              simpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course, fprefix(req)))  }
             <div id="traffic">
             { if (item.pathinfo != null) 
                  simpleLabel("via",   "lleftlab", "APRS via:", TXT( cleanPath(item.pathinfo)))

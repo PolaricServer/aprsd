@@ -17,7 +17,7 @@ package no.polaric.aprsd.http
 
 
       protected def htmlBody (req: Request, head : NodeSeq, content : NodeSeq) : Node =
-        if (req.getParameter("ajax") == null)           
+         if (req.getParameter("ajax") == null)           
             <html>
             <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -29,16 +29,25 @@ package no.polaric.aprsd.http
             </body>
             </html>
        
-       else
+        else
            <xml:group> { content } </xml:group>
-
+        ;
 
            
        protected def fprefix(req: Request) : String = 
            if ((req.getParameter("ajax") == null)) "/"+_wfiledir else _wfiledir 
-
-      
-      
+           ;
+           
+       protected def label(id:String, cls:String, lbl:String): NodeSeq =
+           <label for={id} class={cls}>{lbl}</label>
+          ;
+       
+       
+       protected def label(id:String, cls:String, lbl:String, title: String): NodeSeq =
+           <label for={id} class={cls} title={title}>{lbl}</label>
+          ;
+          
+          
        protected def simpleLabel(id:String, cls:String, lbl:String, content: NodeSeq): NodeSeq =
            <label for={id} class={cls}>{lbl}</label>
            <label id={id}> {content}</label>
@@ -49,17 +58,20 @@ package no.polaric.aprsd.http
            <label id={id}> {content}</label>
           ;
           
+      protected def textInput(id : String, length: Int, maxlength: Int, value: String): NodeSeq =  
+           <input type="text" id={id} name={id} length={length.toString()} maxlength={maxlength.toString()} value={value} />
+          ;
           
-       protected def TXT(t:String): NodeSeq = <xml:group>{t}</xml:group>
+      protected def TXT(t:String): NodeSeq = <xml:group>{t}</xml:group>
    
    
-       protected def checkBox(id:String, check: Boolean, t: NodeSeq): NodeSeq =
+      protected def checkBox(id:String, check: Boolean, t: NodeSeq): NodeSeq =
            <input type="checkbox" name={id} id={id}
               checked= {if (check) "checked" else null:String}
               value="true">
           {t}
           </input>
-
+          ;
 
 
        /**
@@ -70,14 +82,26 @@ package no.polaric.aprsd.http
                       : (Request) => NodeSeq = 
        {
           def wrapper(req : Request) : NodeSeq =
-          if (authorizedForUpdate(req))
-             func(req)
-          else
-             <h2>Du er ikke autorisert for denne operasjonen</h2>
+             if (authorizedForUpdate(req))
+                func(req)
+             else
+                <h2>Du er ikke autorisert for denne operasjonen</h2>
       
           wrapper
        }
-
+       
+       
+       protected def IF_ADMIN( func: (Request) => NodeSeq ) 
+                      : (Request) => NodeSeq = 
+       {
+          def wrapper(req : Request) : NodeSeq =
+             if (authorizedForAdmin(req))
+                func(req)
+             else
+                <h2>Du er ikke autorisert for denne operasjonen</h2>
+      
+          wrapper
+       }
 
 
 
