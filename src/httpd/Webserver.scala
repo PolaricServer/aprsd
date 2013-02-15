@@ -77,7 +77,8 @@ package no.polaric.aprsd.http
                  {  val ch = api.getChanManager().get(x); 
                     i += 1;
                     simpleLabel("chan_"+ch.getIdent(), 
-                     "leftlab", "Kanal '"+ch.getIdent()+"' ("+ch.getShortDescr()+"):", TXT(ch.toString())) } 
+                     "leftlab", "Kanal '"+ch.getIdent()+"' ("+ch.getShortDescr()+"):", 
+                            TXT(ch.toString()+", Rx=" + ch.nHeardPackets() + ", Tx=" + ch.nSentPackets())) } 
               }
 
               
@@ -309,27 +310,31 @@ package no.polaric.aprsd.http
         
         /* Fields to be filled in */
         def fields(req : Request): NodeSeq =
-           <xml:group>
-            <label for="objid" class="lleftlab">Objekt ID:</label>
-            <input id="objid" name="objid" type="text" size="9" maxlength="9"/>
-            <br/>
-            <label for="objsym" class="lleftlab">Symbol:</label>
-            <input id="osymtab" name="osymtab" type="text" size="1" maxlength="1" value="/" />
-            <input id="osym" name="osym" type="text" size="1" maxlength="1" value="c" />
-            <br/>      
-            <label for="descr" class="lleftlab">Beskrivelse:</label>
-            <input id="descr" name="descr" type="text" size="30" maxlength="40"/>
-            <br/>
-            <label for="utmz" class="lleftlab">Pos (UTM): </label>
-            {  if (pos==null)
-                  utmForm('W', 34)
-               else
-                  showUTM(pos)
+            <xml:group>
+            {
+              label("objid", "lleftlab", "Objekt ID:", "Identifikator for objekt") ++
+              textInput("objid", 9, 9, "") ++
+              br ++
+              label("osymtab", "lleftlab", "Symbol:", "APRS symboltabell og symbol") ++
+              textInput("osymtab", 1, 1, "/") ++
+              textInput("osym", 1, 1, "c")
+              br ++
+              label("descr", "lleftlab", "Beskrivelse", "") ++
+              textInput("descr", 30, 40, "") ++
+              br ++
+              label("utmz", "lleftlab", "Pos (UTM):", "Objektets posisjon") ++
+              {  if (pos==null)
+                   utmForm('W', 34)
+                 else
+                   showUTM(pos)
+              }
             }
             <br/>
             <div>
-            <label for="perm" class="lleftlab">Innstillinger: </label>
-            {checkBox("perm", false, TXT("Tidløs (Permanent)"))}
+            {
+              label("perm", "lleftlab", "Innstillinger:", "") ++
+              checkBox("perm", false, TXT("Tidløs (Permanent)"))
+            }
             </div>
             </xml:group>
             ;

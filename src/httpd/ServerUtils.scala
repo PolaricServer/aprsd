@@ -33,10 +33,14 @@ package no.polaric.aprsd.http
            <xml:group> { content } </xml:group>
         ;
 
+        
+       protected def br = <br/>
            
+       /** File name prefix */
        protected def fprefix(req: Request) : String = 
            if ((req.getParameter("ajax") == null)) "/"+_wfiledir else _wfiledir 
            ;
+           
            
        protected def label(id:String, cls:String, lbl:String): NodeSeq =
            <label for={id} class={cls}>{lbl}</label>
@@ -47,31 +51,36 @@ package no.polaric.aprsd.http
            <label for={id} class={cls} title={title}>{lbl}</label>
           ;
           
-          
+       /** Label with field */   
        protected def simpleLabel(id:String, cls:String, lbl:String, content: NodeSeq): NodeSeq =
            <label for={id} class={cls}>{lbl}</label>
            <label id={id}> {content}</label>
           ;
-          
+       
+       /** Label with field */
        protected def simpleLabel(id:String, cls:String, lbl:String, title:String, content: NodeSeq): NodeSeq =  
            <label for={id} title={title} class={cls}>{lbl}</label>
            <label id={id}> {content}</label>
           ;
           
+      /** Input type text */
       protected def textInput(id : String, length: Int, maxlength: Int, value: String): NodeSeq =  
-           <input type="text" id={id} name={id} length={length.toString()} maxlength={maxlength.toString()} value={value} />
+           <input type="text" id={id} name={id} size={length.toString()} maxlength={maxlength.toString()} value={value} />
           ;
+          
           
       protected def TXT(t:String): NodeSeq = <xml:group>{t}</xml:group>
    
    
+      /** Input type checkbox */
       protected def checkBox(id:String, check: Boolean, t: NodeSeq): NodeSeq =
+           <xml:group>
            <input type="checkbox" name={id} id={id}
               checked= {if (check) "checked" else null:String}
-              value="true">
-          {t}
-          </input>
-          ;
+              value="true" />
+           {t}
+           </xml:group>
+           ;
 
 
        /**
@@ -194,13 +203,31 @@ package no.polaric.aprsd.http
    /**
     * HTML form elements (fields) for entering a UTM reference.
     */
-   protected def utmForm(nzone: Char, zone: Int) : NodeSeq =
+   protected def utmForm(nzone: Char, zone: Int, x: String, y: String) : NodeSeq =
        <input id="utmz" name="utmz" type="text" size="2" maxlength="2" value={zone.toString} />
        <input id="utmnz" name="utmnz" type="text" size="1" maxlength="1" value={nzone.toString} />
-       <input id="utmx" name="x" type="text" size="6" maxlength="6"/>
-       <input id="utmy" name="y" type="text" size="7" maxlength="7"/>;
-
-
+       <input id="utmx" name="x" type="text" size="6" maxlength="6" value={x} />
+       <input id="utmy" name="y" type="text" size="7" maxlength="7" value={x} />
+       ;
+        
+        
+   protected def utmForm(ref: Reference): NodeSeq =
+   { 
+      val sref = ref.toLatLng().toUTMRef()
+      utmForm(sref.getLatZone(), sref.getLngZone(), sref.getEasting().toString(), sref.getNorthing().toString())
+   }
+       
+       
+   protected def utmForm(ref: String): NodeSeq =
+   {
+      val r = ref.split("\\s+")
+      utmForm(r(0)(2), r(0).substring(0,2).toInt, r(1), r(2))
+   }
+   
+   
+   protected def utmForm(nzone: Char, zone: Int) : NodeSeq = 
+       utmForm(nzone, zone, null, null)
+       ;
 
 
    /**

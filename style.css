@@ -16,7 +16,7 @@ td {
 
 label, input, select, textarea { 
    margin-bottom: 4px; 
-   vertical-align: bottom
+   vertical-align: middle
 }
 
 label.leftlab, label.lleftlab {
@@ -34,6 +34,7 @@ label.lleftlab {
 br { clear: left; }
 fieldset{ 
     background: #f0f5ec;
+    padding-top: 0.7em;
     margin-top: 0.7em; margin-bottom: 0.7em; 
 }
 
@@ -41,3 +42,7 @@ span.kartref {
    background: yellow;
    text-decoration: underline;
 }
+
+span.postfield {font-size: smaller; color: #755; margin-left: 5px; }
+span.fielderror {color: #c00}
+span.fieldsuccess {color: #080;}
