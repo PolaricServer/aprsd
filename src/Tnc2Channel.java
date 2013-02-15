@@ -86,6 +86,7 @@ public class Tnc2Channel extends TncChannel implements Runnable
        else 
            _out.print(p.report+"\r");
        _out.flush();    
+       _sent++;
     }
    
     

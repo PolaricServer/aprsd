@@ -82,6 +82,7 @@ public class InetChannel extends Channel implements Runnable, Serializable
                 ":" + p.report );
                 /* Should type char be part of report? */
             _out.flush();
+            _sent++;
         }      
     }
     
@@ -188,6 +189,6 @@ public class InetChannel extends Channel implements Runnable, Serializable
         System.out.println("*** Couldn't connect to APRS server '"+_host+"' - giving up");        
     }
  
-    public String toString() { return _host+":"+_port+", userid="+_user; }
+    public String toString() { return _host+":"+_port; }
 }
 

@@ -29,7 +29,9 @@ public abstract class Channel extends Source implements Serializable
 {
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      transient protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap();
-        
+    
+     /* Statistics */
+     transient protected long _heardPackets, _duplicates, _sent;        
 
 
 
@@ -272,7 +274,15 @@ public abstract class Channel extends Source implements Serializable
     public int nHeard()
        { return _heard.keySet().size(); }
        
-    
+    public long nHeardPackets()
+       { return _heardPackets; }
+
+    public long nDuplicates()
+       { return _duplicates; }
+
+    public long nSentPackets()
+       { return _sent; }
+       
     public PrintWriter getWriter()
        { return _out; }
 
@@ -398,11 +408,13 @@ public abstract class Channel extends Source implements Serializable
 
        p.source = this;
        System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+p);
+       _heardPackets++;
        dup = _dupCheck.checkPacket(p.from, p.to, p.report);
        if (!dup) 
           /* Register heard, only for first instance of packet, not duplicates */
           regHeard(p);
-
+       else
+          _duplicates++;
        for (Receiver r: _rcv)
            r.receivePacket(p, dup);
     }

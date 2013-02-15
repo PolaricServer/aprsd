@@ -97,6 +97,8 @@ public class KissTncChannel extends TncChannel
         
            /* End of frame */
            sendFend();
+           
+           _sent++;
         }
         catch (IOException e)
            { System.out.println("*** Error: KissTncChannel.sendPacket: "+e); }
