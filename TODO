@@ -2,8 +2,9 @@
 V.1.2 (february 2013)
 --------------------
 
-* Implement and test configuration support (complete list below). Config plugin prototype. 
-
+* Implement and test configuration support (see also list below). Config plugin. 
+     DONE (mostly).
+     
 * [M] Better styling of forms for mobile. Consider JQuery mobile.
 
 * [M] Remove rubber-zoom button? Something more useful?
@@ -12,10 +13,17 @@ V.1.2 (february 2013)
 
 * [C] Hack and use OL offline tile caching??
 
+* [C] Allow auto-including of plugin css and js
+    DONE.
+    
+* [C] Allow more than one plugin js to add callback for menu.
+
 * Allow channels to be visible for logged in or SAR users only. 
 
 * Move to Java 7
     DONE.
+
+* Ensure that Java7 is used if both java6 and java7 are installed. 
 
 * Move to Scala 1.8+
     DONE.
@@ -44,6 +52,12 @@ Configuration support
      
 * Make a list of class <-> parameter relationships
      DONE.
+
+* Support for run-time overrides to config parameters.
+     DONE.
+     
+* Support for persistence of config overrides. 
+     DONE.
      
 * Consider per-use reading of parameters
      
@@ -51,11 +65,8 @@ Configuration support
   to reduce redundant storage when there are multiple instances? 
 
 * Make channel classes and other relevant classes implement 
-  ManagedObject interface. 
-
-* Support for run-time overrides to config parameters.
-  
-* Support for persistence of config overrides. 
+  ManagedObject interface. Consider re-load without needing to 
+  restart server.
 
 
 

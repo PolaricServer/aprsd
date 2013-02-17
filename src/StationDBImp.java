@@ -202,8 +202,9 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     
     public synchronized void removeItem(String id)
     {   
-            String[] idd = id.split("@");
-           if (idd.length > 1 && _api.getOwnPos().getIdent().equals(idd[1]))
+           String[] idd = id.split("@");
+           
+           if (idd != null && idd.length > 1 && idd[1].equals(_api.getOwnPos().getIdent()))
                  _ownobj.delete(idd[0]);
                  
            _map.remove(id);
