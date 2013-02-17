@@ -48,7 +48,7 @@ public abstract class ServerBase
       _api=api; 
       _utmzone     = api.getIntProperty("map.utm.zone", 33);
       _utmlatzone  = api.getProperty("map.utm.latzone", "W").charAt(0);
-      _wfiledir    = api.getProperty("map.web.dir", "aprsd");
+      _wfiledir    = api.getProperty("map.web.dir", "/aprsd");
       _infraonly   = api.getBoolProperty("map.infraonly", false);
       _timezone    = api.getProperty("timezone", "");
       _adminuser   = api.getProperty("user.admin", "admin");

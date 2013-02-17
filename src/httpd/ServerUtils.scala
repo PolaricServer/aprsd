@@ -37,8 +37,9 @@ package no.polaric.aprsd.http
        protected def br = <br/>
            
        /** File name prefix */
+       // FIXME: Do we need this anymore??
        protected def fprefix(req: Request) : String = 
-           if ((req.getParameter("ajax") == null)) "/"+_wfiledir else _wfiledir 
+           if ((req.getParameter("ajax") == null)) _wfiledir else _wfiledir 
            ;
            
            
@@ -64,8 +65,13 @@ package no.polaric.aprsd.http
           ;
           
       /** Input type text */
-      protected def textInput(id : String, length: Int, maxlength: Int, value: String): NodeSeq =  
-           <input type="text" id={id} name={id} size={length.toString()} maxlength={maxlength.toString()} value={value} />
+      protected def textInput(id : String, length: Int, maxlength: Int, pattern: String, value: String): NodeSeq =  
+           <input type="text" id={id} name={id} size={length.toString()} maxlength={maxlength.toString()} 
+                  pattern={pattern} value={value} />
+          ;
+          
+      protected def textInput(id : String, length: Int, maxlength: Int, value: String): NodeSeq = 
+          textInput(id, length, maxlength, null, value)
           ;
           
           
@@ -204,10 +210,10 @@ package no.polaric.aprsd.http
     * HTML form elements (fields) for entering a UTM reference.
     */
    protected def utmForm(nzone: Char, zone: Int, x: String, y: String) : NodeSeq =
-       <input id="utmz" name="utmz" type="text" size="2" maxlength="2" value={zone.toString} />
-       <input id="utmnz" name="utmnz" type="text" size="1" maxlength="1" value={nzone.toString} />
-       <input id="utmx" name="x" type="text" size="6" maxlength="6" value={x} />
-       <input id="utmy" name="y" type="text" size="7" maxlength="7" value={x} />
+       <input id="utmz" name="utmz" type="text" size="2" maxlength="2" pattern="[0-9]{2}" value={zone.toString} />
+       <input id="utmnz" name="utmnz" type="text" size="1" maxlength="1" pattern="[a-zA-Z]" value={nzone.toString} />
+       <input id="utmx" name="x" type="text" size="6" maxlength="6" pattern="[0-9]{6}" value={x} />
+       <input id="utmy" name="y" type="text" size="7" maxlength="7" pattern="[0-9]{7}" value={y} />
        ;
         
         
