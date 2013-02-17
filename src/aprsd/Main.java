@@ -28,6 +28,7 @@ public class Main implements ServerAPI
    private static Channel.Manager _chanManager = new Channel.Manager();
    private static SarUrl sarurl;
    
+   
    /* Experimental !! 
     * Database interface must be known here. The interface is 
     * implemented by a plugin 
@@ -127,6 +128,7 @@ public class Main implements ServerAPI
         try {
            FileInputStream fin = new FileInputStream(args[0]);
            _config.load(fin);
+           _config = new Properties(_config); 
            
            /* API */
            api = this; // new Main();
@@ -258,7 +260,7 @@ public class Main implements ServerAPI
              ioe.printStackTrace(System.err);;
         }
         
-   }
+    }
   
 
     
@@ -266,6 +268,7 @@ public class Main implements ServerAPI
       // Inform the Thread to terminate the run(), close the ServerSockets
     {
          System.out.println("*** Polaric APRSD shutdown"); 
+         PluginManager.deactivateAll();
          if (db  != null) db.save(); 
          if (ch1 != null) ch1.close();
          if (ch2 != null) ch2.close();

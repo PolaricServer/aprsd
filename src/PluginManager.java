@@ -40,7 +40,8 @@ public class PluginManager
    /* FIXME: Shorter path to get/put methods */
    public static Map<String, Object> properties() 
      { return _properties; }
-       
+      
+      
    
    /** Get interfaces of all registered plugins. */
    public static Plugin[] getPlugins()
@@ -53,6 +54,7 @@ public class PluginManager
       }
 
       
+      
    /**
     * set the api. Must be done at startup of server. 
     * @param a the server interface. 
@@ -61,6 +63,7 @@ public class PluginManager
      { api = a; }  
      
 
+     
    /**
     *  Register a plugin. 
     * <ul>
@@ -92,7 +95,8 @@ public class PluginManager
           { throw new PluginError("Cannot activate plugin: "+cn, e); }
     }
     
-    
+ 
+ 
     /**
      * Register multiple plugins. 
      * @param cn Comma separated list of plugin names (Java class names).
@@ -105,6 +109,15 @@ public class PluginManager
         for (String x : plugins)
            add(x);
     }
+ 
+ 
+ 
+    public static void deactivateAll()
+    {
+       for (Plugin p : _plugins.values())
+         p.deActivate();
+    }
     
+ 
 }
 
