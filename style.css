@@ -46,3 +46,5 @@ span.kartref {
 span.postfield {font-size: smaller; color: #755; margin-left: 5px; }
 span.fielderror {color: #c00}
 span.fieldsuccess {color: #080;}
+
+input {height: 1.5em; padding: 0px 3px 0px 3px}

@@ -317,7 +317,7 @@ package no.polaric.aprsd.http
               br ++
               label("osymtab", "lleftlab", "Symbol:", "APRS symboltabell og symbol") ++
               textInput("osymtab", 1, 1, "/") ++
-              textInput("osym", 1, 1, "c")
+              textInput("osym", 1, 1, "c") ++
               br ++
               label("descr", "lleftlab", "Beskrivelse", "") ++
               textInput("descr", 30, 40, "") ++
@@ -343,7 +343,7 @@ package no.polaric.aprsd.http
         /* Action. To be executed when user hits 'submit' button */
         def action(request : Request): NodeSeq =
             if (id == null || !id.matches("[a-zA-Z0-9_].*\\w*")) {
-               <h2>Feil</h2>
+               <h2>Feil id {id} </h2>
                <p>må oppgi 'objid' som parameter og denne må begynne med bokstav/tall</p>;
             }
             else {
