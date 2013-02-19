@@ -136,7 +136,7 @@ public class Main implements ServerAPI
            
            /* Database of stations/objects */
            db  = new StationDBImp(api); 
-           AprsPoint.setDB(db);
+           AprsPoint.setApi(api);
         }
         catch( Exception ioe )
         {

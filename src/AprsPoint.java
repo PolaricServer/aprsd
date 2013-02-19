@@ -26,8 +26,10 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
     private   static long      _nonMovingTime = 1000 * 60 * 5;   
     private   static SymTable  _symTab        = new SymTable (System.getProperties().getProperty("confdir", ".")+"/symbols");
     private   static Notifier  _change        = new Notifier();
-    protected static StationDB _db    = null;
-    
+    protected static ServerAPI _api = null;
+    protected static StationDB _db  = null; 
+
+
     public AprsPoint(Reference p)
       { super(p); }
       
@@ -67,8 +69,8 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
        { return x != y || (x != null && !x.equals(y)); }   
        
        
-    public static void setDB(StationDB db)
-       { _db = db; }   
+    public static void setApi(ServerAPI api)
+       { _api = api; _db = _api.getDB(); }   
        
        
     protected char        _symbol; 
