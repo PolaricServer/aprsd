@@ -17,14 +17,19 @@ http://aprs.no/dokuwiki/doku.php?id=polaricserver
 ## System requirements
 
 Linux/Java platform (tested with Debian/Ubuntu) with
-* Java Runtime environment version 6 or later. 
-* Scala library version 2.7.7 (sorry, there are some problems with 2.8 or later). 
+* Java Runtime environment version 7 or later. 
+* Scala library version 2.8 or later. 
 * jsvc
 * librxtx-java (if using serial port for communication with TNC or GPS).
 
 We support automatic installation packages for Debian/Ubuntu. 
 It shouldn't be too hard to port it to e.g. Windows if anyone wants to 
 do the job. 
+
+We also use the following external libraries. jar files are included: 
+* Jcoord, with some small modifications. Compiled jar and source included.
+* utf8-with-fallback with some small modifications. Compiled jar and source included. 
+* Simple framework. 
 
 ## Installation
 
@@ -41,6 +46,6 @@ Build from the source is done by a plain old makefile. Yes I know :)
 Maybe I move to Maven a little later. Setup for generating Debian
 packages is included. You may use the 'debuild' command.
 
-You will need JDK (Oracle or OpenJDK) version 6 or later, the Scala
-programming language version 2.7.7 (scala and scala-library) and 
+You will need JDK (Oracle or OpenJDK) version 7 or later, the Scala
+programming language version 2.8 or later (scala and scala-library) and 
 librxtx-java. 
