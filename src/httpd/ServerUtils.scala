@@ -118,16 +118,25 @@ package no.polaric.aprsd.http
           wrapper
        }
 
-
-
+       def simple_submit(req: Request): NodeSeq =
+           <input type="submit" name="update" id="update" value="Oppdater"/>
+           ;
+           
+       def default_submit(req: Request): NodeSeq = 
+           <input type="submit" onclick="window.close()" id="cancel" value="Avbryt"/>
+           <input type="submit" name="update" id="update" value="Oppdater"/>
+           ;
+           
+           
        /**
         * Generic HTML form method.
         * Field content and action to be performed are given as function-arguments
         */
-       protected def htmlForm( req    : Request,
+       protected def htmlForm( req  : Request,
                              prefix : NodeSeq,
                              fields : (Request) => NodeSeq,
-                             action : (Request) => NodeSeq ) : NodeSeq =
+                             action : (Request) => NodeSeq,
+                             submit : (Request) => NodeSeq ) : NodeSeq =
        {
            if (req.getParameter("update") != null) 
                <div><script source="javascript">setTimeout('window.close()', 2000);</script>
@@ -141,13 +150,19 @@ package no.polaric.aprsd.http
               <fieldset>
                  { fields(req) }
               </fieldset>
-
-              <input type="submit" onclick="window.close()" id="cancel" value="Avbryt"/>
-              <input type="submit" name="update" id="update" value="Oppdater"/>
+              { submit(req);}
               </form>
        }
 
-
+       
+       protected def htmlForm( req  : Request,
+                             prefix : NodeSeq,
+                             fields : (Request) => NodeSeq,
+                             action : (Request) => NodeSeq) : NodeSeq =
+           htmlForm(req, prefix, fields, action, default_submit)
+           ;
+           
+           
 
        protected def printHtml(res : Response, content : Node ) =
        {        
