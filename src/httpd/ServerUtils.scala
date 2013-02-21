@@ -39,7 +39,7 @@ package no.polaric.aprsd.http
        /** File name prefix */
        // FIXME: Do we need this anymore??
        protected def fprefix(req: Request) : String = 
-           if ((req.getParameter("ajax") == null)) _wfiledir else _wfiledir 
+           if ((req.getParameter("ajax") == null)) "../"+_wfiledir else _wfiledir 
            ;
            
            
