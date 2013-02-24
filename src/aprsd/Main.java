@@ -154,15 +154,18 @@ public class Main implements ServerAPI
            /* Start HTTP server */
            int http_port = getIntProperty("httpserver.port", 8081);
            ws = new HttpServer(api, http_port);
-           ws.addHandler(new Webserver(api), null);
            System.out.println( "*** HTTP server ready on port " + http_port);
              
-           /* Plugins */
+           /* Plugins. Note that plugins are installed and started before main webservices, channels
+            * aprs parser and own position/objects. If some core service is to be modified or extended
+            * by plugins it must be installed before plugins. 
+            */
            PluginManager.addList(getProperty("plugins", ""));
         
+           /* Add main webservices */
+           ws.addHandler(new Webserver(api), null);
         
-        
-          /* Start parser and connect it to channel(s) if any */
+           /* Start parser and connect it to channel(s) if any */
            AprsParser p = new AprsParser(api, db.getMsgProcessor());
 
            /*
