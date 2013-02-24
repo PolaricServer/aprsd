@@ -36,8 +36,8 @@ package no.polaric.aprsd.http
 
 
        def action(req : Request): NodeSeq =
-          if (!authorizedForAdmin(req))
-              <h3>Du er ikke autorisert for admin operasjoner</h3>
+          if (!authorizedForUpdate(req))
+              <h3>Du er ikke autorisert for slike operasjoner</h3>
           else if ("gc".equals(cmd)) {
               _api.getDB().garbageCollect()
               <h3>GC, ok</h3>
