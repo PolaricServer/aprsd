@@ -133,10 +133,6 @@ public class Main implements ServerAPI
            /* API */
            api = this; // new Main();
            PluginManager.setServerApi(api);
-           
-           /* Database of stations/objects */
-           db  = new StationDBImp(api); 
-           AprsPoint.setApi(api);
         }
         catch( Exception ioe )
         {
@@ -155,13 +151,19 @@ public class Main implements ServerAPI
            int http_port = getIntProperty("httpserver.port", 8081);
            ws = new HttpServer(api, http_port);
            System.out.println( "*** HTTP server ready on port " + http_port);
-             
+           
+           /* Database of stations/objects */
+           db  = new StationDBImp(api);   
+           
            /* Plugins. Note that plugins are installed and started before main webservices, channels
             * aprs parser and own position/objects. If some core service is to be modified or extended
             * by plugins it must be installed before plugins. 
             */
            PluginManager.addList(getProperty("plugins", ""));
-        
+           
+           AprsPoint.setApi(api);
+           Station.init(api); 
+           
            /* Add main webservices */
            ws.addHandler(new Webserver(api), null);
         

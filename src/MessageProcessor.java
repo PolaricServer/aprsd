@@ -163,6 +163,8 @@ public class MessageProcessor implements Runnable
                   (SecUtils.digestB64(_key+sender.getIdent()+recipient+text+msgid, 8));
             }
             result = result && subs.recipient.handleMessage(sender, text);
+            if (!result) 
+               System.out.println("*** Message authentication failed. msgid="+msgid);
             recMessages.put(sender.getIdent()+"#"+msgid, result);
          }     
          if (msgid != null)

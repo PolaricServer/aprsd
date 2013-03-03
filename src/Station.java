@@ -45,7 +45,12 @@ public static class Status implements Serializable
     public static void setExpiretime(long exp)
        { _expiretime = exp; }
 
-
+     public static void init(ServerAPI api)
+      { int exptime = api.getIntProperty("aprs.expiretime", 60);
+        setExpiretime(exptime * 60 * 1000);
+      }   
+    
+    
     /*
      * Attributes of a station record (APRS data)
      */

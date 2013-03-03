@@ -69,6 +69,7 @@ public class SecUtils
            return dig.digest();
       }
       catch (Exception e) {
+          System.out.println("*** Cannot generate message digest: "+e);
           return null;
       }
     }

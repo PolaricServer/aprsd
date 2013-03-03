@@ -697,15 +697,14 @@ package no.polaric.aprsd.http
        
        val result : NodeSeq = 
           if (item == null)
-            <xml:group>
             TXT("Fant ikke info: "+ident)
-            </xml:group>
           else
             <xml:group>
             <label for="callsign" class="lleftlab">Ident:</label>
             <label id="callsign"><b> { ident } </b></label>
             { simpleLabel("time",  "lleftlab", "Tid:", TXT( df.format(item.getTS()))) ++
-              simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )  ++
+              { if (item.speed >= 0) simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )
+                else xml.NodeSeq.Empty } ++
               simpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course, fprefix(req)))  }
             <div id="traffic">
             { if (item.pathinfo != null) 
