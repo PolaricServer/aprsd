@@ -21,6 +21,8 @@ INSTALL_CONFIG = $(DESTDIR)/etc/polaric-aprsd
  INSTALL_DATA  = $(DESTDIR)/var/lib/polaric
    INSTALL_LOG = $(DESTDIR)/var/log/polaric
   INSTALL_SUDO = $(DESTDIR)/etc/sudoers.d
+INSTALL_PLUGDIR= $(INSTALL_CONFIG)/config.d
+
 
 ##################################################
 ##  things below should not be changed
@@ -36,6 +38,7 @@ all: aprs
 
 install: polaric-aprsd.jar
 	install -d $(INSTALL_CONFIG)
+	install -d $(INSTALL_PLUGDIR)
 	install -d $(INSTALL_BIN)
 	install -d $(INSTALL_JAR)
 	install -d $(INSTALL_WEB)/icons $(INSTALL_WEB)/icons/signs $(INSTALL_WEB)/dicons

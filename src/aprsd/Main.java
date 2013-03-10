@@ -125,9 +125,36 @@ public class Main implements ServerAPI
         if (args.length < 1)
            System.out.println("Usage: Daemon <config-file>");
              
+        String confdir = System.getProperties().getProperty("confdir", ".");  
+             
         try {
            FileInputStream fin = new FileInputStream(args[0]);
            _config.load(fin);
+           fin.close(); 
+           String plugins = getProperty("plugins", "");
+           
+           /* Scan subdirectory config.d for additional config files 
+            * placed there by plugins. 
+            */
+           File pconfdir = new File(confdir+"/config.d");
+           File[] files = pconfdir.listFiles( new FileFilter() {
+                    public boolean accept(File x)
+                       { return x.canRead() && x.getName().matches(".*\\.ini"); }
+                 });
+           
+           for (File f : files) {
+                System.out.println("*** Config file: "+f.getName());
+                FileInputStream ffin = new FileInputStream(f.getAbsolutePath());
+               _config.load( ffin );
+                ffin.close();
+                plugins = plugins +", "+getProperty("plugins","");
+           }
+           _config.setProperty("plugins", plugins);
+           
+           
+           /* Allow config parameters to be overridden programmatically 
+            * using the original config as defaults. 
+            */
            _config = new Properties(_config); 
            
            /* API */

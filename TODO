@@ -19,7 +19,7 @@ V.1.2 (february 2013)
 * [C] Allow more than one plugin js to add callback for menu.
     DONE.
     
-* Consider auto including of plugins when installing? config.d subdirectory??
+* Consider auto including of plugin configs when installing? config.d subdirectory??
 
 * Allow channels to be visible for logged in or SAR users only. 
 
@@ -45,8 +45,12 @@ V.1.2 (february 2013)
     DONE.
 
 * Init file: Find correct JAVA_HOME setting. FIX. 
+    Seems to work now
 
-
+    
+* Create objects: Symbol and symtable are switched. Fix. 
+    DONE.
+    
 
 V.1.3 (march 2013)
 ------------------
