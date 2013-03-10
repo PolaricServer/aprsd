@@ -355,8 +355,8 @@ package no.polaric.aprsd.http
                System.out.println("*** SET OBJECT: '"+id+"' by user '"+getAuthUser(request)+"'")
                if ( _api.getDB().getOwnObjects().add(id, 
                       new AprsHandler.PosData( pos,
-                         if (osymtab==null) '/' else osymtab(0),
-                         if (osym==null) 'c' else osym(0)) ,
+                         if (osym==null) 'c' else osym(0) ,
+                         if (osymtab==null) '/' else osymtab(0)),
                       if (otxt==null) "" else otxt,
                       "true".equals(perm) ))
                   
@@ -372,7 +372,8 @@ package no.polaric.aprsd.http
     }
 
 
-   def _directionIcon(direction:Int, fprefix: String): NodeSeq = 
+    
+    def _directionIcon(direction:Int, fprefix: String): NodeSeq = 
         direction match {
           case x if !(22 until 337 contains x) =>
               <div><img src= {fprefix+"/dicons/dN.png"}/> N</div>
