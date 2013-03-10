@@ -55,6 +55,10 @@ JDK_DIRS="
           /usr/lib/jvm/default-java \
           /usr/lib/jvm/java-7-sun \
           /usr/lib/jvm/java-7-openjdk-i386 \
+          /usr/lib/jvm/java-7-openjdk-armel \
+          /usr/lib/jvm/java-7-openjdk-armhf \
+          /usr/lib/jvm/java-7-openjdk-amd64 \
+          /usr/lib/jvm/java-7-openjdk-ia64 \
          "
 
 
