@@ -315,9 +315,10 @@ package no.polaric.aprsd.http
               label("objid", "lleftlab", "Objekt ID:", "Identifikator for objekt") ++
               textInput("objid", 9, 9, "") ++
               br ++
-              label("osymtab", "lleftlab", "Symbol:", "APRS symboltabell og symbol") ++
+              label("osymtab", "lleftlab", "Symbol:", "APRS symboltabell og symbol. Fyll inn eller velg i listen til høyre.") ++
               textInput("osymtab", 1, 1, "/") ++
               textInput("osym", 1, 1, "c") ++
+              symChoice ++
               br ++
               label("descr", "lleftlab", "Beskrivelse", "") ++
               textInput("descr", 30, 40, "") ++
@@ -339,7 +340,20 @@ package no.polaric.aprsd.http
             </xml:group>
             ;
             
-             
+        def symChoice = 
+            <select id="symChoice"
+             onchange="var x=event.target.value;document.getElementById('osymtab').value=x[0];document.getElementById('osym').value=x[1];">
+               <option value="/c" style="background-image:url(../aprsd/icons/orient.gif)">Post</option>
+               <option value="\m" style="background-image:url(../aprsd/icons/sign.gif)">Skilt</option>
+               <option value="\." style="background-image:url(../aprsd/icons/sym00.gif)">Kryss</option>
+               <option value="\n" style="background-image:url(../aprsd/icons/sym07.gif)">Trekant</option>
+               <option value="/+" style="background-image:url(../aprsd/icons/sym02.png)">Kors</option>
+               <option value="/o" style="background-image:url(../aprsd/icons/eoc.png)">OPS/KO</option>
+               <option value="/r" style="background-image:url(../aprsd/icons/radio.png)">Radiostasjon</option>
+            </select>
+            ;
+            
+            
         /* Action. To be executed when user hits 'submit' button */
         def action(request : Request): NodeSeq =
             if (id == null || !id.matches("[a-zA-Z0-9_].*\\w*")) {

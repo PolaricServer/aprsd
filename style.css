@@ -38,6 +38,12 @@ fieldset{
     margin-top: 0.7em; margin-bottom: 0.7em; 
 }
 
+select#symChoice option {
+  background-repeat: no-repeat;
+  padding-left:  23px;
+  background-size: contain;
+}
+
 span.kartref {
    background: yellow;
    text-decoration: underline;
