@@ -162,13 +162,13 @@ package no.polaric.aprsd.http
            <br/>
            
            <label for="sar_prefix" class="lleftlab">Skjul prefiks:</label>
-           { textInput("sar_prefix", 50, 50,
+           { textInput("sar_prefix", 25, 50,
                if ( api.getSar()==null) "" else api.getSar().getFilter() ) }
            <br/>
            
            <label for="sar_reason" class="lleftlab">Beskrivelse:</label>
            { if (api.getSar() == null)
-                textInput("sar_reason", 50, 50, "")
+                textInput("sar_reason", 25, 50, "")
              else 
                 <xml:group>
                 <label id="sar_reason">{ api.getSar().getReason() }
@@ -590,7 +590,7 @@ package no.polaric.aprsd.http
                     else null }
                   <br/>   
                   <label for="nalias" class="leftlab">Ny alias:</label>
-                  { textInput("nalias", 10, 10, 
+                  { textInput("nalias", 10, 20, 
                         if (x.getAlias()==null) "" else x.getAlias()) }
                   <br/>
                   { iconSelect(x, fprefix(req), "/icons/") }
