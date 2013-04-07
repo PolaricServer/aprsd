@@ -180,7 +180,7 @@ public class XmlServer extends ServerBase
             UTMRef ref = toUTM(s.getPosition()); 
             if (ref == null) continue; 
                
-            if (!s.visible()) 
+            if (!s.visible()|| (!showSarInfo && _api.getSar() != null && _api.getSar().filter(s)))  
                    out.println("<delete id=\""+fixText(s.getIdent())+"\"/>");
             else {
                synchronized(s) {
@@ -191,7 +191,7 @@ public class XmlServer extends ServerBase
                              : " title=\"[" + fixText(s.getIdent()) + "] " + fixText(s.getDescr()) + "\"";
                   String flags = " flags=\"a" + (s.isInfra() ? "i" : "") + "\"";
 
-                  String icon = _wfiledir + "/icons/"+ (s.getIcon() != null ? s.getIcon() : _icon);    
+                  String icon = _wfiledir + "/icons/"+ (s.getIcon(showSarInfo) != null ? s.getIcon(showSarInfo) : _icon);    
                 
                   out.println("<point id=\""+fixText(s.getIdent())+"\" x=\""
                                + (int) Math.round(ref.getEasting()) + "\" y=\"" + (int) Math.round(ref.getNorthing())+ "\"" 

@@ -102,13 +102,17 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
     public void setSymtab(char s)
        { _altsym = s; }
        
-    @Override public String getIcon()
+    public String getIcon(boolean override)
     { 
-       if (_icon != null)
+       if (override && _icon != null)
           return _icon; 
        return _symTab.getIcon(_symbol, _altsym);
     }           
     
+    @Override public String getIcon()
+       { return getIcon(true); }
+
+
     public int getAmbiguity()
        { return _ambiguity; }
        
