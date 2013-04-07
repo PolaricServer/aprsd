@@ -147,7 +147,12 @@ public class Main implements ServerAPI
                 FileInputStream ffin = new FileInputStream(f.getAbsolutePath());
                _config.load( ffin );
                 ffin.close();
-                plugins = plugins +", "+getProperty("plugins","");
+                String newplug = getProperty("plugins","");
+                if (newplug.length() > 0) {
+                    if (plugins.length() > 0)
+                       plugins += ", ";       
+                    plugins += getProperty("plugins","");
+                }
            }
            _config.setProperty("plugins", plugins);
            
