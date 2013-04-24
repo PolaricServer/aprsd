@@ -23,7 +23,7 @@ import java.io.Serializable;
  */
 public class AprsObject extends AprsPoint implements Serializable
 {
-    private static long _expiretime    = 1000 * 60 * 60 * 3;    // Default: 3 hour
+    private static long _expiretime    = 1000 * 60 * 60 * 12;    // Default: 3 hour
     
     /*
      * Attributes of object/item record (APRS data)
