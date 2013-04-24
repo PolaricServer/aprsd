@@ -20,8 +20,9 @@ V.1.2 (february 2013)
     DONE.
     
 * Consider auto including of plugin configs when installing? config.d subdirectory??
-
-* Allow channels to be visible for logged in or SAR users only. 
+    DONE.
+    
+* Allow channels to be visible for logged in or SAR users only?
 
 * Move to Java 7
     DONE.
@@ -51,18 +52,16 @@ V.1.2 (february 2013)
 * Create objects: Symbol and symtable are switched. Fix. 
     DONE.
     
+* [C] Install over 1.0: Empty /etc/polaric-webapp ? 
 
-V.1.3 (march 2013)
-------------------
+* Too easy to lock yourself out when changing users regex. Workaround?
+  Prevent removing of 'admin' user by plugin? 
 
-GoOpen conference! 
+* SAR mode prefix filter does not work.
+    DONE.
 
-
-V.1.4 (april 2013)
-------------------
-
-NRRL dagene.
-
+* SAR mode: hide alternative icon as well?
+    DONE.
 
 
 
@@ -158,8 +157,6 @@ Other.
 * App: Autodiscovery of servers on local network
 
 * Messaging - a plugin? 
-
-* Web config plugin
 
 * Allow objects with certain attributes (like source, callsign) to 
   be visible only for logged in users. Note: Should this be part of a filter framework?
