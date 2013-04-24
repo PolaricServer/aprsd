@@ -381,16 +381,15 @@ public abstract class Channel extends Source implements Serializable
      * an optional receive filter. 
      * @param packet String representation of packet. 
      * @param dup True if packet is known to be a duplicate.
+     * @return true if accepted
      */
-    protected void receivePacket(String packet, boolean dup)
+    protected boolean receivePacket(String packet, boolean dup)
     { 
        if (packet == null || packet.length() < 1)
-          return; 
+          return false; 
        Packet p = string2packet(packet);
-       
-       if (_rfilter != null && !_rfilter.equals("") && !packet.matches(_rfilter))
-          return; 
-       receivePacket(p, dup);
+
+       return receivePacket(p, dup);
     }
     
     
@@ -400,12 +399,16 @@ public abstract class Channel extends Source implements Serializable
      * duplicates and if all is ok, deliver packet to receivers.
      * @param packet Pre-parsed packet.
      * @param dup True if packet is known to be a duplicate.
+     * @return true if accepted.
      */
-    protected void receivePacket(Packet p, boolean dup)
+    protected boolean receivePacket(Packet p, boolean dup)
     {      
        if (p == null)
-          return; 
-
+          return false; 
+       
+       if (_rfilter != null && !_rfilter.equals("") && !p.toString().matches(_rfilter))
+          return false; 
+          
        p.source = this;
        System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+p);
        _heardPackets++;
@@ -417,6 +420,7 @@ public abstract class Channel extends Source implements Serializable
           _duplicates++;
        for (Receiver r: _rcv)
            r.receivePacket(p, dup);
+       return !dup;
     }
     
     
