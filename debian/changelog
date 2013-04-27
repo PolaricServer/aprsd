@@ -1,8 +1,8 @@
-polaric-aprsd (1.1.1+) UNRELEASED; urgency=low
+polaric-aprsd (1.2) unstable; urgency=low
 
-  * Move to java 7 + more hacking 
+  * Several fixes and additions (che changelog). 
 
- -- Øyvind hanssen <ohanssen@acm.org>  Sun, 03 Feb 2013 23:17:11 +0100
+ -- Øyvind hanssen <ohanssen@acm.org>  Sat, 27 Apr 2013 13:19:18 +0200
 
 polaric-aprsd (1.1.1) unstable; urgency=low
 

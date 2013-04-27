@@ -10,5 +10,24 @@ V.1.1.1
 * Some bugfixes, mostly related to icons and signs. . 
  
 
+V.1.2
+-----
 
- 
+* Implement and test configuration support. Config plugin. 
+* Auto including of plugin configs when installing? config.d subdirectory.
+* Move to Java 7
+* Move to Scala 1.8+
+* Object expire. Should not expire own objects? Fix. 
+* Plugin manager starts AFTER http server and AFTER StationDB -> 
+  Those do not get parameters from webconfig plugin! Fix. 
+* Create objects: Symbol and symtable are switched. Fix. 
+* SAR mode prefix filter does not work. Fix. 
+* SAR mode: hide alternative icon as well?
+* XML support for a collection of points (without anything else). <pointcloud> tag.   
+* [C] Allow more than one plugin js to add callback for menu.
+* [C] Allow auto-including of plugin css and js
+* [C] Install a password file with user admin, initially. 
+* [C] Fix serious bug: Menu didn't work if plugins didn't add menu-items. 
+* [C] XML support for a displaying a collection of points (without anything else).
+* [C] Statkart name database lookup.
+    
