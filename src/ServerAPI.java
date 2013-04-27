@@ -77,6 +77,12 @@ import java.util.*;
        public Properties getConfig();
        
        
+       /** Save config. Note that this is destructive and should only be called
+        * at shutdown. 
+        */
+       public void saveConfig();
+          
+          
        /** Get string configuration property. 
         * @param pn property name.
         * @param dval default value. 

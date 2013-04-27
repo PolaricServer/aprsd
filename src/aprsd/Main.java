@@ -23,11 +23,11 @@ public class Main implements ServerAPI
    public static  OwnPosition ownpos = null; 
    public static  RemoteCtl rctl;
    public static  SarMode  sarmode = null;
-   private static Properties _config = new Properties();
+   private static Properties _config, _defaultConf; 
    private static HttpServer ws;
    private static Channel.Manager _chanManager = new Channel.Manager();
    private static SarUrl sarurl;
-   
+   private static String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
    
    /* Experimental !! 
     * Database interface must be known here. The interface is 
@@ -81,6 +81,17 @@ public class Main implements ServerAPI
     
    public Properties getConfig()
     { return _config; }
+    
+    
+   public void saveConfig() 
+   { 
+       try {
+            _defaultConf.clear();
+            FileOutputStream cfout = new FileOutputStream(_xconf);
+            _config.storeToXML(cfout, "Configuration for Polaric APRSD");
+       }
+       catch (java.io.IOException e) {System.out.println("*** WARNING: Cannot write file "+e);}
+   }
           
    public String getProperty(String pname, String dvalue)
     { String x = _config.getProperty(pname, dvalue); 
@@ -129,9 +140,10 @@ public class Main implements ServerAPI
              
         try {
            FileInputStream fin = new FileInputStream(args[0]);
-           _config.load(fin);
+           _defaultConf = new Properties();
+           _defaultConf.load(fin);
            fin.close(); 
-           String plugins = getProperty("plugins", "");
+           String plugins = _defaultConf.getProperty("plugins", "");
            
            /* Scan subdirectory config.d for additional config files 
             * placed there by plugins. 
@@ -145,22 +157,33 @@ public class Main implements ServerAPI
            for (File f : files) {
                 System.out.println("*** Config file: "+f.getName());
                 FileInputStream ffin = new FileInputStream(f.getAbsolutePath());
-               _config.load( ffin );
+               _defaultConf.load( ffin );
                 ffin.close();
-                String newplug = getProperty("plugins","");
+                String newplug = _defaultConf.getProperty("plugins","");
                 if (newplug.length() > 0) {
                     if (plugins.length() > 0)
                        plugins += ", ";       
-                    plugins += getProperty("plugins","");
+                    plugins += _defaultConf.getProperty("plugins","");
                 }
            }
-           _config.setProperty("plugins", plugins);
+           _defaultConf.setProperty("plugins", plugins);
            
-           
-           /* Allow config parameters to be overridden programmatically 
-            * using the original config as defaults. 
+            
+           /* 
+            * Allow default config properties to be overridden
+            * programmatically and saved elsewhere. The original config file
+            * now functions as default values! Note that there is a special plugin
+            * that is responsible for updating override-config and saves the 
+            * file when it terminates. If such a plugin is not installed, this file 
+            * is not used. 
             */
-           _config = new Properties(_config); 
+           _config = new Properties(_defaultConf); 
+           try { 
+               FileInputStream cfin = new FileInputStream(_xconf); 
+               _config.loadFromXML(cfin);
+           }
+           catch (java.io.FileNotFoundException e) {}
+           
            
            /* API */
            api = this; // new Main();
@@ -184,12 +207,17 @@ public class Main implements ServerAPI
            ws = new HttpServer(api, http_port);
            System.out.println( "*** HTTP server ready on port " + http_port);
            
+           
            /* Database of stations/objects */
            db  = new StationDBImp(api);   
            
            /* Plugins. Note that plugins are installed and started before main webservices, channels
             * aprs parser and own position/objects. If some core service is to be modified or extended
             * by plugins it must be installed before plugins. 
+            *
+            * FIXME: Do this with 'plugins.preinit' before db is created and the rest of the plugins later
+            *  OR add an init function to the plugin that can be called early, OR find another way to solve
+            *  this problem!!!
             */
            PluginManager.addList(getProperty("plugins", ""));
            
