@@ -19,7 +19,11 @@ import java.util.*;
        
        /** Get data interface. */
        public StationDB getDB();
-       
+    
+    
+       /** Get APRS parser */
+       public AprsParser getAprsParser();
+    
        
        /** Get channel manager interface. */
        public Channel.Manager getChanManager(); 

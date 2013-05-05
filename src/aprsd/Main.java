@@ -16,6 +16,7 @@ public class Main implements ServerAPI
    public static String toaddr  = "APPS12";
    
    private static StationDB db = null;
+   private static AprsParser parser = null;
    public  static InetChannel ch1 = null;
    public  static TncChannel  ch2 = null;
    public static  Igate igate  = null;
@@ -41,6 +42,9 @@ public class Main implements ServerAPI
    public StationDB getDB() 
     { return db; }
    
+   public AprsParser getAprsParser()
+    { return parser; }
+    
    public AprsHandler getAprsHandler() 
     { return dblog; }
     
@@ -207,9 +211,11 @@ public class Main implements ServerAPI
            ws = new HttpServer(api, http_port);
            System.out.println( "*** HTTP server ready on port " + http_port);
            
-           
            /* Database of stations/objects */
            db  = new StationDBImp(api);   
+           
+           /* Start parser and connect it to channel(s) if any */
+           parser = new AprsParser(api, db.getMsgProcessor());
            
            /* Plugins. Note that plugins are installed and started before main webservices, channels
             * aprs parser and own position/objects. If some core service is to be modified or extended
@@ -226,9 +232,7 @@ public class Main implements ServerAPI
            
            /* Add main webservices */
            ws.addHandler(new Webserver(api), null);
-        
-           /* Start parser and connect it to channel(s) if any */
-           AprsParser p = new AprsParser(api, db.getMsgProcessor());
+      
 
            /*
             * default channel setup: one named aprsis type APRSIS and one named tnc type TNC2
@@ -257,7 +261,7 @@ public class Main implements ServerAPI
                     String type = getProperty("channel."+chan+".type", "");
                     ch[i] = _chanManager.newInstance(api, type, chan);
                     if (ch[i] != null)
-                       ch[i].addReceiver(p);
+                       ch[i].addReceiver(parser);
                     else
                        System.out.println("*** ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
                     i++;
