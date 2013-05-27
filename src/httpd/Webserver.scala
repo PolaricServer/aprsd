@@ -438,7 +438,7 @@ package no.polaric.aprsd.http
 
                <tr onclick={
                  if (x.visible() && x.getPosition() != null) 
-                     "findStation('" + x.getIdent() + "', 'true')"
+                     "findItem('" + x.getIdent() + "', 'true')"
                  else "" 
                }>
           

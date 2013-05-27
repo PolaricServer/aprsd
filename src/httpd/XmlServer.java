@@ -43,10 +43,10 @@ public class XmlServer extends ServerBase
 
    
    /**
-    * Look up a station and return id, x and y coordinates (separated by commas).
+    * Look up a station/object and return id, x and y coordinates (separated by commas).
     * If not found, return nothing.
     */
-   public void handle_findstation(Request req, Response res)
+   public void handle_finditem(Request req, Response res)
        throws IOException
    { 
        PrintWriter out = getWriter(res);
