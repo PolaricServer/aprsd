@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2013 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,17 +19,24 @@ import uk.me.jstott.jcoord.*;
 import java.util.concurrent.*;
  
 /**
- * SAR URL
+ * SAR key and SAR URL.
+ * Generate keys that can be used to authenticate and authorize (limited) access
+ * temporarly, to the system. Keys are saved to a file as URL's to allow a web 
+ * server frontend to do authorization plus mapping to an url for a specific area. 
  */
-public class SarUrl implements Runnable
+ 
+public final class SarUrl implements Runnable
 {
-    private String     _file, _proto;
-    private boolean   _hasChanged = false; 
-    private List<Item> _mapping = new ArrayList();
-    private long _timeLimit = 1000  * 60 * 60  * 24;
+    private String             _file, _proto;
+    private boolean            _hasChanged = false; 
+    private List<Item>         _mapping = new ArrayList();
+    private Item               _lastItem;
+    private static final long  _timeLimit = 1000  * 60 * 60  * 25;
+    private static final long  _cacheTime = 1000  * 60 * 60 * 2;
     
-    
-    private static class Item {
+
+
+    private static final class Item {
         String key, target; 
         Date time;
         public Item(String k, String tg, Date t)
@@ -47,37 +54,57 @@ public class SarUrl implements Runnable
         Thread t = new Thread(this, "SarUrlWriter");
         t.start(); 
     }
+
     
-    
+    public boolean validKey(String key)
+    {
+        for (Item it: _mapping)
+           if (it.key.equals(key))
+              return true;
+        return false;
+    }
+
+
+
     public static String getKey(String url)
     {
        String[] s = url.split("sar-");
        return s[1];
     }
     
+
     
     public String create(String target)
     {
+       Date now = new Date(); 
+       String host = target.replaceFirst("http(s?)://", ""); 
+       if (host.indexOf('/') == -1)
+          host = "localhost";
+       else
+          host = host.substring(0, host.indexOf('/'));
+       target = target.replaceFirst("http(s?)://[a-zA-Z0-9\\.\\-]+/", "");
+       
+       // Consider sorting the list on time
+       for (Item it: _mapping) {
+           if (now.getTime() < it.time.getTime() + _cacheTime && it.target.equals(target))
+              return _proto + "://"+host+"/sar-"+ it.key;
+       }
        try {
-          /* A 24 bit key in hexadecimal */
-          String key = SecUtils.b2hex((SecUtils.getKey(3)));
-          String host = target.replaceFirst("http(s?)://", ""); 
-          if (host.indexOf('/') == -1)
-              host = "localhost";
-          else
-              host = host.substring(0, host.indexOf('/'));
-          target = target.replaceFirst("http(s?)://[a-zA-Z0-9\\.\\-]+/", "");
-          synchronized(this) {
-             _mapping.add( new Item(key, target, new Date()) );  
-          }
-          saveMap();
-          return _proto + "://"+host+"/sar-"+key; 
+           /* A 24 bit key in hexadecimal */
+           String key = SecUtils.b2hex((SecUtils.getKey(3)));
+           synchronized(this) {
+               _lastItem =  new Item(key, target, now);
+               _mapping.add( _lastItem );  
+           }
+           saveMap();
        } 
        catch (IOException e)
-        {return null;}
+            {return null;}
+       return _proto + "://"+host+"/sar-"+_lastItem.key;
     }
     
-       
+    
+    
     
     private synchronized void saveMap()
         throws IOException
@@ -100,7 +127,8 @@ public class SarUrl implements Runnable
     
     
     /**
-     * Thread to periodically checkpoint mapping data to file. 
+     * Thread to periodically remove old keys and checkpoint mapping 
+     * data to file. 
      */   
     public void run()
     {
