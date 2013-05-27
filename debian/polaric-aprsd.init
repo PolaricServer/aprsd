@@ -24,7 +24,7 @@ SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB
     INIFILE=$CONFDIR/server.ini
     
        JAVA=java
-       JSVC=jsvc
+       JSVC=/usr/bin/jsvc
   JAVA_HOME=/usr/lib/jvm/java-7-openjdk-i386
        USER=polaric
     PIDFILE=/var/run/$NAME.pid
