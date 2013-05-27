@@ -1,3 +1,9 @@
+polaric-aprsd (1.2+) UNRELEASED; urgency=low
+
+  * Hacking 
+
+ -- Øyvind hanssen <ohanssen@acm.org>  Wed, 22 May 2013 20:11:11 +0200
+
 polaric-aprsd (1.2) unstable; urgency=low
 
   * Several fixes and additions (che changelog). 

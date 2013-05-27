@@ -10,6 +10,8 @@ V.1.3 (may or june 2013)
 
 * [C] Hack and use OL offline tile caching??
     
+* [C] Configurable gray-layer over maps. Adjust contrast?  
+
 * Allow channels to be visible for logged in or SAR users only?
     
 * [C] Install over 1.0: Empty /etc/polaric-webapp ? 
@@ -19,7 +21,35 @@ V.1.3 (may or june 2013)
 
 * Export to GPX files (database plugin. Does this need changes here?)
 
+* Activate/deactivate of channels at run-time. Re-load config. 
+
+* Selection of pre-defined region: Also select map-layer?
+
+* Extend or re-write SarUrl. Re-use SAR-codes in requests close in time. 
+  make available for plugin API. Consider security. 
+
+* [C] Alias info does not show when refreshing, in SAR mode. 
+
+* [C] Extend iframeAPI ....
+       IN PROGRESS
+
+* [C] Move API code out from menu.js to api.js
+       IN PROGRESS
+       
+
 ...
+
+Iframe API
+----------
+* Make links work in search lists
+* Subscribe to asynchronous updates (events/callbacks)
+* Subscription: Objects in map view.
+* Subscription: Info about a particular station/objects.
+* Subscription: Misc. events from map view. 
+* Consider how to add API extensions from plugins
+* Consider security/login
+
+
 
 
 

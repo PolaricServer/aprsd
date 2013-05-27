@@ -12,7 +12,7 @@ import no.polaric.aprsd.http.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "1.2";
+   public  static String version = "1.2+";
    public static String toaddr  = "APPS12";
    
    private static StationDB db = null;
