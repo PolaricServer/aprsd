@@ -436,7 +436,10 @@ package no.polaric.aprsd.http
                val moving = if (s!=null) !s.getTrail().isEmpty()
                             else false;
 
-               <tr onclick={
+               <tr class={
+                 if (x.visible() && x.getPosition() != null) 
+                      "" else "nopos" } 
+                 onclick={
                  if (x.visible() && x.getPosition() != null) 
                      "findItem('" + x.getIdent() + "', 'true')"
                  else "" 

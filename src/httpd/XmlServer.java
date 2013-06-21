@@ -188,7 +188,7 @@ public class XmlServer extends ServerBase
                   if (ref == null) continue; 
                   
                   String title = s.getDescr() == null ? "" 
-                             : " title=\"[" + fixText(s.getIdent()) + "] " + fixText(s.getDescr()) + "\"";
+                             : " title=\"" + fixText(s.getDescr()) + "\"";
                   String flags = " flags=\"a" + (s.isInfra() ? "i" : "") + "\"";
 
                   String icon = _wfiledir + "/icons/"+ (s.getIcon(showSarInfo) != null ? s.getIcon(showSarInfo) : _icon);    
