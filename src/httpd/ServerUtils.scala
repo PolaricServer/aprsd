@@ -173,6 +173,17 @@ package no.polaric.aprsd.http
        }
   
 
+       protected def printXml(res : Response, content : Node ) = 
+       {
+           val out = getWriter(res)
+           if (res.getValue("Content-Type") == null)
+               res.setValue("Content-Type", "text/xml; charset=utf-8");
+           out.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>")
+           out.println(content.toString())
+           out.close()
+       }
+       
+       
   
    /**
     * Exctract UTM reference from request parameters.

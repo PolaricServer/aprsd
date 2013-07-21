@@ -1,5 +1,5 @@
 
-V.1.3 (may or june 2013)
+V.1.3 (july 2013)
 ------------------------
      
 * [M] Better styling of forms for mobile. Consider JQuery mobile.
@@ -20,6 +20,7 @@ V.1.3 (may or june 2013)
   Prevent removing of 'admin' user by plugin? 
 
 * Export to GPX files (database plugin. Does this need changes here?)
+       DONE.
 
 * Activate/deactivate of channels at run-time. Re-load config. 
 
@@ -28,7 +29,11 @@ V.1.3 (may or june 2013)
 * Extend or re-write SarUrl. Re-use SAR-codes in requests close in time. 
   make available for plugin API. Consider security. 
 
-* [C] Alias info does not show when refreshing, in SAR mode. 
+* [C] Alias info does not show when refreshing, in SAR mode. ??
+
+* "Skjul ident" ("globale innstillinger") virker bare for innloggede brukere??
+
+* Sjekk om overføring av alternative ikon blir overført til andre servere slik som alias.
 
 * [C] Extend iframeAPI ....
        IN PROGRESS
@@ -36,14 +41,20 @@ V.1.3 (may or june 2013)
 * [C] Move API code out from menu.js to api.js
        IN PROGRESS
        
+* Clean classpath components for plugins???
+
+
 
 ...
 
 Iframe API
 ----------
 * Make links work in search lists
+     DONE??
 * Subscribe to asynchronous updates (events/callbacks)
+     DONE.
 * Subscription: Objects in map view.
+     DONE.
 * Subscription: Info about a particular station/objects.
 * Subscription: Misc. events from map view. 
 * Consider how to add API extensions from plugins
