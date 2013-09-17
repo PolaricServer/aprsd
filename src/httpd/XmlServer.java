@@ -80,7 +80,7 @@ public class XmlServer extends ServerBase
        throws IOException
    {
       /* FIXME: All that are logged in are allowed to see SAR info. Is this too liberal? */
-      _handle_mapdata(req, res, true);
+      _handle_mapdata(req, res, true, true);
    }
    
    
@@ -91,7 +91,7 @@ public class XmlServer extends ServerBase
    public void handle_mapdata(Request req, Response res)
       throws IOException
    {
-      _handle_mapdata(req, res, _api.getSar() == null);
+      _handle_mapdata(req, res,  _api.getSar() == null || !_api.getSar().isAliasHidden(), false );
    }
    
    
@@ -99,7 +99,7 @@ public class XmlServer extends ServerBase
    /**
     * Produces XML (Ka-map overlay spec.) for plotting station/symbols/labels on map.   
     */
-   public void _handle_mapdata(Request req, Response res, boolean showSarInfo) 
+   public void _handle_mapdata(Request req, Response res, boolean showSarInfo, boolean loggedIn) 
       throws IOException
    {         
         PrintWriter out = getWriter(res);
@@ -179,8 +179,8 @@ public class XmlServer extends ServerBase
                    
             UTMRef ref = toUTM(s.getPosition()); 
             if (ref == null) continue; 
-               
-            if (!s.visible()|| (!showSarInfo && _api.getSar() != null && _api.getSar().filter(s)))  
+            
+            if (!s.visible() || (_api.getSar() != null && !loggedIn && _api.getSar().filter(s)))  
                    out.println("<delete id=\""+fixText(s.getIdent())+"\"/>");
             else {
                synchronized(s) {

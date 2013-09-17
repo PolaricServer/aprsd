@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2013 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,14 +19,18 @@ import java.util.*;
  */
 public class SarMode 
 { 
-    private String _reason;
-    private String _user;
-    private String _prefixFilter;
-    private Date   _time;
+    private String  _reason;
+    private String  _user;
+    private String  _prefixFilter;
+    private Date    _time;
+    private boolean _aliasHidden;
     
-    public SarMode(String r, String u, String filt)
-     { _reason = r; _user = u; _time = new Date(); _prefixFilter = filt.trim().toUpperCase(); }
+    public SarMode(String r, String u, String filt, boolean h)
+     { _reason = r; _user = u; _time = new Date(); _prefixFilter = filt.trim().toUpperCase(); _aliasHidden = h; }
      
+    public boolean isAliasHidden() 
+       { return _aliasHidden; }
+       
     public String getReason()
        { return _reason; }
        

@@ -248,9 +248,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
                System.out.println("*** WARNING: remote SAR command syntax error");
                return false;
            }
+           boolean nohide = arg[2].matches("\\[NOHIDE\\].*");
+           
            System.out.println("*** Set SAR-mode from "+sender.getIdent());
            String filter = ("NONE".equals(arg[1]) ? "" : arg[1]);
-           _api.setSar(arg[2], arg[0], filter);
+           _api.setSar(arg[2], arg[0], filter, !nohide);
        }
        return true;
    }

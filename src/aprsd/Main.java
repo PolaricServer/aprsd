@@ -123,8 +123,8 @@ public class Main implements ServerAPI
    public SarMode getSar()
     { return sarmode; }
     
-   public void setSar(String reason, String src, String filt)
-    { sarmode = new SarMode(reason, src, filt); }
+   public void setSar(String reason, String src, String filt, boolean hideAlias)
+    { sarmode = new SarMode(reason, src, filt, hideAlias); }
  
    public void clearSar()
     { sarmode = null; }
@@ -171,7 +171,7 @@ public class Main implements ServerAPI
                 }
            }
            _defaultConf.setProperty("plugins", plugins);
-           
+           System.out.println("plugins = "+plugins);
             
            /* 
             * Allow default config properties to be overridden

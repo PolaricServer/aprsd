@@ -152,19 +152,24 @@ package no.polaric.aprsd.http
        val prefix = <h2>Søk og redningsmodus</h2>
        var filter = req.getParameter("sar_prefix")
        var reason = req.getParameter("sar_reason")
+       var hidesar = req.getParameter("sar_hidesar")
        val on = req.getParameter("sar_on")
        
        def fields(req : Request): NodeSeq =          
            <xml:group>
-           <p>Alias-info o.l. bare synlig for innloggete brukere.</p>
+           <p>Visse typer info o.l. bare synlig for innloggete brukere.</p>
            <label for="sar_on" class="lleftlab">SAR modus:</label>
            { checkBox("sar_on", api.getSar() !=null, TXT("aktivert")) }  
+           <br/>
+           <label for="sar_hidesar" class="lleftlab">Alias/ikon:</label>
+           { checkBox("sar_hidesar", api.getSar()==null || api.getSar().isAliasHidden(), TXT("skjult")) }  
            <br/>
            
            <label for="sar_prefix" class="lleftlab">Skjul prefiks:</label>
            { textInput("sar_prefix", 25, 50,
                if ( api.getSar()==null) "" else api.getSar().getFilter() ) }
            <br/>
+           
            
            <label for="sar_reason" class="lleftlab">Beskrivelse:</label>
            { if (api.getSar() == null)
@@ -184,10 +189,16 @@ package no.polaric.aprsd.http
        {
           AprsPoint.abortWaiters(true);
           if (on != null && "true".equals(on) ) {
+               val hide = (hidesar != null && "true".equals(hidesar) ) 
                val filt = if ("".equals(filter)) "NONE" else filter;
-               api.setSar(reason, getAuthUser(req), filter);
+               
+               api.setSar(reason, getAuthUser(req), filter, hide);
+               
+               reason = if (!hide) "[NOHIDE] "+reason 
+                        else reason;
                if (api.getRemoteCtl() != null)
                    api.getRemoteCtl().sendRequestAll("SAR "+getAuthUser(req)+" "+filt+" "+reason, null);
+               
                
                <h3>Aktivert</h3>
                <p>{reason}</p>

@@ -135,7 +135,7 @@ import java.util.*;
         * @param filt Regular expression for filtering source callsign of pos reports.
         * @param desc The reason why SAR mode is requested. 
         */
-       public void setSar(String src, String filt, String descr);
+       public void setSar(String src, String filt, String descr, boolean h);
     
     
        /**
