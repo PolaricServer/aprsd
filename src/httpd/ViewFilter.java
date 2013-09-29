@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2013 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,20 +48,6 @@ public class ViewFilter {
   }
   
   
-  
-  public static class Tracking2 extends ViewFilter
-  {  
-       public boolean showIdent(AprsPoint x)
-           { return !(x instanceof AprsObject) || 
-                    ( !isSymbol(x, 'j', '\\')    &&
-                      !isSymbol(x, 'n', '\\'))   
-                      ||
-                    ( !((AprsObject)x).getOwner().getIdent().equals("LA1FTA-14") && 
-                      !((AprsObject)x).getOwner().getIdent().equals("LA4JAA-2")) ;   }      
-           
-  }
-  
-  
    
   public static class Tracking extends ViewFilter
   {  
@@ -77,8 +63,9 @@ public class ViewFilter {
                       isSymbol(x, 'b', '/') || isSymbol(x, 'c', '/')  || isSymbol(x, 'e', '/') ||
                       isSymbol(x, 'f', '/') || isSymbol(x, 'f', '/')  || isSymbol(x, 'k', '*') ||
                       isSymbol(x, 'p', '/') || isSymbol(x, 's', '/')  || isSymbol(x, 'u', '*') ||
-                      isSymbol(x, 'v', '*') || isSymbol(x, 'j', '/') ); }
+                      isSymbol(x, 'v', '*') || isSymbol(x, 'j', '/')  || isSymbol(x, '$', '/') ); }
   }
+  
   
   
   public static class Infra extends ViewFilter 
@@ -117,7 +104,7 @@ public class ViewFilter {
   static {
       _map.put("all", new ViewFilter());
       _map.put("track", new Tracking());
-      _map.put("track2", new Tracking2());
+      _map.put("track2", new Tracking()); // Tracking2 is removed. This is a placeholder for future policies
       _map.put("le", new Callsign("LE.*"));
       _map.put("infra", new Infra("LD.*"));
       _map.put("ainfra", new Infra(null));

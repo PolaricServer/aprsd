@@ -199,6 +199,8 @@ public class XmlServer extends ServerBase
                                ((s instanceof AprsObject) && _api.getDB().getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""))  ? " own=\"true\"":"") +">");
                   out.println("   <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
         
+                   
+                  /* Show label */ 
                   if (vfilt.showIdent(s)) {
                      String style = "lobject";
                      if (s instanceof Station)
