@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2013 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public class RouteInfo implements Serializable
        public void update(boolean p) 
        {
            Date now = new Date();
-           if (primary && ts != null && ts.getTime() + 100*60*60*24 < now.getTime())
+           if (primary && ts != null && ts.getTime() + 100*60*60*24*3 < now.getTime())
               primary = false;
            if (p)
               primary = true;

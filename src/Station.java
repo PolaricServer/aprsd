@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2013 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,13 +102,13 @@ public static class Status implements Serializable
        
        
     /**
-     * Reset infrastructure settings if older than 24 hours 
+     * Reset infrastructure settings if older than 7 days 
      */
     private void expireInfra()
     {
         Date now = new Date();
         if (_infra_updated != null && 
-            _infra_updated.getTime() + 1000*60*60*24 < now.getTime())
+            _infra_updated.getTime() + 1000*60*60*24*7 < now.getTime())
           _igate = _wdigi = false; 
     } 
     
