@@ -83,6 +83,9 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
     private   boolean     _hidelabel = false;  
     
     
+    public Date getLastChanged()
+       { return _lastChanged; }
+       
     public boolean isInfra() 
        { return false; }
    

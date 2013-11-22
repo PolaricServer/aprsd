@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2013 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -414,10 +414,9 @@ public class AprsParser implements Channel.Receiver
             }     
             
             
-            
+            station.update(new Date(), pd, comment, pathinfo);             
             _api.getAprsHandler().handlePosReport(src, station.getIdent(), 
                    new Date(), pd, comment, pathinfo );
-            station.update(new Date(), pd, comment, pathinfo); 
             return;
     }
 
@@ -556,8 +555,8 @@ public class AprsParser implements Channel.Receiver
        if (Channel._dupCheck.checkTS(station.getIdent(), time))
             return;
             
+       station.update(time, pd, "", "(EXT)" );        
        _api.getAprsHandler().handlePosReport(src, station.getIdent(), time, pd, "", "(EXT)" );
-       station.update(time, pd, "", "(EXT)" );
     }
     
     
@@ -705,8 +704,8 @@ public class AprsParser implements Channel.Receiver
           if (comment.length() < 1 || comment.equals(" "))
              comment = null;
              
-          _api.getAprsHandler().handlePosReport(src, station.getIdent(), time, pd, comment, pathinfo );
-          station.update(time, pd, comment, pathinfo );      
+           station.update(time, pd, comment, pathinfo );              
+          _api.getAprsHandler().handlePosReport(src, station.getIdent(), time, pd, comment, pathinfo );  
     }
     
     
