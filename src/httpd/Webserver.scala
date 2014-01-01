@@ -101,7 +101,7 @@ package no.polaric.aprsd.http
     /**
     * set own position
     */          
-   def handle_setownpos(req : Request, res: Response, out: PrintWriter) =
+   def handle_setownpos(req : Request, res: Response) =
    {
         val pos = getUtmCoord(req, 'W', _utmzone)
         val prefix = <h2>Legge inn egen posisjon</h2>
