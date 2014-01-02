@@ -1,0 +1,3 @@
+
+# For now, there is only one field (callsign) and it is obvious.
+polaric-aprsd source: not-using-po-debconf
