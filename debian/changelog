@@ -1,43 +1,43 @@
-polaric-aprsd (1.2+) UNRELEASED; urgency=low
+polaric-aprsd (1.3) unstable; urgency=low
 
-  * Hacking 
+  * Some fixes and additions (see changelog). 
 
- -- Øyvind hanssen <ohanssen@acm.org>  Wed, 22 May 2013 20:11:11 +0200
+ -- Øyvind Hanssen <ohanssen@acm.org>  Thu, 02 Jan 2014 00:49:20 +0100
 
 polaric-aprsd (1.2) unstable; urgency=low
 
-  * Several fixes and additions (che changelog). 
+  * Several fixes and additions (see changelog). 
 
- -- Øyvind hanssen <ohanssen@acm.org>  Sat, 27 Apr 2013 13:19:18 +0200
+ -- Øyvind Hanssen <ohanssen@acm.org>  Sat, 27 Apr 2013 13:19:18 +0200
 
 polaric-aprsd (1.1.1) unstable; urgency=low
 
   * Fix several bugs related to icons/sign editing  
   * Fix problem related to scalability of HTTP server
 
- -- Øyvind hanssen <ohanssen@acm.org>  Fri, 25 Jan 2013 00:27:19 +0100
+ -- Øyvind Hanssen <ohanssen@acm.org>  Fri, 25 Jan 2013 00:27:19 +0100
 
 polaric-aprsd (1.1) unstable; urgency=low
 
   * Release 
 
- -- Øyvind hanssen <ohanssen@acm.org>  Mon, 14 Jan 2013 23:45:16 +0100
+ -- Øyvind Hanssen <ohanssen@acm.org>  Mon, 14 Jan 2013 23:45:16 +0100
 
 polaric-aprsd (1.0.99+1.1-beta3) unstable; urgency=low
 
   * Further hacking. Move to git.  
 
- -- Øyvind hanssen <ohanssen@acm.org>  Fri, 28 Dec 2012 01:05:53 +0100
+ -- Øyvind Hanssen <ohanssen@acm.org>  Fri, 28 Dec 2012 01:05:53 +0100
 
 polaric-aprsd (1.0.99+1.1-beta2) unstable; urgency=low
 
   * Fix some issues - ready to deploy on aprs.no? 
 
- -- Øyvind hanssen <ohanssen@acm.org>  Wed, 24 Oct 2012 21:40:31 +0200
+ -- Øyvind Hanssen <ohanssen@acm.org>  Wed, 24 Oct 2012 21:40:31 +0200
 
 polaric-aprsd (1.0.99+1.1-beta1) unstable; urgency=low
 
   * Stabilize  for release.. 
 
- -- Øyvind hanssen <ohanssen@acm.org>  Wed, 14 Oct 2012 23:09:19 +0200
+ -- Øyvind Hanssen <ohanssen@acm.org>  Wed, 14 Oct 2012 23:09:19 +0200
 

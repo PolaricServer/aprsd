@@ -1,8 +1,7 @@
- 
 Template: polaric-aprsd/callsign 
 Type: string
 Default: NOCALL
-Description: What is your callsign?
+Description: Enter your callsign:
  When connecting to APRS-IS (or when sending out information), you need to identify yourself
  with a unique identifier. This should normally be your amateur radio callsign (possibly 
  with a ssid).
