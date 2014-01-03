@@ -30,4 +30,21 @@ V.1.2
 * [C] Fix serious bug: Menu didn't work if plugins didn't add menu-items. 
 * [C] XML support for a displaying a collection of points (without anything else).
 * [C] Statkart name database lookup.
+* [C] Separate out api.js
     
+    
+V.1.3
+-----
+
+* Set own position didn't work.  Fix      
+* "Skjul ident" ("globale innstillinger") didn't work in all "views". Fix.
+* Allow aliases to be visible for all in SAR modus (option). 
+* [M] Adjust CSS for scale/status box for mobile.
+* [M] Change screen resolution. 
+* [C] Configurable gray-layer over maps. Adjust contrast/opacity?    
+* [C] Iframe API: Make links work in search lists
+* [C] Iframe API: Subscribe to asynchronous updates (events/callbacks)
+* [C] Iframe API: Subscription: Objects in map view.
+* [C] Updates to mapconfig. 
+* [C] Move to OpenLayers 2.13.1       
+* (various small fixes). 
