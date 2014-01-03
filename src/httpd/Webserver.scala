@@ -96,7 +96,18 @@ package no.polaric.aprsd.http
    }
    
    
-   
+   def symChoice = 
+            <select id="symChoice"
+             onchange="var x=event.target.value;document.getElementById('osymtab').value=x[0];document.getElementById('osym').value=x[1];">
+               <option value="/c" style="background-image:url(../aprsd/icons/orient.gif)">Post</option>
+               <option value="\m" style="background-image:url(../aprsd/icons/sign.gif)">Skilt</option>
+               <option value="\." style="background-image:url(../aprsd/icons/sym00.gif)">Kryss</option>
+               <option value="\n" style="background-image:url(../aprsd/icons/sym07.gif)">Trekant</option>
+               <option value="/+" style="background-image:url(../aprsd/icons/sym02.png)">Kors</option>
+               <option value="/o" style="background-image:url(../aprsd/icons/eoc.png)">OPS/KO</option>
+               <option value="/r" style="background-image:url(../aprsd/icons/radio.png)">Radiostasjon</option>
+            </select>
+            ;
    
     /**
     * set own position
@@ -110,18 +121,20 @@ package no.polaric.aprsd.http
         /* Fields to be filled in */
         def fields(req : Request): NodeSeq =
             <xml:group>
-            <label for="objsym" class="lleftlab">Symbol:</label>
-            { textInput("osymtab", 1, 1, ""+p.getSymtab()) }
-            { textInput("osym", 1, 1, ""+p.getSymbol()) }
-              
-            <br/>      
-            <label for="utmz" class="lleftlab">Pos (UTM): </label>
-            {  if (pos==null)
-                  utmForm('W', 34)
-               else
-                  showUTM(pos)
-            }
-            </xml:group>
+            {
+              label("osymtab", "lleftlab", "Symbol:", "APRS symboltabell og symbol. Fyll inn eller velg i listen til høyre.") ++
+              textInput("osymtab", 1, 1, ""+p.getSymtab()) ++
+              textInput("osym", 1, 1, ""+p.getSymbol()) ++
+              symChoice ++
+              br ++
+              label("utmz", "lleftlab", "Pos (UTM):", "Posisjon i UTM format.") ++
+              {  if (pos==null)
+                    utmForm('W', 34)
+                 else
+                    showUTM(pos)
+              }
+           }
+           </xml:group>
            ;  
              
         /* Action. To be executed when user hits 'submit' button */
@@ -351,18 +364,7 @@ package no.polaric.aprsd.http
             </xml:group>
             ;
             
-        def symChoice = 
-            <select id="symChoice"
-             onchange="var x=event.target.value;document.getElementById('osymtab').value=x[0];document.getElementById('osym').value=x[1];">
-               <option value="/c" style="background-image:url(../aprsd/icons/orient.gif)">Post</option>
-               <option value="\m" style="background-image:url(../aprsd/icons/sign.gif)">Skilt</option>
-               <option value="\." style="background-image:url(../aprsd/icons/sym00.gif)">Kryss</option>
-               <option value="\n" style="background-image:url(../aprsd/icons/sym07.gif)">Trekant</option>
-               <option value="/+" style="background-image:url(../aprsd/icons/sym02.png)">Kors</option>
-               <option value="/o" style="background-image:url(../aprsd/icons/eoc.png)">OPS/KO</option>
-               <option value="/r" style="background-image:url(../aprsd/icons/radio.png)">Radiostasjon</option>
-            </select>
-            ;
+
             
             
         /* Action. To be executed when user hits 'submit' button */
