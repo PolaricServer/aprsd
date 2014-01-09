@@ -97,7 +97,7 @@ package no.polaric.aprsd.http
    
    
    def symChoice = 
-            <select id="symChoice"
+            <select id="symChoice" class="symChoice"
              onchange="var x=event.target.value;document.getElementById('osymtab').value=x[0];document.getElementById('osym').value=x[1];">
                <option value="/c" style="background-image:url(../aprsd/icons/orient.gif)">Post</option>
                <option value="\m" style="background-image:url(../aprsd/icons/sign.gif)">Skilt</option>

@@ -288,13 +288,10 @@ package no.polaric.aprsd.http
        val files = icondir.listFiles(flt); 
 
        <div id="iconselect">    
-       {  if (s != null && s.isInstanceOf[AprsPoint])  
-            <xml:group>
-            <input type="radio" name="iconselect" value="system"
-                   checked={if (s.iconIsNull()) "checked" else null:String } /> Automatisk 
-            </xml:group>
-          else null
-       }            
+       <input type="radio" name="iconselect" value="system"
+           checked={if (s== null || s.iconIsNull()) "checked" else null:String } /> Automatisk 
+       
+                   
        { if (files != null) {
            Arrays.sort(files, cmp)
            for (f:File <- files) yield {
