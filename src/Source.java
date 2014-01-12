@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,17 +36,28 @@ public abstract class Source implements Serializable
      public enum Type {inet, radio, local};
      
      
-     protected void _init(ServerAPI config, String prefix, String id) 
+     protected void _init (String id, boolean restrict, String style) 
      {
-        _restrict = config.getBoolProperty(prefix+"."+id+".restrict", false);
-        _style = config.getProperty(prefix+"."+id+".style", _style); 
-        _ident = id;
-           
+        _ident = id; 
+        _restrict = restrict; 
+        _style = style;
+             
         if (_style==null)
            _style = _ident;
         else
            _style.trim();
      }
+     
+     
+     
+     protected void _init(ServerAPI config, String prefix, String id) 
+     {
+        boolean restrict = config.getBoolProperty(prefix+"."+id+".restrict", false);
+        String style = config.getProperty(prefix+"."+id+".style", _style); 
+        _init(id, restrict, style); 
+     }
+     
+     
      
      /**
       * Return an identifier name. 

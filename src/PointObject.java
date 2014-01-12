@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,4 +48,6 @@ public abstract class PointObject extends Point implements Cloneable
        { return (_description == null ? "" : _description); }
        
     public boolean visible() {return true;}
+    
+    public abstract Source getSource(); 
 }

@@ -1,3 +1,17 @@
+ /* 
+ * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
 package no.polaric.aprsd;
 import java.net.*;
 import java.util.*;
@@ -5,8 +19,12 @@ import java.io.*;
 import uk.me.jstott.jcoord.*;
 
 
-public class Signs 
+public class Signs extends Source
 {
+    /*
+     * There is only one instance of this class. In future versions we should 
+     * consider allowing multiple instances with different access permissions. 
+     */
     private static Signs _signs = 
        new Signs(System.getProperties().getProperty("confdir", ".")+"/signs");
     
@@ -33,7 +51,10 @@ public class Signs
           
         public int getId() 
           { return _id; }
-          
+             
+        public Source getSource()
+          { return null; }
+       
         public long getScale()
           { return _maxScale; }
           
@@ -53,6 +74,13 @@ public class Signs
     private ExtDb _extdb = null;
     
     
+    /* Source methods 
+     * Note that as a source this is mostly a dummy.
+     */
+     public String getShortDescr() 
+         { return "SI0"; }
+    
+    
     /**
      * Read signs file.
      * Format of each line: 
@@ -62,6 +90,7 @@ public class Signs
      */  
     protected Signs(String file) 
     {
+        _init ("Signs", false, null);
         try {
            _rd = new BufferedReader(new FileReader(file));
            while (_rd.ready())

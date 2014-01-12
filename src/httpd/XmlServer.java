@@ -174,6 +174,8 @@ public class XmlServer extends ServerBase
         
             if (s.getPosition() == null)
                 continue; 
+            if (s.getSource().isRestricted() && !loggedIn)
+                continue;
             if (!vfilt.useObject(s))
                 continue;
                    

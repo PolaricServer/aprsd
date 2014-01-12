@@ -66,6 +66,10 @@ public class AprsObject extends AprsPoint implements Serializable
        { return _owner; }
        
        
+    public Source getSource()
+       { return _owner.getSource(); }
+       
+       
     /**
      * Set the object to be timeless/permanent. If true it allows other
      * permanent objects o exist with the same name...
