@@ -61,14 +61,6 @@ import java.util.*;
        public void addHttpHandlerCls(String cn, String prefix);
        
        
-       /** Get APRS incoming packet handler object. */
-       public AprsHandler getAprsHandler();
-       
-       
-       /** Set APRS incoming packet handler object. */
-       public void setAprsHandler(AprsHandler log);
-       
-       
        /** Get handler for remote control. */
        public RemoteCtl getRemoteCtl(); 
        

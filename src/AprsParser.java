@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2013 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,15 +46,25 @@ public class AprsParser implements Channel.Receiver
      
     private ServerAPI _api   = null;
     private MessageProcessor _msg;
-    
+    private List<AprsHandler> _subscribers = new LinkedList<AprsHandler>();
 
+    
     public AprsParser(ServerAPI a, MessageProcessor msg) 
     {
         _api = a;
         _msg = msg;
         _hmsFormat.setTimeZone(TimeZone.getTimeZone("GMT")); 
     }  
-       
+    
+    
+    
+    public void subscribe(AprsHandler subscriber)
+      { _subscribers.add(subscriber); }
+      
+    public void unsubscribe(AprsHandler subscriber)
+      { _subscribers.remove(subscriber); }
+    
+    
     
     /**
      * Receive APRS packet. 
@@ -113,7 +123,9 @@ public class AprsParser implements Channel.Receiver
         }catch (NumberFormatException e)
           { System.out.println("*** WARNING: Cannot parse number in input. Report string probably malformed"); }
         
-        _api.getAprsHandler().handlePacket(p.source, rtime, p.from, p.to, p.via, p.report);
+        // _api.getAprsHandler().handlePacket(p.source, rtime, p.from, p.to, p.via, p.report);
+        for (AprsHandler h:_subscribers)
+            h.handlePacket(p.source, rtime, p.from, p.to, p.via, p.report);
         parsePath(station, p.via, duplicate);   
     }
 
@@ -199,7 +211,9 @@ public class AprsParser implements Channel.Receiver
         String content = msg.substring(11, (i>=0 ? i : msg.length()));
         if (_msg != null)
            _msg.incomingMessage(station, recipient, content, msgid);
-        _api.getAprsHandler().handleMessage(src, new Date(), station.getIdent(), recipient, content);   
+        // _api.getAprsHandler().handleMessage(src, new Date(), station.getIdent(), recipient, content);  
+        for (AprsHandler h:_subscribers)
+            h.handleMessage(src, new Date(), station.getIdent(), recipient, content);
     }
 
 
@@ -214,7 +228,9 @@ public class AprsParser implements Channel.Receiver
            d = parseTimestamp(msg, false);
            msg = msg.substring(7);
         }
-        _api.getAprsHandler().handleStatus(src, d, msg);
+        // _api.getAprsHandler().handleStatus(src, d, msg);
+        for (AprsHandler h:_subscribers)
+           h.handleStatus(src, d, msg);
         station.setStatus(d, msg);
     }
     
@@ -414,9 +430,9 @@ public class AprsParser implements Channel.Receiver
             }     
             
             
-            station.update(new Date(), pd, comment, pathinfo);             
-            _api.getAprsHandler().handlePosReport(src, station.getIdent(), 
-                   new Date(), pd, comment, pathinfo );
+            station.update(new Date(), pd, comment, pathinfo);   
+            for (AprsHandler h:_subscribers)
+               h.handlePosReport(src, station.getIdent(), new Date(), pd, comment, pathinfo );
             return;
     }
 
@@ -556,7 +572,9 @@ public class AprsParser implements Channel.Receiver
             return;
             
        station.update(time, pd, "", "(EXT)" );        
-       _api.getAprsHandler().handlePosReport(src, station.getIdent(), time, pd, "", "(EXT)" );
+       // _api.getAprsHandler().handlePosReport(src, station.getIdent(), time, pd, "", "(EXT)" );
+       for (AprsHandler h:_subscribers)
+           h.handlePosReport(src, station.getIdent(), time, pd, "", "(EXT)" );
     }
     
     
@@ -705,7 +723,9 @@ public class AprsParser implements Channel.Receiver
              comment = null;
              
            station.update(time, pd, comment, pathinfo );              
-          _api.getAprsHandler().handlePosReport(src, station.getIdent(), time, pd, comment, pathinfo );  
+           for (AprsHandler h:_subscribers)
+              h.handlePosReport(src, station.getIdent(), time, pd, comment, pathinfo );
+          // _api.getAprsHandler().handlePosReport(src, station.getIdent(), time, pd, comment, pathinfo );  
     }
     
     

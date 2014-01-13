@@ -30,11 +30,6 @@ public class Main implements ServerAPI
    private static SarUrl sarurl;
    private static String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
    
-   /* Experimental !! 
-    * Database interface must be known here. The interface is 
-    * implemented by a plugin 
-    */
-   public static AprsHandler dblog = new AprsHandler.Dummy();
    
    /* API interface methods 
     * Should they be here or in a separate class ??
@@ -44,12 +39,6 @@ public class Main implements ServerAPI
    
    public AprsParser getAprsParser()
     { return parser; }
-    
-   public AprsHandler getAprsHandler() 
-    { return dblog; }
-    
-   public void setAprsHandler(AprsHandler log) 
-    { dblog = log; } 
        
    public Channel.Manager getChanManager()
     { return _chanManager; }
