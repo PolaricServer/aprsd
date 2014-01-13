@@ -14,8 +14,12 @@ V.1.4 (march 2014), etc
   
 * Menu selection of symbol when setting own position. 
 
-* Allow channels to be visible for logged in or SAR users only?
-
+* AprsHandler. Asynchronous subscribe interface to parser
+       DONE.
+       
+* Allow channels (sources) to be visible for logged in or SAR users only?
+       DONE. 
+       
 * Too easy to lock yourself out when changing admin-users regex. Workaround?
   Prevent removing of 'admin' user by plugin? 
 
