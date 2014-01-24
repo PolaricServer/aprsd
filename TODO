@@ -12,6 +12,14 @@ V.1.4 (march 2014), etc
   aliases per SAR-mission instead of globally. Allow a SAR mode to activate 
   a particular (pre-defined) data source? 
   
+* Configurable filters for what is to be displayed on map (and how). Set of "modes". 
+  Configure like channels in web-interface? Can this be a base for alternative
+  SAR/mission mode (see above)?
+  
+  User defined filters like in aprs.fi?   
+  
+* Slight displacement of positions in kamap maps? Check. 
+
 * Menu selection of symbol when setting own position. 
 
 * AprsHandler. Asynchronous subscribe interface to parser
