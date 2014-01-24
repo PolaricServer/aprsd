@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2013 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,6 +68,16 @@ public class ViewFilter {
   
   
   
+  public static class Tracking2 extends ViewFilter
+  {
+       public boolean showIdent(AprsPoint x)
+           { return  !(x instanceof AprsObject) ||
+                     !"LA1FTA-13".equals(((AprsObject)x).getOwner().getIdent()); 
+           }
+  }
+  
+  
+  
   public static class Infra extends ViewFilter 
   {
       private String _call;
@@ -104,7 +114,7 @@ public class ViewFilter {
   static {
       _map.put("all", new ViewFilter());
       _map.put("track", new Tracking());
-      _map.put("track2", new Tracking()); // Tracking2 is removed. This is a placeholder for future policies
+      _map.put("track2", new Tracking2()); // Tracking2 is back
       _map.put("le", new Callsign("LE.*"));
       _map.put("infra", new Infra("LD.*"));
       _map.put("ainfra", new Infra(null));
