@@ -143,7 +143,8 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
           while (true)
           { 
               AprsPoint st = (AprsPoint) ifs.readObject(); 
-              _map.put(st.getIdent(), st);
+              if (!_map.containsKey(st.getIdent()))
+                  _map.put(st.getIdent(), st);
           }
 
         }
