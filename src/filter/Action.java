@@ -1,0 +1,93 @@
+/* 
+ * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+package no.polaric.aprsd.filter;
+import no.polaric.aprsd.*;
+
+
+/**
+ * Changes to how objects are displayed on map. 
+ * Note that objects of this class represent changes to the default situation. 
+ * Allow merging, i.e. the changes are added. For boolean fields this means disjunction (OR). For
+ * the style string it means just to add a new class to the list. 
+ *
+ */
+public class Action 
+{
+        /**
+         * Null Action. No changes. 
+         */
+        public static Action NULL()
+          { return new Action(false, false, false, false, ""); }
+        
+        
+    private boolean _hideIdent, _hideTrail, _hideAll, _showPath;
+    private String _style = ""; 
+    
+    
+    /**
+     * Constructor for Action. 
+     * 
+     * @param hideid Hide ident label (default is to show it).
+     * @param hidetrail Hide trail (default is to show it).
+     * @param hideall Hide geo object completely (default is to show it).
+     * @param showpath Show path of signals (default is to NOT show it).
+     * @param style CSS class (used in addition to other classes). 
+     */
+    public Action(boolean hideid, boolean hidetrail, boolean hideall, boolean showpath, String style) { 
+        _hideIdent = hideid; _hideTrail = hidetrail; _hideAll=hideall; 
+        _showPath = showpath; _style = style; 
+    }
+ 
+    
+    /**
+     * Merge with another action object in a disjunctive manner.     
+     * @param x Action object. 
+     */
+    public void merge(Action x) { 
+        if (x==null)
+           return; 
+        _hideIdent |= x._hideIdent; 
+        _hideTrail |= x._hideTrail; 
+        _hideAll   |= x._hideAll;
+        _showPath  |= x._showPath; 
+        
+        if (!_style.contains(x._style))
+           _style = _style + (_style.equals("") ? "": ";") + x._style; 
+    }
+    
+    
+    /** Return true if we want ident to be hidden */
+    public boolean hideIdent()   
+        { return _hideIdent; }  
+    
+    /** Return true if we want trail to be hidden */
+    public boolean hideTrail()
+        { return _hideTrail; }
+    
+    /** Return true if we want all about point to be hidden */
+    public boolean hideAll()
+        { return _hideAll; }
+    
+    /** Return true if we want to show signal path */       
+    public boolean showPath()
+        { return _showPath; }
+    
+    /** Get CSS style (classes) */
+    public String getStyle()
+        { return _style; }
+    
+    public String toString()
+        { return "Action("+_hideIdent+", "+_hideTrail+", "+_hideAll+", "+_showPath+", '"+_style+"')"; }
+}
