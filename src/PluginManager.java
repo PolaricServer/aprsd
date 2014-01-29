@@ -77,7 +77,7 @@ public class PluginManager
     */
     public static void add(String cn) throws PluginError
     {
-        cn = cn.strip();
+        cn = cn.trim();
         try {
           Plugin p = _plugins.get(cn);
           if (p != null)
