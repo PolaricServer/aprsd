@@ -96,13 +96,20 @@ actions : actions ',' action  { action.merge((Action) $3); }
         ; 
        
        
-action : IDENT '=' STRING     { $$=new Action(false,false,false,false,
-                                   ($1.matches("CSS|css")? $3 : "")); 
+action : IDENT '=' STRING     { if ($1.matches("STYLE|style")) 
+                                   $$=new Action(false,false,false,false,$3);
+                                else {
+                                   $$=new Action(false,false,false,false,"");
+                                   yyerror("Unknown identifier '"+$1+"'"); 
+                                }
                               }
                               
        | IDENT                { $$=new Action( 
                                    $1.matches("hide-ident"), $1.matches("hide-trail"),
                                    $1.matches("hide-all"), $1.matches("show-path"),"");
+                                   
+                                if (!$1.matches("(hide-(ident|all|trail))|show-path"))
+                                   yyerror("Unknown identifier '"+$1+"'"); 
                               }
        ; 
 
@@ -124,14 +131,14 @@ action : IDENT '=' STRING     { $$=new Action(false,false,false,false,
       yyl_return = lexer.yylex();
     }
     catch (IOException e) {
-      System.err.println("IO error :"+e);
+      System.out.println("IO error :"+e);
     }
     return yyl_return;
   }
   
   /* error reporting */
   public void yyerror (String error) {
-    System.err.println ("ERROR [line "+lexer.line()+"]: " + error);
+    System.out.println ("ERROR [line "+lexer.line()+"]: " + error);
   }
 
   public Map<String, RuleSet> getProfiles() 

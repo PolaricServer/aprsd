@@ -142,7 +142,7 @@ class Infra extends Pred
            
        boolean iwd = (fulldigi ? s.isWideDigi() : s.isInfra()); 
        boolean igt = (igate ? s.isIgate() : s.isInfra()); 
-       return iwd || igt;
+       return iwd && igt;
    }
 }
 

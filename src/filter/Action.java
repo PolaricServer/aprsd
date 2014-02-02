@@ -64,7 +64,7 @@ public class Action
         _showPath  |= x._showPath; 
         
         if (!_style.contains(x._style))
-           _style = _style + (_style.equals("") ? "": ";") + x._style; 
+           _style = _style + (_style.equals("") ? "": " ") + x._style; 
     }
     
     

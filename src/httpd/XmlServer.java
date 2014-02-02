@@ -213,6 +213,8 @@ public class XmlServer extends ServerBase
                      if (s.isEmergency())
                         style += " lflash";
                         
+                     style += " "+ action.getStyle();
+                     
                      if (s instanceof Station)
                          style += " "+((Station)s).getSource().getStyle();
                      
