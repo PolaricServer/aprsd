@@ -48,9 +48,14 @@ V.1.4 (march 2014), etc
 * [C] Move API code out from menu.js to api.js
        IN PROGRESS
        
+* [C] Important: Take care of compatibility problems between Apache versions 2.2 and 2.4 !!!
+       http://httpd.apache.org/docs/2.4/upgrading.html#run-time
+      
+* Restart from webconfig plugin terminate program but does not start it again (on Debian unstable?). Fix. 
+
+* In SAR mode, when logged in: Aliases not visible immediately. Fix. 
 
       
-
 Iframe/API
 ----------
 
