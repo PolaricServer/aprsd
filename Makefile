@@ -9,6 +9,8 @@
  CLASSPATH = jcoord-polaric.jar:utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:simple.jar
 # INSTALLDIR = /usr/local/polaric-aprsd
      JAVAC = javac -target 1.7
+      YACC = yacc
+       LEX = jflex
        JAR = jar
 
 # Review (and if necessary) change these if you are going to 
@@ -72,6 +74,14 @@ $(CLASSDIR):
 $(LIBDIR):
 	mkdir $(LIBDIR)
 
+	
+src/filter/Lexer.java : src/filter/filters.lex src/filter/filters.y
+	cd src/filter;$(LEX) filters.lex
+	
+src/filter/Parser.java : src/filter/filters.y
+	cd src/filter;$(YACC) -Jpackage=no.polaric.aprsd.filter filters.y
+	
+	
 .PHONY : util
 util: 
 	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/util/*.java 
@@ -87,8 +97,8 @@ aprsd:
 	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/aprsd/*.java 
 	
 
-.PHONY : filter
-filter: core
+
+filter: core  src/filter/Parser.java src/filter/Lexer.java
 	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/filter/*.java
 
 	
