@@ -22,7 +22,10 @@ import no.polaric.aprsd.*;
 public abstract class Pred
 {
    public abstract boolean eval(AprsPoint obj); 
-   
+      
+   public static Pred FALSE()
+      { return new FALSE(); }
+      
    public static Pred Source(String regex)
       { return new Source(regex); }
    
@@ -51,6 +54,15 @@ public abstract class Pred
       { return new NOT(p); }
 }
 
+
+
+
+class FALSE extends Pred 
+{
+        public boolean eval(AprsPoint p) {
+            return false;
+        }
+}
 
 
 
