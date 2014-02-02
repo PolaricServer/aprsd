@@ -441,7 +441,7 @@ package no.polaric.aprsd.http
          <table>
          {
             for ( x:AprsPoint <- _api.getDB().getAll(arg)
-                  if ( vfilt.useObject(x)) ) yield
+                  if ( !vfilt.apply(x).hideAll()) ) yield
             {
                val s = if (!x.isInstanceOf[Station]) null
                        else x.asInstanceOf[Station];

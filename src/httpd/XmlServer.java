@@ -1,6 +1,7 @@
 
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
+import no.polaric.aprsd.filter.*;
 
 import org.simpleframework.http.core.Container;
 import org.simpleframework.transport.connect.Connection;
@@ -104,7 +105,7 @@ public class XmlServer extends ServerBase
    {         
         PrintWriter out = getWriter(res);
         String filt = _infraonly ? "infra" : req.getParameter("filter");
-        ViewFilter vfilt = ViewFilter.getFilter(filt);
+        RuleSet vfilt = ViewFilter.getFilter(filt);
         res.setValue("Content-Type", "text/xml; charset=utf-8");
                 
         UTMRef uleft = null, lright = null;
@@ -171,12 +172,14 @@ public class XmlServer extends ServerBase
         /* Output APRS objects */
         for (AprsPoint s: _api.getDB().search(uleft, lright)) 
         {
-        
+            Action action = vfilt.apply(s); 
+            // FIXME: Get CSS class from filter rules 
+            
             if (s.getPosition() == null)
                 continue; 
             if (s.getSource().isRestricted() && !loggedIn)
                 continue;
-            if (!vfilt.useObject(s))
+            if (action.hideAll())
                 continue;
                    
             UTMRef ref = toUTM(s.getPosition()); 
@@ -203,19 +206,13 @@ public class XmlServer extends ServerBase
         
                    
                   /* Show label */ 
-                  if (vfilt.showIdent(s)) {
+                  if (!action.hideIdent()) {
                      String style = "lobject";
                      if (s instanceof Station)
                         style = (!(((Station) s).getTrail().isEmpty()) ? "lmoving" : "lstill");
                      if (s.isEmergency())
                         style += " lflash";
                         
-                     if (vfilt instanceof ViewFilter.Infra) {
-                        if (s instanceof Station && ((Station)s).isIgate())
-                           style += " igate";
-                        if (s instanceof Station && ((Station)s).isWideDigi())
-                           style += " wdigi";
-                     }
                      if (s instanceof Station)
                          style += " "+((Station)s).getSource().getStyle();
                      
@@ -231,7 +228,7 @@ public class XmlServer extends ServerBase
                   }
                } /* synchronized(s) */
                
-               if (vfilt.showPath(s) && s.isInfra())
+               if (action.showPath() && s.isInfra())
                   printPathXml(out, (Station) s, uleft, lright);              
                out.println("</point>");
             }

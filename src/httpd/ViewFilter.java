@@ -14,110 +14,37 @@
 
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
+import no.polaric.aprsd.filter.*;
 import java.util.*;
+import java.io.*; 
+
 
 
 public class ViewFilter {
-  
-  protected boolean isSymbol(AprsPoint x, char sym, char symtab)
-     { return x.getSymbol() == sym && (symtab == '*' || x.getSymtab() == symtab); }
-  
-  protected boolean isNumberSym(AprsPoint x)
-     { return x.getSymbol() >= '0' && x.getSymbol() <= '9' && x.getSymtab() == '/'; }
-     
-     
-  public boolean useObject(AprsPoint x)
-       { return true; } 
-       
-  public boolean showPath(AprsPoint x)
-       { return false; }  
-  
-  public boolean showIdent(AprsPoint x)
-       { return !x.isLabelHidden(); }
-
-
-  public static class Callsign extends ViewFilter
-  {      
-      protected String _call;
-       
-      public Callsign(String c)
-         { _call = c; }
-         
-        public boolean useObject(AprsPoint x)
-          { return x.getIdent().matches(_call); }
-  }
-  
-  
-   
-  public static class Tracking extends ViewFilter
-  {  
-       public boolean showIdent(AprsPoint x)
-           { return !x.isLabelHidden() &&                       /* Not explicitly hidden AND */
-                    ( _map.get("moving").useObject(x) ||        /* moving, OR ... */
-                      isSymbol(x, '!', '*') || isSymbol(x, '\'', '*') || isSymbol(x, 'R', '/') ||
-                      isSymbol(x, '(', '*') || isSymbol(x, '*', '/')  || isSymbol(x, '+', '/') ||
-                      isSymbol(x, ',', '/') || isSymbol(x, ':', '/')  || isSymbol(x, '<', '/') ||
-                      isSymbol(x, '>', '*') || isSymbol(x, 'F', '/')  || isSymbol(x, 'P', '/') ||
-                      isSymbol(x, 'U', '*') || isSymbol(x, 'X', '*')  || isSymbol(x, 'Y', '/') ||
-                      isSymbol(x, '[', '/') || isSymbol(x, '^', '*')  || isSymbol(x, 'a', '/') ||
-                      isSymbol(x, 'b', '/') || isSymbol(x, 'c', '/')  || isSymbol(x, 'e', '/') ||
-                      isSymbol(x, 'f', '/') || isSymbol(x, 'f', '/')  || isSymbol(x, 'k', '*') ||
-                      isSymbol(x, 'p', '/') || isSymbol(x, 's', '/')  || isSymbol(x, 'u', '*') ||
-                      isSymbol(x, 'v', '*') || isSymbol(x, 'j', '/')  || isSymbol(x, '$', '/') ); }
-  }
-  
-  
-  
-  public static class Tracking2 extends ViewFilter
-  {
-       public boolean showIdent(AprsPoint x)
-           { return  !(x instanceof AprsObject) ||
-                     !"LA1FTA-13".equals(((AprsObject)x).getOwner().getIdent()); 
-           }
-  }
-  
-  
-  
-  public static class Infra extends ViewFilter 
-  {
-      private String _call;
-      
-      public Infra(String c)
-         { _call = c; }
-                
-      public boolean showPath(AprsPoint x)
-         { return (_call == null); }
-          
-      public boolean useObject(AprsPoint x)
-         { return  x.isInfra() || 
-             (_call == null ? false : x.getIdent().matches(_call) || x.getSymbol() == '#' ||
-               (x.getSymbol() == 'r' && x.getSymtab() == '/')); }
-  }       
-  
-  
-  public static class Moving extends ViewFilter
-  {
-      public boolean useObject(AprsPoint x)
-         { return ((x instanceof Station) ? !((Station) x).getTrail().isEmpty() : false); }
-  }
     
-    
-  private static Map<String, ViewFilter> _map = new HashMap();
-  public static ViewFilter getFilter(String id)
+  private static Map<String, RuleSet> _map = new HashMap();
+  
+  
+  public static RuleSet getFilter(String id)
   {
-     ViewFilter x  = _map.get(id);
+     RuleSet x  = _map.get(id);
      if (x==null) 
-        return new ViewFilter();
+        return new RuleSet();
      return x;
   }    
   
+  
+  
+  /* Action(hideid, hidetrail, hideall, showpath, style) */
   static {
-      _map.put("all", new ViewFilter());
-      _map.put("track", new Tracking());
-      _map.put("track2", new Tracking2()); // Tracking2 is back
-      _map.put("le", new Callsign("LE.*"));
-      _map.put("infra", new Infra("LD.*"));
-      _map.put("ainfra", new Infra(null));
-      _map.put("moving", new Moving());
-  }
+      String filename = System.getProperties().getProperty("confdir", ".") + "/view.profiles";
+      try {
+         System.out.println("*** Compiling view profiles..");
+         Parser parser = new Parser(new FileReader(filename));
+         parser.parse();
+         _map = parser.getProfiles();
+      }
+      catch (FileNotFoundException e)
+        { System.out.println("ERROR: file not found '"+filename+"'"); }
+  } 
 }
