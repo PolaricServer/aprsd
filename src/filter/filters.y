@@ -20,13 +20,24 @@ import java.util.*;
 /* Grammar follows */
 %%
 
-input : profiles
+input : stmts
       ; 
      
-profiles : profiles profile
-         | /* empty */       
-         ;
+stmts : stmts stmt | /* empty */       
+      ;
          
+stmt  : profile | assignment 
+      ; 
+
+assignment : IDENT '=' expr ';'
+                              {  if ($1.matches("infra|INFRA|moving|MOVING|fulldigi|FULLDIGI|igate|IGATE"))
+                                   yyerror("Cannot redefine predicate '"+$1+"'"); 
+                                else
+                                   predicates.put($1, (Pred) $3); 
+                              }     
+           ; 
+
+
 profile : PROFILE IDENT '{' rules '}' 
                              { profiles.put($2, ruleset); 
                                System.out.println("*** View profile '"+$2+"' ok");
@@ -73,7 +84,8 @@ expr : '(' expr ')'           {  $$=$2; }
                                  }
                               }
                               
-     |  IDENT                 {  if ($1.matches("infra|INFRA"))
+     |  IDENT                 {  /* FIXME: Install these predicates in map */
+                                 if ($1.matches("infra|INFRA"))
                                       $$=Pred.Infra(); 
                                  else if ($1.matches("moving|MOVING")) 
                                       $$=Pred.Moving(); 
@@ -81,6 +93,8 @@ expr : '(' expr ')'           {  $$=$2; }
                                       $$=Pred.Infra(true,false); 
                                  else if ($1.matches("igate|IGATE"))
                                       $$=Pred.Infra(false,true); 
+                                 else if (predicates.get($1) != null) 
+                                      $$=predicates.get($1);
                                  else {
                                       $$=Pred.FALSE(); 
                                       yyerror("Unknown identifier '"+$1+"'"); 
@@ -119,6 +133,7 @@ action : IDENT '=' STRING     { if ($1.matches("STYLE|style"))
   private Action action; 
   private RuleSet ruleset; 
   private Map<String, RuleSet> profiles = new HashMap<String,RuleSet>(); 
+  private Map<String, Pred> predicates = new HashMap<String,Pred>(); 
   
   
   /* a reference to the lexer object */
