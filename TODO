@@ -13,11 +13,8 @@ V.1.4 (march 2014), etc
   a particular (pre-defined) data source? 
   
 * Configurable filters for what is to be displayed on map (and how). Set of "modes". 
-  Configure like channels in web-interface? Or make a scripting language. Can this be 
-  a base for alternative SAR/mission mode (see above)?
-       IN PROGRESS. AST classes ok.
-       
-  User defined filters like in aprs.fi?   
+  Make a scripting language. 
+       DONE 
   
 * Slight displacement of positions in kamap maps? Check. 
 
