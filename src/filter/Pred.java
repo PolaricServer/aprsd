@@ -51,7 +51,7 @@ public abstract class Pred
       { return new OR(p); }
    
    public static Pred NOT(Pred p)
-      { return new NOT(p); }
+      { return NOT.optimize(new NOT(p)); }
 }
 
 
@@ -179,7 +179,8 @@ class AND extends Pred
     
     public AND(Pred... args) {
         for (Pred p: args)
-                if (p != null) add(p);
+            if (p != null) add(p);
+        optimize(); 
     }
     
     
@@ -193,7 +194,24 @@ class AND extends Pred
              return false;
        return true; 
     }
+    
+    void optimize() {
+        List<Pred> copy = new LinkedList<Pred>();
+        for (Pred p : conj) {
+           if (p instanceof AND) {
+              System.out.println("*** Flatten recursive AND node");
+              for (Pred q : ((AND)p).conj)
+                 copy.add(q); 
+           }
+           else
+              copy.add(p); 
+        }    
+        conj = copy; 
+    }
+    
 }
+
+
 
 
 /**
@@ -210,11 +228,12 @@ class OR extends Pred
    
    public OR(Pred... args) {
         for (Pred p: args)
-                if (p != null) add(p);
+            if (p != null) add(p);
+        optimize(); 
    }
    
    
-   public void add(Pred r)
+   void add(Pred r)
       { disj.add(r); }
 
    
@@ -224,7 +243,23 @@ class OR extends Pred
             return true;
       return false; 
    }
+   
+   
+   void optimize() {
+        List<Pred> copy = new LinkedList<Pred>();
+        for (Pred p : disj) {
+           if (p instanceof OR) {
+              System.out.println("*** Flatten recursive OR node");
+              for (Pred q : ((OR)p).disj)
+                 copy.add(q); 
+           }
+           else
+              copy.add(p); 
+       }    
+       disj = copy; 
+    }
 }
+
 
 
 class NOT extends Pred
@@ -236,5 +271,14 @@ class NOT extends Pred
         
         public boolean eval (AprsPoint obj)
             { return !pred.eval(obj); }
+            
+        static Pred optimize(NOT p) {
+           if (p.pred instanceof NOT) {
+               System.out.println("*** Eliminate double NOT node");
+               return ((NOT)p.pred).pred; 
+           }
+           else
+               return p;
+        }
 }
 
