@@ -84,16 +84,7 @@ expr : '(' expr ')'           {  $$=$2; }
                                  }
                               }
                               
-     |  IDENT                 {  /* FIXME: Install these predicates in map */
-                                 if ($1.matches("infra|INFRA"))
-                                      $$=Pred.Infra(); 
-                                 else if ($1.matches("moving|MOVING")) 
-                                      $$=Pred.Moving(); 
-                                 else if ($1.matches("fulldigi|FULLDIGI"))
-                                      $$=Pred.Infra(true,false); 
-                                 else if ($1.matches("igate|IGATE"))
-                                      $$=Pred.Infra(false,true); 
-                                 else if (predicates.get($1) != null) 
+     |  IDENT                 {  if (predicates.get($1) != null) 
                                       $$=predicates.get($1);
                                  else {
                                       $$=Pred.FALSE(); 
@@ -120,7 +111,7 @@ action : IDENT '=' STRING     { if ($1.matches("STYLE|style"))
                               
        | IDENT                { $$=new Action( 
                                    $1.matches("hide-ident"), $1.matches("hide-trail"),
-                                   $1.matches("hide-all"), $1.matches("show-path"),"");
+                                   $1.matches("hide-all"), $1.matches("show-path"), "");
                                    
                                 if (!$1.matches("(hide-(ident|all|trail))|show-path"))
                                    yyerror("Unknown identifier '"+$1+"'"); 
@@ -165,6 +156,12 @@ action : IDENT '=' STRING     { if ($1.matches("STYLE|style"))
   /* lexer is created in the constructor */
   public Parser(Reader r) {
     lexer = new Lexer(r, this);
+    
+    /* Install predefined predicates */
+    predicates.put("infra",    Pred.Infra()); 
+    predicates.put("moving",   Pred.Moving());
+    predicates.put("fulldigi", Pred.Infra(true,false));
+    predicates.put("igate",    Pred.Infra(false,true));
   }
 
   /* that's how you use the parser */
