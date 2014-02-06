@@ -1,0 +1,78 @@
+ 
+
+TrackHide = NOT moving AND
+            NOT ident~"LE.*" AND
+            symbol ~ ".#|E0|I0|.&|[/\\]-|/_|/y|/r|\\j|.a" ;
+
+IrlpNode  = symbol ~ "I0" AND ident ~ "IRLP.*" ;
+EchoLink  = symbol ~ "E0" AND ident ~ "EL.*" ;
+
+
+
+#############################
+# Vis alt
+#############################
+
+PROFILE alle {
+}
+
+
+################################################
+# Track mode. Skjul ident for infrastruktur og
+# andre ting som ikke er så "interessant"
+################################################
+
+PROFILE track {
+   TrackHide      => { hide-ident };
+}
+
+          
+#################################################
+# Skjul ident for veimelding objekter.
+#################################################
+        
+PROFILE track2 {
+   ident ~ ".+@LA1FTA\-13" => { hide-ident };
+}
+
+    
+##################################################
+# Vis kun LE kallesignal
+################################################## 
+    
+PROFILE le {
+   NOT ident ~ "LE.+" => { hide-all };
+}
+                                                                          
+                                
+###################################################
+# Infrastruktur - basert på kallesignal og symbol
+###################################################
+
+PROFILE infra {
+   NOT (ident ~ "LD.+" OR symbol ~ "/r|.#" OR IrlpNode OR EchoLink OR infra)
+       => { hide-all };
+}
+
+
+######################################
+# Aktiv infrastruktur.
+######################################
+
+PROFILE ainfra {
+   NOT infra => { hide-all  };
+   infra     => { show-path };
+   fulldigi  => { style = "wdigi" };
+   igate     => { style = "igate" };
+}
+
+
+###################################
+# Vis kun bevegelige
+###################################
+
+PROFILE moving {
+    NOT moving => { hide-all };
+}
+
+
