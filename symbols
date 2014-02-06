@@ -6,23 +6,24 @@
 ####################################
 
 /$ phone.gif
-/[ runner.gif
+/[ buddy.png
 /# star-0.gif
 /' airplane.png
 /^ airplane.png
-/& diamond-G.png
-D& diamond-G.png
-\& diamond-I.gif
+/& diamond-G.png 
+D& diamond-D.png
+\& diamond-I.gif 
 R& diamond-R.gif
 I& diamond-I.gif
+E& diamond-E.png
 // sym08.gif
 \/ sym08.gif
-/+ sym02.png
-/- home.png
+/+ sym02.png 
+/- home.png 
 /_ wx.gif
 \_ wx.gif
 /> car.gif
-/K home.png
+/K home.png 
 \L lighthouse.png
 /P car-police.gif
 /R car.gif
@@ -31,6 +32,7 @@ I& diamond-I.gif
 \K sym00.gif
 /a hospital.gif
 \a sym06.gif
+Da dstar.png
 /c orient.gif
 \j workzone.png
 /j car.gif
@@ -40,7 +42,7 @@ I& diamond-I.gif
 /y home.png
 \! 00-emergency.gif
 \# star.gif
-\- home.png
+\- home.png 
 \> car.gif
 4> car-4.gif
 5> car-5.gif
@@ -60,6 +62,7 @@ I& diamond-I.gif
 /r radio.png
 P0 c-P.png
 E0 c-E.png
+I0 c-I.png
 \m sign.gif
 S# star-S.gif
 B# star-B.gif
@@ -88,3 +91,4 @@ L# star-L.gif
 \8 c-8.png
 \9 c-9.png
 #
+
