@@ -206,7 +206,7 @@ public class XmlServer extends ServerBase
         
                    
                   /* Show label */ 
-                  if (!action.hideIdent()) {
+                  if (!action.hideIdent() && !s.isLabelHidden() ) {
                      String style = "lobject";
                      if (s instanceof Station)
                         style = (!(((Station) s).getTrail().isEmpty()) ? "lmoving" : "lstill");
@@ -225,7 +225,7 @@ public class XmlServer extends ServerBase
                   if (s instanceof Station) {
                      Trail h = ((Station)s).getTrail();
                      Station ss = (Station) s;
-                     if (!h.isEmpty())
+                     if (!action.hideTrail() && !h.isEmpty())
                         printTrailXml(out, ss.getTrailColor(), ss.getPosition(), h, uleft, lright);
                   }
                } /* synchronized(s) */
