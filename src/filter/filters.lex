@@ -48,6 +48,9 @@ FALSE|False|false
 PROFILE|profile
          { return Parser.PROFILE; }
          
+PUBLIC|"public"
+         { return Parser.PUBLIC; }
+         
 AND|"and"|\&     
          { return Parser.AND; }
          

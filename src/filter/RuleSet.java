@@ -26,7 +26,19 @@ import no.polaric.aprsd.*;
 public class RuleSet 
 {
     private List<Rule> rlist = new LinkedList<Rule>(); 
+    private boolean _public = false; 
     
+    
+    /**
+     * Set ruleset to be publicly accessible.
+     */
+    public void setPublic()
+       { _public = true; }
+       
+    public boolean isPublic()
+       { return _public; }
+       
+       
     /**
      * Add a rule to the ruleset.
      * @param r rule to be added. 

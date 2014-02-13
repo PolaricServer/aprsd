@@ -8,10 +8,10 @@ import java.util.*;
 %token <sval>  STRING 
 %token <sval>  IDENT
 %token <obj>   BOOLEAN VALUE
-%token         AND OR NOT ARROW PROFILE
+%token         AND OR NOT ARROW PROFILE PUBLIC
 %token         ERROR
 
-%type <obj>  action actions expr rule
+%type <obj>  action actions expr rule public
 
 %left '~'
 %left AND OR NOT 
@@ -34,18 +34,26 @@ assignment : IDENT '=' expr ';'
                                    yyerror("Cannot redefine predicate '"+$1+"'"); 
                                 else
                                    predicates.put($1, (Pred) $3); 
-                              }     
+                              }    
+           | error
            ; 
 
 
-profile : PROFILE IDENT '{' rules '}' 
-                             { profiles.put($2, ruleset); 
-                               System.out.println("*** View profile '"+$2+"' ok");
+profile : public PROFILE IDENT '{' rules '}' 
+                             { if ($1) 
+                                  ruleset.setPublic(); 
+                               profiles.put($3, ruleset); 
+                               System.out.println("*** View profile '"+$3+"' ok");
                                ruleset=null; }
         | error 
                             
         ;
         
+  
+public : PUBLIC              { $$ = true; }
+       | /* empty */         { $$ = false; }
+       ; 
+      
       
 rules : rules rule           { if ($2 != null) 
                                  { ruleset.add((Rule)$2); }
