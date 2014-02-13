@@ -13,9 +13,20 @@ V.1.4 (march 2014), etc
   a particular (pre-defined) data source? 
   
 * Configurable filters for what is to be displayed on map (and how). Set of "modes". 
-  Make a scripting language. 
+  Scripting of view-profiles. 
        DONE 
   
+* [C] Filter profiles menu on client: Separate source/class for view profile menu.  Menu choices
+  that are only visible for logged in users?
+       DONE.
+
+* [C] Filter profiles menu on client: Consider: Nested menu? Use JS popup instead of SELECT box? 
+  Get list from server? 
+                 
+* Hiding of ident. Do it all on client. Hint from server. 
+       
+* There is still a bug in timestamp interpretation the 1st in a month. Fix.        
+       
 * Slight displacement of positions in kamap maps? Check. 
 
 * Menu selection of symbol when setting own position. 
@@ -45,13 +56,18 @@ V.1.4 (march 2014), etc
 * [C] Move API code out from menu.js to api.js
        IN PROGRESS
        
+* [C] Auto tracking. Item disappears when moving (until map is zoomed or panned). Fix.        
+       DONE. 
+       
 * [C] Important: Take care of compatibility problems between Apache versions 2.2 and 2.4 !!!
        http://httpd.apache.org/docs/2.4/upgrading.html#run-time
       
 * Restart from webconfig plugin terminate program but does not start it again (on Debian unstable?). Fix. 
-
+       DONE (in webconfig plugin)
+       
 * In SAR mode, when logged in: Aliases not visible immediately. Fix. 
-
+       CANNOT RECREATE 
+       
       
 Iframe/API
 ----------
@@ -83,10 +99,6 @@ Configuration support
     
 Channels/Sources
 ----------------
-
-* Filters based on getSource. Experiment.  
-
-* Access control and visibility to clients
      
 * Channel code in separate subpackage / subdirectory: 
     - Move out Channel, InetChannel, TncChannel and DupCheck. 
@@ -124,14 +136,10 @@ Other.
 
 * Allow objects with certain attributes (like source, callsign) to 
   be visible only for logged in users. Note: Should this be part of a filter framework?
-      STARTED
+      IN PROGRESS
 
 * Change class hierarchy to support other types of position objects, 
   not just plain APRS. 
       STARTED.
     
 * Additions to search function?
-
-* More configurable view profiles?  Filter framework? Scripting?
-
- 
