@@ -214,9 +214,7 @@ public class XmlServer extends ServerBase
                         style += " lflash";
                         
                      style += " "+ action.getStyle();
-                     
-                     if (s instanceof Station)
-                         style += " "+((Station)s).getSource().getStyle();
+                     style += " "+ s.getSource().getStyle();
                      
                      out.println("   <label style=\""+style+"\">");
                      out.println("       "+fixText(s.getDisplayId(showSarInfo)));

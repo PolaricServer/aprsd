@@ -65,7 +65,8 @@ public class AprsObject extends AprsPoint implements Serializable
     public Station getOwner()
        { return _owner; }
        
-       
+    
+    @Override
     public Source getSource()
        { return _owner.getSource(); }
        
