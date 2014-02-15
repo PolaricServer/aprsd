@@ -23,13 +23,13 @@ import java.io.*;
 public class ViewFilter {
     
   private static Map<String, RuleSet> _map = new HashMap();
+  private static RuleSet _default = new RuleSet(); 
   
-  
-  public static RuleSet getFilter(String id)
+  public static RuleSet getFilter(String id, boolean loggedIn)
   {
      RuleSet x  = _map.get(id);
-     if (x==null) 
-        return new RuleSet();
+     if (x==null || (!x.isPublic() && !loggedIn)) 
+        return _default;
      return x;
   }    
   
@@ -39,6 +39,9 @@ public class ViewFilter {
   static {
       String filename = System.getProperties().getProperty("confdir", ".") + "/view.profiles";
       try {
+         // Default is to hide all
+         _default.add(Pred.TRUE(), new Action(true,true,true,false,""));
+         
          System.out.println("*** Compiling view profiles..");
          Parser parser = new Parser(new FileReader(filename));
          parser.parse();

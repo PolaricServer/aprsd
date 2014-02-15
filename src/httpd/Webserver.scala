@@ -430,7 +430,7 @@ package no.polaric.aprsd.http
    def handle_search(req : Request, res : Response) =
    {
        val filtid = if (_infraonly) "infra"  else req.getParameter("filter")
-       val vfilt = ViewFilter.getFilter(filtid)
+       val vfilt = ViewFilter.getFilter(filtid, authorizedForUpdate(req))
        
        var arg = req.getParameter("filter")
        var mob = req.getParameter("mobile");
@@ -441,7 +441,7 @@ package no.polaric.aprsd.http
          <table>
          {
             for ( x:AprsPoint <- _api.getDB().getAll(arg)
-                  if ( !vfilt.apply(x).hideAll()) ) yield
+                  if ( true || !vfilt.apply(x).hideAll()) ) yield
             {
                val s = if (!x.isInstanceOf[Station]) null
                        else x.asInstanceOf[Station];

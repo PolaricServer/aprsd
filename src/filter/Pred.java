@@ -25,6 +25,9 @@ public abstract class Pred
       
    public static Pred FALSE()
       { return new FALSE(); }
+       
+   public static Pred TRUE()
+      { return new TRUE(); }
       
    public static Pred Source(String regex)
       { return new Source(regex); }
@@ -64,6 +67,14 @@ class FALSE extends Pred
         }
 }
 
+
+
+class TRUE extends Pred 
+{
+        public boolean eval(AprsPoint p) {
+            return true;
+        }
+}
 
 
 /**
@@ -245,6 +256,10 @@ class OR extends Pred
    }
    
    
+   /* 
+    * IMPORTANT: Be sure that optimization does not change other nodes
+    * than this, since they may be referenced from elsewhere. 
+    */
    void optimize() {
         List<Pred> copy = new LinkedList<Pred>();
         for (Pred p : disj) {
@@ -274,7 +289,7 @@ class NOT extends Pred
             
         static Pred optimize(NOT p) {
            if (p.pred instanceof NOT) {
-               System.out.println("*** Eliminate double NOT node");
+               System.out.println("*** Bypass double NOT node");
                return ((NOT)p.pred).pred; 
            }
            else

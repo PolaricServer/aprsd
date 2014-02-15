@@ -105,7 +105,7 @@ public class XmlServer extends ServerBase
    {         
         PrintWriter out = getWriter(res);
         String filt = _infraonly ? "infra" : req.getParameter("filter");
-        RuleSet vfilt = ViewFilter.getFilter(filt);
+        RuleSet vfilt = ViewFilter.getFilter(filt, loggedIn);
         res.setValue("Content-Type", "text/xml; charset=utf-8");
                 
         UTMRef uleft = null, lright = null;

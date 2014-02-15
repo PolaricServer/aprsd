@@ -40,7 +40,7 @@ assignment : IDENT '=' expr ';'
 
 
 profile : public PROFILE IDENT '{' rules '}' 
-                             { if ($1) 
+                             { if ((boolean)$1) 
                                   ruleset.setPublic(); 
                                profiles.put($3, ruleset); 
                                System.out.println("*** View profile '"+$3+"' ok");
