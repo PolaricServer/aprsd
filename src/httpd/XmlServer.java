@@ -142,7 +142,7 @@ public class XmlServer extends ServerBase
         out.println("<overlay seq=\""+_seq+"\"" +
             (filt==null ? ""  : " view=\"" + filt + "\"") + ">");
             
-        printXmlMetaTags(out, req);
+        printXmlMetaTags(out, req, loggedIn);
         out.println("<meta name=\"clientses\" value=\""+ client + "\"/>");    
         
         

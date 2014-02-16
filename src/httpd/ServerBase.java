@@ -180,14 +180,15 @@ public abstract class ServerBase
    
    
    
-   protected void printXmlMetaTags(PrintWriter out, Request req)
+   protected void printXmlMetaTags(PrintWriter out, Request req, boolean loggedIn)
       throws IOException
    {
-        out.println("<meta name=\"utmzone\" value=\""+ _utmzone + "\"/>");
-        out.println("<meta name=\"login\" value=\""+ getAuthUser(req) + "\"/>");
-        out.println("<meta name=\"adminuser\" value=\""+ (authorizedForAdmin(req) ? "true" : "false") + "\"/>");
-        out.println("<meta name=\"updateuser\" value=\""+ (authorizedForUpdate(req) ? "true" : "false") + "\"/>"); 
-        out.println("<meta name=\"sarmode\" value=\""+ (_api.getSar() !=null ? "true" : "false")+"\"/>");
+        out.println("<meta name=\"utmzone\" value=\"" + _utmzone + "\"/>");
+        out.println("<meta name=\"login\" value=\"" + getAuthUser(req) + "\"/>");
+        out.println("<meta name=\"loginuser\" value=\"" + (loggedIn ? "true" : "false") + "\"/>");
+        out.println("<meta name=\"adminuser\" value=\"" + (authorizedForAdmin(req) ? "true" : "false") + "\"/>");
+        out.println("<meta name=\"updateuser\" value=\"" + (authorizedForUpdate(req) ? "true" : "false") + "\"/>"); 
+        out.println("<meta name=\"sarmode\" value=\"" + (_api.getSar() !=null ? "true" : "false")+"\"/>");
    }
    
    
