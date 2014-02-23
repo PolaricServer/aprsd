@@ -453,7 +453,7 @@ public class AprsParser implements Channel.Receiver
     
     
     
-        
+     
     /**
      * Parse timestamp.
      * 'Compression' of timestamp is experimental. It is not part of 
@@ -467,15 +467,15 @@ public class AprsParser implements Channel.Receiver
          String dstr = data.substring(0, (compressed ? 3:6) ); 
          Calendar now = (Calendar) localTime.clone();    
          now.setTimeInMillis((new Date()).getTime());
-                                    
-                                       
+     
+                                   
          /* Default timezone is zulu */
          ts = (Calendar) utcTime.clone();
          ts.setTimeInMillis( now.getTimeInMillis()) ;
-                  
+              
          if (compressed || tst == 'h') {
              /* Parse time in HHMMSS format */
-             day = ts.get(Calendar.DAY_OF_MONTH);
+             day = now.get(Calendar.DAY_OF_MONTH);
              if (compressed) {
                 hour = dstr.charAt(0) - '0';
                 min = dstr.charAt(1) - '0';
@@ -491,7 +491,7 @@ public class AprsParser implements Channel.Receiver
             /* Parse time in DDHHMM format */
             if (tst == 'z') {
                if (dstr.equals("111111")) 
-                  return null; /* Timeless timestamp, ugh! */
+                   return null; /* Timeless timestamp, ugh! */
             }
             else {
                ts = (Calendar) localTime.clone(); 
@@ -507,27 +507,31 @@ public class AprsParser implements Channel.Receiver
             System.out.println("*** WARNING: Timestamp format problem: "+dstr+tst);
             return new Date();
          }
-        
-         /* Try to figure out the month and the year of the timestamp. 
-          * if timestamp day number is higher than todays number, the timestamp 
-          * is probably from previous month. 
+
+     
+         /* Set fields of the timestamp. Try to figure out the month and the year. 
+          * if timestamp hour number is higher than actual time, the timestamp 
+          * is probably from previous day. If timestamp day number is higher than
+          * todays day number it is probably the previous month.
           */
-         ts.set(Calendar.YEAR, now.get(Calendar.YEAR));
-         ts.set(Calendar.MONTH, now.get(Calendar.MONTH)); 
+     
+         ts.set(Calendar.SECOND, sec);
+         ts.set(Calendar.MINUTE, min);
+         ts.set(Calendar.HOUR_OF_DAY, hour);
+         ts.set(Calendar.DAY_OF_MONTH, day);
+         ts.set(Calendar.MONTH, now.get(Calendar.MONTH));  
+     
+         if (  ts.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR) 
+              && hour > now.get(Calendar.HOUR_OF_DAY) + 2) 
+             ts.add(Calendar.DAY_OF_MONTH, -1); 
+      
          if (day > now.get(Calendar.DAY_OF_MONTH))
              ts.add(Calendar.MONTH, -1);
-         
-         ts.set(Calendar.DAY_OF_MONTH, day);
-         if (ts.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR) 
-             && hour > now.get(Calendar.HOUR_OF_DAY)+2) 
-            ts.add(Calendar.DAY_OF_MONTH, -1);
-            
-         ts.set(Calendar.HOUR_OF_DAY, hour);
-         ts.set(Calendar.MINUTE, min);
-         ts.set(Calendar.SECOND, sec);
-             
+     
+         ts.set(Calendar.YEAR, now.get(Calendar.YEAR)); 
          return ts.getTime();
     }
+      
     
     
     
