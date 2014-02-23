@@ -20,12 +20,22 @@ V.1.4 (march 2014), etc
   that are only visible for logged in users?
        DONE.
 
+* [C] Show restricted contents (channels, filters) to users that are given SAR access (code, url). 
+       DONE. 
+       
+* [C] SAR code entering does not work! Fix. 
+       DONE BUT ONLY ANDROID. 
+       
+* [C] Separate out code for authorization. 
+       DONE. 
+       
 * [C] Filter profiles menu on client: Consider: Nested menu? Use JS popup instead of SELECT box? 
   Get list from server? 
                  
 * Hiding of ident. Do it all on client. Hint from server. 
        
 * There is still a bug in timestamp interpretation the 1st in a month. Fix.        
+       DONE.
        
 * Slight displacement of positions in kamap maps? Check. 
 
@@ -43,8 +53,6 @@ V.1.4 (march 2014), etc
 * Activate/deactivate of channels at run-time. Re-load config. 
 
 * Selection of pre-defined region: Also select map-layer?
-
-* Sjekk om alternative ikon blir overført til andre servere slik som alias.
 
 * [M] Better styling of forms for mobile. Consider JQuery mobile.
 
@@ -66,7 +74,15 @@ V.1.4 (march 2014), etc
        DONE (in webconfig plugin)
        
 * In SAR mode, when logged in: Aliases not visible immediately. Fix. 
-       CANNOT RECREATE 
+       ?? 
+       
+       
+       
+Autorisation/Authentication
+---------------------------
+
+* How can we extend this in a plugin. 
+
        
       
 Iframe/API
