@@ -1,4 +1,6 @@
- 
+#
+# Se http://aprs.no/dokuwiki/doku.php?id=filter.profiles for dokumentasjon. 
+#
 
 TrackHide = NOT moving AND
             NOT ident~"LE.*" AND
@@ -13,7 +15,7 @@ EchoLink  = symbol ~ "E0" AND ident ~ "EL.*" ;
 # Vis alt
 #############################
 
-PROFILE alle {
+PUBLIC PROFILE alle {
 }
 
 
@@ -22,7 +24,7 @@ PROFILE alle {
 # andre ting som ikke er så "interessant"
 ################################################
 
-PROFILE track {
+PUBLIC PROFILE track {
    TrackHide      => { hide-ident };
 }
 
@@ -31,7 +33,7 @@ PROFILE track {
 # Skjul ident for veimelding objekter.
 #################################################
         
-PROFILE track2 {
+PUBLIC PROFILE track2 {
    ident ~ ".+@LA1FTA\-13" => { hide-ident };
 }
 
@@ -40,7 +42,7 @@ PROFILE track2 {
 # Vis kun LE kallesignal
 ################################################## 
     
-PROFILE le {
+PUBLIC PROFILE le {
    NOT ident ~ "LE.+" => { hide-all };
 }
                                                                           
@@ -49,7 +51,7 @@ PROFILE le {
 # Infrastruktur - basert på kallesignal og symbol
 ###################################################
 
-PROFILE infra {
+PUBLIC PROFILE infra {
    NOT (ident ~ "LD.+" OR symbol ~ "/r|.#" OR IrlpNode OR EchoLink OR infra)
        => { hide-all };
 }
@@ -59,7 +61,7 @@ PROFILE infra {
 # Aktiv infrastruktur.
 ######################################
 
-PROFILE ainfra {
+PUBLIC PROFILE ainfra {
    NOT infra => { hide-all  };
    infra     => { show-path };
    fulldigi  => { style = "wdigi" };
@@ -71,7 +73,7 @@ PROFILE ainfra {
 # Vis kun bevegelige
 ###################################
 
-PROFILE moving {
+PUBLIC PROFILE moving {
     NOT moving => { hide-all };
 }
 
