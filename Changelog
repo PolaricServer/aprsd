@@ -57,10 +57,11 @@ V.1.4
 * Fix a bug in timestamp interpretation the 1st in a month.        
 * AprsHandler. Asynchronous subscribe interface to parser       
 * Allow channels (sources) to be visible for logged in or SAR users only?
+* Some updates to icons. 
 * [C] Filter profiles menu on client: Separate source/class for view profile menu.  
       Menu choices that are only visible for logged in users?
 * [C] Show restricted contents (channels, filters) to users that are given SAR access. 
-* [C] SAR code entering does not work! Fix for Android app. 
+* [C] SAR code entering did not work! Fix for Android app. 
 * [C] Separate out code for authentication/autorisation.               
 * [C] Fix small bug with auto tracking that made item dissappear from map 
       under certain conditions. 
