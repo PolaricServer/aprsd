@@ -13,9 +13,11 @@ import java.util.*;
 
 %type <obj>  action actions expr rule public
 
-%left '~'
-%left AND OR NOT 
-
+/* Associativity and precedence */
+%left OR
+%left AND
+%right NOT 
+%nonassoc '~'
 
 /* Grammar follows */
 %%
@@ -66,7 +68,7 @@ rules : rules rule           { if ($2 != null)
      
      
 rule : expr ARROW '{' actions '}' ';' 
-                              {  $$=new Rule((Pred) $1, action); } 
+                              {  $$ = new Rule((Pred) $1, action); } 
      | error ';'              {  $$ = null; } 
      ;
 
