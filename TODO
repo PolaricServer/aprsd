@@ -1,5 +1,5 @@
 
-V.1.4 (march 2014), etc
+V.1.5 (april 2014), etc
 -----------------------
       
 * Extend login/user support. Individidual users + groups (roles) + permissions. 
@@ -11,42 +11,16 @@ V.1.4 (march 2014), etc
   views to control how things are displayed (filters, etc). Consider assigning 
   aliases per SAR-mission instead of globally. Allow a SAR mode to activate 
   a particular (pre-defined) data source? 
-  
-* Configurable filters for what is to be displayed on map (and how). Set of "modes". 
-  Scripting of view-profiles. 
-       DONE 
-  
-* [C] Filter profiles menu on client: Separate source/class for view profile menu.  Menu choices
-  that are only visible for logged in users?
-       DONE.
-
-* [C] Show restricted contents (channels, filters) to users that are given SAR access (code, url). 
-       DONE. 
        
-* [C] SAR code entering does not work! Fix. 
-       DONE BUT ONLY ANDROID. 
-       
-* [C] Separate out code for authorization. 
-       DONE. 
-       
-* [C] Filter profiles menu on client: Consider: Nested menu? Use JS popup instead of SELECT box? 
-  Get list from server? 
+* [C] Filter profiles menu on client: Consider: Nested menu? Use JS popup instead 
+      of SELECT box? Get list from server? 
                  
 * Hiding of ident. Do it all on client. Hint from server. 
-       
-* There is still a bug in timestamp interpretation the 1st in a month. Fix.        
-       DONE.
        
 * Slight displacement of positions in kamap maps? Check. 
 
 * Menu selection of symbol when setting own position. 
 
-* AprsHandler. Asynchronous subscribe interface to parser
-       DONE.
-       
-* Allow channels (sources) to be visible for logged in or SAR users only?
-       DONE. 
-       
 * Too easy to lock yourself out when changing admin-users regex. Workaround?
   Prevent removing of 'admin' user by plugin? 
 
@@ -64,14 +38,8 @@ V.1.4 (march 2014), etc
 * [C] Move API code out from menu.js to api.js
        IN PROGRESS
        
-* [C] Auto tracking. Item disappears when moving (until map is zoomed or panned). Fix.        
-       DONE. 
-       
 * [C] Important: Take care of compatibility problems between Apache versions 2.2 and 2.4 !!!
        http://httpd.apache.org/docs/2.4/upgrading.html#run-time
-      
-* Restart from webconfig plugin terminate program but does not start it again (on Debian unstable?). Fix. 
-       DONE (in webconfig plugin)
        
 * In SAR mode, when logged in: Aliases not visible immediately. Fix. 
        ?? 

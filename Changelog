@@ -48,3 +48,20 @@ V.1.3
 * [C] Updates to mapconfig. 
 * [C] Move to OpenLayers 2.13.1       
 * (various small fixes). 
+
+
+V.1.4
+-----
+* Configurable filters for what is to be displayed on map (and how). Set of "modes". 
+  Scripting of view-profiles.
+* Fix a bug in timestamp interpretation the 1st in a month.        
+* AprsHandler. Asynchronous subscribe interface to parser       
+* Allow channels (sources) to be visible for logged in or SAR users only?
+* [C] Filter profiles menu on client: Separate source/class for view profile menu.  
+      Menu choices that are only visible for logged in users?
+* [C] Show restricted contents (channels, filters) to users that are given SAR access. 
+* [C] SAR code entering does not work! Fix for Android app. 
+* [C] Separate out code for authentication/autorisation.               
+* [C] Fix small bug with auto tracking that made item dissappear from map 
+      under certain conditions. 
+
