@@ -188,7 +188,9 @@ public abstract class Channel extends Source implements Serializable
     protected String _rfilter = null;
 
     public static DupCheck  _dupCheck = new DupCheck();
-    public static final String _rx_encoding = "X-UTF-8_with_cp-850_fallback";
+    public static final String _rx_encoding = /* "X-UTF-8_with_cp-850_fallback"; */
+                                              "X-UTF-8_with_ISO-8859-1_fallback";
+                          
     public static final String _tx_encoding = "UTF-8";
 
     
