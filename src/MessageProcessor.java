@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,13 +74,17 @@ public class MessageProcessor implements Runnable
 
    private static final int _MSG_INTERVAL = 20;
    private static final int _MSG_MAX_RETRY = 3; 
+   private static final int _MAX_MSGID = 10000;
+   private static final int _MSGID_STORE_SIZE = 512;
    
-   /* The last 100 received messages */
+   
+   /* The last nn received messages by sender-callsign + "# + msgid 
+    */
    private LinkedHashMap<String, Boolean> recMessages =
        new LinkedHashMap()
        {
            protected boolean removeEldestEntry(Map.Entry e)
-               { return size() > 100; }
+               { return size() > _MSGID_STORE_SIZE; }
        };
        
    private Map<String, Subscriber> _subscribers = new HashMap();
@@ -94,12 +98,17 @@ public class MessageProcessor implements Runnable
    private String     _alwaysRf;
    private int        _threadid;
     
+    
+    
    private static String getNextId()
    {
-      _msgno = (_msgno + 1) % 1000;
+      _msgno = (_msgno + 1) % _MAX_MSGID;
       return ""+_msgno;
    }
 
+   
+   
+   
    private int threadid=0;
    public MessageProcessor(ServerAPI api)
    {
@@ -198,9 +207,9 @@ public class MessageProcessor implements Runnable
     * If acked is true, it will wait for an ack message and retry until such a message
     * arrives or timeout.
     *
-    * If authenticated is true, generate a MAC based on the secret key, the sender-id,
-    * recipient-id, message and the message-id. The MAC is prefixed with a # and is
-    * placed at the end of the message (before the message id). We Base64 encode the MAC
+    * If authenticated is true, generate a HMAC based on the secret key, the sender-id,
+    * recipient-id, message and the message-id. The HMAC is prefixed with a # and is
+    * placed at the end of the message (before the message id). We Base64 encode the HMAC
     * and use the first 8 bytes of it.
     *
     * @param recipient Destination address of message
@@ -295,6 +304,7 @@ public class MessageProcessor implements Runnable
     { 
        try { 
           ofs.writeObject(_msgno);
+          ofs.writeObject(recMessages); 
        } catch (Exception e) {} 
     }
 
@@ -303,6 +313,7 @@ public class MessageProcessor implements Runnable
      {
         try { 
             _msgno = (Integer) ifs.readObject(); 
+            recMessages = (LinkedHashMap<String, Boolean>) ifs.readObject(); 
         } catch (Exception e) {} 
      }
      
