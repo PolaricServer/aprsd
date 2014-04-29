@@ -115,7 +115,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
              ObjectOutput ofs = new ObjectOutputStream(fs);
              
              ofs.writeObject(_routes);
-             _msgProc.save(ofs);
+             _msgProc.save();
              _ownobj.save(ofs);
              for (AprsPoint s: _map.values())
                 { ofs.writeObject(s); }
@@ -138,7 +138,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
           ObjectInput ifs = new ObjectInputStream(fs);
           
           _routes = (RouteInfo) ifs.readObject();
-          _msgProc.restore(ifs);
+          _msgProc.restore();
           _ownobj.restore(ifs);
           while (true)
           { 

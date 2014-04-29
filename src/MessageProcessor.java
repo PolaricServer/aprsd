@@ -24,7 +24,7 @@ import java.util.*;
  * We also add an option to use a Message Authentication scheme (MAC field). 
  */
  
-public class MessageProcessor implements Runnable
+public class MessageProcessor implements Runnable, Serializable
 {
     
    /** 
@@ -78,14 +78,16 @@ public class MessageProcessor implements Runnable
    private static final int _MSGID_STORE_SIZE = 512;
    
    
-   /* The last nn received messages by sender-callsign + "# + msgid 
+   
+   /**
+    * The last nn received messages by sender-callsign + "# + msgid 
     */
-   private LinkedHashMap<String, Boolean> recMessages =
-       new LinkedHashMap()
-       {
-           protected boolean removeEldestEntry(Map.Entry e)
-               { return size() > _MSGID_STORE_SIZE; }
-       };
+   private static class RecMessages extends LinkedHashMap<String, Boolean> {
+       protected boolean removeEldestEntry(Map.Entry e)
+            { return size() > _MSGID_STORE_SIZE; }
+   }
+   private RecMessages recMessages = new RecMessages();
+   
        
    private Map<String, Subscriber> _subscribers = new HashMap();
    private Map<String, OutMessage> _outgoing = new HashMap();
@@ -97,7 +99,7 @@ public class MessageProcessor implements Runnable
    private String     _defaultPath;
    private String     _alwaysRf;
    private int        _threadid;
-    
+   private String     _file;
     
     
    private static String getNextId()
@@ -112,9 +114,14 @@ public class MessageProcessor implements Runnable
    private int threadid=0;
    public MessageProcessor(ServerAPI api)
    {
+       _file = api.getProperty("message.file", "messages.dat");
+       if (_file.charAt(0) != '/')
+           _file = System.getProperties().getProperty("datadir", ".")+"/"+_file; 
+   
        _myCall = api.getProperty("message.mycall", "").toUpperCase();
        if (_myCall.length() == 0)
            _myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();
+     
        _key         = api.getProperty("message.auth.key", "NOKEY");
        _defaultPath = api.getProperty("message.rfpath", "WIDE1-1");
        _alwaysRf    = api.getProperty("message.alwaysRf", "");
@@ -156,6 +163,7 @@ public class MessageProcessor implements Runnable
          _outgoing.remove(msgid);   
          return;
       } 
+      
       Subscriber subs = _subscribers.get(recipient);
       if (subs != null) {
          if (!recMessages.containsKey(sender.getIdent()+"#"+msgid)) { 
@@ -300,21 +308,33 @@ public class MessageProcessor implements Runnable
    }
 
 
-    void save(ObjectOutput ofs)
+    void save()
     { 
        try { 
-          ofs.writeObject(_msgno);
-          ofs.writeObject(recMessages); 
-       } catch (Exception e) {} 
+           System.out.println("*** Saving message data...");
+           FileOutputStream fs = new FileOutputStream(_file);
+           ObjectOutput ofs = new ObjectOutputStream(fs);
+       
+           ofs.writeObject(_msgno);
+           ofs.writeObject(recMessages); 
+       } catch (Exception e) {
+           System.out.println("*** MesssageProcessor: cannot save: "+e);
+       } 
     }
 
 
-    void restore(ObjectInput ifs)
-     {
-        try { 
-            _msgno = (Integer) ifs.readObject(); 
-            recMessages = (LinkedHashMap<String, Boolean>) ifs.readObject(); 
-        } catch (Exception e) {} 
+    void restore()
+     {        
+         try {     
+             System.out.println("*** Restoring message data...");
+             FileInputStream fs = new FileInputStream(_file);
+             ObjectInput ifs = new ObjectInputStream(fs);
+          
+             _msgno = (Integer) ifs.readObject(); 
+             recMessages = (RecMessages) ifs.readObject(); 
+         } catch (Exception e) {
+             System.out.println("*** MessageProcessor: cannot restore: "+e);
+         } 
      }
      
 
