@@ -65,4 +65,5 @@ V.1.4
 * [C] Separate out code for authentication/autorisation.               
 * [C] Fix small bug with auto tracking that made item dissappear from map 
       under certain conditions. 
+* [C] Handle compatibility problems between Apache 2.2 and 2.4
 
