@@ -80,7 +80,7 @@ public class OwnPosition extends Station implements Runnable
         setId(myCall);
         setAltitude(-1);
         _description = _comment;
-           
+        
         if (_txOn) {
            _thread = new Thread(this, "OwnPosition-"+(_tid++));
            _thread.start();
@@ -125,8 +125,9 @@ public class OwnPosition extends Station implements Runnable
           minx = 1 - minx; // FIXME: is this correct. Check code in PT as well?
           
        float mins = ((float) Math.round( minx * 60 * 100)) / 100;
-       return String.format("%0"+ndeg+"d%05.2f", deg, mins);  
+       return String.format((Locale)null, "%0"+ndeg+"d%05.2f", deg, mins);  
    }  
+
    
    /**
     * Encode position for use in APRS.
