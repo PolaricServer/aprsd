@@ -1,6 +1,14 @@
 
 V.1.5 (april 2014), etc
 -----------------------
+
+* Message sequence numbers used in authenticated APRS messages: Increase range, 
+  increase number of stored numbers to better guard against replay-attacks. 
+  
+   - Increase msgid range, increase size of received msgid map and save received msgid map to file. 
+        DONE. 
+   - Store msgids on a separate file. 
+        DONE
       
 * Extend login/user support. Individidual users + groups (roles) + permissions. 
   (maybe some of this should be implemented in db plugin, but need some
@@ -20,7 +28,8 @@ V.1.5 (april 2014), etc
 * Slight displacement of positions in kamap maps? Check. 
 
 * Menu selection of symbol when setting own position. 
-
+       DONE.
+       
 * Too easy to lock yourself out when changing admin-users regex. Workaround?
   Prevent removing of 'admin' user by plugin? 
 
@@ -38,12 +47,16 @@ V.1.5 (april 2014), etc
 * [C] Move API code out from menu.js to api.js
        IN PROGRESS
        
-* [C] Important: Take care of compatibility problems between Apache versions 2.2 and 2.4 !!!
-       http://httpd.apache.org/docs/2.4/upgrading.html#run-time
-       
 * In SAR mode, when logged in: Aliases not visible immediately. Fix. 
        ?? 
        
+* java.lang.NullPointerException
+        at no.polaric.aprsd.Signs.search(Signs.java:147)
+
+* Hide ident: propagate to other servers. 
+
+* Fix bug in formatting own position (on aprs)
+        DONE.
        
        
 Autorisation/Authentication
@@ -56,10 +69,10 @@ Autorisation/Authentication
 Iframe/API
 ----------
 
+* Consider how to add API extensions from plugins
 * Add: Get trace from database
 * Subscription: Info about a particular station/objects.
 * Subscription: Misc. events from map view. 
-* Consider how to add API extensions from plugins
 * Consider security/login
 
 
