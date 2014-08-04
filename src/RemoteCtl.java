@@ -338,8 +338,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
 
 
    /* 
-    * Thread to refresh connection to "parent" every 15 minutes. 
-    * Parent removes a child if its timestamp is older than 30 minutes.
+    * Thread to refresh connection to "parent" every 20 minutes. 
+    * Parent removes a child if its timestamp is older than 40 minutes.
     */
    public void run()
    {
@@ -353,11 +353,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             }
             
             for (String x : getChildren()) 
-                if (_children.get(x).getTime() + 1800000 <= (new Date()).getTime()) {
+                if (_children.get(x).getTime() + 2400000 <= (new Date()).getTime()) {
                    _log.add("*** "+x+" disconnected (timeout)");
                    _children.remove(x);
                 }
-            Thread.sleep(900000);
+            Thread.sleep(1200000);
          }
       } catch (Exception e) {}
    } 
