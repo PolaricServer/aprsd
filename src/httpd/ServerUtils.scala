@@ -136,21 +136,26 @@ package no.polaric.aprsd.http
                              prefix : NodeSeq,
                              fields : (Request) => NodeSeq,
                              action : (Request) => NodeSeq,
+                             close  : Boolean,
                              submit : (Request) => NodeSeq ) : NodeSeq =
        {
            if (req.getParameter("update") != null) 
-               <div><script source="javascript">setTimeout('window.close()', 2000);</script>
-               { action(req) }
+               <div>
+                 { if (close)
+                     <script source="javascript">setTimeout('window.close()', 2000);</script>
+                   else null
+                   action(req) 
+                 }
                </div>;
         
            else
 
               <form action="" method="post">
-              { prefix }
-              <fieldset>
-                 { fields(req) }
-              </fieldset>
-              { submit(req);}
+                { prefix }
+                <fieldset>
+                  { fields(req) }
+                </fieldset>
+                { submit(req);}
               </form>
        }
 
@@ -159,7 +164,7 @@ package no.polaric.aprsd.http
                              prefix : NodeSeq,
                              fields : (Request) => NodeSeq,
                              action : (Request) => NodeSeq) : NodeSeq =
-           htmlForm(req, prefix, fields, action, default_submit)
+           htmlForm(req, prefix, fields, action, true, default_submit)
            ;
            
            

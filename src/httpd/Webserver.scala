@@ -88,7 +88,7 @@ package no.polaric.aprsd.http
                    simpleLabel("rctl", "leftlab", "Fjernkontroll: ", TXT(""+_api.getRemoteCtl())) else null; }     
                    
               </fieldset>  
-              <input type="submit" onclick="window.close()" id="cancel" value="Avbryt"/>
+              <input type="submit" onclick="top.window.close()" id="cancel" value="Avbryt"/>
           else
               <h3>Ukjent kommando</h3>
              
@@ -108,6 +108,8 @@ package no.polaric.aprsd.http
                <option value="/r" style="background-image:url(../aprsd/icons/radio.png)">Radiostasjon</option>
             </select>
             ;
+   
+   
    
     /**
     * set own position
