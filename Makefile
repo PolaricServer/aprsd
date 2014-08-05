@@ -56,6 +56,7 @@ install: polaric-aprsd.jar
 	install -m 644 icons/signs/*.png icons/signs/*.gif $(INSTALL_WEB)/icons/signs
 	install -m 644 dicons/*.png $(INSTALL_WEB)/dicons
 	install -m 644 style.css $(INSTALL_WEB)
+	install -m 755 polaric-restart $(INSTALL_BIN)
 	cp sudoers.d $(INSTALL_SUDO)/polaric-aprsd
 	chmod 644 $(INSTALL_SUDO)/polaric-aprsd
 	
