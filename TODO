@@ -9,16 +9,6 @@ V.1.5 (april 2014), etc
         DONE. 
    - Store msgids on a separate file. 
         DONE
-      
-* Extend login/user support. Individidual users + groups (roles) + permissions. 
-  (maybe some of this should be implemented in db plugin, but need some
-   core support here). 
-  
-* Re-consider SAR-mode. Allow multiple SAR-modes for different missions. 
-  Assign users/groups/roles to SAR-missions. Configure SAR-missions like
-  views to control how things are displayed (filters, etc). Consider assigning 
-  aliases per SAR-mission instead of globally. Allow a SAR mode to activate 
-  a particular (pre-defined) data source? 
        
 * [C] Filter profiles menu on client: Consider: Nested menu? Use JS popup instead 
       of SELECT box? Get list from server? 
@@ -63,12 +53,27 @@ V.1.5 (april 2014), etc
 * Deny HTTP requests coming from outside localhost (security). 
         DONE. 
 
+* After reload: Authentication status is not available before XML overlay is updated.
+        DONE (load a metadata-only XML document when initializing app). 
+
+* Review how XML overlay works. Document it? Improvements? 
+
 
 Autorisation/Authentication
 ---------------------------
 
 * How can we extend this in a plugin. 
-
+      
+* Extend login/user support. Individidual users + groups (roles) + permissions. 
+  (maybe some of this should be implemented in db plugin, but need some
+   core support here). 
+  
+* Re-consider SAR-mode. Allow multiple SAR-modes for different missions. 
+  Assign users/groups/roles to SAR-missions. Configure SAR-missions like
+  views to control how things are displayed (filters, etc). Consider assigning 
+  aliases per SAR-mission instead of globally. Allow a SAR mode to activate 
+  a particular (pre-defined) data source? 
+  
        
       
 Iframe/API

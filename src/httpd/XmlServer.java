@@ -145,7 +145,16 @@ public class XmlServer extends ServerBase
         printXmlMetaTags(out, req, loggedIn);
         out.println("<meta name=\"clientses\" value=\""+ client + "\"/>");    
         
+        /* Could we put metadata in a separate service? */
+        if (parms.get("metaonly") != null) {
+             out.println("<meta name=\"metaonly\" value=\"true\"/>");
+             out.println("</overlay>");              
+             out.close();
+        }
+        out.println("<meta name=\"metaonly\" value=\"false\"/>");
         
+        
+         
         /* Output signs. A sign is not an APRS object
          * just a small icon and a title. It may be a better idea to do this
          * in map-layers instead?
