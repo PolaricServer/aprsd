@@ -46,6 +46,8 @@ V.1.5 (april 2014), etc
 
 * [C] Move API code out from menu.js to api.js
        IN PROGRESS
+
+* [C] Better WX reports. 
        
 * In SAR mode, when logged in: Aliases not visible immediately. Fix. 
        ?? 
@@ -58,7 +60,10 @@ V.1.5 (april 2014), etc
 * Fix bug in formatting own position (on aprs)
         DONE.
        
-       
+* Deny HTTP requests coming from outside localhost (security). 
+        DONE. 
+
+
 Autorisation/Authentication
 ---------------------------
 

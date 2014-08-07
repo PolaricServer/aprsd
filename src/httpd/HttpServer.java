@@ -60,22 +60,29 @@ public class HttpServer implements Container, ServerAPI.ServerStats
        
          try {
             String uri = req.getTarget().replaceAll("\\?.*", ""); 
-            /* For compatibility. Temporary fix */
-            uri = uri.replaceFirst("sec-mapdata", "mapdata_sec");
-            uri = uri.replaceFirst("sec-station", "station_sec");
-         
-            resp.setValue("Server", "Polaric APRSD 1.1");
+            boolean allowed = 
+                 req.getClientAddress().getAddress().isLoopbackAddress(); 
+            
+            resp.setValue("Server", "Polaric APRSD 1.4+");
             resp.setValue("Content-Type", "text/html; charset=utf-8");
          
             _Handler h = _handlers.get(uri);
-            if (h != null) 
+            if (h != null && allowed) 
                h.method.invoke(h.obj, req, resp);
             else {
                OutputStream os = resp.getOutputStream();
                PrintWriter out =  new PrintWriter(new OutputStreamWriter(os, _encoding));
-               out.println("<html><body>Unknown service: "+uri+"</body></html>");
-               resp.setCode(404); 
-               resp.setDescription("Not found");
+               if (!allowed) {
+                  out.println("<html><body>Access denied.</body></html>");
+                  resp.setCode(403); 
+                  resp.setDescription("Forbidden");
+                  System.out.println("*** HTTP access denied. From: "+req.getClientAddress());
+               }
+               else {
+                  out.println("<html><body>Unknown service: "+uri+"</body></html>");
+                  resp.setCode(404); 
+                  resp.setDescription("Not found");
+               }
                out.close();
             }
          
