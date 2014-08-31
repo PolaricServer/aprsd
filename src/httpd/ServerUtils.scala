@@ -141,21 +141,22 @@ package no.polaric.aprsd.http
        {
            if (req.getParameter("update") != null) 
                <div>
-                 { if (close)
+                 {
+                   if (close)
                      <script source="javascript">setTimeout('window.close()', 2000);</script>
-                   else null
-                   action(req) 
-                 }
+                   else null  
+                 } 
+                 { action(req) }
                </div>;
         
            else
 
               <form action="" method="post">
-                { prefix }
+                  { prefix }
                 <fieldset>
                   { fields(req) }
                 </fieldset>
-                { submit(req);}
+                  { submit(req);}
               </form>
        }
 

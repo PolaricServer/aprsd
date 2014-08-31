@@ -534,7 +534,7 @@ package no.polaric.aprsd.http
         def fields(req : Request): NodeSeq =
             <xml:group>  
             <label for="callsign" class="leftlab">Ident:</label>
-            <label id="callsign"><b> { if (x.getIdent != null) x.getIdent().replaceFirst("@.*","") else "" } </b></label>
+            <label id="callsign"><b> { if (x != null && x.getIdent != null) x.getIdent().replaceFirst("@.*","") else "" } </b></label>
 
             { if (!simple)
                  simpleLabel("symbol", "leftlab", "Symbol:",TXT( x.getSymtab()+" "+x.getSymbol())) else null }
@@ -661,7 +661,7 @@ package no.polaric.aprsd.http
 
         printHtml (res, htmlBody ( req, null, 
                                    if (simple) fields(req)
-                                   else htmlForm(req, prefix, fields, IF_AUTH(action))))
+                                   else htmlForm(req, prefix, fields, IF_AUTH(action), true, default_submit)))
     }
       
 
