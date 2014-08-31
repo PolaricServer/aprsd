@@ -34,9 +34,9 @@ public class KissTncChannel extends TncChannel
    protected static final byte TFEND = (byte) 0xDC;
    protected static final byte TFESC = (byte) 0xDD;
    
-   private InputStream _istream; 
-   private OutputStream _ostream;
-   private boolean _close = false; 
+   protected InputStream _istream; 
+   protected OutputStream _ostream;
+   protected boolean _close = false; 
   
     
    protected static class Addr {
@@ -142,7 +142,7 @@ public class KissTncChannel extends TncChannel
     
     
     
-    private Packet _receivePacket() throws Timeout
+    protected Packet _receivePacket() throws Timeout
     {
         Packet p = new Packet();
         p.report = p.via = ""; 

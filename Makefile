@@ -32,7 +32,7 @@ INSTALL_PLUGDIR= $(INSTALL_CONFIG)/config.d
 ##################################################
     LIBDIR = _lib
  JAVAFLAGS =
- PACKAGES  = core util filter httpd scala aprsd
+ PACKAGES  = core util channels filter httpd scala aprsd
 
 
 
@@ -99,7 +99,12 @@ aprsd:
 	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/aprsd/*.java 
 	
 
+.PHONY : channels
+channels: 
+	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/channels/*.java 
+	
 
+	
 filter: core  src/filter/Parser.java src/filter/Lexer.java
 	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/filter/*.java
 
