@@ -59,6 +59,7 @@ public class MessageProcessor implements Runnable, Serializable
         { msgid = mid; recipient = rec; message = msg; time = new Date(); not=n; }
    }
 
+   
    /**
     * Keep record of subscribers to this service.
     */
@@ -80,7 +81,7 @@ public class MessageProcessor implements Runnable, Serializable
    
    
    /**
-    * The last nn received messages by sender-callsign + "# + msgid 
+    * The last nn received messages by sender-callsign + # + msgid 
     */
    private static class RecMessages extends LinkedHashMap<String, Boolean> {
        protected boolean removeEldestEntry(Map.Entry e)
@@ -304,7 +305,9 @@ public class MessageProcessor implements Runnable, Serializable
            */
           p.via = sentOnRf ? "qAR,"+_myCall : "TCPIP";
           _inetChan.sendPacket(p);
-       }        
+       }   
+       if (_inetChan == null && _rfChan == null)
+          System.out.println("*** MessageProcessor: Cannot send message. No channel.");
    }
 
 
