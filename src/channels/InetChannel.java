@@ -21,45 +21,25 @@ import java.util.*;
 /**
  * Internet channel. Connect to APRS-IS server. 
  */
-public class InetChannel extends Channel implements Runnable, Serializable
+public class InetChannel extends TcpChannel
 {
-    private  String   _host;
-    private  int      _port;
     private  String   _user, _pass, _filter;
-    private  boolean  _close = false;
-    
-    transient private  int            _max_retry;
-    transient private  long           _retry_time;   
-    transient private  Socket         _sock = null; 
     transient private  BufferedReader _rder = null;
-    transient private  ServerAPI      _api;
-    transient private  Thread         _thread;
-    transient private int            _chno;
-    
-    private static int _next_chno = 0;
+
     
 
 
     
     public InetChannel(ServerAPI api, String id) 
     {
-        _init(api, "channel", id);
-        _api = api;
-        _chno = _next_chno;
-        _next_chno++;
-        
-        _host = api.getProperty("channel."+id+".host", "localhost");
-        _port = api.getIntProperty("channel."+id+".port", 14580);
-        _max_retry  = api.getIntProperty("channel."+id+".retry", 0);
-        _retry_time = Long.parseLong(api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
+        super(api, id);
+
         _user = api.getProperty("channel."+id+".user", "").toUpperCase();
         if (_user.length() == 0)
            _user = api.getProperty("default.mycall", "NOCALL").toUpperCase();
         _pass     = api.getProperty("channel."+id+".pass", "-1");
         _filter   = api.getProperty("channel."+id+".filter", ""); 
         _rfilter  = api.getProperty("channel."+id+".rfilter", ""); 
-        _thread   = new Thread(this, "channel."+id);
-        _thread.start();
     }
  
 
@@ -87,25 +67,16 @@ public class InetChannel extends Channel implements Runnable, Serializable
     }
     
     
-    private void _close()
+    @Override protected void _close()
     {
        try { 
           if (_rder != null) _rder.close(); 
-          if (_out != null) _out.close();
+          if (_out != null)  _out.close();
           if (_sock != null) _sock.close(); 
           Thread.sleep(500);
        } catch (Exception e) {}
     }
     
-    
-    public void close()
-    {
-       try {
-         _close = true;
-         Thread.sleep(5000);
-         _close();
-       } catch (Exception e) {}  
-    }
     
 
     
@@ -115,80 +86,32 @@ public class InetChannel extends Channel implements Runnable, Serializable
            _heard.put(p.from, new Heard(new Date(), p.via));
     }
     
-
     
-    /**
-     * Main thread - connects to APRS-IS server and awaits incoming packets. 
-     */
-    public void run()
-    {
-        int retry = 0;             
-        while (true) 
-        { 
-           try {
-               _sock = new Socket(_host, _port);
-                 // 5 minutes timeout
-               _sock.setSoTimeout(1000 * 60 * 5);       
-               if (!_sock.isConnected()) 
-               {
-                   System.out.println("*** Connection to APRS server '"+_host+"' failed");
-                   retry++;
-                   continue; // WHATS GOING ON HERE?
-               }
-               
-               retry = 0; 
-               System.out.println("*** Connection to APRS server '"+_host+"' established");
-               _rder = new BufferedReader(new InputStreamReader(_sock.getInputStream(), _rx_encoding));
-               _out = new PrintWriter(new OutputStreamWriter(_sock.getOutputStream(), _tx_encoding));
-               _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+_api.getVersion()+"\r\n");
-               
-               if (_filter.length() > 0)
-                   _out.print("# filter "+_filter+ "\r\n"); 
-               _out.flush();
-               while (!_close) 
-               {
-                   String inp = _rder.readLine(); 
-                   if (inp != null) 
-                      receivePacket(inp, false);
-                   else {   
-                      System.out.println("*** Disconnected from APRS server '"+_host+"'");
-                      break; 
-                   }              
-               }
-           }
-           catch (java.net.ConnectException e)
-           {
-                System.out.println("*** APRS server '"+_host+"' : "+e.getMessage());
-           }
-           catch (java.net.SocketTimeoutException e)
-           {
-                System.out.println("*** APRS server'"+_host+"' : socket timeout");
-           }
-           catch(Exception e)
-           {   
-                System.out.println("*** APRS server '"+_host+"' : "+e); 
-                e.printStackTrace(System.out);
-           }
-           finally 
-             { _close(); }
-        
-           if (_close)
-                   return;
-                   
-           retry++;
-           if (retry <= _max_retry || _max_retry == 0) // MOVE THIS TO TOP OF LOOP
-               try { 
-                   long sleep = 30000 * (long) retry;
-                   if (sleep > _retry_time) 
-                      sleep = _retry_time; /* Default: Max 30 minutes */
-                   Thread.sleep(sleep); 
-               } 
-               catch (Exception e) {} 
-           else break;
-        }
-        System.out.println("*** Couldn't connect to APRS server '"+_host+"' - giving up");        
+    
+    
+    protected void receiveLoop() throws Exception
+    {           
+         _rder = new BufferedReader(new InputStreamReader(_sock.getInputStream(), _rx_encoding));
+         _out = new PrintWriter(new OutputStreamWriter(_sock.getOutputStream(), _tx_encoding));
+         
+         _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+_api.getVersion()+"\r\n");
+         
+         if (_filter.length() > 0)
+             _out.print("# filter "+_filter+ "\r\n"); 
+         _out.flush();
+         
+         while (!_close) 
+         {
+             String inp = _rder.readLine(); 
+             if (inp != null) 
+                receivePacket(inp, false);
+             else {   
+                logNote("Disconnected from APRS server '"+getHost()+"'");
+                break; 
+             }              
+         }
     }
- 
-    public String toString() { return _host+":"+_port; }
+    
+
 }
 

@@ -194,6 +194,10 @@ public abstract class Channel extends Source implements Serializable
     public static final String _tx_encoding = "UTF-8";
 
     
+    protected void logNote(String txt)
+      { System.out.println("*** [" + getShortDescr()+"] " + txt ); }
+    
+    
     /**
       * Returns true if callsign is heard on the channel.
       */

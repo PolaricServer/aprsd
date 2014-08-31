@@ -82,7 +82,7 @@ public abstract class TncChannel extends Channel implements Runnable
     {
         CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(_portName);
         if ( portIdentifier.isCurrentlyOwned() )
-            System.out.println("*** ERROR: Port "+ _portName + " is currently in use");
+            logNote("ERROR: Port "+ _portName + " is currently in use");
         else
         {
             CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);       
@@ -92,11 +92,11 @@ public abstract class TncChannel extends Channel implements Runnable
                 serialPort.setSerialPortParams(_baud, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
                 serialPort.enableReceiveTimeout(1000);
                 if (!serialPort.isReceiveTimeoutEnabled())
-                   System.out.println("*** WARNING: Timeout not enabled on serial port");
+                   logNote("WARNING: Timeout not enabled on serial port");
                 return (SerialPort) commPort;
             }
             else
-                System.out.println("*** ERROR: Port " + _portName + " is not a serial port.");
+                logNote("ERROR: Port " + _portName + " is not a serial port.");
         }    
         return null; 
     }
@@ -124,7 +124,7 @@ public abstract class TncChannel extends Channel implements Runnable
            else break;
         
            try {
-               System.out.println("*** Initialize TNC on "+_portName);
+               logNote("Initialize TNC on "+_portName);
                _serialPort = connect();
                if (_serialPort == null)
                    continue; 
@@ -132,7 +132,7 @@ public abstract class TncChannel extends Channel implements Runnable
            }
            catch(NoSuchPortException e)
            {
-                System.out.println("*** WARNING: serial port " + _portName + " not found");
+                logNote("WARNING: serial port " + _portName + " not found");
                 e.printStackTrace(System.out);
            }
            catch(Exception e)
@@ -142,7 +142,7 @@ public abstract class TncChannel extends Channel implements Runnable
            }  
            retry++;      
         }
-        System.out.println("*** Couldn't connect to TNC on'"+_portName+"' - giving up");
+        logNote("Couldn't connect to TNC on'"+_portName+"' - giving up");
      }
        
        
