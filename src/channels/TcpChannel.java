@@ -47,7 +47,7 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
         _next_chno++;
         
         _host = api.getProperty("channel."+id+".host", "localhost");
-        _port = api.getIntProperty("channel."+id+".port", 14580);
+        _port = api.getIntProperty("channel."+id+".port", 21);
         _max_retry  = api.getIntProperty("channel."+id+".retry", 0);
         _retry_time = Long.parseLong(api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
         _thread   = new Thread(this, "channel."+id);
