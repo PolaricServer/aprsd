@@ -12,7 +12,18 @@ V.1.5 (april 2014), etc
        
 * [C] Filter profiles menu on client: Consider: Nested menu? Use JS popup instead 
       of SELECT box? Get list from server? 
-                 
+              
+   - Modularize context menu. API to install handler functions for various contexts? 
+        DONE.
+   - Use JS context menu (and icons) for filter-profiles menu and map-area menu. 
+        DONE.
+   - Ability to hide map-area-views from menu. 
+        DONE.
+
+* [C] More configurable toolbar for iframe/mobile mode. 
+
+* Selection of pre-defined region: Also select map-layer?
+   
 * Hiding of ident. Do it all on client. Hint from server. 
        
 * Slight displacement of positions in kamap maps? Check. 
@@ -24,8 +35,6 @@ V.1.5 (april 2014), etc
   Prevent removing of 'admin' user by plugin? 
 
 * Activate/deactivate of channels at run-time. Re-load config. 
-
-* Selection of pre-defined region: Also select map-layer?
 
 * [M] Better styling of forms for mobile. Consider JQuery mobile.
 
@@ -39,9 +48,7 @@ V.1.5 (april 2014), etc
 
 * [C] Better WX reports. 
        
-* In SAR mode, when logged in: Aliases not visible immediately. Fix. 
-       ?? 
-       
+   
 * java.lang.NullPointerException
         at no.polaric.aprsd.Signs.search(Signs.java:147)
 
@@ -58,6 +65,14 @@ V.1.5 (april 2014), etc
 
 * Review how XML overlay works. Document it? Improvements? 
 
+
+* Restructure channel class framework somewhat. Move classes to separate directory. 
+        DONE. 
+        
+* KISS over TCP channel
+        IN PROGRESS.
+
+        
 
 Autorisation/Authentication
 ---------------------------
