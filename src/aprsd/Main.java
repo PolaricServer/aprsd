@@ -229,6 +229,7 @@ public class Main implements ServerAPI
            _chanManager.addClass("APRSIS", "no.polaric.aprsd.InetChannel");
            _chanManager.addClass("TNC2", "no.polaric.aprsd.Tnc2Channel");
            _chanManager.addClass("KISS", "no.polaric.aprsd.KissTncChannel");
+           _chanManager.addClass("TCPKISS", "no.polaric.aprsd.TcpKissChannel");
            
            String[] channelns = {"aprsis", "tnc"};
            if (getProperty("channel.aprsis.type", "").equals(""))
