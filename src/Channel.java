@@ -326,11 +326,6 @@ public abstract class Channel extends Source implements Serializable
             
             p.via  = m.group(3);
             p.report  = m.group(m.groupCount());
-            
-            /* Do some preliminary parsing of report */
-            p = checkReport(p); 
-            if (p==null)
-               return null; 
                 
             /* Remove first comma in path */
             if (p.via != null) 
@@ -343,6 +338,8 @@ public abstract class Channel extends Source implements Serializable
     }
 
     
+    
+    
     /**
      * Do some preliminary parsing of report part of the packet. 
      * Return null if report is invalid. 
@@ -354,6 +351,8 @@ public abstract class Channel extends Source implements Serializable
             return null;
          p.type = p.report.charAt(0); 
          
+         if (p.report.charAt(p.report.length()-1) == '\r')
+           p.report = p.report.substring(0, p.report.length()-1);
          if (p.type == '}') {
             /* Special treatment for third-party type. 
              * Strip off type character and apply this function recursively
@@ -399,6 +398,7 @@ public abstract class Channel extends Source implements Serializable
     }
     
     
+    
     /**
      * Process incoming packet. 
      * To be called from subclass. Parses packet, updates heard table, checks for
@@ -411,6 +411,10 @@ public abstract class Channel extends Source implements Serializable
     {      
        if (p == null)
           return false; 
+      
+       p = checkReport(p); 
+       if (p==null)
+          return false;
        
        if (_rfilter != null && !_rfilter.equals("") && !p.toString().matches(_rfilter))
           return false; 
