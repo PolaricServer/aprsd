@@ -67,3 +67,21 @@ V.1.4
       under certain conditions. 
 * [C] Handle compatibility problems between Apache 2.2 and 2.4
 
+
+V.1.5
+-----
+* Message sequence numbers used in authenticated APRS messages: Increase range, 
+  increase number of stored numbers to better guard against replay-attacks. Store msgids on a separate 
+  file. 
+* Menu selection of symbol when setting own position. 
+* Fix bug in formatting own position (in aprs reports)     
+* Deny HTTP requests coming from outside localhost (security!). 
+* After client reload: Authentication status is not available before XML overlay is updated. Fix. 
+  (load a metadata-only XML document when initializing app). 
+* Restructure channel class framework. Move classes to separate directory. 
+* Implement KISS over TCP channel.
+* Reports from KISS channels weren't displayed. Didn't extract message type. Fix.
+* [C] Modularize context menu. API to install handler functions for various contexts? 
+* [C] Use JS context menu (and icons) for filter-profiles menu and map-area menu. Ability to hide 
+      map-area-views from menu.       
+* (some small fixes).

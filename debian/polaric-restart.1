@@ -2,7 +2,7 @@
 .\" First parameter, NAME, should be all caps
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
-.TH POLARIC-APRSD 1 "November 15, 2011"
+.TH POLARIC-APRSD 1 "September 2, 2014"
 .\" Please adjust this date whenever revising the manpage.
 .\"
 .\" Some roff macros, for reference:
@@ -16,16 +16,12 @@
 .\" .sp <n>    insert n+1 empty lines
 .\" for manpage-specific macros, see man(7)
 .SH NAME
-restart-server \- Restart the server (polaric-aprsd)
+polaric-restart \- Restart the server (polaric-aprsd)
 .SH SYNOPSIS
-.B restart server
+.B polaric-restart
 .br
 
 .SH DESCRIPTION
-restart-server is a script to restart the server. It runs the init script through sudo, 
-and asks for a password if necessary. It is useful if run from a desktop icon or similar. 
-
-Before using this script you have to edit the sudoers config files to allow the 
-user in question to run /etc/init.d/polaric-aprsd as root. 
+restart-server is a script to restart the server.
 .PP
 This program and manual page was written by LA7ECA, Øyvind hanssen <ohanssen@acm.org>.
