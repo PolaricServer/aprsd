@@ -2,7 +2,9 @@
 /* Plugin (in version 1.1+ could inherit this */
 package no.polaric.aprsd;
 
-
+/**
+ * Service that can be activated or deactivated. 
+ */
 public interface ManagedObject
 {
     /** Start the service */

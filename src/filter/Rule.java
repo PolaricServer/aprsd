@@ -29,8 +29,8 @@ public class Rule
    
    /**
     * Apply the rule.
-    * @params p AprsPoint object.  
-    * @returns action - object that tells how the argument is going to be displayed. 
+    * @param obj AprsPoint object.  
+    * @return action - object that tells how the argument is going to be displayed. 
     */
    public Action apply(AprsPoint obj) {
        if (pred.eval(obj))

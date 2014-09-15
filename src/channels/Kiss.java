@@ -19,7 +19,7 @@ import gnu.io.*;
 import java.util.concurrent.Semaphore;
 
 /**
- * TNC channel. For devices in KISS compatible mode.
+ * Implementation of the KISS protocol. For devices in KISS compatible mode.
  */
  
 public class Kiss
@@ -37,7 +37,8 @@ public class Kiss
    protected InputStream _istream; 
    protected OutputStream _ostream;
   
-    
+   
+   /** Address field. */
    protected static class Addr {
       String addr;
       byte flags; 
@@ -48,11 +49,13 @@ public class Kiss
       public Addr(String a, byte f)
         { addr=a; flags=f; }
    }
-
  
+ 
+   /** Exception to signal the end of a frame. */
    protected static class Frame_End extends Throwable
    {}
-   
+ 
+   /** Exception to signal a timeout. */
    protected static class Timeout extends Throwable
    {}
     
@@ -65,7 +68,7 @@ public class Kiss
    
 
     /**
-     * Send packet on RF. 
+     * Send packet. 
      */ 
     public synchronized void sendPacket(Channel.Packet p)
        throws IOException
@@ -97,7 +100,9 @@ public class Kiss
    
    
     
-    
+    /**
+     * Receive packet. 
+     */
     public Channel.Packet receivePacket() throws Timeout
     {
         Channel.Packet p = new Channel.Packet();
@@ -190,7 +195,7 @@ public class Kiss
        else if (x==FESC)
           { _ostream.write(FESC); _ostream.write(TFESC); }
        else
-            _ostream.write(x);
+           _ostream.write(x);
     }
     
     

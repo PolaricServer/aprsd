@@ -178,10 +178,10 @@ public class OwnPosition extends Station implements Runnable
     /**
      * Manual update of position. To be called from user interface. 
      *
-     * @param ts Timestamp (time of update). If null, the object will be timeless/permanent.
-     * @param pd Position data (position, symbol, ambiguity, etc..)
-     * @param descr Comment field. 
-     * @param path Digipeater path of containing packet. 
+     * @param t Timestamp (time of update). If null, the object will be timeless/permanent.
+     * @param pos Position data (position, symbol, ambiguity, etc..)
+     * @param symtab APRS symbol table 
+     * @param symbol APRS symbol. 
      */
     public synchronized void updatePosition(Date t, Reference pos, char symtab, char symbol)
     {

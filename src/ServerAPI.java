@@ -8,8 +8,14 @@ import java.util.*;
     */
    public interface ServerAPI 
    {
+      /**
+       * Statistics about server.
+       */
       public interface ServerStats {
+         /** Number of clients. */
          public int getClients();
+         
+         /** Number of requests. */
          public int getReq();
       }
    
@@ -55,7 +61,7 @@ import java.util.*;
        
        
        /** Add HTTP handlers (webservices).
-        * @param class  Class name. 
+        * @param cn  Class name. 
         * @param prefix Optional URL prefix for services of this object. 
         */
        public void addHttpHandlerCls(String cn, String prefix);
@@ -125,7 +131,7 @@ import java.util.*;
        /** Set SAR mode. 
         * @param src Callsign of the user requesting SAR mode. 
         * @param filt Regular expression for filtering source callsign of pos reports.
-        * @param desc The reason why SAR mode is requested. 
+        * @param descr The reason why SAR mode is requested. 
         */
        public void setSar(String src, String filt, String descr, boolean h);
     

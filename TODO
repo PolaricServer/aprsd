@@ -33,7 +33,8 @@ V.1.6 (october 2014), etc
 
 * Review how XML overlay works. Document it? Improvements? 
         
-        
+* Callback (API) to notify plugins about setting alias/icon.
+
         
 
 Autorisation/Authentication

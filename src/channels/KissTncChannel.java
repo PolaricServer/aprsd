@@ -25,18 +25,12 @@ import java.util.concurrent.Semaphore;
 public class KissTncChannel extends TncChannel
 {
 
-   protected InputStream _istream; 
-   protected OutputStream _ostream;
-   protected boolean _close = false; 
+    protected InputStream _istream; 
+    protected OutputStream _ostream;
+    protected boolean _close = false; 
   
-   Kiss _kiss; 
+    Kiss _kiss; 
 
- 
-   protected static class Frame_End extends Throwable
-   {}
-   
-   protected static class Timeout extends Throwable
-   {}
     
     
     public KissTncChannel(ServerAPI api, String id) 

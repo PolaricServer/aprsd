@@ -3,7 +3,9 @@ import java.util.*;
 
 /* experimental. Consider creating an API subpackage */
 
-
+/**
+ * Manage plugins (identified by class name). 
+ */
 public class PluginManager
 {
 

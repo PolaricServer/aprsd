@@ -403,7 +403,7 @@ public abstract class Channel extends Source implements Serializable
      * Process incoming packet. 
      * To be called from subclass. Parses packet, updates heard table, checks for
      * duplicates and if all is ok, deliver packet to receivers.
-     * @param packet Pre-parsed packet.
+     * @param p Pre-parsed packet.
      * @param dup True if packet is known to be a duplicate.
      * @return true if accepted.
      */

@@ -58,8 +58,8 @@ public class RuleSet
 
     /**
      * Apply the ruleset to a point.
-     * @params p AprsPoint object.  
-     * @returns action - object that tells how the argument is going to be displayed. 
+     * @param p AprsPoint object.  
+     * @return action - object that tells how the argument is going to be displayed. 
      */
     public Action apply(AprsPoint p) {
        /* Start with a null action.  An action that changes nothing. */

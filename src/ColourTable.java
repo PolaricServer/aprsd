@@ -3,7 +3,9 @@ import java.net.*;
 import java.util.*;
 import java.io.*;
 
-
+/**
+ * Colour alternatives for trails.
+ */
 public class ColourTable 
 {
     BufferedReader  _rd;
