@@ -1,3 +1,17 @@
+/* 
+ * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+ 
 import java.util._
 import java.io._
 import uk.me.jstott.jcoord._
@@ -116,7 +130,7 @@ package no.polaric.aprsd.http
     */          
    def handle_setownpos(req : Request, res: Response) =
    {
-        val pos = getUtmCoord(req, 'W', _utmzone)
+        val pos = getUtmCoord(req, _utmlatzone, _utmzone)
         val prefix = <h2>Legge inn egen posisjon</h2>
         val p = api.getOwnPos()
        
@@ -330,7 +344,7 @@ package no.polaric.aprsd.http
     */          
    def handle_addobject(req : Request, res : Response) =
    {
-        val pos = getUtmCoord(req, 'W', _utmzone)
+        val pos = getUtmCoord(req, _utmlatzone, _utmzone)
         val id = req.getParameter("objid")
         val prefix = <h2>Legge inn objekt</h2>
         

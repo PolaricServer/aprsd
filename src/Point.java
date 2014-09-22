@@ -46,6 +46,9 @@ public class Point implements Serializable,  Cloneable
      */          
     public boolean isInside(UTMRef uleft, UTMRef lright, double xext, double yext)
     {
+        /* Be sure that uleft and lright are in the same longitude zones */
+        lright = lright.toLatLng().toUTMRef(uleft.getLngZone()); 
+        
         if (uleft == null || lright == null)
            return false; 
         

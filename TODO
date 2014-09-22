@@ -35,8 +35,18 @@ V.1.6 (october 2014), etc
         
 * Callback (API) to notify plugins about setting alias/icon.
 
-        
+* Nullpointerexception on determining if to send objects on RF, if own position is not set. Fix. 
+      DONE
 
+* UTM zones should not be fixed in aprsd. Clients tells in each request. 
+   - Get parameters from requests. (zone in config is now just default, still 
+       included in XML overlay for compatibility). 
+          DONE. Need testing.
+   - Don't use utm-zone field in XML overlay but values set in mapconfig.js. 
+          DONE. Need testing. 
+   - Send utm zones with client requests to server. 
+
+      
 Autorisation/Authentication
 ---------------------------
 

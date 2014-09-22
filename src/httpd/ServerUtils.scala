@@ -1,3 +1,17 @@
+/* 
+ * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
 import java.util._
 import java.io._
 import scala.xml._
@@ -198,6 +212,8 @@ package no.polaric.aprsd.http
     *   utmnz: UTM zone letter (optional)
     *   returns UTM reference. Null if not possible to construct a correct
     *   UTM reference from the given parameters.
+    *   
+    *   zones will probably be mandatory from version 1.6. 
     */
    protected def getUtmCoord(req : Request, nzone: Char, zone: Int) : UTMRef =
    {
@@ -209,7 +225,7 @@ package no.polaric.aprsd.http
            if (x != null && y != null)
                new UTMRef( x.toDouble, y.toDouble,
                    if (utmnz==null) 'W' else utmnz(0),
-                   if (utmz==null) _utmzone else utmz.toInt )  /* FIXME: Lat zone */
+                   if (utmz==null) _utmzone else utmz.toInt )  
            else
                null
         }

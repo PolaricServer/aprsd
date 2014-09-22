@@ -1,4 +1,17 @@
-
+/* 
+ * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+ 
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
 import no.polaric.aprsd.filter.*;
@@ -111,12 +124,19 @@ public class XmlServer extends ServerBase
         UTMRef uleft = null, lright = null;
         Query parms = req.getQuery();
         if (parms.get("x1") != null) {
+          int utmz = _utmzone;
+          char utmnz = _utmlatzone; 
+          if (parms.get("utmz") != null) {
+              utmz = Integer.parseInt(parms.get("utmz"));
+              utmnz = parms.get("utmnz").charAt(0);
+          }
+          
           long x1 = Long.parseLong( parms.get("x1") );
           long x2 = Long.parseLong( parms.get("x2") );
           long x3 = Long.parseLong( parms.get("x3") );    
           long x4 = Long.parseLong( parms.get("x4") );
-          uleft = new UTMRef((double) x1, (double) x2, _utmlatzone, _utmzone); 
-          lright = new UTMRef((double) x3, (double) x4, _utmlatzone, _utmzone);
+          uleft = new UTMRef((double) x1, (double) x2, utmnz, utmz); 
+          lright = new UTMRef((double) x3, (double) x4, utmnz, utmz);
         }
         long scale = 0;
         if (parms.get("scale") != null)
