@@ -219,8 +219,9 @@ public class OwnObjects implements Runnable
     
     private boolean object_in_range(AprsObject obj, int range)
     {
-        if (_api.getOwnPos() == null && _api.getOwnPos().getPosition() == null)
-            return true;
+        /* If own position is not set, object is NOT in range */
+        if (_api.getOwnPos() == null || _api.getOwnPos().getPosition() == null)
+            return false;
         return (obj.distance(_api.getOwnPos()) < range*1000);
     }
     
