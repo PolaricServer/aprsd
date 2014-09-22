@@ -90,10 +90,21 @@ public class InetChannel extends TcpChannel
     
     
     protected void receiveLoop() throws Exception
-    {           
-         _rder = new BufferedReader(new InputStreamReader(_sock.getInputStream(), _rx_encoding));
-         _out = new PrintWriter(new OutputStreamWriter(_sock.getOutputStream(), _tx_encoding));
+    {    
+        /* Watchdog: close input (and trigger IO exception) after 4 
+         * minutes of inactivity 
+         */
+         WatchDog watch = new WatchDog(240, null) {
+             public void action() {
+                logNote("Receive loop timeout");
+                try { _rder.close(); }
+                catch (Exception e) {}
+                close();
+             }
+         };  
          
+         _rder = new BufferedReader(new InputStreamReader(_sock.getInputStream(), _rx_encoding));
+         _out = new PrintWriter(new OutputStreamWriter(_sock.getOutputStream(), _tx_encoding));         
          _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+_api.getVersion()+"\r\n");
          
          if (_filter.length() > 0)
@@ -102,6 +113,7 @@ public class InetChannel extends TcpChannel
          
          while (!_close) 
          {
+             watch.checkIn();
              String inp = _rder.readLine(); 
              if (inp != null) 
                 receivePacket(inp, false);
@@ -110,6 +122,7 @@ public class InetChannel extends TcpChannel
                 break; 
              }              
          }
+         watch.close(); 
     }
     
 
