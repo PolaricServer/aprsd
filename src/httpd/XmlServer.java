@@ -65,6 +65,15 @@ public class XmlServer extends ServerBase
    { 
        PrintWriter out = getWriter(res);
        String ident = req.getParameter("id").toUpperCase();
+       
+       int utmz = _utmzone;
+       char utmnz = _utmlatzone; 
+       Query parms = req.getQuery();
+       if (parms.get("utmz") != null) {
+          utmz = Integer.parseInt(parms.get("utmz"));
+          utmnz = parms.get("utmnz").charAt(0);
+       }
+       
        AprsPoint s = _api.getDB().getItem(ident, null);
        if (s==null) {
           int i = ident.lastIndexOf('-');
@@ -75,7 +84,7 @@ public class XmlServer extends ServerBase
               s = l.get(0);
        }
        if (s!=null && !s.expired() && s.getPosition() != null) {
-          UTMRef xpos = toUTM(s.getPosition()); 
+          UTMRef xpos = toUTM(s.getPosition(), utmz); 
           out.println(s.getIdent()+","+ (long) Math.round(xpos.getEasting()) + "," + (long) Math.round(xpos.getNorthing()));   
        }
        res.setValue("Content-Type", "text/csv; charset=utf-8");
@@ -120,23 +129,23 @@ public class XmlServer extends ServerBase
         String filt = _infraonly ? "infra" : req.getParameter("filter");
         RuleSet vfilt = ViewFilter.getFilter(filt, loggedIn);
         res.setValue("Content-Type", "text/xml; charset=utf-8");
-                
-        UTMRef uleft = null, lright = null;
         Query parms = req.getQuery();
+                
+        int utmz = _utmzone;
+        char utmnz = _utmlatzone; 
+        if (parms.get("utmz") != null) {
+           utmz = Integer.parseInt(parms.get("utmz"));
+           utmnz = parms.get("utmnz").charAt(0);
+        }
+        
+        UTMRef uleft = null, lright = null;
         if (parms.get("x1") != null) {
-          int utmz = _utmzone;
-          char utmnz = _utmlatzone; 
-          if (parms.get("utmz") != null) {
-              utmz = Integer.parseInt(parms.get("utmz"));
-              utmnz = parms.get("utmnz").charAt(0);
-          }
-          
-          long x1 = Long.parseLong( parms.get("x1") );
-          long x2 = Long.parseLong( parms.get("x2") );
-          long x3 = Long.parseLong( parms.get("x3") );    
-          long x4 = Long.parseLong( parms.get("x4") );
-          uleft = new UTMRef((double) x1, (double) x2, utmnz, utmz); 
-          lright = new UTMRef((double) x3, (double) x4, utmnz, utmz);
+           long x1 = Long.parseLong( parms.get("x1") );
+           long x2 = Long.parseLong( parms.get("x2") );
+           long x3 = Long.parseLong( parms.get("x3") );    
+           long x4 = Long.parseLong( parms.get("x4") );
+           uleft = new UTMRef((double) x1, (double) x2, utmnz, utmz); 
+           lright = new UTMRef((double) x3, (double) x4, utmnz, utmz);
         }
         long scale = 0;
         if (parms.get("scale") != null)
@@ -182,7 +191,7 @@ public class XmlServer extends ServerBase
         int i=0;
         for (Signs.Item s: Signs.search(scale, uleft, lright))
         {
-            UTMRef ref = toUTM(s.getPosition()); 
+            UTMRef ref = toUTM(s.getPosition(), utmz); 
             if (ref == null)
                 continue;
             String href = s.getUrl() == null ? "" : "href=\"" + s.getUrl() + "\"";
@@ -211,14 +220,14 @@ public class XmlServer extends ServerBase
             if (action.hideAll())
                 continue;
                    
-            UTMRef ref = toUTM(s.getPosition()); 
+            UTMRef ref = toUTM(s.getPosition(), utmz); 
             if (ref == null) continue; 
             
             if (!s.visible() || (_api.getSar() != null && !loggedIn && _api.getSar().filter(s)))  
                    out.println("<delete id=\""+fixText(s.getIdent())+"\"/>");
             else {
                synchronized(s) {
-                  ref = toUTM(s.getPosition()); 
+                  ref = toUTM(s.getPosition(), utmz); 
                   if (ref == null) continue; 
                   
                   String title = s.getDescr() == null ? "" 

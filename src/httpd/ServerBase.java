@@ -82,9 +82,9 @@ public abstract class ServerBase
     * Convert reference to UTM projection with our chosen zone.
     * Return null if it cannot be converted to our zone (too far away).
     */
-   protected UTMRef toUTM(Reference ref)
+   protected UTMRef toUTM(Reference ref, int utmz)
    {
-        try { return ref.toLatLng().toUTMRef(_utmzone); }
+        try { return ref.toLatLng().toUTMRef(utmz); }
         catch (Exception e)
            { System.out.println("*** Kan ikke konvertere til UTM"+_utmzone+" : "+ref);
              return null; }
@@ -210,7 +210,7 @@ public abstract class ServerBase
     */
    protected void printPathXml(PrintWriter out, Station s, UTMRef uleft, UTMRef lright)
    {
-       UTMRef ity = toUTM(s.getPosition());
+       UTMRef ity = toUTM(s.getPosition(), uleft.getLngZone());
        Set<String> from = s.getTrafficTo();
        if (from == null || from.isEmpty()) 
            return;
@@ -222,7 +222,7 @@ public abstract class ServerBase
             if (p==null || !p.isInside(uleft, lright) || p.expired())
                 continue;
             Reference x = p.getPosition();
-            UTMRef itx = toUTM(x);
+            UTMRef itx = toUTM(x, uleft.getLngZone());
             RouteInfo.Edge e = _api.getDB().getRoutes().getEdge(s.getIdent(), p.getIdent());
             if (itx != null) { 
                out.print("<linestring stroke="+
@@ -266,9 +266,10 @@ public abstract class ServerBase
    protected void printPoints(PrintWriter out, String pre, String post, 
           Reference firstpos, Iterable<TPoint> h, UTMRef uleft, UTMRef lright)
    {
+       int utmz = uleft.getLngZone();
        boolean first = true;
        int state = 1, n = 0;
-       UTMRef itx = (firstpos == null ? null :  toUTM(firstpos));  
+       UTMRef itx = (firstpos == null ? null :  toUTM(firstpos, utmz));  
        String t = "00000000000000";
        
        for (TPoint it : h) 
@@ -298,7 +299,7 @@ public abstract class ServerBase
               out.println(post);
           }
           else {
-              itx = toUTM(it.getPosition());
+              itx = toUTM(it.getPosition(), utmz);
               if (it.getTS() == null) 
                  t = "0";
               else
