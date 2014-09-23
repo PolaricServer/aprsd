@@ -60,7 +60,6 @@ public abstract class ServerBase
    {
       _api=api; 
       _utmzone     = api.getIntProperty("map.utm.zone", 33);
-      _utmlatzone  = api.getProperty("map.utm.latzone", "W").charAt(0);
       _wfiledir    = api.getProperty("map.web.dir", "aprsd");
       _infraonly   = api.getBoolProperty("map.infraonly", false);
       _timezone    = api.getProperty("timezone", "");
@@ -196,7 +195,13 @@ public abstract class ServerBase
    protected void printXmlMetaTags(PrintWriter out, Request req, boolean loggedIn)
       throws IOException
    {
-        out.println("<meta name=\"utmzone\" value=\"" + _utmzone + "\"/>");
+        /* FIXME: Putting zone in here is redundant */
+        int utmz = _utmzone;
+        Query parms = req.getQuery();
+        if (parms.get("utmz") != null) 
+           utmz = Integer.parseInt(parms.get("utmz"));
+           
+        out.println("<meta name=\"utmzone\" value=\"" + utmz + "\"/>");
         out.println("<meta name=\"login\" value=\"" + getAuthUser(req) + "\"/>");
         out.println("<meta name=\"loginuser\" value=\"" + (loggedIn ? "true" : "false") + "\"/>");
         out.println("<meta name=\"adminuser\" value=\"" + (authorizedForAdmin(req) ? "true" : "false") + "\"/>");

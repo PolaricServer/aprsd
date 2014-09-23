@@ -67,12 +67,9 @@ public class XmlServer extends ServerBase
        String ident = req.getParameter("id").toUpperCase();
        
        int utmz = _utmzone;
-       char utmnz = _utmlatzone; 
        Query parms = req.getQuery();
-       if (parms.get("utmz") != null) {
+       if (parms.get("utmz") != null) 
           utmz = Integer.parseInt(parms.get("utmz"));
-          utmnz = parms.get("utmnz").charAt(0);
-       }
        
        AprsPoint s = _api.getDB().getItem(ident, null);
        if (s==null) {
@@ -130,13 +127,10 @@ public class XmlServer extends ServerBase
         RuleSet vfilt = ViewFilter.getFilter(filt, loggedIn);
         res.setValue("Content-Type", "text/xml; charset=utf-8");
         Query parms = req.getQuery();
-                
+        
         int utmz = _utmzone;
-        char utmnz = _utmlatzone; 
-        if (parms.get("utmz") != null) {
+        if (parms.get("utmz") != null) 
            utmz = Integer.parseInt(parms.get("utmz"));
-           utmnz = parms.get("utmnz").charAt(0);
-        }
         
         UTMRef uleft = null, lright = null;
         if (parms.get("x1") != null) {
@@ -144,8 +138,9 @@ public class XmlServer extends ServerBase
            long x2 = Long.parseLong( parms.get("x2") );
            long x3 = Long.parseLong( parms.get("x3") );    
            long x4 = Long.parseLong( parms.get("x4") );
-           uleft = new UTMRef((double) x1, (double) x2, utmnz, utmz); 
-           lright = new UTMRef((double) x3, (double) x4, utmnz, utmz);
+           uleft = new UTMRef((double) x1, (double) x2, 'W', utmz); 
+           lright = new UTMRef((double) x3, (double) x4, 'W', utmz);
+              /* The zone letter is actually redundant. Here it doesn't matter what it is */
         }
         long scale = 0;
         if (parms.get("scale") != null)
