@@ -21,7 +21,7 @@ import no.polaric.aprsd.*;
 
 public abstract class Pred
 {
-   public abstract boolean eval(AprsPoint obj); 
+   public abstract boolean eval(AprsPoint obj, long scale); 
       
    public static Pred FALSE()
       { return new FALSE(); }
@@ -35,6 +35,9 @@ public abstract class Pred
    public static Pred Ident(String regex)
       { return new Ident(regex); }
    
+   public static Pred Scale(long sc, String op)
+      { return new Scale(sc, op); }
+      
    public static Pred AprsSym(String regex)
       { return new AprsSym(regex); }
    
@@ -62,7 +65,7 @@ public abstract class Pred
 
 class FALSE extends Pred 
 {
-        public boolean eval(AprsPoint p) {
+        public boolean eval(AprsPoint p, long scale) {
             return false;
         }
 }
@@ -71,7 +74,7 @@ class FALSE extends Pred
 
 class TRUE extends Pred 
 {
-        public boolean eval(AprsPoint p) {
+        public boolean eval(AprsPoint p, long scale) {
             return true;
         }
 }
@@ -89,7 +92,7 @@ class Source extends Pred
     public Source(String regex) 
        { this.regex = regex; }
     
-        public boolean eval(AprsPoint p) 
+        public boolean eval(AprsPoint p, long scale) 
            { return p.getSource().getIdent().matches(regex); }
 }
 
@@ -110,7 +113,7 @@ class AprsSym extends Pred
     public AprsSym(String regex) 
        { this.regex = regex; }
     
-        public boolean eval(AprsPoint p) 
+        public boolean eval(AprsPoint p, long scale) 
            { return (""+p.getSymtab()+p.getSymbol()).matches(regex); }
 }
 
@@ -120,7 +123,7 @@ class AprsSym extends Pred
  */
 class Moving extends Pred 
 {
-        public boolean eval(AprsPoint p) {
+        public boolean eval(AprsPoint p, long scale) {
             return ((p instanceof Station) ? !((Station) p).getTrail().isEmpty() : false);
         }
 }
@@ -146,7 +149,7 @@ class Infra extends Pred
    public Infra() 
      { fulldigi = igate = false; }
      
-   public boolean eval(AprsPoint p) {
+   public boolean eval(AprsPoint p, long scale) {
            if (!(p instanceof Station))
                    return false; 
            Station s = (Station) p; 
@@ -170,9 +173,31 @@ class Ident extends Pred
     public Ident(String regex) 
        { this.regex = regex; }
     
-    public boolean eval(AprsPoint obj) 
+    public boolean eval(AprsPoint obj, long scale) 
        { return obj.getIdent().matches(regex); }
 }
+
+
+
+class Scale extends Pred 
+{
+    private long scale; 
+    private String op;
+    
+    public Scale(long scale, String op) 
+       { this.scale = scale; this.op = op;}
+       
+    public boolean eval(AprsPoint obj, long scale) {
+       switch (op) {
+          case "<": return scale < this.scale; 
+          case ">": return scale > this.scale;
+          case "<=" : return scale <= this.scale; 
+          case ">=" : return scale >= this.scale; 
+          default: return false; 
+       }
+    } 
+}
+
 
 
 
@@ -199,9 +224,9 @@ class AND extends Pred
        { conj.add(r); }
 
     
-    public boolean eval(AprsPoint obj) {
+    public boolean eval(AprsPoint obj, long scale) {
        for (Pred r : conj) 
-          if (!r.eval(obj)) 
+          if (!r.eval(obj, scale)) 
              return false;
        return true; 
     }
@@ -248,9 +273,9 @@ class OR extends Pred
       { disj.add(r); }
 
    
-   public boolean eval(AprsPoint obj) {
+   public boolean eval(AprsPoint obj, long scale) {
       for (Pred r : disj) 
-         if (r.eval(obj)) 
+         if (r.eval(obj, scale)) 
             return true;
       return false; 
    }
@@ -284,8 +309,8 @@ class NOT extends Pred
         public NOT(Pred p)
             { pred = p; }
         
-        public boolean eval (AprsPoint obj)
-            { return !pred.eval(obj); }
+        public boolean eval (AprsPoint obj, long scale)
+            { return !pred.eval(obj, scale); }
             
         static Pred optimize(NOT p) {
            if (p.pred instanceof NOT) {

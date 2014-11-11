@@ -205,7 +205,7 @@ public class XmlServer extends ServerBase
         /* Output APRS objects */
         for (AprsPoint s: _api.getDB().search(uleft, lright)) 
         {
-            Action action = vfilt.apply(s); 
+            Action action = vfilt.apply(s, scale); 
             // FIXME: Get CSS class from filter rules 
             
             if (s.getPosition() == null)

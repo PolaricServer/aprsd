@@ -59,15 +59,16 @@ public class RuleSet
     /**
      * Apply the ruleset to a point.
      * @param p AprsPoint object.  
+     * @param scale Current map scale
      * @return action - object that tells how the argument is going to be displayed. 
      */
-    public Action apply(AprsPoint p) {
+    public Action apply(AprsPoint p, long scale) {
        /* Start with a null action.  An action that changes nothing. */
        Action a = Action.NULL(); 
        
        /*  Actions are additive */
        for (Rule r: rlist)
-          a.merge(r.apply(p)); 
+          a.merge(r.apply(p, scale)); 
        
        return a; 
     }

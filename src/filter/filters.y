@@ -7,6 +7,9 @@ import java.util.*;
 /* YACC Declarations */
 %token <sval>  STRING 
 %token <sval>  IDENT
+%token <sval>  RELOP
+%token <obj>  NUM
+
 %token <obj>   BOOLEAN VALUE
 %token         AND OR NOT ARROW PROFILE PUBLIC
 %token         ERROR
@@ -81,6 +84,10 @@ expr : '(' expr ')'           {  $$=$2; }
      |  expr AND expr         {  $$=Pred.AND((Pred)$1, (Pred)$3); }  
                               
      |  expr OR expr          {  $$=Pred.OR((Pred)$1, (Pred)$3); }  
+     
+     |  IDENT RELOP NUM       {   if ($1.matches("scale|SCALE"))
+                                     $$=Pred.Scale((Long) $3, $2); 
+                              }
                               
      |  IDENT '~' STRING      {  if ($1.matches("ident|IDENT")) 
                                       $$=Pred.Ident($3); 

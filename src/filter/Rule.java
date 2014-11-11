@@ -30,10 +30,11 @@ public class Rule
    /**
     * Apply the rule.
     * @param obj AprsPoint object.  
+    * @param scale Map scale
     * @return action - object that tells how the argument is going to be displayed. 
     */
-   public Action apply(AprsPoint obj) {
-       if (pred.eval(obj))
+   public Action apply(AprsPoint obj, long scale) {
+       if (pred.eval(obj, scale))
           return action;
        else
           return null;

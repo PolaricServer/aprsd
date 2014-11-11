@@ -63,12 +63,21 @@ NOT|"not"|\!
 =>       
          { return Parser.ARROW; }
            
+\<|\>|<=|>=
+         { yyparser.yylval = new ParserVal(yytext());
+           return Parser.RELOP;
+         }
            
 [a-zA-Z]+[0-9a-zA-Z_\-]+
-         {   yyparser.yylval = new ParserVal(yytext()); 
-             return Parser.IDENT; 
+         { yyparser.yylval = new ParserVal(yytext()); 
+           return Parser.IDENT; 
          }
 
+[0-9]+
+         { yyparser.yylval = new ParserVal((Long) Long.parseLong(yytext())); 
+           return Parser.NUM; 
+         }
+         
          
 [\~\;\(\)\=\{\}\,]
          { return (int) yycharat(0); }
