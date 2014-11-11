@@ -90,9 +90,20 @@ public class HttpServer implements Container, ServerAPI.ServerStats
             resp.setDate("Date", time);
             resp.setDate("Last-Modified", time);
          }
-         catch (Throwable e) 
-            { System.out.println("*** HTTP REQ exception: "+e);
-              e.printStackTrace(System.out); } 
+         catch (Throwable e) {
+             System.out.println("*** HTTP REQ exception: "+e);
+             e.printStackTrace(System.out);
+             if (e instanceof InvocationTargetException)
+                e = e.getCause();
+             try {
+                OutputStream os = resp.getOutputStream();
+                PrintWriter out =  new PrintWriter(new OutputStreamWriter(os, _encoding));
+                out.println("<html><body>Exception: "+e+"</body></html>");
+                resp.setCode(500); 
+                resp.setDescription("Internal server error");
+                out.close();
+             } catch (Throwable ee) {};
+         } 
          finally {
             synchronized(HttpServer.this) { _requests--; } }
       }
