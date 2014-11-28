@@ -1,5 +1,5 @@
 
-V.1.6 (october 2014), etc
+V.1.6 (november 2014), etc
 --------------------------
        
 * [C] Filter profiles menu on client: Consider: Nested menu? Get list from server?
@@ -9,8 +9,6 @@ V.1.6 (october 2014), etc
 * Selection of pre-defined region: Also select map-layer?
    
 * Hiding of ident. Do it all on client. Hint from server. 
-       
-* Slight displacement of positions in kamap maps? Check. 
        
 * Too easy to lock yourself out when changing admin-users regex. Workaround?
   Prevent removing of 'admin' user by plugin? 
@@ -29,24 +27,19 @@ V.1.6 (october 2014), etc
 
 * [C] Better WX reports.        
 
-* Hide ident: propagate to other servers. 
-
 * Review how XML overlay works. Document it? Improvements? 
         
 * Callback (API) to notify plugins about setting alias/icon.
 
-* Nullpointerexception on determining if to send objects on RF, if own position is not set. Fix. 
-      DONE
+* [C] More work in allowing layers with other projections than UTM to be used.
+   - Support mixing layers with different projections. 
+     Consider reprojecting max_extent for layers where it is necessary. 
+          
+* Use Lat/Long coordinates (instead of UTM) in Requests/responses between client and server. 
 
-* UTM zones should not be fixed in aprsd. Clients tells in each request. 
-   - Get parameters from requests. (zone in config is now just default, still 
-       included in XML overlay for compatibility). 
-          DONE. Need testing.
-   - Don't use utm-zone field in XML overlay but values set in mapconfig.js. 
-          DONE. Need testing. 
-   - Send utm zones with client requests to server. 
 
-      
+
+   
 Autorisation/Authentication
 ---------------------------
 
@@ -105,7 +98,7 @@ Channels/Sources
     - Allow translation between protocols? Pluggable modules. 
 
 * Soundmodem plugin
-     STARTED.
+     STARTED. CANCELLED. Use extmodem instead.
 
 * AIS plugin
 
@@ -123,11 +116,9 @@ Other.
 
 * Import from GPX files (to layers?)
 
-* App: Better scaling of map layers. 
-
 * App: Autodiscovery of servers on local network
 
-* Messaging - a plugin? 
+* APRS messaging - a plugin? 
 
 * Allow objects with certain attributes (like source, callsign) to 
   be visible only for logged in users. Note: Should this be part of a filter framework?

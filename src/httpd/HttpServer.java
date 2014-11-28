@@ -63,7 +63,7 @@ public class HttpServer implements Container, ServerAPI.ServerStats
             boolean allowed = 
                  req.getClientAddress().getAddress().isLoopbackAddress(); 
             
-            resp.setValue("Server", "Polaric APRSD 1.5");
+            resp.setValue("Server", "Polaric APRSD 1.6");
             resp.setValue("Content-Type", "text/html; charset=utf-8");
          
             _Handler h = _handlers.get(uri);

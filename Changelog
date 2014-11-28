@@ -85,3 +85,20 @@ V.1.5
 * [C] Use JS context menu (and icons) for filter-profiles menu and map-area menu. Ability to hide 
       map-area-views from menu.       
 * (some small fixes).
+
+
+V.1.6
+-----
+* Add scale to view-filter criteria. 
+* UTM zones not hardwired in aprsd anymore. Clients tell in each request. Zone in config 
+  is now just default, still included in XML overlay for compatibility). Eliminate need for setting zone letter
+  since this is redundant. 
+* [C] Some hacking to allow layers with other projections than UTM to be used. Tested with OSM. 
+* [C] Some fixes/adjustments to scale info and distance measurements.
+* [C] Simpler configuration of UTM zones/layers in mapconfig.js.
+* [C] Remove ka-map backend. Remove unecessary code from kaMap.js        
+* [C] Use Mapcache instead of ka-map cache backend (note that mapcache is not supported in older 
+   versions of Debian. Use Jessie or recent versions of Ubuntu/Mint). 
+* (some small fixes)
+         
+ 
