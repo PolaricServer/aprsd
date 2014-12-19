@@ -1,5 +1,4 @@
- 
-/* 
+ /* 
  * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,6 +27,8 @@ import java.lang.reflect.Constructor;
 public abstract class Channel extends Source implements Serializable
 {
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
+     private static boolean _logPackets = false; 
+     
      transient protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap();
     
      /* Statistics */
@@ -97,7 +98,8 @@ public abstract class Channel extends Source implements Serializable
            { return _instances.get(id); }
      }
 
-
+       
+    
 
      /**
       * Information about APRS packet heard on the channel. 
@@ -108,8 +110,14 @@ public abstract class Channel extends Source implements Serializable
          public Heard(Date t, String p)
            { time = t; path = p;}
      }
-         
-        
+     
+     
+     
+     public static void init(ServerAPI api) {
+        _logPackets = api.getBoolProperty("channel.logpackets", true);
+     }
+     
+     
      
      private void removeOldHeardEntries()
      {
@@ -420,7 +428,8 @@ public abstract class Channel extends Source implements Serializable
           return false; 
           
        p.source = this;
-       System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+p);
+       if (_logPackets)
+          System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+p);
        _heardPackets++;
        dup = _dupCheck.checkPacket(p.from, p.to, p.report);
        if (!dup) 

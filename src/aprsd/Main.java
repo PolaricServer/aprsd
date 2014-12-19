@@ -12,7 +12,7 @@ import no.polaric.aprsd.http.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "1.6";
+   public  static String version = "1.6+";
    public static String toaddr  = "APPS16";
    
    private static StationDB db = null;
@@ -226,6 +226,7 @@ public class Main implements ServerAPI
            /*
             * default channel setup: one named aprsis type APRSIS and one named tnc type TNC2
             */
+            Channel.init(api);
            _chanManager.addClass("APRSIS", "no.polaric.aprsd.InetChannel");
            _chanManager.addClass("TNC2", "no.polaric.aprsd.Tnc2Channel");
            _chanManager.addClass("KISS", "no.polaric.aprsd.KissTncChannel");
