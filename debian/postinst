@@ -18,6 +18,9 @@ case "$1" in
            fi
            chown -R polaric:adm /var/log/polaric /var/lib/polaric
            chmod 755 /var/log/polaric
+           if [ -e "/var/lib/polaric/mapcache" ]; then
+              chown -R www-data /var/lib/polaric/mapcache
+           fi
         fi  
         
         db_get polaric-aprsd/callsign
