@@ -1,5 +1,5 @@
 
-V.1.6 (november 2014), etc
+V.1.7 (january 2014), etc
 --------------------------
        
 * [C] Filter profiles menu on client: Consider: Nested menu? Get list from server?
@@ -31,11 +31,26 @@ V.1.6 (november 2014), etc
         
 * Callback (API) to notify plugins about setting alias/icon.
 
-* [C] More work in allowing layers with other projections than UTM to be used.
-   - Support mixing layers with different projections. 
-     Consider reprojecting max_extent for layers where it is necessary. 
-          
 * Use Lat/Long coordinates (instead of UTM) in Requests/responses between client and server. 
+        DONE 
+   
+* [C] More work in allowing layers with other projections than UTM to be used.
+   - Support mixing layers with different projections. Re-center and re-zoom map when projection changes.
+        DONE.
+   - Get scalebar right for other projections than UTM. 
+        DONE.
+        
+        
+* [C] Flexible OL Layer setup. dynamic evalutation of what layers to show.
+        DONE.
+   - More flexible setup of layers in mapconfig.js
+        DONE
+   - Automatic hiding/showing of layers in layer switcher. Preserve ordering of layers. 
+        DONE.
+   - JS file to be included before mapconfig.js. Based on gpx.js
+        DONE
+   - Filter support. Polygons/extent filter, scale, projection, selected base layer, etc..
+        DONE.  
 
 
 
