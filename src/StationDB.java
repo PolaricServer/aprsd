@@ -127,7 +127,7 @@ public interface StationDB
        * Search. Return a list of all items within the given geographical area.
        */
        public List<AprsPoint>
-             search(UTMRef uleft, UTMRef lright);       
+             search(Reference uleft, Reference lright);       
     
     
        // FIXME: These seems to be implementation specific

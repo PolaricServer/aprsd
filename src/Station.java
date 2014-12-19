@@ -211,7 +211,7 @@ public static class Status implements Serializable
        { _altitude = a; }
 
    
-    @Override public boolean isInside(UTMRef uleft, UTMRef lright) 
+    @Override public boolean isInside(Reference uleft, Reference lright) 
     {
        if (super.isInside(uleft, lright))
           return true;

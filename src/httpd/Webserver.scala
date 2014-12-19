@@ -130,7 +130,7 @@ package no.polaric.aprsd.http
     */          
    def handle_setownpos(req : Request, res: Response) =
    {
-        val pos = getUtmCoord(req, _utmzone)
+        val pos = getCoord(req)
         val prefix = <h2>Legge inn egen posisjon</h2>
         val p = api.getOwnPos()
        
@@ -344,7 +344,7 @@ package no.polaric.aprsd.http
     */          
    def handle_addobject(req : Request, res : Response) =
    {
-        val pos = getUtmCoord(req, _utmzone)
+        val pos = getCoord(req)
         val id = req.getParameter("objid")
         val prefix = <h2>Legge inn objekt</h2>
         

@@ -34,8 +34,6 @@ import java.util.concurrent.locks.*;
 public abstract class ServerBase 
 {
    protected  ServerAPI  _api;
-   protected  int        _utmzone;
-   protected  char       _utmlatzone;
    private    String     _timezone;
    protected  String     _wfiledir;
    protected  boolean    _infraonly;
@@ -59,7 +57,6 @@ public abstract class ServerBase
    public ServerBase(ServerAPI api) throws IOException
    {
       _api=api; 
-      _utmzone     = api.getIntProperty("map.utm.zone", 33);
       _wfiledir    = api.getProperty("map.web.dir", "aprsd");
       _infraonly   = api.getBoolProperty("map.infraonly", false);
       _timezone    = api.getProperty("timezone", "");
@@ -74,6 +71,11 @@ public abstract class ServerBase
           tf.setTimeZone(z);
       }
    }
+   
+   
+   protected double roundDeg(double x)
+       { return ((double) Math.round(x*100000)) / 100000; 
+       }
 
 
 
@@ -85,7 +87,7 @@ public abstract class ServerBase
    {
         try { return ref.toLatLng().toUTMRef(utmz); }
         catch (Exception e)
-           { System.out.println("*** Kan ikke konvertere til UTM"+_utmzone+" : "+ref);
+           { System.out.println("*** Kan ikke konvertere til UTM"+ utmz+ " : "+ref);
              return null; }
    }
    
@@ -195,13 +197,7 @@ public abstract class ServerBase
    protected void printXmlMetaTags(PrintWriter out, Request req, boolean loggedIn)
       throws IOException
    {
-        /* FIXME: Putting zone in here is redundant */
-        int utmz = _utmzone;
         Query parms = req.getQuery();
-        if (parms.get("utmz") != null) 
-           utmz = Integer.parseInt(parms.get("utmz"));
-           
-        out.println("<meta name=\"utmzone\" value=\"" + utmz + "\"/>");
         out.println("<meta name=\"login\" value=\"" + getAuthUser(req) + "\"/>");
         out.println("<meta name=\"loginuser\" value=\"" + (loggedIn ? "true" : "false") + "\"/>");
         out.println("<meta name=\"adminuser\" value=\"" + (authorizedForAdmin(req) ? "true" : "false") + "\"/>");
@@ -213,9 +209,9 @@ public abstract class ServerBase
    /**
     * Display a message path between nodes. 
     */
-   protected void printPathXml(PrintWriter out, Station s, UTMRef uleft, UTMRef lright)
+   protected void printPathXml(PrintWriter out, Station s, Reference uleft, Reference lright)
    {
-       UTMRef ity = toUTM(s.getPosition(), uleft.getLngZone());
+       LatLng ity = s.getPosition().toLatLng();
        Set<String> from = s.getTrafficTo();
        if (from == null || from.isEmpty()) 
            return;
@@ -226,16 +222,16 @@ public abstract class ServerBase
             Station p = (Station)_api.getDB().getItem(it.next(), null);
             if (p==null || !p.isInside(uleft, lright) || p.expired())
                 continue;
-            Reference x = p.getPosition();
-            UTMRef itx = toUTM(x, uleft.getLngZone());
+                
+            LatLng itx = p.getPosition().toLatLng();
             RouteInfo.Edge e = _api.getDB().getRoutes().getEdge(s.getIdent(), p.getIdent());
             if (itx != null) { 
                out.print("<linestring stroke="+
                    (e.primary ? "\"2\"" : "\"1\"")  + " opacity=\"1.0\" color=\""  +
                    (e.primary ? "B00\">" : "00A\">"));
-               out.print((int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()));
+               out.print( roundDeg(itx.getLng()) + " " + roundDeg(itx.getLat()) );
                out.print(", ");
-               out.print((int) Math.round(ity.getEasting())+ " " + (int) Math.round(ity.getNorthing()));
+               out.print(roundDeg( ity.getLng()) + " " + roundDeg(ity.getLat()) );
                out.println("</linestring>");
             }
        }
@@ -245,7 +241,7 @@ public abstract class ServerBase
    
    
     protected void printTrailXml(PrintWriter out, String[] tcolor, 
-          Reference firstpos, Iterable<TPoint> h, UTMRef uleft, UTMRef lright)  
+          Reference firstpos, Iterable<TPoint> h, Reference uleft, Reference lright)  
     {
         String pre  = "   <linestring stroke=\"2\" opacity=\"1.0\" color=\""+ tcolor[0] +"\" color2=\""+ tcolor[1] +"\">";
         String post = "   </linestring>";     
@@ -255,7 +251,7 @@ public abstract class ServerBase
     
     
     protected void printPointCloud(PrintWriter out, String color, 
-          Iterable<TPoint> h, UTMRef uleft, UTMRef lright)  
+          Iterable<TPoint> h, Reference uleft, Reference lright)  
     {
         String pre  = "   <pointcloud opacity=\"0.6\" color2=\""+color+"\">";
         String post = "   </pointcloud>";    
@@ -269,12 +265,11 @@ public abstract class ServerBase
     * Print a history trail of a moving station as a XML linestring object. 
     */
    protected void printPoints(PrintWriter out, String pre, String post, 
-          Reference firstpos, Iterable<TPoint> h, UTMRef uleft, UTMRef lright)
+          Reference firstpos, Iterable<TPoint> h, Reference uleft, Reference lright)
    {
-       int utmz = uleft.getLngZone();
        boolean first = true;
        int state = 1, n = 0;
-       UTMRef itx = (firstpos == null ? null :  toUTM(firstpos, utmz));  
+       LatLng itx = (firstpos == null ? null :  firstpos.toLatLng());  
        String t = "00000000000000";
        
        for (TPoint it : h) 
@@ -287,7 +282,7 @@ public abstract class ServerBase
                   out.print(", "); 
               else
                   first = false;   
-              out.println( (int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()) +
+              out.println( roundDeg(itx.getLng())+ " " + roundDeg(itx.getLat() ) +
                           " " + t);           
           }
             
@@ -304,7 +299,7 @@ public abstract class ServerBase
               out.println(post);
           }
           else {
-              itx = toUTM(it.getPosition(), utmz);
+              itx = it.getPosition().toLatLng();
               if (it.getTS() == null) 
                  t = "0";
               else
@@ -313,7 +308,7 @@ public abstract class ServerBase
        
        }
        if (itx != null && state < 3)
-           out.println(", "+ (int) Math.round(itx.getEasting())+ " " + (int) Math.round(itx.getNorthing()) +
+           out.println(", "+ roundDeg(itx.getLng())+ " " + roundDeg(itx.getLat()) +
                          " "+t);  // FIXME: get first time
        if (n > 0) 
           out.println(post);

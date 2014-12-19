@@ -305,14 +305,14 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
      * for the map must be in the same UTM zones. 
      */   
     public synchronized List<AprsPoint>
-          search(UTMRef uleft, UTMRef lright)
+          search(Reference uleft, Reference lright)
     {
          if (uleft==null || lright==null)
             return getAll(null);
             
          LinkedList<AprsPoint> result = new LinkedList();
          for (AprsPoint s: _map.values())
-            if (s.isInside(uleft, lright))
+            if (s.isInside(uleft, lright, 0.1, 0.1))
                 result.add(s);
         return result;
     }

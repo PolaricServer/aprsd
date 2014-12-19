@@ -33,7 +33,7 @@ public class Signs extends Source
      * Interface for searching in a database external to this class. 
      */
     public interface ExtDb {
-        public Iterable<Item> search(long scale, UTMRef uleft, UTMRef lright);
+        public Iterable<Item> search(long scale, Reference uleft, Reference lright);
         public void close(); 
     }
     
@@ -128,7 +128,7 @@ public class Signs extends Source
        
     
     public static synchronized Iterable<Item>
-          search(long scale, UTMRef uleft, UTMRef lright)
+          search(long scale, Reference uleft, Reference lright)
     {
          if (uleft==null || lright==null)
             return _signs._list;
@@ -136,7 +136,7 @@ public class Signs extends Source
           
          LinkedList<Item> result = new LinkedList();
          for (Item s: _signs._list)
-            if (s.visible(scale) && s.isInside(uleft, lright))
+            if (s.visible(scale) && s.isInside(uleft, lright, 0.1, 0.1))
                 result.add(s);
         
          if (_signs._extdb != null) {

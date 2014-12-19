@@ -39,7 +39,7 @@ public class Notifier
      * @param id Identity of the waiter thread. Assumed to be a unique number. 
      *           Other waiters with the same id will be aborted.
      */
-    public boolean waitSignal(UTMRef uleft, UTMRef lright, long id)
+    public boolean waitSignal(Reference uleft, Reference lright, long id)
     {
          long wstart = (new Date()).getTime();
          long elapsed = 0;
@@ -85,6 +85,7 @@ public class Notifier
          _waiters.remove(id);
          return true;
     }
+    
     
     /**
      * Signal an event on a certain geographical point. This will wake up

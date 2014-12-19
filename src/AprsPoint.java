@@ -61,7 +61,7 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
      * @param clientid Unique numbe for calling thread.
      * @return true=ok, false=was aborted.
      */
-    public static boolean waitChange(UTMRef uleft, UTMRef lright, long clientid) 
+    public static boolean waitChange(Reference uleft, Reference lright, long clientid) 
        { return _change.waitSignal(uleft, lright, clientid); } 
 
        

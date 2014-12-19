@@ -206,23 +206,19 @@ package no.polaric.aprsd.http
        
   
    /**
-    * Exctract UTM reference from request parameters.
-    *   x and y: coordinates relative to mapserver UTM zone
-    *   utmz: UTM zone (optional)
-    *   returns UTM reference. Null if not possible to construct a correct
-    *   UTM reference from the given parameters.
-    *   
-    *   zones will probably be mandatory from version 1.6. 
+    * Exctract reference from request parameters.
+    *   x and y: coordinates in lat long projection
+    *   returns reference. Null if not possible to construct a correct
+    *   reference from the given parameters.
+    *    
     */
-   protected def getUtmCoord(req : Request, zone: Int) : UTMRef =
+   protected def getCoord(req : Request) : Reference =
    {
         val x = req.getParameter("x")
         val y = req.getParameter("y")
-        var utmz = req.getParameter("utmz")
         try {
            if (x != null && y != null)
-               new UTMRef( x.toDouble, y.toDouble,
-                   'W', if (utmz==null) _utmzone else utmz.toInt ).toLatLng().toUTMRef();
+               new LatLng( y.toDouble, x.toDouble );
            else
                null
         }

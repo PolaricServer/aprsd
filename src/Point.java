@@ -37,31 +37,30 @@ public class Point implements Serializable,  Cloneable
     
     /**
      * Test if position is inside of a rectangular area. The area is defined by uleft (upper left corner)
-     * and lright (lower right corner). Assume that uleft and lright are within the same
-     * UTM zone. 
+     * and lright (lower right corner). 
+     
      * @param uleft Upper left corner of the area. 
      * @param lright Lower right corner of the area. 
      * @param xext Percentage with which to extend the search area in x direction.
      * @param yext Percentage with which to extend the search area in y direction.
      */          
-    public boolean isInside(UTMRef uleft, UTMRef lright, double xext, double yext)
-    {
-        /* Be sure that uleft and lright are in the same longitude zones */
-        lright = lright.toLatLng().toUTMRef(uleft.getLngZone()); 
+    public boolean isInside(Reference ul, Reference lr, double xext, double yext)
+    {   
+        LatLng uleft = ul.toLatLng();
+        LatLng lright = lr.toLatLng(); 
         
         if (uleft == null || lright == null)
            return false; 
         
-        double xoff  = xext * (lright.getEasting() - uleft.getEasting());
-        double yoff = yext * (lright.getNorthing() - uleft.getNorthing());
+        double xoff  = xext * (lright.getLng() - uleft.getLng());
+        double yoff = yext * (uleft.getLat() - lright.getLat());
     
-         /* FIXME: Add lat zone as well */
         if (_position == null)
            return false;
         try {
-           UTMRef ref = _position.toLatLng().toUTMRef(uleft.getLngZone());
-           return ( ref.getEasting() >= uleft.getEasting()-xoff && ref.getNorthing() >= uleft.getNorthing()-yoff &&
-                    ref.getEasting() <= lright.getEasting()+xoff && ref.getNorthing() <= lright.getNorthing()+yoff );
+           LatLng ref = _position.toLatLng();
+           return ( ref.getLng() >= uleft.getLng()-xoff && ref.getLat() >= lright.getLat()-yoff &&
+                    ref.getLng() <= lright.getLng()+xoff && ref.getLat() <= uleft.getLat()+yoff ); 
         }
         catch (Exception e) { return false; }
     }
@@ -74,7 +73,7 @@ public class Point implements Serializable,  Cloneable
      * @param uleft Upper left corner of the area. 
      * @param lright Lower right corner of the area. 
      */
-    public boolean isInside(UTMRef uleft, UTMRef lright)
+    public boolean isInside(Reference uleft, Reference lright)
        { return isInside(uleft, lright, 0, 0); }
 
        

@@ -65,12 +65,8 @@ public class XmlServer extends ServerBase
    { 
        PrintWriter out = getWriter(res);
        String ident = req.getParameter("id").toUpperCase();
-       
-       int utmz = _utmzone;
+
        Query parms = req.getQuery();
-       if (parms.get("utmz") != null) 
-          utmz = Integer.parseInt(parms.get("utmz"));
-       
        AprsPoint s = _api.getDB().getItem(ident, null);
        if (s==null) {
           int i = ident.lastIndexOf('-');
@@ -81,8 +77,8 @@ public class XmlServer extends ServerBase
               s = l.get(0);
        }
        if (s!=null && !s.expired() && s.getPosition() != null) {
-          UTMRef xpos = toUTM(s.getPosition(), utmz); 
-          out.println(s.getIdent()+","+ (long) Math.round(xpos.getEasting()) + "," + (long) Math.round(xpos.getNorthing()));   
+          LatLng xpos = s.getPosition().toLatLng(); 
+          out.println(s.getIdent()+"," + roundDeg(xpos.getLng()) + "," + roundDeg(xpos.getLat()));   
        }
        res.setValue("Content-Type", "text/csv; charset=utf-8");
        out.close();
@@ -128,20 +124,16 @@ public class XmlServer extends ServerBase
         res.setValue("Content-Type", "text/xml; charset=utf-8");
         Query parms = req.getQuery();
         
-        int utmz = _utmzone;
-        if (parms.get("utmz") != null) 
-           utmz = Integer.parseInt(parms.get("utmz"));
-        
-        UTMRef uleft = null, lright = null;
+        LatLng uleft = null, lright = null;
         if (parms.get("x1") != null) {
-           long x1 = Long.parseLong( parms.get("x1") );
-           long x2 = Long.parseLong( parms.get("x2") );
-           long x3 = Long.parseLong( parms.get("x3") );    
-           long x4 = Long.parseLong( parms.get("x4") );
-           uleft = new UTMRef((double) x1, (double) x2, 'W', utmz); 
-           lright = new UTMRef((double) x3, (double) x4, 'W', utmz);
-              /* The zone letter is actually redundant. Here it doesn't matter what it is */
+           Double x1 = Double.parseDouble( parms.get("x1") );
+           Double x2 = Double.parseDouble( parms.get("x2") );
+           Double x3 = Double.parseDouble( parms.get("x3") );    
+           Double x4 = Double.parseDouble( parms.get("x4") );
+           uleft  = new LatLng((double) x4, (double) x1); 
+           lright = new LatLng((double) x2, (double) x3);
         }
+        
         long scale = 0;
         if (parms.get("scale") != null)
            scale = Long.parseLong(parms.get("scale"));
@@ -186,7 +178,7 @@ public class XmlServer extends ServerBase
         int i=0;
         for (Signs.Item s: Signs.search(scale, uleft, lright))
         {
-            UTMRef ref = toUTM(s.getPosition(), utmz); 
+            LatLng ref = s.getPosition().toLatLng(); 
             if (ref == null)
                 continue;
             String href = s.getUrl() == null ? "" : "href=\"" + s.getUrl() + "\"";
@@ -194,7 +186,7 @@ public class XmlServer extends ServerBase
             String icon = _wfiledir + "/icons/"+ s.getIcon();    
            
             out.println("<point id=\""+ (s.getId() < 0 ? "__sign" + (i++) : "__"+s.getId()) + "\" x=\""
-                         + (int) Math.round(ref.getEasting()) + "\" y=\"" + (int) Math.round(ref.getNorthing())+ "\" " 
+                         + roundDeg(ref.getLng()) + "\" y=\"" + roundDeg(ref.getLat()) + "\" " 
                          + href + " " + title+">");
             out.println("   <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
             out.println("</point>");    
@@ -215,14 +207,14 @@ public class XmlServer extends ServerBase
             if (action.hideAll())
                 continue;
                    
-            UTMRef ref = toUTM(s.getPosition(), utmz); 
+            LatLng ref = s.getPosition().toLatLng(); 
             if (ref == null) continue; 
             
             if (!s.visible() || (_api.getSar() != null && !loggedIn && _api.getSar().filter(s)))  
                    out.println("<delete id=\""+fixText(s.getIdent())+"\"/>");
             else {
                synchronized(s) {
-                  ref = toUTM(s.getPosition(), utmz); 
+                  ref = s.getPosition().toLatLng(); 
                   if (ref == null) continue; 
                   
                   String title = s.getDescr() == null ? "" 
@@ -232,7 +224,7 @@ public class XmlServer extends ServerBase
                   String icon = _wfiledir + "/icons/"+ (s.getIcon(showSarInfo) != null ? s.getIcon(showSarInfo) : _icon);    
                 
                   out.println("<point id=\""+fixText(s.getIdent())+"\" x=\""
-                               + (int) Math.round(ref.getEasting()) + "\" y=\"" + (int) Math.round(ref.getNorthing())+ "\"" 
+                               + roundDeg(ref.getLng()) + "\" y=\"" + roundDeg(ref.getLat()) + "\"" 
                                + title + flags + (s.isChanging() ? " redraw=\"true\"" : "") +
                                ((s instanceof AprsObject) && _api.getDB().getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""))  ? " own=\"true\"":"") +">");
                   out.println("   <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
@@ -257,7 +249,7 @@ public class XmlServer extends ServerBase
                      Trail h = ((Station)s).getTrail();
                      Station ss = (Station) s;
                      if (!action.hideTrail() && !h.isEmpty())
-                        printTrailXml(out, ss.getTrailColor(), ss.getPosition(), h, uleft, lright);
+                        printTrailXml(out, ss.getTrailColor(), ss.getPosition(), h, uleft, lright); 
                   }
                } /* synchronized(s) */
                
