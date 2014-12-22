@@ -1,6 +1,7 @@
 package no.polaric.aprsd;
 import java.net.*;
 import java.util.*;
+import java.util.regex.*;
 import java.io.*;
 
 /**
@@ -11,7 +12,17 @@ public class SymTable
     private BufferedReader  _rd;
     private StringTokenizer _next;
     private Map<String, String> _stab = new HashMap(); 
-  
+    private ArrayList<Exp> _rtab = new ArrayList();
+    
+    protected class Exp {
+        public String exp; 
+        public String file; 
+        public Exp(String e, String f) {
+           exp=e; 
+           file=f; 
+        }
+    }
+    
     
     public SymTable(String file) 
     {
@@ -25,7 +36,7 @@ public class SymTable
                    String[] x = line.split("\\s+");  
                    if (x[0].length() < 2) 
                        continue;
-                   _stab.put(x[0], x[1]);
+                   _rtab.add(new Exp(x[0], x[1]));    
                }
             }     
         }
@@ -39,7 +50,12 @@ public class SymTable
     {
          String key = "" + alt + sym;
          String icon = _stab.get(key);
-         return (icon==null ? _stab.get(""+"\\"+sym) : icon);
-              
+         if (icon==null)
+            for (Exp e: _rtab)
+               if (key.matches(e.exp)) {
+                   _stab.put(key, e.file);
+                   return e.file; 
+               }
+         return (icon==null ? null: icon);         
     }
 }
