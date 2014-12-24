@@ -52,7 +52,12 @@ V.1.7 (january 2014), etc
    - Filter support. Polygons/extent filter, scale, projection, selected base layer, etc..
         DONE.  
 
+* Regex based mapping from symbols to icons
+        DONE. 
 
+* Symbol/icon updates. 
+        DONE/IN PROGRESS. 
+        
 
    
 Autorisation/Authentication
