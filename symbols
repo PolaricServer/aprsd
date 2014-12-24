@@ -1,94 +1,108 @@
-####################################
+######################################################
 # Symbol to icon mapping
 #
 # format: 
-#  <sym-table><symbol>  <icon-file>
-####################################
+#  <regex>  <icon-file>
+#
+# The regular expression matches the two 
+# symbol characters.
+# 
+# [abc] matches either a, b or c.. 
+# .     matches any character
+# a|b   matches a or b
+# \     the next character is to be be taken literally
+#
+######################################################
+#
+# TODO: 
+#   - Convert all GIFs to PNGs
+#   - ATV icon
+#   - Ambulance icon (ask RK)
+#   - Icons for various nodes, DMR, Wifi, etc. 
+#   - Much more.....
+######################################################
 
-/$ phone.gif
-/[ buddy.png
-/# star-0.gif
-/' airplane.png
-/^ airplane.png
-/& diamond-G.png 
-D& diamond-D.png
-\& diamond-I.gif 
-R& diamond-R.gif
-I& diamond-I.gif
-E& diamond-E.png
-// sym08.gif
-\/ sym08.gif
-/+ sym02.png 
-/- home.png 
-/_ wx.gif
-\_ wx.gif
-/> car.gif
-/K home.png 
-\L lighthouse.png
-/P car-police.gif
-/R car.gif
-/U bus.gif
-/K h-school.gif
-\K sym00.gif
-/a hospital.gif
-\a sym06.gif
-Da dstar.png
-/c orient.gif
-\j workzone.png
-/j car.gif
-/k car.gif
-\k car-van.gif
-/o eoc.png
-/y home.png
-\! 00-emergency.gif
-\# star.gif
-\- home.png 
-\> car.gif
-4> car-4.gif
-5> car-5.gif
-\? c-qm.png
-\P c-P.png
-/u car-van.gif
-\u car-truck.gif
-/v car-van.gif
-\v car-van.gif
-/= train.gif
-/* scooter-a.png
-/I info.png
-/s boat.gif
-/U bus.gif
-/Y boat.gif
-\n sym07.gif
-/r radio.png
-P0 c-P.png
-E0 c-E.png
-I0 c-I.png
-\m sign.gif
-S# star-S.gif
-B# star-B.gif
-L# star-L.gif
-1# star-1.gif
-2# star-2.gif
-3# star-3.gif
-00 c-0.png
-10 c-1.png
-20 c-2.png
-30 c-3.png
-40 c-4.png
-50 c-5.png
-60 c-6.png
-70 c-7.png
-80 c-8.png
-90 c-9.png
-\0 c-0.png
-\1 c-1.png
-\2 c-2.png
-\3 c-3.png
-\4 c-4.png
-\5 c-5.png
-\6 c-6.png
-\7 c-7.png
-\8 c-8.png
-\9 c-9.png
+
+# Aircrafts
+/\'|.\^        airplane.png
+/X             helicopter.png
+
+# Gateways 
+/&             diamond-G.png 
+D&             diamond-D.png    # D-star
+[\\IT2]&       diamond-I.gif    # Igate 
+R&             diamond-R.gif    # Receive only igate
+E&             diamond-E.png
+
+# Cars/vehicles
+/[>jR\(]|\\>   car.gif          # Ordinary car /h is actually SUV
+[4A]k          car.gif          # 4k is 4x4. Ak is ATV (need icon?). #k is special vehicles. 
+\\[kv]|/[uv]   car-van.gif
+4>             car-4.gif
+5>             car-5.gif
+/P             car-police.gif
+/f             car-fire.png
+[\\GTCH]u|/k   car-truck.gif    # #u is trucks. h is Hu is hazardous   
+/U             bus.gif
+/=             train.gif
+/\*            scooter-a.png
+/[sY]          boat.gif
+
+# Human beings
+R\[            runner.png
+.\[            buddy.png
+
+# Emergency management, etc.. 
+/c             orient.gif       # Incident command post.
+.c             slc.png          # Civil defence
+/o             eoc.png
+\\!            00-emergency.gif
+/!             police.png
+
+# Misc. 
+/[Ky+\-]|.\-   home.png         # #- is house
+[\\/]/         sym08.gif
+/\+            sym02.png  
+._|/[_w]       wx.gif           # Weather stations
+/\$            phone.gif
+/p             dog.png
+\\L            lighthouse.png
+/K             h-school.gif
+/[ah]          hospital.gif      # /h is new spec #h is building
+\\K            sym00.gif
+\\a|Wa         sym06.gif
+Da             dstar.png
+\\j            workzone.png
+\\`            showers.png
+/`             dishant.png
+\\\?           c-qm.png
+/I             info.png
+\\n            sym07.gif
+/[rm]          radio.png
+P0|\\P         c-P.png
+E0             c-E.png
+I0             c-I.png
+\\o            slo.png
+\\m            sign.gif
+/#             star-0.gif
+S#             star-S.gif
+B#             star-B.gif
+L#             star-L.gif
+1#             star-1.gif
+2#             star-2.gif
+3#             star-3.gif
+.#             star.gif
+
+[\\0]0        c-0.png
+\\1|10        c-1.png
+\\2|20        c-2.png
+\\3|30        c-3.png
+\\4|40        c-4.png
+\\5|50        c-5.png
+\\6|60        c-6.png
+\\7|70        c-7.png
+\\8|80        c-8.png
+\\9|90        c-9.png
+
 #
 
