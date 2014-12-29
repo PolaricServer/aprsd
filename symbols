@@ -13,13 +13,6 @@
 # \     the next character is to be be taken literally
 #
 ######################################################
-#
-# TODO: 
-#   - ATV icon
-#   - Ambulance icon (ask RK)
-#   - Icons for various nodes, DMR, Wifi, etc. 
-#   - Much more.....
-######################################################
 
 
 # Aircrafts
@@ -34,12 +27,14 @@ R&             diamond-R.png    # Receive only igate
 E&             diamond-E.png
 
 # Cars/vehicles
-/[>hjR\(]|.>   car.gif          # Ordinary car /h is actually SUV
-[4A]k          car.gif          # 4k is 4x4. Ak is ATV (need icon?). #k is special vehicles. 
+/[>hjR\(]|.>   car.png          # Ordinary car /h is actually SUV
+[4A]k          car.png          # 4k is 4x4. Ak is ATV (need icon?). #k is special vehicles. 
 \\[kv]|/[uv]   car-van.png
 
 /P             car-police.png
 /f             car-fire.png
+/a             ambul.png    
+
 [\\GTCH]u|/k   car-truck.png    # #u is trucks. Hu is hazardous   
 /U             bus.png
 /=             train.png
@@ -80,15 +75,15 @@ Da             dstar.png
 P0|\\P         c-P.png
 E0             c-E.png
 I0             c-I.png
-\\o            slo.png
+\\o            alt/slo.png
 \\m            sign.png
 /#             star-0.png
-S#             star-S.png
-B#             star-B.png
-L#             star-L.png
-1#             star-1.png
-2#             star-2.png
-3#             star-3.png
+S#             alt/star-S.png
+B#             alt/star-B.png
+L#             alt/star-L.png
+1#             alt/star-1.png
+2#             alt/star-2.png
+3#             alt/star-3.png
 .#             star.png
 .8             wifi.png
 

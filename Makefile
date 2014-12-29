@@ -43,7 +43,7 @@ install: polaric-aprsd.jar
 	install -d $(INSTALL_PLUGDIR)
 	install -d $(INSTALL_BIN)
 	install -d $(INSTALL_JAR)
-	install -d $(INSTALL_WEB)/icons $(INSTALL_WEB)/icons/signs $(INSTALL_WEB)/dicons
+	install -d $(INSTALL_WEB)/icons $(INSTALL_WEB)/icons/alt $(INSTALL_WEB)/icons/signs $(INSTALL_WEB)/dicons
 	install -d $(INSTALL_DATA)
 	install -d $(INSTALL_SUDO)
 	install -m 755 -d $(INSTALL_LOG)
@@ -52,7 +52,8 @@ install: polaric-aprsd.jar
 	install -m 644 trailcolours $(INSTALL_CONFIG)
 	install -m 644 view.profiles $(INSTALL_CONFIG)
 	install -m 644 *.jar $(INSTALL_JAR)
-	install -m 644 icons/*.png icons/*.gif $(INSTALL_WEB)/icons
+	install -m 644 icons/*.png $(INSTALL_WEB)/icons
+	install -m 644 icons/alt/*.png $(INSTALL_WEB)/icons/alt
 	install -m 644 icons/signs/*.png icons/signs/*.gif $(INSTALL_WEB)/icons/signs
 	install -m 644 dicons/*.png $(INSTALL_WEB)/dicons
 	install -m 644 style.css $(INSTALL_WEB)
