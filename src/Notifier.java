@@ -62,12 +62,11 @@ public class Notifier
                      wait(found ? _mintime-elapsed : _timeout-elapsed);
                      Integer abort = _waiters.get(id);
                      if (abort != null && abort > 0 && !noAbort) {
-                         if (abort == 1) 
-                            _waiters.remove(id);
-                         else
-                            _waiters.put(id, 0);
-                         return (abort==1) ? true : false;        
+                         _waiters.remove(id);
+                         return false;        
                      }
+                     else
+                         _waiters.put(id, 0);
                      noAbort = false; 
                      /* Has there been events inside the interest zone */
                      found = found || signalledPt == null || uleft == null || 
