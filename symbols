@@ -56,7 +56,8 @@ R\[            runner.png
 /[Ky+\-]|.\-   home.png         # #- is house
 \\K            sym00.png
 /\+            sym02.png
-\\a|Wa         sym06.png
+Wa             alt/winlink.png
+Wa             sym06.png
 \\n            sym07.png
 [\\/]/         sym08.png
 ._|/[_w]       wx.png           # Weather stations

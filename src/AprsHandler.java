@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2013 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,8 @@ public interface AprsHandler
           {pos=p; course=crs; speed=sp; symbol=sym; symtab=stab; }   
     }
 
+   
+   
     /**
      * Handle APRS position report.
      * @param s Source channel.
