@@ -54,13 +54,23 @@ public class Point implements Serializable,  Cloneable
         
         double xoff  = xext * (lright.getLng() - uleft.getLng());
         double yoff = yext * (uleft.getLat() - lright.getLat());
-    
+        
         if (_position == null)
            return false;
         try {
            LatLng ref = _position.toLatLng();
-           return ( ref.getLng() >= uleft.getLng()-xoff && ref.getLat() >= lright.getLat()-yoff &&
-                    ref.getLng() <= lright.getLng()+xoff && ref.getLat() <= uleft.getLat()+yoff ); 
+           if (lright.getLng() < uleft.getLng()) {
+              double xleft = uleft.getLng();
+              double xright = 360 + lright.getLng(); 
+              double x = ref.getLng() < xleft-xoff ? 360+ref.getLng() : ref.getLng();
+              xoff = xext * (xright - xleft); 
+
+              return (x >= xleft-xoff && ref.getLat() >= lright.getLat()-yoff &&
+                      x <= xright+xoff  && ref.getLat() <= uleft.getLat()+yoff );
+           }
+           else
+              return ( ref.getLng() >= uleft.getLng()-xoff && ref.getLat() >= lright.getLat()-yoff &&
+                       ref.getLng() <= lright.getLng()+xoff && ref.getLat() <= uleft.getLat()+yoff ); 
         }
         catch (Exception e) { return false; }
     }
@@ -68,8 +78,7 @@ public class Point implements Serializable,  Cloneable
       
      /**
      * Test if position is inside of a rectangular area. The area is defined by uleft (upper left corner)
-     * and lright (lower right corner). Assume that uleft and lright are within the same
-     * UTM zone. 
+     * and lright (lower right corner).  
      * @param uleft Upper left corner of the area. 
      * @param lright Lower right corner of the area. 
      */
