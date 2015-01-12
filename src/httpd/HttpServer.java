@@ -8,6 +8,7 @@ import org.simpleframework.transport.connect.Connection;
 import org.simpleframework.transport.connect.SocketConnection;
 import org.simpleframework.http.Request;
 import org.simpleframework.http.Response;
+import org.simpleframework.http.Query;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.io.PrintStream;
@@ -19,6 +20,10 @@ import java.text.*;
 import com.mindprod.base64.Base64;
 import java.util.concurrent.locks.*; 
 import java.util.concurrent.*;
+import com.teamunify.i18n.*;
+
+
+
 
 public class HttpServer implements Container, ServerAPI.ServerStats
 {
@@ -62,7 +67,12 @@ public class HttpServer implements Container, ServerAPI.ServerStats
             String uri = req.getTarget().replaceAll("\\?.*", ""); 
             boolean allowed = 
                  req.getClientAddress().getAddress().isLoopbackAddress(); 
-            
+         
+            Query parms = req.getQuery();
+            String lang = parms.get("lang");
+            if (lang != null && lang.length() > 0)
+                I.setLanguage(lang);
+                
             resp.setValue("Server", "Polaric APRSD 1.6");
             resp.setValue("Content-Type", "text/html; charset=utf-8");
          

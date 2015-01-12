@@ -87,7 +87,7 @@ public abstract class ServerBase
    {
         try { return ref.toLatLng().toUTMRef(utmz); }
         catch (Exception e)
-           { System.out.println("*** Kan ikke konvertere til UTM"+ utmz+ " : "+ref);
+           { System.out.println("*** Cannot convert to UTM"+ utmz+ " : "+ref);
              return null; }
    }
    

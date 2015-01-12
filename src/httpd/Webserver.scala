@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import org.simpleframework.http.core.Container
 import org.simpleframework.transport.connect.Connection
 import org.simpleframework.transport.connect.SocketConnection
 import org.simpleframework.http._
-
+import com.teamunify.i18n._
 
 
    
@@ -51,36 +51,36 @@ package no.polaric.aprsd.http
 
        def action(req : Request): NodeSeq =
           if (!authorizedForUpdate(req))
-              <h3>Du er ikke autorisert for slike operasjoner</h3>
+              <h3>{I.tr("You are not authorized for such operations")}</h3>
           else if ("gc".equals(cmd)) {
               _api.getDB().garbageCollect()
               <h3>GC, ok</h3>
           }
           else if ("clearobj".equals(cmd)) {
               _api.getDB().getOwnObjects().clear()
-              <h3>Clear own objects, ok</h3>
+              <h3>{I.tr("Clear own objects, ok")}</h3>
           }
           else if ("clearlinks".equals(cmd)) {
               _api.getDB().getRoutes().clear()
-              <h3>Clear link information, ok</h3>    
+              <h3>{I.tr("Clear link information, ok")}</h3>    
           }
           else if ("info".equals(cmd))    
               <h3>Status info for Polaric APRSD</h3>
               <fieldset>
-              { simpleLabel("items", "leftlab", "Server kjørt siden:", TXT(""+_time)) ++
-                simpleLabel("items", "leftlab", "Server versjon:", TXT(""+_api.getVersion())) ++ 
-                simpleLabel("items", "leftlab", "Antall APRS enheter:", TXT(""+_api.getDB().nItems())) ++
-                simpleLabel("items", "leftlab", "Antall forbindelser:", TXT(""+_api.getDB().getRoutes().nItems())) ++
-                simpleLabel("items", "leftlab", "Egne objekter:", TXT(""+_api.getDB().getOwnObjects().nItems())) ++   
-                simpleLabel("items", "leftlab", "Antall HTTP klienter nå:", TXT(""+(_api.getHttps().getClients()-1))) ++  
-                simpleLabel("items", "leftlab", "Antall HTTP forespørsler:", TXT(""+(_api.getHttps().getReq()))) }    
-              { simpleLabel("freemem", "leftlab", "Brukt minne:", 
+              { simpleLabel("items", "leftlab", I.tr("Server run since:"), TXT(""+_time)) ++
+                simpleLabel("items", "leftlab", I.tr("Server version:"), TXT(""+_api.getVersion())) ++ 
+                simpleLabel("items", "leftlab", I.tr("Number of APRS items:"), TXT(""+_api.getDB().nItems())) ++
+                simpleLabel("items", "leftlab", I.tr("Number of connections:"), TXT(""+_api.getDB().getRoutes().nItems())) ++
+                simpleLabel("items", "leftlab", I.tr("Own objects:"), TXT(""+_api.getDB().getOwnObjects().nItems())) ++   
+                simpleLabel("items", "leftlab", I.tr("Number of HTTP clients:"), TXT(""+(_api.getHttps().getClients()-1))) ++  
+                simpleLabel("items", "leftlab", I.tr("Number of HTTP requests:"), TXT(""+(_api.getHttps().getReq()))) }    
+              { simpleLabel("freemem", "leftlab", I.tr("Used memory:"), 
                   TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
                             
               {  var i=0;
                  for (x <- PluginManager.getPlugins()) yield {
                     i+=1;
-                    simpleLabel("", "leftlab", if (i<=1) "Plugin modul: " else "", 
+                    simpleLabel("", "leftlab", if (i<=1) I.tr("Plugin module")+": " else "", 
                          TXT(x.getDescr())); 
                  }
               }    
@@ -99,12 +99,12 @@ package no.polaric.aprsd.http
               { simpleLabel("igate", "leftlab", "Igate: ", 
                    if (_api.getIgate()==null) TXT("---") else TXT(""+_api.getIgate())) }   
               { if (_api.getRemoteCtl() != null && !_api.getRemoteCtl().isEmpty())  
-                   simpleLabel("rctl", "leftlab", "Fjernkontroll: ", TXT(""+_api.getRemoteCtl())) else null; }     
+                   simpleLabel("rctl", "leftlab", I.tr("Remote control")+": ", TXT(""+_api.getRemoteCtl())) else null; }     
                    
               </fieldset>  
               <input type="submit" onclick="top.window.close()" id="cancel" value="Avbryt"/>
           else
-              <h3>Ukjent kommando</h3>
+              <h3>{I.tr("Unknown command")}</h3>
              
         printHtml (res, htmlBody(req, head, action(req)));    
    }
@@ -138,12 +138,13 @@ package no.polaric.aprsd.http
         def fields(req : Request): NodeSeq =
             <xml:group>
             {
-              label("osymtab", "lleftlab", "Symbol:", "APRS symboltabell og symbol. Fyll inn eller velg i listen til høyre.") ++
+              label("osymtab", "lleftlab", I.tr("Symbol")+":", 
+                    I.tr("APRS symbol table and symbol. Fill in or chose from the list at the right side.")) ++
               textInput("osymtab", 1, 1, ""+p.getSymtab()) ++
               textInput("osym", 1, 1, ""+p.getSymbol()) ++
               symChoice ++
               br ++
-              label("utmz", "lleftlab", "Pos (UTM):", "Posisjon i UTM format.") ++
+              label("utmz", "lleftlab", I.tr("Pos (UTM)")+":", I.tr("Position in UTM format.")) ++
               {  if (pos==null)
                     utmForm('W', 34)
                  else
@@ -156,7 +157,7 @@ package no.polaric.aprsd.http
         /* Action. To be executed when user hits 'submit' button */
         def action(req : Request): NodeSeq = {
                if (!authorizedForAdmin(req))
-                  <h3>Du er ikke autorisert for admin operasjoner</h3>
+                  <h3> {I.tr("You are not authorized for admin operations")} </h3>
                else {
                   val osymtab = req.getParameter("osymtab")
                   val osym  = req.getParameter("osym")
@@ -164,7 +165,7 @@ package no.polaric.aprsd.http
                   p.updatePosition(new Date(), pos, 
                       if (osymtab==null) '/' else osymtab(0), if (osym==null) 'c' else osym(0))
                   
-                 <h2>Posisjon registrert</h2>
+                 <h2> {I.tr("Position registerred")} </h2>
                  <p>pos={ showUTM(pos) }</p>
               }
         };
@@ -178,7 +179,7 @@ package no.polaric.aprsd.http
    
    def handle_sarmode(req : Request, res: Response) =
    {
-       val prefix = <h2>Søk og redningsmodus</h2>
+       val prefix = <h2> {I.tr("Search and rescue mode")} </h2>
        var filter = req.getParameter("sar_prefix")
        var reason = req.getParameter("sar_reason")
        var hidesar = req.getParameter("sar_hidesar")
@@ -186,21 +187,21 @@ package no.polaric.aprsd.http
        
        def fields(req : Request): NodeSeq =          
            <xml:group>
-           <p>Visse typer info o.l. bare synlig for innloggete brukere.</p>
-           <label for="sar_on" class="lleftlab">SAR modus:</label>
+           <p> {I.tr("Certain types of info only visible for authorized users.")} </p>
+           <label for="sar_on" class="lleftlab"> {I.tr("SAR mode")+":"} </label>
            { checkBox("sar_on", api.getSar() !=null, TXT("aktivert")) }  
            <br/>
-           <label for="sar_hidesar" class="lleftlab">Alias/ikon:</label>
-           { checkBox("sar_hidesar", api.getSar()==null || api.getSar().isAliasHidden(), TXT("skjult")) }  
+           <label for="sar_hidesar" class="lleftlab"> {I.tr("Alias/icon")+":"} </label>
+           { checkBox("sar_hidesar", api.getSar()==null || api.getSar().isAliasHidden(), TXT(I.tr("hidden"))) }  
            <br/>
            
-           <label for="sar_prefix" class="lleftlab">Skjul prefiks:</label>
+           <label for="sar_prefix" class="lleftlab"> {I.tr("Hide prefix")+":"} </label>
            { textInput("sar_prefix", 25, 50,
                if ( api.getSar()==null) "" else api.getSar().getFilter() ) }
            <br/>
            
            
-           <label for="sar_reason" class="lleftlab">Beskrivelse:</label>
+           <label for="sar_reason" class="lleftlab"> {I.tr("Description")+":"} </label>
            { if (api.getSar() == null)
                 textInput("sar_reason", 25, 50, "")
              else 
@@ -208,7 +209,7 @@ package no.polaric.aprsd.http
                 <label id="sar_reason">{ api.getSar().getReason() }
                 <em> { "("+api.getSar().getUser()+")" } </em></label>
                 <br/>
-                { simpleLabel("sar_date", "lleftlab", "Aktivert:", TXT(""+api.getSar().getTime())) }
+                { simpleLabel("sar_date", "lleftlab", I.tr("Activated")+":", TXT(""+api.getSar().getTime())) }
                 </xml:group>
            }
            </xml:group>     
@@ -229,14 +230,14 @@ package no.polaric.aprsd.http
                    api.getRemoteCtl().sendRequestAll("SAR "+getAuthUser(req)+" "+filt+" "+reason, null);
                
                
-               <h3>Aktivert</h3>
+               <h3> {I.tr("Activated")} </h3>
                <p>{reason}</p>
           }
           else {   
                api.clearSar();
                if (api.getRemoteCtl() != null)
                   api.getRemoteCtl().sendRequestAll("SAR OFF", null);
-               <h3>Avsluttet</h3>
+               <h3> {I.tr("Ended")} </h3>
           } 
        }
             
@@ -254,14 +255,14 @@ package no.polaric.aprsd.http
        def action(req : Request): NodeSeq = 
        {
           if (!authorizedForUpdate(req) && api.getSarUrl() != null )  
-              <h3>SAR URL ikke tilgjengelig eller du er ikke autorisert</h3>
+              <h3>{ I.tr("SAR URL not available or you are not authorized")} </h3>
           else {
               val sarurl = api.getSarUrl().create(url)
-              <h1>Kort-URL for søk og redning</h1>
+              <h1> { I.tr("Short URL for search and rescue")} </h1>
               <h2><a class="sarurl" href={sarurl}>{sarurl}</a></h2>
-              <h1>Nøkkel:</h1>
+              <h1> { I.tr("Key")+":" }</h1>
               <h2 class="sarurl">{SarUrl.getKey(sarurl)}</h2>
-              <p>Gyldig i 1 døgn fra nå</p>
+              <p> { I.tr("Valid 1 day from now")} </p>
           }
        }   
        printHtml (res, htmlBody(req, null, action(req)));        
@@ -277,7 +278,7 @@ package no.polaric.aprsd.http
    {
        var id = req.getParameter("objid")
        id = if (id != null) id.replaceFirst("@.*", "") else null
-       val prefix = <h2>Slett objekt</h2>
+       val prefix = <h2> { I.tr("Remove object")} </h2>
        
        def fields(req : Request): NodeSeq =
            <xml:group>
@@ -290,16 +291,16 @@ package no.polaric.aprsd.http
       
        def action(req : Request): NodeSeq =
           if (id == null) {
-              <h3>Feil:</h3>
-              <p>må oppgi 'objid' som parameter</p>;
+              <h3> {I.tr("Error")+":"} </h3>
+              <p> {I.tr("'objid' must be given as parameter")} </p>;
           }
           else {
               if (_api.getDB().getOwnObjects().delete(id)) {
                   System.out.println("*** DELETE OBJECT: '"+id+"' by user '"+getAuthUser(req)+"'")
-                  <h3>Objekt slettet!</h3>
+                  <h3> {I.tr("Object removed!")} </h3>
               }
               else
-                  <h3>Fant ikke objekt: {id}</h3>
+                  <h3> {I.tr("Couldn't find object")+": "+id} </h3>
           }  
           ;
           
@@ -312,7 +313,7 @@ package no.polaric.aprsd.http
    def handle_resetinfo(req : Request, res : Response) =
    {
        val id = req.getParameter("objid")
-       val prefix = <h2>Nullstill info om stasjon/objekt</h2>
+       val prefix = <h2> {I.tr("Reset info about station/object")} </h2>
        
        def fields(req : Request): NodeSeq =
            <label for="objid" class="lleftlab">Objekt ID:</label>
@@ -322,14 +323,14 @@ package no.polaric.aprsd.http
       
        def action(req : Request): NodeSeq =
           if (id == null) {
-              <h3>Feil:</h3>
-              <p>må oppgi 'objid' som parameter</p>;
+              <h3> {I.tr("Error")+":"} </h3>
+              <p> {I.tr("'objid' must be given as parameter")} </p>;
           }
           else {
              val x = _api.getDB().getItem(id, null);
              if (x != null)
                 x.reset();
-             <h3>Info om objekt nullstilt!</h3>
+             <h3> {I.tr("Info about object is reset!")} </h3>
           } 
           ;
           
@@ -346,24 +347,25 @@ package no.polaric.aprsd.http
    {
         val pos = getCoord(req)
         val id = req.getParameter("objid")
-        val prefix = <h2>Legge inn objekt</h2>
+        val prefix = <h2> {I.tr("Add object")} </h2>
         
         /* Fields to be filled in */
         def fields(req : Request): NodeSeq =
             <xml:group>
             {
-              label("objid", "lleftlab", "Objekt ID:", "Identifikator for objekt") ++
+              label("objid", "lleftlab", I.tr("Object ID")+":", I.tr("Identifier for object")) ++
               textInput("objid", 9, 9, "") ++
               br ++
-              label("osymtab", "lleftlab", "Symbol:", "APRS symboltabell og symbol. Fyll inn eller velg i listen til høyre.") ++
+              label("osymtab", "lleftlab", I.tr("Symbol")+":", 
+                     I.tr("APRS symbol table and symbol. Fill in or chose from the list at the right side.")) ++
               textInput("osymtab", 1, 1, "/") ++
               textInput("osym", 1, 1, "c") ++
               symChoice ++
               br ++
-              label("descr", "lleftlab", "Beskrivelse", "") ++
+              label("descr", "lleftlab", I.tr("Description")+":", "") ++
               textInput("descr", 30, 40, "") ++
               br ++
-              label("utmz", "lleftlab", "Pos (UTM):", "Objektets posisjon") ++
+              label("utmz", "lleftlab", I.tr("Pos (UTM)")+":", I.tr("Object's position")) ++
               {  if (pos==null)
                    utmForm('W', 34)
                  else
@@ -373,8 +375,8 @@ package no.polaric.aprsd.http
             <br/>
             <div>
             {
-              label("perm", "lleftlab", "Innstillinger:", "") ++
-              checkBox("perm", false, TXT("Tidløs (Permanent)"))
+              label("perm", "lleftlab", I.tr("Settings")+":", "") ++
+              checkBox("perm", false, TXT(I.tr("Timeless (Permanent)")))
             }
             </div>
             </xml:group>
@@ -386,8 +388,8 @@ package no.polaric.aprsd.http
         /* Action. To be executed when user hits 'submit' button */
         def action(request : Request): NodeSeq =
             if (id == null || !id.matches("[a-zA-Z0-9_].*\\w*")) {
-               <h2>Feil id {id} </h2>
-               <p>må oppgi 'objid' som parameter og denne må begynne med bokstav/tall</p>;
+               <h2> { I.trf("Invalid id {0}",id)} </h2>
+               <p>  { I.tr("please give 'objid' as a parameter. This must start with a letter/number")} </p>;
             }
             else {
                val osymtab = req.getParameter("osymtab")
@@ -403,11 +405,11 @@ package no.polaric.aprsd.http
                       if (otxt==null) "" else otxt,
                       "true".equals(perm) ))
                   
-                  <h2>Objekt registrert</h2>
+                  <h2> {I.tr("Objekt updated")} </h2>
                   <p>ident={"'"+id+"'"}<br/>pos={showUTM(pos) }</p>;
                else
-                  <h2>Kan ikke registreres</h2>
-                  <p>Objekt '{id}' er allerede registrert av noen andre</p>
+                  <h2> {I.tr("Cannot update")} </h2>
+                  <p>  {I.trf("Object '{0}' is already added by someone else", id)} </p>
             }
             ;
             
@@ -551,57 +553,57 @@ package no.polaric.aprsd.http
             <label id="callsign"><b> { if (x != null && x.getIdent != null) x.getIdent().replaceFirst("@.*","") else "" } </b></label>
 
             { if (!simple)
-                 simpleLabel("symbol", "leftlab", "Symbol:",TXT( x.getSymtab()+" "+x.getSymbol())) else null }
+                 simpleLabel("symbol", "leftlab", I.tr("Symbol")+":",TXT( x.getSymtab()+" "+x.getSymbol())) else null }
             { if (x.getAlias() != null)
-                 simpleLabel("alias", "leftlab", "Alias:", <b>{x.getAlias()}</b>) else null }
+                 simpleLabel("alias", "leftlab", I.tr("Alias")+":", <b>{x.getAlias()}</b>) else null }
             { if (obj != null)
-                 simpleLabel("owner", "leftlab", "Avsender:", <b>{obj.getOwner().getIdent()}</b>) else null}
+                 simpleLabel("owner", "leftlab", I.tr("Sender")+":", <b>{obj.getOwner().getIdent()}</b>) else null}
             { if (x.getDescr() != null && x.getDescr().length() > 0)
-                 simpleLabel("descr", "leftlab", "Beskrivelse:", TXT(x.getDescr())) else null}
+                 simpleLabel("descr", "leftlab", I.tr("Description")+":", TXT(x.getDescr())) else null}
             { if (s != null && s.getStatus() != null)
-                 simpleLabel("status", "leftlab", "Status:", "Sist mottatte APRS statusmelding",
+                 simpleLabel("status", "leftlab", I.tr("Status")+":", I.tr("Last received APRS status message"),
                       TXT ( s.getStatus().text + " [" + df.format(s.getStatus().time)+"]"))  else null}
       
-            { simpleLabel("pos", "leftlab", "Posisjon (UTM):",
+            { simpleLabel("pos", "leftlab", I.tr("Position")+" (UTM):",
                 if (x.getPosition() != null) showUTM(x.getPosition())
-                else TXT("ikke registrert") ) }
+                else TXT(I.tr("not registered")) ) }
  
-            { simpleLabel("posll", "leftlab", "Position (latlong):",
+            { simpleLabel("posll", "leftlab", I.tr("Position")+" (latlong):",
                 if (x.getPosition() != null) TXT( ll2dmString( x.getPosition().toLatLng()))
-                else TXT("ikke registrert") ) }
+                else TXT(I.tr("not registered")) ) }
                 
             { if (x != null && x.getAmbiguity() > 0)
-                  simpleLabel("ambg", "leftlab", "Unøyaktighet:", 
-                    TXT( "± "+0.01 * Math.pow(10, x.getAmbiguity())/2 + " minutter" )) else null}
+                  simpleLabel("ambg", "leftlab", I.tr("Ambiguity")+":", 
+                    TXT( "± "+0.01 * Math.pow(10, x.getAmbiguity())/2 + " "+I.tr("minutes") )) else null}
             
             { if (s != null && s.getAltitude() >= 0)
-                  simpleLabel("altitude", "leftlab", "Høyde (o/h):", TXT(s.getAltitude() + " m ")) else null }
+                  simpleLabel("altitude", "leftlab", I.tr("Altitude")+":", TXT(s.getAltitude() + " m ")) else null }
             { if (s != null && s.getSpeed() > 0)
-                  simpleLabel("cspeed", "leftlab", "Bevegelse:", _directionIcon(s.getCourse(), fprefix(req))) else null }
+                  simpleLabel("cspeed", "leftlab", I.tr("Movement")+":", _directionIcon(s.getCourse(), fprefix(req))) else null }
 
-            { simpleLabel("hrd", "leftlab", "Sist rapportert:", "Tidspunkt for siste mottatte APRS rapport",
+            { simpleLabel("hrd", "leftlab", I.tr("Last reported")+":", I.tr("Time of last received APRS report"),
                   TXT( df.format(x.getUpdated()))) }
                   
-            { if (pathinfo != null) simpleLabel("via", "leftlab", "Via:", "Hvilken rute siste APRS rapport har tatt", 
+            { if (pathinfo != null) simpleLabel("via", "leftlab", I.tr("Via")+":", I.tr("Which route the last APRS report took"), 
                      TXT(pathinfo)) else null }
                   
             { var txt = "";
               if (s != null) {
                  if (s.isIgate()) txt += "IGATE "; 
-                 if (s.isWideDigi()) txt += "Wide-Digi";
+                 if (s.isWideDigi()) txt += I.tr("Wide-Digi");
                  if ((s.isIgate() || s.isWideDigi()) && simple)
-                   { simpleLabel("infra", "leftlab", "Infrastruktur:", TXT(txt)) } else null 
+                   { simpleLabel("infra", "leftlab", I.tr("Infrastructure")+":", TXT(txt)) } else null 
               } else null
             }
             
             { if (simple)        
                <div id="traffic">
                   { if (s != null && s.isInfra() )
-                     {  <label for="hrds" class="leftlab">Trafikk fra:</label>
+                     {  <label for="hrds" class="leftlab"> {I.tr("Traffic from")+":"} </label>
                         <label id="hrds"> { itemList(s.getTrafficFrom()) } </label> } else null }
                
                   { if (s != null && s.getTrafficTo != null && !s.getTrafficTo.isEmpty)
-                     {  <label for="hrd" class="leftlab">Trafikk til:</label>
+                     {  <label for="hrd" class="leftlab"> {I.tr("Traffic to")+":"} </label>
                         <label id="hrd"> { itemList(s.getTrafficTo()) } </label> } else null }
                </div>
                else null                    
@@ -612,16 +614,16 @@ package no.polaric.aprsd.http
             { if (edit && canUpdate)
                   <div>
                   <br/>
-                  { label("hidelabel", "leftlab", "Innstillinger:") ++
-                    checkBox("hidelabel", x.isLabelHidden(), TXT("Skjul ID")) ++
-                    checkBox("pers", x.isPersistent(), TXT("Varig lagring")) }
+                  { label("hidelabel", "leftlab", I.tr("Settings")+":") ++
+                    checkBox("hidelabel", x.isLabelHidden(), TXT(I.tr("Hide ID"))) ++
+                    checkBox("pers", x.isPersistent(), TXT(I.tr("Persistent storage"))) }
                   <br/>
                   { if (s != null)
-                        label("newcolor", "leftlab", "Spor:") ++ 
-                        checkBox("newcolor", false, TXT("Finn ny Farge"))
+                        label("newcolor", "leftlab", I.tr("Trail")+":") ++ 
+                        checkBox("newcolor", false, TXT(I.tr("Find new colour")))
                     else null }
                   <br/>   
-                  <label for="nalias" class="leftlab">Ny alias:</label>
+                  <label for="nalias" class="leftlab"> {I.tr("New alias")+":"} </label>
                   { textInput("nalias", 10, 20, 
                         if (x.getAlias()==null) "" else x.getAlias()) }
                   <br/>
@@ -695,10 +697,10 @@ package no.polaric.aprsd.http
        val s = _api.getDB().getStation(req.getParameter("id"), null)
        val result: NodeSeq =
           if (s == null)
-             <h2>Feil:</h2><p>Fant ikke stasjon</p>;
+             <h2>Feil:</h2><p> {I.tr("Couldn't find station")} </p>;
           else
              <table>
-               <tr><th>Tidspunkt</th><th>Km/h </th><th>Retn </th><th>Distanse</th><th>APRS via</th></tr>
+               <tr><th>{I.tr("Time")} </th><th>Km/h </th><th> {I.tr("Dir")} </th><th> {I.tr("Distance")} </th><th> {I.tr("APRS via")} </th></tr>
                {
                    val h = s.getTrail()
                    var x = s.getHItem()
@@ -744,18 +746,18 @@ package no.polaric.aprsd.http
        
        val result : NodeSeq = 
           if (item == null)
-            TXT("Fant ikke info: "+ident)
+            TXT(I.tr("Couldn't find info")+": "+ident)
           else
             <xml:group>
-            <label for="callsign" class="lleftlab">Ident:</label>
+            <label for="callsign" class="lleftlab"> {I.tr("Ident")+":"} </label>
             <label id="callsign"><b> { ident } </b></label>
-            { simpleLabel("time",  "lleftlab", "Tid:", TXT( df.format(item.getTS()))) ++
-              { if (item.speed >= 0) simpleLabel("speed", "lleftlab", "Fart:", TXT(item.speed+" km/h") )
+            { simpleLabel("time",  "lleftlab", I.tr("Time")+":", TXT( df.format(item.getTS()))) ++
+              { if (item.speed >= 0) simpleLabel("speed", "lleftlab", I.tr("Speed")+":", TXT(item.speed+" km/h") )
                 else xml.NodeSeq.Empty } ++
-              simpleLabel("dir",   "lleftlab", "Retning:", _directionIcon(item.course, fprefix(req)))  }
+              simpleLabel("dir",   "lleftlab", I.tr("Heading")+":", _directionIcon(item.course, fprefix(req)))  }
             <div id="traffic">
             { if (item.pathinfo != null) 
-                 simpleLabel("via",   "lleftlab", "APRS via:", TXT( cleanPath(item.pathinfo)))
+                 simpleLabel("via",   "lleftlab", I.tr("APRS via")+":", TXT( cleanPath(item.pathinfo)))
               else null }
             </div>
             </xml:group>

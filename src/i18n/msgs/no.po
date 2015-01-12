@@ -1,0 +1,349 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Polaric-aprsd\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: LA7ECA Øyvind Hanssen <ohanssen@acm.org>\n"
+"Language-Team: none\n"
+"Language: no\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 1.6.10\n"
+
+#: src/httpd/Webserver.scala:54
+msgid "You are not authorized for such operations"
+msgstr "Du er ikke autorisert for slike operasjoner"
+
+#: src/httpd/Webserver.scala:61
+msgid "Clear own objects, ok"
+msgstr "Nulstille egne objekter, ok"
+
+#: src/httpd/Webserver.scala:65
+msgid "Clear link information, ok"
+msgstr "Nullstille lenke-info, ok"
+
+#: src/httpd/Webserver.scala:70
+msgid "Server run since:"
+msgstr "Tjener kjørt siden:"
+
+#: src/httpd/Webserver.scala:71
+msgid "Server version:"
+msgstr "Tjener versjon:"
+
+#: src/httpd/Webserver.scala:72
+msgid "Number of APRS items:"
+msgstr "Antall APRS enheter:"
+
+#: src/httpd/Webserver.scala:73
+msgid "Number of connections:"
+msgstr "Antall forbindelser:"
+
+#: src/httpd/Webserver.scala:74
+msgid "Own objects:"
+msgstr "Egne objekter:"
+
+#: src/httpd/Webserver.scala:75
+msgid "Number of HTTP clients:"
+msgstr "Antall HTTP klienter nå:"
+
+#: src/httpd/Webserver.scala:76
+msgid "Number of HTTP requests:"
+msgstr "Antall HTTP forespørsler:"
+
+#: src/httpd/Webserver.scala:77
+msgid "Used memory:"
+msgstr "Brukt minne:"
+
+#: src/httpd/Webserver.scala:83
+msgid "Plugin module"
+msgstr "Plugin modul"
+
+#: src/httpd/Webserver.scala:102
+msgid "Remote control"
+msgstr "Fjernkontroll"
+
+#: src/httpd/Webserver.scala:107
+msgid "Unknown command"
+msgstr "Ukjent kommando"
+
+#: src/httpd/Webserver.scala:141 src/httpd/Webserver.scala:359
+#: src/httpd/Webserver.scala:556
+msgid "Symbol"
+msgstr "Symbol"
+
+#: src/httpd/Webserver.scala:142 src/httpd/Webserver.scala:360
+msgid ""
+"APRS symbol table and symbol. Fill in or chose from the list at the right "
+"side."
+msgstr ""
+"APRS symboltabell og symbol. Fyll in eller velg fra liste på høyre side."
+
+#: src/httpd/Webserver.scala:147 src/httpd/Webserver.scala:368
+msgid "Pos (UTM)"
+msgstr "Pos (UTM)"
+
+#: src/httpd/Webserver.scala:147
+msgid "Position in UTM format."
+msgstr "Posisjon i UTM format"
+
+#: src/httpd/Webserver.scala:160
+msgid "You are not authorized for admin operations"
+msgstr "Du er ikke autorisert for admin operasjoner"
+
+#: src/httpd/Webserver.scala:168
+msgid "Position registerred"
+msgstr "Posisjon registrert"
+
+#: src/httpd/Webserver.scala:182
+msgid "Search and rescue mode"
+msgstr "Søk- og redningsmodus"
+
+#: src/httpd/Webserver.scala:190
+msgid "Certain types of info only visible for authorized users."
+msgstr "Visse typer info bare synlig for autoriserte brukere."
+
+#: src/httpd/Webserver.scala:191
+msgid "SAR mode"
+msgstr "SAR modus"
+
+#: src/httpd/Webserver.scala:194
+msgid "Alias/icon"
+msgstr "Alias/ikon"
+
+#: src/httpd/Webserver.scala:195
+msgid "hidden"
+msgstr "skjult"
+
+#: src/httpd/Webserver.scala:198
+msgid "Hide prefix"
+msgstr "Skjul prefiks"
+
+#: src/httpd/Webserver.scala:204 src/httpd/Webserver.scala:365
+#: src/httpd/Webserver.scala:562
+msgid "Description"
+msgstr "Beskrivelse"
+
+#: src/httpd/Webserver.scala:212 src/httpd/Webserver.scala:233
+msgid "Activated"
+msgstr "Aktivert"
+
+#: src/httpd/Webserver.scala:240
+msgid "Ended"
+msgstr "Avsluttet"
+
+#: src/httpd/Webserver.scala:258
+msgid "SAR URL not available or you are not authorized"
+msgstr "SAR URL ikke tilgjengelig eller du er ikke autorisert"
+
+#: src/httpd/Webserver.scala:261
+msgid "Short URL for search and rescue"
+msgstr "Kort URL for søk- og redning"
+
+#: src/httpd/Webserver.scala:263
+msgid "Key"
+msgstr "Nøkkel"
+
+#: src/httpd/Webserver.scala:265
+msgid "Valid 1 day from now"
+msgstr "Gyldig i 1 døgn fra nå"
+
+#: src/httpd/Webserver.scala:281
+msgid "Remove object"
+msgstr "Slett objekt"
+
+#: src/httpd/Webserver.scala:294 src/httpd/Webserver.scala:326
+msgid "Error"
+msgstr "Feil"
+
+#: src/httpd/Webserver.scala:295 src/httpd/Webserver.scala:327
+msgid "'objid' must be given as parameter"
+msgstr "'objid' må oppgis som parameter"
+
+#: src/httpd/Webserver.scala:300
+msgid "Object removed!"
+msgstr "Objekt slettet!"
+
+#: src/httpd/Webserver.scala:303
+msgid "Couldn't find object"
+msgstr "Kunne ikke finne objekt"
+
+#: src/httpd/Webserver.scala:316
+msgid "Reset info about station/object"
+msgstr "Nullstill info om stasjon/objekt"
+
+#: src/httpd/Webserver.scala:333
+msgid "Info about object is reset!"
+msgstr "Info om objektet er nullstilt!"
+
+#: src/httpd/Webserver.scala:350
+msgid "Add object"
+msgstr "Legg til objekt"
+
+#: src/httpd/Webserver.scala:356
+msgid "Identifier for object"
+msgstr "Identifikator for objekt"
+
+#: src/httpd/Webserver.scala:356
+msgid "Object ID"
+msgstr "Objekt ID"
+
+#: src/httpd/Webserver.scala:368
+msgid "Object's position"
+msgstr "Objektets posisjon"
+
+#: src/httpd/Webserver.scala:378 src/httpd/Webserver.scala:617
+msgid "Settings"
+msgstr "Innstillinger"
+
+#: src/httpd/Webserver.scala:379
+msgid "Timeless (Permanent)"
+msgstr "Tidløs (Permanent)"
+
+#: src/httpd/Webserver.scala:391
+#, java-format
+msgid "Invalid id {0}"
+msgstr "Ugyldig id {0}"
+
+#: src/httpd/Webserver.scala:392
+msgid ""
+"please give 'objid' as a parameter. This must start with a letter/number"
+msgstr "du må oppgi 'objid' som parameter. Denne må starte med en bokstav/tall"
+
+#: src/httpd/Webserver.scala:408
+msgid "Objekt updated"
+msgstr "Objekt oppdatert"
+
+#: src/httpd/Webserver.scala:411
+msgid "Cannot update"
+msgstr "Kunne ikke oppdatere"
+
+#: src/httpd/Webserver.scala:412
+msgid "Object '{0}' is already added by someone else"
+msgstr "Objekt '{0}' er allerede registrert av noen andre"
+
+#: src/httpd/Webserver.scala:558
+msgid "Alias"
+msgstr "Alias"
+
+#: src/httpd/Webserver.scala:560
+msgid "Sender"
+msgstr "Avsender"
+
+#: src/httpd/Webserver.scala:564
+msgid "Last received APRS status message"
+msgstr "Sist mottatte APRS statusmelding"
+
+#: src/httpd/Webserver.scala:564
+msgid "Status"
+msgstr "Status"
+
+#: src/httpd/Webserver.scala:567 src/httpd/Webserver.scala:571
+msgid "Position"
+msgstr "Posisjon"
+
+#: src/httpd/Webserver.scala:569 src/httpd/Webserver.scala:573
+msgid "not registered"
+msgstr "ikke registrert"
+
+#: src/httpd/Webserver.scala:576
+msgid "Ambiguity"
+msgstr "Unøyaktighet"
+
+#: src/httpd/Webserver.scala:577
+msgid "minutes"
+msgstr "minutter"
+
+#: src/httpd/Webserver.scala:580
+msgid "Altitude"
+msgstr "Høyde (m/oh)"
+
+#: src/httpd/Webserver.scala:582
+msgid "Movement"
+msgstr "Bevegelse"
+
+#: src/httpd/Webserver.scala:584
+msgid "Last reported"
+msgstr "Sist rapportert"
+
+#: src/httpd/Webserver.scala:584
+msgid "Time of last received APRS report"
+msgstr "Tidspunkt for sist mottatte APRS rapport"
+
+#: src/httpd/Webserver.scala:587
+msgid "Via"
+msgstr "VIa"
+
+#: src/httpd/Webserver.scala:587
+msgid "Which route the last APRS report took"
+msgstr "Hvilken rute den siste APRS rapporten gikk"
+
+#: src/httpd/Webserver.scala:593
+msgid "Wide-Digi"
+msgstr "Wide-Digi"
+
+#: src/httpd/Webserver.scala:595
+msgid "Infrastructure"
+msgstr "Infrastruktur"
+
+#: src/httpd/Webserver.scala:602
+msgid "Traffic from"
+msgstr "Trafikk fra"
+
+#: src/httpd/Webserver.scala:606
+msgid "Traffic to"
+msgstr "Trafikk fra"
+
+#: src/httpd/Webserver.scala:618
+msgid "Hide ID"
+msgstr "Skjul ID"
+
+#: src/httpd/Webserver.scala:619
+msgid "Persistent storage"
+msgstr "Varig lagring"
+
+#: src/httpd/Webserver.scala:622
+msgid "Trail"
+msgstr "Spor"
+
+#: src/httpd/Webserver.scala:623
+msgid "Find new colour"
+msgstr "Finn ny farge"
+
+#: src/httpd/Webserver.scala:700
+msgid "Couldn't find station"
+msgstr "Kunne ikke finne stasjon"
+
+#: src/httpd/Webserver.scala:703 src/httpd/Webserver.scala:760
+msgid "APRS via"
+msgstr "APRS via"
+
+# Short for direction
+#: src/httpd/Webserver.scala:703
+msgid "Dir"
+msgstr "Retn"
+
+#: src/httpd/Webserver.scala:703
+msgid "Distance"
+msgstr "Avstand"
+
+#: src/httpd/Webserver.scala:703 src/httpd/Webserver.scala:754
+msgid "Time"
+msgstr "Tid"
+
+#: src/httpd/Webserver.scala:749
+msgid "Couldn't find info"
+msgstr "Kunne ikke finne info"
+
+#: src/httpd/Webserver.scala:752
+msgid "Ident"
+msgstr "Ident"
+
+#: src/httpd/Webserver.scala:755
+msgid "Speed"
+msgstr "Fart"
+
+#: src/httpd/Webserver.scala:757
+msgid "Heading"
+msgstr "Retning"
