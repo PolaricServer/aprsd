@@ -20,6 +20,8 @@ import org.simpleframework.transport.connect.SocketConnection
 import org.simpleframework.http._
 import uk.me.jstott.jcoord._
 import no.polaric.aprsd._
+import com.teamunify.i18n._
+
 
 
 package no.polaric.aprsd.http 
@@ -114,7 +116,7 @@ package no.polaric.aprsd.http
              if (authorizedForUpdate(req))
                 func(req)
              else
-                <h2>Du er ikke autorisert for denne operasjonen</h2>
+                <h2> {I.tr("You are not authorized for this operation")} </h2>
       
           wrapper
        }
@@ -127,18 +129,18 @@ package no.polaric.aprsd.http
              if (authorizedForAdmin(req))
                 func(req)
              else
-                <h2>Du er ikke autorisert for denne operasjonen</h2>
+                <h2> {I.tr("You are not authorized for this operation")} </h2>
       
           wrapper
        }
 
        def simple_submit(req: Request): NodeSeq =
-           <input type="submit" name="update" id="update" value="Oppdater"/>
+           <input type="submit" name="update" id="update" value={I.tr("Update")} />
            ;
            
        def default_submit(req: Request): NodeSeq = 
-           <input type="submit" onclick="window.close()" id="cancel" value="Avbryt"/>
-           <input type="submit" name="update" id="update" value="Oppdater"/>
+           <input type="submit" onclick="window.close()" id="cancel" value={I.tr("Cancel")} />
+           <input type="submit" name="update" id="update" value={I.tr("Update")} />
            ;
            
            
@@ -241,7 +243,7 @@ package no.polaric.aprsd.http
          </span>  
       }
       catch {
-          case e:Exception => Text("(ugyldig posisjon)")
+          case e:Exception => Text(I.tr("(invalid position)"))
       }
   
   
@@ -304,7 +306,7 @@ package no.polaric.aprsd.http
 
        <div id="iconselect">    
        <input type="radio" name="iconselect" value="system"
-           checked={if (s== null || s.iconIsNull()) "checked" else null:String } /> Automatisk 
+           checked={if (s== null || s.iconIsNull()) "checked" else null:String } /> {I.tr("Automatic")} 
        
                    
        { if (files != null) {

@@ -12,6 +12,26 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.6.10\n"
 
+#: src/httpd/ServerUtils.scala:119 src/httpd/ServerUtils.scala:132
+msgid "You are not authorized for this operation"
+msgstr "Du er ikke autorisert for denne operasjonen"
+
+#: src/httpd/ServerUtils.scala:138 src/httpd/ServerUtils.scala:143
+msgid "Update"
+msgstr "Oppdater"
+
+#: src/httpd/ServerUtils.scala:142
+msgid "Cancel"
+msgstr "Avbryt"
+
+#: src/httpd/ServerUtils.scala:246
+msgid "(invalid position)"
+msgstr "(ugyldig posisjon)"
+
+#: src/httpd/ServerUtils.scala:309
+msgid "Automatic"
+msgstr "Automatisk"
+
 #: src/httpd/Webserver.scala:54
 msgid "You are not authorized for such operations"
 msgstr "Du er ikke autorisert for slike operasjoner"
@@ -68,6 +88,34 @@ msgstr "Fjernkontroll"
 msgid "Unknown command"
 msgstr "Ukjent kommando"
 
+#: src/httpd/Webserver.scala:116
+msgid "Post"
+msgstr "Post"
+
+#: src/httpd/Webserver.scala:117
+msgid "Sign"
+msgstr "Skilt"
+
+#: src/httpd/Webserver.scala:118 src/httpd/Webserver.scala:120
+msgid "Cross"
+msgstr "Kors"
+
+#: src/httpd/Webserver.scala:119
+msgid "Triangle"
+msgstr "Trekant"
+
+#: src/httpd/Webserver.scala:121
+msgid "OPS/EOS"
+msgstr "OBS/KO"
+
+#: src/httpd/Webserver.scala:122
+msgid "Radio station"
+msgstr "Radiostasjon"
+
+#: src/httpd/Webserver.scala:134
+msgid "Set your own position"
+msgstr "Sett din egen posisjon"
+
 #: src/httpd/Webserver.scala:141 src/httpd/Webserver.scala:359
 #: src/httpd/Webserver.scala:556
 msgid "Symbol"
@@ -107,6 +155,10 @@ msgstr "Visse typer info bare synlig for autoriserte brukere."
 #: src/httpd/Webserver.scala:191
 msgid "SAR mode"
 msgstr "SAR modus"
+
+#: src/httpd/Webserver.scala:192
+msgid "activated"
+msgstr "aktivert"
 
 #: src/httpd/Webserver.scala:194
 msgid "Alias/icon"
@@ -293,7 +345,7 @@ msgstr "Trafikk fra"
 
 #: src/httpd/Webserver.scala:606
 msgid "Traffic to"
-msgstr "Trafikk fra"
+msgstr "Trafikk til"
 
 #: src/httpd/Webserver.scala:618
 msgid "Hide ID"
@@ -310,6 +362,10 @@ msgstr "Spor"
 #: src/httpd/Webserver.scala:623
 msgid "Find new colour"
 msgstr "Finn ny farge"
+
+#: src/httpd/Webserver.scala:626
+msgid "New alias"
+msgstr "Nytt alias"
 
 #: src/httpd/Webserver.scala:700
 msgid "Couldn't find station"

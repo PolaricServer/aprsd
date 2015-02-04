@@ -113,13 +113,13 @@ package no.polaric.aprsd.http
    def symChoice = 
             <select id="symChoice" class="symChoice"
              onchange="var x=event.target.value;document.getElementById('osymtab').value=x[0];document.getElementById('osym').value=x[1];">
-               <option value="/c" style="background-image:url(../aprsd/icons/orient.gif)">Post</option>
-               <option value="\m" style="background-image:url(../aprsd/icons/sign.gif)">Skilt</option>
-               <option value="\." style="background-image:url(../aprsd/icons/sym00.gif)">Kryss</option>
-               <option value="\n" style="background-image:url(../aprsd/icons/sym07.gif)">Trekant</option>
-               <option value="/+" style="background-image:url(../aprsd/icons/sym02.png)">Kors</option>
-               <option value="/o" style="background-image:url(../aprsd/icons/eoc.png)">OPS/KO</option>
-               <option value="/r" style="background-image:url(../aprsd/icons/radio.png)">Radiostasjon</option>
+               <option value="/c" style="background-image:url(../aprsd/icons/orient.png)"> {I.tr("Post")} </option>
+               <option value="\m" style="background-image:url(../aprsd/icons/sign.png)"> {I.tr("Sign")} </option>
+               <option value="\." style="background-image:url(../aprsd/icons/sym00.png)"> {I.tr("Cross")} </option>
+               <option value="\n" style="background-image:url(../aprsd/icons/sym07.png)"> {I.tr("Triangle")} </option>
+               <option value="/+" style="background-image:url(../aprsd/icons/sym02.png)"> {I.tr("Cross")} </option>
+               <option value="/o" style="background-image:url(../aprsd/icons/eoc.png)"> {I.tr("OPS/EOS")} </option>
+               <option value="/r" style="background-image:url(../aprsd/icons/radio.png)"> {I.tr("Radio station")} </option>
             </select>
             ;
    
@@ -131,7 +131,7 @@ package no.polaric.aprsd.http
    def handle_setownpos(req : Request, res: Response) =
    {
         val pos = getCoord(req)
-        val prefix = <h2>Legge inn egen posisjon</h2>
+        val prefix = <h2> {I.tr("Set your own position")} </h2>
         val p = api.getOwnPos()
        
         /* Fields to be filled in */
@@ -189,7 +189,7 @@ package no.polaric.aprsd.http
            <xml:group>
            <p> {I.tr("Certain types of info only visible for authorized users.")} </p>
            <label for="sar_on" class="lleftlab"> {I.tr("SAR mode")+":"} </label>
-           { checkBox("sar_on", api.getSar() !=null, TXT("aktivert")) }  
+           { checkBox("sar_on", api.getSar() !=null, TXT(I.tr("activated"))) }  
            <br/>
            <label for="sar_hidesar" class="lleftlab"> {I.tr("Alias/icon")+":"} </label>
            { checkBox("sar_hidesar", api.getSar()==null || api.getSar().isAliasHidden(), TXT(I.tr("hidden"))) }  
