@@ -3,6 +3,13 @@ body {background: #cfd5cc; }
 th { text-align: left; }
 a {text-decoration: none}
 
+h2 {
+   font-size: 140%; 
+   font-family: arial;
+   margin-left: 5px; 
+   margin-bottom: 10px
+}
+
 div.trblock, label {display: block; overflow: hidden; }
 
 td {
@@ -44,13 +51,11 @@ select#symChoice option, select.symChoice option {
   background-size: contain;
 }
 
-span.kartref {
-   background: yellow;
-   text-decoration: underline;
-}
+span.kartref { color: #700 }
+span.kartref:hover {font-weight: bold}
 
 span.postfield {font-size: smaller; color: #755; margin-left: 5px; }
 span.fielderror {color: #c00}
 span.fieldsuccess {color: #080;}
 
-input {height: 1.5em; padding: 0px 3px 0px 3px}
+input {height: 1.5em; margin-left: 5px; padding: 0px 3px 0px 3px}
