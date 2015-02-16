@@ -7,7 +7,7 @@ fi
 mkdir -p _lib > /dev/null 2>&1
 for lang in $*
 do
-  echo "Compiling $lang to package com.example.translations"
-  msgfmt --verbose -f -r no.polaric.aprsd.i18n.messages --java2 -d _lib \
+  echo "Compiling $lang to package no.polaric.aprsd.http"
+  msgfmt --verbose -f -r no.polaric.aprsd.http.i18n.Messages --java2 -d _lib \
   -l ${lang} src/i18n/msgs/${lang}.po
 done

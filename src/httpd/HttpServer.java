@@ -20,8 +20,7 @@ import java.text.*;
 import com.mindprod.base64.Base64;
 import java.util.concurrent.locks.*; 
 import java.util.concurrent.*;
-import com.teamunify.i18n.*;
-
+import org.xnap.commons.i18n.*;
 
 
 
@@ -67,18 +66,14 @@ public class HttpServer implements Container, ServerAPI.ServerStats
             String uri = req.getTarget().replaceAll("\\?.*", ""); 
             boolean allowed = 
                  req.getClientAddress().getAddress().isLoopbackAddress(); 
-         
-            Query parms = req.getQuery();
-            String lang = parms.get("lang");
-            if (lang != null && lang.length() > 0)
-                I.setLanguage(lang);
                 
             resp.setValue("Server", "Polaric APRSD 1.6");
             resp.setValue("Content-Type", "text/html; charset=utf-8");
          
             _Handler h = _handlers.get(uri);
-            if (h != null && allowed) 
-               h.method.invoke(h.obj, req, resp);
+            if (h != null && allowed)  
+                h.method.invoke(h.obj, req, resp);
+            
             else {
                OutputStream os = resp.getOutputStream();
                PrintWriter out =  new PrintWriter(new OutputStreamWriter(os, _encoding));

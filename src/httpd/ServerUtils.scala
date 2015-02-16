@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,7 @@ import org.simpleframework.transport.connect.SocketConnection
 import org.simpleframework.http._
 import uk.me.jstott.jcoord._
 import no.polaric.aprsd._
-import com.teamunify.i18n._
-
+import org.xnap.commons.i18n._
 
 
 package no.polaric.aprsd.http 
@@ -31,6 +30,7 @@ package no.polaric.aprsd.http
   {
       val doctype = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN \">";
 
+      
 
       protected def htmlBody (req: Request, head : NodeSeq, content : NodeSeq) : Node =
          if (req.getParameter("ajax") == null)           
@@ -112,12 +112,13 @@ package no.polaric.aprsd.http
        protected def IF_AUTH( func: (Request) => NodeSeq ) 
                       : (Request) => NodeSeq = 
        {
-          def wrapper(req : Request) : NodeSeq =
+          def wrapper(req : Request) : NodeSeq = 
              if (authorizedForUpdate(req))
                 func(req)
-             else
-                <h2> {I.tr("You are not authorized for this operation")} </h2>
-      
+             else {
+                val i18n = getI18n(req)
+                <h2> {i18n.tr("You are not authorized for this operation")} </h2>
+             }
           wrapper
        }
        
@@ -128,20 +129,25 @@ package no.polaric.aprsd.http
           def wrapper(req : Request) : NodeSeq =
              if (authorizedForAdmin(req))
                 func(req)
-             else
-                <h2> {I.tr("You are not authorized for this operation")} </h2>
-      
+             else {
+                val i18n = getI18n(req)
+                <h2> {i18n.tr("You are not authorized for this operation")} </h2>
+             }
           wrapper
        }
+       
 
-       def simple_submit(req: Request): NodeSeq =
-           <input type="submit" name="update" id="update" value={I.tr("Update")} />
-           ;
+       def simple_submit(req: Request): NodeSeq = {
+           val i18n = getI18n(req)
+           <input type="submit" name="update" id="update" value={i18n.tr("Update")} />
+       }
            
-       def default_submit(req: Request): NodeSeq = 
-           <input type="submit" onclick="window.close()" id="cancel" value={I.tr("Cancel")} />
-           <input type="submit" name="update" id="update" value={I.tr("Update")} />
-           ;
+           
+       def default_submit(req: Request): NodeSeq = {
+           val i18n = getI18n(req)
+           <input type="submit" onclick="window.close()" id="cancel" value={i18n.tr("Cancel")} />
+           <input type="submit" name="update" id="update" value={i18n.tr("Update")} />
+       }
            
            
        /**
@@ -233,7 +239,8 @@ package no.polaric.aprsd.http
    /** 
     * Print reference as UTM reference. 
     */
-   protected def showUTM(ref: Reference) : NodeSeq =
+   protected def showUTM(req: Request, ref: Reference) : NodeSeq = {
+      val i18n = getI18n(req)
       try {
          val sref = ref.toLatLng().toUTMRef().toString()
          <span class="utmref">
@@ -243,8 +250,9 @@ package no.polaric.aprsd.http
          </span>  
       }
       catch {
-          case e:Exception => Text(I.tr("(invalid position)"))
+          case e:Exception => Text(i18n.tr("(invalid position)"))
       }
+   }
   
   
      
@@ -285,19 +293,21 @@ package no.polaric.aprsd.http
     * @param wprefix  web prefix 
     * @param fprefix for icon files (relative to wprefix)
     */
-   def iconSelect(s: PointObject, wprefix: String, fprefix: String): NodeSeq =
+   def iconSelect(req: Request, s: PointObject, wprefix: String, fprefix: String): NodeSeq =
    {
        def fmatch(x: String, y: String): Boolean = {
           val yy = y.substring(y.lastIndexOf("/")+1)
           (x.equals(y) || x.equals(yy)) 
        }
-       
+      
+      
+       val i18n = getI18n(req)
        val webdir = System.getProperties().getProperty("webdir", ".")
        val fsprefix = if (fprefix.charAt(0) == '/') fprefix.substring(1,fprefix.length()) 
                       else fprefix 
 
        val icondir = new File(webdir+"/"+fsprefix)
-       
+      
        val flt = new FilenameFilter()
            { def accept(dir:File, f: String): Boolean = f.matches(".*\\.(png|gif|jpg)") } 
        val cmp = new Comparator[File] ()
@@ -306,7 +316,7 @@ package no.polaric.aprsd.http
 
        <div id="iconselect">    
        <input type="radio" name="iconselect" value="system"
-           checked={if (s== null || s.iconIsNull()) "checked" else null:String } /> {I.tr("Automatic")} 
+           checked={if (s== null || s.iconIsNull()) "checked" else null:String } /> {i18n.tr("Automatic")} 
        
                    
        { if (files != null) {

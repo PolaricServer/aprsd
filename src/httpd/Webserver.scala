@@ -22,7 +22,7 @@ import org.simpleframework.http.core.Container
 import org.simpleframework.transport.connect.Connection
 import org.simpleframework.transport.connect.SocketConnection
 import org.simpleframework.http._
-import com.teamunify.i18n._
+import org.xnap.commons.i18n._
 
 
    
@@ -32,18 +32,18 @@ package no.polaric.aprsd.http
   class Webserver 
       ( val api: ServerAPI) extends XmlServer(api) with ServerUtils
   {
-
-
+ 
    val _time = new Date();
+      
 
-
-
+    
    /** 
     * Admin interface. 
     * To be developed further...
     */
    def handle_admin(req : Request, res: Response) =
    {   
+       val I = getI18n(req)
        val out = getWriter(res);
        val cmd = req.getParameter("cmd")
        val head = <meta http-equiv="refresh" content="60" />
@@ -110,9 +110,10 @@ package no.polaric.aprsd.http
    }
    
    
-   def symChoice = 
-            <select id="symChoice" class="symChoice"
-             onchange="var x=event.target.value;document.getElementById('osymtab').value=x[0];document.getElementById('osym').value=x[1];">
+   def symChoice(req: Request) = {
+        val I = getI18n(req)
+        <select id="symChoice" class="symChoice"
+           onchange="var x=event.target.value;document.getElementById('osymtab').value=x[0];document.getElementById('osym').value=x[1];">
                <option value="/c" style="background-image:url(../aprsd/icons/orient.png)"> {I.tr("Post")} </option>
                <option value="\m" style="background-image:url(../aprsd/icons/sign.png)"> {I.tr("Sign")} </option>
                <option value="\." style="background-image:url(../aprsd/icons/sym00.png)"> {I.tr("Cross")} </option>
@@ -120,8 +121,8 @@ package no.polaric.aprsd.http
                <option value="/+" style="background-image:url(../aprsd/icons/sym02.png)"> {I.tr("Cross")} </option>
                <option value="/o" style="background-image:url(../aprsd/icons/eoc.png)"> {I.tr("OPS/EOS")} </option>
                <option value="/r" style="background-image:url(../aprsd/icons/radio.png)"> {I.tr("Radio station")} </option>
-            </select>
-            ;
+         </select>
+    }
    
    
    
@@ -130,6 +131,7 @@ package no.polaric.aprsd.http
     */          
    def handle_setownpos(req : Request, res: Response) =
    {
+        val I = getI18n(req)
         val pos = getCoord(req)
         val prefix = <h2> {I.tr("Set your own position")} </h2>
         val p = api.getOwnPos()
@@ -142,13 +144,13 @@ package no.polaric.aprsd.http
                     I.tr("APRS symbol table and symbol. Fill in or chose from the list at the right side.")) ++
               textInput("osymtab", 1, 1, ""+p.getSymtab()) ++
               textInput("osym", 1, 1, ""+p.getSymbol()) ++
-              symChoice ++
+              symChoice(req) ++
               br ++
               label("utmz", "lleftlab", I.tr("Pos (UTM)")+":", I.tr("Position in UTM format.")) ++
               {  if (pos==null)
                     utmForm('W', 34)
                  else
-                    showUTM(pos)
+                    showUTM(req, pos)
               }
            }
            </xml:group>
@@ -166,7 +168,7 @@ package no.polaric.aprsd.http
                       if (osymtab==null) '/' else osymtab(0), if (osym==null) 'c' else osym(0))
                   
                  <h2> {I.tr("Position registerred")} </h2>
-                 <p>pos={ showUTM(pos) }</p>
+                 <p>pos={ showUTM(req, pos) }</p>
               }
         };
             
@@ -179,6 +181,7 @@ package no.polaric.aprsd.http
    
    def handle_sarmode(req : Request, res: Response) =
    {
+       val I = getI18n(req)
        val prefix = <h2> {I.tr("Search and rescue mode")} </h2>
        var filter = req.getParameter("sar_prefix")
        var reason = req.getParameter("sar_reason")
@@ -250,6 +253,7 @@ package no.polaric.aprsd.http
    
    def handle_sarurl(req : Request, res: Response) =
    {
+       val I = getI18n(req)
        val url = req.getParameter("url")
        
        def action(req : Request): NodeSeq = 
@@ -276,6 +280,7 @@ package no.polaric.aprsd.http
 
    def handle_deleteobject(req : Request, res: Response) =
    {
+       val I = getI18n(req)
        var id = req.getParameter("objid")
        id = if (id != null) id.replaceFirst("@.*", "") else null
        val prefix = <h2> { I.tr("Remove object")} </h2>
@@ -312,6 +317,7 @@ package no.polaric.aprsd.http
 
    def handle_resetinfo(req : Request, res : Response) =
    {
+       val I = getI18n(req)
        val id = req.getParameter("objid")
        val prefix = <h2> {I.tr("Reset info about station/object")} </h2>
        
@@ -345,6 +351,7 @@ package no.polaric.aprsd.http
     */          
    def handle_addobject(req : Request, res : Response) =
    {
+        val I = getI18n(req)
         val pos = getCoord(req)
         val id = req.getParameter("objid")
         val prefix = <h2> {I.tr("Add object")} </h2>
@@ -360,7 +367,7 @@ package no.polaric.aprsd.http
                      I.tr("APRS symbol table and symbol. Fill in or chose from the list at the right side.")) ++
               textInput("osymtab", 1, 1, "/") ++
               textInput("osym", 1, 1, "c") ++
-              symChoice ++
+              symChoice(req) ++
               br ++
               label("descr", "lleftlab", I.tr("Description")+":", "") ++
               textInput("descr", 30, 40, "") ++
@@ -369,7 +376,7 @@ package no.polaric.aprsd.http
               {  if (pos==null)
                    utmForm('W', 34)
                  else
-                   showUTM(pos)
+                   showUTM(req, pos)
               }
             }
             <br/>
@@ -388,7 +395,7 @@ package no.polaric.aprsd.http
         /* Action. To be executed when user hits 'submit' button */
         def action(request : Request): NodeSeq =
             if (id == null || !id.matches("[a-zA-Z0-9_].*\\w*")) {
-               <h2> { I.trf("Invalid id {0}",id)} </h2>
+               <h2> { I.tr("Invalid id {0}",id)} </h2>
                <p>  { I.tr("please give 'objid' as a parameter. This must start with a letter/number")} </p>;
             }
             else {
@@ -406,10 +413,10 @@ package no.polaric.aprsd.http
                       "true".equals(perm) ))
                   
                   <h2> {I.tr("Objekt updated")} </h2>
-                  <p>ident={"'"+id+"'"}<br/>pos={showUTM(pos) }</p>;
+                  <p>ident={"'"+id+"'"}<br/>pos={showUTM(req, pos) }</p>;
                else
                   <h2> {I.tr("Cannot update")} </h2>
-                  <p>  {I.trf("Object '{0}' is already added by someone else", id)} </p>
+                  <p>  {I.tr("Object '{0}' is already added by someone else", id)} </p>
             }
             ;
             
@@ -447,6 +454,7 @@ package no.polaric.aprsd.http
    
    def handle_search(req : Request, res : Response) =
    {
+       val I = getI18n(req)
        val filtid = if (_infraonly) "infra"  else req.getParameter("filter")
        val vfilt = ViewFilter.getFilter(filtid, authorizedForUpdate(req))
        
@@ -511,6 +519,7 @@ package no.polaric.aprsd.http
     */
    def _handle_station(req : Request, res : Response, canUpdate: Boolean) =
    {        
+        val I = getI18n(req)
         val id = req.getParameter("id")
         val x = _api.getDB().getItem(id, null)
         val s = if (x.isInstanceOf[Station]) x.asInstanceOf[Station] else null
@@ -565,7 +574,7 @@ package no.polaric.aprsd.http
                       TXT ( s.getStatus().text + " [" + df.format(s.getStatus().time)+"]"))  else null}
       
             { simpleLabel("pos", "leftlab", I.tr("Position")+" (UTM):",
-                if (x.getPosition() != null) showUTM(x.getPosition())
+                if (x.getPosition() != null) showUTM(req, x.getPosition())
                 else TXT(I.tr("not registered")) ) }
  
             { simpleLabel("posll", "leftlab", I.tr("Position")+" (latlong):",
@@ -627,7 +636,7 @@ package no.polaric.aprsd.http
                   { textInput("nalias", 10, 20, 
                         if (x.getAlias()==null) "" else x.getAlias()) }
                   <br/>
-                  { iconSelect(x, fprefix(req), "/icons/") }
+                  { iconSelect(req, x, fprefix(req), "/icons/") }
                   </div>
                else null        
             }              
@@ -694,6 +703,7 @@ package no.polaric.aprsd.http
     */
    def handle_history(req : Request, res : Response) =
    {        
+       val I = getI18n(req)
        val s = _api.getDB().getStation(req.getParameter("id"), null)
        val result: NodeSeq =
           if (s == null)
@@ -739,6 +749,7 @@ package no.polaric.aprsd.http
 
     def handle_trailpoint(req : Request, res : Response) =
     {
+       val I = getI18n(req)
        val time = xf.parse(req.getParameter("time"))
        val ident = req.getParameter("id")
        val item = _api.getDB().getTrailPoint(ident, time)

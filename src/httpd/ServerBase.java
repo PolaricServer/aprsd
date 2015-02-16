@@ -29,6 +29,7 @@ import java.io.*;
 import java.text.*;
 import com.mindprod.base64.Base64;
 import java.util.concurrent.locks.*; 
+import org.xnap.commons.i18n.*;
 
 
 public abstract class ServerBase 
@@ -73,10 +74,27 @@ public abstract class ServerBase
    }
    
    
+   private static final String i18n_base = "no.polaric.aprsd.http";
+   
+      
+   public I18n getI18n(Request req)
+       { return getI18n(req, i18n_base); }
+       
+      
+   public I18n getI18n(Request req, String base) 
+   {
+        String lang = req.getParameter("lang");         
+        Locale loc = ((lang != null && lang.length() > 0) ? new Locale(lang) : new Locale("en"));
+        return I18nFactory.getI18n(base + ".XX", "i18n.Messages", 
+                       getClass().getClassLoader(), loc, I18nFactory.FALLBACK);
+   }
+   
+   
+   
    protected double roundDeg(double x)
        { return ((double) Math.round(x*100000)) / 100000; 
        }
-
+  
 
 
    /**

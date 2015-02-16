@@ -8,9 +8,6 @@ import java.util.concurrent.locks.*;
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import no.polaric.aprsd.http.*;
-import com.teamunify.i18n.*;
-import com.teamunify.i18n.escape.*;
-import com.teamunify.i18n.settings.*;
 
 
 
@@ -129,13 +126,6 @@ public class Main implements ServerAPI
    public void init(String[] args) 
       // Here open configuration files, create a trace file, create ServerSockets, Threads
    {
-        // Look for translations in com.example.translations (classes named messages_lang_country.class)
-        LanguageSetting.translationPackage = "no.polaric.aprsd.i18n";
-
-        // Do not escape translated characters at all
-        I.setEscapeFunction(EscapeFunction.NoEscape);
-        
-        
    
         /* Get properties from configfile */
         if (args.length < 1)

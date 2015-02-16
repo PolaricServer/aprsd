@@ -12,7 +12,7 @@
        NAME=polaric-aprsd         
        JLIB=/usr/share/java
        PLUGINS=/etc/polaric-aprsd/plugins
-  CLASSPATH=$JLIB/commons-daemon.jar:$JLIB/simple.jar:$JLIB/libintl.jar:$JLIB/easyi18n.jar:$JLIB/jcoord-polaric.jar:$JLIB/polaric-aprsd.jar:$JLIB/utf8-with-fallback-polaric.jar:$JLIB/RXTXcomm.jar:$JLIB/scala-library.jar:$PLUGINS/*
+  CLASSPATH=$JLIB/commons-daemon.jar:$JLIB/simple.jar:$JLIB/libintl.jar:$JLIB/gettext-commons.jar:$JLIB/jcoord-polaric.jar:$JLIB/polaric-aprsd.jar:$JLIB/utf8-with-fallback-polaric.jar:$JLIB/RXTXcomm.jar:$JLIB/scala-library.jar:$PLUGINS/*
 SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB0:/dev/ttyUSB1:/dev/ttyACM0:/dev/ttyACM1
       FLAGS=-Djava.net.preferIPv4Stack=true 
      
