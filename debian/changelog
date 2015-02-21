@@ -1,8 +1,8 @@
-polaric-aprsd (1.6+) UNRELEASED; urgency=medium
+polaric-aprsd (1.7) unstable; urgency=medium
 
-  * Hacking 
+  * Fixes and additions. Internationalization work! 
 
- -- Øyvind Hanssen <ohanssen@acm.org>  Thu, 18 Dec 2014 23:59:10 +0000
+ -- Øyvind Hanssen <ohanssen@acm.org>  Sat, 21 Feb 2015 23:00:57 +0000
 
 polaric-aprsd (1.6) unstable; urgency=low
 

@@ -101,4 +101,26 @@ V.1.6
    versions of Debian. Use Jessie or recent versions of Ubuntu/Mint). 
 * (some small fixes)
          
+         
+V.1.7
+-----
+* Language and translation support (based on GNU gettext). 'lang' URL parameter.
+* Use Lat/Long coordinates (instead of UTM) in requests/responses between client and server. 
+* Regex based mapping from symbols to icons.
+* Symbol/icon updates
+
+* [C] Support mixing layers with different projections. Re-center and re-zoom map when projection changes.
+* [C] Get scalebar right for other projections than UTM.         
+* [C] Add 'gotopos' URL parameter.
+* [C] Minor style updates.
+* [C] Flexible OL Layer setup. dynamic evalutation of what layers to show:      
+   - More flexible setup of layers in mapconfig.js.
+   - Automatic hiding/showing of layers in layer switcher. Preserve ordering of layers. 
+   - JS file to be included before mapconfig.js. Based on gpx.js
+   - Filter support. Polygons/extent filter, scale, projection, selected base layer, etc..
+
+
+
+
+         
  

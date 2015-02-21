@@ -1,5 +1,5 @@
 
-V.1.7 (january 2014), etc
+V.1.7 (february 2014), etc
 --------------------------
        
 * [C] Filter profiles menu on client: Consider: Nested menu? Get list from server?
@@ -17,47 +17,25 @@ V.1.7 (january 2014), etc
 
 * [M] Better styling of forms for mobile. Consider JQuery mobile.
 
-* [C] Hack and use OL offline tile caching??  
-
 * [C] Extend iframeAPI ....
        IN PROGRESS
 
 * [C] Move API code out from menu.js to api.js
-       IN PROGRESS
-
-* [C] Better WX reports.        
+       IN PROGRESS        
 
 * Review how XML overlay works. Document it? Improvements? 
         
 * Callback (API) to notify plugins about setting alias/icon.
-
-* Use Lat/Long coordinates (instead of UTM) in Requests/responses between client and server. 
-        DONE 
-   
-* [C] More work in allowing layers with other projections than UTM to be used.
-   - Support mixing layers with different projections. Re-center and re-zoom map when projection changes.
-        DONE.
-   - Get scalebar right for other projections than UTM. 
-        DONE.
         
-        
-* [C] Flexible OL Layer setup. dynamic evalutation of what layers to show.
-        DONE.
-   - More flexible setup of layers in mapconfig.js
-        DONE
-   - Automatic hiding/showing of layers in layer switcher. Preserve ordering of layers. 
-        DONE.
-   - JS file to be included before mapconfig.js. Based on gpx.js
-        DONE
-   - Filter support. Polygons/extent filter, scale, projection, selected base layer, etc..
-        DONE.  
+* Dateline wrapping problems: 
+   - Rubber zoom that crosses dateline results in trouble. 
 
-* Regex based mapping from symbols to icons
-        DONE. 
+* Document and simplify translation ?
 
-* Symbol/icon updates. 
-        DONE/IN PROGRESS. 
-        
+* Consider moving country-specific (statkart, met.no, etc) stuff to separate plugin.
+
+* Add copyright info for LocalePlanet stuff
+
 
    
 Autorisation/Authentication
