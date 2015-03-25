@@ -81,9 +81,20 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
      */
     public void run()
     {
-        int retry = 0;             
+        int retry = 0;   
         while (true) 
         { 
+           _state = State.STARTING;
+           if (retry <= _max_retry || _max_retry == 0) 
+              try { 
+                 long sleep = 30000 * (long) retry;
+                 if (sleep > _retry_time) 
+                    sleep = _retry_time; /* Default: Max 30 minutes */
+                 Thread.sleep(sleep); 
+              } 
+              catch (Exception e) {} 
+           else break;       
+         
            try {
                _sock = new Socket(_host, _port);
                  // 5 minutes timeout
@@ -97,6 +108,7 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
                
                retry = 0; 
                logNote("Connection to server '"+_host+"' established");
+               _state = State.RUNNING;
                receiveLoop();  
            }
            catch (java.net.ConnectException e)
@@ -119,17 +131,10 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
                    return;
                    
            retry++;
-           if (retry <= _max_retry || _max_retry == 0) // MOVE THIS TO TOP OF LOOP
-               try { 
-                   long sleep = 30000 * (long) retry;
-                   if (sleep > _retry_time) 
-                      sleep = _retry_time; /* Default: Max 30 minutes */
-                   Thread.sleep(sleep); 
-               } 
-               catch (Exception e) {} 
-           else break;
         }
-        logNote("Couldn't connect to server '"+_host+"' - giving up");        
+        logNote("Couldn't connect to server '"+_host+"' - giving up");   
+        _state = State.FAILED;
+        /* TODO: Try to start backup channel if available */
     }
  
     public String toString() { return _host+":"+_port; }

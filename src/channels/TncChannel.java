@@ -113,6 +113,7 @@ public abstract class TncChannel extends Channel implements Runnable
         int retry = 0;             
         while (true) 
         {
+           _state = State.STARTING;
            if (retry <= _max_retry || _max_retry == 0) 
                try { 
                    long sleep = 30000 * (long) retry;
@@ -128,6 +129,7 @@ public abstract class TncChannel extends Channel implements Runnable
                _serialPort = connect();
                if (_serialPort == null)
                    continue; 
+               _state = State.RUNNING;
                receiveLoop();
            }
            catch(NoSuchPortException e)
@@ -143,6 +145,7 @@ public abstract class TncChannel extends Channel implements Runnable
            retry++;      
         }
         logNote("Couldn't connect to TNC on'"+_portName+"' - giving up");
+        _state = State.FAILED;
      }
        
        

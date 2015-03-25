@@ -34,9 +34,15 @@ public abstract class Channel extends Source implements Serializable
      /* Statistics */
      transient protected long _heardPackets, _duplicates, _sent;        
 
+     /* State. RUNNING if running ok. */
+ 
+     public enum State {
+         OFF, STARTING, RUNNING, FAILED
+     }
+     transient protected State _state = State.OFF;
 
-
-
+     
+     
      /**
       * Abstract factory for Channel objects. 
       */
@@ -118,6 +124,8 @@ public abstract class Channel extends Source implements Serializable
      }
      
      
+     public State getState() 
+        { return _state; }
      
      private void removeOldHeardEntries()
      {
