@@ -83,6 +83,7 @@ public class AprsParser implements Channel.Receiver
             station = _api.getDB().newStation(p.from); 
         station.setSource(p.source);
         Date rtime = new Date(); 
+        
         if (!duplicate) try {    
         switch(p.type)
         {
@@ -589,14 +590,13 @@ public class AprsParser implements Channel.Receiver
     private void parseStdAprs(Source src, String data, AprsPoint station, boolean timestamp, String pathinfo)
     {
          Date time = new Date();
-         
          if (timestamp) {
             if (data.substring(1).matches("[0-9]{6}h.*")) 
                 time = parseTimestamp(data.substring(1), false);   
             data = data.substring(8);
             /* A duplicate check on timestamp itself */
-            if (Channel._dupCheck.checkTS(station.getIdent(), time))
-               return;
+            if (Channel._dupCheck.checkTS(station.getIdent(), time)) 
+                return; 
          }
          else
             data = data.substring(1);
@@ -612,6 +612,7 @@ public class AprsParser implements Channel.Receiver
          if (m.matches())
          {
              pd = new AprsHandler.PosData();
+             
              String lat     = m.group(1);
              char   latNS   = m.group(4).charAt(0);
              pd.symtab  = m.group(5).charAt(0);
@@ -619,6 +620,11 @@ public class AprsParser implements Channel.Receiver
              char   lngEW   = m.group(9).charAt(0);
              pd.symbol  = m.group(10).charAt(0);
              comment = m.group(11);
+             
+             if (!lat.matches("[0-9\\s]{4}.[0-9\\s]{2}") || !lng.matches("[0-9\\s]{5}.[0-9\\s]{2}")) {
+                /* ERROR: couldn't understand Lat/Long field */
+                 return; 
+             }
              
              if (lat.charAt(6) == ' ') {
                  pd.ambiguity = 1; 
@@ -640,8 +646,14 @@ public class AprsParser implements Channel.Receiver
              lngDeg = Integer.parseInt(lng.substring(0,3)) + Double.parseDouble(lng.substring(3,8))/60;
              if (lngEW == 'W')
                lngDeg *= -1;
+             
+             if (latDeg < -90 || latDeg > 90 || lngDeg < -180 || lngDeg > 180)
+                /* ERROR: LatLong coordinates out of range */
+                return; 
              pd.pos = new LatLng(latDeg, lngDeg);  
           }
+          
+          
           else if (data.matches("[\\\\/][\\x21-\\x7f]{12}.*"))
            /* Parse compressed position report */
           {
@@ -650,7 +662,7 @@ public class AprsParser implements Channel.Receiver
           }
           else 
              /* ERROR: couldnt understand data field */ 
-             return;        
+              return;        
           
           if (pd.symbol == '_')
               comment = parseWX(comment);
@@ -728,8 +740,7 @@ public class AprsParser implements Channel.Receiver
              
            station.update(time, pd, comment, pathinfo );              
            for (AprsHandler h:_subscribers)
-              h.handlePosReport(src, station.getIdent(), time, pd, comment, pathinfo );
-          // _api.getAprsHandler().handlePosReport(src, station.getIdent(), time, pd, comment, pathinfo );  
+              h.handlePosReport(src, station.getIdent(), time, pd, comment, pathinfo ); 
     }
     
     
