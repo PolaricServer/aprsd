@@ -39,10 +39,14 @@ V.1.7 (february 2014), etc
 * Activate/deactivate of channels at run-time. Re-load config. At least allow starting channels...
 
 * Status indication on channels. RUNNING, NOT-RUNNING, FAILED?
+     DONE.
 
 * Allow backup channels which are automatically started when primary channel fails. 
-
-
+     
+        
+        
+        
+        
    
 Autorisation/Authentication
 ---------------------------

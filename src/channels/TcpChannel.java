@@ -26,6 +26,7 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
     private   String   _host;
     private   int      _port;
     protected boolean  _close = false;
+    protected String   _backup; 
     
     transient protected Socket       _sock = null;     
     transient private   int          _max_retry;
@@ -48,6 +49,7 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
         
         _host = api.getProperty("channel."+id+".host", "localhost");
         _port = api.getIntProperty("channel."+id+".port", 21);
+        _backup = api.getProperty("channel."+id+".backup", null);
         _max_retry  = api.getIntProperty("channel."+id+".retry", 0);
         _retry_time = Long.parseLong(api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
         _thread   = new Thread(this, "channel."+id);
@@ -134,7 +136,8 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
         }
         logNote("Couldn't connect to server '"+_host+"' - giving up");   
         _state = State.FAILED;
-        /* TODO: Try to start backup channel if available */
+        
+        /* Try to start backup channel if available */  
     }
  
     public String toString() { return _host+":"+_port; }
