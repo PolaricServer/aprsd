@@ -258,7 +258,7 @@ public class OwnObjects implements Runnable
          try {
             Thread.sleep(3000);
             synchronized(this) {
-              String err; 
+              String err = null; 
               for (String oid: _ownObjects) {
                  AprsObject obj = (AprsObject) _api.getDB().getItem(oid+'@'+_api.getOwnPos().getIdent(), null);
                  if (obj != null)
@@ -266,7 +266,8 @@ public class OwnObjects implements Runnable
                  else 
                     err = oid; 
               }
-              _ownObjects.delete(err);
+              if (err != null)
+                 _ownObjects.remove(err);
             }
                  
             Thread.sleep(_txPeriod * 1000 - 3000);
