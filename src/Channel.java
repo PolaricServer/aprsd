@@ -24,7 +24,7 @@ import java.lang.reflect.Constructor;
 /**
  * Channel for sending/receiving APRS data. 
  */
-public abstract class Channel extends Source implements Serializable
+public abstract class Channel extends Source implements Serializable, ManagedObject
 {
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      private static boolean _logPackets = false; 
@@ -41,7 +41,22 @@ public abstract class Channel extends Source implements Serializable
      }
      transient protected State _state = State.OFF;
 
-     
+        
+   
+     /** stop the service. Return false if this cannot be done. */
+     public boolean deActivate() {
+        if (isActive())
+            return false; 
+        return true;
+     }
+   
+   
+     /** Return true if service is running */
+     public boolean isActive() {
+        return _state == State.STARTING || _state == State.RUNNING;
+     }
+ 
+ 
      
      /**
       * Abstract factory for Channel objects. 

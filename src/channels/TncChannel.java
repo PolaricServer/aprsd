@@ -56,10 +56,16 @@ public abstract class TncChannel extends Channel implements Runnable
         // FIXME: set gnu.io.rxtx.SerialPorts property here instead of in startup script
         _log = new Logfile(api, id, "rf.log");
         _thread = new Thread(this, "channel."+id);
-        _thread.start();
+        _state = State.OFF;
     }
   
-  
+   
+ 
+    /** Start the service */
+    public void activate(ServerAPI a) {
+        _thread.start();
+    }
+
   
     @Override protected void regHeard(Packet p) 
     {

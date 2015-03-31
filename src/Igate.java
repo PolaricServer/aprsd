@@ -71,10 +71,11 @@ public class Igate implements Channel.Receiver, ManagedObject
    
    
     /** stop the service. */
-    public synchronized void deActivate() {
+    public synchronized boolean deActivate() {
          _inetChan.removeReceiver(this); 
          _rfChan.removeReceiver(this);
          _active = false;
+         return true;
     }
     
    

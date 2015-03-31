@@ -13,7 +13,7 @@ import no.polaric.aprsd.http.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "1.7";
+   public  static String version = "1.7+";
    public static String toaddr  = "APPS17";
    
    private static StationDB db = null;
@@ -257,7 +257,11 @@ public class Main implements ServerAPI
                        ch[i].addReceiver(parser);
                     else
                        System.out.println("*** ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
+                    ch[i].activate(api);
                     i++;
+                    /* FIXME: Instantiate all channels, 
+                     * activate only those that are set to "on". 
+                     */
                 }
            }
 
