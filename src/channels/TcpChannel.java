@@ -46,24 +46,36 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
         _api = api;
         _chno = _next_chno;
         _next_chno++;
-        
-        _host = api.getProperty("channel."+id+".host", "localhost");
-        _port = api.getIntProperty("channel."+id+".port", 21);
-        _backup = api.getProperty("channel."+id+".backup", null);
-        _max_retry  = api.getIntProperty("channel."+id+".retry", 0);
-        _retry_time = Long.parseLong(api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
+
         _thread   = new Thread(this, "channel."+id);
         _state = State.OFF;
     }
  
- 
+    
+   /**
+    * Load/reload configuration parameters. Called each time channel is activated. 
+    */
+   protected void getConfig()
+   {
+        String id = getIdent();
+        _host = _api.getProperty("channel."+id+".host", "localhost");
+        _port = _api.getIntProperty("channel."+id+".port", 21);
+        _backup = _api.getProperty("channel."+id+".backup", null);
+        _max_retry  = _api.getIntProperty("channel."+id+".retry", 0);
+        _retry_time = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
+   }
+   
  
     /** Start the service */
     public void activate(ServerAPI a) {
+        getConfig(); 
         _thread.start();
     }
 
- 
+    /** Stop the service */
+    public void deActivate() {
+        close();
+    }
     
     public String getHost() 
         {return _host;}
@@ -136,8 +148,10 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
            finally 
              { _close(); }
         
-           if (_close)
-                   return;
+           if (_close) {
+              _state = State.OFF;
+              return;
+           }
                    
            retry++;
         }

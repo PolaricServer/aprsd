@@ -26,8 +26,7 @@ public class KissTncChannel extends TncChannel
 {
 
     protected InputStream _istream; 
-    protected OutputStream _ostream;
-    protected boolean _close = false; 
+    protected OutputStream _ostream; 
   
     Kiss _kiss; 
 

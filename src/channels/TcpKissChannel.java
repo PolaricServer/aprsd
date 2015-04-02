@@ -30,14 +30,18 @@ public class TcpKissChannel extends TcpChannel
     transient protected Logfile    _log; 
     
     
+    
     public TcpKissChannel(ServerAPI api, String id) 
-    {
-       super(api, id);
-       Properties config = api.getConfig();
-       _log = new Logfile(api, id, "rf.log");
+       { super(api, id); }
+        
+        
+    
+    @Override protected void getConfig() {
+       super.getConfig();
+       _log = new Logfile(_api, getIdent(), "rf.log");
     }
-   
-   
+    
+    
    
     /**
      * Close down the channel. 

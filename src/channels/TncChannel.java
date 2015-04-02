@@ -27,15 +27,17 @@ public abstract class TncChannel extends Channel implements Runnable
     private   String  _portName; 
     private   int     _baud;
     protected String  _myCall; /* Move this ? */
-      
+    
+    transient protected boolean      _close = false;
     transient private   int          _max_retry;
     transient private   long         _retry_time;   
+    transient protected ServerAPI    _api;
     transient protected SerialPort   _serialPort;
     transient private   Semaphore    _sem = new Semaphore(1, true);
     transient protected Logfile      _log; 
     transient private   Thread       _thread;
     transient private   int          _chno;
-    
+       
     private static int _next_chno = 0;
     
     
@@ -43,30 +45,46 @@ public abstract class TncChannel extends Channel implements Runnable
     public TncChannel(ServerAPI api, String id) 
     {
         _init(api, "channel", id);
+        _api = api;
         _chno = _next_chno;
         _next_chno++;
         
-        _myCall = api.getProperty("channel."+id+".mycall", "").toUpperCase();
-        if (_myCall.length() == 0)
-           _myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();       
-        _max_retry = api.getIntProperty("channel."+id+".retry", 0);
-        _retry_time = Long.parseLong(api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
-        _portName = api.getProperty("channel."+id+".port", "/dev/ttyS0");
-        _baud = api.getIntProperty("channel."+id+".baud", 9600);
-        // FIXME: set gnu.io.rxtx.SerialPorts property here instead of in startup script
-        _log = new Logfile(api, id, "rf.log");
         _thread = new Thread(this, "channel."+id);
         _state = State.OFF;
     }
   
    
- 
+    /**
+    * Load/reload configuration parameters. Called each time channel is activated. 
+    */
+   protected void getConfig()
+   {
+        String id = getIdent();
+        _myCall = _api.getProperty("channel."+id+".mycall", "").toUpperCase();
+        if (_myCall.length() == 0)
+           _myCall = _api.getProperty("default.mycall", "NOCALL").toUpperCase();       
+        _max_retry = _api.getIntProperty("channel."+id+".retry", 0);
+        _retry_time = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
+        _portName = _api.getProperty("channel."+id+".port", "/dev/ttyS0");
+        _baud = _api.getIntProperty("channel."+id+".baud", 9600);
+        // FIXME: set gnu.io.rxtx.SerialPorts property here instead of in startup script
+        _log = new Logfile(_api, id, "rf.log");
+   }
+   
+   
     /** Start the service */
     public void activate(ServerAPI a) {
+        getConfig();
         _thread.start();
     }
 
   
+    /** Stop the service */
+    public void deActivate() {
+        close();
+    }
+    
+    
     @Override protected void regHeard(Packet p) 
     {
         _heard.put(p.from, new Heard(new Date(), p.via));
@@ -148,6 +166,12 @@ public abstract class TncChannel extends Channel implements Runnable
                 e.printStackTrace(System.out); 
                 close();
            }  
+                   
+           if (_close) {
+              _state = State.OFF;
+              return;
+           }
+           
            retry++;      
         }
         logNote("Couldn't connect to TNC on'"+_portName+"' - giving up");

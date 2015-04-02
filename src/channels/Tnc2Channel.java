@@ -27,7 +27,6 @@ public class Tnc2Channel extends TncChannel implements Runnable
 {
 
     transient private  String         _pathCmd, _unproto; 
-    transient private  boolean        _close = false;
     transient private  boolean        _noBreak = false; 
     transient private  BufferedReader _in; 
     transient private  OutputStream   _ostream;    
@@ -36,16 +35,18 @@ public class Tnc2Channel extends TncChannel implements Runnable
     private static final String _initfile = System.getProperties().getProperty("confdir", ".")+"/init.tnc";
     
 
-    
-    
-    public Tnc2Channel(ServerAPI api, String id) 
-    {
-       super(api, id);
-      _unproto = api.getToAddr();  
-      _pathCmd = api.getProperty("channel."+id+".pathcommand", "UNPROTO");  
-      _noBreak = api.getBoolProperty("channel."+id+".nobreak", false);
-    }
  
+    public Tnc2Channel(ServerAPI api, String id) 
+       { super(api, id); }
+       
+       
+ 
+    @Override protected void getConfig() {
+       super.getConfig();
+       _unproto = _api.getToAddr();  
+       _pathCmd = _api.getProperty("channel."+getIdent()+".pathcommand", "UNPROTO");  
+       _noBreak = _api.getBoolProperty("channel."+getIdent()+".nobreak", false);
+    }
  
  
     /**

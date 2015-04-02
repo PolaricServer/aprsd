@@ -27,19 +27,19 @@ public class InetChannel extends TcpChannel
     transient private  BufferedReader _rder = null;
 
     
-
-
-    
     public InetChannel(ServerAPI api, String id) 
-    {
-        super(api, id);
-
-        _user = api.getProperty("channel."+id+".user", "").toUpperCase();
-        if (_user.length() == 0)
-           _user = api.getProperty("default.mycall", "NOCALL").toUpperCase();
-        _pass     = api.getProperty("channel."+id+".pass", "-1");
-        _filter   = api.getProperty("channel."+id+".filter", ""); 
-        _rfilter  = api.getProperty("channel."+id+".rfilter", ""); 
+       { super(api, id); }
+       
+    
+    @Override protected void getConfig() {
+       super.getConfig();
+       String id = getIdent();
+       _user = _api.getProperty("channel."+id+".user", "").toUpperCase();
+       if (_user.length() == 0)
+           _user = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
+       _pass     = _api.getProperty("channel."+id+".pass", "-1");
+       _filter   = _api.getProperty("channel."+id+".filter", ""); 
+       _rfilter  = _api.getProperty("channel."+id+".rfilter", ""); 
     }
  
 
@@ -91,10 +91,10 @@ public class InetChannel extends TcpChannel
     
     protected void receiveLoop() throws Exception
     {    
-        /* Watchdog: close input (and trigger IO exception) after 4 
+        /* Watchdog: close input (and trigger IO exception) after 5 
          * minutes of inactivity 
          */
-         WatchDog watch = new WatchDog(240, null) {
+         WatchDog watch = new WatchDog(300, null) {
              public void action() {
                 logNote("Receive loop timeout");
                 try { _rder.close(); }

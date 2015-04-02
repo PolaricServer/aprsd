@@ -11,7 +11,7 @@ public interface ManagedObject
    public void activate(ServerAPI a);
    
     /** stop the service */
-   public boolean deActivate();
+   public void deActivate();
    
     /** Return true if service is running */
    public boolean isActive();

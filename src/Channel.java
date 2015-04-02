@@ -41,15 +41,7 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
      }
      transient protected State _state = State.OFF;
 
-        
-   
-     /** stop the service. Return false if this cannot be done. */
-     public boolean deActivate() {
-        if (isActive())
-            return false; 
-        return true;
-     }
-   
+
    
      /** Return true if service is running */
      public boolean isActive() {
