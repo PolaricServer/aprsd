@@ -46,8 +46,6 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
         _api = api;
         _chno = _next_chno;
         _next_chno++;
-
-        _thread   = new Thread(this, "channel."+id);
         _state = State.OFF;
     }
  
@@ -61,7 +59,7 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
         _host = _api.getProperty("channel."+id+".host", "localhost");
         _port = _api.getIntProperty("channel."+id+".port", 21);
         _backup = _api.getProperty("channel."+id+".backup", null);
-        _max_retry  = _api.getIntProperty("channel."+id+".retry", 0);
+        _max_retry  = _api.getIntProperty("channel."+id+".retry", 5);
         _retry_time = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
    }
    
@@ -69,6 +67,7 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
     /** Start the service */
     public void activate(ServerAPI a) {
         getConfig(); 
+        _thread = new Thread(this, "channel."+getIdent());
         _thread.start();
     }
 
@@ -86,7 +85,7 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
     {
        try {
          _close = true;
-         Thread.sleep(5000);
+         Thread.sleep(1000);
          _close();
        } catch (Exception e) {}  
     }
@@ -103,15 +102,17 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
     public void run()
     {
         int retry = 0;   
+        _close = false; 
+        logNote("Starting main thread");
         while (true) 
         { 
            _state = State.STARTING;
            if (retry <= _max_retry || _max_retry == 0) 
               try { 
-                 long sleep = 30000 * (long) retry;
+                 long sleep = 60000 * (long) retry;
                  if (sleep > _retry_time) 
                     sleep = _retry_time; /* Default: Max 30 minutes */
-                 Thread.sleep(sleep); 
+                 Thread.sleep(sleep);
               } 
               catch (Exception e) {} 
            else break;       
@@ -140,6 +141,11 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
            {
                 logNote("Server '"+_host+"' : socket timeout");
            }
+           catch (java.net.UnknownHostException e)
+           {
+                logNote("Server '"+_host+"' : Unknown host");
+                retry = _max_retry; 
+           }
            catch(Exception e)
            {   
                 logNote("Server '"+_host+"' : "+e); 
@@ -150,6 +156,7 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
         
            if (_close) {
               _state = State.OFF;
+              logNote("Channel closed");
               return;
            }
                    

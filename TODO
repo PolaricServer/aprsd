@@ -36,7 +36,8 @@ V.1.7 (february 2014), etc
 
 * Add copyright info for LocalePlanet stuff
 
-* Activate/deactivate of channels at run-time. Re-load config. At least allow starting channels...
+* Activate/deactivate of channels at run-time. Re-load config.
+     DONE.
 
 * Status indication on channels. RUNNING, NOT-RUNNING, FAILED?
      DONE.

@@ -48,8 +48,6 @@ public abstract class TncChannel extends Channel implements Runnable
         _api = api;
         _chno = _next_chno;
         _next_chno++;
-        
-        _thread = new Thread(this, "channel."+id);
         _state = State.OFF;
     }
   
@@ -75,6 +73,7 @@ public abstract class TncChannel extends Channel implements Runnable
     /** Start the service */
     public void activate(ServerAPI a) {
         getConfig();
+        _thread = new Thread(this, "channel."+getIdent());
         _thread.start();
     }
 
@@ -134,7 +133,9 @@ public abstract class TncChannel extends Channel implements Runnable
        
     public void run()
     {
-        int retry = 0;             
+        int retry = 0;       
+        _close = false;
+        logNote("Starting main thread");
         while (true) 
         {
            _state = State.STARTING;
@@ -169,6 +170,7 @@ public abstract class TncChannel extends Channel implements Runnable
                    
            if (_close) {
               _state = State.OFF;
+              logNote("Channel closed");
               return;
            }
            
