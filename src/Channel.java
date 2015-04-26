@@ -221,6 +221,10 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
       { System.out.println("*** [" + getShortDescr()+"] " + txt ); }
     
     
+    
+    public abstract void close(); 
+    
+    
     /**
       * Returns true if callsign is heard on the channel.
       */

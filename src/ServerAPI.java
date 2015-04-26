@@ -41,8 +41,15 @@ import java.util.*;
        
        /** Get message processor interface. */
        public MessageProcessor getMsgProcessor(); 
-       
-       
+          
+          
+       /** Replace current internet channel in igate, etc.. */   
+       public void setInetChannel(Channel ch);
+          
+       /** Return current internet channel in igate, etc.. */
+       public Channel getInetChannel();
+          
+          
        /** Get server statistics. */
        public ServerStats getHttps();
        

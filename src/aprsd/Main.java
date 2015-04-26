@@ -18,8 +18,8 @@ public class Main implements ServerAPI
    
    private static StationDB db = null;
    private static AprsParser parser = null;
-   public  static InetChannel ch1 = null;
-   public  static TncChannel  ch2 = null;
+   public  static Channel ch1 = null;
+   public  static Channel ch2 = null;
    public static  Igate igate  = null;
    public static  OwnObjects ownobjects; 
    public static  OwnPosition ownpos = null; 
@@ -55,7 +55,20 @@ public class Main implements ServerAPI
           
    public RemoteCtl getRemoteCtl()
     { return rctl; } 
+    
    
+   public void setInetChannel(Channel ch) {
+       ch1 = ch; 
+       igate.setChannels(ch2, ch1);
+       db.getMsgProcessor().setChannels(ch2, ch1);
+       ownpos.setChannels(ch2, ch1);
+       ownobjects.setChannels(ch2, ch1); 
+   }
+   
+   public Channel getInetChannel()
+      { return ch1; }
+      
+      
    public void addHttpHandler(Object obj, String prefix)
     { ws.addHandler(obj, prefix); }
 
@@ -248,21 +261,17 @@ public class Main implements ServerAPI
            
            Channel[] ch = new Channel[channelns.length];
            for (String chan: channelns) {
-                if (getBoolProperty("channel."+chan+".on", true))  {
-                
-                    /* Define and activate channel */
-                    String type = getProperty("channel."+chan+".type", "");
-                    ch[i] = _chanManager.newInstance(api, type, chan);
-                    if (ch[i] != null)
-                       ch[i].addReceiver(parser);
-                    else
-                       System.out.println("*** ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
-                    ch[i].activate(api);
-                    i++;
-                    /* FIXME: Instantiate all channels, 
-                     * activate only those that are set to "on". 
-                     */
-                }
+                 /* Define and activate channel */
+                 String type = getProperty("channel."+chan+".type", "");
+                 ch[i] = _chanManager.newInstance(api, type, chan);
+                 if (ch[i] != null) {
+                    ch[i].addReceiver(parser);
+                    if (getBoolProperty("channel."+chan+".on", true))
+                        ch[i].activate(api);
+                 }
+                 else
+                    System.out.println("*** ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
+                 i++;
            }
 
            
@@ -281,8 +290,8 @@ public class Main implements ServerAPI
             */
            String ch_inet_name = getProperty("channel.default.inet", "aprsis"); 
            String ch_rf_name = getProperty("channel.default.rf", "tnc");
-           Channel ch1 = (ch_inet_name.length() > 0 ? _chanManager.get(ch_inet_name) : null);
-           Channel ch2 = (ch_rf_name.length() > 0  ? _chanManager.get(ch_rf_name) : null);          
+           ch1 = (ch_inet_name.length() > 0 ? _chanManager.get(ch_inet_name) : null);
+           ch2 = (ch_rf_name.length() > 0  ? _chanManager.get(ch_rf_name) : null);          
 
            /* Igate.
             * FIXME:  Should create igate object also if not on to allow it to be 

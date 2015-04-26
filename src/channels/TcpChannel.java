@@ -16,6 +16,7 @@ package no.polaric.aprsd;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 
 /**
@@ -69,6 +70,11 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
         getConfig(); 
         _thread = new Thread(this, "channel."+getIdent());
         _thread.start();
+        
+        /* If there is a backup running, deactivate it */
+        Channel back = _api.getChanManager().get(_backup); 
+        if (back != null)
+           back.deActivate();
     }
 
     /** Stop the service */
@@ -93,6 +99,33 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
     
     protected abstract void _close();
     protected abstract void receiveLoop() throws Exception;
+    
+    
+    private final ScheduledExecutorService scheduler =
+        Executors.newScheduledThreadPool(1);
+    
+    
+    protected void try_backup()
+    {
+        if (_backup != null) {
+           final Channel ch = _api.getChanManager().get(_backup);         
+           if (ch == null) {
+              logNote("Backup channel '"+_backup+"' not found");
+              return;
+           }
+           logNote("Activating backup channel '"+_backup+"'");
+           ch.activate(_api);
+           if (this == _api.getInetChannel())
+              _api.setInetChannel(ch);
+           
+           /* Re-try the first channel after two hours */
+           scheduler.schedule(new Runnable() {
+                 public void run() 
+                    { ch.deActivate(); activate(_api); }
+              }, 2 * 60 * 60, TimeUnit.SECONDS);
+        }
+    }
+    
     
     
     
@@ -166,6 +199,7 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
         _state = State.FAILED;
         
         /* Try to start backup channel if available */  
+        try_backup();
     }
  
     public String toString() { return _host+":"+_port; }
