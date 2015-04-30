@@ -62,6 +62,8 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
         _backup = _api.getProperty("channel."+id+".backup", null);
         _max_retry  = _api.getIntProperty("channel."+id+".retry", 5);
         _retry_time = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
+        if (_backup != null)
+           _api.getChanManager().addBackup(_backup);
    }
    
  

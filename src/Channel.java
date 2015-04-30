@@ -59,6 +59,7 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
      public static class Manager {
          private HashMap<String, String>  _classes = new HashMap();
          private HashMap<String, Channel> _instances = new LinkedHashMap();
+         private Set<String> _backups = new HashSet();
          
          
          /**
@@ -109,6 +110,17 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
           */
          public Channel get(String id)
            { return _instances.get(id); }
+           
+           
+         /**
+          * Return true if the named channel is a backup-channel
+          */
+         public boolean isBackup(String id)
+            { return _backups.contains(id); }
+         
+         
+         public void addBackup(String id)
+            { _backups.add(id); }
      }
 
        
