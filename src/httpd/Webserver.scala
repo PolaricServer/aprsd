@@ -76,25 +76,24 @@ package no.polaric.aprsd.http
                 simpleLabel("items", "leftlab", I.tr("Number of HTTP requests:"), TXT(""+(_api.getHttps().getReq()))) }    
               { simpleLabel("freemem", "leftlab", I.tr("Used memory:"), 
                   TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
-                            
-              {  var i=0;
-                 for (x <- PluginManager.getPlugins()) yield {
-                    i+=1;
-                    simpleLabel("", "leftlab", if (i<=1) I.tr("Plugin module")+": " else "", 
-                         TXT(x.getDescr())); 
-                 }
-              }    
-              <br/>
-         
-              { var i = 0; 
-                for ( x:String <- _api.getChanManager().getKeys()) yield
-                 {  val ch = api.getChanManager().get(x); 
-                    i += 1;
-                    simpleLabel("chan_"+ch.getIdent(), 
-                     "leftlab", "Kanal '"+ch.getIdent()+"' ("+ch.getShortDescr()+"):", 
-                            TXT(ch.toString()+", Rx=" + ch.nHeardPackets() + ", Tx=" + ch.nSentPackets())) } 
-              }
-
+                                
+              { simpleLabel ("plugins", "leftlab", I.tr("Plugin modules")+": ", 
+                 <div>
+                    { PluginManager.getPlugins().map
+                       { x => TXT(x.getDescr()) ++ br } }
+                 </div> 
+              )}
+              
+              { simpleLabel("channels", "leftlab", I.tr("Channels")+": ",
+                <div>
+                  { api.getChanManager().getKeys().map
+                     { x => api.getChanManager().get(x) }.map 
+                        { ch => TXT(ch.getShortDescr()+": " + ch.getIdent() +
+                             (if (ch.isActive()) " --"+ I.tr("Active")+"--" else "")) ++ br } 
+                  }
+                </div>
+              )}
+              
               
               { simpleLabel("igate", "leftlab", "Igate: ", 
                    if (_api.getIgate()==null) TXT("---") else TXT(""+_api.getIgate())) }   
