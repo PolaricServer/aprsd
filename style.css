@@ -58,4 +58,8 @@ span.postfield {font-size: smaller; color: #755; margin-left: 5px; }
 span.fielderror {color: #c00}
 span.fieldsuccess {color: #080;}
 
-input {height: 1.5em; margin-left: 5px; padding: 0px 3px 0px 3px}
+select {margin-left: 5px; border: 1px inset #666; background: #eee}
+input {height: 1.5em; border: 1px inset #666;  margin-left: 5px; padding: 0px 3px 0px 3px}
+button {background: #cdc; font-size: smaller; margin-left: 5px;}
+
+

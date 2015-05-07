@@ -88,8 +88,8 @@ package no.polaric.aprsd.http
                 <div>
                   { api.getChanManager().getKeys().map
                      { x => api.getChanManager().get(x) }.map 
-                        { ch => TXT(ch.getShortDescr()+": " + ch.getIdent() +
-                             (if (ch.isActive()) " --"+ I.tr("Active")+"--" else "")) ++ br } 
+                        { ch => TXT(ch.getShortDescr()+": " + ch.getIdent()) ++
+                             (if (ch.isActive())  "  ["+ I.tr("Active")+"]" else "") ++ br } 
                   }
                 </div>
               )}
@@ -101,7 +101,7 @@ package no.polaric.aprsd.http
                    simpleLabel("rctl", "leftlab", I.tr("Remote control")+": ", TXT(""+_api.getRemoteCtl())) else null; }     
                    
               </fieldset>  
-              <input type="submit" onclick="top.window.close()" id="cancel" value="Avbryt"/>
+              <button type="submit" onclick="top.window.close()" id="cancel">{I.tr("Cancel")} </button>
           else
               <h3>{I.tr("Unknown command")}</h3>
              

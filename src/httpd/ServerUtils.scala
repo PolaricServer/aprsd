@@ -139,14 +139,14 @@ package no.polaric.aprsd.http
 
        def simple_submit(req: Request): NodeSeq = {
            val i18n = getI18n(req)
-           <input type="submit" name="update" id="update" value={i18n.tr("Update")} />
+           <button type="submit" name="update" id="update"> {i18n.tr("Update")} </button>
        }
            
            
        def default_submit(req: Request): NodeSeq = {
            val i18n = getI18n(req)
-           <input type="submit" onclick="window.close()" id="cancel" value={i18n.tr("Cancel")} />
-           <input type="submit" name="update" id="update" value={i18n.tr("Update")} />
+           <button type="submit" onclick="window.close()" id="cancel"> {i18n.tr("Cancel")} </button>
+           <button type="submit" name="update" id="update"> {i18n.tr("Update")} </button>
        }
            
            
