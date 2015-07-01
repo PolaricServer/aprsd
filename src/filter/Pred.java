@@ -35,6 +35,9 @@ public abstract class Pred
    public static Pred Ident(String regex)
       { return new Ident(regex); }
    
+   public static Pred Path(String regex)
+      { return new Path(regex); }
+      
    public static Pred Scale(long sc, String op)
       { return new Scale(sc, op); }
       
@@ -176,6 +179,30 @@ class Ident extends Pred
     public boolean eval(AprsPoint obj, long scale) 
        { return obj.getIdent().matches(regex); }
 }
+
+
+
+/**
+ * Regex match of path field. 
+ */
+class Path extends Pred
+{   
+    private String regex;  
+    
+    public Path(String regex) 
+       { this.regex = regex; }
+    
+    public boolean eval(AprsPoint obj, long scale) 
+       { if (obj instanceof Station) 
+           return ((Station) obj).getPathInfo().matches(regex); 
+         else if (obj instanceof AprsObject && 
+              ((AprsObject) obj).getOwner() != null && ((AprsObject) obj).getOwner().getPathInfo() != null)
+           return ((AprsObject) obj).getOwner().getPathInfo().matches(regex); 
+         else
+           return false; 
+       }
+}
+
 
 
 

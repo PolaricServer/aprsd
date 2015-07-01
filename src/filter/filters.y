@@ -91,6 +91,8 @@ expr : '(' expr ')'           {  $$=$2; }
                               
      |  IDENT '~' STRING      {  if ($1.matches("ident|IDENT")) 
                                       $$=Pred.Ident($3); 
+                                 else if ($1.matches("path|PATH"))
+                                      $$=Pred.Path($3);
                                  else if ($1.matches("source|SOURCE")) 
                                       $$=Pred.Source($3); 
                                  else if ($1.matches("symbol|SYMBOL")) 

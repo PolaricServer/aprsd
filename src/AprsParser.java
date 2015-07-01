@@ -106,7 +106,7 @@ public class AprsParser implements Channel.Receiver
                
             case ';': 
                /* Object report */
-               parseObjectReport(p.source, p.report, station);
+               parseObjectReport(p.source, p.report, station, p.via);
                
             case '\'':
             case '`': 
@@ -240,11 +240,12 @@ public class AprsParser implements Channel.Receiver
     /**
      * Parse APRS object report.
      */
-    private void parseObjectReport(Source src, String msg, Station station)
+    private void parseObjectReport(Source src, String msg, Station station, String pathinfo)
     {
         String ident = msg.substring(1,10).trim();
         char op = msg.charAt(10);
         
+        station.setPathInfo(pathinfo); 
         AprsPoint x = _api.getDB().getItem(ident+'@'+station.getIdent(), null);      
         AprsObject obj;
         if (x == null)

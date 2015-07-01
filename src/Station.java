@@ -91,6 +91,9 @@ public static class Status implements Serializable
     public String getPathInfo()
        { return _pathinfo; }
        
+    public void setPathInfo(String p)
+       { _pathinfo = p; }
+       
     public Set<String> getTrafficFrom()
        {  return _db.getRoutes().getToEdges(getIdent()); }
        
