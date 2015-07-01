@@ -8,7 +8,7 @@
   CLASSDIR = classes
  CLASSPATH = /usr/share/java/gettext-commons.jar:jcoord-polaric.jar:utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:simple.jar
 # INSTALLDIR = /usr/local/polaric-aprsd
-     JAVAC = javac -target 1.7
+     JAVAC = javac -source 1.7 -target 1.7
       YACC = yacc
        LEX = jflex
        JAR = jar
