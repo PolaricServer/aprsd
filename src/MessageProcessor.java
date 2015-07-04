@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -271,7 +271,7 @@ public class MessageProcessor implements Runnable, Serializable
     */
    private void sendPacket(String message, String recipient)
    {
-       Channel.Packet p = new Channel.Packet();
+       AprsPacket p = new AprsPacket();
        p.from = _myCall;
        p.to = "APRS";
        p.msgto = recipient;

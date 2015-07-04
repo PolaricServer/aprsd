@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ public class TcpKissChannel extends TcpChannel
   
   
    
-    public synchronized void sendPacket(Packet p)
+    public synchronized void sendPacket(AprsPacket p)
     {
         _log.log(" [>" + this.getShortDescr() + "] " + p);
         try {
@@ -80,7 +80,7 @@ public class TcpKissChannel extends TcpChannel
          while (!_close) 
          {
             try { 
-                Packet p = _kiss.receivePacket();
+                AprsPacket p = _kiss.receivePacket();
                 receivePacket(p, false);
             }
             catch (Kiss.Timeout e) {}
@@ -89,7 +89,7 @@ public class TcpKissChannel extends TcpChannel
     }
     
     
-    @Override protected void regHeard(Packet p) 
+    @Override protected void regHeard(AprsPacket p) 
     {
         _heard.put(p.from, new Heard(new Date(), p.via));
         /* FIXME: Check for TCPxx in third party packets and consider registering 

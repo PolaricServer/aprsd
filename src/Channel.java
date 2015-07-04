@@ -1,5 +1,5 @@
  /* 
- * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -159,39 +159,6 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
           }
      }
 
-
-    /**
-     *  APRS packet.
-     */ 
-    public static class Packet implements Cloneable {
-
-        /* If packet is gated or routed elsewhere, the original via
-         * can be saved in via_orig. If it is a thirdparty packet, more
-         * info about source packet is in from_orig and to_orig.
-         */
-        public String from, to, msgto, via, report; 
-        public String from_orig, to_orig, via_orig; 
-        public char type; 
-        public boolean thirdparty = false; 
-        public Channel source;
-
-        @Override public Packet clone() 
-            { try { return (Packet) super.clone();}
-              catch (Exception e) {return null; } 
-            }
-        public String toString()
-            {  
-              String msg = from+">"+to +
-                   ((via != null && via.length()>0) ? ","+via : "") + ":" + report;
-                   
-              if (thirdparty)
-                 return from_orig+">"+to_orig +
-                   ((via_orig != null && via_orig.length()>0) ? ","+via_orig : "") + ":}" + msg;
-              else     
-                 return msg; 
-            }
-    }
-    
     
 
     /**
@@ -199,15 +166,12 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
      */
     public interface Receiver {
         /** Receive an APRS packet. 
-         * @param p Packet content.
+         * @param p AprsPacket content.
          * @param dup Set to true to indicate that this packet is a duplicate.
          */
-        public void receivePacket(Channel.Packet p, boolean dup);
+        public void receivePacket(AprsPacket p, boolean dup);
     }
-    
-    
-    private static Pattern _ppat = Pattern.compile
-       ("([\\w\\-]+)>([\\w\\-]+)(((,[\\w\\-]+\\*?))*):(.*)");
+
 
     
     private DateFormat df = new SimpleDateFormat("dd MMM yyyy HH:mm:ss",
@@ -291,7 +255,7 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
    /**
     * Return a string that presents a packet as a third party report. 
     */
-    public static String thirdPartyReport(Packet p)
+    public static String thirdPartyReport(AprsPacket p)
       { return thirdPartyReport(p, null); }
       
 
@@ -302,7 +266,7 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
      * @param path Digi-path to be used in the thirdparty report. If null, we will 
      *     use the path of the original packet. 
      */
-    public static String thirdPartyReport(Packet p, String path)
+    public static String thirdPartyReport(AprsPacket p, String path)
     { 
        if (path == null) 
           path = ((p.via_orig != null && p.via_orig.length() > 0) ? ","+p.via_orig : "");
@@ -332,7 +296,7 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
        { return _out; }
 
     
-    public abstract void sendPacket(Channel.Packet p);
+    public abstract void sendPacket(AprsPacket p);
     
     
     /**
@@ -345,45 +309,14 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
        { if (r != null) _rcv.remove(r); }   
     
     
-    
-    
-     
-    /**
-     * Convert text string to packet structure. 
-     */
-    protected Packet string2packet(String packet)
-    {
-        packet = packet.replace('\uffff', ' ');
-        if (packet == null || packet.length() < 10)
-           return null;
-        Matcher m = _ppat.matcher(packet);
-        if (m.matches())
-        {
-            Packet p = new Packet();
-            p.from_orig = p.from = m.group(1).trim().toUpperCase();
-            p.to_orig = p.to = m.group(2).trim().toUpperCase();
-            
-            p.via  = m.group(3);
-            p.report  = m.group(m.groupCount());
-                
-            /* Remove first comma in path */
-            if (p.via != null) 
-                  p.via = p.via.trim();
-            while (p.via != null && p.via.length() > 0 && p.via.charAt(0) == ',')
-                  p.via = p.via.substring(1);
-            return p;
-        }
-        return null;
-    }
 
-    
     
     
     /**
      * Do some preliminary parsing of report part of the packet. 
      * Return null if report is invalid. 
      */
-    protected Packet checkReport(Packet p) 
+    protected AprsPacket checkReport(AprsPacket p) 
     {   
          p.report = p.report.replace('\uffff', ' ');
          if (p.report.length() <= 1)
@@ -397,7 +330,7 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
              * Strip off type character and apply this function recursively
              * on the wrapped message. 
              */
-             p = string2packet(p.report.substring(1, p.report.length()));
+             p = AprsPacket.fromString(p.report.substring(1, p.report.length()));
              if (p != null) 
                 p.thirdparty = true; 
              else
@@ -414,7 +347,7 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
     
     
 
-    protected abstract void regHeard(Packet p);
+    protected abstract void regHeard(AprsPacket p);
     
     
     
@@ -431,7 +364,7 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
     { 
        if (packet == null || packet.length() < 1)
           return false; 
-       Packet p = string2packet(packet);
+       AprsPacket p = AprsPacket.fromString(packet);
 
        return receivePacket(p, dup);
     }
@@ -446,7 +379,7 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
      * @param dup True if packet is known to be a duplicate.
      * @return true if accepted.
      */
-    protected boolean receivePacket(Packet p, boolean dup)
+    protected boolean receivePacket(AprsPacket p, boolean dup)
     {      
        if (p == null)
           return false; 

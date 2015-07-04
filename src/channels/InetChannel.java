@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ public class InetChannel extends TcpChannel
     /**
      * Send a packet to APRS-IS.
      */ 
-    public void sendPacket(Packet p)
+    public void sendPacket(AprsPacket p)
     {  
         if (p.via == null || p.via.equals("")) {
            p = p.clone(); 
@@ -80,7 +80,7 @@ public class InetChannel extends TcpChannel
     
 
     
-    @Override protected void regHeard(Packet p)
+    @Override protected void regHeard(AprsPacket p)
     {
         if (p.via.matches(".*(TCPIP\\*|TCPXX\\*).*"))
            _heard.put(p.from, new Heard(new Date(), p.via));

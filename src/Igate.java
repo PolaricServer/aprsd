@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,7 +104,7 @@ public class Igate implements Channel.Receiver, ManagedObject
     /**
      * Gate packet (from RF) to internet.
      */
-    private void gate_to_inet(Channel.Packet p)
+    private void gate_to_inet(AprsPacket p)
     {
        /* Note, we assume that third-party headers are stripped 
         * by the channel-implementation.  
@@ -127,7 +127,7 @@ public class Igate implements Channel.Receiver, ManagedObject
     /**
      * Gate packet (from internet) to RF.
      */
-    private void gate_to_rf(Channel.Packet p)
+    private void gate_to_rf(AprsPacket p)
     {
         if ( ( (  /* Receiver heard on RF */
                  ( _rfChan.heard(p.to) || (p.msgto!= null && 
@@ -173,7 +173,7 @@ public class Igate implements Channel.Receiver, ManagedObject
     
     
     
-    private boolean object_in_range(Channel.Packet p, int range)
+    private boolean object_in_range(AprsPacket p, int range)
     {
        /* We assume that object's position is already parsed and in database. */
        if (_api.getOwnPos() == null || _api.getOwnPos().getPosition() == null)
@@ -194,7 +194,7 @@ public class Igate implements Channel.Receiver, ManagedObject
      */
     private void answer_query()
     {
-        Channel.Packet p = new Channel.Packet(); 
+        AprsPacket p = new AprsPacket(); 
         p.type = '<';
         p.report = "<IGATE,MSG_CNT="+_msgcnt+",LOC_CNT="+_rfChan.nHeard()+",Polaric-Aprsd";
         _rfChan.sendPacket(p);
@@ -204,7 +204,7 @@ public class Igate implements Channel.Receiver, ManagedObject
     /**
      * Receive and gate an APRS packet.
      */
-    public synchronized void receivePacket(Channel.Packet p, boolean dup)
+    public synchronized void receivePacket(AprsPacket p, boolean dup)
     {
         if (dup || _api.getOwnPos().getIdent().equals(p.msgto))
            return;

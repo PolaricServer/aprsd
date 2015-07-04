@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2011 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ public abstract class TncChannel extends Channel implements Runnable
     }
     
     
-    @Override protected void regHeard(Packet p) 
+    @Override protected void regHeard(AprsPacket p) 
     {
         _heard.put(p.from, new Heard(new Date(), p.via));
         /* FIXME: Check for TCPxx in third party packets and consider registering 

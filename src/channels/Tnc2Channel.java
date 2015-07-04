@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ public class Tnc2Channel extends TncChannel implements Runnable
      * Break out of converse mode and try to send command to TNC.
      */ 
      
-    public synchronized void sendPacket(Packet p)
+    public synchronized void sendPacket(AprsPacket p)
     {
        if (_out == null)
           return;

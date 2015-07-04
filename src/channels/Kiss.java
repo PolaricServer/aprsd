@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ public class Kiss
     /**
      * Send packet. 
      */ 
-    public synchronized void sendPacket(Channel.Packet p)
+    public synchronized void sendPacket(AprsPacket p)
        throws IOException
     {
          /* Start of frame. KISS command = data */
@@ -103,9 +103,9 @@ public class Kiss
     /**
      * Receive packet. 
      */
-    public Channel.Packet receivePacket() throws Timeout
+    public AprsPacket receivePacket() throws Timeout
     {
-        Channel.Packet p = new Channel.Packet();
+        AprsPacket p = new AprsPacket();
         p.report = p.via = ""; 
         boolean complete = false;
      

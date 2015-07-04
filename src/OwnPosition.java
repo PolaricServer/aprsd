@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -149,7 +149,7 @@ public class OwnPosition extends Station implements Runnable
      */
     protected void sendPosReport()
     {
-       Channel.Packet p = new Channel.Packet();
+       AprsPacket p = new AprsPacket();
        p.from = getIdent();
        p.to = _api.getToAddr();
        p.type = '/';
