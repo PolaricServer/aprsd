@@ -14,7 +14,7 @@
 
 package no.polaric.aprsd;
 import java.util.regex.*;
-
+import java.util.Date;
 
 
 /**
@@ -30,12 +30,17 @@ public class AprsPacket implements Cloneable {
      * can be saved in via_orig. If it is a thirdparty packet, more
      * info about source packet is in from_orig and to_orig.
      */
+    public Date time; 
     public Channel source;
     public char type;
     public String from, to, msgto, via, report; 
     public String from_orig, to_orig, via_orig; 
     public boolean thirdparty = false; 
 
+    
+    public AprsPacket() 
+       { time = new Date(); }
+    
 
     
     @Override public AprsPacket clone() 

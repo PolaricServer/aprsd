@@ -89,34 +89,34 @@ public class AprsParser implements Channel.Receiver
         {
             case '>':
                /* Status report */
-               parseStatusReport(p.source, p.report, station);
+               parseStatusReport(p, station);
                break;
                
             case '!': 
             case '=':
                /* Real time position report */ 
-               parseStdAprs(p.source, p.report, station, false, p.via);
+               parseStdAprs(p, p.report, station, false, p.via);
                break;
               
             case '@':
             case '/': 
                /* Timestamped position report */   
-               parseStdAprs(p.source, p.report, station, true, p.via);
+               parseStdAprs(p, p.report, station, true, p.via);
                break;
                
             case ';': 
                /* Object report */
-               parseObjectReport(p.source, p.report, station, p.via);
+               parseObjectReport(p, station);
                
             case '\'':
             case '`': 
                /* Mic-E report */
-               parseMicE(p.source, p.to, p.report, station, p.via); 
+               parseMicE(p, station); 
                break;
                
             case ':':
                /* Message */
-               parseMessage(p.source, p.report, station);
+               parseMessage(p, station);
                break;
                
             default: 
@@ -201,9 +201,11 @@ public class AprsParser implements Channel.Receiver
     /**
      * Parse APRS message.
      */
-    private void parseMessage(Source src, String msg, Station station)
+    private void parseMessage(AprsPacket p, Station station)
     {
         String msgid = null;
+        String msg = p.report;
+        
         String recipient = msg.substring(1,9).trim();
         int i = msg.lastIndexOf('{');
         if (i >= 0) 
@@ -211,18 +213,18 @@ public class AprsParser implements Channel.Receiver
         
         String content = msg.substring(11, (i>=0 ? i : msg.length()));
         if (_msg != null)
-           _msg.incomingMessage(station, recipient, content, msgid);
-        // _api.getAprsHandler().handleMessage(src, new Date(), station.getIdent(), recipient, content);  
+           _msg.incomingMessage(station, recipient, content, msgid);  
         for (AprsHandler h:_subscribers)
-            h.handleMessage(src, new Date(), station.getIdent(), recipient, content);
+            h.handleMessage(p.source, new Date(), station.getIdent(), recipient, content);
     }
 
 
     /**
      * Parse APRS status report.
      */
-    private void parseStatusReport(Source src, String msg, Station station)
+    private void parseStatusReport(AprsPacket p, Station station)
     {
+        String msg = p.report; 
         Date d = null;
         msg = msg.substring(1);
         if (msg.matches("[0-9]{6}[hz/].*")) {
@@ -231,7 +233,7 @@ public class AprsParser implements Channel.Receiver
         }
         // _api.getAprsHandler().handleStatus(src, d, msg);
         for (AprsHandler h:_subscribers)
-           h.handleStatus(src, d, msg);
+           h.handleStatus(p.source, d, msg);
         station.setStatus(d, msg);
     }
     
@@ -240,12 +242,13 @@ public class AprsParser implements Channel.Receiver
     /**
      * Parse APRS object report.
      */
-    private void parseObjectReport(Source src, String msg, Station station, String pathinfo)
+    private void parseObjectReport(AprsPacket p, Station station)
     {
+        String msg = p.report; 
         String ident = msg.substring(1,10).trim();
         char op = msg.charAt(10);
         
-        station.setPathInfo(pathinfo); 
+        station.setPathInfo(p.via); 
         AprsPoint x = _api.getDB().getItem(ident+'@'+station.getIdent(), null);      
         AprsObject obj;
         if (x == null)
@@ -254,7 +257,7 @@ public class AprsParser implements Channel.Receiver
             obj = (AprsObject) x;
              
         if (op=='*') {
-           parseStdAprs(src, msg.substring(10), obj, true, "");
+           parseStdAprs(p, msg.substring(10), obj, true, "");
            _api.getDB().deactivateSimilarObjects(ident, station);
         }
         else {
@@ -270,8 +273,10 @@ public class AprsParser implements Channel.Receiver
      * Parse mic-e data.
      * Based on http://www.aprs-is.net/javAPRS/mice_parser.htm
      */
-    private void parseMicE (Source src, String toField, String msg, AprsPoint station, String pathinfo) 
+    private void parseMicE (AprsPacket p, AprsPoint station) 
     {
+            String toField = p.to;
+            String msg = p.report;
             int j, k;
             Double pos_lat, pos_long; 
             AprsHandler.PosData pd = new AprsHandler.PosData();
@@ -432,9 +437,9 @@ public class AprsParser implements Channel.Receiver
             }     
             
             
-            station.update(new Date(), pd, comment, pathinfo);   
+            station.update(new Date(), pd, comment, p.via);   
             for (AprsHandler h:_subscribers)
-               h.handlePosReport(src, station.getIdent(), new Date(), pd, comment, pathinfo );
+               h.handlePosReport(p.source, station.getIdent(), new Date(), pd, comment, p.report );
             return;
     }
 
@@ -588,9 +593,9 @@ public class AprsParser implements Channel.Receiver
     /** 
      * Parse standard position data.
      */
-    private void parseStdAprs(Source src, String data, AprsPoint station, boolean timestamp, String pathinfo)
+    private void parseStdAprs(AprsPacket p, String data, AprsPoint station, boolean timestamp, String pathinfo)
     {
-         Date time = new Date();
+         Date time = p.time;
          if (timestamp) {
             if (data.substring(1).matches("[0-9]{6}h.*")) 
                 time = parseTimestamp(data.substring(1), false);   
@@ -728,7 +733,7 @@ public class AprsParser implements Channel.Receiver
            * Format: "/#" + compressed timestamp + compressed report */
           while (comment.length() >= 18 && comment.matches("(/\\#.{16})+.*"))
           {
-              parseExtraReport(src, comment.substring(2,18), station); 
+              parseExtraReport(p.source, comment.substring(2,18), station); 
               comment = comment.substring(18, comment.length());
           }
           
@@ -741,7 +746,7 @@ public class AprsParser implements Channel.Receiver
              
            station.update(time, pd, comment, pathinfo );              
            for (AprsHandler h:_subscribers)
-              h.handlePosReport(src, station.getIdent(), time, pd, comment, pathinfo ); 
+              h.handlePosReport(p.source, station.getIdent(), time, pd, comment, pathinfo ); 
     }
     
     
