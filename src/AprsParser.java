@@ -82,7 +82,6 @@ public class AprsParser implements Channel.Receiver
         if (station == null)
             station = _api.getDB().newStation(p.from); 
         station.setSource(p.source);
-        Date rtime = new Date(); 
         
         if (!duplicate) try {    
         switch(p.type)
@@ -126,7 +125,7 @@ public class AprsParser implements Channel.Receiver
         
         // _api.getAprsHandler().handlePacket(p.source, rtime, p.from, p.to, p.via, p.report);
         for (AprsHandler h:_subscribers)
-            h.handlePacket(p.source, rtime, p.from, p.to, p.via, p.report);
+            h.handlePacket(p);
         parsePath(station, p.via, duplicate);   
     }
 

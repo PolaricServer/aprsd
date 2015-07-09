@@ -83,14 +83,9 @@ public interface AprsHandler
     /**
      * Handle raw APRS packet. This is called in addition to specific reports to allow
      * handlers to log packets for instance. 
-     * @param s Source channel.
-     * @param ts Timestamp
-     * @param src Callsign of sender.
-     * @param dest Callsign of destination.   
-     * @param path Path (digipeaters) of containing packet.   
-     * @param txt Packet text.
+     * @param p Packet
      */
-    public void handlePacket(Source s, Date ts, String src, String dest, String path, String txt);
+    public void handlePacket(AprsPacket p);
 
 
     /**
@@ -102,7 +97,7 @@ public interface AprsHandler
                String descr, String pathinfo) {};
        public void handleStatus(Source s, Date ts, String msg) {};                               
        public void handleMessage(Source s, Date ts, String src, String dest, String msg) {}
-       public void handlePacket(Source s, Date ts, String src, String dest, String path, String txt) {}
+       public void handlePacket(AprsPacket p) {}
     }     
 }
  
