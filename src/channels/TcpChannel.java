@@ -103,7 +103,7 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
     protected abstract void receiveLoop() throws Exception;
     
     
-    private final ScheduledExecutorService scheduler =
+    private transient final ScheduledExecutorService scheduler =
         Executors.newScheduledThreadPool(1);
     
     
