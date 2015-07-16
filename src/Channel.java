@@ -72,6 +72,16 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
 
          
          /**
+          * Get the set of typenames for channel classes (see addClass). 
+          */
+          
+         public Set<String> getTypes() 
+         {
+             return _classes.keySet();
+         }
+         
+         
+         /**
           * Instantiate a channel.
           * @param api
           * @param tname A short name for the type. See addClass method.

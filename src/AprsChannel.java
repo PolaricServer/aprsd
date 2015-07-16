@@ -24,7 +24,7 @@ import java.lang.reflect.Constructor;
 /**
  * Channel for sending/receiving APRS data. 
  */
-public abstract class AprsChannel extends Channel implements Serializable, ManagedObject
+public abstract class AprsChannel extends Channel 
 {
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      private static boolean _logPackets = false; 

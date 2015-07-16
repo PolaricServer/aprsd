@@ -257,21 +257,22 @@ public class Main implements ServerAPI
            if (c.length > 0)
              channelns = c; 
            
-           int i = 0;
            
-           AprsChannel[] ch = new AprsChannel[channelns.length];
+           /* Try to instantiate channels in channel list */
            for (String chan: channelns) {
                  /* Define and activate channel */
                  String type = getProperty("channel."+chan+".type", "");
-                 ch[i] = (AprsChannel) _chanManager.newInstance(api, type, chan);
-                 if (ch[i] != null) {
-                    ch[i].addReceiver(parser);
+                 Channel ch = _chanManager.newInstance(api, type, chan);
+                 if (ch != null) {
+                    /* FIXME: add parser in AprsChannel constructor?? */
+                    if (ch instanceof AprsChannel) 
+                        ((AprsChannel)ch).addReceiver(parser);
+                 
                     if (getBoolProperty("channel."+chan+".on", true))
-                        ch[i].activate(api);
+                        ch.activate(api);
                  }
                  else
                     System.out.println("*** ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
-                 i++;
            }
 
            
