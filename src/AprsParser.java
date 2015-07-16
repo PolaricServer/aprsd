@@ -106,7 +106,9 @@ public class AprsParser implements Channel.Receiver
             case ';': 
                /* Object report */
                parseObjectReport(p, station);
-               
+            case ')': 
+               /* Object report */
+               parseItemReport(p, station);
             case '\'':
             case '`': 
                /* Mic-E report */
@@ -262,6 +264,41 @@ public class AprsParser implements Channel.Receiver
         else {
            obj.kill();
            System.out.println("   OBJECT KILL: id="+ident+", op="+op);
+        }
+    }
+    
+    
+    
+    
+     /**
+     * Parse APRS item report.
+     */
+    private void parseItemReport(AprsPacket p, Station station)
+    {
+        String msg = p.report;
+        int i = msg.indexOf('!');
+        if (i == -1 || i > 11)
+           i = msg.indexOf('_');  
+        if (i==-1) return;
+           
+        String ident = msg.substring(1,i+1).trim();
+        char op = msg.charAt(i);
+        
+        station.setPathInfo(p.via); 
+        AprsPoint x = _api.getDB().getItem(ident+'@'+station.getIdent(), null);      
+        AprsObject obj;
+        if (x == null)
+            obj = _api.getDB().newObject(station, ident);
+        else 
+            obj = (AprsObject) x;
+             
+        if (op=='!') {
+           parseStdAprs(p, msg.substring(10), obj, true, "");
+           _api.getDB().deactivateSimilarObjects(ident, station);
+        }
+        else {
+           obj.kill();
+           System.out.println("   ITEM KILL: id="+ident+", op="+op);
         }
     }
     
