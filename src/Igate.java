@@ -23,9 +23,9 @@ import uk.me.jstott.jcoord.*;
 /**
  * Igate - Gateway between RF channel and internet channel.
  */
-public class Igate implements Channel.Receiver, ManagedObject
+public class Igate implements AprsChannel.Receiver, ManagedObject
 { 
-    private Channel  _inetChan, _rfChan;
+    private AprsChannel  _inetChan, _rfChan;
     private boolean  _allowRf, _gateObj;
     private String   _myCall; /* Move this ? */
     private long     _msgcnt = 0; 
@@ -92,7 +92,7 @@ public class Igate implements Channel.Receiver, ManagedObject
      * @param rf RF channel.
      * @param inet Internet channel (APRS-IS).
      */   
-    public synchronized void setChannels(Channel rf, Channel inet)
+    public synchronized void setChannels(AprsChannel rf, AprsChannel inet)
     {
         _inetChan = inet;
         _rfChan = rf; 
@@ -159,9 +159,9 @@ public class Igate implements Channel.Receiver, ManagedObject
           if (p.type == ';' && _pathObj != null)
              p.via = _pathObj;
           if (p.type == ':' && path != null) 
-             p.via = Channel.getReversePath(path); 
+             p.via = AprsChannel.getReversePath(path); 
              
-          p.report = Channel.thirdPartyReport(p, "TCPIP,"+_myCall+"*");
+          p.report = AprsChannel.thirdPartyReport(p, "TCPIP,"+_myCall+"*");
           p.from = _myCall;
           p.to = _api.getToAddr();
           p.thirdparty = true; 

@@ -18,8 +18,8 @@ public class Main implements ServerAPI
    
    private static StationDB db = null;
    private static AprsParser parser = null;
-   public  static Channel ch1 = null;
-   public  static Channel ch2 = null;
+   public  static AprsChannel ch1 = null;
+   public  static AprsChannel ch2 = null;
    public static  Igate igate  = null;
    public static  OwnObjects ownobjects; 
    public static  OwnPosition ownpos = null; 
@@ -57,7 +57,7 @@ public class Main implements ServerAPI
     { return rctl; } 
     
    
-   public void setInetChannel(Channel ch) {
+   public void setInetChannel(AprsChannel ch) {
        ch1 = ch; 
        igate.setChannels(ch2, ch1);
        db.getMsgProcessor().setChannels(ch2, ch1);
@@ -65,7 +65,7 @@ public class Main implements ServerAPI
        ownobjects.setChannels(ch2, ch1); 
    }
    
-   public Channel getInetChannel()
+   public AprsChannel getInetChannel()
       { return ch1; }
       
       
@@ -241,7 +241,7 @@ public class Main implements ServerAPI
            /*
             * default channel setup: one named aprsis type APRSIS and one named tnc type TNC2
             */
-            Channel.init(api);
+            AprsChannel.init(api);
            _chanManager.addClass("APRSIS", "no.polaric.aprsd.InetChannel");
            _chanManager.addClass("TNC2", "no.polaric.aprsd.Tnc2Channel");
            _chanManager.addClass("KISS", "no.polaric.aprsd.KissTncChannel");
@@ -259,11 +259,11 @@ public class Main implements ServerAPI
            
            int i = 0;
            
-           Channel[] ch = new Channel[channelns.length];
+           AprsChannel[] ch = new AprsChannel[channelns.length];
            for (String chan: channelns) {
                  /* Define and activate channel */
                  String type = getProperty("channel."+chan+".type", "");
-                 ch[i] = _chanManager.newInstance(api, type, chan);
+                 ch[i] = (AprsChannel) _chanManager.newInstance(api, type, chan);
                  if (ch[i] != null) {
                     ch[i].addReceiver(parser);
                     if (getBoolProperty("channel."+chan+".on", true))
@@ -290,8 +290,8 @@ public class Main implements ServerAPI
             */
            String ch_inet_name = getProperty("channel.default.inet", "aprsis"); 
            String ch_rf_name = getProperty("channel.default.rf", "tnc");
-           ch1 = (ch_inet_name.length() > 0 ? _chanManager.get(ch_inet_name) : null);
-           ch2 = (ch_rf_name.length() > 0  ? _chanManager.get(ch_rf_name) : null);          
+           ch1 = (ch_inet_name.length() > 0 ? (AprsChannel) _chanManager.get(ch_inet_name) : null);
+           ch2 = (ch_rf_name.length() > 0  ? (AprsChannel) _chanManager.get(ch_rf_name) : null);          
 
            /* Igate.
             * FIXME:  Should create igate object also if not on to allow it to be 

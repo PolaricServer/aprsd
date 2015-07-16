@@ -22,7 +22,7 @@ import java.util.concurrent.Semaphore;
  * TNC channel. For devices in TNC2 compatible mode.
  */
  
-public abstract class TncChannel extends Channel implements Runnable
+public abstract class TncChannel extends AprsChannel implements Runnable
 {
     private   String  _portName; 
     private   int     _baud;

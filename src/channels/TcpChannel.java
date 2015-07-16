@@ -22,7 +22,7 @@ import java.util.concurrent.*;
 /**
  * TCP channel. Connect to a server on the internet. 
  */
-public abstract class TcpChannel extends Channel implements Runnable, Serializable
+public abstract class TcpChannel extends AprsChannel implements Runnable, Serializable
 {
     private   String   _host;
     private   int      _port;
@@ -110,7 +110,7 @@ public abstract class TcpChannel extends Channel implements Runnable, Serializab
     protected void try_backup()
     {
         if (_backup != null) {
-           final Channel ch = _api.getChanManager().get(_backup);         
+           final AprsChannel ch = (AprsChannel) _api.getChanManager().get(_backup);         
            if (ch == null) {
               logNote("Backup channel '"+_backup+"' not found");
               return;

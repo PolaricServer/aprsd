@@ -23,7 +23,7 @@ import uk.me.jstott.jcoord.*;
 /**
  * Parse and interpret APRS datastreams.
  */
-public class AprsParser implements Channel.Receiver
+public class AprsParser implements AprsChannel.Receiver
 { 
 
     /* Standard APRS position report format */
@@ -281,7 +281,7 @@ public class AprsParser implements Channel.Receiver
            i = msg.indexOf('_');  
         if (i==-1) return;
            
-        String ident = msg.substring(1,i+1).trim();
+        String ident = msg.substring(1, i).trim();
         char op = msg.charAt(i);
         
         station.setPathInfo(p.via); 
@@ -293,7 +293,7 @@ public class AprsParser implements Channel.Receiver
             obj = (AprsObject) x;
              
         if (op=='!') {
-           parseStdAprs(p, msg.substring(10), obj, true, "");
+           parseStdAprs(p, msg.substring(i), obj, false, "");
            _api.getDB().deactivateSimilarObjects(ident, station);
         }
         else {
@@ -615,7 +615,7 @@ public class AprsParser implements Channel.Receiver
        Date time = new Date();
        time = parseTimestamp(data.substring(0), true);
        AprsHandler.PosData pd = parseCompressedPos(data.substring(3));
-       if (Channel._dupCheck.checkTS(station.getIdent(), time))
+       if (AprsChannel._dupCheck.checkTS(station.getIdent(), time))
             return;
             
        station.update(time, pd, "", "(EXT)" );        
@@ -637,7 +637,7 @@ public class AprsParser implements Channel.Receiver
                 time = parseTimestamp(data.substring(1), false);   
             data = data.substring(8);
             /* A duplicate check on timestamp itself */
-            if (Channel._dupCheck.checkTS(station.getIdent(), time)) 
+            if (AprsChannel._dupCheck.checkTS(station.getIdent(), time)) 
                 return; 
          }
          else

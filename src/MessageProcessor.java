@@ -90,17 +90,17 @@ public class MessageProcessor implements Runnable, Serializable
    private RecMessages recMessages = new RecMessages();
    
        
-   private Map<String, Subscriber> _subscribers = new HashMap();
-   private Map<String, OutMessage> _outgoing = new HashMap();
-   private static int _msgno = 0;
-   private Channel    _inetChan, _rfChan;
-   private String     _myCall; /* Move this ? */
-   private Thread     _thread;
-   private String     _key;
-   private String     _defaultPath;
-   private String     _alwaysRf;
-   private int        _threadid;
-   private String     _file;
+   private Map<String,  Subscriber> _subscribers = new HashMap();
+   private Map<String,  OutMessage> _outgoing = new HashMap();
+   private static int  _msgno = 0;
+   private AprsChannel _inetChan, _rfChan;
+   private String      _myCall; /* Move this ? */
+   private Thread      _thread;
+   private String      _key;
+   private String      _defaultPath;
+   private String      _alwaysRf;
+   private int         _threadid;
+   private String      _file;
     
     
    private static String getNextId()
@@ -132,7 +132,7 @@ public class MessageProcessor implements Runnable, Serializable
        
            
       
-   public void setChannels(Channel rf, Channel inet)
+   public void setChannels(AprsChannel rf, AprsChannel inet)
    {
        _inetChan = inet;
        _rfChan = rf;
@@ -294,7 +294,7 @@ public class MessageProcessor implements Runnable, Serializable
           if (path == null)
              p.via = _defaultPath;
           else
-             p.via = Channel.getReversePath(path); 
+             p.via = AprsChannel.getReversePath(path); 
          
           _rfChan.sendPacket(p);
           sentOnRf = true;

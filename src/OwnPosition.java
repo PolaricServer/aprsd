@@ -25,13 +25,13 @@ import uk.me.jstott.jcoord.*;
  */
 public class OwnPosition extends Station implements Runnable
 {
-    transient private  Channel    _inetChan, _rfChan;
-    transient private  Thread     _thread;
-    transient private  ServerAPI  _api;
-    transient private  int        _tid;
-    transient private  boolean    _txOn, _allowRf;
-    transient protected String    _pathRf, _comment;
-    transient protected int       _maxPause, _minPause;
+    transient private  AprsChannel _inetChan, _rfChan;
+    transient private  Thread      _thread;
+    transient private  ServerAPI   _api;
+    transient private  int         _tid;
+    transient private  boolean     _txOn, _allowRf;
+    transient protected String     _pathRf, _comment;
+    transient protected int        _maxPause, _minPause;
     
     private final static int _trackTime = 10;
     
@@ -92,7 +92,7 @@ public class OwnPosition extends Station implements Runnable
      *  @param rfc RF channel (radio)
      *  @param ic  Internet channel (APRS-IS)
      */
-    public synchronized void setChannels(Channel rfc, Channel ic)
+    public synchronized void setChannels(AprsChannel rfc, AprsChannel ic)
     {
        _inetChan = ic; 
        _rfChan = rfc;

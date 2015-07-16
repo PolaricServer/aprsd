@@ -44,10 +44,10 @@ import java.util.*;
           
           
        /** Replace current internet channel in igate, etc.. */   
-       public void setInetChannel(Channel ch);
+       public void setInetChannel(AprsChannel ch);
           
        /** Return current internet channel in igate, etc.. */
-       public Channel getInetChannel();
+       public AprsChannel getInetChannel();
           
           
        /** Get server statistics. */

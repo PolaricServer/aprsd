@@ -26,7 +26,7 @@ import uk.me.jstott.jcoord.*;
  
 public class OwnObjects implements Runnable
 { 
-    private Channel         _inetChan, _rfChan;
+    private AprsChannel     _inetChan, _rfChan;
     private boolean         _allowRf;
     private String          _pathRf;
     private int             _rangeRf;
@@ -145,7 +145,7 @@ public class OwnObjects implements Runnable
             
     
        
-    public void setChannels(Channel rf, Channel inet)
+    public void setChannels(AprsChannel rf, AprsChannel inet)
     {
         _inetChan = inet;
         _rfChan = rf; 
