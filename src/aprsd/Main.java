@@ -152,6 +152,7 @@ public class Main implements ServerAPI
            _defaultConf.load(fin);
            fin.close(); 
            String plugins = _defaultConf.getProperty("plugins", "");
+           String channels = _defaultConf.getProperty("channels", "");
            
            /* Scan subdirectory config.d for additional config files 
             * placed there by plugins. 
@@ -165,18 +166,29 @@ public class Main implements ServerAPI
            for (File f : files) {
                 System.out.println("*** Config file: "+f.getName());
                 FileInputStream ffin = new FileInputStream(f.getAbsolutePath());
-               _defaultConf.load( ffin );
+                _defaultConf.load( ffin );
                 ffin.close();
+                
                 String newplug = _defaultConf.getProperty("plugins","");
                 if (newplug.length() > 0) {
                     if (plugins.length() > 0)
                        plugins += ", ";       
                     plugins += _defaultConf.getProperty("plugins","");
                 }
+                
+                String newchan = _defaultConf.getProperty("channels", "");
+                if (newchan.length() > 0) {
+                    if (channels.length() > 0)
+                       channels += ", ";       
+                    channels += _defaultConf.getProperty("channels","");
+                }
            }
            _defaultConf.setProperty("plugins", plugins);
            System.out.println("plugins = "+plugins);
-            
+          _defaultConf.setProperty("channels", channels);
+           System.out.println("channels = "+channels);
+           
+           
            /* 
             * Allow default config properties to be overridden
             * programmatically and saved elsewhere. The original config file
