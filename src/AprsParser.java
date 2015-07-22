@@ -106,9 +106,13 @@ public class AprsParser implements AprsChannel.Receiver
             case ';': 
                /* Object report */
                parseObjectReport(p, station);
+               break;
+               
             case ')': 
                /* Object report */
                parseItemReport(p, station);
+               break;
+               
             case '\'':
             case '`': 
                /* Mic-E report */
