@@ -120,9 +120,6 @@ public abstract class AprsPoint extends PointObject implements Serializable, Clo
        { return _ambiguity; }
        
        
-    public abstract String getIdent();
-       
-       
     public String getAlias()
        { return _alias; }
        

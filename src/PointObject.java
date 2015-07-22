@@ -30,7 +30,11 @@ public abstract class PointObject extends Point implements Cloneable
     
        
     public PointObject(Reference p)
-       { super(p); }
+       { super(p); }       
+    
+    
+    public abstract String getIdent();
+    
        
     public boolean iconIsNull()
        { return _icon == null; }

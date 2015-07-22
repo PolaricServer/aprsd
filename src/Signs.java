@@ -51,7 +51,10 @@ public class Signs extends Source
           
         public int getId() 
           { return _id; }
-             
+          
+        public String getIdent()
+          { return ""+_id; }
+          
         public Source getSource()
           { return null; }
        
