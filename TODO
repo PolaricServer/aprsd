@@ -43,18 +43,32 @@ V.1.8 (july 2014), etc
 * Allow backup channels which are automatically started when primary channel fails. 
      DONE.
      
-* Consider architecture for semantic tagging. 
+* Consider architecture for (semantic) tagging. Automatic tagging, user tagging.  
 
 * Allow clients to show raw APRS packets. 
-
+     DONE. 
+     
 * Allow filtering on APRS "via" field.
 
 * Design and implement AIS data source. Separate plugin? 
+     DONE. 
+     
+* Move to Java 8. Trouble: This breaks Scala and newer version of Scala doesn't support XML any longer!!!
+  Debian Stable have only old version of Scala - breaks if used with Java 8. 
+  Temporary fix: Force Java 7. 
+        
+* Change class hierarchy to better support other types of position objects than APRS. Some parts of APRS specific 
+  classes can be moved to a generic class. 
+      IN PROGRESS.   
+      DONE for channels (AprsChannel separated out)
+        
+* Consider moving APRS specific stuff to a separate package. 
 
-        
-        
-        
-        
+* Support incoming aprs item reports. 
+      DONE.
+      
+      
+      
    
 Autorisation/Authentication
 ---------------------------
@@ -103,20 +117,10 @@ Configuration support
     
 Channels/Sources
 ----------------
-     
-* Channel code in separate subpackage / subdirectory: 
-    - Move out Channel, InetChannel, TncChannel and DupCheck. 
-    - Rename Channel to ChannelBase
-    - Channel interface in core
     
 * Flexible Gate for routing packets to and between channels? igate --> router
     - Router specification? Router framework?
     - Allow translation between protocols? Pluggable modules. 
-
-* Soundmodem plugin
-     STARTED. CANCELLED. Use extmodem instead.
-
-* AIS plugin
 
 * Receive positions from clients (mobile app). This is both a source and a web-service?
   Separate plugin? 
@@ -135,13 +139,5 @@ Other.
 * App: Autodiscovery of servers on local network
 
 * APRS messaging - a plugin? 
-
-* Allow objects with certain attributes (like source, callsign) to 
-  be visible only for logged in users. Note: Should this be part of a filter framework?
-      IN PROGRESS
-
-* Change class hierarchy to support other types of position objects, 
-  not just plain APRS. 
-      STARTED.
     
 * Additions to search function?
