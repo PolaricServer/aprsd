@@ -67,12 +67,12 @@ public class XmlServer extends ServerBase
        String ident = req.getParameter("id").toUpperCase();
 
        Query parms = req.getQuery();
-       AprsPoint s = _api.getDB().getItem(ident, null);
+       TrackerPoint s = _api.getDB().getItem(ident, null);
        if (s==null) {
           int i = ident.lastIndexOf('-');
           if (i > -1)    
              ident = ident.substring(0, i);
-          List<AprsPoint> l = _api.getDB().getAllPrefix(ident);
+          List<TrackerPoint> l = _api.getDB().getAllPrefix(ident);
           if (l.size() > 0)
               s = l.get(0);
        }
@@ -195,7 +195,7 @@ public class XmlServer extends ServerBase
          
         
         /* Output APRS objects */
-        for (AprsPoint s: _api.getDB().search(uleft, lright)) 
+        for (TrackerPoint s: _api.getDB().search(uleft, lright)) 
         {
             Action action = vfilt.apply(s, scale); 
             // FIXME: Get CSS class from filter rules 
@@ -219,7 +219,7 @@ public class XmlServer extends ServerBase
                   
                   String title = s.getDescr() == null ? "" 
                              : " title=\"" + fixText(s.getDescr()) + "\"";
-                  String flags = " flags=\"a" + (s.isInfra() ? "i" : "") + "\"";
+                  String flags = " flags=\"a" + (s instanceof AprsPoint && ((AprsPoint)s).isInfra() ? "i" : "") + "\"";
 
                   String icon = _wfiledir + "/icons/"+ (s.getIcon(showSarInfo) != null ? s.getIcon(showSarInfo) : _icon);    
                 
@@ -235,7 +235,7 @@ public class XmlServer extends ServerBase
                      String style = "lobject";
                      if (s instanceof Station)
                         style = (!(((Station) s).getTrail().isEmpty()) ? "lmoving" : "lstill");
-                     if (s.isEmergency())
+                     if (s instanceof AprsPoint && ((AprsPoint)s).isEmergency())
                         style += " lflash";
                         
                      style += " "+ action.getStyle();
@@ -253,7 +253,7 @@ public class XmlServer extends ServerBase
                   }
                } /* synchronized(s) */
                
-               if (action.showPath() && s.isInfra())
+               if (action.showPath() && s instanceof AprsPoint && ((AprsPoint)s).isInfra())
                   printPathXml(out, (Station) s, uleft, lright);              
                out.println("</point>");
             }

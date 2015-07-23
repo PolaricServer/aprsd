@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ public interface StationDB
          * @param id identifier (typically a callsign) of item.
          * @param d time of capture, null if realtime
          */
-        public AprsPoint getItem(String id, Date d);
+        public TrackerPoint getItem(String id, Date d);
         
         /**
          * Get trail point. 
@@ -41,7 +41,7 @@ public interface StationDB
     
     
 
-      public AprsPoint getItem(String id, Date d);
+      public TrackerPoint getItem(String id, Date d);
         
       public Trail.Item getTrailPoint(String src, java.util.Date t);
         
@@ -117,16 +117,16 @@ public interface StationDB
        public void deactivateSimilarObjects(String id, Station owner);
     
     
-       public List<AprsPoint> getAll(String arg);
+       public List<TrackerPoint> getAll(String arg);
     
-       public List<AprsPoint> getAllPrefix(String arg);
+       public List<TrackerPoint> getAllPrefix(String arg);
         
 
    
       /**
        * Search. Return a list of all items within the given geographical area.
        */
-       public List<AprsPoint>
+       public List<TrackerPoint>
              search(Reference uleft, Reference lright);       
     
     

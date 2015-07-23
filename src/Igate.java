@@ -178,7 +178,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
        /* We assume that object's position is already parsed and in database. */
        if (_api.getOwnPos() == null || _api.getOwnPos().getPosition() == null)
             return false;
-       AprsPoint obj = _api.getDB().getItem(p.msgto, null);
+       AprsPoint obj = (AprsPoint) _api.getDB().getItem(p.msgto, null);
        if (obj == null)
             return false;
        return (obj.distance(_api.getOwnPos()) < range*1000);

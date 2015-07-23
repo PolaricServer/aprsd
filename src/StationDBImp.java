@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import java.util.regex.*;
  */
 public class StationDBImp implements StationDB, StationDB.Hist, Runnable
 {
-    private SortedMap<String, AprsPoint> _map = new ConcurrentSkipListMap();
+    private SortedMap<String, TrackerPoint> _map = new ConcurrentSkipListMap();
     private String     _file;
     private boolean   _hasChanged = false; 
     private RouteInfo _routes;
@@ -63,7 +63,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
 
         
             
-    public AprsPoint getItem(String id, Date t)
+    public TrackerPoint getItem(String id, Date t)
     { 
        if (t==null)
           return _map.get(id); 
@@ -117,7 +117,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
              ofs.writeObject(_routes);
              _msgProc.save();
              _ownobj.save(ofs);
-             for (AprsPoint s: _map.values())
+             for (TrackerPoint s: _map.values())
                 { ofs.writeObject(s); }
            }
            catch (Exception e) {
@@ -142,7 +142,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
           _ownobj.restore(ifs);
           while (true)
           { 
-              AprsPoint st = (AprsPoint) ifs.readObject(); 
+              TrackerPoint st = (TrackerPoint) ifs.readObject(); 
               if (!_map.containsKey(st.getIdent()))
                   _map.put(st.getIdent(), st);
           }
@@ -166,10 +166,10 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     {
          Date now = new Date();  
          System.out.println("*** Garbage collection...");
-         Iterator<AprsPoint> stn = _map.values().iterator();
+         Iterator<TrackerPoint> stn = _map.values().iterator();
          while (stn.hasNext()) 
          {
-             AprsPoint st = stn.next();
+             TrackerPoint st = stn.next();
              if (st.expired() && !st.isPersistent() ) 
              {
                 System.out.println("        Removing: "+st.getIdent()); 
@@ -194,7 +194,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     
     private synchronized void checkMoving()
     {
-         for (AprsPoint s: _map.values())
+         for (TrackerPoint s: _map.values())
             if (s.isChanging())
                 _hasChanged = true;
     }
@@ -215,7 +215,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
        
     public synchronized Station getStation(String id, Date t)
     { 
-         AprsPoint x = getItem(id, t);
+         TrackerPoint x = getItem(id, t);
          if (x instanceof Station) return (Station) x;
          else return null;
     }   
@@ -251,8 +251,8 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
      */
     public synchronized void deactivateSimilarObjects(String id, Station owner)
     {
-        Collection<AprsPoint> dupes =  _map.subMap(id+'@', id+'@'+"zzzzz").values();
-        for (AprsPoint x : dupes)
+        Collection<TrackerPoint> dupes =  _map.subMap(id+'@', id+'@'+"zzzzz").values();
+        for (TrackerPoint x : dupes)
            if (x instanceof AprsObject && !((AprsObject)x).isTimeless() && 
                   !owner.getIdent().equals(((AprsObject)x).getOwner().getIdent())) {
                System.out.println("*** Object overtaken/deactivated: "+id+"@"+((AprsObject)x).getOwner().getIdent());
@@ -260,24 +260,32 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
            }
     }
     
-    
-    public synchronized List<AprsPoint> getAllPrefix(String srch)
+    /**
+     * Return a list of trackerpoints where the ident has the given prefix. 
+     * @Param srch Prefix 
+     */
+    public synchronized List<TrackerPoint> getAllPrefix(String srch)
     {
-        LinkedList<AprsPoint> result = new LinkedList();
+        LinkedList<TrackerPoint> result = new LinkedList();
         if (srch == null)
            return result;
         srch = srch.toUpperCase(); 
-        for (AprsPoint s: _map.values())
+        for (TrackerPoint s: _map.values())
            if (s.getIdent().toUpperCase().startsWith(srch) ) 
                result.add(s);
         return result;  
     }    
         
         
-        
-    public synchronized List<AprsPoint> getAll(String srch)
+    /**
+     * Return a list of trackerpoints where ident or description matches the given expression.
+     * If expression is prefixed with "REG:", it is regarded as a regular expression, otherwise
+     * it is a simple wildcard expression. 
+     * @Param srch Search expression.
+     */
+    public synchronized List<TrackerPoint> getAll(String srch)
     {
-        LinkedList<AprsPoint> result = new LinkedList();
+        LinkedList<TrackerPoint> result = new LinkedList();
         if (srch == null)
            return result;
         srch = srch.toUpperCase(); 
@@ -287,7 +295,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
            srch = srch.replaceAll("\\.", Matcher.quoteReplacement("\\."));
            srch = srch.replaceAll("\\*", Matcher.quoteReplacement("(\\S*)"));
         }
-        for (AprsPoint s: _map.values())
+        for (TrackerPoint s: _map.values())
            if  (s.getIdent().toUpperCase().matches(srch) ||
                s.getDescr().toUpperCase().matches("(.*\\s+)?\\(?("+srch+")\\)?\\,?(\\s+.*)?") ) 
                result.add(s);
@@ -298,20 +306,20 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
        
        
     /**
-     * Simple search. Return list of stations within the rectangle defined by
+     * Simple geographical search. Return list of stations within the rectangle defined by
      * uleft (upper left corner) and lright (lower right corner). The coordinate system
      * should be the same as the visual map. Currently, we assume that the map 
      * is using a UTM projection. This also means that coordinates used here, and 
      * for the map must be in the same UTM zones. 
      */   
-    public synchronized List<AprsPoint>
+    public synchronized List<TrackerPoint>
           search(Reference uleft, Reference lright)
     {
          if (uleft==null || lright==null)
             return getAll(null);
             
-         LinkedList<AprsPoint> result = new LinkedList();
-         for (AprsPoint s: _map.values())
+         LinkedList<TrackerPoint> result = new LinkedList();
+         for (TrackerPoint s: _map.values())
             if (s.isInside(uleft, lright, 0.1, 0.1))
                 result.add(s);
         return result;

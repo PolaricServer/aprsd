@@ -230,7 +230,12 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       return true;
    }
 
-
+   /**
+    * Set SAR mode. 
+    * @param sender The station that sent the commmand.
+    * @param args The arguments of the SAR command: ON or OFF.
+    * @return true if success.
+    */
    protected boolean doSetSarMode(Station sender, String args)
    {
        if (args == null) {
@@ -258,7 +263,12 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    }
    
 
-
+   /**
+    * Set an alias on a trackerpoint. 
+    * @param sender The station that sent the commmand.
+    * @param args The arguments of the ALIAS command.
+    * @return true if success.
+    */
    protected boolean doSetAlias(Station sender, String args)
    {
       if (args == null) {
@@ -269,7 +279,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       System.out.println("*** Set ALIAS from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
-      AprsPoint item = _api.getDB().getItem(arg[0].trim(), null);
+      TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;
@@ -282,7 +292,12 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       
 
 
-   /* Note: These two methods are almost identical */
+   /**
+    * Set an icon on a trackerpoint. 
+    * @param sender The station that sent the commmand.
+    * @param args The arguments of the ICON command.
+    * @return true if success.
+    */
    protected boolean doSetIcon(Station sender, String args)
    {
       if (args == null) {
@@ -293,7 +308,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       System.out.println("*** Set ICON from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
-      AprsPoint item = _api.getDB().getItem(arg[0].trim(), null);
+      TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;

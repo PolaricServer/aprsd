@@ -254,12 +254,16 @@ public class AprsParser implements AprsChannel.Receiver
         char op = msg.charAt(10);
         
         station.setPathInfo(p.via); 
-        AprsPoint x = _api.getDB().getItem(ident+'@'+station.getIdent(), null);      
+        TrackerPoint x = _api.getDB().getItem(ident+'@'+station.getIdent(), null);      
         AprsObject obj;
         if (x == null)
             obj = _api.getDB().newObject(station, ident);
-        else 
+        else if (x instanceof AprsObject)
             obj = (AprsObject) x;
+        else {
+           System.out.println("*** WARNING: Object "+x+" is not an APRS object");
+           return;
+        }
              
         if (op=='*') {
            parseStdAprs(p, msg.substring(10), obj, true, "");
@@ -289,12 +293,16 @@ public class AprsParser implements AprsChannel.Receiver
         char op = msg.charAt(i);
         
         station.setPathInfo(p.via); 
-        AprsPoint x = _api.getDB().getItem(ident+'@'+station.getIdent(), null);      
+        TrackerPoint x = _api.getDB().getItem(ident+'@'+station.getIdent(), null);      
         AprsObject obj;
         if (x == null)
             obj = _api.getDB().newObject(station, ident);
-        else 
+        else if (x instanceof AprsObject)
             obj = (AprsObject) x;
+        else{
+           System.out.println("*** WARNING: Object "+x+" is not an APRS item");
+           return;
+        }
              
         if (op=='!') {
            parseStdAprs(p, msg.substring(i), obj, false, "");

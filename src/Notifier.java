@@ -26,7 +26,7 @@ import java.io.Serializable;
 public class Notifier
 {
     private Date signalled = new Date(); 
-    private AprsPoint signalledPt; 
+    private TrackerPoint signalledPt; 
     private static long _mintime  = 1000 * 10;   /* Minimum wait time: 10s */
     private static long _timeout  = 1000 * 120;  /* Maximum wait time: 2min */
     private Map<Long, Integer> _waiters = new HashMap();
@@ -90,7 +90,7 @@ public class Notifier
      * Signal an event on a certain geographical point. This will wake up
      * waiters that subscribes to an area containing this location.
      */
-    public synchronized void signal(AprsPoint st)
+    public synchronized void signal(TrackerPoint st)
     {   
          signalled = new Date(); 
          signalledPt = st;

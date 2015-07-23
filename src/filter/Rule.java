@@ -29,11 +29,11 @@ public class Rule
    
    /**
     * Apply the rule.
-    * @param obj AprsPoint object.  
+    * @param obj TrackerPoint object.  
     * @param scale Map scale
     * @return action - object that tells how the argument is going to be displayed. 
     */
-   public Action apply(AprsPoint obj, long scale) {
+   public Action apply(TrackerPoint obj, long scale) {
        if (pred.eval(obj, scale))
           return action;
        else

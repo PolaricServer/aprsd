@@ -43,7 +43,7 @@ public class SarMode
     public String getFilter()
        { return _prefixFilter; }
        
-    public boolean filter(AprsPoint p)
+    public boolean filter(TrackerPoint p)
     {
        if (_prefixFilter == null || _prefixFilter.equals(""))
          return false;

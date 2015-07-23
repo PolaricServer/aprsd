@@ -219,7 +219,7 @@ package no.polaric.aprsd.http
               
        def action(req : Request): NodeSeq = 
        {
-          AprsPoint.abortWaiters(true);
+          TrackerPoint.abortWaiters(true);
           if (on != null && "true".equals(on) ) {
                val hide = (hidesar != null && "true".equals(hidesar) ) 
                val filt = if ("".equals(filter)) "NONE" else filter;
@@ -465,7 +465,7 @@ package no.polaric.aprsd.http
        val result: NodeSeq =
          <table>
          {
-            for ( x:AprsPoint <- _api.getDB().getAll(arg)
+            for ( x:TrackerPoint <- _api.getDB().getAll(arg)
                   if ( true || !vfilt.apply(x, 0).hideAll()) ) yield
             {
                val s = if (!x.isInstanceOf[Station]) null
@@ -521,6 +521,7 @@ package no.polaric.aprsd.http
         val I = getI18n(req)
         val id = req.getParameter("id")
         val x = _api.getDB().getItem(id, null)
+        val xa = if (x.isInstanceOf[AprsPoint]) x.asInstanceOf[AprsPoint] else null
         val s = if (x.isInstanceOf[Station]) x.asInstanceOf[Station] else null
         val obj = if (x.isInstanceOf[AprsObject]) x.asInstanceOf[AprsObject] else null
         val edit  =  ( req.getParameter("edit") != null )
@@ -560,8 +561,8 @@ package no.polaric.aprsd.http
             <label for="callsign" class="leftlab">Ident:</label>
             <label id="callsign"><b> { if (x != null && x.getIdent != null) x.getIdent().replaceFirst("@.*","") else "" } </b></label>
 
-            { if (!simple)
-                 simpleLabel("symbol", "leftlab", I.tr("Symbol")+":",TXT( x.getSymtab()+" "+x.getSymbol())) else null }
+            { if (!simple && xa != null)
+                 simpleLabel("symbol", "leftlab", I.tr("APRS symbol")+":",TXT( xa.getSymtab()+" "+xa.getSymbol())) else null }
             { if (x.getAlias() != null)
                  simpleLabel("alias", "leftlab", I.tr("Alias")+":", <b>{x.getAlias()}</b>) else null }
             { if (obj != null)
@@ -580,9 +581,9 @@ package no.polaric.aprsd.http
                 if (x.getPosition() != null) TXT( ll2dmString( x.getPosition().toLatLng()))
                 else TXT(I.tr("not registered")) ) }
                 
-            { if (x != null && x.getAmbiguity() > 0)
+            { if (xa != null && xa.getAmbiguity() > 0)
                   simpleLabel("ambg", "leftlab", I.tr("Ambiguity")+":", 
-                    TXT( "± "+0.01 * Math.pow(10, x.getAmbiguity())/2 + " "+I.tr("minutes") )) else null}
+                    TXT( "± "+0.01 * Math.pow(10, xa.getAmbiguity())/2 + " "+I.tr("minutes") )) else null}
             
             { if (s != null && s.getAltitude() >= 0)
                   simpleLabel("altitude", "leftlab", I.tr("Altitude")+":", TXT(s.getAltitude() + " m ")) else null }
