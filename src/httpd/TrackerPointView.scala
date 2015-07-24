@@ -40,7 +40,15 @@ package no.polaric.aprsd.http
                simpleLabel("alias", "leftlab", I.tr("Alias")+":", <b>{model.getAlias()}</b>) 
            else <span></span> 
        
-       
+                                  
+                           
+       protected def heightcourse(req: Request): NodeSeq =
+            { if (model.getAltitude() >= 0)
+                  simpleLabel("altitude", "leftlab", I.tr("Altitude")+":", TXT(model.getAltitude() + " m ")) else <span></span> } ++
+            { if (model.getSpeed() > 0)
+                  simpleLabel("cspeed", "leftlab", I.tr("Movement")+":", _directionIcon(model.getCourse(), fprefix(req))) else <span></span> }
+            ;
+            
        
        /** Basic settings. */
        /* FIXME: Add trail colour when ready. */
@@ -102,6 +110,7 @@ package no.polaric.aprsd.http
            alias(req) ++
            descr(req) ++
            position(req) ++
+           heightcourse(req) ++ 
            basicSettings(req)
            ;
               

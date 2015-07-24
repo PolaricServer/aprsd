@@ -36,14 +36,7 @@ package no.polaric.aprsd.http
    {
        val pathinfo = if (model.getPathInfo() != null && model.getPathInfo().length() > 1) 
                            cleanPath(model.getPathInfo()) else null
-                           
-                           
-       protected def heightcourse(req: Request): NodeSeq =
-            { if (model.getAltitude() >= 0)
-                  simpleLabel("altitude", "leftlab", I.tr("Altitude")+":", TXT(model.getAltitude() + " m ")) else <span></span> } ++
-            { if (model.getSpeed() > 0)
-                  simpleLabel("cspeed", "leftlab", I.tr("Movement")+":", _directionIcon(model.getCourse(), fprefix(req))) else <span></span> }
-            ;
+
             
             
        protected def reportinfo(req: Request): NodeSeq = {

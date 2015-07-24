@@ -47,7 +47,7 @@ public static class Status implements Serializable
     public static void setExpiretime(long exp)
        { _expiretime = exp; }
 
-     public static void init(ServerAPI api)
+    public static void init(ServerAPI api)
       { int exptime = api.getIntProperty("aprs.expiretime", 60);
         setExpiretime(exptime * 60 * 1000);
       }   
@@ -58,10 +58,6 @@ public static class Status implements Serializable
      */
     private String    _callsign; 
     private Status    _status;
-    private int       _course;
-    private int       _speed; 
-    private int       _altitude;
-       
     private Trail     _trail = new Trail(); 
 
     
@@ -84,7 +80,11 @@ public static class Status implements Serializable
     public Object clone() throws CloneNotSupportedException
        { return super.clone(); }
                       
-    
+           
+
+    public String getIdent()
+       { return _callsign; }
+       
     protected void setId(String id)
        { _callsign = id; }
        
@@ -146,11 +146,7 @@ public static class Status implements Serializable
     
     
     public synchronized Trail.Item getHItem()
-       { return new Trail.Item(_updated, _position, _speed, _course, ""); }
-       
-       
-    public String getIdent()
-       { return _callsign; }
+       { return new Trail.Item(_updated, _position, getSpeed(), getCourse(), ""); }
        
     
 
@@ -197,21 +193,6 @@ public static class Status implements Serializable
     public void nextTrailColor()
        { _trailcolor = _colTab.nextColour(); setChanging(); }
 
-       
-    public int getSpeed ()
-       { return _speed; }
-    
-       
-    public int getCourse ()
-       { return _course; }
-    
-       
-    public int getAltitude()
-       { return _altitude; }
-    
-
-    public void setAltitude(int a)
-       { _altitude = a; }
 
    
     @Override public boolean isInside(Reference uleft, Reference lright) 
@@ -289,7 +270,7 @@ public static class Status implements Serializable
             * save the previous position.
             */
            if (distance(pd.pos) > Trail.mindist && 
-               _trail.add(_updated, _position, _speed, _course, _pathinfo)) 
+               _trail.add(_updated, _position, getSpeed(), getCourse(), _pathinfo)) 
            {
               if (_trail.length() == 1 && _autotrail)
                   _trailcolor = _colTab.nextColour();
@@ -300,9 +281,9 @@ public static class Status implements Serializable
         }
         updatePosition(ts, pd.pos, pd.ambiguity);
         
-        _speed = pd.speed;
-        _course = pd.course;
-        _altitude = (int) pd.altitude;
+        setSpeed(pd.speed);
+        setCourse(pd.course);
+        setAltitude((int) pd.altitude);
         _pathinfo = pathinfo; 
        
         setDescr(descr); 

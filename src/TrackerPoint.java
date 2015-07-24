@@ -28,6 +28,10 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     private   static Notifier  _change = new Notifier();
     protected static ServerAPI _api = null;
     protected static StationDB _db  = null;
+   
+    private int       _course = -1;
+    private int       _speed = -1; 
+    private int       _altitude = -1;
     
     private boolean    _changing = false; 
     protected Date     _updated = new Date();  // FIXME: Can this be private?
@@ -46,8 +50,30 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     public static void setApi(ServerAPI api)
        { _api = api; _db = _api.getDB(); }   
        
+   
+    /************** Course, speed and altitude ***************/
+    
+           
+    public int getSpeed ()
+       { return _speed; }
+
+    protected void setSpeed (int s)
+       { _speed = s; }
        
+    public int getCourse ()
+       { return _course; }
        
+    protected void setCourse(int c)
+       { _course = c; }
+       
+    public int getAltitude()
+       { return _altitude; }
+    
+    protected void setAltitude(int a)
+       { _altitude = a; }
+    
+    
+    
     /************** Methods related to tracking of changes ***************/
           
     /** 
