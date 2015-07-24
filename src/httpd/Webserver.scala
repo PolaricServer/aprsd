@@ -34,8 +34,17 @@ package no.polaric.aprsd.http
   {
  
    val _time = new Date();
-      
-
+   
+   /* 
+    * Register views for position objects. 
+    * addView ( class-of-model, class-of-view 
+    */
+   PointView.addView(classOf[AprsObject],  classOf[AprsObjectView])
+   PointView.addView(classOf[Station],     classOf[AprsStationView])
+   PointView.addView(classOf[OwnPosition], classOf[AprsPointView])
+    
+    
+    
     
    /** 
     * Admin interface. 
@@ -423,27 +432,6 @@ package no.polaric.aprsd.http
     }
 
 
-    
-    def _directionIcon(direction:Int, fprefix: String): NodeSeq = 
-        direction match {
-          case x if !(22 until 337 contains x) =>
-              <div><img src= {fprefix+"/dicons/dN.png"}/> N</div>
-          case x if (22 until 67 contains x) =>
-              <div><img src= {fprefix+"/dicons/dNE.png"}/> NE</div>
-          case x if (67 until 112 contains x) =>
-              <div><img src= {fprefix+"/dicons/dE.png"}/> E</div>
-          case x if (112 until 157 contains x) =>
-              <div><img src= {fprefix+"/dicons/dSE.png"}/> SE</div>
-          case x if (157 until 202 contains x) =>
-              <div><img src= {fprefix+"/dicons/dS.png"}/> S</div>
-          case x if (202 until 247 contains x) =>
-              <div><img src= {fprefix+"/dicons/dSW.png"}/> SW</div>
-          case x if (247 until 292 contains x) =>
-              <div><img src= {fprefix+"/dicons/dW.png"}/> W</div>
-          case x if (292 until 337 contains x) =>
-              <div><img src= {fprefix+"/dicons/dNW.png"}/> NW</div>
-          case _ => null;
-      }
 
 
    
@@ -512,190 +500,19 @@ package no.polaric.aprsd.http
        ;
   
   
-  
-   /** 
-    * Info about station/object (standard HTML)
-    */
    def _handle_station(req : Request, res : Response, canUpdate: Boolean) =
-   {        
-        val I = getI18n(req)
-        val id = req.getParameter("id")
-        val x = _api.getDB().getItem(id, null)
-        val xa = if (x.isInstanceOf[AprsPoint]) x.asInstanceOf[AprsPoint] else null
-        val s = if (x.isInstanceOf[Station]) x.asInstanceOf[Station] else null
-        val obj = if (x.isInstanceOf[AprsObject]) x.asInstanceOf[AprsObject] else null
-        val edit  =  ( req.getParameter("edit") != null )
-        val simple =  ( req.getParameter("simple") != null )
-        val prefix = null
-        val pathinfo = if (s != null && s.getPathInfo() != null && 
-                           s.getPathInfo().length() > 1) 
-                               cleanPath(s.getPathInfo()) else null
-                         
-        if (obj != null)
-            obj.update();
-
-
-        def itemList(items : Set[String]) = 
-             <div class="trblock">
-             {  
-                var i=0
-                if (items != null) 
-                 for (it <- items) yield {
-                    i += 1
-                    val xx = _api.getDB().getItem(it, null)
-                    val linkable = (xx != null  && xx.visible() && xx.getPosition() != null)
-                    <span class={ if (linkable) "link_id" else ""} onclick={
-                        if (linkable) 
-                           "findItem('" + xx.getIdent() + "', true)"
-                        else "" }> {it + " " } </span>
-                }
-                else null;
-             }
-             </div>
-             ;
-        
-        
-        /* Fields to be filled in */
-        def fields(req : Request): NodeSeq =
-            <xml:group>  
-            <label for="callsign" class="leftlab">Ident:</label>
-            <label id="callsign"><b> { if (x != null && x.getIdent != null) x.getIdent().replaceFirst("@.*","") else "" } </b></label>
-
-            { if (!simple && xa != null)
-                 simpleLabel("symbol", "leftlab", I.tr("APRS symbol")+":",TXT( xa.getSymtab()+" "+xa.getSymbol())) else null }
-            { if (x.getAlias() != null)
-                 simpleLabel("alias", "leftlab", I.tr("Alias")+":", <b>{x.getAlias()}</b>) else null }
-            { if (obj != null)
-                 simpleLabel("owner", "leftlab", I.tr("Sender")+":", <b>{obj.getOwner().getIdent()}</b>) else null}
-            { if (x.getDescr() != null && x.getDescr().length() > 0)
-                 simpleLabel("descr", "leftlab", I.tr("Description")+":", TXT(x.getDescr())) else null}
-            { if (s != null && s.getStatus() != null)
-                 simpleLabel("status", "leftlab", I.tr("Status")+":", I.tr("Last received APRS status message"),
-                      TXT ( s.getStatus().text + " [" + df.format(s.getStatus().time)+"]"))  else null}
-      
-            { simpleLabel("pos", "leftlab", I.tr("Position")+" (UTM):",
-                if (x.getPosition() != null) showUTM(req, x.getPosition())
-                else TXT(I.tr("not registered")) ) }
- 
-            { simpleLabel("posll", "leftlab", I.tr("Position")+" (latlong):",
-                if (x.getPosition() != null) TXT( ll2dmString( x.getPosition().toLatLng()))
-                else TXT(I.tr("not registered")) ) }
-                
-            { if (xa != null && xa.getAmbiguity() > 0)
-                  simpleLabel("ambg", "leftlab", I.tr("Ambiguity")+":", 
-                    TXT( "± "+0.01 * Math.pow(10, xa.getAmbiguity())/2 + " "+I.tr("minutes") )) else null}
-            
-            { if (s != null && s.getAltitude() >= 0)
-                  simpleLabel("altitude", "leftlab", I.tr("Altitude")+":", TXT(s.getAltitude() + " m ")) else null }
-            { if (s != null && s.getSpeed() > 0)
-                  simpleLabel("cspeed", "leftlab", I.tr("Movement")+":", _directionIcon(s.getCourse(), fprefix(req))) else null }
-
-            { simpleLabel("hrd", "leftlab", I.tr("Last reported")+":", I.tr("Time of last received APRS report"),
-                  TXT( df.format(x.getUpdated()))) }
-                  
-            { if (pathinfo != null) simpleLabel("via", "leftlab", I.tr("Via")+":", I.tr("Which route the last APRS report took"), 
-                     TXT(pathinfo)) else null }
-                  
-            { var txt = "";
-              if (s != null) {
-                 if (s.isIgate()) txt += "IGATE "; 
-                 if (s.isWideDigi()) txt += I.tr("Wide-Digi");
-                 if ((s.isIgate() || s.isWideDigi()) && simple)
-                   { simpleLabel("infra", "leftlab", I.tr("Infrastructure")+":", TXT(txt)) } else null 
-              } else null
-            }
-            
-            { if (simple)        
-               <div id="traffic">
-                  { if (s != null && s.isInfra() )
-                     {  <label for="hrds" class="leftlab"> {I.tr("Traffic from")+":"} </label>
-                        <label id="hrds"> { itemList(s.getTrafficFrom()) } </label> } else null }
-               
-                  { if (s != null && s.getTrafficTo != null && !s.getTrafficTo.isEmpty)
-                     {  <label for="hrd" class="leftlab"> {I.tr("Traffic to")+":"} </label>
-                        <label id="hrd"> { itemList(s.getTrafficTo()) } </label> } else null }
-               </div>
-               else null                    
-            }
-            
-           
-                                 
-            { if (edit && canUpdate)
-                  <div>
-                  <br/>
-                  { label("hidelabel", "leftlab", I.tr("Settings")+":") ++
-                    checkBox("hidelabel", x.isLabelHidden(), TXT(I.tr("Hide ID"))) ++
-                    checkBox("pers", x.isPersistent(), TXT(I.tr("Persistent storage"))) }
-                  <br/>
-                  { if (s != null)
-                        label("newcolor", "leftlab", I.tr("Trail")+":") ++ 
-                        checkBox("newcolor", false, TXT(I.tr("Find new colour")))
-                    else null }
-                  <br/>   
-                  <label for="nalias" class="leftlab"> {I.tr("New alias")+":"} </label>
-                  { textInput("nalias", 10, 20, 
-                        if (x.getAlias()==null) "" else x.getAlias()) }
-                  <br/>
-                  { iconSelect(req, x, fprefix(req), "/icons/") }
-                  </div>
-               else null        
-            }              
-            </xml:group> 
-            ;
-
-
-
-        /* Action. To be executed when user hits 'submit' button */
-        def action(req : Request): NodeSeq =
-        {
-             val perm = req.getParameter("pers");
-             x.setPersistent( "true".equals(perm) );  
-             val hide = req.getParameter("hidelabel");
-             x.setLabelHidden( "true".equals(hide) );     
-             
-             val newcolor = req.getParameter("newcolor");
-             if (s != null && "true".equals(newcolor) )
-                s.nextTrailColor();             
-
-
-             /* Alias setting */
-             var alias = req.getParameter("nalias");
-             var ch = false;
-             if (alias != null && alias.length() > 0)      
-                 ch = x.setAlias(alias);
-             else
-                { ch = x.setAlias(null)
-                  alias = "NULL"
-                }
-             System.out.println("*** ALIAS: '"+alias+"' for '"+x.getIdent()+"' by user '"+getAuthUser(req)+"'")
-             if (ch && _api.getRemoteCtl() != null)
-                 _api.getRemoteCtl().sendRequestAll("ALIAS "+x.getIdent()+" "+alias, null);
-
-             /* Icon setting */
-             var icon = req.getParameter("iconselect");
-             if ("system".equals(icon)) 
-                 icon = null; 
-             if (x.setIcon(icon) && _api.getRemoteCtl() != null )
-                 _api.getRemoteCtl().sendRequestAll("ICON "+x.getIdent() + " " +
-                    { if (icon==null) "NULL" else icon }, 
-                    null);
-            
-             <h3>Oppdatert</h3>
-        }
-
-
-        printHtml (res, htmlBody ( req, null, 
-                                   if (simple) fields(req)
-                                   else htmlForm(req, prefix, fields, IF_AUTH(action), true, default_submit)))
-    }
-      
-
-
+   {
+       val simple =  ( req.getParameter("simple") != null )
+       val id = req.getParameter("id")
+       val x:TrackerPoint = _api.getDB().getItem(id, null)
+       val view = PointView.getViewFor(x, api, canUpdate, req)
+       
+       printHtml (res, htmlBody ( req, null, 
+                    if (simple) view.fields(req)
+                    else htmlForm(req, null, view.fields, IF_AUTH(view.action), true, default_submit)))
+   }
   
-    private def cleanPath(txt:String): String = 
-        txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]*(\\-[0-9]+)?\\*?,?)|(qA.),?", "")
-           .replaceAll("\\*", "").replaceAll(",+|(, )+", ", ")   
-        ;
+
 
       
    /** 

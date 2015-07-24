@@ -287,6 +287,36 @@ package no.polaric.aprsd.http
        ;
 
 
+  
+   def cleanPath(txt:String): String = 
+        txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]*(\\-[0-9]+)?\\*?,?)|(qA.),?", "")
+           .replaceAll("\\*", "").replaceAll(",+|(, )+", ", ")   
+        ;
+        
+        
+   def _directionIcon(direction:Int, fprefix: String): NodeSeq = 
+        direction match {
+          case x if !(22 until 337 contains x) =>
+              <div><img src= {fprefix+"/dicons/dN.png"}/> N</div>
+          case x if (22 until 67 contains x) =>
+              <div><img src= {fprefix+"/dicons/dNE.png"}/> NE</div>
+          case x if (67 until 112 contains x) =>
+              <div><img src= {fprefix+"/dicons/dE.png"}/> E</div>
+          case x if (112 until 157 contains x) =>
+              <div><img src= {fprefix+"/dicons/dSE.png"}/> SE</div>
+          case x if (157 until 202 contains x) =>
+              <div><img src= {fprefix+"/dicons/dS.png"}/> S</div>
+          case x if (202 until 247 contains x) =>
+              <div><img src= {fprefix+"/dicons/dSW.png"}/> SW</div>
+          case x if (247 until 292 contains x) =>
+              <div><img src= {fprefix+"/dicons/dW.png"}/> W</div>
+          case x if (292 until 337 contains x) =>
+              <div><img src= {fprefix+"/dicons/dNW.png"}/> NW</div>
+          case _ => null;
+      }
+
+      
+      
    /**
     * Selection of icon. List available icons. 
     * @param s object to select icon for (see what is already selected)
