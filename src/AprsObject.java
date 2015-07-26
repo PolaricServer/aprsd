@@ -136,7 +136,7 @@ public class AprsObject extends AprsPoint implements Serializable
     /** 
      * Return true if object has expired. 
      */ 
-    public synchronized boolean expired() 
+    protected boolean _expired() 
     {    Date now = new Date(); 
          return (_owner != _api.getOwnPos() && // Do not expire own objects
                 (_owner.expired() || now.getTime() > (_updated.getTime() + _expiretime))) ; 

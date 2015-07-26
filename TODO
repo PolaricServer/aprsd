@@ -48,8 +48,6 @@ V.1.8 (july 2014), etc
 * Allow clients to show raw APRS packets. 
      DONE. 
      
-* Allow filtering on APRS "via" field.
-
 * Design and implement AIS data source. Separate plugin? 
      DONE. 
      
@@ -67,7 +65,8 @@ V.1.8 (july 2014), etc
 * Support incoming aprs item reports. 
       DONE.
       
-      
+* Framework for Views for Point objects. Easily extendable for subclasses. 
+      DONE.
       
    
 Autorisation/Authentication

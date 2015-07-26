@@ -97,10 +97,10 @@ public interface StationDB
     
     
         /**
-        * Add an existing APRS station. 
+        * Add an existing tracker point. 
         * @param s existing station
         */
-       public void addStation(Station s);
+       public void addPoint(TrackerPoint s);
         
         
        /**

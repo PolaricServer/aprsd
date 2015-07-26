@@ -19,41 +19,147 @@ import java.util.*;
 import java.io.Serializable;
   
 
+
 /**
  * Geographical point. Movable, with label, etc..
  */
 public abstract class TrackerPoint extends PointObject implements Serializable, Cloneable
 {
-    private   static long      _nonMovingTime = 1000 * 60 * 5; 
-    private   static Notifier  _change = new Notifier();
-    protected static ServerAPI _api = null;
-    protected static StationDB _db  = null;
-   
-    private int       _course = -1;
-    private int       _speed = -1; 
-    private int       _altitude = -1;
+    private   static long        _nonMovingTime = 1000 * 60 * 5; 
+    private   static Notifier    _change = new Notifier();
+    protected static ServerAPI   _api = null;
+    protected static StationDB   _db  = null;
+    protected static ColourTable _colTab = 
+        new ColourTable (System.getProperties().getProperty("confdir", ".")+"/trailcolours");
+                  
+    public static void setApi(ServerAPI api)
+       { _api = api; _db = _api.getDB(); }
+       
+    /*
+     * Static variables and functions to control expire timeouts 
+     * and notifications
+     */
+    private static long _expiretime    = 1000 * 60 * 60 * 2;    // Default: 2 hour
+        
+    public static long getExpiretime()
+       { return _expiretime; }
+         
+    public static void setExpiretime(long exp)
+       { _expiretime = exp; }
+  
+      
+      
+    protected Trail     _trail = new Trail(); 
+    protected String[]  _trailcolor = new String[] {"dddddd", "ff0000"};   
+    
+    private int        _course = -1;
+    private int        _speed = -1; 
+    private int        _altitude = -1;
     
     private boolean    _changing = false; 
-    protected Date     _updated = new Date();  // FIXME: Can this be private?
+    protected Date     _updated = new Date();  
     private Date       _lastChanged;        
-        
+    protected boolean  _expired = false; 
+            
     private   String   _alias;    
     private   boolean  _hidelabel = false; 
-    protected boolean  _persistent = false;
+    protected boolean  _persistent = false;  
   
   
   
     public TrackerPoint(Reference p)
       { super(p); }
     
-              
-    public static void setApi(ServerAPI api)
-       { _api = api; _db = _api.getDB(); }   
+   
        
    
-    /************** Course, speed and altitude ***************/
+    /************** Position, trail, Course, speed and altitude ***************/
+        
+        
+    /**
+     * Update position of the object. Note that this does not add to the trail. This must
+     * be done explicitly by a subclass by calling saveToTrail() BEFORE calling updatePosition! 
+     *
+     * @param ts Timestamp (time of update).
+     * @param newpos Position coordinates.
+     */    
+    public void updatePosition(Date ts, Reference newpos)
+    {
+         if (_position == null)
+             setChanging();
+         setUpdated(ts == null ? new Date() : ts);
+         _position = newpos;
+    }
     
+    
+    
+    /**
+     * Save position to trail if there is a significant change. 
+     * If we want a trail, this should be done before updatePosition.
+     *
+     * @param ts timestamp of the NEXT position.
+     * @param pos the NEXT position.
+     * @param pathinfo optional extra information. E.g. path info.
+     */
+    public boolean saveToTrail(Date ts, Reference newpos, String pathinfo) 
+    {         
+        /*
+         * If object has moved, indicate that object is moving/changing, 
+         * save the previous position.
+         */
+        if (_position == null || newpos == null)
+            return false;
+        if (distance(newpos) > Trail.mindist && 
+            _trail.add(_updated, _position, getSpeed(), getCourse(), pathinfo)) 
+        {
+           if (_trail.length() == 1)
+               _trailcolor = _colTab.nextColour();
+           _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
+           setChanging();   
+           return true;
+        }
+        return false;
+    }
+    
+    
+    
+    /**
+     * Return true if point or parts of its trail is inside the given area. 
+     *
+     * @param uleft upper left corner of area.
+     * @param lright lower right corner of area. 
+     */
+    @Override public boolean isInside(Reference uleft, Reference lright) 
+    {
+       if (super.isInside(uleft, lright))
+          return true;
+       if (_trail == null)
+          return false;    
+       
+       /* If part of trace is inside displayed area and the station itself is within a 
+        * certain distance from displayed area 
+        */
+       if (super.isInside(uleft, lright, 1, 1))
+        for (TPoint it : _trail) 
+          if (it.isInside(uleft, lright))
+             return true;
+         
+       return false;
+    }          
+    
+    
+    public synchronized Trail getTrail() 
+        { return _trail; }       
+    
+    public synchronized Trail.Item getHItem()
+       { return new Trail.Item(_updated, _position, getSpeed(), getCourse(), ""); }
            
+    public String[] getTrailColor()
+       { return _trailcolor;}
+
+    public void nextTrailColor()
+       { _trailcolor = _colTab.nextColour(); setChanging(); }  
+       
     public int getSpeed ()
        { return _speed; }
 
@@ -128,9 +234,10 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
        { _updated = t; }
        
     
-    
+    /** Reset trail, etc.. */
     public synchronized void reset()
-    {
+    {      
+       _trail = new Trail();
        _updated  = new Date(0);
        setChanging();
     }
@@ -211,6 +318,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
       return false;
     }
   
+    /* FIXME: do override logic here */
     public abstract String getIcon(boolean override);
     
     
@@ -225,9 +333,12 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * @return ident or alias.
      */
     public String getDisplayId(boolean usealias)
-       { return (usealias && _alias != null) ? _alias : getIdent().replaceFirst("@.*",""); }    
+       { return (usealias && _alias != null) ? _alias : _getDisplayId(); }    
     
-    
+    protected String _getDisplayId()
+       { return  getIdent().replaceFirst("@.*",""); }
+       
+       
     /** 
      * Get identifier for display on map. 
      * @return ident or alias. 
@@ -281,9 +392,19 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     /** 
      * Return true if object has expired. 
      */    
-    public abstract boolean expired();
+    public boolean expired() {
+        if (_expired) 
+            return true;
+        return _expired = _expired();
+    }
     
-   
+    protected boolean _expired() {
+        Date now = new Date();
+        return (now.getTime() > _updated.getTime() + _expiretime);    
+    }
+    
+    
+    
     /**
      * Return false if object should not be visible on maps. If it has expired.
      */

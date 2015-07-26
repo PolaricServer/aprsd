@@ -232,9 +232,9 @@ public class XmlServer extends ServerBase
                    
                   /* Show label */ 
                   if (!action.hideIdent() && !s.isLabelHidden() ) {
-                     String style = "lobject";
-                     if (s instanceof Station)
-                        style = (!(((Station) s).getTrail().isEmpty()) ? "lmoving" : "lstill");
+                     String style = (!(s.getTrail().isEmpty()) ? "lmoving" : "lstill");
+                     if (s instanceof AprsObject)
+                        style = "lobject"; 
                      if (s instanceof AprsPoint && ((AprsPoint)s).isEmergency())
                         style += " lflash";
                         
@@ -245,12 +245,12 @@ public class XmlServer extends ServerBase
                      out.println("       "+fixText(s.getDisplayId(showSarInfo)));
                      out.println("   </label>"); 
                   }
-                  if (s instanceof Station) {
-                     Trail h = ((Station)s).getTrail();
-                     Station ss = (Station) s;
-                     if (!action.hideTrail() && !h.isEmpty())
-                        printTrailXml(out, ss.getTrailColor(), ss.getPosition(), h, uleft, lright); 
-                  }
+                  
+                  /* Trail */
+                  Trail h = s.getTrail();
+                  if (!action.hideTrail() && !h.isEmpty())
+                     printTrailXml(out, s.getTrailColor(), s.getPosition(), h, uleft, lright); 
+       
                } /* synchronized(s) */
                
                if (action.showPath() && s instanceof AprsPoint && ((AprsPoint)s).isInfra())

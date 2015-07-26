@@ -41,7 +41,7 @@ package no.polaric.aprsd.http
            else <span></span> 
        
                                   
-                           
+       /** Show altitude and course */                    
        protected def heightcourse(req: Request): NodeSeq =
             { if (model.getAltitude() >= 0)
                   simpleLabel("altitude", "leftlab", I.tr("Altitude")+":", TXT(model.getAltitude() + " m ")) else <span></span> } ++

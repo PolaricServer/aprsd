@@ -229,7 +229,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     }
         
         
-    public synchronized void addStation(Station s)
+    public synchronized void addPoint(TrackerPoint s)
         { _map.put(s.getIdent(), s); }
         
         

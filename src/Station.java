@@ -24,33 +24,19 @@ import java.io.Serializable;
 public class Station extends AprsPoint implements Serializable, Cloneable
 {
 
-public static class Status implements Serializable
-{
-    public Date time;
-    public String text;
-    public Status(Date t, String txt)
-      { time = t; text = txt; }
-}
+   public static class Status implements Serializable
+   {
+       public Date time;
+       public String text;
+       public Status(Date t, String txt)
+          { time = t; text = txt; }
+   }
 
-
-    /*
-     * Static variables and functions to control expire timeouts 
-     * and notifications
-     */
-    private static long _expiretime    = 1000 * 60 * 60 * 2;    // Default: 2 hour
-    private static ColourTable _colTab = 
-      new ColourTable (System.getProperties().getProperty("confdir", ".")+"/trailcolours");
-        
-    public static long getExpiretime()
-       { return _expiretime; }
-         
-    public static void setExpiretime(long exp)
-       { _expiretime = exp; }
-
+ 
     public static void init(ServerAPI api)
       { int exptime = api.getIntProperty("aprs.expiretime", 60);
         setExpiretime(exptime * 60 * 1000);
-      }   
+      }
     
     
     /*
@@ -58,16 +44,13 @@ public static class Status implements Serializable
      */
     private String    _callsign; 
     private Status    _status;
-    private Trail     _trail = new Trail(); 
+
 
     
     /* 
      * Other variables (presentation, storage, etc.)
      */
     private String      _pathinfo; 
-    private String[]    _trailcolor = new String[] {"dddddd", "ff0000"};
-    private boolean     _autotrail = true;
-    private boolean     _expired = false; 
     private int         _report_ignored = 0;
     private boolean     _igate, _wdigi;
     private Date        _infra_updated = null;
@@ -82,7 +65,7 @@ public static class Status implements Serializable
                       
            
 
-    public String getIdent()
+    @Override public String getIdent()
        { return _callsign; }
        
     protected void setId(String id)
@@ -121,7 +104,7 @@ public static class Status implements Serializable
     public void setSource(Source src)
        { _source = src; }
    
-    public Source getSource()
+    @Override public Source getSource()
        { return _source; }
        
     
@@ -143,10 +126,6 @@ public static class Status implements Serializable
     public void setWideDigi(boolean x)
        { _infra_updated = new Date(); 
          _wdigi = x; }       
-    
-    
-    public synchronized Trail.Item getHItem()
-       { return new Trail.Item(_updated, _position, getSpeed(), getCourse(), ""); }
        
     
 
@@ -162,60 +141,22 @@ public static class Status implements Serializable
         { return _status; }
     
     
-    public synchronized void reset()
+    @Override public synchronized void reset()
     {  
-        _trail = new Trail();
         _db.getRoutes().removeNode(this.getIdent());
         super.reset(); 
     }
-          
-    
-    public synchronized Trail getTrail() 
-        { return _trail; }        
-      
-      
-      
+     
+            
     protected void checkForChanges()
     { 
         if (_trail.itemsExpired()) 
            setChanging(); 
     }     
-   
-   
-    public boolean isAutoTrail()
-       { return _autotrail; }  
-    
-       
-    public String[] getTrailColor()
-       { return _trailcolor;}
-
-
-    public void nextTrailColor()
-       { _trailcolor = _colTab.nextColour(); setChanging(); }
-
-
-   
-    @Override public boolean isInside(Reference uleft, Reference lright) 
-    {
-       if (super.isInside(uleft, lright))
-          return true;
-       if (_trail == null)
-          return false;    
-       
-       /* If part of trace is inside displayed area and the station itself is within a 
-        * certain distance from displayed area 
-        */
-       if (super.isInside(uleft, lright, 1, 1))
-        for (TPoint it : _trail) 
-          if (it.isInside(uleft, lright))
-             return true;
-         
-       return false;
-    }
      
      
      
-    public synchronized void setUpdated(Date ts)
+    @Override public synchronized void setUpdated(Date ts)
       { _updated = ts; _expired = false; }
       
       
@@ -224,8 +165,6 @@ public static class Status implements Serializable
     { 
         if (_position != null && _updated != null)
         { 
-            
-           
            if (ts != null)
            {
               /* Time distance in seconds */
@@ -264,19 +203,9 @@ public static class Status implements Serializable
            }            
            _report_ignored = 0;
                        
-           
-           /*
-            * If object has moved, indicate that object is moving/changing, 
-            * save the previous position.
-            */
-           if (distance(pd.pos) > Trail.mindist && 
-               _trail.add(_updated, _position, getSpeed(), getCourse(), _pathinfo)) 
-           {
-              if (_trail.length() == 1 && _autotrail)
-                  _trailcolor = _colTab.nextColour();
-              _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
-              setChanging();   
-           }
+
+           if (saveToTrail(ts, pd.pos, _pathinfo)) 
+               _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
            
         }
         updatePosition(ts, pd.pos, pd.ambiguity);
@@ -306,18 +235,14 @@ public static class Status implements Serializable
 
     
     @Override
-    public synchronized boolean expired()
+    public synchronized boolean _expired()
     {
-        Date now = new Date(); 
-        if (_expired) 
-            return true;
-        if (now.getTime() <= _updated.getTime() + _expiretime)  // If expired
+        if (!super._expired()) 
             return false;
         if (!_db.getOwnObjects().mayExpire(this))
             return false;
         _db.getRoutes().removeNode(this.getIdent());
-        return (_expired = true); 
-        
+        return true; 
     }
     
 

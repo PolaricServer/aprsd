@@ -334,7 +334,7 @@ public class Main implements ServerAPI
                ownpos = new OwnPosition(api);
 
            ownpos.setChannels(ch2, ch1);
-           db.addStation(ownpos); 
+           db.addPoint(ownpos); 
            
            /* APRS objects */
            ownobjects = db.getOwnObjects(); 
