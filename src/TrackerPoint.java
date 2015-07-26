@@ -83,8 +83,9 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * @param ts Timestamp (time of update).
      * @param newpos Position coordinates.
      */    
+    private boolean _fastmove = false; 
     public void updatePosition(Date ts, Reference newpos)
-    {
+    { 
          if (_position == null)
              setChanging();
          setUpdated(ts == null ? new Date() : ts);
@@ -100,15 +101,51 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * @param ts timestamp of the NEXT position.
      * @param pos the NEXT position.
      * @param pathinfo optional extra information. E.g. path info.
+     * @return true to indicate if position is ok an can be saved to realtime point. 
      */
-    public boolean saveToTrail(Date ts, Reference newpos, String pathinfo) 
+    public boolean saveToTrail(Date ts, Reference newpos, int speed, int course, String pathinfo) 
     {         
+        /*
+         * If position is null or timestamp is in the future, do nothing.
+         */
+        if (_position == null || newpos == null || ts.getTime() > (new Date()).getTime()+ 10000)
+            return (newpos != null);
+           
+
+        /* Time distance in seconds */
+        long tdistance = (ts.getTime() - _updated.getTime()) / 1000;          
+           
+        /* Downsample. Time resolution is 10 seconds or more */
+        if (tdistance < 5)
+             return true; 
+        
+        /* If moving incredibly fast (i.e. over 500 km/h) ignore, but only 
+         * first time. Second time, clear trail. 
+         */
+        if ( tdistance > 0 && distance(newpos)/tdistance > (500 * 0.27778)) {
+            if (!_fastmove) {
+               System.out.println("*** Moving faster than 500km/h. ignore.");
+               _fastmove = true; 
+               return false; 
+            }
+            _trail.clear(); 
+        }
+        _fastmove = false;     
+    
+        /* If report is older than the previous one, just save it in the 
+         * history 
+         */
+        if (tdistance < 0 && _trail.add(ts, newpos, speed, course, pathinfo)) {
+            System.out.println("*** Old report - update trail");
+            setChanging(); 
+            return false;
+        }
+
+        
         /*
          * If object has moved, indicate that object is moving/changing, 
          * save the previous position.
          */
-        if (_position == null || newpos == null)
-            return false;
         if (distance(newpos) > Trail.mindist && 
             _trail.add(_updated, _position, getSpeed(), getCourse(), pathinfo)) 
         {
@@ -116,9 +153,8 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
                _trailcolor = _colTab.nextColour();
            _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
            setChanging();   
-           return true;
         }
-        return false;
+        return true;
     }
     
     
@@ -163,13 +199,13 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     public int getSpeed ()
        { return _speed; }
 
-    protected void setSpeed (int s)
+    public void setSpeed (int s)
        { _speed = s; }
        
     public int getCourse ()
        { return _course; }
        
-    protected void setCourse(int c)
+    public void setCourse(int c)
        { _course = c; }
        
     public int getAltitude()

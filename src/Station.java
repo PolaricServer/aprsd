@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,8 +45,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     private String    _callsign; 
     private Status    _status;
 
-
-    
+   
     /* 
      * Other variables (presentation, storage, etc.)
      */
@@ -56,6 +55,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     private Date        _infra_updated = null;
     private Source      _source;
        
+
        
     public Station(String id)
        { super(null); _callsign = id; _trailcolor = _colTab.nextColour(); }
@@ -63,8 +63,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     public Object clone() throws CloneNotSupportedException
        { return super.clone(); }
                       
-           
-
+   
     @Override public String getIdent()
        { return _callsign; }
        
@@ -163,72 +162,27 @@ public class Station extends AprsPoint implements Serializable, Cloneable
         
     public synchronized void update(Date ts, AprsHandler.PosData pd, String descr, String pathinfo)
     { 
-        if (_position != null && _updated != null)
-        { 
-           if (ts != null)
-           {
-              /* Time distance in seconds */
-              long tdistance = (ts.getTime() - _updated.getTime()) / 1000;          
-              
-              /* Downsample. Time resolution is 10 seconds or more */
-              if (tdistance < 5)
-                 return; 
-                 
-              /*
-               * If distance/time implies a speed more than a certain limit (500km/h), 
-               * ignore the report. But not more than 3 times. Clear history if
-               * ignored 3 times. 
-               * FIXME: speed limit should be configurable.
-               */
-              if ( _report_ignored < 2 && tdistance > 0 && 
-                    distance(pd.pos)/tdistance > (500 * 0.27778)) 
-              {
-                 System.out.println("*** Ignore report moving beyond speed limit (500km/h)");
-                 _report_ignored++;
-                 return;
-              }
-              if (_report_ignored >= 2) {
-                 _trail.clear();
-                 _db.getRoutes().removeOldEdges(getIdent(), ts);
-              }
-              
-              /* If report is older than the previous one, just save it in the 
-               * history 
-               */
-               if (tdistance < 0 && _trail.add(ts, pd.pos, pd.speed, pd.course, pathinfo)) {
-                   System.out.println("*** Old report - update trail");
-                   setChanging(); 
-                   return;
-               }            
-           }            
-           _report_ignored = 0;
-                       
-
-           if (saveToTrail(ts, pd.pos, _pathinfo)) 
-               _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
+        if (saveToTrail(ts, pd.pos, pd.speed, pd.course, _pathinfo)) {
+             updatePosition(ts, pd.pos, pd.ambiguity);
+            _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
            
+            setSpeed(pd.speed);
+            setCourse(pd.course);
+            setAltitude((int) pd.altitude);
+            _pathinfo = pathinfo; 
+            setDescr(descr); 
+        
+            if (pd.symbol != 0 && pd.symtab != 0 && (pd.symbol != _symbol || pd.symtab != _altsym))
+            {
+                if (pd.symbol != 0)  _symbol = pd.symbol;
+                if (pd.symtab != 0)  _altsym = pd.symtab;
+                setChanging();
+            }
         }
-        updatePosition(ts, pd.pos, pd.ambiguity);
-        
-        setSpeed(pd.speed);
-        setCourse(pd.course);
-        setAltitude((int) pd.altitude);
-        _pathinfo = pathinfo; 
-       
-        setDescr(descr); 
-        
         if (_expired) {
             _expired = false;
             setChanging();
         }
-        
-        if (pd.symbol != 0 && pd.symtab != 0 && (pd.symbol != _symbol || pd.symtab != _altsym))
-        {
-            if (pd.symbol != 0)  _symbol = pd.symbol;
-            if (pd.symtab != 0)  _altsym = pd.symtab;
-            setChanging();
-        }
-        
         isChanging(); 
     }
     
