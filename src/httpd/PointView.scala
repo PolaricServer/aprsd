@@ -53,8 +53,8 @@ package no.polaric.aprsd.http
        val I = getI18n(req);
        val simple =  ( req.getParameter("simple") != null )
        val edit  =  ( req.getParameter("edit") != null )
-       
-       
+    
+    
        /** Identifier field. */
        protected def ident(req : Request): NodeSeq =
            <xml:group>  
@@ -67,7 +67,7 @@ package no.polaric.aprsd.http
            
        /** Description. */
        protected def descr(req: Request): NodeSeq = 
-           if (model.getDescr() != null && model.getDescr().length() > 0)
+           if (model.hasDescr() && model.getDescr().length() > 0)
                simpleLabel("descr", "leftlab", I.tr("Description")+":", TXT(model.getDescr())) else <span></span>
        
        

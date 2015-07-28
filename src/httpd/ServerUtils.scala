@@ -52,6 +52,9 @@ package no.polaric.aprsd.http
         
        protected def br = <br/>
            
+       protected def EMPTY = xml.NodeSeq.Empty
+       
+       
        /** File name prefix */
        // FIXME: Do we need this anymore??
        protected def fprefix(req: Request) : String = 
@@ -297,21 +300,21 @@ package no.polaric.aprsd.http
    def _directionIcon(direction:Int, fprefix: String): NodeSeq = 
         direction match {
           case x if !(22 until 337 contains x) =>
-              <div><img src= {fprefix+"/dicons/dN.png"}/> N</div>
+              <span><img src= {fprefix+"/dicons/dN.png"}/> N</span>
           case x if (22 until 67 contains x) =>
-              <div><img src= {fprefix+"/dicons/dNE.png"}/> NE</div>
+              <span><img src= {fprefix+"/dicons/dNE.png"}/> NE</span>
           case x if (67 until 112 contains x) =>
-              <div><img src= {fprefix+"/dicons/dE.png"}/> E</div>
+              <span><img src= {fprefix+"/dicons/dE.png"}/> E</span>
           case x if (112 until 157 contains x) =>
-              <div><img src= {fprefix+"/dicons/dSE.png"}/> SE</div>
+              <span><img src= {fprefix+"/dicons/dSE.png"}/> SE</span>
           case x if (157 until 202 contains x) =>
-              <div><img src= {fprefix+"/dicons/dS.png"}/> S</div>
+              <span><img src= {fprefix+"/dicons/dS.png"}/> S</span>
           case x if (202 until 247 contains x) =>
-              <div><img src= {fprefix+"/dicons/dSW.png"}/> SW</div>
+              <span><img src= {fprefix+"/dicons/dSW.png"}/> SW</span>
           case x if (247 until 292 contains x) =>
-              <div><img src= {fprefix+"/dicons/dW.png"}/> W</div>
+              <span><img src= {fprefix+"/dicons/dW.png"}/> W</span>
           case x if (292 until 337 contains x) =>
-              <div><img src= {fprefix+"/dicons/dNW.png"}/> NW</div>
+              <span><img src= {fprefix+"/dicons/dNW.png"}/> NW</span>
           case _ => null;
       }
 

@@ -83,6 +83,8 @@ public abstract class ServerBase
       
    public I18n getI18n(Request req, String base) 
    {
+        if (base==null)
+           base = i18n_base; 
         String lang = req.getParameter("lang");         
         Locale loc = ((lang != null && lang.length() > 0) ? new Locale(lang) : new Locale("en"));
         return I18nFactory.getI18n(base + ".XX", "i18n.Messages", 

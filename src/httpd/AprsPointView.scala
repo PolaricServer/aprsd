@@ -42,13 +42,27 @@ package no.polaric.aprsd.http
            simpleLabel("hrd", "leftlab", I.tr("Last reported")+":", I.tr("Time of last received APRS report"),
                  TXT( df.format(model.getUpdated()))) 
                  
-       
+                 
+       override def trailpoint(req: Request, tp: Trail.Item): NodeSeq = {
+            tp_prefix(tp) ++
+            {  if (tp.speed >= 0) simpleLabel("tp_speed", "lleftlab", I.tr("Speed")+":", TXT(tp.speed+" km/h") )
+               else EMPTY } ++
+               simpleLabel("tp_dir",   "lleftlab", I.tr("Heading")+":", _directionIcon(tp.course, fprefix(req)))  ++
+            <div id="traffic">
+              { if (tp.pathinfo != null) 
+                   simpleLabel("tp_via",   "lleftlab", I.tr("APRS via")+":", TXT( cleanPath(tp.pathinfo)))
+                else EMPTY }
+            </div>
+       }  
+         
+         
        override def fields(req : Request): NodeSeq = 
            ident(req) ++
            alias(req) ++
-           { if (!simple) aprssym(req) else <span></span> } ++
+           { if (!simple) aprssym(req) else EMPTY } ++
            descr(req) ++
            position(req) ++
+           heightcourse(req) ++ 
            reporttime(req) ++
            basicSettings(req)
            ;

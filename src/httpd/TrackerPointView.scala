@@ -38,7 +38,7 @@ package no.polaric.aprsd.http
        protected def alias(req: Request): NodeSeq = 
            if (model.getAlias() != null)
                simpleLabel("alias", "leftlab", I.tr("Alias")+":", <b>{model.getAlias()}</b>) 
-           else <span></span> 
+           else EMPTY 
        
                                   
        /** Show altitude and course */                    
@@ -66,7 +66,7 @@ package no.polaric.aprsd.http
                <br/>
                { iconSelect(req, model, fprefix(req), "/icons/") }
                </div>
-            else <span></span>;        
+            else EMPTY        
        
        
        
@@ -100,8 +100,24 @@ package no.polaric.aprsd.http
                     { if (icon==null) "NULL" else icon }, 
                     null);
             
-             <h3>Oppdatert</h3>
+             <h3>{I.tr("Updated")}</h3>
        }
+  
+       /** Prefix for trailpoints: id and timestamp. */
+       protected def tp_prefix(tp: Trail.Item): NodeSeq = 
+         <xml:group>
+            <label for="tp_ident" class="lleftlab"> {I.tr("Ident")+":"} </label>
+            <label id="tp_ident"><b> { model.getIdent() } </b></label>
+            { simpleLabel("tp_time",  "lleftlab", I.tr("Time")+":", TXT( df.format(tp.getTS()))) }
+         </xml:group>
+
+         
+         
+       def trailpoint(req: Request, tp: Trail.Item): NodeSeq = 
+            tp_prefix(tp) ++
+            { if (tp.speed >= 0) simpleLabel("tp_speed", "lleftlab", I.tr("Speed")+":", TXT(tp.speed+" km/h") )
+                else EMPTY } ++
+              simpleLabel("tp_dir",   "lleftlab", I.tr("Heading")+":", _directionIcon(tp.course, fprefix(req)))  
        
        
        

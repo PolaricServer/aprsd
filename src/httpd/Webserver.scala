@@ -37,7 +37,7 @@ package no.polaric.aprsd.http
    
    /* 
     * Register views for position objects. 
-    * addView ( class-of-model, class-of-view 
+    * addView ( class-of-model, class-of-view )
     */
    PointView.addView(classOf[AprsObject],  classOf[AprsObjectView])
    PointView.addView(classOf[Station],     classOf[AprsStationView])
@@ -521,10 +521,10 @@ package no.polaric.aprsd.http
    def handle_history(req : Request, res : Response) =
    {        
        val I = getI18n(req)
-       val s = _api.getDB().getStation(req.getParameter("id"), null)
+       val s = _api.getDB().getItem(req.getParameter("id"), null)
        val result: NodeSeq =
           if (s == null)
-             <h2>Feil:</h2><p> {I.tr("Couldn't find station")} </p>;
+             <h2>{I.tr("Error")+":"}</h2><p> {I.tr("Couldn't find item")} </p>;
           else
              <table>
                <tr><th>{I.tr("Time")} </th><th>Km/h </th><th> {I.tr("Dir")} </th><th> {I.tr("Distance")} </th><th> {I.tr("APRS via")} </th></tr>
@@ -569,29 +569,20 @@ package no.polaric.aprsd.http
        val I = getI18n(req)
        val time = xf.parse(req.getParameter("time"))
        val ident = req.getParameter("id")
+       val x:TrackerPoint = _api.getDB().getItem(ident, null)
        val item = _api.getDB().getTrailPoint(ident, time)
-       /* FIXME: Check if valid result */
        
        val result : NodeSeq = 
           if (item == null)
-            TXT(I.tr("Couldn't find info")+": "+ident)
-          else
-            <xml:group>
-            <label for="callsign" class="lleftlab"> {I.tr("Ident")+":"} </label>
-            <label id="callsign"><b> { ident } </b></label>
-            { simpleLabel("time",  "lleftlab", I.tr("Time")+":", TXT( df.format(item.getTS()))) ++
-              { if (item.speed >= 0) simpleLabel("speed", "lleftlab", I.tr("Speed")+":", TXT(item.speed+" km/h") )
-                else xml.NodeSeq.Empty } ++
-              simpleLabel("dir",   "lleftlab", I.tr("Heading")+":", _directionIcon(item.course, fprefix(req)))  }
-            <div id="traffic">
-            { if (item.pathinfo != null) 
-                 simpleLabel("via",   "lleftlab", I.tr("APRS via")+":", TXT( cleanPath(item.pathinfo)))
-              else null }
-            </div>
-            </xml:group>
+             TXT(I.tr("Couldn't find info")+": "+ident)
+          else {
+             val view = PointView.getViewFor(x, _api, false, req).asInstanceOf[TrackerPointView]
+             view.trailpoint(req, item)
+          }
       
       printHtml(res, htmlBody(req, null, result)) 
     }
   
   }
+  
 }

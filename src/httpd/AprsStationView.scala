@@ -45,9 +45,9 @@ package no.polaric.aprsd.http
             if (model.isWideDigi()) txt += I.tr("Wide-Digi");
 
             { if (pathinfo != null) simpleLabel("via", "leftlab", I.tr("Via")+":", I.tr("Which route the last APRS report took"), 
-                     TXT(pathinfo)) else <span></span> } ++
+                     TXT(pathinfo)) else xml.NodeSeq.Empty } ++
             { if ((model.isIgate() || model.isWideDigi()) && simple) simpleLabel("infra", "leftlab", I.tr("Infrastructure")+":", 
-                     TXT(txt)) else <span></span> } 
+                     TXT(txt)) else EMPTY } 
        }
       
       
@@ -86,12 +86,13 @@ package no.polaric.aprsd.http
        override def fields(req : Request): NodeSeq = {
            ident(req) ++
            alias(req) ++
+           { if (!simple) aprssym(req) else EMPTY } ++
            descr(req) ++
            position(req) ++
            heightcourse(req) ++
            reporttime(req) ++
            reportinfo(req) ++
-           { if (simple) trafficinfo(req) else <span></span> } ++
+           { if (simple) trafficinfo(req) else EMPTY } ++
            basicSettings(req)
        }
    }

@@ -27,7 +27,6 @@ public abstract class PointObject extends Point implements Cloneable
 {             
     protected String      _icon; 
     protected String      _description;    
-    
        
     public PointObject(Reference p)
        { super(p); }       
@@ -46,8 +45,11 @@ public abstract class PointObject extends Point implements Cloneable
        if (_icon != null)
           return _icon; 
        return null;
-    }           
+    }  
     
+    public boolean hasDescr()
+       { return _description != null; }
+       
     public String getDescr()
        { return (_description == null ? "" : _description); }
        

@@ -76,13 +76,12 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
        
     public Trail.Item getTrailPoint(String src, java.util.Date t)
     {
-        Station st = getStation(src, null);
-        if (st != null) {
+        TrackerPoint st = getItem(src, null);
+        if (st != null && st.getTrail() != null) {
            Trail.Item x = st.getTrail().getPointAt(t);
            if (x != null)
               return x;
         }
-        System.out.println("*** getTrailPunkt: QUERY DB");
         if (_histData != null)
            return _histData.getTrailPoint(src, t);
         return null;
