@@ -83,7 +83,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * @param ts Timestamp (time of update).
      * @param newpos Position coordinates.
      */    
-    private boolean _fastmove = false; 
+
     public void updatePosition(Date ts, Reference newpos)
     { 
          if (_position == null)
@@ -103,6 +103,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * @param pathinfo optional extra information. E.g. path info.
      * @return true to indicate if position is ok an can be saved to realtime point. 
      */
+    private boolean _fastmove = false;  
     public boolean saveToTrail(Date ts, Reference newpos, int speed, int course, String pathinfo) 
     {         
         /*
@@ -311,10 +312,15 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
                checkForChanges(); 
           return _changing; 
     }
-    
-        
-    protected void checkForChanges() {}    
-    
+     
+                
+    protected void checkForChanges()
+    { 
+        if (_trail.itemsExpired()) 
+           setChanging(); 
+    }     
+     
+     
     
     
     

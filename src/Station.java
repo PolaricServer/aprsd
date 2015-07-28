@@ -146,14 +146,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
         super.reset(); 
     }
      
-            
-    protected void checkForChanges()
-    { 
-        if (_trail.itemsExpired()) 
-           setChanging(); 
-    }     
-     
-     
+
      
     @Override public synchronized void setUpdated(Date ts)
       { _updated = ts; _expired = false; }
