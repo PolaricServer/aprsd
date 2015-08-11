@@ -12,7 +12,7 @@
        NAME=polaric-aprsd         
        JLIB=/usr/share/java
        PLUGINS=/etc/polaric-aprsd/plugins
-  CLASSPATH=$JLIB/commons-daemon.jar:$JLIB/simple.jar:$JLIB/libintl.jar:$JLIB/gettext-commons.jar:$JLIB/jcoord-polaric.jar:$JLIB/polaric-aprsd.jar:$JLIB/utf8-with-fallback-polaric.jar:$JLIB/RXTXcomm.jar:$JLIB/scala-library.jar:$PLUGINS/*
+  CLASSPATH=$JLIB/commons-daemon.jar:$JLIB/simple.jar:$JLIB/libintl.jar:$JLIB/gettext-commons.jar:$JLIB/jcoord-polaric.jar:$JLIB/polaric-aprsd.jar:$JLIB/utf8-with-fallback-polaric.jar:$JLIB/RXTXcomm.jar:$JLIB/scala-library.jar:$JLIB/scala-parser-combinators*:$JLIB/scala-xml*:$PLUGINS/*
 SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB0:/dev/ttyUSB1:/dev/ttyACM0:/dev/ttyACM1
       FLAGS=-Djava.net.preferIPv4Stack=true 
      
@@ -25,7 +25,7 @@ SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB
     
        JAVA=java
        JSVC=/usr/bin/jsvc
-  JAVA_HOME=/usr/lib/jvm/java-7-openjdk-i386
+  JAVA_HOME=/usr/lib/jvm/java-8-openjdk-i386
        USER=polaric
     PIDFILE=/var/run/$NAME.pid
  SCRIPTNAME=/etc/init.d/$NAME
@@ -52,26 +52,27 @@ fi
 # The first existing directory is used for JAVA_HOME 
 # Should contain a list of space separated directories  
 JDK_DIRS="
+          /usr/lib/jvm/java-8-sun \
+          /usr/lib/jvm/java-8-openjdk-i386 \
+          /usr/lib/jvm/java-8-openjdk-armel \
+          /usr/lib/jvm/java-8-openjdk-armhf \
+          /usr/lib/jvm/java-8-openjdk-amd64 \
+          /usr/lib/jvm/java-8-openjdk-ia64 \
           /usr/lib/jvm/default-java \
-          /usr/lib/jvm/java-7-sun \
-          /usr/lib/jvm/java-7-openjdk-i386 \
-          /usr/lib/jvm/java-7-openjdk-armel \
-          /usr/lib/jvm/java-7-openjdk-armhf \
-          /usr/lib/jvm/java-7-openjdk-amd64 \
-          /usr/lib/jvm/java-7-openjdk-ia64 \
          "
-
+ 
 
 # Look for the right JVM to use
 # FIXME: This does not work??
 for jdir in $JDK_DIRS; do
         if [ -d "$jdir" ]; then
                 JAVA_HOME="$jdir"
+                break
         fi
 done
 export JAVA_HOME
 export LD_LIBRARY_PATH=/usr/lib/jni
-
+JAVA=$JDK_DIRS/bin/java
 
 
 case "$1" in 
