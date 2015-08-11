@@ -122,8 +122,11 @@ public abstract class TcpChannel extends AprsChannel implements Runnable, Serial
            
            /* Re-try the first channel after two hours */
            scheduler.schedule(new Runnable() {
-                 public void run() 
-                    { ch.deActivate(); activate(_api); }
+                 public void run() { 
+                    logNote("Try to re-activate channel '"+this+"' after using backup");
+                    ch.deActivate(); 
+                    activate(_api); 
+                 }
               }, 2 * 60 * 60, TimeUnit.SECONDS);
         }
     }

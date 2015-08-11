@@ -59,7 +59,8 @@ public class Main implements ServerAPI
    
    public void setInetChannel(AprsChannel ch) {
        ch1 = ch; 
-       igate.setChannels(ch2, ch1);
+       if (igate != null) 
+           igate.setChannels(ch2, ch1);
        db.getMsgProcessor().setChannels(ch2, ch1);
        ownpos.setChannels(ch2, ch1);
        ownobjects.setChannels(ch2, ch1); 
