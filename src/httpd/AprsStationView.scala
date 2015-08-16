@@ -44,10 +44,11 @@ package no.polaric.aprsd.http
             if (model.isIgate()) txt += "IGATE "; 
             if (model.isWideDigi()) txt += I.tr("Wide-Digi");
 
-            { if (pathinfo != null) simpleLabel("via", "leftlab", I.tr("Via")+":", I.tr("Which route the last APRS report took"), 
-                     TXT(pathinfo)) else xml.NodeSeq.Empty } ++
+            { if (pathinfo != null && pathinfo.length() > 0) 
+                   simpleLabel("via", "leftlab", I.tr("Via")+":", I.tr("Which route the last APRS report took"), 
+                   TXT(pathinfo)) else EMPTY } ++
             { if ((model.isIgate() || model.isWideDigi()) && simple) simpleLabel("infra", "leftlab", I.tr("Infrastructure")+":", 
-                     TXT(txt)) else EMPTY } 
+                   TXT(txt)) else EMPTY } 
        }
       
       

@@ -1,27 +1,12 @@
 
-V.1.8 (july 2014), etc
+V.1.9 (october 2015), etc
 --------------------------
-       
-* [C] Filter profiles menu on client: Consider: Nested menu? Get list from server?
-
-* [C] More configurable toolbar for iframe/mobile mode. 
-
-* Selection of pre-defined region: Also select map-layer?
-   
-* Hiding of ident. Do it all on client. Hint from server. 
-       
-* Too easy to lock yourself out when changing admin-users regex. Workaround?
-  Prevent removing of 'admin' user by plugin? 
-
-* [M] Better styling of forms for mobile. Consider JQuery mobile.
 
 * [C] Extend iframeAPI ....
        IN PROGRESS
 
 * [C] Move API code out from menu.js to api.js
        IN PROGRESS        
-
-* Review how XML overlay works. Document it? Improvements? 
         
 * Callback (API) to notify plugins about setting alias/icon.
         
@@ -33,41 +18,13 @@ V.1.8 (july 2014), etc
 * Consider moving country-specific (statkart, met.no, etc) stuff to separate plugin.
 
 * Add copyright info for LocalePlanet stuff
-
-* Activate/deactivate of channels at run-time. Re-load config.
-     DONE.
-
-* Status indication on channels. RUNNING, NOT-RUNNING, FAILED?
-     DONE.
-
-* Allow backup channels which are automatically started when primary channel fails. 
-     DONE.
      
-* Consider architecture for (semantic) tagging. Automatic tagging, user tagging.  
+* Implement architecture for (semantic) tagging. Automatic tagging, user tagging.          
 
-* Allow clients to show raw APRS packets. 
-     DONE. 
-     
-* Design and implement AIS data source. Separate plugin? 
-     DONE. 
-     
-* Move to Java 8. Trouble: This breaks Scala and newer version of Scala doesn't support XML any longer!!!
-  Debian Stable have only old version of Scala - breaks if used with Java 8. 
-  Temporary fix: Force Java 7. 
-        
-* Change class hierarchy to better support other types of position objects than APRS. Some parts of APRS specific 
-  classes can be moved to a generic class. 
-      IN PROGRESS.   
-      DONE for channels (AprsChannel separated out)
-        
-* Consider moving APRS specific stuff to a separate package. 
+* Synchronisation protocol doesn't reconnect when parent is restarted? Check? Fix.
 
-* Support incoming aprs item reports. 
-      DONE.
-      
-* Framework for Views for Point objects. Easily extendable for subclasses. 
-      DONE.
-      
+
+
    
 Autorisation/Authentication
 ---------------------------
@@ -97,22 +54,6 @@ Iframe/API
 
 
 
-
-
-Configuration support
----------------------
-     
-* Consider per-use reading of parameters
-     
-* Look at httpd/ServerBase.java: Can some config parameters be made static
-  to reduce redundant storage when there are multiple instances? 
-
-* Make channel classes and other relevant classes implement 
-  ManagedObject interface. Support re-load without needing to 
-  restart server.
-    
-
-
     
 Channels/Sources
 ----------------
@@ -132,6 +73,8 @@ Channels/Sources
 
 Other. 
 -----
+
+* Review how XML overlay works. Document it? Improvements? 
 
 * Import from GPX files (to layers?)
 

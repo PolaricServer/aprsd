@@ -1,4 +1,4 @@
-#
+#.
 # Se http://aprs.no/dokuwiki/doku.php?id=filter.profiles for dokumentasjon. 
 #
 
@@ -28,14 +28,6 @@ PUBLIC PROFILE track {
    TrackHide      => { hide-ident };
 }
 
-          
-#################################################
-# Skjul ident for veimelding objekter.
-#################################################
-        
-PUBLIC PROFILE track2 {
-   ident ~ ".+@LA1FTA\-13" => { hide-ident };
-}
 
     
 ##################################################

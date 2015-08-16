@@ -13,8 +13,8 @@ import no.polaric.aprsd.http.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "1.7+";
-   public static String toaddr  = "APPS17";
+   public  static String version = "1.8";
+   public static String toaddr  = "APPS18";
    
    private static StationDB db = null;
    private static AprsParser parser = null;
@@ -165,23 +165,24 @@ public class Main implements ServerAPI
                  });
            
            for (File f : files) {
+                Properties xConf = new Properties(); 
                 System.out.println("*** Config file: "+f.getName());
                 FileInputStream ffin = new FileInputStream(f.getAbsolutePath());
-                _defaultConf.load( ffin );
+                xConf.load( ffin );
                 ffin.close();
                 
-                String newplug = _defaultConf.getProperty("plugins","");
+                String newplug = xConf.getProperty("plugins","");
                 if (newplug.length() > 0) {
                     if (plugins.length() > 0)
                        plugins += ", ";       
-                    plugins += _defaultConf.getProperty("plugins","");
+                    plugins += newplug; 
                 }
                 
-                String newchan = _defaultConf.getProperty("channels", "");
+                String newchan = xConf.getProperty("channels", "");
                 if (newchan.length() > 0) {
                     if (channels.length() > 0)
                        channels += ", ";       
-                    channels += _defaultConf.getProperty("channels","");
+                    channels += newplug; 
                 }
            }
            _defaultConf.setProperty("plugins", plugins);

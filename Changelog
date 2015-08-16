@@ -120,7 +120,28 @@ V.1.7
    - Filter support. Polygons/extent filter, scale, projection, selected base layer, etc..
 
 
+V.1.8
+-----
+* Activate/deactivate of channels at run-time. Support re-load without needing to 
+  restart server.
+* Status indication on channels. RUNNING, NOT-RUNNING, FAILED?
+* Allow backup channels which are automatically started when primary 
+  channel fails. 
+* Allow clients to show raw APRS packets. 
+* Move to Java 8. Note: This change means that we depend on Scala version 2.11 or later
+  and extra Scala package for XML handling. 
+* Change class hierarchy to better support other types of position objects than APRS. 
+  Some parts of APRS specific classes moved to generic class.     
+* Framework for Views (MVC pattern) for Point objects. Easily extendable for subclasses. 
+* Support incoming aprs item reports.    
+* Various updates and fixes.. 
 
+* [C] Implement our own layer switcher. 
+* [C] Layer switcher icon on toolbar. 
+* [C] Persistent choices of overlay-layers. 
+* [C] Fixes to toolbar for mobile and iframe mode
+* [C] Fix issues with canvas/scale with IE browser. 
+      Some cleanup wrt browser support. 
 
          
  
