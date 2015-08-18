@@ -182,8 +182,12 @@ public class Main implements ServerAPI
                 if (newchan.length() > 0) {
                     if (channels.length() > 0)
                        channels += ", ";       
-                    channels += newplug; 
+                    channels += newchan; 
                 }
+                
+                for (String key: xConf.stringPropertyNames())
+                   if (!key.equals("plugins") && !key.equals("channels"))
+                      _defaultConf.setProperty(key, xConf.getProperty(key));
            }
            _defaultConf.setProperty("plugins", plugins);
            System.out.println("plugins = "+plugins);
