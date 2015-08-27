@@ -286,7 +286,7 @@ public class Main implements ServerAPI
                     if (ch instanceof AprsChannel) 
                         ((AprsChannel)ch).addReceiver(parser);
                  
-                    if (getBoolProperty("channel."+chan+".on", true))
+                    if (getBoolProperty("channel."+chan+".on", false))
                         ch.activate(api);
                  }
                  else
