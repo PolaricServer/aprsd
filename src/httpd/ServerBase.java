@@ -92,6 +92,9 @@ public abstract class ServerBase
    }
    
    
+   protected ServerAPI getApi() 
+       { return _api; }
+   
    
    protected double roundDeg(double x)
        { return ((double) Math.round(x*100000)) / 100000; 
