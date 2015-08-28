@@ -116,8 +116,10 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
              ofs.writeObject(_routes);
              _msgProc.save();
              _ownobj.save(ofs);
+             PointObject.saveTags(ofs);
              for (TrackerPoint s: _map.values())
                 { ofs.writeObject(s); }
+
            }
            catch (Exception e) {
                System.out.println("*** StationDBImp: cannot save: "+e);
@@ -139,13 +141,13 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
           _routes = (RouteInfo) ifs.readObject();
           _msgProc.restore();
           _ownobj.restore(ifs);
+          PointObject.restoreTags(ifs);
           while (true)
           { 
               TrackerPoint st = (TrackerPoint) ifs.readObject(); 
               if (!_map.containsKey(st.getIdent()))
                   _map.put(st.getIdent(), st);
           }
-
         }
         catch (EOFException e) { }
         catch (Exception e) {

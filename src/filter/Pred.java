@@ -29,6 +29,9 @@ public abstract class Pred
    public static Pred TRUE()
       { return new TRUE(); }
       
+   public static Pred Tag(String t) 
+      { return new Tag(t); }
+      
    public static Pred Source(String regex)
       { return new Source(regex); }
    
@@ -82,6 +85,21 @@ class TRUE extends Pred
         }
 }
 
+/**
+ * Check for tag
+ */
+class Tag extends Pred
+{
+   private String tag;
+
+   public Tag(String t)
+      { this.tag=t; }
+
+   public boolean eval(TrackerPoint p, long scale)
+      { return p.hasTag(tag);}
+}
+
+
 
 /**
  * Regex match of data source. 
@@ -95,8 +113,8 @@ class Source extends Pred
     public Source(String regex) 
        { this.regex = regex; }
     
-        public boolean eval(TrackerPoint p, long scale) 
-           { return p.getSource().getIdent().matches(regex); }
+    public boolean eval(TrackerPoint p, long scale) 
+       { return p.getSource().getIdent().matches(regex); }
 }
 
 
@@ -265,7 +283,6 @@ class AND extends Pred
         List<Pred> copy = new LinkedList<Pred>();
         for (Pred p : conj) {
            if (p instanceof AND) {
-              System.out.println("*** Flatten recursive AND node");
               for (Pred q : ((AND)p).conj)
                  copy.add(q); 
            }
@@ -319,7 +336,6 @@ class OR extends Pred
         List<Pred> copy = new LinkedList<Pred>();
         for (Pred p : disj) {
            if (p instanceof OR) {
-              System.out.println("*** Flatten recursive OR node");
               for (Pred q : ((OR)p).disj)
                  copy.add(q); 
            }
@@ -344,7 +360,6 @@ class NOT extends Pred
             
         static Pred optimize(NOT p) {
            if (p.pred instanceof NOT) {
-               System.out.println("*** Bypass double NOT node");
                return ((NOT)p.pred).pred; 
            }
            else

@@ -15,8 +15,7 @@
 package no.polaric.aprsd;
 import uk.me.jstott.jcoord.*; 
 import java.util.*;
-import java.io.Serializable;
-  
+import java.io.*;
 
 /**
  * Object at a single location.
@@ -25,11 +24,42 @@ import java.io.Serializable;
  
 public abstract class PointObject extends Point implements Cloneable
 {             
+
+    /* 
+     * All points can have tags. This is implemented with a static
+     * set where each tag is prefixed with the point identifier and a '#' 
+     *
+     * Note: This doesn't support getting all tags for a object. 
+     * This may be implemented if we use a SortedSet instead. 
+     */
+    protected static Set<String> _tags = new HashSet<String>();
+    
+    public static void saveTags(ObjectOutput ofs) 
+      throws IOException
+      { ofs.writeObject(_tags); }
+      
+    public static void restoreTags(ObjectInput ifs) 
+     throws IOException,ClassNotFoundException
+      { _tags = (Set<String>) ifs.readObject(); }
+    
+    public void setTag(String tag) 
+      { _tags.add(getIdent()+"#"+tag); }
+    
+    public void removeTag(String tag)
+      { _tags.remove(getIdent()+"#"+tag); }
+     
+    public boolean hasTag(String tag) 
+      { return _tags.contains(getIdent()+"#"+tag); }
+    
+    
+    
     protected String      _icon; 
     protected String      _description;    
        
     public PointObject(Reference p)
        { super(p); }       
+    
+
     
     
     public abstract String getIdent();

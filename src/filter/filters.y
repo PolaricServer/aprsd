@@ -110,6 +110,9 @@ expr : '(' expr ')'           {  $$=$2; }
                                       yyerror("Unknown identifier '"+$1+"'"); 
                                  } 
                               }
+                              
+     | TAG IDENT              { $$=Pred.Tag($2); }  
+     
      ;
        
        

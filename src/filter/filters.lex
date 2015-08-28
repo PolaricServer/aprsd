@@ -27,6 +27,7 @@ WS = [\ \t\b\012]
 
 <YYINITIAL> {
 
+
 ({WS}|\n)+|#.*
          { }
            
@@ -68,7 +69,7 @@ NOT|"not"|\!
            return Parser.RELOP;
          }
            
-[a-zA-Z]+[0-9a-zA-Z_\-]+
+[a-zA-Z]+[0-9a-zA-Z_\-\.]+
          { yyparser.yylval = new ParserVal(yytext()); 
            return Parser.IDENT; 
          }
@@ -78,7 +79,9 @@ NOT|"not"|\!
            return Parser.NUM; 
          }
          
-         
+TAG|"tag"|\*|\+
+         { return Parser.TAG; }
+        
 [\~\;\(\)\=\{\}\,]
          { return (int) yycharat(0); }
            
