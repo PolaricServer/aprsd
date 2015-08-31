@@ -62,4 +62,15 @@ select {margin-left: 5px; border: 1px inset #666; background: #eee}
 input {height: 1.5em; border: 1px inset #666;  margin-left: 5px; padding: 0px 3px 0px 3px}
 button {background: #cdc; font-size: smaller; margin-left: 5px;}
 
-
+div.taglist {
+   -moz-columns: auto; 
+   -moz-column-width: 11em; 
+   -moz-column-gap:0.5em;
+   -webkit-columns: auto; 
+   -webkit-column-width: 11em; 
+   -webkit-column-gap:0.5em;
+   columns: auto; 
+   column-width: 11em; 
+   column-gap:0.5em;
+}
+  

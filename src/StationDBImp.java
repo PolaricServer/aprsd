@@ -174,6 +174,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
              if (st.expired() && !st.isPersistent() ) 
              {
                 System.out.println("        Removing: "+st.getIdent()); 
+                st.removeAllTags();
                 removeItem(st.getIdent());
                 _routes.removeNode(st.getIdent()); 
              } 

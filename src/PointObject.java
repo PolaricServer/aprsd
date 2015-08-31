@@ -26,30 +26,93 @@ public abstract class PointObject extends Point implements Cloneable
 {             
 
     /* 
-     * All points can have tags. This is implemented with a static
-     * set where each tag is prefixed with the point identifier and a '#' 
-     *
-     * Note: This doesn't support getting all tags for a object. 
-     * This may be implemented if we use a SortedSet instead. 
+     * All points can have tags, implemented using a set of strings. 
+     * There is also a static map to keep track of what tag-names are 
+     * used an how many point-objects using each. 
      */
-    protected static Set<String> _tags = new HashSet<String>();
+    protected Set<String> _tags = new HashSet<String>();
+    protected static SortedMap<String, Integer> _tagUse = new TreeMap<String, Integer>();
     
+    
+    /** 
+     * Save tags on file.
+     */
     public static void saveTags(ObjectOutput ofs) 
       throws IOException
-      { ofs.writeObject(_tags); }
+      { ofs.writeObject(_tagUse); }
       
+      
+    /**
+     * Restore tags from file. 
+     */
     public static void restoreTags(ObjectInput ifs) 
      throws IOException,ClassNotFoundException
-      { _tags = (Set<String>) ifs.readObject(); }
+      { _tagUse = (SortedMap<String,Integer>) ifs.readObject(); }
     
-    public void setTag(String tag) 
-      { _tags.add(getIdent()+"#"+tag); }
+        
+    /**
+     * Increment the count for the given tag. 
+     */
+    private static void _incrementTag(String tag) {
+       Integer x = _tagUse.get(tag); 
+       if (x != null) 
+          x++;
+       else 
+          _tagUse.put(tag, new Integer(1));
+    }
     
-    public void removeTag(String tag)
-      { _tags.remove(getIdent()+"#"+tag); }
-     
+    
+    /**
+     * Decrement the count for the given tag. 
+     */
+    private static void _decrementTag(String tag) {
+       Integer x = _tagUse.get(tag);
+       if (x == null) return; 
+       x--;
+       if (x <= 0)
+          _tagUse.remove(tag);
+    }
+    
+    /** 
+     * Return the set of used tags. 
+     */
+    public static Set<String> getUsedTags() 
+       { return _tagUse.keySet(); }
+    
+    
+    /**
+     * Set tag on this object. 
+     */
+    public void setTag(String tag) {
+       _incrementTag(tag);
+       _tags.add(tag); 
+    }
+    
+    
+    /**
+     * Remove tag. 
+     */
+    public void removeTag(String tag) { 
+       _decrementTag(tag);
+       _tags.remove(tag); 
+    }
+    
+    
+    /**
+     * Remove all tags associated with this object. 
+     */
+    public void removeAllTags() {
+        for (String x : _tags)
+           _decrementTag(x);
+        _tags.clear();
+    }
+    
+    
+    /**
+     * Return true if tag exists on this object. 
+     */
     public boolean hasTag(String tag) 
-      { return _tags.contains(getIdent()+"#"+tag); }
+      { return _tags.contains(tag); }
     
     
     
@@ -58,9 +121,7 @@ public abstract class PointObject extends Point implements Cloneable
        
     public PointObject(Reference p)
        { super(p); }       
-    
-
-    
+  
     
     public abstract String getIdent();
     

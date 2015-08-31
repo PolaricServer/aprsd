@@ -88,14 +88,14 @@ package no.polaric.aprsd.http
                                 
               { simpleLabel ("plugins", "leftlab", I.tr("Plugin modules")+": ", 
                  <div>
-                    { PluginManager.getPlugins().map
+                    { PluginManager.getPlugins.toSeq.map
                        { x => TXT(x.getDescr()) ++ br } }
                  </div> 
               )}
               
               { simpleLabel("channels", "leftlab", I.tr("Channels")+": ",
                 <div>
-                  { api.getChanManager().getKeys().map
+                  { api.getChanManager().getKeys.toSeq.map
                      { x => api.getChanManager().get(x) }.map 
                         { ch => TXT(ch.getShortDescr()+": " + ch.getIdent()) ++
                              (if (ch.isActive())  "  ["+ I.tr("Active")+"]" else "") ++ br } 
@@ -321,6 +321,56 @@ package no.polaric.aprsd.http
    }          
 
 
+
+   def handle_addtag(req : Request, res : Response) =
+   {
+       val I = getI18n(req)
+       val id = req.getParameter("objid")
+       val item = _api.getDB().getItem(id, null);
+       val prefix = <h2> {I.tr("Tags for: "+id)} </h2>
+       
+       def fields(req : Request): NodeSeq = {
+         <div class="taglist"> {
+            PointObject.getUsedTags.toSeq.map 
+              { x =>  checkBox("tag_"+x, item.hasTag(x), TXT(x)) ++ br }
+         }
+         { checkBox("newtagc", false, textInput("newtag", 10, 20, "")) }
+         </div>
+       }       
+           
+      
+       def action(req : Request): NodeSeq = {
+           val newtag = req.getParameter("newtag")
+           val newtagc = req.getParameter("newtagc")
+           val newtagcc = (newtag != null && newtagc != null && newtagc.equals("true"));
+           <div>
+           { for (x:String <- PointObject.getUsedTags.toSeq) yield {
+               val ux = req.getParameter("tag_"+x);
+               val uxx = (ux != null && ux.equals("true"));
+               
+               if (uxx != item.hasTag(x)) {
+                   if (uxx)
+                       item.setTag(x)
+                   else 
+                       item.removeTag(x)
+                   <span class="fieldsuccess">{"Tag '"+x+"'. " + 
+                     (if (uxx) "Added" else "Removed") + "."}</span><br/>
+               }
+               else
+                   <span>{"Tag '"+x+"'. No change."}</span><br/>
+           }} 
+           {  if (newtagcc) {
+                item.setTag(newtag)
+                <span class="fieldsuccess">{"Tag '"+newtag+"'. Added."}</span>
+              }
+              else EMPTY
+           }
+           </div>
+         }
+          
+          
+       printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
+   }          
 
 
    def handle_resetinfo(req : Request, res : Response) =
