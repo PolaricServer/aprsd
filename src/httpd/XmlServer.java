@@ -219,7 +219,9 @@ public class XmlServer extends ServerBase
                   
                   String title = s.getDescr() == null ? "" 
                              : " title=\"" + fixText(s.getDescr()) + "\"";
-                  String flags = " flags=\"a" + (s instanceof AprsPoint && ((AprsPoint)s).isInfra() ? "i" : "") + "\"";
+                  String flags = " flags=\""+
+                       (s instanceof AprsPoint ? "a":"") + 
+                       (s instanceof AprsPoint && ((AprsPoint)s).isInfra() ? "i" : "") + "\"";
 
                   String icon = _wfiledir + "/icons/"+ (s.getIcon(showSarInfo) != null ? s.getIcon(showSarInfo) : _icon);    
                 
