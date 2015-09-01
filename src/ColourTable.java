@@ -37,6 +37,10 @@ public class ColourTable
              return new String[] {"000000","ff0000"}; 
          if (! it.hasNext()) 
              it = list.iterator();
-         return it.next().split(" ");
+         String x = it.next();
+         if (x==null)
+            return new String[] {"000000","ff0000"}; 
+         else
+            return x.split(" ");
     }
 }

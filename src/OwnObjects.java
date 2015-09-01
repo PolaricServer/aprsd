@@ -271,7 +271,8 @@ public class OwnObjects implements Runnable
             }
                  
             Thread.sleep(_txPeriod * 1000 - 3000);
-         } catch (Exception e) { System.out.println("*** OWNOBJECTS THREAD: "+e); e.printStackTrace(System.out); }
+         } catch (Exception e) 
+            { System.out.println("*** OWNOBJECTS THREAD: "+e); e.printStackTrace(System.out); }
        }
     }
    

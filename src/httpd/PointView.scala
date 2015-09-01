@@ -37,8 +37,13 @@ package no.polaric.aprsd.http
    
       var map = scala.collection.immutable.Map[Class[_<:PointObject], Class[_<:PointView]](); 
       
-      def getViewFor(x:PointObject, api: ServerAPI, canUpdate: Boolean, req: Request):PointView = 
-          map(x.getClass).getConstructors()(0).newInstance(api,x,canUpdate:java.lang.Boolean,req).asInstanceOf[PointView];
+      def getViewFor(x:PointObject, api: ServerAPI, canUpdate: Boolean, req: Request):PointView = {
+          val cls = map(x.getClass); 
+          if (cls == null) 
+              new PointView(api,x,canUpdate,req); 
+          else 
+              cls.getConstructors()(0).newInstance(api, x, canUpdate:java.lang.Boolean, req).asInstanceOf[PointView];
+      }
       
       def addView(model: Class[_<:PointObject], view: Class[_<:PointView]) = 
          map += (model -> view)
