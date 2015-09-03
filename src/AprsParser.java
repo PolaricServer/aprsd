@@ -82,6 +82,8 @@ public class AprsParser implements AprsChannel.Receiver
         if (station == null)
             station = _api.getDB().newStation(p.from); 
         station.setSource(p.source);
+        station.setTag("APRS");
+        station.setTag(p.source.getTag());
         
         if (!duplicate) try {    
         switch(p.type)
@@ -256,8 +258,11 @@ public class AprsParser implements AprsChannel.Receiver
         station.setPathInfo(p.via); 
         TrackerPoint x = _api.getDB().getItem(ident+'@'+station.getIdent(), null);      
         AprsObject obj;
-        if (x == null)
+        if (x == null) {
             obj = _api.getDB().newObject(station, ident);
+            obj.setTag("APRS");
+            obj.setTag(p.source.getTag());
+        }
         else if (x instanceof AprsObject)
             obj = (AprsObject) x;
         else {

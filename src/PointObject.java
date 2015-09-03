@@ -79,11 +79,16 @@ public abstract class PointObject extends Point implements Cloneable
     public static Set<String> getUsedTags() 
        { return _tagUse.keySet(); }
     
-    
+    public static boolean tagIsUsed(String tag)
+       { return _tagUse.get(tag) != null; }
+       
+       
     /**
      * Set tag on this object. 
      */
     public void setTag(String tag) {
+       if (tag == null) 
+          return; 
        _incrementTag(tag);
        _tags.add(tag); 
     }
@@ -93,6 +98,8 @@ public abstract class PointObject extends Point implements Cloneable
      * Remove tag. 
      */
     public void removeTag(String tag) { 
+       if (tag == null)
+          return;
        _decrementTag(tag);
        _tags.remove(tag); 
     }

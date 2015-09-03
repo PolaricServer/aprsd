@@ -87,6 +87,7 @@ public class OwnObjects implements Runnable
             obj.update(new Date(), pos, comment,  "");
             obj.setTimeless(perm);
             _ownObjects.add(id);
+            obj.setTag("own");
             sendObjectReport(obj, false);
             return true;
          }

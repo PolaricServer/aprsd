@@ -40,7 +40,7 @@ public class OwnPosition extends Station implements Runnable
     private class LocalSource extends Source
      {
          public LocalSource(ServerAPI api, String prefix, String id)
-            { _style="own"; _init(api, prefix, "ownposition"); }
+            { _tag="own"; _init(api, prefix, "ownposition"); }
          public String getShortDescr() 
             { return "OWN"; }
      }

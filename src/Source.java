@@ -29,23 +29,20 @@ public abstract class Source implements Serializable
 {
      
      protected boolean _restrict = false;
-     protected String _style = null;
+     protected String _tag = null;
      protected String _ident = null; 
         
      
      public enum Type {inet, radio, local};
      
      
-     protected void _init (String id, boolean restrict, String style) 
+     protected void _init (String id, boolean restrict, String tag) 
      {
         _ident = id; 
         _restrict = restrict; 
-        _style = style;
-             
-        if (_style==null)
-           _style = _ident;
-        else
-           _style.trim();
+        _tag = tag; 
+        if (tag != null) 
+            _tag.trim();
      }
      
      
@@ -53,8 +50,8 @@ public abstract class Source implements Serializable
      protected void _init(ServerAPI config, String prefix, String id) 
      {
         boolean restrict = config.getBoolProperty(prefix+"."+id+".restrict", false);
-        String style = config.getProperty(prefix+"."+id+".style", _style); 
-        _init(id, restrict, style); 
+        String tag = config.getProperty(prefix+"."+id+".tag", _tag); 
+        _init(id, restrict, tag); 
      }
      
      
@@ -67,11 +64,10 @@ public abstract class Source implements Serializable
         
         
      /**
-      * Return a CSS class to use for labels for objects originating from this channel.
-      * This is set in the x.x.style property in config
+      * Return a string to tag point objects with. 
       */
-     public String getStyle() 
-        { return _style; }
+     public String getTag() 
+        { return _tag; }
         
         
      /**

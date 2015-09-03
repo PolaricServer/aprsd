@@ -331,8 +331,13 @@ package no.polaric.aprsd.http
        
        def fields(req : Request): NodeSeq = {
          <div class="taglist"> {
-            PointObject.getUsedTags.toSeq.map 
-              { x =>  checkBox("tag_"+x, item.hasTag(x), TXT(x)) ++ br }
+            for (x <- PointObject.getUsedTags.toSeq) yield {
+               val pfx = x.split('.')(0)
+               if (pfx.length == x.length || item.hasTag(pfx) || !PointObject.tagIsUsed(pfx))
+                   checkBox("tag_"+x, item.hasTag(x), TXT(x)) ++ br
+               else
+                   EMPTY
+            }
          }
          { checkBox("newtagc", false, textInput("newtag", 10, 20, "")) }
          </div>

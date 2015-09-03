@@ -239,9 +239,7 @@ public class XmlServer extends ServerBase
                         style = "lobject"; 
                      if (s instanceof AprsPoint && ((AprsPoint)s).isEmergency())
                         style += " lflash";
-                        
                      style += " "+ action.getStyle();
-                     style += " "+ s.getSource().getStyle();
                      
                      out.println("   <label style=\""+style+"\">");
                      out.println("       "+fixText(s.getDisplayId(showSarInfo)));
