@@ -343,6 +343,23 @@ package no.polaric.aprsd.http
          </div>
        }       
            
+           
+       def setTag(item:PointObject, tag:String)
+       {
+           item.setTag(tag)
+           System.out.println("*** TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthUser(req)+"'")
+           if (api.getRemoteCtl() != null)
+              api.getRemoteCtl().sendRequestAll("TAG "+item.getIdent()+" "+tag, null);
+       }
+       
+       def removeTag(item:PointObject, tag:String)
+       {
+           item.removeTag(tag)
+           System.out.println("*** REMOVE TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthUser(req)+"'")
+           if (api.getRemoteCtl() != null)
+              api.getRemoteCtl().sendRequestAll("RMTAG "+item.getIdent()+" "+tag, null);
+       }
+      
       
        def action(req : Request): NodeSeq = {
            val newtag = req.getParameter("newtag")
@@ -355,9 +372,9 @@ package no.polaric.aprsd.http
                
                if (uxx != item.hasTag(x)) {
                    if (uxx)
-                       item.setTag(x)
+                       setTag(item,x)
                    else 
-                       item.removeTag(x)
+                       removeTag(item, x)
                    <span class="fieldsuccess">{"Tag '"+x+"'. " + 
                      (if (uxx) "Added" else "Removed") + "."}</span><br/>
                }
@@ -365,7 +382,8 @@ package no.polaric.aprsd.http
                    <span>{"Tag '"+x+"'. No change."}</span><br/>
            }} 
            {  if (newtagcc) {
-                item.setTag(newtag)
+                setTag(item, newtag)
+                
                 <span class="fieldsuccess">{"Tag '"+newtag+"'. Added."}</span>
               }
               else EMPTY

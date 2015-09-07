@@ -144,7 +144,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
      String[] arg = text.split("\\s+", 3);
      String prefix = arg[0], suffix = null;
   
-     if (arg[0].matches("ALIAS|ICON")) {
+     if (arg[0].matches("ALIAS|ICON|TAG|RMTAG")) {
          prefix = prefix + " " + arg[1];
          suffix = arg[2];
      }
@@ -192,6 +192,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           p = doSetAlias(sender, args);
       else if (arg[0].equals("ICON"))
           p = doSetIcon(sender, args);
+      else if (arg[0].equals("TAG"))
+          p = doSetTag(sender, args);
+      else if (arg[0].equals("RMTAG"))
+          p = doRemoveTag(sender, args);          
       else if (arg[0].equals("SAR"))
           p = doSetSarMode(sender, args);
            
@@ -262,7 +266,59 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        return true;
    }
    
-
+   
+   /**
+    * Set a tag on a point object. 
+    * @param sender The station that sent the commmand.
+    * @param args The arguments of the TAG command.
+    * @return true if success.
+    */
+   protected boolean doSetTag(Station sender, String args)
+   {
+      if (args == null) {
+          System.out.println("*** WARNING: missing arguments to remote TAG command");
+          return false;
+      }
+      
+      System.out.println("*** Set TAG from "+sender.getIdent());
+      String[] arg = args.split("\\s+", 2);
+      
+      PointObject item = _api.getDB().getItem(arg[0].trim(), null);
+      arg[1] = arg[1].trim();
+      
+      if (item == null)
+          item = newItem(arg[0].trim());   
+      item.setTag(arg[1]);
+      return true;
+   }
+   
+        
+   /**
+    * Remove a tag on a point object. 
+    * @param sender The station that sent the commmand.
+    * @param args The arguments of the RMTAG command.
+    * @return true if success.
+    */
+   protected boolean doRemoveTag(Station sender, String args)
+   {
+      if (args == null) {
+          System.out.println("*** WARNING: missing arguments to remote TAG command");
+          return false;
+      }
+      
+      System.out.println("*** Remove TAG from "+sender.getIdent());
+      String[] arg = args.split("\\s+", 2);
+      
+      PointObject item = _api.getDB().getItem(arg[0].trim(), null);
+      arg[1] = arg[1].trim();
+      
+      if (item == null)
+          return false;  
+      item.removeTag(arg[1]);
+      return true;
+   } 
+   
+   
    /**
     * Set an alias on a trackerpoint. 
     * @param sender The station that sent the commmand.
