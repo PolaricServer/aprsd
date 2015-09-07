@@ -99,7 +99,7 @@ public class GpsPosition extends OwnPosition
         _turnLimit = api.getIntProperty("ownposition.tx.turnlimit", 30);
         _max_retry = api.getIntProperty("ownposition.gps.retry", 0);
         _retry_time = Long.parseLong(api.getProperty("ownposition.gps.retry.time", "30")) * 60 * 1000;         
-        _adjustClock = api.getBoolProperty("ownposition.gps.on", false); 
+        _adjustClock = api.getBoolProperty("ownposition.gps.adjustclock", false); 
         _gpsParser = new GpsParser(); 
         _gpsParser.start();
     }
@@ -129,8 +129,7 @@ public class GpsPosition extends OwnPosition
 
 
 
-    private int cnt = 0;
-
+    private int fcnt=300;
     private void do_RMC(String[] arg)
     {
        if (arg.length != 12)   /* Ignore if wrong format */
@@ -138,6 +137,10 @@ public class GpsPosition extends OwnPosition
 
        if (!"A".equals(arg[2])) {
           _gpx_fix = false;
+          if (++fcnt>=360) {
+              System.out.println("*** Still waiting for GPS to get fix...");
+              fcnt=0;
+          }
           return;
        }
        _gpx_fix = true;
@@ -168,8 +171,9 @@ public class GpsPosition extends OwnPosition
 
 
 
+    private int cnt = 0;
     private void updatePosition(Date t, Reference pos, int crs, int speed)
-    {  
+    {
         if (++cnt >= 5 || speed > 1 && ( course_change(crs, getCourse(), 30) && cnt >= 3)) {
            cnt = 0;
            AprsHandler.PosData pd = new AprsHandler.PosData(pos, crs, speed, (char) 0, (char) 0); 
@@ -185,7 +189,7 @@ public class GpsPosition extends OwnPosition
           tcnt = 0;
           try {
              String cmd = "sudo date " + linuxtimeformat.format(t); 
-             System.out.println("*** SET TIME: "+cmd); 
+             System.out.println("*** GPS SET TIME: "+cmd); 
              Runtime.getRuntime().exec(cmd);
           } catch (IOException e1) 
              {  e1.printStackTrace(); }
