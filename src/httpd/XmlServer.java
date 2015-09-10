@@ -188,11 +188,12 @@ public class XmlServer extends ServerBase
             out.println("<point id=\""+ (s.getId() < 0 ? "__sign" + (i++) : "__"+s.getId()) + "\" x=\""
                          + roundDeg(ref.getLng()) + "\" y=\"" + roundDeg(ref.getLat()) + "\" " 
                          + href + " " + title+">");
-            out.println("   <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
+            out.println(" <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
             out.println("</point>");    
         }                
          
          
+
         
         /* Output APRS objects */
         for (TrackerPoint s: _api.getDB().search(uleft, lright)) 
@@ -211,27 +212,27 @@ public class XmlServer extends ServerBase
             if (ref == null) continue; 
             
             if (!s.visible() || (_api.getSar() != null && !loggedIn && _api.getSar().filter(s)))  
-                   out.println("<delete id=\""+fixText(s.getIdent())+"\"/>");
+                   out.println("<delete id=\""+s.getIdent()+"\"/>");
             else {
                synchronized(s) {
                   ref = s.getPosition().toLatLng(); 
                   if (ref == null) continue; 
                   
                   String title = s.getDescr() == null ? "" 
-                             : " title=\"" + fixText(s.getDescr()) + "\"";
+                             : " title=\"" + fixText(s.getDescr()) + "\""; 
                   String flags = " flags=\""+
                        (s instanceof AprsPoint ? "a":"") + 
                        (s instanceof AprsPoint && ((AprsPoint)s).isInfra() ? "i" : "") + "\"";
-
+                  
                   String icon = _wfiledir + "/icons/"+ (s.getIcon(showSarInfo) != null ? s.getIcon(showSarInfo) : _icon);    
-                
-                  out.println("<point id=\""+fixText(s.getIdent())+"\" x=\""
+                  
+                  // FIXME: Sanitize ident input somewhere else
+                  out.println("<point id=\""+s.getIdent()+"\" x=\""
                                + roundDeg(ref.getLng()) + "\" y=\"" + roundDeg(ref.getLat()) + "\"" 
                                + title + flags + (s.isChanging() ? " redraw=\"true\"" : "") +
                                ((s instanceof AprsObject) && _api.getDB().getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""))  ? " own=\"true\"":"") +">");
-                  out.println("   <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
-        
-                   
+                  out.println(" <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
+
                   /* Show label */ 
                   if (!action.hideIdent() && !s.isLabelHidden() ) {
                      String style = (!(s.getTrail().isEmpty()) ? "lmoving" : "lstill");
@@ -241,9 +242,9 @@ public class XmlServer extends ServerBase
                         style += " lflash";
                      style += " "+ action.getStyle();
                      
-                     out.println("   <label style=\""+style+"\">");
-                     out.println("       "+fixText(s.getDisplayId(showSarInfo)));
-                     out.println("   </label>"); 
+                     out.println(" <label style=\""+style+"\">");
+                     out.println("   "+s.getDisplayId(showSarInfo));
+                     out.println(" </label>"); 
                   }
                   
                   /* Trail */

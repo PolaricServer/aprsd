@@ -79,7 +79,7 @@ package no.polaric.aprsd.http
              model.setLabelHidden( "true".equals(hide) );     
 
              /* Alias setting */
-             var alias = req.getParameter("nalias");
+             var alias = fixText(req.getParameter("nalias"));
              var ch = false;
              if (alias != null && alias.length() > 0)      
                  ch = model.setAlias(alias);

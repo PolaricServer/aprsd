@@ -434,7 +434,7 @@ package no.polaric.aprsd.http
    {
         val I = getI18n(req)
         val pos = getCoord(req)
-        val id = req.getParameter("objid")
+        val id = fixText(req.getParameter("objid"))
         val prefix = <h2> {I.tr("Add object")} </h2>
         
         /* Fields to be filled in */

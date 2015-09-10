@@ -158,27 +158,50 @@ public abstract class ServerBase
    protected PrintWriter getWriter(Response resp) throws IOException
    {
         OutputStream os = resp.getOutputStream();
-        return new PrintWriter(new OutputStreamWriter(os, _encoding));
+        return new PrintWriter(new BufferedWriter(new OutputStreamWriter(os, _encoding)));
    }
    
 
-    
+   /**
+    * Sanitize text input that can be used in HTML output. 
+    */
    protected String fixText(String t)
-   {
-        t = t.replaceAll("&amp;", "##amp;"); 
-        t = t.replaceAll("&lt;", "##lt;");
-        t = t.replaceAll("&gt;", "##gt;");   
-        t = t.replaceAll("&quot;", "##amp;");
-        t = t.replaceAll("&", "&amp;");   
-        t = t.replaceAll("<", "&lt;");
-        t = t.replaceAll(">", "&gt;");
-        t = t.replaceAll("\"", "&quot;");
-        t = t.replaceAll("\\p{Cntrl}", "?");
-        t = t.replaceAll("##amp;", "&amp;"); 
-        t = t.replaceAll("##lt;", "&lt;");
-        t = t.replaceAll("##gt;", "&gt;");   
-        t = t.replaceAll("##quot;", "&amp;"); 
-        return t; 
+   {  
+        if (t==null)
+           return t; 
+        StringBuilder sb = new StringBuilder(t);
+        int length = t.length();
+        for (int i=0; i<length; i++)
+           switch (sb.charAt(i)) {
+              case '&': 
+                   if (sb.substring(i+1).matches("(amp|lt|gt|quot);.*")) 
+                      i = sb.indexOf(";", i)+1;
+                   else {
+                      sb.insert(i+1,"amp;");
+                      i+= 4;
+                      length += 4;
+                   }
+                   break;
+                
+              case '<': 
+                   sb.setCharAt(i,'&');
+                   sb.insert(++i, "lt;");
+                   length += 3;
+                   break;
+              case '>': 
+                   sb.setCharAt(i,'&');
+                   sb.insert(++i, "gt;");
+                   length += 3;
+                   break;
+              case '"':
+                   sb.setCharAt(i,'&');
+                   sb.insert(++i, "quot;");
+                   length += 5;
+                   break;
+           }        
+//        t = t.replaceAll("\\p{Cntrl}", "?");
+
+        return sb.toString(); 
    }
    
   
@@ -201,19 +224,19 @@ public abstract class ServerBase
    
    
    
-  protected long _sessions = 0;
-  protected synchronized long getSession(Request req)
+   protected long _sessions = 0;
+   protected synchronized long getSession(Request req)
       throws IOException
-  {
-     String s_str  = req.getParameter("clientses");
-     if (s_str != null && s_str.matches("[0-9]+")) {
-        long s_id = Long.parseLong(s_str);
-        if (s_id > 0)
-           return s_id;
-     }
-     _sessions = (_sessions +1) % 2000000000;
-     return _sessions;       
-  }
+   {
+      String s_str  = req.getParameter("clientses");
+      if (s_str != null && s_str.matches("[0-9]+")) {
+         long s_id = Long.parseLong(s_str);
+         if (s_id > 0)
+            return s_id;
+      }
+      _sessions = (_sessions +1) % 2000000000;
+      return _sessions;       
+   }
    
    
    
