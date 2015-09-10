@@ -31,7 +31,9 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     protected static StationDB   _db  = null;
     protected static ColourTable _colTab = 
         new ColourTable (System.getProperties().getProperty("confdir", ".")+"/trailcolours");
-                  
+    private   static long        _posUpdates = 0;
+    
+    
     public static void setApi(ServerAPI api)
        { _api = api; _db = _api.getDB(); }
        
@@ -47,7 +49,10 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     public static void setExpiretime(long exp)
        { _expiretime = exp; }
   
-      
+    public static long getPosUpdates()
+       { return _posUpdates; }
+       
+       
       
     protected Trail     _trail = new Trail(); 
     protected String[]  _trailcolor = new String[] {"dddddd", "ff0000"};   
@@ -90,6 +95,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
              setChanging();
          setUpdated(ts == null ? new Date() : ts);
          _position = newpos;
+         _posUpdates++;
     }
     
     

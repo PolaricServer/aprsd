@@ -13,7 +13,7 @@ import no.polaric.aprsd.http.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "1.8";
+   public  static String version = "1.8.1+";
    public static String toaddr  = "APPS18";
    
    private static StationDB db = null;
@@ -30,7 +30,7 @@ public class Main implements ServerAPI
    private static Channel.Manager _chanManager = new Channel.Manager();
    private static SarUrl sarurl;
    private static String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
-   
+   private static StatLogger stats; 
    
    /* API interface methods 
     * Should they be here or in a separate class ??
@@ -346,6 +346,12 @@ public class Main implements ServerAPI
            ownobjects = db.getOwnObjects(); 
            ownobjects.setChannels(ch2, ch1); 
 
+           
+           /* Server statistics */
+           if (getBoolProperty("serverstats.on", false)) {
+               System.out.println("*** Activate server statistics");
+               stats = new StatLogger(api, "serverstats", "serverstats.csv");
+           }
             
         }
         catch( Exception ioe )
