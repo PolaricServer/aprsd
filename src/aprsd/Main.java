@@ -350,7 +350,7 @@ public class Main implements ServerAPI
            /* Server statistics */
            if (getBoolProperty("serverstats.on", false)) {
                System.out.println("*** Activate server statistics");
-               stats = new StatLogger(api, "serverstats", "serverstats.csv");
+               stats = new StatLogger(api, "serverstats", "serverstats.log");
            }
             
         }

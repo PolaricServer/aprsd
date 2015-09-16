@@ -1,4 +1,5 @@
 
+        
 V.1.9 (october 2015), etc
 --------------------------
 
@@ -20,9 +21,30 @@ V.1.9 (october 2015), etc
 * Add copyright info for LocalePlanet stuff
      
 * Implement architecture for (semantic) tagging. Automatic tagging, user tagging.          
-
+     - Basic tagging. DONE.
+     - Simple UI. DONE.
+     - Tags in filterscripts. DONE.
+     - Set tags in AIS plugin. DONE.
+     - Special tags, supertags? Hierarchies? 
+     - Tags on points in XML overlay? 
+     - Tag APRS points as 'APRS'. DONE.
+     - Set tags instead of CSS class in channel-config. DONE.
+     - Document. 
+     
+* Revise filter scripting. 
+     - Consider use /* */ for comments instead of #? And # for tags. 
+     - Consider rules to set tags. Tag ontology? Separate script or same file as filters?  
+     - Consider positive rules, not just negative rules. 
+     - Cleaner syntax? 
+     - Additional actions? Icon selection? 
+     - Document. 
+     
+     
 * Synchronisation protocol doesn't reconnect when parent is restarted? Check? Fix.
 
+* Scalability issues? DoS vulnerability? Measure load?  
+
+* IMPORTANT: Proper input sanitization. Ident and description. 
 
 
    

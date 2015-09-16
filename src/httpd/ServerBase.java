@@ -37,7 +37,6 @@ public abstract class ServerBase
    protected  ServerAPI  _api;
    private    String     _timezone;
    protected  String     _wfiledir;
-   protected  boolean    _infraonly;
    private    String     _adminuser, _updateusers;
            
    public static final String _encoding = "UTF-8";
@@ -59,7 +58,6 @@ public abstract class ServerBase
    {
       _api=api; 
       _wfiledir    = api.getProperty("map.web.dir", "aprsd");
-      _infraonly   = api.getBoolProperty("map.infraonly", false);
       _timezone    = api.getProperty("timezone", "");
       _adminuser   = api.getProperty("user.admin", "admin");
       _updateusers = api.getProperty("user.update", "");

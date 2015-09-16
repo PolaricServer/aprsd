@@ -107,7 +107,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * @param ts timestamp of the NEXT position.
      * @param pos the NEXT position.
      * @param pathinfo optional extra information. E.g. path info.
-     * @return true to indicate if position is ok an can be saved to realtime point. 
+     * @return true to indicate if position is ok and can be saved to realtime point. 
      */
     private boolean _fastmove = false;  
     public boolean saveToTrail(Date ts, Reference newpos, int speed, int course, String pathinfo) 
@@ -124,7 +124,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
            
         /* Downsample. Time resolution is 10 seconds or more */
         if (tdistance < 5)
-             return true; 
+             return false; 
         
         /* If moving incredibly fast (i.e. over 500 km/h) ignore, but only 
          * first time. Second time, clear trail. 

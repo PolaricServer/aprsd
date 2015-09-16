@@ -42,7 +42,8 @@ package no.polaric.aprsd.http
    PointView.addView(classOf[AprsObject],  classOf[AprsObjectView])
    PointView.addView(classOf[Station],     classOf[AprsStationView])
    PointView.addView(classOf[OwnPosition], classOf[AprsPointView])
-    
+   PointView.addView(classOf[GpsPosition], classOf[AprsPointView])
+
     
     
     
