@@ -265,11 +265,12 @@ public class Main implements ServerAPI
            _chanManager.addClass("KISS", "no.polaric.aprsd.KissTncChannel");
            _chanManager.addClass("TCPKISS", "no.polaric.aprsd.TcpKissChannel");
            
+           /* FIXME: IS THIS RIGHT???? */
            String[] channelns = {"aprsis", "tnc"};
            if (getProperty("channel.aprsis.type", "").equals(""))
               _config.setProperty("channel.aprsis.type", "APRSIS"); 
            if (getProperty("channel.tnc.type", "").equals(""))
-              _config.setProperty("channel.aprsis.type", "TNC2");  
+              _config.setProperty("channel.tnc.type", "TNC2");  
            
            String[] c = getProperty("channels", "").split(",(\\s*)");
            if (c.length > 0)
