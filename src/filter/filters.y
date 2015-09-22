@@ -124,18 +124,19 @@ actions : actions ',' action  { action.merge((Action) $3); }
        
        
 action : IDENT '=' STRING     { if ($1.matches("STYLE|style")) 
-                                   $$=new Action(false,false,false,false,$3);
+                                   $$=new Action(false,false,false,false,false,$3);
                                 else {
-                                   $$=new Action(false,false,false,false,"");
+                                   $$=new Action(false,false,false,false,false,"");
                                    yyerror("Unknown identifier '"+$1+"'"); 
                                 }
                               }
                               
        | IDENT                { $$=new Action( 
                                    $1.matches("hide-ident"), $1.matches("hide-trail"),
-                                   $1.matches("hide-all"), $1.matches("show-path"), "");
+                                   $1.matches("hide-all"), $1.matches("show-path"),
+                                   $1.matches("set-public"), "");
                                    
-                                if (!$1.matches("(hide-(ident|all|trail))|show-path"))
+                                if (!$1.matches("(hide-(ident|all|trail))|show-path|public"))
                                    yyerror("Unknown identifier '"+$1+"'"); 
                               }
        ; 

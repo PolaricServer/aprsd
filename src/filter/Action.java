@@ -29,10 +29,10 @@ public class Action
          * Null Action. No changes. 
          */
         public static Action NULL()
-          { return new Action(false, false, false, false, ""); }
+          { return new Action(false, false, false, false, false, ""); }
         
         
-    private boolean _hideIdent, _hideTrail, _hideAll, _showPath;
+    private boolean _hideIdent, _hideTrail, _hideAll, _showPath, _public;
     private String _style = ""; 
     
     
@@ -45,9 +45,9 @@ public class Action
      * @param showpath Show path of signals (default is to NOT show it).
      * @param style CSS class (used in addition to other classes). 
      */
-    public Action(boolean hideid, boolean hidetrail, boolean hideall, boolean showpath, String style) { 
+    public Action(boolean hideid, boolean hidetrail, boolean hideall, boolean showpath, boolean pub, String style) { 
         _hideIdent = hideid; _hideTrail = hidetrail; _hideAll=hideall; 
-        _showPath = showpath; _style = style; 
+        _showPath = showpath; _style = style; _public = pub; 
     }
  
     
@@ -62,6 +62,7 @@ public class Action
         _hideTrail |= x._hideTrail; 
         _hideAll   |= x._hideAll;
         _showPath  |= x._showPath; 
+        _public    |= x._public;
         
         if (!_style.contains(x._style))
            _style = _style + (_style.equals("") ? "": " ") + x._style; 
@@ -84,10 +85,14 @@ public class Action
     public boolean showPath()
         { return _showPath; }
     
+    public boolean isPublic()
+        { return _public; }
+        
+        
     /** Get CSS style (classes) */
     public String getStyle()
         { return _style; }
     
     public String toString()
-        { return "Action("+_hideIdent+", "+_hideTrail+", "+_hideAll+", "+_showPath+", '"+_style+"')"; }
+        { return "Action("+_hideIdent+", "+_hideTrail+", "+_hideAll+", "+_showPath+", "+_public+", '"+_style+"')"; }
 }
