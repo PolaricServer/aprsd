@@ -203,7 +203,7 @@ public class XmlServer extends ServerBase
             
             if (s.getPosition() == null)
                 continue; 
-            if (s.getSource().isRestricted() && !loggedIn)
+            if (s.getSource().isRestricted() && !action.isPublic() && !loggedIn)
                 continue;
             if (action.hideAll())
                 continue;
