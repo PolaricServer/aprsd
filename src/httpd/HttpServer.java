@@ -30,6 +30,7 @@ public class HttpServer implements Container, ServerAPI.ServerStats
    protected  ServerAPI  _api;
    protected  String     _serverurl;
    protected  boolean    _infraonly;
+   protected  int        _max_load;
    protected int _requests = 0, _reqNo = 0;
    
    
@@ -77,6 +78,12 @@ public class HttpServer implements Container, ServerAPI.ServerStats
             else {
                OutputStream os = resp.getOutputStream();
                PrintWriter out =  new PrintWriter(new OutputStreamWriter(os, _encoding));
+               if (_requests > _max_load) {
+                  resp.setCode(503); 
+                  resp.setDescription("Service Unavailable");
+                  System.out.println("*** Server overload or threads not finishing");
+               }
+               
                if (!allowed) {
                   out.println("<html><body>Access denied.</body></html>");
                   resp.setCode(403); 
@@ -122,6 +129,7 @@ public class HttpServer implements Container, ServerAPI.ServerStats
       _api=api; 
       _infraonly   = api.getBoolProperty("map.infraonly", false);
       _serverurl   = api.getProperty("server.url", "/srv");
+      _max_load    = api.getIntProperty("server.maxload", 200);
       
       /* Configure this web container */
       Server srv = new ContainerServer(this, 12); 
