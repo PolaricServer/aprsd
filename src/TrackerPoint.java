@@ -89,7 +89,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * @param newpos Position coordinates.
      */    
 
-    public void updatePosition(Date ts, Reference newpos)
+    public synchronized void updatePosition(Date ts, Reference newpos)
     { 
          if (_position == null)
              setChanging();
@@ -110,7 +110,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * @return true to indicate if position is ok and can be saved to realtime point. 
      */
     private boolean _fastmove = false;  
-    public boolean saveToTrail(Date ts, Reference newpos, int speed, int course, String pathinfo) 
+    public synchronized boolean saveToTrail(Date ts, Reference newpos, int speed, int course, String pathinfo) 
     {         
         /*
          * If position is null or timestamp is in the future, do nothing.
@@ -200,7 +200,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     public String[] getTrailColor()
        { return _trailcolor;}
 
-    public void nextTrailColor()
+    public synchronized void nextTrailColor()
        { _trailcolor = _colTab.nextColour(); setChanging(); }  
        
     public int getSpeed ()
@@ -273,7 +273,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     
     
     /** Set time when last updated. */   
-    public void setUpdated(Date t)
+    public synchronized void setUpdated(Date t)
        { _updated = t; }
        
     

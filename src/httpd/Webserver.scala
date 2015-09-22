@@ -79,7 +79,7 @@ package no.polaric.aprsd.http
               <fieldset>
               { simpleLabel("items", "leftlab", I.tr("Server run since:"), TXT(""+_time)) ++
                 simpleLabel("items", "leftlab", I.tr("Server version:"), TXT(""+_api.getVersion())) ++ 
-                simpleLabel("items", "leftlab", I.tr("Number of APRS items:"), TXT(""+_api.getDB().nItems())) ++
+                simpleLabel("items", "leftlab", I.tr("Number of items:"), TXT(""+_api.getDB().nItems())) ++
                 simpleLabel("items", "leftlab", I.tr("Number of connections:"), TXT(""+_api.getDB().getRoutes().nItems())) ++
                 simpleLabel("items", "leftlab", I.tr("Own objects:"), TXT(""+_api.getDB().getOwnObjects().nItems())) ++   
                 simpleLabel("items", "leftlab", I.tr("Number of HTTP clients:"), TXT(""+(_api.getHttps().getClients()-1))) ++  
@@ -516,14 +516,14 @@ package no.polaric.aprsd.http
    def handle_search(req : Request, res : Response) =
    {
        val I = getI18n(req)
-       val filtid = if (_infraonly) "infra"  else req.getParameter("filter")
+       val filtid = req.getParameter("filter")
        val vfilt = ViewFilter.getFilter(filtid, authorizedForUpdate(req))
        
        var arg = req.getParameter("filter")
        var mob = req.getParameter("mobile");
        if (arg == null) 
            arg  = "__NOCALL__"; 
-       val infra = _infraonly || "infra".equals(arg)
+       val infra = "infra".equals(arg)
        val result: NodeSeq =
          <table>
          {

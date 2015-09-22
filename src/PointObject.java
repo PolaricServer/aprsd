@@ -55,8 +55,10 @@ public abstract class PointObject extends Point implements Cloneable
      */
     private static void _incrementTag(String tag) {
        Integer x = _tagUse.get(tag); 
-       if (x != null) 
+       if (x != null) {
           x++;
+          _tagUse.replace(tag, x);
+       }
        else 
           _tagUse.put(tag, new Integer(1));
     }
@@ -71,6 +73,8 @@ public abstract class PointObject extends Point implements Cloneable
        x--;
        if (x <= 0)
           _tagUse.remove(tag);
+       else 
+          _tagUse.replace(tag, x);
     }
     
     /** 
