@@ -38,7 +38,7 @@ package no.polaric.aprsd.http
       var map = scala.collection.immutable.Map[Class[_<:PointObject], Class[_<:PointView]](); 
       
       def getViewFor(x:PointObject, api: ServerAPI, canUpdate: Boolean, req: Request):PointView = {
-          val cls = map(x.getClass); 
+          val cls = if (x !=null) map(x.getClass) else null; 
           if (cls == null) 
               new PointView(api,x,canUpdate,req); 
           else 

@@ -136,7 +136,7 @@ action : IDENT '=' STRING     { if ($1.matches("STYLE|style"))
                                    $1.matches("hide-all"), $1.matches("show-path"),
                                    $1.matches("set-public"), "");
                                    
-                                if (!$1.matches("(hide-(ident|all|trail))|show-path|public"))
+                                if (!$1.matches("(hide-(ident|all|trail))|show-path|set-public"))
                                    yyerror("Unknown identifier '"+$1+"'"); 
                               }
        ; 
