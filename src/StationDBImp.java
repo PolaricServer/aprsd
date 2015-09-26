@@ -18,7 +18,7 @@ import java.io.*;
 import uk.me.jstott.jcoord.*; 
 import java.util.concurrent.*;
 import java.util.regex.*;
-
+import java.util.stream.*;
 
 
 /**
@@ -109,7 +109,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     {
         if (_hasChanged)
           try {
-             System.out.println("*** Saving station data...");
+             System.out.println("*** Saving point data...");
              FileOutputStream fs = new FileOutputStream(_file);
              ObjectOutput ofs = new ObjectOutputStream(fs);
              
@@ -134,7 +134,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     private synchronized void restore()
     {
         try {
-          System.out.println("*** Restoring station data...");
+          System.out.println("*** Restoring point data...");
           FileInputStream fs = new FileInputStream(_file);
           ObjectInput ifs = new ObjectInputStream(fs);
           
@@ -257,10 +257,13 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
         for (TrackerPoint x : dupes)
            if (x instanceof AprsObject && !((AprsObject)x).isTimeless() && 
                   !owner.getIdent().equals(((AprsObject)x).getOwner().getIdent())) {
-               System.out.println("*** Object overtaken/deactivated: "+id+"@"+((AprsObject)x).getOwner().getIdent());
+               System.out.println("*** APRS object overtaken/deactivated: "+id+"@"+((AprsObject)x).getOwner().getIdent());
                ((AprsObject)x).kill();
            }
     }
+    
+    
+    
     
     /**
      * Return a list of trackerpoints where the ident has the given prefix. 
@@ -268,63 +271,61 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
      */
     public synchronized List<TrackerPoint> getAllPrefix(String srch)
     {
-        LinkedList<TrackerPoint> result = new LinkedList();
         if (srch == null)
-           return result;
-        srch = srch.toUpperCase(); 
-        for (TrackerPoint s: _map.values())
-           if (s.getIdent().toUpperCase().startsWith(srch) ) 
-               result.add(s);
-        return result;  
+           return new LinkedList();
+        return _map.values().stream().filter( s ->
+           ( s.getIdent().toUpperCase().startsWith(srch) )).collect(Collectors.toList());
     }    
-        
-        
+            
+
+    
     /**
-     * Return a list of trackerpoints where ident or description matches the given expression.
-     * If expression is prefixed with "REG:", it is regarded as a regular expression, otherwise
-     * it is a simple wildcard expression. 
+     * Search in the database of trackerpoints. 
+     * Return a list of trackerpoints where ident or description matches the given search 
+     * expression AND all the tags in the list.
+     *
+     * If the search expression is prefixed with "REG:", it is regarded as a regular 
+     * expression, otherwise it is a simple wildcard expression.
+     *
      * @Param srch Search expression.
+     * @Param tags Array of tags (keywords). 
      */
-    public synchronized List<TrackerPoint> getAll(String srch)
+    public synchronized List<TrackerPoint> search(String srch, String[] tags)
     {
-        LinkedList<TrackerPoint> result = new LinkedList();
-        if (srch == null)
-           return result;
-        srch = srch.toUpperCase(); 
-        if (srch.matches("REG:.*"))
+         LinkedList<TrackerPoint> result = new LinkedList();
+         srch = srch.toUpperCase();
+         if (srch.matches("REG:.*"))
            srch = srch.substring(4);
-        else {
+         else {
            srch = srch.replaceAll("\\.", Matcher.quoteReplacement("\\."));
            srch = srch.replaceAll("\\*", Matcher.quoteReplacement("(\\S*)"));
-        }
-        for (TrackerPoint s: _map.values())
-           if  (s.getIdent().toUpperCase().matches(srch) ||
-               s.getDescr().toUpperCase().matches("(.*\\s+)?\\(?("+srch+")\\)?\\,?(\\s+.*)?") ) 
-               result.add(s);
-        return result;
+         }
+         
+         final String _srch = srch;
+         return _map.values().stream().filter( s -> 
+              ( s.getIdent().toUpperCase().matches(_srch) ||
+                   s.getDisplayId().toUpperCase().matches(_srch) ||
+                   s.getDescr().toUpperCase().matches("(.*\\s+)?\\(?("+_srch+")\\)?\\,?(\\s+.*)?") ) &&
+              ( tags==null ? true : 
+                   (Arrays.stream(tags).map(x -> s.hasTag(x))
+                                       .reduce((x,y) -> (x && y))).get())
+          ).collect(Collectors.toList());
+        
     }
     
     
        
-       
     /**
-     * Simple geographical search. Return list of stations within the rectangle defined by
-     * uleft (upper left corner) and lright (lower right corner). The coordinate system
-     * should be the same as the visual map. Currently, we assume that the map 
-     * is using a UTM projection. This also means that coordinates used here, and 
-     * for the map must be in the same UTM zones. 
+     * Geographical search in the database of trackerpoints. 
+     * Return list of stations within the rectangle defined by uleft (upper left 
+     * corner) and lright (lower right corner). 
      */   
     public synchronized List<TrackerPoint>
           search(Reference uleft, Reference lright)
-    {
-         if (uleft==null || lright==null)
-            return getAll(null);
-            
-         LinkedList<TrackerPoint> result = new LinkedList();
-         for (TrackerPoint s: _map.values())
-            if (s.isInside(uleft, lright, 0.1, 0.1))
-                result.add(s);
-        return result;
+    { 
+         return _map.values().stream().filter( s ->
+               (uleft==null || lright==null || s.isInside(uleft, lright, 0.1, 0.1))
+          ).collect(Collectors.toList());    
     }
     
        

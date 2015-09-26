@@ -322,6 +322,30 @@ package no.polaric.aprsd.http
    }          
 
 
+   
+   def taglist(item: PointObject, args: Array[String], freeField: Boolean): NodeSeq = 
+   {
+     def hasTag(x: String): Boolean = if (item!=null) inArgs(x) || item.hasTag(x) 
+                                      else inArgs(x)
+     def inArgs(x: String): Boolean = if (args!= null) args.map(y => y.equals(x)).reduce((y,z) => y || z) 
+                                      else false
+     
+     <div class="taglist"> {
+            for (x <- PointObject.getUsedTags.toSeq) yield {
+               val pfx = x.split('.')(0)
+               if (pfx.length == x.length || hasTag(pfx) || !PointObject.tagIsUsed(pfx))
+                   checkBox("tag_"+x, hasTag(x), 
+                        TXT(x)) ++ br
+               else
+                   EMPTY
+            }
+         }
+         { if (freeField) checkBox("newtagc", false, textInput("newtag", 10, 20, ""))
+           else EMPTY }
+     </div>
+   }
+         
+         
 
    def handle_addtag(req : Request, res : Response) =
    {
@@ -330,20 +354,9 @@ package no.polaric.aprsd.http
        val item = _api.getDB().getItem(id, null);
        val prefix = <h2> {I.tr("Tags for: "+id)} </h2>
        
-       def fields(req : Request): NodeSeq = {
-         <div class="taglist"> {
-            for (x <- PointObject.getUsedTags.toSeq) yield {
-               val pfx = x.split('.')(0)
-               if (pfx.length == x.length || item.hasTag(pfx) || !PointObject.tagIsUsed(pfx))
-                   checkBox("tag_"+x, item.hasTag(x), TXT(x)) ++ br
-               else
-                   EMPTY
-            }
-         }
-         { checkBox("newtagc", false, textInput("newtag", 10, 20, "")) }
-         </div>
-       }       
-           
+       def fields(req : Request): NodeSeq = 
+          taglist(item, null, true)
+             
            
        def setTag(item:PointObject, tag:String)
        {
@@ -396,6 +409,7 @@ package no.polaric.aprsd.http
        printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
    }          
 
+   
 
    def handle_resetinfo(req : Request, res : Response) =
    {
@@ -504,37 +518,15 @@ package no.polaric.aprsd.http
             
         printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
     }
+    
 
 
-
-
-   
-  /** 
-    * Presents a status list over registered stations (standard HTML)
-    */
-   
-   def handle_search(req : Request, res : Response) =
-   {
-       val I = getI18n(req)
-       val filtid = req.getParameter("filter")
-       val vfilt = ViewFilter.getFilter(filtid, authorizedForUpdate(req))
-       
-       var arg = req.getParameter("filter")
-       var mob = req.getParameter("mobile");
-       if (arg == null) 
-           arg  = "__NOCALL__"; 
-       val infra = "infra".equals(arg)
-       val result: NodeSeq =
-         <table>
+    def itemList(list: List[TrackerPoint], mobile: Boolean, fprefix: String): NodeSeq = 
+      <table>
          {
-            for ( x:TrackerPoint <- _api.getDB().getAll(arg)
-                  if ( true || !vfilt.apply(x, 0).hideAll()) ) yield
+            for ( x:TrackerPoint <- list ) yield
             {
-               val s = if (!x.isInstanceOf[Station]) null
-                       else x.asInstanceOf[Station];
-
-               val moving = if (s!=null) !s.getTrail().isEmpty()
-                            else false;
+               val moving = x.getTrail().isEmpty()
 
                <tr class={
                  if (x.visible() && x.getPosition() != null) 
@@ -545,25 +537,53 @@ package no.polaric.aprsd.http
                  else "" 
                }>
           
-               <td>{x.getIdent()}</td>
+               <td>{x.getDisplayId()}</td>
                <td> 
-               { if (moving && s.getSpeed() > 0)
-                       _directionIcon(s.getCourse(), fprefix(req)) else 
-                          if (s==null) TXT("obj") else null } </td>
+               { if (moving && x.getSpeed() > 0)
+                       _directionIcon(x.getCourse(), fprefix) 
+                  else 
+                      EMPTY } </td>
                <td> { df.format(x.getUpdated()) } </td>
-               { if (!"true".equals(mob)) 
+               { if (!mobile) 
                   <td> { if (x.getDescr() != null) x.getDescr() else "" } </td> 
                  else null }
                </tr>
            }
         } 
-        </table>;
-        printHtml (res, htmlBody (req, null, result))
+      </table>
+
+
+   
+  /** 
+    * Search in the database over point objects. 
+    * Returns a list (standard HTML)
+    */
+   
+   def handle_search(req : Request, res : Response) =
+   {
+       val I = getI18n(req)
+       val filtid = req.getParameter("filter")
+       val tags = req.getParameter("tags")
+       val vfilt = ViewFilter.getFilter(filtid, authorizedForUpdate(req))
+       
+       var arg = req.getParameter("srch")
+       var mob = req.getParameter("mobile");
+       if (arg == null) 
+           arg  = "__NOCALL__"; 
+       val infra = "infra".equals(arg)
+       val tagList = if (tags==null || tags.equals("")) null else tags.split(",")
+      
+       val result = itemList(_api.getDB().search(arg, tagList), "true".equals(mob), fprefix(req) )
+       printHtml (res, htmlBody (req, null, result))
    }
  
 
-
-
+   
+   def handle_tags(req: Request, res: Response) = {
+       val args = req.getParameter("tags")
+       val tags = if (args == null) null else args.split(",")
+       printHtml (res, htmlBody (req, null, taglist(null, tags, false)))
+   }
 
    def handle_station(req : Request, res : Response)  = 
        _handle_station(req, res, false)

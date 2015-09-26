@@ -116,13 +116,10 @@ public interface StationDB
         */ 
        public void deactivateSimilarObjects(String id, Station owner);
     
-    
-       public List<TrackerPoint> getAll(String arg);
-    
        public List<TrackerPoint> getAllPrefix(String arg);
-        
 
-   
+       public List<TrackerPoint> search(String srch, String[] tags);
+       
       /**
        * Search. Return a list of all items within the given geographical area.
        */
