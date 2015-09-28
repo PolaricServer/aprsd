@@ -34,6 +34,11 @@ public class AprsParser implements AprsChannel.Receiver
     private static Pattern _wxPat = Pattern.compile
        ("(\\d\\d\\d|...)/(\\d\\d\\d|...)g(\\d\\d\\d|...)t(\\d\\d\\d|...).*");
                 
+    /* Telemetry in comment format */
+    private static Pattern _telPat = Pattern.compile
+       (".*\\|([\\x21-\\x7f]{4,14})\\|.*");
+    
+    
     private static DateFormat _dtgFormat = new SimpleDateFormat("ddhhmm");
     private static DateFormat _hmsFormat = new SimpleDateFormat("hhmmss");
     
@@ -483,6 +488,7 @@ public class AprsParser implements AprsChannel.Receiver
                else if (pd.altitude == -1)
                     comment = typecode+comment;
             }     
+            comment = parseComment(comment, station, pd, p);
             if (comment != null){
                 comment = comment.trim();   
                 if (comment.length() == 0)
@@ -726,9 +732,32 @@ public class AprsParser implements AprsChannel.Receiver
           if (pd.symbol == '_')
               comment = parseWX(comment);
               
-          /* Get course and speed */    
-          else if (comment.length() >= 7 && comment.substring(0,7).matches("[0-9]{3}/[0-9]{3}"))
-          {
+          comment = parseComment(comment, station, pd, p); 
+
+          if (comment.length() > 0 && comment.charAt(0) == '/') 
+             comment = comment.substring(1);  
+          comment = comment.trim();
+          if (comment.length() < 1 || comment.equals(" "))
+             comment = null;
+            
+           station.update(time, pd, comment, pathinfo );              
+           for (AprsHandler h:_subscribers)
+              h.handlePosReport(p.source, station.getIdent(), time, pd, comment, pathinfo ); 
+    }
+    
+    
+    
+
+    /** 
+     * Parse comment field 
+     */
+    private String parseComment(String comment, AprsPoint station, AprsHandler.PosData pd, AprsPacket p)
+    {        
+        if (comment==null)
+           return null;
+        while( true ) {
+           /* Course and speed: nnn/nnn */
+           if (comment.length() >= 7 && comment.substring(0,7).matches("[0-9]{3}/[0-9]{3}")) {
               pd.course = Integer.parseInt(comment.substring(0,3));
               pd.speed  = (int) Math.round( Integer.parseInt(comment.substring(4,7))* 1.852);
               comment = comment.substring(7);
@@ -738,11 +767,15 @@ public class AprsParser implements AprsChannel.Receiver
                  comment = comment.substring(8);
               else if (comment.length() >= 8 && comment.substring(0,8).matches("/(\\.\\.\\./\\.\\.\\.)"))
                  /* Ignore */ ;
-          } 
-          else if (comment.length() >= 7 && comment.substring(0,7).matches("/(\\.\\.\\./\\.\\.\\.)"))
-              /* ignore */ ;
-          else if (comment.length() >= 7 && comment.substring(0,7).matches("PHG[0-9]{4}"))
-          {
+           } 
+           
+           /* .../... */
+           else if (comment.length() >= 7 && comment.substring(0,7).matches("/(\\.\\.\\./\\.\\.\\.)"))
+              /* Ignore */
+              ;
+           
+           /* PHGnnnn */
+           else if (comment.length() >= 7 && comment.substring(0,7).matches("PHG[0-9]{4}")) {
              int power = (comment.charAt(3)-'0');
              power = power * power; 
              int gain = (comment.charAt(5)-'0');
@@ -765,45 +798,43 @@ public class AprsParser implements AprsChannel.Receiver
              }
              comment = comment.substring(7,comment.length()) + " ("+power+" watt, "+gain+" dB"+dir+
                    (rKm>0 ? " => "+rKm+" km" : "") + ")"; 
-          }
-          else if (comment.length() >= 7 && comment.substring(0,7).matches("RNG[0-9]{4}"))
-          {
+           }
+           
+           /* RNGnnnn */
+           else if (comment.length() >= 7 && comment.substring(0,7).matches("RNG[0-9]{4}")) {
              int r = Integer.parseInt(comment.substring(3,7));
              int rKm = (int) Math.round(r*1.609344);
              comment = comment.substring(7, comment.length()) + " ("+rKm+" km omni)";
-          }
+           }
           
-          
-          /* Altitude */
-          if (comment.length() >= 9 && comment.substring(0,9).matches("/A=[0-9]{6}"))
-          {
+           /* Altitude /A=nnnn */
+           else if (comment.length() >= 9 && comment.substring(0,9).matches("/A=[0-9]{6}")) {
               pd.altitude = Long.parseLong(comment.substring(3,9));
               pd.altitude *= 0.3048;
               comment = comment.substring(9, comment.length());
-          }
-          
-          /* Extra posreports (experimental) 
-           * Format: "/#" + compressed timestamp + compressed report */
-          while (comment.length() >= 18 && comment.matches("(/\\#.{16})+.*"))
-          {
+           }
+ 
+           /* Extra posreports (experimental) 
+            * Format: "/#" + compressed timestamp + compressed report */
+           else if (comment.length() >= 18 && comment.matches("(/\\#.{16})+.*")) {
               parseExtraReport(p.source, comment.substring(2,18), station); 
               comment = comment.substring(18, comment.length());
-          }
-          
-          
-          if (comment.length() > 0 && comment.charAt(0) == '/') 
-             comment = comment.substring(1);  
-          comment = comment.trim();
-          if (comment.length() < 1 || comment.equals(" "))
-             comment = null;
-             
-           station.update(time, pd, comment, pathinfo );              
-           for (AprsHandler h:_subscribers)
-              h.handlePosReport(p.source, station.getIdent(), time, pd, comment, pathinfo ); 
+           }
+           else break;
+        }
+        
+        /* Telemetry */
+        Matcher m = _telPat.matcher(comment);
+        if (m.matches()) {
+           String telemetry = m.group(1); 
+           comment = comment.substring(0, m.start(1)-1) + " (telemetry) " + comment.substring(m.end(1)+1);
+        }
+        /* FIXME: Add DAO parsing for extra precision */
+        return comment;
     }
     
     
-
+    
     
     /**
      * Parse WX report.
