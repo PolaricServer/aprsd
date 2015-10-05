@@ -1,3 +1,8 @@
+Caused by: java.lang.NullPointerException
+        at no.polaric.aprsd.http.PointView$.getViewFor(PointView.scala:41)
+        at no.polaric.aprsd.http.Webserver._handle_station(Webserver.scala:582)
+        at no.polaric.aprsd.http.Webserver.handle_station(Webserver.scala:569)
+        ... 8 more
 
         
 V.1.9 (october 2015), etc
@@ -24,8 +29,7 @@ V.1.9 (october 2015), etc
      - Basic tagging. DONE.
      - Simple UI. DONE.
      - Tags in filterscripts. DONE.
-     - Set tags in AIS plugin. DONE.
-     - Special tags, supertags? Hierarchies? 
+     - Set tags in AIS plugin. DONE. 
      - Tags on points in XML overlay? 
      - Tag APRS points as 'APRS'. DONE.
      - Set tags instead of CSS class in channel-config. DONE.
@@ -34,18 +38,35 @@ V.1.9 (october 2015), etc
 * Revise filter scripting. 
      - Consider use /* */ for comments instead of #? And # for tags. 
      - Consider rules to set tags. Tag ontology? Separate script or same file as filters?  
-     - Consider positive rules, not just negative rules. 
+     - Consider positive actions, not just negative actions. 
      - Cleaner syntax? 
      - Additional actions? Icon selection? 
+          - Added 'set-public'
      - Document. 
      
-     
-* Synchronisation protocol doesn't reconnect when parent is restarted? Check? Fix.
+* Improve search. Use tags (keywords). 
+     DONE.
 
 * Scalability issues? DoS vulnerability? Measure load?  
+     DONE performance issue. 
 
-* IMPORTANT: Proper input sanitization. Ident and description. 
+* Allow filter to make items publicly visiible even it set to be non-public 
+  in channel setup. 
+     DONE.
+  
+* [C] jsInclude in webappconfig.php doesnt seem to work. Fix. 
 
+* Security. Check if more webservice functions need a sec_ version. 
+
+* Implement telemetry annotations in APRS position reports. 
+     - Basic parsing.
+     - Receive metadata messages.
+     - Basic storage in Java objects.
+     - Storage in database over larger timespan. 
+     - Basic presentation of telemetry. 
+     - Graphic presentation of telemetry.
+
+     
 
    
 Autorisation/Authentication

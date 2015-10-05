@@ -1,4 +1,4 @@
- /* 
+/*
  * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -115,6 +115,8 @@ public class Signs extends Source
                    Reference pos = new UTMRef( Integer.parseInt( x[0].substring(0,2)), 
                                                x[0].charAt(2),
                                                easting, northing);
+                   if (x.length > 7)
+                     x[6] = x[6] + " "+ x[7];
                    Item it = new Item(-1, pos, scale, x[4], x[5], x[6]);
                    _list.add(it);
                }

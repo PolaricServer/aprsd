@@ -29,7 +29,7 @@ public final class SarUrl implements Runnable
 {
     private String             _file, _proto;
     private boolean            _hasChanged = false; 
-    private List<Item>         _mapping = new ArrayList();
+    private List<Item>         _mapping = new ArrayList<>();
     private Item               _lastItem;
     private static final long  _timeLimit = 1000  * 60 * 60  * 25;
     private static final long  _cacheTime = 1000  * 60 * 60 * 2;

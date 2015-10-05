@@ -97,19 +97,21 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
          _position = newpos;
          _posUpdates++;
     }
-    
-    
-    
+
+
+
+    private boolean _fastmove = false;
+
     /**
      * Save position to trail if there is a significant change. 
-     * If we want a trail, this should be done before updatePosition.
+     * If we want a trail, this should be done before updatePosition
      *
      * @param ts timestamp of the NEXT position.
-     * @param pos the NEXT position.
+     * @param newpos the NEXT position.
      * @param pathinfo optional extra information. E.g. path info.
      * @return true to indicate if position is ok and can be saved to realtime point. 
      */
-    private boolean _fastmove = false;  
+
     public synchronized boolean saveToTrail(Date ts, Reference newpos, int speed, int course, String pathinfo) 
     {         
         /*
@@ -131,7 +133,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
          */
         if ( tdistance > 0 && distance(newpos)/tdistance > (500 * 0.27778)) {
             if (!_fastmove) {
-               System.out.println("*** Moving faster than 500km/h. ignore.");
+               System.out.println("*** Point '"+this.getIdent()+"' moving faster than 500km/h. ignore.");
                _fastmove = true; 
                return false; 
             }
@@ -414,7 +416,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     {   
         if (d != null) 
         {
-           if ((_description==null && d!=null) || (_description != null && !_description.equals(d)))
+           if (_description==null || !_description.equals(d))
                setChanging(); 
            _description = d;  
         }
