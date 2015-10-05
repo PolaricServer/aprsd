@@ -521,13 +521,22 @@ package no.polaric.aprsd.http
     
 
 
-    def itemList(list: List[TrackerPoint], mobile: Boolean, fprefix: String): NodeSeq = 
+    protected def itemList(I:I18n, list: List[TrackerPoint], mobile: Boolean, 
+                  fprefix: String, loggedIn: Boolean): NodeSeq = 
       <table>
+         <tr>
+           <th>{I.tr("Ident")}</th><th>{I.tr("Updated")}</th>
+           <th>{I.tr("Move")}</th><th>{I.tr("Description")}</th>
+         </tr>
          {
-            for ( x:TrackerPoint <- list ) yield
+            for ( x:TrackerPoint <- list  
+                  if (!x.getSource().isRestricted() || loggedIn || x.hasTag("OPEN"))) yield
             {
-               val moving = x.getTrail().isEmpty()
-
+               val moving = !x.getTrail().isEmpty()
+               var descr = x.getDescr()
+               if (descr != null && descr.length() > 60)
+                  descr = descr.substring(0,60)+"..";
+                  
                <tr class={
                  if (x.visible() && x.getPosition() != null) 
                       "" else "nopos" } 
@@ -538,33 +547,41 @@ package no.polaric.aprsd.http
                }>
           
                <td>{x.getDisplayId()}</td>
+               <td> { df.format(x.getUpdated()) } </td>
                <td> 
                { if (moving && x.getSpeed() > 0)
                        _directionIcon(x.getCourse(), fprefix) 
                   else 
                       EMPTY } </td>
-               <td> { df.format(x.getUpdated()) } </td>
+
                { if (!mobile) 
-                  <td> { if (x.getDescr() != null) x.getDescr() else "" } </td> 
+                  <td> { if (descr != null) descr else "" } </td> 
                  else null }
                </tr>
            }
         } 
       </table>
 
-
+   
+   
    
   /** 
     * Search in the database over point objects. 
     * Returns a list (standard HTML)
     */
-   
-   def handle_search(req : Request, res : Response) =
+   def handle_search(req : Request, res : Response) = 
+      _handle_search(req, res, false)
+      ;
+      
+   def handle_search_sec(req : Request, res : Response) = 
+      _handle_search(req, res, true)
+      ;
+    
+   def _handle_search(req : Request, res : Response, loggedIn: Boolean) =
    {
        val I = getI18n(req)
        val filtid = req.getParameter("filter")
        val tags = req.getParameter("tags")
-       val vfilt = ViewFilter.getFilter(filtid, authorizedForUpdate(req))
        
        var arg = req.getParameter("srch")
        var mob = req.getParameter("mobile");
@@ -573,22 +590,20 @@ package no.polaric.aprsd.http
        val infra = "infra".equals(arg)
        val tagList = if (tags==null || tags.equals("")) null else tags.split(",")
       
-       val result = itemList(_api.getDB().search(arg, tagList), "true".equals(mob), fprefix(req) )
+       val result = itemList(I, _api.getDB().search(arg, tagList), "true".equals(mob), fprefix(req), loggedIn )
        printHtml (res, htmlBody (req, null, result))
    }
  
 
-   
-   def handle_tags(req: Request, res: Response) = {
-       val args = req.getParameter("tags")
-       val tags = if (args == null) null else args.split(",")
-       printHtml (res, htmlBody (req, null, taglist(null, tags, false)))
-   }
 
+   /** 
+    * View one particular point object. 
+    */
    def handle_station(req : Request, res : Response)  = 
        _handle_station(req, res, false)
        ;
-       
+   
+   
    def handle_station_sec(req : Request, res : Response)  = 
        _handle_station(req, res, authorizedForUpdate(req))
        ;
@@ -607,7 +622,15 @@ package no.polaric.aprsd.http
    }
   
 
-
+   
+   
+   def handle_tags(req: Request, res: Response) = {
+       val args = req.getParameter("tags")
+       val tags = if (args == null) null else args.split(",")
+       printHtml (res, htmlBody (req, null, taglist(null, tags, false)))
+   }
+   
+   
       
    /** 
     * Presents a list over last positions and movements (standard HTML)
