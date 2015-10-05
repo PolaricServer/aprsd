@@ -84,8 +84,13 @@ public class Station extends AprsPoint implements Serializable, Cloneable
        { return _db.getRoutes().getFromEdges(getIdent());}
               
               
-    public boolean isInfra()
-       { return getTrafficFrom() != null && !getTrafficFrom().isEmpty(); }
+    public boolean isInfra() { 
+        if (getTrafficFrom() != null && !getTrafficFrom().isEmpty()) {
+           setTag("APRS.infra");
+           return true;
+        }
+        else return false;
+    }
        
        
     /**
@@ -95,8 +100,12 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     {
         Date now = new Date();
         if (_infra_updated != null && 
-            _infra_updated.getTime() + 1000*60*60*24*7 < now.getTime())
-          _igate = _wdigi = false; 
+            _infra_updated.getTime() + 1000*60*60*24*7 < now.getTime()) {
+           _igate = _wdigi = false;
+           removeTag("APRS.infra");
+           removeTag("APRS.infra.igate");
+           removeTag("APRS.infra.wdigi");
+        }
     } 
     
     
@@ -113,8 +122,10 @@ public class Station extends AprsPoint implements Serializable, Cloneable
        
        
     public void setIgate(boolean x)
-       { _infra_updated = new Date(); 
-         _igate = x; }
+       { _infra_updated = new Date();
+         _igate = x; 
+         setTag("APRS.infra.igate");
+       }
        
        
     public boolean isWideDigi()
@@ -124,7 +135,9 @@ public class Station extends AprsPoint implements Serializable, Cloneable
        
     public void setWideDigi(boolean x)
        { _infra_updated = new Date(); 
-         _wdigi = x; }       
+         _wdigi = x;
+         setTag("APRS.infra.wdigi");
+       }       
        
     
 
