@@ -60,8 +60,8 @@ public abstract class TcpChannel extends AprsChannel implements Runnable, Serial
         _host = _api.getProperty("channel."+id+".host", "localhost");
         _port = _api.getIntProperty("channel."+id+".port", 21);
         _backup = _api.getProperty("channel."+id+".backup", null);
-        _max_retry  = _api.getIntProperty("channel."+id+".retry", 5);
-        _retry_time = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
+        _max_retry  = _api.getIntProperty("channel."+id+".retry", 8);
+        _retry_time = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "10")) * 60 * 1000; 
         if (_backup != null)
            _api.getChanManager().addBackup(_backup);
    }
@@ -107,13 +107,13 @@ public abstract class TcpChannel extends AprsChannel implements Runnable, Serial
         Executors.newScheduledThreadPool(1);
     
     
-    protected void try_backup()
+    protected boolean try_backup()
     {
         if (_backup != null) {
            final AprsChannel ch = (AprsChannel) _api.getChanManager().get(_backup);         
            if (ch == null) {
               logNote("Backup channel '"+_backup+"' not found");
-              return;
+              return false;
            }
            logNote("Activating backup channel '"+_backup+"'");
            ch.activate(_api);
@@ -129,6 +129,7 @@ public abstract class TcpChannel extends AprsChannel implements Runnable, Serial
                  }
               }, 2 * 60 * 60, TimeUnit.SECONDS);
         }
+        return true;
     }
     
     
@@ -145,11 +146,11 @@ public abstract class TcpChannel extends AprsChannel implements Runnable, Serial
         while (true) 
         { 
            _state = State.STARTING;
-           if (retry <= _max_retry || _max_retry == 0) 
+           if (retry <= (_backup!=null ? _max_retry : _max_retry *2) || _max_retry == 0) 
               try { 
                  long sleep = 60000 * (long) retry;
                  if (sleep > _retry_time) 
-                    sleep = _retry_time; /* Default: Max 30 minutes */
+                    sleep = _retry_time; 
                  Thread.sleep(sleep);
               } 
               catch (Exception e) {} 
@@ -182,7 +183,8 @@ public abstract class TcpChannel extends AprsChannel implements Runnable, Serial
            catch (java.net.UnknownHostException e)
            {
                 logNote("Server '"+_host+"' : Unknown host");
-                retry = _max_retry; 
+                retry = _max_retry-2;
+                /* One more chance. Then give up */
            }
            catch(Exception e)
            {   
