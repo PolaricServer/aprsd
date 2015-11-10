@@ -1,11 +1,5 @@
-Caused by: java.lang.NullPointerException
-        at no.polaric.aprsd.http.PointView$.getViewFor(PointView.scala:41)
-        at no.polaric.aprsd.http.Webserver._handle_station(Webserver.scala:582)
-        at no.polaric.aprsd.http.Webserver.handle_station(Webserver.scala:569)
-        ... 8 more
 
-        
-V.1.9 (october 2015), etc
+V.1.9 (november 2015), etc
 --------------------------
 
 * [C] Extend iframeAPI ....
@@ -35,9 +29,10 @@ V.1.9 (october 2015), etc
      - Set tags instead of CSS class in channel-config. DONE.
      - Document. 
      
+* Implement automatic tagging using rule-base. Separate script or same as filters? 
+
 * Revise filter scripting. 
      - Consider use /* */ for comments instead of #? And # for tags. 
-     - Consider rules to set tags. Tag ontology? Separate script or same file as filters?  
      - Consider positive actions, not just negative actions. 
      - Cleaner syntax? 
      - Additional actions? Icon selection? 
@@ -50,7 +45,7 @@ V.1.9 (october 2015), etc
 * Scalability issues? DoS vulnerability? Measure load?  
      DONE performance issue. 
 
-* Allow filter to make items publicly visiible even it set to be non-public 
+* Allow filter to make items publicly visible even it set to be non-public 
   in channel setup. 
      DONE.
   
@@ -62,7 +57,7 @@ V.1.9 (october 2015), etc
      - Basic parsing.
      - Receive metadata messages.
      - Basic storage in Java objects.
-     - Storage in database over larger timespan. 
+     - Storage in database over longer timespan (optional).
      - Basic presentation of telemetry. 
      - Graphic presentation of telemetry.
 
