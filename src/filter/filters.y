@@ -8,13 +8,13 @@ import java.util.*;
 %token <sval>  STRING 
 %token <sval>  IDENT
 %token <sval>  RELOP
-%token <obj>  NUM
+%token <obj>   NUM
 
 %token <obj>   BOOLEAN VALUE
-%token         AND OR NOT ARROW PROFILE PUBLIC
+%token         AND OR NOT ARROW PROFILE AUTOTAG PUBLIC
 %token         ERROR
 
-%type <obj>  action actions expr rule public
+%type <obj>  action actions expr rule tag_rule public
 
 /* Associativity and precedence */
 %left OR
@@ -31,7 +31,7 @@ input : stmts
 stmts : stmts stmt | /* empty */       
       ;
          
-stmt  : profile | assignment 
+stmt  : profile | assignment | autotag
       ; 
 
 assignment : IDENT '=' expr ';'
@@ -140,12 +140,42 @@ action : IDENT '=' STRING     { if ($1.matches("STYLE|style"))
                                    yyerror("Unknown identifier '"+$1+"'"); 
                               }
        ; 
+       
+       
+       
+autotag : AUTOTAG '{' tag_rules '}' 
+        ;
+     
+     
+tag_rules : tag_rules tag_rule   
+                             { if ($2 != null) 
+                                 { tagrules.add((TagRule)$2); }
+                             }
+          | /* Empty */      { tagrules = new TagRuleSet();  }
+          ;
+      
+      
+tag_rule : expr ARROW '{' tag_actions '}' ';' 
+                              { $$ = new TagRule((Pred) $1, tagaction); }
+         | error ';'          { $$ = null; }
+         ;
+     
+     
+tag_actions : tag_actions ',' TAG IDENT  
+                              { tagaction.add($4); }
+            | TAG IDENT       { tagaction=new LinkedList<String>(); tagaction.add($2); }
+            ;
+            
+
+
 
        
 %%
 
   private Action action; 
+  private List<String> tagaction;
   private RuleSet ruleset; 
+  private TagRuleSet tagrules; 
   private Map<String, RuleSet> profiles = new HashMap<String,RuleSet>(); 
   private Map<String, Pred> predicates = new HashMap<String,Pred>(); 
   
@@ -167,11 +197,14 @@ action : IDENT '=' STRING     { if ($1.matches("STYLE|style"))
   
   /* error reporting */
   public void yyerror (String error) {
-    System.out.println ("ERROR [line "+lexer.line()+"]: " + error);
+     System.out.println ("ERROR [line "+lexer.line()+"]: " + error);
   }
 
   public Map<String, RuleSet> getProfiles() 
-      {return profiles; }
+      { return profiles; }
+      
+  public TagRuleSet getTagRules () 
+      { return tagrules; }
       
   public void parse()
       { yyparse(); }

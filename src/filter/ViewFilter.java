@@ -12,9 +12,8 @@
  * GNU General Public License for more details.
  */
 
-package no.polaric.aprsd.http;
+package no.polaric.aprsd.filter;
 import no.polaric.aprsd.*;
-import no.polaric.aprsd.filter.*;
 import java.util.*;
 import java.io.*; 
 
@@ -24,6 +23,8 @@ public class ViewFilter {
     
   private static Map<String, RuleSet> _map = new HashMap();
   private static RuleSet _default = new RuleSet(); 
+  private static TagRuleSet _tagrules; 
+  
   
   public static RuleSet getFilter(String id, boolean loggedIn)
   {
@@ -33,6 +34,10 @@ public class ViewFilter {
      return x;
   }    
   
+  
+  public static TagRuleSet getTagRules() 
+     { return _tagrules; }
+     
   
   
   /* Action(hideid, hidetrail, hideall, showpath, style) */
@@ -46,6 +51,7 @@ public class ViewFilter {
          Parser parser = new Parser(new FileReader(filename));
          parser.parse();
          _map = parser.getProfiles();
+         _tagrules = parser.getTagRules();
       }
       catch (FileNotFoundException e)
         { System.out.println("ERROR: file not found '"+filename+"'"); }

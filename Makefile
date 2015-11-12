@@ -32,7 +32,7 @@ INSTALL_PLUGDIR= $(INSTALL_CONFIG)/config.d
 ##################################################
     LIBDIR = _lib
  JAVAFLAGS =
- PACKAGES  = core i18n util channels filter httpd scala aprsd
+ PACKAGES  = core i18n util channels httpd scala aprsd
  LANGUAGES = no
 
 
@@ -97,8 +97,8 @@ util:
 	
 	
 .PHONY : core
-core: util
-	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/*.java 
+core: util src/filter/Parser.java src/filter/Lexer.java
+	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/*.java  src/filter/*.java
 	
 	
 .PHONY : aprsd
@@ -112,8 +112,8 @@ channels:
 	
 
 	
-filter: core  src/filter/Parser.java src/filter/Lexer.java
-	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/filter/*.java
+#filter: core  src/filter/Parser.java src/filter/Lexer.java
+#	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/filter/*.java
 
 	
 .PHONY : httpd

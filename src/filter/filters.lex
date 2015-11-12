@@ -49,6 +49,9 @@ FALSE|False|false
 PROFILE|profile
          { return Parser.PROFILE; }
          
+AUTOTAG|autotag
+         { return Parser.AUTOTAG; }
+         
 PUBLIC|"public"
          { return Parser.PUBLIC; }
          

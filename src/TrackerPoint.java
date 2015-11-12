@@ -17,6 +17,7 @@ package no.polaric.aprsd;
 import uk.me.jstott.jcoord.*; 
 import java.util.*;
 import java.io.Serializable;
+import no.polaric.aprsd.filter.ViewFilter; 
   
 
 
@@ -75,7 +76,12 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     public TrackerPoint(Reference p)
       { super(p); }
     
-   
+    
+    public void autoTag()
+    {
+       if (ViewFilter.getTagRules() != null) 
+           ViewFilter.getTagRules().apply(this);
+    }
        
    
     /************** Position, trail, Course, speed and altitude ***************/

@@ -496,7 +496,8 @@ public class AprsParser implements AprsChannel.Receiver
             }     
             
             
-            station.update(new Date(), pd, comment, p.via);   
+            station.update(new Date(), pd, comment, p.via);
+            station.autoTag();
             for (AprsHandler h:_subscribers)
                h.handlePosReport(p.source, station.getIdent(), new Date(), pd, comment, p.report );
             return;
@@ -740,7 +741,8 @@ public class AprsParser implements AprsChannel.Receiver
           if (comment.length() < 1 || comment.equals(" "))
              comment = null;
             
-           station.update(time, pd, comment, pathinfo );              
+           station.update(time, pd, comment, pathinfo );           
+           station.autoTag();
            for (AprsHandler h:_subscribers)
               h.handlePosReport(p.source, station.getIdent(), time, pd, comment, pathinfo ); 
     }
