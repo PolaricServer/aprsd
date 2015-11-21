@@ -699,6 +699,36 @@ package no.polaric.aprsd.http
       
       printHtml(res, htmlBody(req, null, result)) 
     }
+    
+    
+    
+    
+    def handle_telemetry(req : Request, res : Response) = 
+    {
+         val I = getI18n(req)
+         val id = req.getParameter("id")
+         val x:Station = _api.getDB().getItem(id, null).asInstanceOf[Station]
+         val tm = x.getTelemetry(); 
+         val d = tm.getCurrent();
+         val result: NodeSeq =
+           <xml:group>
+             <h1>{ if (tm.getDescr()==null) I.tr("Telemetry from ") + x.getIdent() 
+                   else tm.getDescr() }</h1>
+             { for (i <- 0 to Telemetry.ANALOG_CHANNELS-1) yield {
+                 var parm = tm.getMeta(i).parm
+                 var unit = tm.getMeta(i).unit
+                 parm = if (parm == null) I.tr("Channel")+" "+i else parm
+                 unit = if (unit == null) "" else unit
+                 
+                 simpleLabel("chan" + i, "leftlab", parm + ":", 
+                    TXT("" + d.getAnalog(i) + " " + unit)) 
+               }
+             }
+           </xml:group>
+         
+        printHtml(res, htmlBody(req, null, result)) 
+    }
+    
   
   }
   

@@ -131,6 +131,11 @@ public class AprsParser implements AprsChannel.Receiver
                parseMessage(p, station);
                break;
                
+            case 'T':  
+               /* Telemetry (old format - deprecated) */
+               parseOldTelemetry(p, station);
+               break;
+               
             default: 
         }
         }catch (NumberFormatException e)
@@ -224,12 +229,18 @@ public class AprsParser implements AprsChannel.Receiver
            msgid = msg.substring(i+1, msg.length());
         
         String content = msg.substring(11, (i>=0 ? i : msg.length()));
+        
+        /* If sender==recipient and no msg id: This is telemetry metadata */
+        if (msgid==null && station.getIdent().equals(recipient))
+           parseMetadata(station, content);
+        
         if (_msg != null)
            _msg.incomingMessage(station, recipient, content, msgid);  
         for (AprsHandler h:_subscribers)
             h.handleMessage(p.source, new Date(), station.getIdent(), recipient, content);
     }
 
+    
 
     /**
      * Parse APRS status report.
@@ -488,7 +499,7 @@ public class AprsParser implements AprsChannel.Receiver
                else if (pd.altitude == -1)
                     comment = typecode+comment;
             }     
-            comment = parseComment(comment, station, pd, p);
+            comment = parseComment(comment, new Date(), station, pd, p);
             if (comment != null){
                 comment = comment.trim();   
                 if (comment.length() == 0)
@@ -600,6 +611,21 @@ public class AprsParser implements AprsChannel.Receiver
     }
       
     
+    private long base91Decode(byte c0, byte c1, byte c2, byte c3)
+    {
+        if (c0<33) c0=33; 
+        if (c1<33) c1=33;
+        if (c2<33) c2=33;
+        if (c3<33) c3=33;   
+        return (c0-33) * 753571 + (c1-33) * 8281 + (c2-33) * 91 + (c3-33);
+    }
+    
+    
+    private int base91Decode(byte c0, byte c1)
+    {
+        return (int) base91Decode((byte)0, (byte)0, c0, c1);
+    }
+    
     
     
     private AprsHandler.PosData parseCompressedPos(String data)
@@ -611,10 +637,15 @@ public class AprsParser implements AprsChannel.Receiver
           byte[] y = data.substring(1,5).getBytes();
           byte[] x = data.substring(5,9).getBytes();
           byte[] csT = data.substring(10,13).getBytes();
-          latDeg = 90.0 - (((double)(y[0]-33))*753571 + ((double)(y[1]-33))*8281 + 
-                           ((double)(y[2]-33))*91 + ((double) y[3])-33) / 380926;
-          lngDeg = -180 + (((double)(x[0]-33))*753571 + ((double)(x[1]-33))*8281 + 
-                           ((double)(x[2]-33))*91 + ((double) x[3])-33) / 190463;
+          
+          latDeg = 90.0 - ((double) base91Decode(y[0], y[1], y[2], y[3])) / 380926; 
+          lngDeg = -180 + ((double) base91Decode(x[0], x[1], x[2], x[3])) / 190463;
+          
+//          latDeg = 90.0 - (((double)(y[0]-33))*753571 + ((double)(y[1]-33))*8281 + 
+//                           ((double)(y[2]-33))*91 + ((double) y[3])-33) / 380926;
+                           
+//          lngDeg = -180 + (((double)(x[0]-33))*753571 + ((double)(x[1]-33))*8281 + 
+//                           ((double)(x[2]-33))*91 + ((double) x[3])-33) / 190463;
           
           if (((csT[2]-33) & 0x18) == 0x10) 
           {
@@ -733,7 +764,7 @@ public class AprsParser implements AprsChannel.Receiver
           if (pd.symbol == '_')
               comment = parseWX(comment);
               
-          comment = parseComment(comment, station, pd, p); 
+          comment = parseComment(comment, time, station, pd, p); 
 
           if (comment.length() > 0 && comment.charAt(0) == '/') 
              comment = comment.substring(1);  
@@ -753,7 +784,7 @@ public class AprsParser implements AprsChannel.Receiver
     /** 
      * Parse comment field 
      */
-    private String parseComment(String comment, AprsPoint station, AprsHandler.PosData pd, AprsPacket p)
+    private String parseComment(String comment, Date ts, AprsPoint station, AprsHandler.PosData pd, AprsPacket p)
     {        
         if (comment==null)
            return null;
@@ -828,11 +859,97 @@ public class AprsParser implements AprsChannel.Receiver
         /* Telemetry */
         Matcher m = _telPat.matcher(comment);
         if (m.matches()) {
-           String telemetry = m.group(1); 
+           if (station instanceof Station)
+              parseTelemetry((Station) station, ts, m.group(1)); 
            comment = comment.substring(0, m.start(1)-1) + " (telemetry) " + comment.substring(m.end(1)+1);
         }
         /* FIXME: Add DAO parsing for extra precision */
         return comment;
+    }
+    
+    
+    /**
+     * Parse telemetry (old style).
+     */
+    private void parseOldTelemetry(AprsPacket p, Station st)
+    {
+        float[]  aresult = new float[Telemetry.ANALOG_CHANNELS];
+        boolean[] bits = new boolean[Telemetry.BINARY_CHANNELS];
+                
+        String[] data = p.report.split(",\\s*");
+        if (data.length < 7)
+           return; 
+        
+        int seq = Integer.parseInt(data[0].substring(2));    
+        for (int i=0; i < Telemetry.ANALOG_CHANNELS; i++)
+           aresult[i] = Float.parseFloat(data[i+1]);
+        
+        for (int i=0; i < Telemetry.BINARY_CHANNELS && i < data[6].length(); i++)
+           bits[i] = (data[6].charAt(i) == '1'); 
+
+        st.getTelemetry().addData(seq, new Date(), aresult, bits);  
+        st.setTag("APRS.telemetry");
+    }
+     
+    
+    /**
+     * Parse compressed telemetry.
+     */
+    private void parseTelemetry(Station st, Date ts, String data)
+    {  
+        float[]  aresult = new float[Telemetry.ANALOG_CHANNELS];
+        int    bresult = 0;
+        byte[] bdata   = data.getBytes();
+
+        int seq = (int) base91Decode(bdata[0], bdata[1]);         
+        for (int i=1; i <= Telemetry.ANALOG_CHANNELS && data.length()-2 >= i*2; i++) 
+            aresult[i-1] = (float) base91Decode(bdata[i*2], bdata[i*2+1]);
+        if (data.length() == 14) 
+            bresult = (int) base91Decode(bdata[12], bdata[13]);
+      
+        boolean[] bits = new boolean[Telemetry.BINARY_CHANNELS];
+        for (int i = 0; i < Telemetry.BINARY_CHANNELS; i++) 
+            bits[Telemetry.BINARY_CHANNELS - 1 - i] = (1 << i & bresult) != 0;
+          
+        st.getTelemetry().addData(seq, ts, aresult, bits);  
+        st.setTag("APRS.telemetry");
+    }
+    
+    
+    
+    /**
+     * Parse telemetry metadata.
+     */
+    private void parseMetadata(Station st, String data)
+    {
+        Telemetry t = st.getTelemetry();
+        String d = data.substring(5);
+        
+        if (data.matches("PARM.*")) 
+           t.setParm( d.split(",\\s*") );
+           
+        else if (data.matches("UNIT.*"))
+           t.setUnit( d.split(",\\s*") );
+           
+        else if (data.matches("EQNS.*")) {
+           float[] nd = new float[15];
+           int i=0;
+           for (String x : d.split(",\\s*")) {
+               nd[i] = Float.parseFloat(x);
+               if (++i >= 15)
+                  break;
+           }
+           t.setEqns(nd);
+        }
+        else if (data.matches("BITS.*")) {
+           String[] bb = d.split(",\\s*"); 
+           boolean[] bits = new boolean[8];
+           for (int i=0; i<8; i++)
+              bits[i] = (bb[0].charAt(i) == '1');
+           t.setBits(bits);
+           if (bb.length > 1)
+              t.setDescr(bb[1]);
+        }
     }
     
     

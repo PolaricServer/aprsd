@@ -44,6 +44,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
      */
     private String    _callsign; 
     private Status    _status;
+    private Telemetry _telemetry; 
 
    
     /* 
@@ -69,6 +70,17 @@ public class Station extends AprsPoint implements Serializable, Cloneable
        
     protected void setId(String id)
        { _callsign = id; }
+      
+      
+    public boolean hasTelemetry() 
+      { return _telemetry != null; }
+      
+       
+    public Telemetry getTelemetry() {
+       if (_telemetry == null)
+          _telemetry = new Telemetry(); 
+       return _telemetry;
+    }
        
     public String getPathInfo()
        { return _pathinfo; }
