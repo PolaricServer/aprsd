@@ -73,4 +73,5 @@ div.taglist {
    column-width: 11em; 
    column-gap:0.5em;
 }
-  
+
+div.taglist input {margin: 0.1em}
