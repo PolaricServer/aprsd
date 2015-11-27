@@ -71,6 +71,12 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     protected void setId(String id)
        { _callsign = id; }
       
+    @Override public void autoTag() {
+        super.autoTag();
+        if (_telemetry != null)
+           if (!_telemetry.valid())
+              removeTag("APRS.telemetry");
+    }
       
     public boolean hasTelemetry() 
       { return _telemetry != null; }

@@ -29,7 +29,8 @@ V.1.9 (november 2015), etc
      - Set tags instead of CSS class in channel-config. DONE.
      - Document. 
      
-* Implement automatic tagging using rule-base. Separate script or same as filters? 
+* Implement automatic tagging using rule-base. 
+     DONE.
 
 * Revise filter scripting. 
      - Consider use /* */ for comments instead of #? And # for tags. 
@@ -53,12 +54,12 @@ V.1.9 (november 2015), etc
 
 * Security. Check if more webservice functions need a sec_ version. 
 
-* Implement telemetry annotations in APRS position reports. 
-     - Basic parsing.
-     - Receive metadata messages.
-     - Basic storage in Java objects.
+* Implement APRS telemetry. 
+     - Basic parsing. DONE.
+     - Receive metadata messages. DONE.
+     - Basic storage in Java objects. DONE. 
      - Storage in database over longer timespan (optional).
-     - Basic presentation of telemetry. 
+     - Basic presentation of telemetry. IN PROGRESS.
      - Graphic presentation of telemetry.
 
      

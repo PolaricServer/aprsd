@@ -41,9 +41,9 @@ public class Telemetry implements Serializable
         public float[] num;
         public boolean[] bin;
         
-        public Data(int s, Date time, float[] n, boolean[] b) {
+        public Data(int s, Date t, float[] n, boolean[] b) {
             seq = s;
-            time = time; 
+            time = t; 
             num = n; 
             bin = b; 
         }
@@ -76,6 +76,7 @@ public class Telemetry implements Serializable
      */
     public static class BinChannelMeta extends ChannelMeta implements Serializable {
         public boolean bit; 
+        public boolean use = false; 
     }
     
     
@@ -119,8 +120,10 @@ public class Telemetry implements Serializable
         for (int i=0; i < CHANNELS && i < p.length; i++) 
             if (i < ANALOG_CHANNELS) 
                 _chanMeta[i].parm = p[i];
-            else 
+            else {
                 _binChanMeta[i-ANALOG_CHANNELS].parm = p[i];
+                _binChanMeta[i-ANALOG_CHANNELS].use = true; 
+            }
     }
     
     
@@ -131,8 +134,10 @@ public class Telemetry implements Serializable
         for (int i=0; i < CHANNELS && i < p.length; i++)
             if (i < ANALOG_CHANNELS)
                 _chanMeta[i].unit = p[i];
-            else
+            else {
                 _binChanMeta[i-ANALOG_CHANNELS].unit = p[i];
+                _binChanMeta[i-ANALOG_CHANNELS].use = true;
+            }
     }
     
     
@@ -187,9 +192,19 @@ public class Telemetry implements Serializable
         _lastSeq = seq; 
     }
     
-    
+    public Collection<Data> getHistory()
+       { return _data; }
+       
     public Data getCurrent()
        { return _current; }
 
+       
+    public boolean valid() {
+        if ( _current == null) return false;
+        if ( _current.time == null || 
+             _current.time.getTime() + 1000 * 60 * 60 * 24 < (new Date()).getTime())
+           return false; 
+        return true;
+    }
 }
 

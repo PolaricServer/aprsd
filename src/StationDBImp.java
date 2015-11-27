@@ -168,18 +168,21 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
          Date now = new Date();  
          System.out.println("*** Garbage collection...");
          Iterator<TrackerPoint> stn = _map.values().iterator();
+         int n=0;
          while (stn.hasNext()) 
          {
              TrackerPoint st = stn.next();
              if (st.expired() && !st.isPersistent() ) 
              {
-                System.out.println("        Removing: "+st.getIdent()); 
                 st.removeAllTags();
                 removeItem(st.getIdent());
                 _routes.removeNode(st.getIdent()); 
+                n++;
              } 
+             else
+                st.autoTag();
          }
-         System.out.println("        Removing old edges from route table");
+         System.out.println("        Removed: "+n+" items"); 
          Calendar t = Calendar.getInstance();
          t.add(Calendar.DAY_OF_YEAR, -1);
          _routes.removeOldEdges(t.getTime());
