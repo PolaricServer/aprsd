@@ -20,7 +20,7 @@ msgstr "Avsender"
 msgid "APRS symbol"
 msgstr "APRS Symbol"
 
-#: src/httpd/AprsPointView.scala:42
+#: src/httpd/AprsPointView.scala:42 src/httpd/Webserver.scala:731
 msgid "Last reported"
 msgstr "Sist rapportert"
 
@@ -36,7 +36,7 @@ msgstr "Fart"
 msgid "Heading"
 msgstr "Retning"
 
-#: src/httpd/AprsPointView.scala:53 src/httpd/Webserver.scala:632
+#: src/httpd/AprsPointView.scala:53 src/httpd/Webserver.scala:647
 msgid "APRS via"
 msgstr "APRS via"
 
@@ -65,7 +65,7 @@ msgid "Traffic to"
 msgstr "Trafikk til"
 
 #: src/httpd/PointView.scala:76 src/httpd/Webserver.scala:216
-#: src/httpd/Webserver.scala:468 src/httpd/Webserver.scala:528
+#: src/httpd/Webserver.scala:468 src/httpd/Webserver.scala:529
 msgid "Description"
 msgstr "Beskrivelse"
 
@@ -125,15 +125,15 @@ msgstr "Varig lagring"
 msgid "New alias"
 msgstr "Nytt alias"
 
-#: src/httpd/TrackerPointView.scala:103 src/httpd/Webserver.scala:527
+#: src/httpd/TrackerPointView.scala:103 src/httpd/Webserver.scala:528
 msgid "Updated"
 msgstr "Oppdatert"
 
-#: src/httpd/TrackerPointView.scala:109 src/httpd/Webserver.scala:527
+#: src/httpd/TrackerPointView.scala:109 src/httpd/Webserver.scala:528
 msgid "Ident"
 msgstr "Ident"
 
-#: src/httpd/TrackerPointView.scala:111 src/httpd/Webserver.scala:632
+#: src/httpd/TrackerPointView.scala:111 src/httpd/Webserver.scala:647
 msgid "Time"
 msgstr "Tid"
 
@@ -313,7 +313,7 @@ msgid "Remove object"
 msgstr "Slett objekt"
 
 #: src/httpd/Webserver.scala:308 src/httpd/Webserver.scala:428
-#: src/httpd/Webserver.scala:629
+#: src/httpd/Webserver.scala:644
 msgid "Error"
 msgstr "Feil"
 
@@ -383,44 +383,60 @@ msgstr "Kunne ikke oppdatere"
 msgid "Object '{0}' is already added by someone else"
 msgstr "Objekt '{0}' er allerede registrert av noen andre"
 
-#: src/httpd/Webserver.scala:528
+#: src/httpd/Webserver.scala:529
 msgid "Move"
 msgstr "Beveg"
 
-#: src/httpd/Webserver.scala:629
+#: src/httpd/Webserver.scala:644
 msgid "Couldn't find item"
 msgstr "Kunne ikke finne objekt"
 
 # Short for direction
-#: src/httpd/Webserver.scala:632
+#: src/httpd/Webserver.scala:647
 msgid "Dir"
 msgstr "Retn"
 
-#: src/httpd/Webserver.scala:632
+#: src/httpd/Webserver.scala:647
 msgid "Distance"
 msgstr "Avstand"
 
-#: src/httpd/Webserver.scala:679
+#: src/httpd/Webserver.scala:694
 msgid "Couldn't find info"
 msgstr "Kunne ikke finne info"
 
-#~ msgid "Couldn't find station"
-#~ msgstr "Kunne ikke finne stasjon"
+#: src/httpd/Webserver.scala:718
+msgid "Telemetry from "
+msgstr "Telemetri fra"
 
-#~ msgid "Find new colour"
-#~ msgstr "Finn ny farge"
+#: src/httpd/Webserver.scala:723
+msgid "Channel"
+msgstr "Kanal"
 
-#~ msgid "Trail"
-#~ msgstr "Spor"
+#: src/httpd/Webserver.scala:731
+msgid "Time of last received telemetry report"
+msgstr "Tidspunkt for sist mottatte telemetri rapport"
 
-#~ msgid "minutes"
-#~ msgstr "minutter"
+#: src/httpd/Webserver.scala:769
+msgid "Ch"
+msgstr "Ch"
 
-#~ msgid "Ambiguity"
-#~ msgstr "Unøyaktighet"
+#~ msgid "Last received APRS status message"
+#~ msgstr "Sist mottatte APRS statusmelding"
 
 #~ msgid "Status"
 #~ msgstr "Status"
 
-#~ msgid "Last received APRS status message"
-#~ msgstr "Sist mottatte APRS statusmelding"
+#~ msgid "Ambiguity"
+#~ msgstr "Unøyaktighet"
+
+#~ msgid "minutes"
+#~ msgstr "minutter"
+
+#~ msgid "Trail"
+#~ msgstr "Spor"
+
+#~ msgid "Find new colour"
+#~ msgstr "Finn ny farge"
+
+#~ msgid "Couldn't find station"
+#~ msgstr "Kunne ikke finne stasjon"
