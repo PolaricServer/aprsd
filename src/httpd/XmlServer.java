@@ -221,6 +221,7 @@ public class XmlServer extends ServerBase
                   String title = s.getDescr() == null ? "" 
                              : " title=\"" + fixText(s.getDescr()) + "\""; 
                   String flags = " flags=\""+
+                       (s.hasTag("APRS.telemetry") ? "t":"") +
                        (s instanceof AprsPoint ? "a":"") + 
                        (s instanceof AprsPoint && ((AprsPoint)s).isInfra() ? "i" : "") + "\"";
                   
