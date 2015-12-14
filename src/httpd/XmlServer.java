@@ -239,8 +239,6 @@ public class XmlServer extends ServerBase
                      String style = (!(s.getTrail().isEmpty()) ? "lmoving" : "lstill");
                      if (s instanceof AprsObject)
                         style = "lobject"; 
-                     if (s instanceof AprsPoint && ((AprsPoint)s).isEmergency())
-                        style += " lflash";
                      style += " "+ action.getStyle();
                      
                      out.println(" <label style=\""+style+"\">");

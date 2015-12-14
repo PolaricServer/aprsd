@@ -38,10 +38,6 @@ public abstract class AprsPoint extends TrackerPoint implements Serializable, Cl
     public boolean isInfra() 
        { return false; }
    
-    public boolean isEmergency()
-       { return (_altsym=='\\' && _symbol=='!'); }
-             
-
     public char getSymbol()
        { return _symbol; }
        
