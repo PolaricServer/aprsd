@@ -405,7 +405,7 @@ msgid "Couldn't find info"
 msgstr "Kunne ikke finne info"
 
 #: src/httpd/Webserver.scala:718
-msgid "Telemetry from "
+msgid "Telemetry from"
 msgstr "Telemetri fra"
 
 #: src/httpd/Webserver.scala:723
@@ -415,6 +415,10 @@ msgstr "Kanal"
 #: src/httpd/Webserver.scala:731
 msgid "Time of last received telemetry report"
 msgstr "Tidspunkt for sist mottatte telemetri rapport"
+
+#: src/httpd/Webserver.scala:745
+msgid "Previous Data"
+msgstr "Historikk"
 
 #: src/httpd/Webserver.scala:769
 msgid "Ch"

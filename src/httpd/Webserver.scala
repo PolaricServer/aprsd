@@ -715,7 +715,7 @@ package no.polaric.aprsd.http
          val d = tm.getCurrent();
          val result: NodeSeq =
            <xml:group>
-             <h1>{ if (tm.getDescr()==null) I.tr("Telemetry from ") + x.getIdent() 
+             <h1>{ if (tm.getDescr()==null) I.tr("Telemetry from") + " " + x.getIdent() 
                    else tm.getDescr() }</h1>
              { for (i <- 0 to Telemetry.ANALOG_CHANNELS-1) yield {
                  var parm = tm.getMeta(i).parm
@@ -723,12 +723,12 @@ package no.polaric.aprsd.http
                  parm = if (parm == null) I.tr("Channel")+" "+i else parm
                  unit = if (unit == null) "" else unit
                  
-                 simpleLabel("chan" + i, "leftlab", parm + ":", 
+                 simpleLabel("chan" + i, "lleftlab", parm + ":", 
                     dfield("" + ddf.format(d.getAnalog(i)), unit)) 
                }
              } 
              { if (d.time != null) 
-                  simpleLabel("hrd", "leftlab", I.tr("Last reported")+":", I.tr("Time of last received telemetry report"),
+                  simpleLabel("hrd", "lleftlab", I.tr("Last reported")+":", I.tr("Time of last received telemetry report"),
                      TXT( df.format(d.time))) 
                else EMPTY       
              }
@@ -742,7 +742,7 @@ package no.polaric.aprsd.http
              </div>
              <div id="tlmhist"></div>
                   
-             <button id="listbutton">Previous Data</button>
+             <button id="listbutton">{I.tr("Previous Data")}</button>
            </xml:group>
          
         printHtml(res, htmlBody(req, null, result)) 
