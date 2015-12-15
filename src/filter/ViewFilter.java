@@ -45,7 +45,7 @@ public class ViewFilter {
       String filename = System.getProperties().getProperty("confdir", ".") + "/view.profiles";
       try {
          // Default is to hide all
-         _default.add(Pred.TRUE(), new Action(true,true,true,false,false,""));
+         _default.add(Pred.TRUE(), new Action(true,true,true,false,false,"",null));
          
          System.out.println("*** Compiling view profiles..");
          Parser parser = new Parser(new FileReader(filename));

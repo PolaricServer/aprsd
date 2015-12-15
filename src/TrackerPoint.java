@@ -381,6 +381,10 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     @Override public String getIcon()
        { return getIcon(true); }
     
+    public boolean iconOverride()
+       { return _icon != null; }
+    
+    
     
     /** 
      * Get identifier for display on map. 

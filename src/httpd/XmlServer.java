@@ -225,7 +225,10 @@ public class XmlServer extends ServerBase
                        (s instanceof AprsPoint ? "a":"") + 
                        (s instanceof AprsPoint && ((AprsPoint)s).isInfra() ? "i" : "") + "\"";
                   
-                  String icon = _wfiledir + "/icons/"+ (s.getIcon(showSarInfo) != null ? s.getIcon(showSarInfo) : _icon);    
+                  String icon = action.getIcon(s.getIcon()); 
+                  if (s.iconOverride() && showSarInfo) 
+                     icon = s.getIcon(); 
+                  icon = _wfiledir + "/icons/"+ (icon != null ? icon : _icon);    
                   
                   // FIXME: Sanitize ident input somewhere else
                   out.println("<point id=\""+s.getIdent()+"\" x=\""

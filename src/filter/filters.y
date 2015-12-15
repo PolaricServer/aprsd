@@ -124,9 +124,11 @@ actions : actions ',' action  { action.merge((Action) $3); }
        
        
 action : IDENT '=' STRING     { if ($1.matches("STYLE|style")) 
-                                   $$=new Action(false,false,false,false,false,$3);
+                                   $$=new Action(false,false,false,false,false,$3,null);
+                                else if ($1.matches("ICON|icon"))
+                                   $$=new Action(false,false,false,false,false,"",$3);
                                 else {
-                                   $$=new Action(false,false,false,false,false,"");
+                                   $$=new Action(false,false,false,false,false,"",null);
                                    yyerror("Unknown identifier '"+$1+"'"); 
                                 }
                               }
@@ -134,7 +136,7 @@ action : IDENT '=' STRING     { if ($1.matches("STYLE|style"))
        | IDENT                { $$=new Action( 
                                    $1.matches("hide-ident"), $1.matches("hide-trail"),
                                    $1.matches("hide-all"), $1.matches("show-path"),
-                                   $1.matches("set-public"), "");
+                                   $1.matches("set-public"), "", null);
                                    
                                 if (!$1.matches("(hide-(ident|all|trail))|show-path|set-public"))
                                    yyerror("Unknown identifier '"+$1+"'"); 

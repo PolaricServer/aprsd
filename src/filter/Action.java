@@ -25,15 +25,17 @@ import no.polaric.aprsd.*;
  */
 public class Action 
 {
-        /**
-         * Null Action. No changes. 
-         */
-        public static Action NULL()
-          { return new Action(false, false, false, false, false, ""); }
+    /**
+     * Null Action. No changes. 
+     */
+    public static Action NULL()
+          { return new Action(false, false, false, false, false, "", null); }
         
         
     private boolean _hideIdent, _hideTrail, _hideAll, _showPath, _public;
     private String _style = ""; 
+    private String _icon = null;
+    
     
     
     /**
@@ -45,9 +47,9 @@ public class Action
      * @param showpath Show path of signals (default is to NOT show it).
      * @param style CSS class (used in addition to other classes). 
      */
-    public Action(boolean hideid, boolean hidetrail, boolean hideall, boolean showpath, boolean pub, String style) { 
+    public Action(boolean hideid, boolean hidetrail, boolean hideall, boolean showpath, boolean pub, String style, String icon) { 
         _hideIdent = hideid; _hideTrail = hidetrail; _hideAll=hideall; 
-        _showPath = showpath; _style = style; _public = pub; 
+        _showPath = showpath; _style = style; _public = pub; _icon = icon;
     }
  
     
@@ -63,6 +65,9 @@ public class Action
         _hideAll   |= x._hideAll;
         _showPath  |= x._showPath; 
         _public    |= x._public;
+        
+        if (x._icon != null) 
+           _icon = x._icon;
         
         if (!_style.contains(x._style))
            _style = _style + (_style.equals("") ? "": " ") + x._style; 
@@ -92,6 +97,11 @@ public class Action
     /** Get CSS style (classes) */
     public String getStyle()
         { return _style; }
+    
+    
+    public String getIcon(String dfl)
+        { return _icon == null ? dfl : _icon; }
+    
     
     public String toString()
         { return "Action("+_hideIdent+", "+_hideTrail+", "+_hideAll+", "+_showPath+", "+_public+", '"+_style+"')"; }
