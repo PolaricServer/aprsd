@@ -54,12 +54,15 @@ V.1.9 (november 2015), etc
 
 * Security. Check if more webservice functions need a sec_ version. 
 
-* Implement APRS telemetry. 
-     - Basic parsing. DONE.
-     - Receive metadata messages. DONE.
-     - Basic storage in Java objects. DONE. 
+* Security. Consider token-based authorization. Consider using JWS tokens. Protect against CSRF. 
+  It should not be too hard to add the use of external authorization service later. 
+
+
+* Implement APRS telemetry with basic presentation (numeric values, list)
+     DONE. 
+     
+* APRS telemetry extensions: 
      - Storage in database over longer timespan (optional).
-     - Basic presentation of telemetry. IN PROGRESS.
      - Graphic presentation of telemetry.
 
      

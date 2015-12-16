@@ -8,7 +8,7 @@ and manipulate the information through a simple HTTP service. The daemon can
 also be set up as an igate (internet gateway) and can be installed independently of the web app. 
 
 More documentation on the project can be found here: 
-http://aprs.no/dokuwiki/doku.php?id=polaricserver
+http://aprs.no/polaricserver
 
 ## System requirements
 
@@ -29,10 +29,10 @@ We also use the following external libraries. jar files are included:
 ## Installation
 
 We provide Debian packages. For information on getting started on a Debian/Ubuntu/Mint platform please 
-see: http://aprs.no/dokuwiki/doku.php?id=installation
+see: http://aprs.no/dokuwiki/?id=installation
 
 More documentation on the project can be found here: 
-http://aprs.no/dokuwiki/doku.php?id=polaricserver
+http://aprs.no/dokuwiki/polaricserver
 
 The polaric-webconfig-plugin is recommended. 
 
