@@ -2,8 +2,8 @@
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
 import org.simpleframework.http.core.Container;
-import org.simpleframework.transport.Server;
-import org.simpleframework.http.core.ContainerServer;
+import org.simpleframework.transport.SocketProcessor;
+import org.simpleframework.http.core.ContainerSocketProcessor;
 import org.simpleframework.transport.connect.Connection;
 import org.simpleframework.transport.connect.SocketConnection;
 import org.simpleframework.http.Request;
@@ -132,7 +132,7 @@ public class HttpServer implements Container, ServerAPI.ServerStats
       _max_load    = api.getIntProperty("server.maxload", 200);
       
       /* Configure this web container */
-      Server srv = new ContainerServer(this, 12); 
+      SocketProcessor srv = new ContainerSocketProcessor(this, 12); 
       Connection connection = new SocketConnection(srv);
       SocketAddress address = new InetSocketAddress(port);
       connection.connect(address);
