@@ -24,7 +24,7 @@ import org.xnap.commons.i18n.*;
 
 
 
-public class HttpServer implements Container, ServerAPI.ServerStats
+public class WebContainer implements Container, ServerAPI.ServerStats
 {
   
    protected  ServerAPI  _api;
@@ -58,7 +58,7 @@ public class HttpServer implements Container, ServerAPI.ServerStats
 
        public void run() {
          int reqNo;
-         synchronized (HttpServer.this) {
+         synchronized (WebContainer.this) {
             _requests++; _reqNo++;
             reqNo = _reqNo;
          }
@@ -117,14 +117,14 @@ public class HttpServer implements Container, ServerAPI.ServerStats
              } catch (Throwable ee) {};
          } 
          finally {
-            synchronized(HttpServer.this) { _requests--; } }
+            synchronized(WebContainer.this) { _requests--; } }
       }
    } // Task
    
    
    
    
-   public HttpServer(ServerAPI api, int port) throws IOException
+   public WebContainer(ServerAPI api, int port) throws IOException
    {
       _api=api; 
       _infraonly   = api.getBoolProperty("map.infraonly", false);

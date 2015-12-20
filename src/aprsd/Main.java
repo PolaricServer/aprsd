@@ -26,7 +26,7 @@ public class Main implements ServerAPI
    public static  RemoteCtl rctl;
    public static  SarMode  sarmode = null;
    private static Properties _config, _defaultConf; 
-   private static HttpServer ws;
+   private static WebContainer ws;
    private static Channel.Manager _chanManager = new Channel.Manager();
    private static SarUrl sarurl;
    private static String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
@@ -230,7 +230,7 @@ public class Main implements ServerAPI
                    
            /* Start HTTP server */
            int http_port = getIntProperty("httpserver.port", 8081);
-           ws = new HttpServer(api, http_port);
+           ws = new WebContainer(api, http_port);
            System.out.println( "*** HTTP server ready on port " + http_port);
            
            /* Database of stations/objects */
@@ -253,7 +253,7 @@ public class Main implements ServerAPI
            Station.init(api); 
            
            /* Add main webservices */
-           ws.addHandler(new Webserver(api), null);
+           ws.addHandler(new Webservices(api), null);
       
 
            /*

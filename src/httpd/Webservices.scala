@@ -29,8 +29,8 @@ import org.xnap.commons.i18n._
 package no.polaric.aprsd.http 
 {
 
-  class Webserver 
-      ( val api: ServerAPI) extends XmlServer(api) with ServerUtils
+  class Webservices 
+      ( val api: ServerAPI) extends XmlServices(api) with ServerUtils
   {
  
    val _time = new Date();

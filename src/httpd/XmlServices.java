@@ -33,13 +33,13 @@ import java.util.concurrent.locks.*;
 
 
 
-public class XmlServer extends ServerBase
+public class XmlServices extends ServerBase
 {
    private String _icon; 
    private String _adminuser, _updateusers;
    private int _seq = 0;
    
-   public XmlServer(ServerAPI api) throws IOException
+   public XmlServices(ServerAPI api) throws IOException
    {
       super(api);
       _icon = api.getProperty("map.icon.default", "sym.gif");
