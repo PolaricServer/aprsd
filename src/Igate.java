@@ -211,11 +211,11 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
         if (p.source == _rfChan) {
            if (p.report.matches("\\?IGATE\\?.*"))
                answer_query();
-           else
+           else if (_inetChan.isActive())
                gate_to_inet(p);
         }
         else
-           if ( _allowRf )
+           if ( _allowRf && _rfChan.isActive())
               gate_to_rf(p);
     }
     
