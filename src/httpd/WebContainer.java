@@ -124,18 +124,16 @@ public class WebContainer implements Container, ServerAPI.ServerStats
    
    
    
-   public WebContainer(ServerAPI api, int port) throws IOException
+   public WebContainer(ServerAPI api) throws IOException
    {
       _api=api; 
       _infraonly   = api.getBoolProperty("map.infraonly", false);
       _serverurl   = api.getProperty("server.url", "/srv");
       _max_load    = api.getIntProperty("server.maxload", 200);
-      
-      /* Configure this web container */
-      SocketProcessor srv = new ContainerSocketProcessor(this, 12); 
-      Connection connection = new SocketConnection(srv);
-      SocketAddress address = new InetSocketAddress(port);
-      connection.connect(address);
+
+      /* Thread pool for high loads. 
+       * This may not be needed when we move to websockets. 
+       */
       executor = Executors.newCachedThreadPool();
    }
    
