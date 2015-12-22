@@ -24,7 +24,7 @@ public class WebServer {
    public WebServer(ServerAPI api, int port, Container wc) throws IOException {
     
      /* Web socket service via router. Add service later.. */
-      Router wsrouter = new DirectRouter(null); 
+      Router wsrouter = new DirectRouter(new ChatRoom()); 
       
       Container c = new RouterContainer(wc, wsrouter, 2);
       _server = new ContainerSocketProcessor(c, 12);
