@@ -1,3 +1,9 @@
+polaric-aprsd (1.9) unstable; urgency=medium
+
+  * Fixes and addition (see Changelog)
+
+ -- Øyvind Hanssen <ohanssen@acm.org>  Wed, 30 Dec 2015 00:11:50 +0100
+
 polaric-aprsd (1.8.1) unstable; urgency=medium
 
   * Fix mistake in reading properties. 
