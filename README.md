@@ -1,6 +1,8 @@
 # Polaric APRSD
 
-The "Polaric Server" is mainly a web based service to present APRS tracking information on maps and where the information is updated in real-time. It is originally targeted for use by radio amateurs in voluntary search and rescue service in Norway. It consists of a web application and a server 
+The "Polaric Server" is mainly a web based service to present APRS tracking information on maps and where 
+the information is updated in real-time. It is originally targeted for use by radio amateurs in voluntary 
+search and rescue service in Norway. It consists of a web application and a server 
 program (APRS daemon). 
  
 The APRS daemon gets data from a TNC or APRS-IS or a combination. It can present 
@@ -12,9 +14,10 @@ http://aprs.no/polaricserver
 
 ## System requirements
 
-Linux/Java platform (tested with Debian/Ubuntu) with
-* Java Runtime environment version 7 or later. 
-* Scala library version 2.8 or later. 
+Linux/Java platform (tested with Debian/Ubuntu/Mint) with
+* Java Runtime environment version 8 or later. 
+* Scala library version 2.11 or later. You will also need scala-xml
+  and scala-parser-combinators packages.
 * jsvc.
 * librxtx-java (if using serial port for communication with TNC or GPS).
 
@@ -29,10 +32,10 @@ We also use the following external libraries. jar files are included:
 ## Installation
 
 We provide Debian packages. For information on getting started on a Debian/Ubuntu/Mint platform please 
-see: http://aprs.no/dokuwiki/?id=installation
+see: http://aprs.no/dokuwiki/?id=install.dev
 
 More documentation on the project can be found here: 
-http://aprs.no/dokuwiki/polaricserver
+http://aprs.no/polaricserver
 
 The polaric-webconfig-plugin is recommended. 
 
@@ -42,6 +45,6 @@ Build from the source is done by a plain old makefile. Yes I know :)
 Maybe I move to something else a little later. Setup for generating Debian
 packages is included. You may use the 'debuild' command.
 
-You will need JDK (Oracle or OpenJDK) version 7 or later, the Scala
-programming language version 2.8 or later (scala and scala-library) and 
-librxtx-java. 
+You will need JDK (Oracle or OpenJDK) version 8 or later, the Scala
+programming language version 2.11 or later (scala, scala-library scala-xml
+and scala-parser-combinators packages) and librxtx-java. 
