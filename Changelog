@@ -141,7 +141,26 @@ V.1.8
 * [C] Persistent choices of overlay-layers. 
 * [C] Fixes to toolbar for mobile and iframe mode
 * [C] Fix issues with canvas/scale with IE browser. 
-      Some cleanup wrt browser support. 
+      Some cleanup wrt browser support. [
 
-         
+      
+V.1.9
+-----
+     
+* Implement architecture for tagging. Automatic tagging, user tagging.          
+* Use tags instead of CSS class in channel-config. 
+* Add tags, autotagging and icons to filterscripting. 
+* Improve search: Use tags (keywords). 
+* Deal with performance/server overload issue. 
+* Allow filter to make items publicly visible even it set to be non-public 
+  in channel setup. 
+* Implement APRS telemetry with basic presentation (numeric values, list)
+* Some small improvements to channel configuration.
+* Use Simple Framework 6.0.1 
+* Some smaller bugfixes.
+* Rename some classes and source files. 
+
+[C] Add some examples for North America and some help in using Google Maps (thanks W6ELA)
+[C] Allow GPX layers to work with different projections. 
+
  

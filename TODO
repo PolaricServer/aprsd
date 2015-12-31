@@ -1,6 +1,6 @@
 
-V.1.9 (november 2015), etc
---------------------------
+V.1.10 (february 2016), etc
+---------------------------
 
 * [C] Extend iframeAPI ....
        IN PROGRESS
@@ -8,7 +8,7 @@ V.1.9 (november 2015), etc
 * [C] Move API code out from menu.js to api.js
        IN PROGRESS        
         
-* Callback (API) to notify plugins about setting alias/icon.
+* Callback (API) to notify plugins about setting tag/alias/icon.
         
 * Dateline wrapping problems: 
    - Rubber zoom that crosses dateline results in trouble. 
@@ -16,50 +16,11 @@ V.1.9 (november 2015), etc
 * Document and simplify translation ?
 
 * Consider moving country-specific (statkart, met.no, etc) stuff to separate plugin.
-
-* Add copyright info for LocalePlanet stuff
-     
-* Implement architecture for (semantic) tagging. Automatic tagging, user tagging.          
-     - Basic tagging. DONE.
-     - Simple UI. DONE.
-     - Tags in filterscripts. DONE.
-     - Set tags in AIS plugin. DONE. 
-     - Tags on points in XML overlay? 
-     - Tag APRS points as 'APRS'. DONE.
-     - Set tags instead of CSS class in channel-config. DONE.
-     - Document. 
-     
-* Implement automatic tagging using rule-base. 
-     DONE.
-
-* Revise filter scripting. 
-     - Consider use /* */ for comments instead of #? And # for tags. 
-     - Consider positive actions, not just negative actions. 
-     - Cleaner syntax? 
-     - Additional actions? Icon selection? 
-          - Added 'set-public'
-     - Document. 
-     
-* Improve search. Use tags (keywords). 
-     DONE.
-
-* Scalability issues? DoS vulnerability? Measure load?  
-     DONE performance issue. 
-
-* Allow filter to make items publicly visible even it set to be non-public 
-  in channel setup. 
-     DONE.
-  
+ 
 * [C] jsInclude in webappconfig.php doesnt seem to work. Fix. 
 
-* Security. Check if more webservice functions need a sec_ version. 
-
-* Security. Consider token-based authorization. Consider using JWS tokens. Protect against CSRF. 
+* Security. Consider token-based authorization. Consider using JWS tokens. 
   It should not be too hard to add the use of external authorization service later. 
-
-
-* Implement APRS telemetry with basic presentation (numeric values, list)
-     DONE. 
      
 * APRS telemetry extensions: 
      - Storage in database over longer timespan (optional).
@@ -71,7 +32,11 @@ V.1.9 (november 2015), etc
 Autorisation/Authentication
 ---------------------------
 
-* How can we extend this in a plugin. 
+* Consider token-based authorization. Consider using JWS tokens. 
+  Protect against CSRF attacks? 
+  
+* Consider interface to add the use of external authorization service 
+  (OAuth?) later. 
       
 * Extend login/user support. Individidual users + groups (roles) + permissions. 
   (maybe some of this should be implemented in db plugin, but need some
