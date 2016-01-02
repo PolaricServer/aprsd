@@ -13,53 +13,32 @@ import org.simpleframework.http.socket.service.Service;
 
 /* Should this class extend ServerBase? */
 
-public class ChatRoom implements Service 
+public class ChatRoom extends Notifier 
 {
-   
-   private final Map<Long, FrameListener> _clients;
-      
-   
-   public ChatRoom() {
-      _clients = new ConcurrentHashMap<Long, FrameListener>();
-   }  
-     
-   
-   /* FIXME: This method is copied from ServerBase. Should be in a base-class */
-   protected long _sessions = 0;
-   protected synchronized long getSession(Request req)
-      throws IOException
-   {
-      String s_str  = req.getParameter("clientses");
-      if (s_str != null && s_str.matches("[0-9]+")) {
-         long s_id = Long.parseLong(s_str);
-         if (s_id > 0)
-            return s_id;
-      }
-      _sessions = (_sessions +1) % 2000000000;
-      return _sessions;       
-   }
-   
-   
-   /* 
-    * Connect. Join the room. The user id is a long int which is 
-    * assigned automatically.
-    */
-   public void connect(Session connection) {
-      try {
-          FrameChannel chan = connection.getChannel();
-          Request req = connection.getRequest();      
-          long uid = getSession(req); 
-          System.out.println("User '"+uid+"' joined");
-          FrameListener client = new ChatRoomClient(this, chan, uid);
-          chan.register(client );
-          _clients.put(uid, client); /* Subscribe */
-      } catch(Exception e) {
-          System.out.println("Problem joining: " + e);
-      }  
-   }
-   
 
-   /*
+   public class Client extends Notifier.Client 
+   {
+       public Client(FrameChannel ch, long uid) 
+          { super(ch, uid); }
+             
+       @Override public void onTextFrame(Request request, String text) {
+           Frame replay = new DataFrame(FrameType.TEXT, "(" + _uid + ") " +text);
+           distribute(_uid, replay);
+       }
+   }
+     
+    
+    
+   public ChatRoom()
+     { super(); }  
+    
+   
+   @Override public Notifier.Client newClient(FrameChannel ch, long uid) 
+     { return new Client(ch, uid); }
+   
+   
+   
+   /**
     * Distribute a message to the other clients in the room. 
     */
    public void distribute(long from, Frame frame) {
