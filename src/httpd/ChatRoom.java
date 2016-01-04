@@ -21,8 +21,9 @@ public class ChatRoom extends Notifier
        public Client(FrameChannel ch, long uid) 
           { super(ch, uid); }
              
+       /* On text frame from client. Just replay text to all clients. */
        @Override public void onTextFrame(Request request, String text) {
-           Frame replay = new DataFrame(FrameType.TEXT, "(" + _uid + ") " +text);
+           String replay = "(" + _uid + ") " +text;
            distribute(_uid, replay);
        }
    }
@@ -33,6 +34,7 @@ public class ChatRoom extends Notifier
      { super(); }  
     
    
+   /** Factory method */
    @Override public Notifier.Client newClient(FrameChannel ch, long uid) 
      { return new Client(ch, uid); }
    
@@ -41,23 +43,10 @@ public class ChatRoom extends Notifier
    /**
     * Distribute a message to the other clients in the room. 
     */
-   public void distribute(long from, Frame frame) {
-      try {          
-         for(long user : _clients.keySet()) {
-            ChatRoomClient client = (ChatRoomClient) _clients.get(user);
-            
-            try {               
-               if(from != user) {
-                  client.send(frame);
-               }
-            } catch(Exception e){   
-               _clients.remove(user); /* Unsubscribe */
-               client.close();
-               System.out.println("Problem sending message: " + e);
-            }
-         }
-      } catch(Exception e) {
-         System.out.println("Problem distributing message: " + e);
-      }
+   public void distribute(long from, String txt) {
+        postText(txt, x -> x._uid != from);
+          /* Note the use of a lambda expression. It tells to distribute message 
+           * to all except thee one who sent it. 
+           */ 
    }
 }
