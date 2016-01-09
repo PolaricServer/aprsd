@@ -1,4 +1,6 @@
 package no.polaric.aprsd.http;
+import no.polaric.aprsd.*;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,7 +15,7 @@ import com.fasterxml.jackson.databind.*;
 
 
 
-public abstract class Notifier implements Service 
+public abstract class Notifier extends ServerBase implements Service
 {
 
    public abstract class Client implements FrameListener {
@@ -34,7 +36,6 @@ public abstract class Notifier implements Service
    
       public void sendText(String text) throws IOException
          { send(new DataFrame(FrameType.TEXT, text)); }
-   
    
       public void close() throws IOException
          { _chan.close(); }
@@ -74,7 +75,8 @@ public abstract class Notifier implements Service
    protected final Map<Long, FrameListener> _clients;
       
    
-   public Notifier() {
+   public Notifier(ServerAPI api) throws IOException {
+       super(api);
       _clients = new ConcurrentHashMap<Long, FrameListener>();
    }  
      

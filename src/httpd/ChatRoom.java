@@ -1,4 +1,6 @@
 package no.polaric.aprsd.http;
+import no.polaric.aprsd.*;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,11 +13,21 @@ import org.simpleframework.http.socket.service.Service;
 
 
 
-/* Should this class extend ServerBase? */
+/**
+ * Chat room using Websockets. 
+ * This class is mainly to test and demonstrate the use of Websockets. 
+ */
 
 public class ChatRoom extends Notifier 
 {
 
+   public static class Message {
+     public long uid; 
+     public String text; 
+   }
+   
+   
+   
    public class Client extends Notifier.Client 
    {
        public Client(FrameChannel ch, long uid) 
@@ -23,15 +35,18 @@ public class ChatRoom extends Notifier
              
        /* On text frame from client. Just replay text to all clients. */
        @Override public void onTextFrame(Request request, String text) {
-           String replay = "(" + _uid + ") " +text;
-           distribute(_uid, replay);
+           Message m = new Message(); 
+           m.uid = _uid; 
+           m.text = text; 
+           distribute(m);
        }
    }
      
     
     
-   public ChatRoom()
-     { super(); }  
+   public ChatRoom(ServerAPI api) throws IOException
+     { super(api); }  
+    
     
    
    /** Factory method */
@@ -43,8 +58,8 @@ public class ChatRoom extends Notifier
    /**
     * Distribute a message to the other clients in the room. 
     */
-   public void distribute(long from, String txt) {
-        postText(txt, x -> x._uid != from);
+   public void distribute(Message m) {
+        postObject(m, x -> x._uid != m.uid);
           /* Note the use of a lambda expression. It tells to distribute message 
            * to all except thee one who sent it. 
            */ 

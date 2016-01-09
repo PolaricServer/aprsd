@@ -3,6 +3,7 @@ package no.polaric.aprsd.http;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.*;
 
 import org.simpleframework.http.core.Container;
 import org.simpleframework.http.core.ContainerSocketProcessor;
@@ -20,11 +21,21 @@ public class WebServer {
    private final SocketAddress _addr;  
    private final SocketProcessor _server;
    
-   
+   /** 
+    * Configure a webserver. 
+    * @Param 
+    * @Param port server port to listen on
+    * @Param wc   Container with HTTP services. 
+    */
    public WebServer(ServerAPI api, int port, Container wc) throws IOException {
-    
-     /* Web socket service via router. Add service later.. */
-      Router wsrouter = new DirectRouter(new ChatRoom()); 
+  
+      /* Set up a map from paths to service implementations. */
+      Map<String, Service> services = new HashMap<String, Service>(); 
+      services.put("/chatroom", new ChatRoom(api));
+      services.put("/messages", new GeoMessages(api));
+      
+      /* Create a router that uses the paths of the URLs to select the service. */
+      Router wsrouter = new PathRouter (services, null); 
       
       Container c = new RouterContainer(wc, wsrouter, 2);
       _server = new ContainerSocketProcessor(c, 12);
