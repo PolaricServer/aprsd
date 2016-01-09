@@ -290,10 +290,8 @@ public class AprsParser implements AprsChannel.Receiver
            parseStdAprs(p, msg.substring(10), obj, true, "");
            _api.getDB().deactivateSimilarObjects(ident, station);
         }
-        else {
+        else 
            obj.kill();
-           System.out.println("   OBJECT KILL: id="+ident+", op="+op);
-        }
     }
     
     
@@ -329,10 +327,8 @@ public class AprsParser implements AprsChannel.Receiver
            parseStdAprs(p, msg.substring(i), obj, false, "");
            _api.getDB().deactivateSimilarObjects(ident, station);
         }
-        else {
+        else 
            obj.kill();
-           System.out.println("   ITEM KILL: id="+ident+", op="+op);
-        }
     }
     
     
@@ -944,7 +940,7 @@ public class AprsParser implements AprsChannel.Receiver
         else if (data.matches("BITS.*")) {
            String[] bb = d.split(",\\s*"); 
            boolean[] bits = new boolean[8];
-           for (int i=0; i<8; i++)
+           for (int i=0; i<8&&i<bb[0].length(); i++)
               bits[i] = (bb[0].charAt(i) == '1');
            t.setBits(bits);
            if (bb.length > 1)
