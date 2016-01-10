@@ -134,11 +134,8 @@ public abstract class ServerBase
    }
    
 
-
-   protected final boolean authorizedForUpdate(Request req)
+   protected final boolean authorizedForUpdate(String user) 
    {
-       String user = getAuthUser(req);
-
        if (user == null)
           user="_NOLOGIN_";
        return ( user.matches(_adminuser) ||
@@ -146,11 +143,16 @@ public abstract class ServerBase
    }
    
 
+   protected final boolean authorizedForUpdate(Request req)
+      { return authorizedForUpdate(getAuthUser(req)); }
+
+  
+   protected final boolean authorizedForAdmin(String user)
+      { return (user != null && user.matches(_adminuser)); } 
+
+      
    protected final boolean authorizedForAdmin(Request req)
-   {
-       String user = getAuthUser(req);
-       return (user != null && user.matches(_adminuser)); 
-   } 
+      { return authorizedForAdmin(getAuthUser(req)); } 
    
    
    protected PrintWriter getWriter(Response resp) throws IOException
@@ -222,7 +224,7 @@ public abstract class ServerBase
    
    
    
-   protected long _sessions = 0;
+   protected static long _sessions = 0;
    protected synchronized long getSession(Request req)
       throws IOException
    {
