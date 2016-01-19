@@ -53,6 +53,7 @@ R\[            runner.png
 /!             police.png
 
 # Misc. 
+RH             radiation.png
 /[Ky+\-]|.\-   home.png         # #- is house
 \\K            sym00.png
 /\+            sym02.png
