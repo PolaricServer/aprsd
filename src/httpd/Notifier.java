@@ -22,6 +22,9 @@ public abstract class Notifier extends ServerBase implements Service
    
       protected final FrameChannel _chan; 
       protected final long _uid;
+    
+      protected boolean _admin=false, _sar=false, _login=false; 
+      protected String _username;
    
    
       public Client(FrameChannel ch, long uid) {
@@ -30,12 +33,21 @@ public abstract class Notifier extends ServerBase implements Service
       }
    
    
+      public final void setUsername(String uname) {
+            _username = uname; 
+            _admin = authorizedForAdmin(_username);
+            _sar = authorizedForUpdate(_username);
+            _login = (_username != null);
+       }
+       
+   
       public void send(Frame frame) throws IOException
          { _chan.send(frame); }
       
    
       public void sendText(String text) throws IOException
          { send(new DataFrame(FrameType.TEXT, text)); }
+   
    
       public void close() throws IOException
          { _chan.close(); }
@@ -67,7 +79,9 @@ public abstract class Notifier extends ServerBase implements Service
       }
    }
 
-        
+   /* Is this instance on a trusted configuration. */
+   private boolean _trusted = false;
+         
    /* Jackson JSON mapper */ 
    protected final static ObjectMapper mapper = new ObjectMapper();
    
@@ -75,8 +89,9 @@ public abstract class Notifier extends ServerBase implements Service
    protected final Map<Long, FrameListener> _clients;
       
    
-   public Notifier(ServerAPI api) throws IOException {
+   public Notifier(ServerAPI api, boolean trusted) throws IOException {
        super(api);
+      _trusted = trusted;
       _clients = new ConcurrentHashMap<Long, FrameListener>();
    }  
      
@@ -84,23 +99,8 @@ public abstract class Notifier extends ServerBase implements Service
    /* Factory method */
    public abstract Client newClient(FrameChannel ch, long uid);
      
-   
-   
-   /* FIXME: This method is copied from ServerBase. Should be in a base-class */
-   protected long _sessions = 0;
-   protected synchronized long getSession(Request req)
-      throws IOException
-   {
-      String s_str  = req.getParameter("clientses");
-      if (s_str != null && s_str.matches("[0-9]+")) {
-         long s_id = Long.parseLong(s_str);
-         if (s_id > 0)
-            return s_id;
-      }
-      _sessions = (_sessions +1) % 2000000000;
-      return _sessions;       
-   }
-   
+
+     
    
    /** 
     * Connect. Join the room. The user id is a long int which is 
@@ -114,6 +114,13 @@ public abstract class Notifier extends ServerBase implements Service
           Client client = newClient(chan, uid); 
           chan.register(client );
           
+          /* We need to be sure that we can trust that the user
+           * is who he says he is. Can we trust that getAuthUser is authenticated
+           * if not, try to authenticate. 
+           */
+          if (_trusted || trustUser(uid, req))
+                client.setUsername(getAuthUser(req));
+                 
           if (subscribe(uid, client, req)) {
              System.out.println("Subscription success. User="+uid);
              _clients.put(uid, client); 
@@ -128,8 +135,15 @@ public abstract class Notifier extends ServerBase implements Service
    
    
    
+   protected boolean trustUser(long uid, Request req) {
+      return false; 
+   }
+   
+   
    /**
-    * Authorize and subscribe client. Should be overridden in subclass. 
+    * Subscribe a client to the service. Should be overridden in subclass.
+    * This may include authorization, preferences, etc.. 
+    * @return true if subscription is accepted. False if rejected.
     */
    public boolean subscribe(long uid, Client client, Request req) 
       { return true; }

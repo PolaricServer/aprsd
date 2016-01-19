@@ -45,7 +45,7 @@ public class ChatRoom extends Notifier
     
     
    public ChatRoom(ServerAPI api) throws IOException
-     { super(api); }  
+     { super(api, false); }  
     
     
    

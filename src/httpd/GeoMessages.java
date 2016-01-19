@@ -14,22 +14,21 @@ import org.simpleframework.http.socket.service.Service;
 
 
 
-/* Should this class extend ServerBase? */
-
 public class GeoMessages extends Notifier 
 {
 
    public class Client extends Notifier.Client 
-   {
-       public boolean admin, sar, login; 
-       
+   {   
        public Client(FrameChannel ch, long uid) 
           { super(ch, uid); }
              
-       @Override public void onTextFrame(Request request, String text) {
-          System.out.println("onTextFrame: "+text);
+       
+       @Override synchronized public void onTextFrame(Request request, String text) {
           try {
             Message m = mapper.readValue(text, Message.class);
+            m.senderId = _uid;
+            m.msgId = _msgId++;
+            m.from = _username;
             postMessage(m);
          } catch (IOException e) 
              {System.out.println("ERROR: Cannot parse message: "+e);}
@@ -38,15 +37,17 @@ public class GeoMessages extends Notifier
    
    
    public static class Message { 
-       public String senderId;
+       public long senderId;
+       public long msgId;
        public String from, to; 
        public String text;
    }
 
+
+   private static long _msgId = 1;
    
-   
-   public GeoMessages(ServerAPI api) throws IOException
-      { super(api); }  
+   public GeoMessages(ServerAPI api, boolean trusted) throws IOException
+      { super(api, trusted); }  
     
     
    /* Factory method */
@@ -54,22 +55,24 @@ public class GeoMessages extends Notifier
       { return new Client(ch, uid); }
 
       
-   
-   @Override public boolean subscribe(long uid, Notifier.Client client, Request req) { 
-       /* 
-        * Should do authorization here. Can also do things 
-        * like getting user name, preferences, geographical area, etc.. 
-        */
+   /**
+    * Subscribe a client to the service. 
+    * This may include authorization, preferences, etc.. 
+    * @return true if subscription is accepted. False if rejected. 
+    */
+   @Override public boolean subscribe(long uid, Notifier.Client client, Request req)  { 
+       /* TBD. Do we really need this? */
        return true; 
    }
    
+   
    public void postMessage(Message msg) {
-        System.out.println("postMessage: to="+msg.to+", uid="+msg.senderId);
         if (msg.to != null)
           postObject(msg, x -> 
+               msg.to.equals(x._username) ||
                msg.to.matches("ALL") || 
-              (msg.to.matches("ALL-SAR") && ((Client)x).sar) ||
-              (msg.to.matches("ALL-LOGIN") && ((Client)x).login)          
+              (msg.to.matches("ALL-SAR") && x._sar) ||
+              (msg.to.matches("ALL-LOGIN") && x._login)
             );
 
    }

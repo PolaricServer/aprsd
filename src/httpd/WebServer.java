@@ -32,8 +32,9 @@ public class WebServer {
       /* Set up a map from paths to service implementations. */
       Map<String, Service> services = new HashMap<String, Service>(); 
       services.put("/chatroom", new ChatRoom(api));
-      services.put("/messages", new GeoMessages(api));
-      
+      services.put("/messages", new GeoMessages(api, false));
+      services.put("/messages_sec", new GeoMessages(api, true));
+       
       /* Create a router that uses the paths of the URLs to select the service. */
       Router wsrouter = new PathRouter (services, null); 
       
