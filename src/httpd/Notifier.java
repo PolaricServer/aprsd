@@ -10,6 +10,7 @@ import org.simpleframework.http.Cookie;
 import org.simpleframework.http.Request;
 import org.simpleframework.http.socket.*;
 import org.simpleframework.http.socket.service.Service;
+import org.simpleframework.transport.*;
 import java.util.function.*;
 import com.fasterxml.jackson.databind.*;
 
@@ -48,7 +49,9 @@ public abstract class Notifier extends ServerBase implements Service
       public void sendText(String text) throws IOException
          { send(new DataFrame(FrameType.TEXT, text)); }
    
-   
+      public long getUid() 
+         { return _uid; }
+         
       public void close() throws IOException
          { _chan.close(); }
       
@@ -157,7 +160,7 @@ public abstract class Notifier extends ServerBase implements Service
    public void postObject(Object myObj, Predicate<Client> pred) { 
       try { postText(mapper.writeValueAsString(myObj), pred); }
       catch (Exception e) {
-          System.out.println("*** Error. Cannot serialize object: "+e);
+          System.out.println("*** ERROR (Notifier). Cannot serialize object: "+e);
       }
    }
    
@@ -176,13 +179,16 @@ public abstract class Notifier extends ServerBase implements Service
                   client.sendText(txt);
                
             } catch(Exception e){   
-               _clients.remove(user); /* Unsubscribe */
-               client.close();
-               System.out.println("*** Error. Cannot send string: " + e);
+               if (e.getCause() instanceof TransportException) {
+                  _clients.remove(user); 
+                  System.out.println("*** INFO (Notifier): Unsubscribing closed client channel: "+user);       
+               }
+               else throw e;
             }
          }
       } catch(Exception e) {
-         System.out.println("*** Error. Cannot distribute string: " + e);
+         System.out.println("*** ERROR (Notifier). Cannot distribute string: " + e);
+         e.printStackTrace(System.out);
       }
    } 
    
