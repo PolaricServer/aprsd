@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2013 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ public final class SarUrl implements Runnable
     private Item               _lastItem;
     private static final long  _timeLimit = 1000  * 60 * 60  * 25;
     private static final long  _cacheTime = 1000  * 60 * 60 * 2;
-    
+    private ServerAPI          _api;
 
 
     private static final class Item {
@@ -46,6 +46,7 @@ public final class SarUrl implements Runnable
     
     public SarUrl(ServerAPI api)
     {
+        _api = api;
         _file = api.getProperty("sarurl.file", "sarurl.txt");
         _proto = api.getProperty("sarurl.protocol", "https");
         if (_file.charAt(0) != '/')
@@ -111,7 +112,6 @@ public final class SarUrl implements Runnable
     {
        if (_mapping.isEmpty()) 
            return;
-       System.out.println("*** SarUrl: Save/garbagecollect mappings");
        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(_file, false)));
        Iterator<Item> it = _mapping.iterator();
        while (it.hasNext())
@@ -143,7 +143,8 @@ public final class SarUrl implements Runnable
               }
            }
            catch (Exception e)
-               { System.out.println("*** SarUrl writer thread: "+e); e.printStackTrace(System.out);}                  
+               { _api.log().error("SarUrl", "Writer thread: "+e); 
+                  e.printStackTrace(System.out); }                  
         }  
     }   
 

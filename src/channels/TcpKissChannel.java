@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ public class TcpKissChannel extends TcpChannel
            _sent++;
         }
         catch (IOException e)
-           { logNote("Error: KissTncChannel.sendPacket: "+e); }
+           {  _api.log().error("TcpKissChannel", chId()+"KissTncChannel.sendPacket: "+e); }
     }
   
   

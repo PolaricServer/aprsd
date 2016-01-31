@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,13 +30,17 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     private   static Notifier    _change = new Notifier();
     protected static ServerAPI   _api = null;
     protected static StationDB   _db  = null;
-    protected static ColourTable _colTab = 
-        new ColourTable (System.getProperties().getProperty("confdir", ".")+"/trailcolours");
+    protected static ColourTable _colTab = null;
     private   static long        _posUpdates = 0;
     
     
-    public static void setApi(ServerAPI api)
-       { _api = api; _db = _api.getDB(); }
+    public static void setApi(ServerAPI api) { 
+       
+       _api = api; 
+       _db = _api.getDB(); 
+       _colTab = new ColourTable (api, System.getProperties().getProperty("confdir", ".")+"/trailcolours");
+       AprsPoint.setApi(api);
+    }
        
     /*
      * Static variables and functions to control expire timeouts 
@@ -139,7 +143,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
          */
         if ( tdistance > 0 && distance(newpos)/tdistance > (500 * 0.27778)) {
             if (!_fastmove) {
-               System.out.println("*** Point '"+this.getIdent()+"' moving faster than 500km/h. ignore.");
+               _api.log().info("TrackerPoint", "Point '"+this.getIdent()+"' moving faster than 500km/h. ignore.");
                _fastmove = true; 
                return false; 
             }
@@ -151,7 +155,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
          * history 
          */
         if (tdistance < 0 && _trail.add(ts, newpos, speed, course, pathinfo)) {
-            System.out.println("*** Old report - update trail");
+            _api.log().debug("TrackerPoint", "Old report - update trail");
             setChanging(); 
             return false;
         }

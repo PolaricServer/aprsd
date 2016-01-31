@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,13 +40,13 @@ public class StatLogger extends Thread {
            _api = api;
            start();
        }
-       catch (Exception e) { System.out.println("STATS LOGFILE: "+e); }
+       catch (Exception e) { _api.log().error("StatLogger", ""+e); }
     }
     
     
     public void run()
     {
-        System.out.println("*** Starting statistics logger");
+        _api.log().info("StatLogger", "Starting statistics logger");
         _out.println("time, hits, client-threads, pos-updates");
         long period = 1000 * 60;           // 1 minute
         long _posUpd = TrackerPoint.getPosUpdates();
@@ -65,7 +65,8 @@ public class StatLogger extends Thread {
 
            }
            catch (Exception e)
-               { System.out.println("*** StatLogger thread: "+e); e.printStackTrace(System.out);}                  
+               { _api.log().error("StatLogger", "Thread: "+e); 
+                  e.printStackTrace(System.out); }                  
         }  
     }
     

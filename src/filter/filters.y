@@ -2,6 +2,7 @@
 %{
 import java.io.*;
 import java.util.*;
+import no.polaric.aprsd.ServerAPI;
 %}
 
 /* YACC Declarations */
@@ -48,7 +49,7 @@ profile : public PROFILE IDENT '{' rules '}'
                              { if ((boolean)$1) 
                                   ruleset.setPublic(); 
                                profiles.put($3, ruleset); 
-                               System.out.println("*** View profile '"+$3+"' ok");
+                               _api.log().debug("ViewFilter", "View profile '"+$3+"' ok");
                                ruleset=null; }
         | error 
                             
@@ -181,6 +182,8 @@ tag_actions : tag_actions ',' TAG IDENT
   private Map<String, RuleSet> profiles = new HashMap<String,RuleSet>(); 
   private Map<String, Pred> predicates = new HashMap<String,Pred>(); 
   
+  private ServerAPI _api; 
+  private String _filename;
   
   /* a reference to the lexer object */
   private Lexer lexer;
@@ -192,14 +195,14 @@ tag_actions : tag_actions ',' TAG IDENT
       yyl_return = lexer.yylex();
     }
     catch (IOException e) {
-      System.out.println("IO error :"+e);
+      _api.log().error("ViewFilter", "IO error :"+e);
     }
     return yyl_return;
   }
   
   /* error reporting */
   public void yyerror (String error) {
-     System.out.println ("ERROR [line "+lexer.line()+"]: " + error);
+     _api.log().error(null, "In config file '"+_filename+"', line "+lexer.line()+": " + error);
   }
 
   public Map<String, RuleSet> getProfiles() 
@@ -212,8 +215,10 @@ tag_actions : tag_actions ',' TAG IDENT
       { yyparse(); }
       
   /* lexer is created in the constructor */
-  public Parser(Reader r) {
+  public Parser(ServerAPI api, Reader r, String fname) {
     lexer = new Lexer(r, this);
+    _api = api;
+    _filename = fname; 
     
     /* Install predefined predicates */
     predicates.put("infra",    Pred.Infra()); 
@@ -222,8 +227,3 @@ tag_actions : tag_actions ',' TAG IDENT
     predicates.put("igate",    Pred.Infra(false,true));
   }
 
-  /* that's how you use the parser */
-  public static void main(String args[]) throws IOException {
-    Parser yyparser = new Parser(new FileReader(args[0]));
-    yyparser.yyparse();    
-  }

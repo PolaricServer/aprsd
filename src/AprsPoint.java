@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,13 +23,18 @@ import java.io.Serializable;
  */
 public abstract class AprsPoint extends TrackerPoint implements Serializable, Cloneable
 {  
-    private   static SymTable  _symTab = new SymTable (System.getProperties().getProperty("confdir", ".")+"/symbols");
+    private   static SymTable  _symTab;
     
     protected char        _symbol; 
     protected char        _altsym; 
     protected int         _ambiguity = 0;
     
-
+    
+    public static void setApi(ServerAPI api) {
+        _symTab = new SymTable (api, System.getProperties().getProperty("confdir", ".")+"/symbols");
+    }
+    
+    
     public AprsPoint(Reference p)
       { super(p); }
 

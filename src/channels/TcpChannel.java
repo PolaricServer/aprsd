@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,6 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+ 
 package no.polaric.aprsd;
 import java.io.*;
 import java.net.*;
@@ -32,7 +33,6 @@ public abstract class TcpChannel extends AprsChannel implements Runnable, Serial
     transient protected Socket       _sock = null;     
     transient private   int          _max_retry;
     transient private   long         _retry_time;   
-    transient protected ServerAPI    _api;
     transient private   Thread       _thread;
     transient protected int          _chno;
     
@@ -79,6 +79,7 @@ public abstract class TcpChannel extends AprsChannel implements Runnable, Serial
            back.deActivate();
     }
 
+    
     /** Stop the service */
     public void deActivate() {
         close();
@@ -112,10 +113,10 @@ public abstract class TcpChannel extends AprsChannel implements Runnable, Serial
         if (_backup != null) {
            final AprsChannel ch = (AprsChannel) _api.getChanManager().get(_backup);         
            if (ch == null) {
-              logNote("Backup channel '"+_backup+"' not found");
+              _api.log().info("TcpChannel", chId()+"Backup channel '"+_backup+"' not found");
               return false;
            }
-           logNote("Activating backup channel '"+_backup+"'");
+           _api.log().info("TcpChannel", chId()+"Activating backup channel '"+_backup+"'");
            ch.activate(_api);
            if (this == _api.getInetChannel())
               _api.setInetChannel(ch);
@@ -123,7 +124,7 @@ public abstract class TcpChannel extends AprsChannel implements Runnable, Serial
            /* Re-try the first channel after two hours */
            scheduler.schedule(new Runnable() {
                  public void run() { 
-                    logNote("Try to re-activate channel '"+this+"' after using backup");
+                    _api.log().info("TcpChannel", chId()+"Try to re-activate channel '"+this+"' after using backup");
                     ch.deActivate(); 
                     activate(_api); 
                  }
@@ -142,7 +143,7 @@ public abstract class TcpChannel extends AprsChannel implements Runnable, Serial
     {
         int retry = 0;   
         _close = false; 
-        logNote("Starting main thread");
+        _api.log().info("TcpChannel", chId()+"Activating...");
         while (true) 
         { 
            _state = State.STARTING;
@@ -162,33 +163,33 @@ public abstract class TcpChannel extends AprsChannel implements Runnable, Serial
                _sock.setSoTimeout(1000 * 60 * 5);       
                if (!_sock.isConnected()) 
                {
-                   logNote("Connection to server '"+_host+"' failed");
+                   _api.log().warn("TcpChannel", chId()+"Connection to server '"+_host+"' failed");
                    retry++;
                    continue; // WHATS GOING ON HERE?
                }
                
                retry = 0; 
-               logNote("Connection to server '"+_host+"' established");
+                _api.log().info("TcpChannel", chId()+"Connection to server '"+_host+"' established");
                _state = State.RUNNING;
                receiveLoop();  
            }
            catch (java.net.ConnectException e)
            {
-                logNote("Server '"+_host+"' : "+e.getMessage());
+                _api.log().warn("TcpChannel", chId()+"Server '"+_host+"' : "+e.getMessage());
            }
            catch (java.net.SocketTimeoutException e)
            {
-                logNote("Server '"+_host+"' : socket timeout");
+                _api.log().warn("TcpChannel", chId()+"Server '"+_host+"' : socket timeout");
            }
            catch (java.net.UnknownHostException e)
            {
-                logNote("Server '"+_host+"' : Unknown host");
+                _api.log().warn("TcpChannel", chId()+"Server '"+_host+"' : Unknown host");
                 retry = _max_retry-2;
                 /* One more chance. Then give up */
            }
            catch(Exception e)
            {   
-                logNote("Server '"+_host+"' : "+e); 
+                _api.log().error("TcpChannel", chId()+"Server '"+_host+"' : "+e); 
                 e.printStackTrace(System.out);
            }
            finally 
@@ -196,13 +197,13 @@ public abstract class TcpChannel extends AprsChannel implements Runnable, Serial
         
            if (_close) {
               _state = State.OFF;
-              logNote("Channel closed");
+               _api.log().info("TcpChannel", chId()+"Channel closed");
               return;
            }
                    
            retry++;
         }
-        logNote("Couldn't connect to server '"+_host+"' - giving up");   
+         _api.log().warn("TcpChannel", chId()+"Couldn't connect to server '"+_host+"' - giving up");   
         _state = State.FAILED;
         
         /* Try to start backup channel if available */  

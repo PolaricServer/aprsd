@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -101,6 +101,7 @@ public class MessageProcessor implements Runnable, Serializable
    private String      _alwaysRf;
    private int         _threadid;
    private String      _file;
+   private ServerAPI   _api; 
     
     
    private static String getNextId()
@@ -128,6 +129,7 @@ public class MessageProcessor implements Runnable, Serializable
        _alwaysRf    = api.getProperty("message.alwaysRf", "");
        _thread  = new Thread(this, "MessageProcessor-"+(threadid++));
        _thread.start();
+       _api = api;
    }  
        
            
@@ -182,7 +184,7 @@ public class MessageProcessor implements Runnable, Serializable
             }
             result = result && subs.recipient.handleMessage(sender, text);
             if (!result) 
-               System.out.println("*** Message authentication failed. msgid="+msgid);
+               _api.log().info("MessageProc", "Message authentication failed. msgid="+msgid);
             recMessages.put(sender.getIdent()+"#"+msgid, result);
          }     
          if (msgid != null)
@@ -307,21 +309,21 @@ public class MessageProcessor implements Runnable, Serializable
           _inetChan.sendPacket(p);
        }   
        if (_inetChan == null && _rfChan == null)
-          System.out.println("*** MessageProcessor: Cannot send message. No channel.");
+          _api.log().warn("MessageProc", "Cannot send message. No channel.");
    }
 
 
     void save()
     { 
        try { 
-           System.out.println("*** Saving message data...");
+           _api.log().debug("MessageProc", "Saving message data...");
            FileOutputStream fs = new FileOutputStream(_file);
            ObjectOutput ofs = new ObjectOutputStream(fs);
        
            ofs.writeObject(_msgno);
            ofs.writeObject(recMessages); 
        } catch (Exception e) {
-           System.out.println("*** MesssageProcessor: cannot save: "+e);
+           _api.log().warn("MessageProc", "Cannot save: "+e);
        } 
     }
 
@@ -329,14 +331,14 @@ public class MessageProcessor implements Runnable, Serializable
     void restore()
      {        
          try {     
-             System.out.println("*** Restoring message data...");
+             _api.log().debug("MessageProc", "Restoring message data...");
              FileInputStream fs = new FileInputStream(_file);
              ObjectInput ifs = new ObjectInputStream(fs);
           
              _msgno = (Integer) ifs.readObject(); 
              recMessages = (RecMessages) ifs.readObject(); 
          } catch (Exception e) {
-             System.out.println("*** MessageProcessor: cannot restore: "+e);
+             _api.log().warn("MessageProc", "Cannot restore: "+e);
          } 
      }
      
@@ -371,7 +373,8 @@ public class MessageProcessor implements Runnable, Serializable
               }
             }
 
-         } catch (Exception e) { System.out.println("*** MSGPROCESSOR WARNING: "+e); }
+         } catch (Exception e) 
+             { _api.log().warn("MessageProc", ""+e); }
        }
     }
 

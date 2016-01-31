@@ -1,5 +1,5 @@
  /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ public abstract class AprsChannel extends Channel
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      private static boolean _logPackets = false; 
      
+     transient protected ServerAPI _api; 
      transient protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap();
     
      /* Statistics */
@@ -101,10 +102,10 @@ public abstract class AprsChannel extends Channel
                           
     public static final String _tx_encoding = "UTF-8";
 
-    
-    protected void logNote(String txt)
-      { System.out.println("*** [" + getShortDescr()+"] " + txt ); }
-    
+ 
+    protected String chId() {
+       return "["+getShortDescr()+"] "; 
+    }
     
     
     public abstract void close(); 
@@ -302,7 +303,7 @@ public abstract class AprsChannel extends Channel
           
        p.source = this;
        if (_logPackets)
-          System.out.println(df.format(new Date()) + " ["+getShortDescr()+"] "+p);
+          _api.log().log(null, chId()+p);
        _heardPackets++;
        dup = _dupCheck.checkPacket(p.from, p.to, p.report);
        if (!dup) 

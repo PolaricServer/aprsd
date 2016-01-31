@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
          }
          else
             /* FIXME: Should perhaps throw exception here? */
-            System.out.println("*** WARNING: Cannot activate igate, channel(s) not set");
+            _api.log().warn("Igate", "Cannot activate igate, channel(s) not set");
     }
    
    
@@ -114,7 +114,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
            return;
             
        _msgcnt++;
-       System.out.println("*** Gated to internet");
+       _api.log().debug("Igate", "Gated to internet");
        _log.log(" [" + _rfChan.getShortDescr() + ">" + _inetChan.getShortDescr() + "] " + p);       
        
        p.via += (",qAR,"+_myCall);
@@ -146,7 +146,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
                ! p.via.matches(".*((TCPXX)|NOGATE|RFONLY|NO_TX).*") 
        )    
        {        
-          System.out.println("*** Gated to RF");
+          _api.log().debug("Igate", "Gated to RF");
           _log.log(" [" + _inetChan.getShortDescr() + ">" + _rfChan.getShortDescr() + "] " 
                + p + (p.thirdparty ? " (was thirdparty)" : ""));
                

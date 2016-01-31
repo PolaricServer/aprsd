@@ -41,19 +41,20 @@ public class ViewFilter {
   
   
   /* Action(hideid, hidetrail, hideall, showpath, style) */
-  static {
+  public static void init(ServerAPI api) 
+  {
       String filename = System.getProperties().getProperty("confdir", ".") + "/view.profiles";
       try {
          // Default is to hide all
          _default.add(Pred.TRUE(), new Action(true,true,true,false,false,"",null));
          
-         System.out.println("*** Compiling view profiles..");
-         Parser parser = new Parser(new FileReader(filename));
+         api.log().info("ViewFilter", "Compiling view profiles..");
+         Parser parser = new Parser(api, new FileReader(filename), filename);
          parser.parse();
          _map = parser.getProfiles();
          _tagrules = parser.getTagRules();
       }
       catch (FileNotFoundException e)
-        { System.out.println("ERROR: file not found '"+filename+"'"); }
+        { api.log().error("ViewFilter", "File not found '"+filename+"'"); }
   } 
 }

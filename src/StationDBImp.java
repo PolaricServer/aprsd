@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -109,7 +109,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     {
         if (_hasChanged)
           try {
-             System.out.println("*** Saving point data...");
+             _api.log().info("StationDBImp", "Saving point data...");
              FileOutputStream fs = new FileOutputStream(_file);
              ObjectOutput ofs = new ObjectOutputStream(fs);
              
@@ -122,7 +122,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
 
            }
            catch (Exception e) {
-               System.out.println("*** StationDBImp: cannot save: "+e);
+               _api.log().warn("StationDBImp", "Cannot save data: "+e);
            } 
          _hasChanged = false; 
     }
@@ -134,7 +134,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     private synchronized void restore()
     {
         try {
-          System.out.println("*** Restoring point data...");
+          _api.log().info("StationDBImp", "Restoring point data...");
           FileInputStream fs = new FileInputStream(_file);
           ObjectInput ifs = new ObjectInputStream(fs);
           
@@ -151,7 +151,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
         }
         catch (EOFException e) { }
         catch (Exception e) {
-            System.out.println("*** StationDBImp: cannot restore: "+e);
+            _api.log().warn("StationDBImp", "Cannot restore data: "+e);
             _map.clear();
             _routes = new RouteInfo();
         } 
@@ -166,7 +166,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     public synchronized void garbageCollect()
     {
          Date now = new Date();  
-         System.out.println("*** Garbage collection...");
+         _api.log().info("StationDBImp", "Garbage collection...");
          Iterator<TrackerPoint> stn = _map.values().iterator();
          int n=0;
          while (stn.hasNext()) 
@@ -182,17 +182,15 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
              else
                 st.autoTag();
          }
-         System.out.println("        Removed: "+n+" items"); 
+         _api.log().info("StationDBImp", "GC Removed: "+n+" items"); 
          Calendar t = Calendar.getInstance();
          t.add(Calendar.DAY_OF_YEAR, -1);
          _routes.removeOldEdges(t.getTime());
-         
-         System.out.println("        Doing JVM finalization and GC");              
+                    
          s_runtime.runFinalization ();
          s_runtime.gc ();
          Thread.currentThread ().yield ();
-         System.out.println("        Free memory  = "+s_runtime.freeMemory ());
-         System.out.println("*** Garbage collection finished");  
+         _api.log().info("StationDBImp", "Garbage collection finished");
     }
     
     
@@ -260,7 +258,8 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
         for (TrackerPoint x : dupes)
            if (x instanceof AprsObject && !((AprsObject)x).isTimeless() && 
                   !owner.getIdent().equals(((AprsObject)x).getOwner().getIdent())) {
-               System.out.println("*** APRS object overtaken/deactivated: "+id+"@"+((AprsObject)x).getOwner().getIdent());
+               _api.log().info("StationDBImp",
+                  "APRS object overtaken/deactivated: "+id+"@"+((AprsObject)x).getOwner().getIdent());
                ((AprsObject)x).kill();
            }
     }
@@ -353,7 +352,8 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
               save();
            }
            catch (Exception e)
-               { System.out.println("*** StationDB GC thread: "+e); e.printStackTrace(System.out);}                  
+             {  _api.log().error("StationDBImp", "GC thread: "+e); 
+                e.printStackTrace(System.out); }                  
         }  
     }   
 

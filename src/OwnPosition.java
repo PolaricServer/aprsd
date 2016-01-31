@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ public class OwnPosition extends Station implements Runnable
 {
     transient private  AprsChannel _inetChan, _rfChan;
     transient private  Thread      _thread;
-    transient private  ServerAPI   _api;
+    transient protected  ServerAPI   _api;
     transient private  int         _tid;
     transient private  boolean     _txOn, _allowRf;
     transient protected String     _pathRf, _comment;
@@ -75,7 +75,7 @@ public class OwnPosition extends Station implements Runnable
            Reference p = new UTMRef(Double.parseDouble(pp[1]), Double.parseDouble(pp[2]), pp[0].charAt(2), 
                       Integer.parseInt( pp[0].substring(0,2)));
            updatePosition(new Date(), p, 0);
-           System.out.println("*** Own Position: "+p);
+           _api.log().info("OwnPosition", "Position is: "+p);
         }
         setId(myCall);
         setAltitude(-1);
@@ -156,7 +156,7 @@ public class OwnPosition extends Station implements Runnable
        
        /* Should type char be part of report ? */
        p.report = "/" + timeStamp(new Date()) + encodePos()+_comment;
-       System.out.println("*** POSREPORT SEND: "+ p.from+">"+p.to+":"+p.report);
+       _api.log().debug("OwnPosition", "Send position report: "+ p.from+">"+p.to+":"+p.report);
        
        /* Send object report on RF, if appropriate */
        p.via = _pathRf; 

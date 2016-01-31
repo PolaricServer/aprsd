@@ -1,4 +1,18 @@
-
+/* 
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+ 
+ 
 package no.polaric.aprsd;
 import uk.me.jstott.jcoord.*;
 import java.util.*;
@@ -8,7 +22,7 @@ import java.util.concurrent.locks.*;
 import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import no.polaric.aprsd.http.*;
-
+import no.polaric.aprsd.filter.*;
 
 
 public class Main implements ServerAPI
@@ -31,10 +45,17 @@ public class Main implements ServerAPI
    private static SarUrl sarurl;
    private static String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
    private static StatLogger stats; 
+   public  static Logfile log;
    
    /* API interface methods 
     * Should they be here or in a separate class ??
     */
+   public static Logfile getLog() 
+    { return log; }
+    
+   public Logfile log() 
+    { return log; }
+    
    public StationDB getDB() 
     { return db; }
    
@@ -81,7 +102,7 @@ public class Main implements ServerAPI
           ws.addHandler(cc[0].newInstance(this), prefix);
        }
        catch (Exception e)
-        { System.out.println("*** WARNING: cannot instantiate class: "+e); }
+        { log.warn("Main","cannot instantiate class: "+e); }
     }
     
    public ServerAPI.ServerStats getHttps()
@@ -98,7 +119,7 @@ public class Main implements ServerAPI
             FileOutputStream cfout = new FileOutputStream(_xconf);
             _config.storeToXML(cfout, "Configuration for Polaric APRSD");
        }
-       catch (java.io.IOException e) {System.out.println("*** WARNING: Cannot write file "+e);}
+       catch (java.io.IOException e) {log.warn("Main", "Cannot write file "+e);}
    }
           
    public String getProperty(String pname, String dvalue)
@@ -139,8 +160,7 @@ public class Main implements ServerAPI
    
    public void init(String[] args) 
       // Here open configuration files, create a trace file, create ServerSockets, Threads
-   {
-   
+   {    
         /* Get properties from configfile */
         if (args.length < 1)
            System.out.println("Usage: Daemon <config-file>");
@@ -214,10 +234,13 @@ public class Main implements ServerAPI
            /* API */
            api = this; // new Main();
            PluginManager.setServerApi(api);
+           log = new Logfile(this);
+           
+           ViewFilter.init(api);
         }
         catch( Exception ioe )
         {
-             System.err.println( "*** Couldn't init server:\n");
+             System.out.println("ERROR: Couldn't init server.");
              ioe.printStackTrace(System.err);
         }
     }
@@ -231,7 +254,7 @@ public class Main implements ServerAPI
            /* Start HTTP server */
            int http_port = getIntProperty("httpserver.port", 8081);
            ws = new WebContainer(api, http_port);
-           System.out.println( "*** HTTP server ready on port " + http_port);
+           log.info("Main", "HTTP/WS server ready on port " + http_port);
            
            /* Database of stations/objects */
            db  = new StationDBImp(api);   
@@ -249,7 +272,7 @@ public class Main implements ServerAPI
             */
            PluginManager.addList(getProperty("plugins", ""));
            
-           AprsPoint.setApi(api);
+           TrackerPoint.setApi(api);
            Station.init(api); 
            
            /* Add main webservices */
@@ -291,17 +314,17 @@ public class Main implements ServerAPI
                         ch.activate(api);
                  }
                  else
-                    System.out.println("*** ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
+                    log.error("Main", "ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
            }
 
            
            if (getBoolProperty("remotectl.on", false)) {
-               System.out.println("*** Activate Remote Control");
+               log.info("Main", "Activate Remote Control");
                rctl = new RemoteCtl(api, db.getMsgProcessor());
            }
             
            if (getBoolProperty("sarurl.on", false)) {
-               System.out.println("*** Activate Sar URL");
+               log.info("Main", "Activate Sar URL");
                sarurl = new SarUrl(api);
            }
   
@@ -319,7 +342,7 @@ public class Main implements ServerAPI
             * igate will not activate. Should those channels always be created????
             */     
            if (getBoolProperty("igate.on", false)) {
-               System.out.println("*** Activate IGATE");
+               log.info("Main", "Activate IGATE");
                igate = new Igate(api);
                igate.setChannels(ch2, ch1);
                igate.activate(this);
@@ -334,7 +357,7 @@ public class Main implements ServerAPI
           
           /* Own position */
           if (getBoolProperty("ownposition.gps.on", false)) {
-               System.out.println("*** Activate GPS");
+               log.info("Main", "Activate GPS");
                ownpos = new GpsPosition(api);
            }
            else
@@ -350,14 +373,14 @@ public class Main implements ServerAPI
            
            /* Server statistics */
            if (getBoolProperty("serverstats.on", false)) {
-               System.out.println("*** Activate server statistics");
+               log.info("Main", "Activate server statistics");
                stats = new StatLogger(api, "serverstats", "serverstats.log");
            }
             
         }
         catch( Exception ioe )
         {
-             System.err.println( "*** Couldn't start server:\n");
+             log.error("Main", "Couldn't start server:\n");
              ioe.printStackTrace(System.err);;
         }
         
@@ -368,7 +391,7 @@ public class Main implements ServerAPI
     public void stop()
       // Inform the Thread to terminate the run(), close the ServerSockets
     {
-         System.out.println("*** Polaric APRSD shutdown"); 
+         log.info("Main", "Polaric APRSD shutdown"); 
          PluginManager.deactivateAll();
          if (db  != null) db.save(); 
          if (ch1 != null) ch1.close();

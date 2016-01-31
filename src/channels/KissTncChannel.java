@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ public class KissTncChannel extends TncChannel
            _sent++;
         }
         catch (IOException e)
-           { logNote("Error: KissTncChannel.sendPacket: "+e); }
+           { _api.log().error("KissTncChannel", chId()+"sendPacket: "+e); }
     }
    
    
@@ -62,7 +62,7 @@ public class KissTncChannel extends TncChannel
      */
     @Override public void close() 
     { 
-       logNote("Closing TNC channel");
+        _api.log().info("KissTncChannel", chId()+"Closing channel");
        try {  
          _close = true;
          Thread.sleep(3000);

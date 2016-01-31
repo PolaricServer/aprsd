@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -139,7 +139,7 @@ public class AprsParser implements AprsChannel.Receiver
             default: 
         }
         }catch (NumberFormatException e)
-          { System.out.println("*** WARNING: Cannot parse number in input. Report string probably malformed"); }
+          { _api.log().warn("AprsParser", "Cannot parse number in input. Report string probably malformed"); }
         
         // _api.getAprsHandler().handlePacket(p.source, rtime, p.from, p.to, p.via, p.report);
         for (AprsHandler h:_subscribers)
@@ -282,7 +282,7 @@ public class AprsParser implements AprsChannel.Receiver
         else if (x instanceof AprsObject)
             obj = (AprsObject) x;
         else {
-           System.out.println("*** WARNING: Object "+x+" is not an APRS object");
+           _api.log().warn("AprsParser", "Object "+x+" is not an APRS object");
            return;
         }
              
@@ -319,7 +319,7 @@ public class AprsParser implements AprsChannel.Receiver
         else if (x instanceof AprsObject)
             obj = (AprsObject) x;
         else{
-           System.out.println("*** WARNING: Object "+x+" is not an APRS item");
+           _api.log().warn("AprsParser", "Object "+x+" is not an APRS item");
            return;
         }
              
@@ -533,7 +533,7 @@ public class AprsParser implements AprsChannel.Receiver
      * 'Compression' of timestamp is experimental. It is not part of 
      * the standard APRS protocol
      */
-    private static Date parseTimestamp(String data, boolean compressed)
+    private Date parseTimestamp(String data, boolean compressed)
     { 
          Calendar ts;
          int day,hour,min,sec;
@@ -578,7 +578,7 @@ public class AprsParser implements AprsChannel.Receiver
          }
          /* Sanity check */
          if (day<1||day>31||hour>24||min>59||sec>59) { 
-            System.out.println("*** WARNING: Timestamp format problem: "+dstr+tst);
+            _api.log().warn("AprsParser", "Timestamp format problem: "+dstr+tst);
             return new Date();
          }
 
@@ -636,13 +636,7 @@ public class AprsParser implements AprsChannel.Receiver
           
           latDeg = 90.0 - ((double) base91Decode(y[0], y[1], y[2], y[3])) / 380926; 
           lngDeg = -180 + ((double) base91Decode(x[0], x[1], x[2], x[3])) / 190463;
-          
-//          latDeg = 90.0 - (((double)(y[0]-33))*753571 + ((double)(y[1]-33))*8281 + 
-//                           ((double)(y[2]-33))*91 + ((double) y[3])-33) / 380926;
-                           
-//          lngDeg = -180 + (((double)(x[0]-33))*753571 + ((double)(x[1]-33))*8281 + 
-//                           ((double)(x[2]-33))*91 + ((double) x[3])-33) / 190463;
-          
+     
           if (((csT[2]-33) & 0x18) == 0x10) 
           {
              /* Altitude */

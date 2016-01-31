@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,7 +105,7 @@ public class InetChannel extends TcpChannel
              if (inp != null) 
                 receivePacket(inp, false);
              else {   
-                logNote("Disconnected from APRS server '"+getHost()+"'");
+                _api.log().info("InetChannel", chId()+"Disconnected from APRS server '"+getHost()+"'");
                 break; 
              }              
          }
