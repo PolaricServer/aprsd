@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ public class GpsPosition extends OwnPosition
                else break;
 
                try {
-                  System.out.println("*** Initialize GPS on "+_portName);
+                  _api.log().info("GpsPosition", "Initialize GPS on "+_portName);
                   _serialPort = connect(); 
                   _in = new BufferedReader(new InputStreamReader(_serialPort.getInputStream()));
                   while (true) {
@@ -60,7 +60,7 @@ public class GpsPosition extends OwnPosition
                }
                catch(NoSuchPortException e)
                {
-                  System.out.println("*** WARNING: serial port " + _portName + " not found");
+                  _api.log().warn("GpsPosition", "serial port " + _portName + " not found");
                   e.printStackTrace(System.out);
                }
                catch(Exception e)
@@ -70,7 +70,7 @@ public class GpsPosition extends OwnPosition
                }
                retry++;
           }
-          System.out.println("*** Couldn't connect to GPS on'"+_portName+"' - giving up");
+          _api.log().error("GpsPosition", "Couldn't connect to GPS on'"+_portName+"' - giving up");
        }
     }
 
@@ -138,7 +138,7 @@ public class GpsPosition extends OwnPosition
        if (!"A".equals(arg[2])) {
           _gpx_fix = false;
           if (++fcnt>=360) {
-              System.out.println("*** Still waiting for GPS to get fix...");
+              _api.log().info("GpsPosition", "Still waiting for GPS to get fix...");
               fcnt=0;
           }
           return;
@@ -189,7 +189,6 @@ public class GpsPosition extends OwnPosition
           tcnt = 0;
           try {
              String cmd = "sudo date " + linuxtimeformat.format(t); 
-             System.out.println("*** GPS SET TIME: "+cmd); 
              Runtime.getRuntime().exec(cmd);
           } catch (IOException e1) 
              {  e1.printStackTrace(); }
@@ -247,7 +246,7 @@ public class GpsPosition extends OwnPosition
     {
         CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(_portName);
         if ( portIdentifier.isCurrentlyOwned() )
-            System.out.println("*** ERROR: Port "+ _portName + " is currently in use");
+            _api.log().error("GpsPosition", "Port "+ _portName + " is currently in use");
         else
         {
             CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);       
@@ -257,11 +256,11 @@ public class GpsPosition extends OwnPosition
                 serialPort.setSerialPortParams(_baud, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
                 serialPort.enableReceiveTimeout(1000);
                 if (!serialPort.isReceiveTimeoutEnabled())
-                   System.out.println("*** WARNING: Timeout not enabled on serial port");
+                   _api.log().warn("GpsPosition", "Timeout not enabled on serial port");
                 return (SerialPort) commPort;
             }
             else
-                System.out.println("*** ERROR: Port " + _portName + " is not a serial port.");
+                _api.log().error("GpsPosition", "Port " + _portName + " is not a serial port.");
         }    
         return null; 
     }

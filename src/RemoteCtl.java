@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,9 +32,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */
    protected class Subscriber implements MessageProcessor.MessageHandler
    {
-      public boolean handleMessage(Station sender, String text)
-      {
-          System.out.println("*** RemoteCtl: "+sender.getIdent() + " > '"+ text + "'");
+      public boolean handleMessage(Station sender, String text) {
           return processRequest(sender, text);
       } 
    }
@@ -91,7 +89,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private int _try_parent = 0;
    public void reportFailure(String id)
    {
-      System.out.println("*** WARNING: Failed to deliver message to: "+id);
+      _api.log().warn("RemoteCtl", "Failed to deliver message to: "+id);
       if (id.equals(_parent)) {
           _parentCon = false;
           _log.log(" *** Connection to parent: "+id+ " failed");
@@ -243,23 +241,23 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doSetSarMode(Station sender, String args)
    {
        if (args == null) {
-          System.out.println("*** WARNING: missing arguments to remote SAR command");
+          _api.log().warn("RemoteCtl", "Missing arguments to remote SAR command");
           return false;
        }
        if ("OFF".equals(args.trim())) {
-           System.out.println("*** Clear SAR-mode from "+sender.getIdent());
+           _api.log().debug("RemoteCtl", "Clear SAR-mode from "+sender.getIdent());
            _api.clearSar();
        }
        else {      
            String[] arg = args.split("\\s+", 3);
            if (arg.length < 3)
            {
-               System.out.println("*** WARNING: remote SAR command syntax error");
+               _api.log().warn("RemoteCtl", "Remote SAR command syntax error");
                return false;
            }
            boolean nohide = arg[2].matches("\\[NOHIDE\\].*");
            
-           System.out.println("*** Set SAR-mode from "+sender.getIdent());
+           _api.log().debug("RemoteCtl", "Set SAR-mode from "+sender.getIdent());
            String filter = ("NONE".equals(arg[1]) ? "" : arg[1]);
            _api.setSar(arg[2], arg[0], filter, !nohide);
        }
@@ -276,11 +274,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doSetTag(Station sender, String args)
    {
       if (args == null) {
-          System.out.println("*** WARNING: missing arguments to remote TAG command");
+          _api.log().warn("RemoteCtl", "Missing arguments to remote TAG command");
           return false;
       }
       
-      System.out.println("*** Set TAG from "+sender.getIdent());
+      _api.log().debug("RemoteCtl", "Set TAG from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
       PointObject item = _api.getDB().getItem(arg[0].trim(), null);
@@ -302,11 +300,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doRemoveTag(Station sender, String args)
    {
       if (args == null) {
-          System.out.println("*** WARNING: missing arguments to remote TAG command");
+          _api.log().warn("RemoteCtl", "Missing arguments to remote TAG command");
           return false;
       }
       
-      System.out.println("*** Remove TAG from "+sender.getIdent());
+      _api.log().debug("RemoteCtl", "Remove TAG from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
       PointObject item = _api.getDB().getItem(arg[0].trim(), null);
@@ -328,11 +326,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doSetAlias(Station sender, String args)
    {
       if (args == null) {
-          System.out.println("*** WARNING: missing arguments to remote ALIAS command");
+          _api.log().warn("RemoteCtl", "Missing arguments to remote ALIAS command");
           return false;
       }
       
-      System.out.println("*** Set ALIAS from "+sender.getIdent());
+      _api.log().debug("RemoteCtl", "Set ALIAS from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
       TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
@@ -357,11 +355,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doSetIcon(Station sender, String args)
    {
       if (args == null) {
-          System.out.println("*** WARNING: missing arguments to remote ICON command");
+          _api.log().warn("RemoteCtl", "Missing arguments to remote ICON command");
           return false;
       }
       
-      System.out.println("*** Set ICON from "+sender.getIdent());
+      _api.log().debug("RemoteCtl", "Set ICON from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
       TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
@@ -419,7 +417,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
          Thread.sleep(20000);
          while (true) {
             if (_parent != null) {
-               System.out.println("*** RemoteCtl: Send CON: "+_parent);
+               _api.log().debug("RemoteCtl", "Send CON: "+_parent);
                sendRequest(_parent, "CON");
             }
             

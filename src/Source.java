@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ public abstract class Source implements Serializable
      protected boolean _restrict = false;
      protected String _tag = null;
      protected String _ident = null; 
+     protected ServerAPI _api;
         
      
      public enum Type {inet, radio, local};
@@ -49,6 +50,7 @@ public abstract class Source implements Serializable
      
      protected void _init(ServerAPI config, String prefix, String id) 
      {
+        _api = config;
         boolean restrict = config.getBoolProperty(prefix+"."+id+".restrict", false);
         String tag = config.getProperty(prefix+"."+id+".tag", _tag); 
         _init(id, restrict, tag); 

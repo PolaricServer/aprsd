@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,6 @@ public abstract class TncChannel extends AprsChannel implements Runnable
     transient protected boolean      _close = false;
     transient private   int          _max_retry;
     transient private   long         _retry_time;   
-    transient protected ServerAPI    _api;
     transient protected SerialPort   _serialPort;
     transient private   Semaphore    _sem = new Semaphore(1, true);
     transient protected Logfile      _log; 
@@ -105,7 +104,7 @@ public abstract class TncChannel extends AprsChannel implements Runnable
     {
         CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(_portName);
         if ( portIdentifier.isCurrentlyOwned() )
-            logNote("ERROR: Port "+ _portName + " is currently in use");
+            _api.log().error("TncChannel", chId()+"Port "+ _portName + " is currently in use");
         else
         {
             CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);       
@@ -115,11 +114,11 @@ public abstract class TncChannel extends AprsChannel implements Runnable
                 serialPort.setSerialPortParams(_baud, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
                 serialPort.enableReceiveTimeout(1000);
                 if (!serialPort.isReceiveTimeoutEnabled())
-                   logNote("WARNING: Timeout not enabled on serial port");
+                   _api.log().warn("TncChannel", chId()+"Timeout not enabled on serial port");
                 return (SerialPort) commPort;
             }
             else
-                logNote("ERROR: Port " + _portName + " is not a serial port.");
+                _api.log().error("TncChannel", chId()+"Port " + _portName + " is not a serial port.");
         }    
         return null; 
     }
@@ -135,7 +134,7 @@ public abstract class TncChannel extends AprsChannel implements Runnable
     {
         int retry = 0;       
         _close = false;
-        logNote("Starting main thread");
+        _api.log().info("TncChannel", chId()+"Activating...");
         while (true) 
         {
            _state = State.STARTING;
@@ -150,7 +149,7 @@ public abstract class TncChannel extends AprsChannel implements Runnable
            else break;
         
            try {
-               logNote("Initialize TNC on "+_portName);
+               _api.log().debug("TncChannel",chId()+"Initialize TNC on "+_portName);
                _serialPort = connect();
                if (_serialPort == null)
                    continue; 
@@ -159,7 +158,7 @@ public abstract class TncChannel extends AprsChannel implements Runnable
            }
            catch(NoSuchPortException e)
            {
-                logNote("WARNING: serial port " + _portName + " not found");
+                _api.log().error("TncChannel", chId()+"Serial port " + _portName + " not found");
                 e.printStackTrace(System.out);
            }
            catch(Exception e)
@@ -170,13 +169,13 @@ public abstract class TncChannel extends AprsChannel implements Runnable
                    
            if (_close) {
               _state = State.OFF;
-              logNote("Channel closed");
+              _api.log().info("TncChannel", chId()+"Channel closed");
               return;
            }
            
            retry++;      
         }
-        logNote("Couldn't connect to TNC on'"+_portName+"' - giving up");
+         _api.log().warn("TncChannel", chId()+"Couldn't connect to TNC on'"+_portName+"' - giving up");
         _state = State.FAILED;
      }
        

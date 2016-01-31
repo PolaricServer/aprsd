@@ -1,4 +1,18 @@
+/*
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
 
+ 
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
 import org.simpleframework.http.core.Container;
@@ -81,14 +95,14 @@ public class WebContainer implements Container, ServerAPI.ServerStats
                if (_requests > _max_load) {
                   resp.setCode(503); 
                   resp.setDescription("Service Unavailable");
-                  System.out.println("*** Server overload or threads not finishing");
+                  _api.log().warn("WebContainer", "Server overload or threads not finishing");
                }
                
                if (!allowed) {
                   out.println("<html><body>Access denied.</body></html>");
                   resp.setCode(403); 
                   resp.setDescription("Forbidden");
-                  System.out.println("*** HTTP access denied. From: "+req.getClientAddress());
+                  _api.log().info("WebContainer", "HTTP access denied. From: "+req.getClientAddress());
                }
                else {
                   out.println("<html><body>Unknown service: "+uri+"</body></html>");
@@ -103,7 +117,7 @@ public class WebContainer implements Container, ServerAPI.ServerStats
             resp.setDate("Last-Modified", time);
          }
          catch (Throwable e) {
-             System.out.println("*** HTTP REQ exception: "+e);
+             _api.log().error("WebContainer", "HTTP REQ exception: "+e);
              e.printStackTrace(System.out);
              if (e instanceof InvocationTargetException)
                 e = e.getCause();
@@ -170,11 +184,11 @@ public class WebContainer implements Container, ServerAPI.ServerStats
             /* FIXME: Should check if method is public, type of parameters and return value */
             String key = m.getName().replaceFirst("handle_", "");
             if (_handlers.containsKey(key))
-                System.out.println("*** WARNING: add HTTP handler. Key '"+key+"' already exists, overriding");
+                _api.log().warn("WebContainer", "Add HTTP handler. Key '"+key+"' already exists, overriding");
             if (prefix != null && prefix.charAt(0) != '/')
                 prefix = "/" + prefix;
             key = (prefix==null ? "" : prefix) + "/" + key;
-            System.out.println("*** Add HTTP handler method: "+key+" --> "+m.getName());
+            _api.log().debug("WebContainer", "Add HTTP handler method: "+key+" --> "+m.getName());
             _handlers.put(key, new _Handler(o, m));
          }
    }

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,7 +92,7 @@ public class OwnObjects implements Runnable
             return true;
          }
        
-         System.out.println("WARNING: Object "+id+" already exists somewhere else");
+         _api.log().warn("OwnObject", "Object "+id+" already exists somewhere else");
          return false;
     }
     
@@ -204,7 +204,7 @@ public class OwnObjects implements Runnable
        p.report = ";" + id + (delete ? "_" : "*") 
                    + posReport((obj.isTimeless() ? null : obj.getUpdated()), obj.getPosition(), obj.getSymbol(), obj.getSymtab())
                    + obj.getDescr(); 
-       System.out.println("*** OBJECTREPORT SEND: "+ p.from+">"+p.to+":"+p.report);
+       _api.log().debug("OwnObjects", "Send object report: "+ p.from+">"+p.to+":"+p.report);
        
        /* Send object report on aprs-is */
        if (_inetChan != null) 
@@ -233,7 +233,6 @@ public class OwnObjects implements Runnable
        try { 
           ofs.writeObject(_ownObjects.size());
           for (String s: _ownObjects) {
-              System.out.println("Save ownobj: "+s);
               ofs.writeObject(s); 
           }
        } catch (Exception e) {} 
@@ -246,7 +245,6 @@ public class OwnObjects implements Runnable
             int n = (Integer) ifs.readObject(); 
             for (int i=0; i<n; i++) {
                 String x = (String) ifs.readObject();
-                System.out.println("Restore ownobj: "+x);
                 _ownObjects.add(x); 
             }
         } catch (Exception e) {} 
@@ -273,7 +271,8 @@ public class OwnObjects implements Runnable
                  
             Thread.sleep(_txPeriod * 1000 - 3000);
          } catch (Exception e) 
-            { System.out.println("*** OWNOBJECTS THREAD: "+e); e.printStackTrace(System.out); }
+            { _api.log().error("OwnObjects", "Run thread: "+e); 
+               e.printStackTrace(System.out); }
        }
     }
    

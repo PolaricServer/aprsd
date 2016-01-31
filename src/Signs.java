@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -122,8 +122,10 @@ public class Signs extends Source
                }
             }     
         }
-        catch (Exception e) 
-            { System.out.println("SIGNLIST WARNING: "+e); }
+        catch (FileNotFoundException  e) 
+            { _api.log().info("Signs", "No signs file present."); }
+        catch (Exception  e) 
+            { _api.log().warn("Signs", ""+e); }    
     }     
     
     

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,14 +123,14 @@ public class Tnc2Channel extends TncChannel implements Runnable
             line += (char) _in.read();
       
          if (line.contains("cmd:"))
-            System.out.println("*** TNC in command mode");
+             _api.log().debug("TncChannel", chId()+"TNC in command mode");
          else 
             if (reset_retry) {
-                System.out.println("*** Warning: Cannot get command prompt from TNC. Giving up"); 
+                 _api.log().error("TncChannel", chId()+"Cannot get command prompt from TNC. Giving up"); 
                 reset_retry = false;
             }
             else {
-                System.out.println("*** Cannot get command prompt from TNC. Trying a RESET"); 
+                 _api.log().warn("TncChannel", chId()+"Cannot get command prompt from TNC. Trying a RESET"); 
                 reset_retry = true; 
                 continue; 
             }
@@ -173,7 +173,7 @@ public class Tnc2Channel extends TncChannel implements Runnable
           Thread.sleep(200);
         }
         catch (Exception e) 
-           { System.out.println("*** Error: initTnc: "+e); }
+           {  _api.log().error("TncChannel", chId()+"initTnc: "+e); }
     }
     
   
@@ -198,7 +198,7 @@ public class Tnc2Channel extends TncChannel implements Runnable
      */
     @Override public void close() 
     { 
-       System.out.println("*** Closing TNC channel");
+       _api.log().error("TncChannel", chId()+"Closing channel..");
        try {  
          _close = true;
          Thread.sleep(3000);

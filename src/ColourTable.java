@@ -1,3 +1,17 @@
+/* 
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
 package no.polaric.aprsd;
 import java.net.*;
 import java.util.*;
@@ -14,7 +28,7 @@ public class ColourTable
     Iterator<String> it = null;
     
     
-    public ColourTable(String file) 
+    public ColourTable(ServerAPI api, String file) 
     {
         try {
            _rd = new BufferedReader(new FileReader(file));
@@ -26,7 +40,8 @@ public class ColourTable
             }   
            it = list.iterator(); 
         }
-        catch (Exception e) { System.out.println("COLOURLIST WARNING: "+e); }
+        catch (Exception e) { 
+           api.log().error("ColourTable", ""+e); }
     } 
 
 
