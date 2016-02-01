@@ -92,7 +92,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       _api.log().warn("RemoteCtl", "Failed to deliver message to: "+id);
       if (id.equals(_parent)) {
           _parentCon = false;
-          _log.log(" *** Connection to parent: "+id+ " failed");
+          _log.info(null, "Connection to parent: "+id+ " failed");
       }
       _children.remove(id);
    }
@@ -100,7 +100,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    public void reportSuccess(String id)
    {
       if (!_parentCon && id.equals(_parent)) {
-          _log.log(" *** Connection to parent: "+id+ " established");
+          _log.info(null, "Connection to parent: "+id+ " established");
           _parentCon = true;
       }
    }
@@ -112,7 +112,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    public void sendRequest(String dest, String text)
    { 
       _msg.sendMessage(dest, text, true, true, this);
-      _log.log(" [> "+dest+"] "+text);
+      _log.log("[> "+dest+"] "+text);
    }
    
      
@@ -130,7 +130,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             { _msg.sendMessage(r, text, true, true, this); n++; }
     
       if (n>0)
-         _log.log(" [> ALL("+n+")] " + text + (except==null||n==0 ? "" : " -- (not to "+except+")" ));
+         _log.log("[> ALL("+n+")] " + text + (except==null||n==0 ? "" : " -- (not to "+except+")" ));
       storeRequest(text);                
    }
 
@@ -223,9 +223,9 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       if ((!_parentCon || !sender.getIdent().equals(_parent)) 
                && !_children.containsKey(sender.getIdent()))       
       {
-           _log.add(" *** Connection from child: "+sender.getIdent()+" established");
+           _log.info(null, "Connection from child: "+sender.getIdent()+" established");
            if (!_cmds.isEmpty())
-              _log.add(" *** Playback command log");
+              _log.info(null, "Playback command log");
            playbackLog(sender.getIdent());
       }
       _children.put(sender.getIdent(), new Date());
@@ -423,7 +423,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             
             for (String x : getChildren()) 
                 if (_children.get(x).getTime() + 2400000 <= (new Date()).getTime()) {
-                   _log.add("*** "+x+" disconnected (timeout)");
+                   _log.info(null, ""+x+" disconnected (timeout)");
                    _children.remove(x);
                 }
             Thread.sleep(1200000);

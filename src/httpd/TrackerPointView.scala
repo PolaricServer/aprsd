@@ -87,7 +87,7 @@ package no.polaric.aprsd.http
                 { ch = model.setAlias(null)
                   alias = "NULL"
                 }
-             System.out.println("*** ALIAS: '"+alias+"' for '"+model.getIdent()+"' by user '"+getAuthUser(req)+"'")
+             _api.log().info("TrackerPointView", "ALIAS: '"+alias+"' for '"+model.getIdent()+"' by user '"+getAuthUser(req)+"'")
              if (ch && api.getRemoteCtl() != null)
                  api.getRemoteCtl().sendRequestAll("ALIAS "+model.getIdent()+" "+alias, null);
 

@@ -398,7 +398,7 @@ public class Main implements ServerAPI
          try {
             ws.stop();
          } catch (IOException e) {}
-       
+
          log.info("Main", "Polaric APRSD shutdown"); 
          PluginManager.deactivateAll();
          if (db  != null) db.save(); 

@@ -46,7 +46,7 @@ public class StatLogger extends Thread {
     
     public void run()
     {
-        _api.log().info("StatLogger", "Starting statistics logger");
+        _api.log().debug("StatLogger", "Starting statistics logger");
         _out.println("time, hits, client-threads, pos-updates");
         long period = 1000 * 60;           // 1 minute
         long _posUpd = TrackerPoint.getPosUpdates();

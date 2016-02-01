@@ -51,8 +51,10 @@ R\[            runner.png
 /o             eoc.png
 \\!            00-emergency.png
 /!             police.png
+\\<            flag-advisory.png
 
 # Misc. 
+RH             radiation.png
 /[Ky+\-]|.\-   home.png         # #- is house
 \\K            sym00.png
 /\+            sym02.png

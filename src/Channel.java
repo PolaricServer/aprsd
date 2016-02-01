@@ -36,6 +36,12 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
 
      
      
+ 
+     protected String chId() {
+        return "["+getShortDescr()+"] "; 
+     }
+    
+    
      public State getState() 
         { return _state; }
         

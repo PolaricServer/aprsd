@@ -31,7 +31,7 @@ public abstract class Source implements Serializable
      protected boolean _restrict = false;
      protected String _tag = null;
      protected String _ident = null; 
-     protected ServerAPI _api;
+     transient protected ServerAPI _api;
         
      
      public enum Type {inet, radio, local};
