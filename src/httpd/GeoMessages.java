@@ -1,8 +1,7 @@
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.io.IOException;
@@ -28,10 +27,12 @@ public class GeoMessages extends Notifier
             Message m = mapper.readValue(text, Message.class);
             m.senderId = _uid;
             m.msgId = _msgId++;
+            if (m.time==null)
+               m.time = new Date();
             m.from = _username;
             postMessage(m);
          } catch (IOException e) 
-             {System.out.println("ERROR: Cannot parse message: "+e);}
+             { _api.log().error("GeoMessages", "Cannot parse message: "+e); }
        }
    }
    
@@ -39,12 +40,17 @@ public class GeoMessages extends Notifier
    public static class Message { 
        public long senderId;
        public long msgId;
+       public Date time; 
        public String from, to; 
        public String text;
    }
 
 
    private static long _msgId = 1;
+   private List<Message> _lastMsgs = new LinkedList<Message>();
+    // Lag metode for å liste meldinger. 
+    // HTML web interface for å sende melding og se liste. Obs. Oppdatere lista når nye meldinger legges til? 
+    //   callback? Callback til klient via denne websocket? 
    
    public GeoMessages(ServerAPI api, boolean trusted) throws IOException
       { super(api, trusted); }  
@@ -67,13 +73,19 @@ public class GeoMessages extends Notifier
    
    
    public void postMessage(Message msg) {
-        if (msg.to != null)
-          postObject(msg, x -> 
+        if (msg.to != null) {
+           _lastMsgs.add(msg);
+           if (_lastMsgs.size() > 30)
+              _lastMsgs.remove(0);
+              
+           postObject(msg, x -> 
                msg.to.equals(x._username) ||
                msg.to.matches("ALL") || 
               (msg.to.matches("ALL-SAR") && x._sar) ||
               (msg.to.matches("ALL-LOGIN") && x._login)
             );
+            
+        }
 
    }
 

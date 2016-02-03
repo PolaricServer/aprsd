@@ -92,7 +92,13 @@ package no.polaric.aprsd.http
       protected def textInput(id : String, length: Int, maxlength: Int, value: String): NodeSeq = 
           textInput(id, length, maxlength, null, value)
           ;
-          
+      
+      /** Input type textarea */
+      protected def textArea(id : String, width: Int, height: Int, value: String): NodeSeq =  
+           <textarea id={id} name={id} width={width.toString()} height={height.toString()}>
+           {value}
+           </textarea>
+          ;    
           
       protected def TXT(t:String): NodeSeq = <xml:group>{t}</xml:group>
    

@@ -520,6 +520,7 @@ package no.polaric.aprsd.http
     }
     
 
+    
 
     protected def itemList(I:I18n, list: List[TrackerPoint], mobile: Boolean, 
                   fprefix: String, loggedIn: Boolean): NodeSeq = 
@@ -562,8 +563,37 @@ package no.polaric.aprsd.http
         } 
       </table>
 
+
+      
+   /**
+    * Send instant message. 
+    */
+   protected def handle_sendmsg(req : Request, res : Response) = 
+   {
+        val I = getI18n(req)
+        val prefix = <h2> {I.tr("Send message")} </h2>
+        
+        /* Fields to be filled in */
+        def fields(req : Request): NodeSeq =
+            label("msgto", "lleftlab", I.tr("To")+":", "") ++
+            textInput("msgto", 10,10, "") ++
+            label("msgcontent", "lleftlab", I.tr("To")+":", "") ++
+            textArea("msgcontent", 15, 4, "");
+            ;
+            
+            
+        /* Action. To be executed when user hits 'submit' button */
+        def action(request : Request): NodeSeq = 
+            <div></div>          
+            ;
+            
+            
+        printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
+    }
    
    
+       
+       
    
   /** 
     * Search in the database over point objects. 
