@@ -172,7 +172,7 @@ package no.polaric.aprsd.http
                else {
                   val osymtab = req.getParameter("osymtab")
                   val osym  = req.getParameter("osym")
-                  System.out.println("*** SET OWN POS by user '"+getAuthUser(req)+"'")
+                  _api.log().info("Webservices","SET OWN POS by user '"+getAuthUser(req)+"'")
                   p.updatePosition(new Date(), pos, 
                       if (osymtab==null) '/' else osymtab(0), if (osym==null) 'c' else osym(0))
                   
@@ -310,7 +310,7 @@ package no.polaric.aprsd.http
           }
           else {
               if (_api.getDB().getOwnObjects().delete(id)) {
-                  System.out.println("*** DELETE OBJECT: '"+id+"' by user '"+getAuthUser(req)+"'")
+                  _api.log().info("Webservices", "DELETE OBJECT: '"+id+"' by user '"+getAuthUser(req)+"'")
                   <h3> {I.tr("Object removed!")} </h3>
               }
               else
@@ -361,7 +361,7 @@ package no.polaric.aprsd.http
        def setTag(item:PointObject, tag:String)
        {
            item.setTag(tag)
-           System.out.println("*** TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthUser(req)+"'")
+           _api.log().info("Webservices", "TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthUser(req)+"'")
            if (api.getRemoteCtl() != null)
               api.getRemoteCtl().sendRequestAll("TAG "+item.getIdent()+" "+tag, null);
        }
@@ -369,7 +369,7 @@ package no.polaric.aprsd.http
        def removeTag(item:PointObject, tag:String)
        {
            item.removeTag(tag)
-           System.out.println("*** REMOVE TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthUser(req)+"'")
+           _api.log().info("Webservices", "REMOVE TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthUser(req)+"'")
            if (api.getRemoteCtl() != null)
               api.getRemoteCtl().sendRequestAll("RMTAG "+item.getIdent()+" "+tag, null);
        }
@@ -500,7 +500,7 @@ package no.polaric.aprsd.http
                val otxt = req.getParameter("descr")
                val perm = req.getParameter("perm")
                
-               System.out.println("*** SET OBJECT: '"+id+"' by user '"+getAuthUser(request)+"'")
+               _api.log().info("Webservices", "SET OBJECT: '"+id+"' by user '"+getAuthUser(request)+"'")
                if ( _api.getDB().getOwnObjects().add(id, 
                       new AprsHandler.PosData( pos,
                          if (osym==null) 'c' else osym(0) ,
