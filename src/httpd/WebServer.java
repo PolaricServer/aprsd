@@ -16,10 +16,12 @@ import org.simpleframework.http.socket.service.*;
 
 
 
-public class WebServer {
+public class WebServer implements ServerAPI.Web  {
    private final Connection _conn;
    private final SocketAddress _addr;  
    private final SocketProcessor _server;
+   private final GeoMessages _messages;
+   
    
    /** 
     * Configure a webserver. 
@@ -32,8 +34,9 @@ public class WebServer {
       /* Set up a map from paths to service implementations. */
       Map<String, Service> services = new HashMap<String, Service>(); 
       services.put("/chatroom", new ChatRoom(api));
-      services.put("/messages", new GeoMessages(api, false));
-      services.put("/messages_sec", new GeoMessages(api, true));
+   
+      _messages = new GeoMessages(api, true);
+      services.put("/messages_sec", _messages);
        
       /* Create a router that uses the paths of the URLs to select the service. */
       Router wsrouter = new PathRouter (services, null); 
@@ -44,6 +47,9 @@ public class WebServer {
       _addr = new InetSocketAddress(port);
    }
 
+   public ServerAPI.Mbox getMbox() {
+       return _messages;
+   }
    
    public void start() throws IOException {
        _conn.connect(_addr);

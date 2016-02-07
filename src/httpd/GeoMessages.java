@@ -13,7 +13,7 @@ import org.simpleframework.http.socket.service.Service;
 
 
 
-public class GeoMessages extends Notifier 
+public class GeoMessages extends Notifier implements ServerAPI.Mbox
 {
 
    public class Client extends Notifier.Client 
@@ -46,12 +46,19 @@ public class GeoMessages extends Notifier
    }
 
 
+   /* Note that if we want more than one instance of the set of messages/users,
+    * these static variables may be factored out as a class
+    */
    private static long _msgId = 1;
    private List<Message> _lastMsgs = new LinkedList<Message>();
-    // Lag metode for å liste meldinger. 
-    // HTML web interface for å sende melding og se liste. Obs. Oppdatere lista når nye meldinger legges til? 
-    //   callback? Callback til klient via denne websocket? 
+   private SortedSet<String> _users = new TreeSet<String>(); 
    
+   
+   
+   public Set<String> getUsers()
+      { return _users; }
+      
+      
    public GeoMessages(ServerAPI api, boolean trusted) throws IOException
       { super(api, trusted); }  
     
@@ -67,17 +74,30 @@ public class GeoMessages extends Notifier
     * @return true if subscription is accepted. False if rejected. 
     */
    @Override public boolean subscribe(long uid, Notifier.Client client, Request req)  { 
-       /* TBD. Do we really need this? */
+       _users.add(client.getUsername());
        return true; 
+   }
+   
+   
+   public void postMessage(String from, String to, String txt)
+   {
+       Message m = new Message(); 
+       m.from = from; 
+       m.to = to; 
+       m.time = new Date();
+       m.text = txt;
+       postMessage(m);
    }
    
    
    public void postMessage(Message msg) {
         if (msg.to != null) {
-           _lastMsgs.add(msg);
-           if (_lastMsgs.size() > 30)
-              _lastMsgs.remove(0);
-              
+           synchronized(this) {
+             _lastMsgs.add(msg);
+             if (_lastMsgs.size() > 30)
+               _lastMsgs.remove(0);
+           } 
+           
            postObject(msg, x -> 
                msg.to.equals(x._username) ||
                msg.to.matches("ALL") || 

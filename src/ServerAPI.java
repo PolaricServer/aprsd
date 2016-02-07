@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  */
 
-
+ 
 package no.polaric.aprsd;
 import java.util.*;
 
@@ -32,13 +32,33 @@ import java.util.*;
          /** Number of requests. */
          public int getReq();
       }
-   
+      
+      
+      /** Interface to web server */
+      public interface Web {
+         public Mbox getMbox(); 
+         public void start() throws Exception; 
+         public void stop() throws Exception;
+      }
+      
+      
+      /** Messaging service */
+      public interface Mbox {
+         public Set<String> getUsers();
+         public void postMessage(String from, String to, String txt);
+      }
+      
+      
+      
       /* Now, what methods do we need here? Other interfaces.
        * Do we need StationDB? */
        
        public Logfile log();
        
        
+       public Web getWebserver(); 
+      
+      
        /** Get data interface. */
        public StationDB getDB();
     

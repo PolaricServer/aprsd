@@ -27,7 +27,7 @@ import no.polaric.aprsd.filter.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "1.9";
+   public  static String version = "1.9+WS";
    public static String toaddr  = "APPS19";
    
    private static StationDB db = null;
@@ -50,9 +50,13 @@ public class Main implements ServerAPI
    
    /* API interface methods 
     * Should they be here or in a separate class ??
+    * Should they be static or should the API interface be a static variable? 
     */
    public static Logfile getLog() 
     { return log; }
+    
+   public WebServer getWebserver()
+    { return ws; }
     
    public Logfile log() 
     { return log; }

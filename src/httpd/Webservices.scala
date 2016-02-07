@@ -119,6 +119,7 @@ package no.polaric.aprsd.http
    }
    
    
+   
    def symChoice(req: Request) = {
         val I = getI18n(req)
         <select id="symChoice" class="symChoice"
@@ -562,7 +563,7 @@ package no.polaric.aprsd.http
            }
         } 
       </table>
-
+      ;
 
       
    /**
@@ -571,22 +572,41 @@ package no.polaric.aprsd.http
    protected def handle_sendmsg(req : Request, res : Response) = 
    {
         val I = getI18n(req)
-        val prefix = <h2> {I.tr("Send message")} </h2>
+        val mbox = _api.getWebserver().getMbox()
+        val prefix = <h2> {I.tr("Send instant message")} </h2>
+        
+        
+        def userList(id: String): NodeSeq = 
+           <select name={id} id={id}> 
+            { for (x:String <- mbox.getUsers) yield
+                 <option value={x}>{x}</option>
+            }
+            <option value="ALL">ALL</option>
+            <option value="ALL-SAR">ALL-SAR</option>
+            <option value="ALL-LOGIN">ALL-LOGIN</option>
+           </select>
+        ; 
+        
         
         /* Fields to be filled in */
         def fields(req : Request): NodeSeq =
             label("msgto", "lleftlab", I.tr("To")+":", "") ++
-            textInput("msgto", 10,10, "") ++
-            label("msgcontent", "lleftlab", I.tr("To")+":", "") ++
-            textArea("msgcontent", 15, 4, "");
+            userList("msgto") ++ br ++
+            label("msgcontent", "lleftlab", I.tr("Message")+":", "") ++
+            textArea("msgcontent", 240, "");
             ;
             
             
         /* Action. To be executed when user hits 'submit' button */
-        def action(request : Request): NodeSeq = 
-            <div></div>          
-            ;
+        def action(req : Request): NodeSeq = 
+        {
+            val to = req.getParameter("msgto")
+            val txt = req.getParameter("msgcontent")
+            mbox.postMessage(getAuthUser(req), to, txt)
             
+            <h2>{I.tr("Message posted")}</h2>        
+        }
+         
             
         printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
     }

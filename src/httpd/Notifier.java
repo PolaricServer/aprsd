@@ -52,6 +52,9 @@ public abstract class Notifier extends ServerBase implements Service
       public long getUid() 
          { return _uid; }
          
+      public String getUsername()
+         { return _username; }
+         
       public void close() throws IOException
          { _chan.close(); }
       
@@ -119,7 +122,7 @@ public abstract class Notifier extends ServerBase implements Service
           
           /* We need to be sure that we can trust that the user
            * is who he says he is. Can we trust that getAuthUser is authenticated
-           * if not, try to authenticate. 
+           * if not, try to identify and authenticate. 
            */
           if (_trusted || trustUser(uid, req))
                 client.setUsername(getAuthUser(req));
