@@ -82,6 +82,7 @@ public class GeoMessages extends Notifier implements ServerAPI.Mbox
    public void postMessage(String from, String to, String txt)
    {
        Message m = new Message(); 
+       m.msgId = _msgId++;
        m.from = from; 
        m.to = to; 
        m.time = new Date();
