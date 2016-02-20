@@ -45,7 +45,7 @@ msgstr  "Wide-Digi"
 
 #: src/httpd/AprsStationView.scala:48
 msgid   "Via"
-msgstr  "VIa"
+msgstr  "Via"
 
 #: src/httpd/AprsStationView.scala:48
 msgid   "Which route the last APRS report took"
