@@ -27,7 +27,7 @@ import no.polaric.aprsd.filter.ViewFilter;
 public abstract class TrackerPoint extends PointObject implements Serializable, Cloneable
 {
     private   static long        _nonMovingTime = 1000 * 60 * 5; 
-    private   static Notifier    _change = new Notifier();
+    private   static ThreadNotifier    _change = new ThreadNotifier();
     protected static ServerAPI   _api = null;
     protected static StationDB   _db  = null;
     protected static ColourTable _colTab = null;

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,98 +13,15 @@
  */
  
 package no.polaric.aprsd;
-import uk.me.jstott.jcoord.*; 
-import java.util.*;
-import java.io.Serializable;
   
-  
-/**
- * This class allows threads to wait for certain events to occur within
- * a geographical area. 
- */
- 
-public class Notifier
-{
-    private Date signalled = new Date(); 
-    private TrackerPoint signalledPt; 
-    private static long _mintime  = 1000 * 10;   /* Minimum wait time: 10s */
-    private static long _timeout  = 1000 * 120;  /* Maximum wait time: 2min */
-    private Map<Long, Integer> _waiters = new HashMap();
-    // 0 = continue waiting, 1 = return XML, 2 = abort and return nothing
-    
-    /**
-     * Wait for an event to happen within the given geographical area. 
-     * @param uleft Upper left corner of the area.
-     * @param lright Lower right corner of the area. 
-     * @param id Identity of the waiter thread. Assumed to be a unique number. 
-     *           Other waiters with the same id will be aborted.
-     */
-    public boolean waitSignal(Reference uleft, Reference lright, long id)
-    {
-         long wstart = (new Date()).getTime();
-         long elapsed = 0;
-         boolean found = false;
-         boolean noAbort = false;
-                  
-         synchronized (this) {
-            /* Abort any other waiter having the same id  */
-            if (_waiters.containsKey(id)) {
-                _waiters.put(id, 2);
-                notifyAll();
-                noAbort = true; 
-            }
-            else
-                _waiters.put(id, 0);
-         }    
-         do {
-              try {
-                  synchronized(this) {
-                     wait(found ? _mintime-elapsed : _timeout-elapsed);
-                     Integer abort = _waiters.get(id);
-                     if (abort != null && abort > 0 && !noAbort) {
-                         _waiters.remove(id);
-                         return false;        
-                     }
-                     else
-                         _waiters.put(id, 0);
-                     noAbort = false; 
-                     /* Has there been events inside the interest zone */
-                     found = found || signalledPt == null || uleft == null || 
-                                  signalledPt.isInside(uleft, lright); 
-                  } 
-              }
-              catch (Exception e) {}    
-              elapsed = (new Date()).getTime() - wstart;
 
-            /* Wait no shorter than _mintime and no longer 
-             * than _timeout 
-             */
-         } while ( !(found && elapsed > _mintime) &&
-                   elapsed < _timeout );
-         _waiters.remove(id);
-         return true;
-    }
-    
+ 
+public interface Notifier
+{
     
     /**
-     * Signal an event on a certain geographical point. This will wake up
+     * Signal an event on a certain geographical point. This will signal
      * waiters that subscribes to an area containing this location.
      */
-    public synchronized void signal(TrackerPoint st)
-    {   
-         signalled = new Date(); 
-         signalledPt = st;
-         notifyAll();
-    }
-    
-    /**
-     * Abort all waiters.
-     */
-    public synchronized void abortAll(boolean retval)
-    {
-       for (long x: _waiters.keySet())
-          _waiters.put(x, retval ? 1 : 2 );
-       notifyAll();   
-    }
-    
+    public void signal(TrackerPoint st);
 }

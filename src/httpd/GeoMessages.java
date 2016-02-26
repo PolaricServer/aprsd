@@ -13,10 +13,10 @@ import org.simpleframework.http.socket.service.Service;
 
 
 
-public class GeoMessages extends Notifier implements ServerAPI.Mbox
+public class GeoMessages extends WsNotifier implements ServerAPI.Mbox
 {
 
-   public class Client extends Notifier.Client 
+   public class Client extends WsNotifier.Client 
    {   
        public Client(FrameChannel ch, long uid) 
           { super(ch, uid); }
@@ -64,7 +64,7 @@ public class GeoMessages extends Notifier implements ServerAPI.Mbox
     
     
    /* Factory method */
-   @Override public Notifier.Client newClient(FrameChannel ch, long uid) 
+   @Override public WsNotifier.Client newClient(FrameChannel ch, long uid) 
       { return new Client(ch, uid); }
 
       
@@ -73,7 +73,7 @@ public class GeoMessages extends Notifier implements ServerAPI.Mbox
     * This may include authorization, preferences, etc.. 
     * @return true if subscription is accepted. False if rejected. 
     */
-   @Override public boolean subscribe(long uid, Notifier.Client client, Request req)  { 
+   @Override public boolean subscribe(long uid, WsNotifier.Client client, Request req)  { 
        _users.add(client.getUsername());
        return true; 
    }

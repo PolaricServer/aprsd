@@ -15,8 +15,9 @@ import java.util.function.*;
 import com.fasterxml.jackson.databind.*;
 
 
+/** Send events to clients through WebSockets. Let clients subscribe. */
 
-public abstract class Notifier extends ServerBase implements Service
+public abstract class WsNotifier extends ServerBase implements Service
 {
 
    public abstract class Client implements FrameListener {
@@ -95,7 +96,7 @@ public abstract class Notifier extends ServerBase implements Service
    protected final Map<Long, FrameListener> _clients;
       
    
-   public Notifier(ServerAPI api, boolean trusted) throws IOException {
+   public WsNotifier(ServerAPI api, boolean trusted) throws IOException {
        super(api);
       _trusted = trusted;
       _clients = new ConcurrentHashMap<Long, FrameListener>();
@@ -172,14 +173,14 @@ public abstract class Notifier extends ServerBase implements Service
     * Distribute a text to the clients for which the 
     * predicate evaluates to true. 
     */
-   public void postText(String txt, Predicate<Client> pred) {
+   public void postText(Function<Client,String> txt, Predicate<Client> pred) {
       try {          
          /* Distribute to all clients */
          for(long user : _clients.keySet()) {
             Client client = (Client) _clients.get(user);
             try {               
                if(pred.test(client)) 
-                  client.sendText(txt);
+                  client.sendText(txt.apply(client));
                
             } catch(Exception e){   
                if (e.getCause() instanceof TransportException) {
@@ -195,5 +196,8 @@ public abstract class Notifier extends ServerBase implements Service
       }
    } 
    
+   public void postText(String txt, Predicate<Client> pred) {
+        postText(c->txt, pred);
+   }
    
 }
