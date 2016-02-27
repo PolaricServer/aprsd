@@ -33,8 +33,7 @@ public class WebServer implements ServerAPI.Web  {
   
       /* Set up a map from paths to service implementations. */
       Map<String, Service> services = new HashMap<String, Service>(); 
-      services.put("/chatroom", new ChatRoom(api));
-   
+  
       _messages = new GeoMessages(api, true);
       services.put("/messages_sec", _messages);
        
