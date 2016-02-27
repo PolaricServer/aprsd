@@ -35,14 +35,12 @@ import java.util.concurrent.locks.*;
 
 public class XmlServices extends ServerBase
 {
-   private String _icon; 
    private String _adminuser, _updateusers;
    private int _seq = 0;
    
    public XmlServices(ServerAPI api) throws IOException
    {
       super(api);
-      _icon = api.getProperty("map.icon.default", "sym.gif");
       
       int trailage = api.getIntProperty("map.trail.maxAge", 15);
       Trail.setMaxAge(trailage * 60 * 1000); 
@@ -153,118 +151,13 @@ public class XmlServices extends ServerBase
                 out.close();
                 return;
             }
-             
-        /* XML header with meta information */           
-        out.println("<overlay seq=\""+_seq+"\"" +
-            (filt==null ? ""  : " view=\"" + filt + "\"") + ">");
-            
-        printXmlMetaTags(out, req, loggedIn);
-        out.println("<meta name=\"clientses\" value=\""+ client + "\"/>");    
         
-        /* Could we put metadata in a separate service? */
-        if (parms.get("metaonly") != null) {
-             out.println("<meta name=\"metaonly\" value=\"true\"/>");
-             out.println("</overlay>");              
-             out.close();
-        }
-        out.println("<meta name=\"metaonly\" value=\"false\"/>");
+        printOverlay( 
+           getMetaTags(req, client, loggedIn),
+           out, seq, filt, scale, uleft, lright, 
+           loggedIn, parms.get("metaonly") != null, showSarInfo
+        );
         
-        
-         
-        /* Output signs. A sign is not an APRS object
-         * just a small icon and a title. It may be a better idea to do this
-         * in map-layers instead?
-         */
-        int i=0;
-        for (Signs.Item s: Signs.search(scale, uleft, lright))
-        {
-            LatLng ref = s.getPosition().toLatLng(); 
-            if (ref == null)
-                continue;
-            String href = s.getUrl() == null ? "" : "href=\"" + s.getUrl() + "\"";
-            String title = s.getDescr() == null ? "" : "title=\"" + fixText(s.getDescr()) + "\"";
-            String icon = _wfiledir + "/icons/"+ s.getIcon();    
-           
-            out.println("<point id=\""+ (s.getId() < 0 ? "__sign" + (i++) : "__"+s.getId()) + "\" x=\""
-                         + roundDeg(ref.getLng()) + "\" y=\"" + roundDeg(ref.getLat()) + "\" " 
-                         + href + " " + title+">");
-            out.println(" <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
-            out.println("</point>");    
-        }                
-         
-         
-
-        
-        /* Output APRS objects */
-        for (TrackerPoint s: _api.getDB().search(uleft, lright)) 
-        {
-            Action action = vfilt.apply(s, scale); 
-            // FIXME: Get CSS class from filter rules 
-            
-            if (s.getPosition() == null)
-                continue; 
-            if (s.getSource().isRestricted() && !action.isPublic() && !loggedIn)
-                continue;
-            if (action.hideAll())
-                continue;
-                   
-            LatLng ref = s.getPosition().toLatLng(); 
-            if (ref == null) continue; 
-            
-            if (!s.visible() || (_api.getSar() != null && !loggedIn && _api.getSar().filter(s)))  
-                   out.println("<delete id=\""+s.getIdent()+"\"/>");
-            else {
-               synchronized(s) {
-                  ref = s.getPosition().toLatLng(); 
-                  if (ref == null) continue; 
-                  
-                  String title = s.getDescr() == null ? "" 
-                             : " title=\"" + fixText(s.getDescr()) + "\""; 
-                  String flags = " flags=\""+
-                       (s.hasTag("APRS.telemetry") ? "t":"") +
-                       (s instanceof AprsPoint ? "a":"") + 
-                       (s instanceof AprsPoint && ((AprsPoint)s).isInfra() ? "i" : "") + "\"";
-                  
-                  String icon = action.getIcon(s.getIcon()); 
-                  if (s.iconOverride() && showSarInfo) 
-                     icon = s.getIcon(); 
-                  icon = _wfiledir + "/icons/"+ (icon != null ? icon : _icon);    
-                  
-                  // FIXME: Sanitize ident input somewhere else
-                  out.println("<point id=\""+s.getIdent()+"\" x=\""
-                               + roundDeg(ref.getLng()) + "\" y=\"" + roundDeg(ref.getLat()) + "\"" 
-                               + title + flags + (s.isChanging() ? " redraw=\"true\"" : "") +
-                               ((s instanceof AprsObject) && _api.getDB().getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""))  ? " own=\"true\"":"") +">");
-                  out.println(" <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
-
-                  /* Show label */ 
-                  if (!action.hideIdent() && !s.isLabelHidden() ) {
-                     String style = (!(s.getTrail().isEmpty()) ? "lmoving" : "lstill");
-                     if (s instanceof AprsObject)
-                        style = "lobject"; 
-                     style += " "+ action.getStyle();
-                     
-                     out.println(" <label style=\""+style+"\">");
-                     out.println("   "+s.getDisplayId(showSarInfo));
-                     out.println(" </label>"); 
-                  }
-                  
-                  /* Trail */
-                  Trail h = s.getTrail();
-                  if (!action.hideTrail() && !h.isEmpty())
-                     printTrailXml(out, s.getTrailColor(), s.getPosition(), h, uleft, lright); 
-       
-               } /* synchronized(s) */
-               
-               if (action.showPath() && s instanceof AprsPoint && ((AprsPoint)s).isInfra())
-                  printPathXml(out, (Station) s, uleft, lright);              
-               out.println("</point>");
-            }
-          
-            /* Allow other threads to run */ 
-            Thread.currentThread().yield ();
-        }        
-        out.println("</overlay>");
         out.close();
    }
 
