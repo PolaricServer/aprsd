@@ -242,20 +242,11 @@ public abstract class ServerBase
    }
    
    
+   
    protected String metaTag(String name, String val) 
       { return "<meta name=\""+name+"\" value=\""+val+"\"/>"; }
    
-   
-   protected String getMetaTags(Request req, long clientId, boolean loggedIn)
-   {
-        return metaTag("login", getAuthUser(req)) +
-               metaTag("loginuser", (loggedIn ? "true" : "false")) + 
-               metaTag("adminuser", (authorizedForAdmin(req) ? "true" : "false")) +
-               metaTag("updateuser", (authorizedForUpdate(req) ? "true" : "false")) + 
-               metaTag("sarmode", (_api.getSar() !=null ? "true" : "false")) +
-               metaTag("clientses", ""+clientId);
-   }
-   
+
    
    /**
     * Display a message path between nodes. 
