@@ -76,13 +76,13 @@ public abstract class WsNotifier extends ServerBase implements Service
       
    
       public void onError(Session socket, Exception cause) {
-         System.out.println("onError (" + cause + ")");
+         _api.log().error("WsNotifier", "Socket error (" + cause + ")");
          cause.printStackTrace(System.out);
       }
 
    
-      public void onClose(Session session, Reason reason) {
-         System.out.println("onClose (" + reason + ")");
+      public void onClose(Session session, Reason cause) {
+         _api.log().debug("WsNotifier", "Socket closed (" + cause + ")");
       }
    }
 
@@ -129,14 +129,14 @@ public abstract class WsNotifier extends ServerBase implements Service
                 client.setUsername(getAuthUser(req));
                  
           if (subscribe(uid, client, req)) {
-             _api.log().info("Notifier", "Subscription success. User="+uid);
+             _api.log().info("WsNotifier", "Subscription success. User="+uid+(_trusted ? " (trusted chan)" : ""));
              _clients.put(uid, client); 
           }
           else 
-             _api.log().info("Notifier", "Subscription rejected. User="+uid);
+             _api.log().info("WsNotifier", "Subscription rejected. User="+uid);
           
       } catch(Exception e) {
-          _api.log().warn("Notifier", "Subscription failed: " + e);
+          _api.log().warn("WsNotifier", "Subscription failed: " + e);
       }  
    }
    
@@ -164,7 +164,7 @@ public abstract class WsNotifier extends ServerBase implements Service
    public void postObject(Object myObj, Predicate<Client> pred) { 
       try { postText(mapper.writeValueAsString(myObj), pred); }
       catch (Exception e) {
-          _api.log().warn("Notifier", "Cannot serialize object: " + e);
+          _api.log().warn("WsNotifier", "Cannot serialize object: " + e);
       }
    }
    
@@ -185,13 +185,13 @@ public abstract class WsNotifier extends ServerBase implements Service
             } catch(Exception e){   
                if (e.getCause() instanceof TransportException) {
                   _clients.remove(user); 
-                  _api.log().info("Notifier", "Unsubscribing closed client channel: "+user);       
+                  _api.log().info("WsNotifier", "Unsubscribing closed client channel: "+user);       
                }
                else throw e;
             }
          }
       } catch(Exception e) {
-         _api.log().error("Notifier", "Cannot distribute string: " + e);
+         _api.log().error("WsNotifier", "Cannot distribute string: " + e);
          e.printStackTrace(System.out);
       }
    } 

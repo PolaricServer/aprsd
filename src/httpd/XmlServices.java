@@ -118,7 +118,7 @@ public class XmlServices extends ServerBase
    {         
         PrintWriter out = getWriter(res);
         String filt = req.getParameter("filter");
-        RuleSet vfilt = ViewFilter.getFilter(filt, loggedIn);
+ //       RuleSet vfilt = ViewFilter.getFilter(filt, loggedIn);
         res.setValue("Content-Type", "text/xml; charset=utf-8");
         Query parms = req.getQuery();
         

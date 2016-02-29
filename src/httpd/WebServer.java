@@ -21,6 +21,7 @@ public class WebServer implements ServerAPI.Web  {
    private final SocketAddress _addr;  
    private final SocketProcessor _server;
    private final GeoMessages _messages;
+   private final MapUpdater  _mapupdate, _smapupdate;
    
    
    /** 
@@ -33,10 +34,17 @@ public class WebServer implements ServerAPI.Web  {
   
       /* Set up a map from paths to service implementations. */
       Map<String, Service> services = new HashMap<String, Service>(); 
-  
+
       _messages = new GeoMessages(api, true);
       services.put("/messages_sec", _messages);
-       
+      
+      _mapupdate = new MapUpdater(api, false);
+      services.put("/mapdata", _mapupdate);
+      
+      _smapupdate = new MapUpdater(api, true);
+      services.put("/mapdata_sec", _smapupdate);
+      _smapupdate.link(_mapupdate);
+      
       /* Create a router that uses the paths of the URLs to select the service. */
       Router wsrouter = new PathRouter (services, null); 
       
@@ -48,6 +56,10 @@ public class WebServer implements ServerAPI.Web  {
 
    public ServerAPI.Mbox getMbox() {
        return _messages;
+   }
+   
+   public Notifier getNotifier() {
+       return _smapupdate; 
    }
    
    public void start() throws IOException {
