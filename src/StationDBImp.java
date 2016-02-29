@@ -198,7 +198,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     private synchronized void checkMoving()
     {
          for (TrackerPoint s: _map.values())
-            if (s.isChanging())
+            if (s.isChanging(true))
                 _hasChanged = true;
     }
     

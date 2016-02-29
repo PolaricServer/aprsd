@@ -261,6 +261,7 @@ public class Main implements ServerAPI
            wc = new WebContainer(api); 
            ws = new WebServer(api, http_port, wc);
            ws.start();
+           TrackerPoint.setNotifier(ws.getNotifier());
            log.info("Main", "HTTP/WS server ready on port " + http_port);
            
            /* Database of stations/objects */
