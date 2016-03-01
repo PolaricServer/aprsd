@@ -54,6 +54,11 @@ public class WebServer implements ServerAPI.Web  {
       _addr = new InetSocketAddress(port);
    }
 
+   public int nClients() {
+       return _mapupdate.nClients() + _smapupdate.nClients();
+   }
+   
+   
    public ServerAPI.Mbox getMbox() {
        return _messages;
    }

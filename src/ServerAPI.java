@@ -36,6 +36,7 @@ import java.util.*;
       
       /** Interface to web server */
       public interface Web {
+         public int  nClients();
          public Mbox getMbox(); 
          public void start() throws Exception; 
          public void stop() throws Exception;

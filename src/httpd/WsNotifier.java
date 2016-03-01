@@ -56,8 +56,10 @@ public abstract class WsNotifier extends ServerBase implements Service
       public String getUsername()
          { return _username; }
          
-      public void close() throws IOException
-         { _chan.close(); }
+      public void close() throws IOException { 
+         _chan.close(); 
+         _clients.remove(this);
+      }
       
    
       public void onFrame(Session socket, Frame frame) {
@@ -78,11 +80,13 @@ public abstract class WsNotifier extends ServerBase implements Service
       public void onError(Session socket, Exception cause) {
          _api.log().error("WsNotifier", "Socket error (" + cause + ")");
          cause.printStackTrace(System.out);
+         try { close(); } catch (Exception e) {}
       }
 
    
       public void onClose(Session session, Reason cause) {
          _api.log().debug("WsNotifier", "Socket closed (" + cause + ")");
+         _clients.remove(this);
       }
    }
 
@@ -103,10 +107,13 @@ public abstract class WsNotifier extends ServerBase implements Service
    }  
      
      
-   /* Factory method */
+   /** Factory method */
    public abstract Client newClient(FrameChannel ch, long uid);
      
 
+   /** Return number of clients. */
+   public int nClients() 
+     { return _clients.size(); }
      
    
    /** 
