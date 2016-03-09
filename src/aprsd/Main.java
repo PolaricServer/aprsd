@@ -27,7 +27,7 @@ import no.polaric.aprsd.filter.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "1.9";
+   public  static String version = "1.9+WS";
    public static String toaddr  = "APPS19";
    
    private static StationDB db = null;
@@ -40,7 +40,8 @@ public class Main implements ServerAPI
    public static  RemoteCtl rctl;
    public static  SarMode  sarmode = null;
    private static Properties _config, _defaultConf; 
-   private static WebContainer ws;
+   private static WebContainer wc;
+   private static WebServer ws; 
    private static Channel.Manager _chanManager = new Channel.Manager();
    private static SarUrl sarurl;
    private static String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
@@ -49,9 +50,13 @@ public class Main implements ServerAPI
    
    /* API interface methods 
     * Should they be here or in a separate class ??
+    * Should they be static or should the API interface be a static variable? 
     */
    public static Logfile getLog() 
     { return log; }
+    
+   public WebServer getWebserver()
+    { return ws; }
     
    public Logfile log() 
     { return log; }
@@ -92,21 +97,21 @@ public class Main implements ServerAPI
       
       
    public void addHttpHandler(Object obj, String prefix)
-    { ws.addHandler(obj, prefix); }
+    { wc.addHandler(obj, prefix); }
 
    public void addHttpHandlerCls(String cn, String prefix)
     {
        try{
           Class cls = Class.forName(cn); 
           Constructor[] cc = cls.getConstructors();
-          ws.addHandler(cc[0].newInstance(this), prefix);
+          wc.addHandler(cc[0].newInstance(this), prefix);
        }
        catch (Exception e)
         { log.warn("Main","cannot instantiate class: "+e); }
     }
     
    public ServerAPI.ServerStats getHttps()
-    { return ws; } 
+    { return wc; } 
     
    public Properties getConfig()
     { return _config; }
@@ -251,9 +256,12 @@ public class Main implements ServerAPI
         try {
            properties().put("API", this);
                    
-           /* Start HTTP server */
+           /* Configure and Start HTTP server */
            int http_port = getIntProperty("httpserver.port", 8081);
-           ws = new WebContainer(api, http_port);
+           wc = new WebContainer(api); 
+           ws = new WebServer(api, http_port, wc);
+           ws.start();
+           TrackerPoint.setNotifier(ws.getNotifier());
            log.info("Main", "HTTP/WS server ready on port " + http_port);
            
            /* Database of stations/objects */
@@ -276,7 +284,7 @@ public class Main implements ServerAPI
            Station.init(api); 
            
            /* Add main webservices */
-           ws.addHandler(new Webservices(api), null);
+           wc.addHandler(new Webservices(api), null);
       
 
            /*
@@ -391,6 +399,11 @@ public class Main implements ServerAPI
     public void stop()
       // Inform the Thread to terminate the run(), close the ServerSockets
     {
+         log.info("Main", "Stopping HTTP/WS server");
+         try {
+            ws.stop();
+         } catch (IOException e) {}
+
          log.info("Main", "Polaric APRSD shutdown"); 
          PluginManager.deactivateAll();
          if (db  != null) db.save(); 

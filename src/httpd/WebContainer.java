@@ -1,4 +1,18 @@
+/*
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
 
+ 
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
 import org.simpleframework.http.core.Container;
@@ -124,18 +138,16 @@ public class WebContainer implements Container, ServerAPI.ServerStats
    
    
    
-   public WebContainer(ServerAPI api, int port) throws IOException
+   public WebContainer(ServerAPI api) throws IOException
    {
       _api=api; 
       _infraonly   = api.getBoolProperty("map.infraonly", false);
       _serverurl   = api.getProperty("server.url", "/srv");
       _max_load    = api.getIntProperty("server.maxload", 200);
-      
-      /* Configure this web container */
-      SocketProcessor srv = new ContainerSocketProcessor(this, 12); 
-      Connection connection = new SocketConnection(srv);
-      SocketAddress address = new InetSocketAddress(port);
-      connection.connect(address);
+
+      /* Thread pool for high loads. 
+       * This may not be needed when we move to websockets. 
+       */
       executor = Executors.newCachedThreadPool();
    }
    

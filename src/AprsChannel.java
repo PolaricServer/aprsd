@@ -102,6 +102,11 @@ public abstract class AprsChannel extends Channel
                           
     public static final String _tx_encoding = "UTF-8";
 
+ 
+    protected String chId() {
+       return "["+getShortDescr()+"] "; 
+    }
+
     
     public abstract void close(); 
     

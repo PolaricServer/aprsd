@@ -26,6 +26,8 @@ V.1.10 (february 2016), etc
      - Storage in database over longer timespan (optional).
      - Graphic presentation of telemetry.
 
+* Rework on logging
+     DONE.
      
 
    

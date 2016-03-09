@@ -27,12 +27,15 @@ import no.polaric.aprsd.filter.ViewFilter;
 public abstract class TrackerPoint extends PointObject implements Serializable, Cloneable
 {
     private   static long        _nonMovingTime = 1000 * 60 * 5; 
-    private   static Notifier    _change = new Notifier();
+    private   static Notifier    _change;
     protected static ServerAPI   _api = null;
     protected static StationDB   _db  = null;
     protected static ColourTable _colTab = null;
     private   static long        _posUpdates = 0;
     
+    
+    public static void setNotifier(Notifier n)
+        { _change = n; }
     
     public static void setApi(ServerAPI api) { 
        
@@ -242,8 +245,9 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * @param retval Return value: true=ok, false=was aborted.
      */
     public static void abortWaiters(boolean retval)
-      { _change.abortAll(retval); }
-      
+      { /* _change.abortAll(retval); */ }
+     
+     /* FIXME: Remove this. */ 
       
       
     /**
@@ -255,7 +259,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      */
     public static boolean waitChange(long clientid)
        { return waitChange(null, null, clientid); }
-       
+    /* FIXME: Remove this */   
        
        
      /**
@@ -268,8 +272,8 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * @return true=ok, false=was aborted.
      */
     public static boolean waitChange(Reference uleft, Reference lright, long clientid) 
-       { return _change.waitSignal(uleft, lright, clientid); } 
-
+       { return false; /* _change.waitSignal(uleft, lright, clientid); */ } 
+    /* FIXME: Remove this */
        
      
     /** Return time of last significant change in position, etc.. */
@@ -306,24 +310,33 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     {
          _changing = true;
          _lastChanged = new Date();  
-         _change.signal(this); 
+         if ( _change!= null ) 
+            _change.signal(this); 
     }
            
-      
+   
+   
+   /**
+    * Return true and signal a change if position etc. is updated recently.
+    */
+    public boolean isChanging() 
+       { return isChanging(false); }
+       
       
     /**
      * Return true and signal a change if position etc. is updated recently.
      * This must be called periodically to ensure that asyncronous waiters
      * are updated when a station has stopped updating. 
      */ 
-    public synchronized boolean isChanging() 
+    public synchronized boolean isChanging(boolean signal) 
     {
           /* 
            * When station has not changed position or other properties for xx minutes, 
            * it is regarded as not moving. 
            */
           if (_changing && (new Date()).getTime() > _lastChanged.getTime() + _nonMovingTime) {
-               _change.signal(this);
+               if (signal && _change != null)
+                  _change.signal(this);
                return (_changing = false);
           }
           if (!_changing) 

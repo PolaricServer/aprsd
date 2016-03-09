@@ -82,7 +82,7 @@ package no.polaric.aprsd.http
                 simpleLabel("items", "leftlab", I.tr("Number of items:"), TXT(""+_api.getDB().nItems())) ++
                 simpleLabel("items", "leftlab", I.tr("Number of connections:"), TXT(""+_api.getDB().getRoutes().nItems())) ++
                 simpleLabel("items", "leftlab", I.tr("Own objects:"), TXT(""+_api.getDB().getOwnObjects().nItems())) ++   
-                simpleLabel("items", "leftlab", I.tr("Number of HTTP clients:"), TXT(""+(_api.getHttps().getClients()-1))) ++  
+                simpleLabel("items", "leftlab", I.tr("Number of clients now:"), TXT(""+(_api.getWebserver().nClients()))) ++  
                 simpleLabel("items", "leftlab", I.tr("Number of HTTP requests:"), TXT(""+(_api.getHttps().getReq()))) }    
               { simpleLabel("freemem", "leftlab", I.tr("Used memory:"), 
                   TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
@@ -117,6 +117,7 @@ package no.polaric.aprsd.http
              
         printHtml (res, htmlBody(req, head, action(req)));    
    }
+   
    
    
    def symChoice(req: Request) = {
@@ -172,7 +173,7 @@ package no.polaric.aprsd.http
                else {
                   val osymtab = req.getParameter("osymtab")
                   val osym  = req.getParameter("osym")
-                  System.out.println("*** SET OWN POS by user '"+getAuthUser(req)+"'")
+                  _api.log().info("Webservices","SET OWN POS by user '"+getAuthUser(req)+"'")
                   p.updatePosition(new Date(), pos, 
                       if (osymtab==null) '/' else osymtab(0), if (osym==null) 'c' else osym(0))
                   
@@ -310,7 +311,7 @@ package no.polaric.aprsd.http
           }
           else {
               if (_api.getDB().getOwnObjects().delete(id)) {
-                  System.out.println("*** DELETE OBJECT: '"+id+"' by user '"+getAuthUser(req)+"'")
+                  _api.log().info("Webservices", "DELETE OBJECT: '"+id+"' by user '"+getAuthUser(req)+"'")
                   <h3> {I.tr("Object removed!")} </h3>
               }
               else
@@ -361,7 +362,7 @@ package no.polaric.aprsd.http
        def setTag(item:PointObject, tag:String)
        {
            item.setTag(tag)
-           System.out.println("*** TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthUser(req)+"'")
+           _api.log().info("Webservices", "TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthUser(req)+"'")
            if (api.getRemoteCtl() != null)
               api.getRemoteCtl().sendRequestAll("TAG "+item.getIdent()+" "+tag, null);
        }
@@ -369,7 +370,7 @@ package no.polaric.aprsd.http
        def removeTag(item:PointObject, tag:String)
        {
            item.removeTag(tag)
-           System.out.println("*** REMOVE TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthUser(req)+"'")
+           _api.log().info("Webservices", "REMOVE TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthUser(req)+"'")
            if (api.getRemoteCtl() != null)
               api.getRemoteCtl().sendRequestAll("RMTAG "+item.getIdent()+" "+tag, null);
        }
@@ -500,7 +501,7 @@ package no.polaric.aprsd.http
                val otxt = req.getParameter("descr")
                val perm = req.getParameter("perm")
                
-               System.out.println("*** SET OBJECT: '"+id+"' by user '"+getAuthUser(request)+"'")
+               _api.log().info("Webservices", "SET OBJECT: '"+id+"' by user '"+getAuthUser(request)+"'")
                if ( _api.getDB().getOwnObjects().add(id, 
                       new AprsHandler.PosData( pos,
                          if (osym==null) 'c' else osym(0) ,
@@ -520,6 +521,7 @@ package no.polaric.aprsd.http
     }
     
 
+    
 
     protected def itemList(I:I18n, list: List[TrackerPoint], mobile: Boolean, 
                   fprefix: String, loggedIn: Boolean): NodeSeq = 
@@ -561,9 +563,57 @@ package no.polaric.aprsd.http
            }
         } 
       </table>
+      ;
 
+      
+   /**
+    * Send instant message. 
+    */
+   protected def handle_sendmsg(req : Request, res : Response) = 
+   {
+        val I = getI18n(req)
+        val mbox = _api.getWebserver().getMbox()
+        val prefix = <h2> {I.tr("Send instant message")} </h2>
+        
+        
+        def userList(id: String): NodeSeq = 
+           <select name={id} id={id}> 
+            { for (x:String <- mbox.getUsers) yield
+                 <option value={x}>{x}</option>
+            }
+            <option value="ALL">ALL</option>
+            <option value="ALL-SAR">ALL-SAR</option>
+            <option value="ALL-LOGIN">ALL-LOGIN</option>
+           </select>
+        ; 
+        
+        
+        /* Fields to be filled in */
+        def fields(req : Request): NodeSeq =
+            label("msgto", "lleftlab", I.tr("To")+":", "") ++
+            userList("msgto") ++ br ++
+            label("msgcontent", "lleftlab", I.tr("Message")+":", "") ++
+            textArea("msgcontent", 240, "");
+            ;
+            
+            
+        /* Action. To be executed when user hits 'submit' button */
+        def action(req : Request): NodeSeq = 
+        {
+            val to = req.getParameter("msgto")
+            val txt = req.getParameter("msgcontent")
+            mbox.postMessage(getAuthUser(req), to, txt)
+            
+            <h2>{I.tr("Message posted")}</h2>        
+        }
+         
+            
+        printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
+    }
    
    
+       
+       
    
   /** 
     * Search in the database over point objects. 

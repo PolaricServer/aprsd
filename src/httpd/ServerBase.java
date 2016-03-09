@@ -14,6 +14,7 @@
  
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
+import no.polaric.aprsd.filter.*;
 
 import org.simpleframework.http.core.Container;
 import org.simpleframework.transport.connect.Connection;
@@ -25,6 +26,7 @@ import java.io.PrintStream;
 
 import uk.me.jstott.jcoord.*;
 import java.util.*;
+import java.util.function.*;
 import java.io.*;
 import java.text.*;
 import com.mindprod.base64.Base64;
@@ -38,9 +40,9 @@ public abstract class ServerBase
    private    String     _timezone;
    protected  String     _wfiledir;
    private    String     _adminuser, _updateusers;
-           
+   protected  String     _icon;    
+   
    public static final String _encoding = "UTF-8";
-
 
    DateFormat df = new SimpleDateFormat("dd MMM. HH:mm",
            new DateFormatSymbols(new Locale("no")));
@@ -58,6 +60,7 @@ public abstract class ServerBase
    {
       _api=api; 
       _wfiledir    = api.getProperty("map.web.dir", "aprsd");
+      _icon        = api.getProperty("map.icon.default", "sym.gif");
       _timezone    = api.getProperty("timezone", "");
       _adminuser   = api.getProperty("user.admin", "admin");
       _updateusers = api.getProperty("user.update", "");
@@ -108,7 +111,7 @@ public abstract class ServerBase
    {
         try { return ref.toLatLng().toUTMRef(utmz); }
         catch (Exception e)
-           { System.out.println("*** Cannot convert to UTM"+ utmz+ " : "+ref);
+           { _api.log().warn("ServerBase", "Cannot convert to UTM"+ utmz+ " : "+ref);
              return null; }
    }
    
@@ -134,11 +137,8 @@ public abstract class ServerBase
    }
    
 
-
-   protected final boolean authorizedForUpdate(Request req)
+   protected final boolean authorizedForUpdate(String user) 
    {
-       String user = getAuthUser(req);
-
        if (user == null)
           user="_NOLOGIN_";
        return ( user.matches(_adminuser) ||
@@ -146,11 +146,16 @@ public abstract class ServerBase
    }
    
 
+   protected final boolean authorizedForUpdate(Request req)
+      { return authorizedForUpdate(getAuthUser(req)); }
+
+  
+   protected final boolean authorizedForAdmin(String user)
+      { return (user != null && user.matches(_adminuser)); } 
+
+      
    protected final boolean authorizedForAdmin(Request req)
-   {
-       String user = getAuthUser(req);
-       return (user != null && user.matches(_adminuser)); 
-   } 
+      { return authorizedForAdmin(getAuthUser(req)); } 
    
    
    protected PrintWriter getWriter(Response resp) throws IOException
@@ -222,7 +227,7 @@ public abstract class ServerBase
    
    
    
-   protected long _sessions = 0;
+   protected static long _sessions = 0;
    protected synchronized long getSession(Request req)
       throws IOException
    {
@@ -238,17 +243,10 @@ public abstract class ServerBase
    
    
    
-   protected void printXmlMetaTags(PrintWriter out, Request req, boolean loggedIn)
-      throws IOException
-   {
-        Query parms = req.getQuery();
-        out.println("<meta name=\"login\" value=\"" + getAuthUser(req) + "\"/>");
-        out.println("<meta name=\"loginuser\" value=\"" + (loggedIn ? "true" : "false") + "\"/>");
-        out.println("<meta name=\"adminuser\" value=\"" + (authorizedForAdmin(req) ? "true" : "false") + "\"/>");
-        out.println("<meta name=\"updateuser\" value=\"" + (authorizedForUpdate(req) ? "true" : "false") + "\"/>"); 
-        out.println("<meta name=\"sarmode\" value=\"" + (_api.getSar() !=null ? "true" : "false")+"\"/>");
-   }
+   protected String metaTag(String name, String val) 
+      { return "<meta name=\""+name+"\" value=\""+val+"\"/>"; }
    
+
    
    /**
     * Display a message path between nodes. 
@@ -357,5 +355,130 @@ public abstract class ServerBase
        if (n > 0) 
           out.println(post);
    }
-     
+ 
+ 
+ 
+   /** 
+    * Print XML overlay to the given output stream.
+    */
+   protected void printOverlay(String meta, PrintWriter out, int seq, String filt, 
+                             long scale, LatLng uleft, LatLng lright, 
+                             boolean loggedIn, boolean metaonly, boolean showSarInfo) 
+               throws IOException
+   {       
+        RuleSet vfilt = ViewFilter.getFilter(filt, loggedIn);
+        
+        /* XML header with meta information */           
+        out.println("<overlay seq=\""+seq+"\"" +
+            (filt==null ? ""  : " view=\"" + filt + "\"") + ">");
+            
+        out.println(meta);
+        
+        /* Could we put metadata in a separate service? */
+        if (metaonly) {
+             out.println(metaTag("metaonly", "true")); 
+             out.println("</overlay>");              
+             return;
+        }
+        out.println(metaTag("metaonly", "false"));
+        
+        
+         
+        /* Output signs. A sign is not an APRS object
+         * just a small icon and a title. It may be a better idea to do this
+         * in map-layers instead?
+         */
+        int i=0;
+        for (Signs.Item s: Signs.search(scale, uleft, lright))
+        {
+            LatLng ref = s.getPosition().toLatLng(); 
+            if (ref == null)
+                continue;
+            String href = s.getUrl() == null ? "" : "href=\"" + s.getUrl() + "\"";
+            String title = s.getDescr() == null ? "" : "title=\"" + fixText(s.getDescr()) + "\"";
+            String icon = _wfiledir + "/icons/"+ s.getIcon();    
+           
+            out.println("<point id=\""+ (s.getId() < 0 ? "__sign" + (i++) : "__"+s.getId()) + "\" x=\""
+                         + roundDeg(ref.getLng()) + "\" y=\"" + roundDeg(ref.getLat()) + "\" " 
+                         + href + " " + title+">");
+            out.println(" <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
+            out.println("</point>");    
+        }                
+         
+         
+
+        
+        /* Output APRS objects */
+        for (TrackerPoint s: _api.getDB().search(uleft, lright)) 
+        {
+            Action action = vfilt.apply(s, scale); 
+            // FIXME: Get CSS class from filter rules 
+            
+            if (s.getPosition() == null)
+                continue; 
+            if (s.getSource().isRestricted() && !action.isPublic() && !loggedIn)
+                continue;
+            if (action.hideAll())
+                continue;
+                   
+            LatLng ref = s.getPosition().toLatLng(); 
+            if (ref == null) continue; 
+            
+            if (!s.visible() || (_api.getSar() != null && !loggedIn && _api.getSar().filter(s)))  
+                   out.println("<delete id=\""+s.getIdent()+"\"/>");
+            else {
+               synchronized(s) {
+                  ref = s.getPosition().toLatLng(); 
+                  if (ref == null) continue; 
+                  
+                  String title = s.getDescr() == null ? "" 
+                             : " title=\"" + fixText(s.getDescr()) + "\""; 
+                  String flags = " flags=\""+
+                       (s.hasTag("APRS.telemetry") ? "t":"") +
+                       (s instanceof AprsPoint ? "a":"") + 
+                       (s instanceof AprsPoint && ((AprsPoint)s).isInfra() ? "i" : "") + "\"";
+                  
+                  String icon = action.getIcon(s.getIcon()); 
+                  if (s.iconOverride() && showSarInfo) 
+                     icon = s.getIcon(); 
+                  icon = _wfiledir + "/icons/"+ (icon != null ? icon : _icon);    
+                  
+                  // FIXME: Sanitize ident input somewhere else
+                  out.println("<point id=\""+s.getIdent()+"\" x=\""
+                               + roundDeg(ref.getLng()) + "\" y=\"" + roundDeg(ref.getLat()) + "\"" 
+                               + title + flags + (s.isChanging() ? " redraw=\"true\"" : "") +
+                               ((s instanceof AprsObject) && _api.getDB().getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""))  ? " own=\"true\"":"") +">");
+                  out.println(" <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
+
+                  /* Show label */ 
+                  if (!action.hideIdent() && !s.isLabelHidden() ) {
+                     String style = (!(s.getTrail().isEmpty()) ? "lmoving" : "lstill");
+                     if (s instanceof AprsObject)
+                        style = "lobject"; 
+                     style += " "+ action.getStyle();
+                     
+                     out.println(" <label style=\""+style+"\">");
+                     out.println("   "+s.getDisplayId(showSarInfo));
+                     out.println(" </label>"); 
+                  }
+                  
+                  /* Trail */
+                  Trail h = s.getTrail();
+                  if (!action.hideTrail() && !h.isEmpty())
+                     printTrailXml(out, s.getTrailColor(), s.getPosition(), h, uleft, lright); 
+       
+               } /* synchronized(s) */
+               
+               if (action.showPath() && s instanceof AprsPoint && ((AprsPoint)s).isInfra())
+                  printPathXml(out, (Station) s, uleft, lright);              
+               out.println("</point>");
+            }
+          
+            /* Allow other threads to run */ 
+            Thread.currentThread().yield ();
+        }        
+        out.println("</overlay>");
+   }
+ 
+ 
 }
