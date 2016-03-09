@@ -526,7 +526,7 @@ package no.polaric.aprsd.http
       <table>
          <tr>
            <th>{I.tr("Ident")}</th><th>{I.tr("Updated")}</th>
-           <th>{I.tr("Move")}</th><th>{I.tr("Description")}</th>
+           <th id="ilist_move">{I.tr("Move")}</th><th id="ilist_descr">{I.tr("Description")}</th>
          </tr>
          {
             for ( x:TrackerPoint <- list  
