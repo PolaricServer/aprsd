@@ -72,7 +72,7 @@ package no.polaric.aprsd.http
            
        /** Description. */
        protected def descr(req: Request): NodeSeq = 
-           if (model.hasDescr() && model.getDescr().length() > 0)
+           if (model != null && model.hasDescr() && model.getDescr().length() > 0)
                simpleLabel("descr", "leftlab", I.tr("Description")+":", TXT(model.getDescr())) else <span></span>
        
        

@@ -48,7 +48,7 @@ public class WebServer implements ServerAPI.Web  {
       /* Create a router that uses the paths of the URLs to select the service. */
       Router wsrouter = new PathRouter (services, null); 
       
-      Container c = new RouterContainer(wc, wsrouter, 2);
+      Container c = new RouterContainer(wc, wsrouter, 4);
       _server = new ContainerSocketProcessor(c, 12);
       _conn = new SocketConnection(_server);
       _addr = new InetSocketAddress(port);
