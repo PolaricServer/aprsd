@@ -106,18 +106,18 @@ package no.polaric.aprsd.http
        /** Prefix for trailpoints: id and timestamp. */
        protected def tp_prefix(tp: Trail.Item): NodeSeq = 
          <xml:group>
-            <label for="tp_ident" class="lleftlab"> {I.tr("Ident")+":"} </label>
+            <label for="tp_ident" class="sleftlab"> {I.tr("Ident")+":"} </label>
             <label id="tp_ident"><b> { model.getIdent() } </b></label>
-            { simpleLabel("tp_time",  "lleftlab", I.tr("Time")+":", TXT( df.format(tp.getTS()))) }
+            { simpleLabel("tp_time",  "sleftlab", I.tr("Time")+":", TXT( df.format(tp.getTS()))) }
          </xml:group>
 
          
          
        def trailpoint(req: Request, tp: Trail.Item): NodeSeq = 
             tp_prefix(tp) ++
-            { if (tp.speed >= 0) simpleLabel("tp_speed", "lleftlab", I.tr("Speed")+":", TXT(tp.speed+" km/h") )
+            { if (tp.speed >= 0) simpleLabel("tp_speed", "sleftlab", I.tr("Speed")+":", TXT(tp.speed+" km/h") )
                 else EMPTY } ++
-              simpleLabel("tp_dir",   "lleftlab", I.tr("Heading")+":", _directionIcon(tp.course, fprefix(req)))  
+              simpleLabel("tp_dir",   "sleftlab", I.tr("Heading")+":", _directionIcon(tp.course, fprefix(req)))  
        
        
        

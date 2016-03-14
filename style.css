@@ -38,6 +38,10 @@ label.lleftlab {
     width: 7em;
 }
 
+label.sleftlab {
+  width: 5.5em;
+}
+
 br { clear: left; }
 fieldset{ 
     background: #f0f5ec;

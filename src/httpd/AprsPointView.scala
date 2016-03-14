@@ -45,12 +45,12 @@ package no.polaric.aprsd.http
                  
        override def trailpoint(req: Request, tp: Trail.Item): NodeSeq = {
             tp_prefix(tp) ++
-            {  if (tp.speed >= 0) simpleLabel("tp_speed", "lleftlab", I.tr("Speed")+":", TXT(tp.speed+" km/h") )
+            {  if (tp.speed >= 0) simpleLabel("tp_speed", "sleftlab", I.tr("Speed")+":", TXT(tp.speed+" km/h") )
                else EMPTY } ++
-               simpleLabel("tp_dir",   "lleftlab", I.tr("Heading")+":", _directionIcon(tp.course, fprefix(req)))  ++
+               simpleLabel("tp_dir",   "sleftlab", I.tr("Heading")+":", _directionIcon(tp.course, fprefix(req)))  ++
             <div id="traffic">
               { if (tp.pathinfo != null) 
-                   simpleLabel("tp_via",   "lleftlab", I.tr("APRS via")+":", TXT( cleanPath(tp.pathinfo)))
+                   simpleLabel("tp_via",   "sleftlab", I.tr("APRS via")+":", TXT( cleanPath(tp.pathinfo)))
                 else EMPTY }
             </div>
        }  
