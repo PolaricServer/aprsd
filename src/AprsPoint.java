@@ -63,6 +63,10 @@ public abstract class AprsPoint extends TrackerPoint implements Serializable, Cl
     { 
        if (override && _icon != null)
           return _icon; 
+       if (_symTab == null) {
+         _api.log().error("AprsPoint", "Symbol table is null");
+         return "ERROR";
+       }
        return _symTab.getIcon(_symbol, _altsym);
     }           
            

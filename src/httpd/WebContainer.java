@@ -82,7 +82,7 @@ public class WebContainer implements Container, ServerAPI.ServerStats
             boolean allowed = 
                  req.getClientAddress().getAddress().isLoopbackAddress(); 
                 
-            resp.setValue("Server", "Polaric APRSD 1.9");
+            resp.setValue("Server", "Polaric APRSD 1.9+WS");
             resp.setValue("Content-Type", "text/html; charset=utf-8");
          
             _Handler h = _handlers.get(uri);

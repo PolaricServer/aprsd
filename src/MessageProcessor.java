@@ -374,7 +374,8 @@ public class MessageProcessor implements Runnable, Serializable
             }
 
          } catch (Exception e) 
-             { _api.log().warn("MessageProc", ""+e); }
+             { _api.log().warn("MessageProc", ""+e);
+               e.printStackTrace(System.out);}
        }
     }
 

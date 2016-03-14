@@ -357,7 +357,7 @@ public abstract class ServerBase
    }
  
  
- 
+ int _cnt = 0;
    /** 
     * Print XML overlay to the given output stream.
     */
@@ -377,7 +377,7 @@ public abstract class ServerBase
         /* Could we put metadata in a separate service? */
         if (metaonly) {
              out.println(metaTag("metaonly", "true")); 
-             out.println("</overlay>");              
+             out.println("</overlay>");            
              return;
         }
         out.println(metaTag("metaonly", "false"));
@@ -403,11 +403,8 @@ public abstract class ServerBase
                          + href + " " + title+">");
             out.println(" <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
             out.println("</point>");    
-        }                
-         
-         
-
-        
+        }              
+                
         /* Output APRS objects */
         for (TrackerPoint s: _api.getDB().search(uleft, lright)) 
         {
@@ -420,14 +417,13 @@ public abstract class ServerBase
                 continue;
             if (action.hideAll())
                 continue;
-                   
+            
             LatLng ref = s.getPosition().toLatLng(); 
             if (ref == null) continue; 
             
             if (!s.visible() || (_api.getSar() != null && !loggedIn && _api.getSar().filter(s)))  
                    out.println("<delete id=\""+s.getIdent()+"\"/>");
-            else {
-               synchronized(s) {
+            else {               
                   ref = s.getPosition().toLatLng(); 
                   if (ref == null) continue; 
                   
@@ -449,7 +445,7 @@ public abstract class ServerBase
                                + title + flags + (s.isChanging() ? " redraw=\"true\"" : "") +
                                ((s instanceof AprsObject) && _api.getDB().getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""))  ? " own=\"true\"":"") +">");
                   out.println(" <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     
-
+                  
                   /* Show label */ 
                   if (!action.hideIdent() && !s.isLabelHidden() ) {
                      String style = (!(s.getTrail().isEmpty()) ? "lmoving" : "lstill");
@@ -461,19 +457,19 @@ public abstract class ServerBase
                      out.println("   "+s.getDisplayId(showSarInfo));
                      out.println(" </label>"); 
                   }
-                  
-                  /* Trail */
-                  Trail h = s.getTrail();
+                           
+               /* Trail */
+               Trail h = s.getTrail();
+               synchronized(h) {
                   if (!action.hideTrail() && !h.isEmpty())
                      printTrailXml(out, s.getTrailColor(), s.getPosition(), h, uleft, lright); 
-       
-               } /* synchronized(s) */
+               }
                
                if (action.showPath() && s instanceof AprsPoint && ((AprsPoint)s).isInfra())
                   printPathXml(out, (Station) s, uleft, lright);              
                out.println("</point>");
             }
-          
+            
             /* Allow other threads to run */ 
             Thread.currentThread().yield ();
         }        
