@@ -216,7 +216,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
         
                 
        
-    public synchronized Station getStation(String id, Date t)
+    public Station getStation(String id, Date t)
     { 
          TrackerPoint x = getItem(id, t);
          if (x instanceof Station) return (Station) x;
@@ -224,7 +224,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     }   
 
     
-    public synchronized Station newStation(String id)
+    public Station newStation(String id)
     {  
         Station st = new Station(id);
         _map.put(id, st); 
@@ -232,7 +232,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     }
         
         
-    public synchronized void addPoint(TrackerPoint s)
+    public void addPoint(TrackerPoint s)
         { _map.put(s.getIdent(), s); }
         
         
@@ -240,7 +240,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
      * Create a new APRS object.
      * Note that an object is in this database identified by 'ident@owner'
      */
-    public synchronized AprsObject newObject(Station owner, String id)
+    public AprsObject newObject(Station owner, String id)
     {
         AprsObject st = new AprsObject(owner, id);
         _map.put(id+'@'+owner.getIdent(), st); 
@@ -252,7 +252,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     /**
      * Deactivate objects having the same name. 
      */
-    public synchronized void deactivateSimilarObjects(String id, Station owner)
+    public void deactivateSimilarObjects(String id, Station owner)
     {
         Collection<TrackerPoint> dupes =  _map.subMap(id+'@', id+'@'+"zzzzz").values();
         for (TrackerPoint x : dupes)
@@ -271,7 +271,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
      * Return a list of trackerpoints where the ident has the given prefix. 
      * @Param srch Prefix 
      */
-    public synchronized List<TrackerPoint> getAllPrefix(String srch)
+    public List<TrackerPoint> getAllPrefix(String srch)
     {
         if (srch == null)
            return new LinkedList();
@@ -292,7 +292,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
      * @Param srch Search expression.
      * @Param tags Array of tags (keywords). 
      */
-    public synchronized List<TrackerPoint> search(String srch, String[] tags)
+    public List<TrackerPoint> search(String srch, String[] tags)
     {
          LinkedList<TrackerPoint> result = new LinkedList();
          srch = srch.toUpperCase();
@@ -322,12 +322,12 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
      * Return list of stations within the rectangle defined by uleft (upper left 
      * corner) and lright (lower right corner). 
      */   
-    public synchronized List<TrackerPoint>
+    public List<TrackerPoint>
           search(Reference uleft, Reference lright)
     { 
          return _map.values().stream().filter( s ->
                (uleft==null || lright==null || s.isInside(uleft, lright, 0.1, 0.1))
-          ).collect(Collectors.toList());    
+          ).collect(Collectors.toList()); 
     }
     
        
