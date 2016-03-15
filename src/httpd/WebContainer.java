@@ -38,7 +38,7 @@ import org.xnap.commons.i18n.*;
 
 
 
-public class WebContainer implements Container, ServerAPI.ServerStats
+public class WebContainer implements Container
 {
   
    protected  ServerAPI  _api;

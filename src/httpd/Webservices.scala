@@ -82,8 +82,10 @@ package no.polaric.aprsd.http
                 simpleLabel("items", "leftlab", I.tr("Number of items:"), TXT(""+_api.getDB().nItems())) ++
                 simpleLabel("items", "leftlab", I.tr("Number of connections:"), TXT(""+_api.getDB().getRoutes().nItems())) ++
                 simpleLabel("items", "leftlab", I.tr("Own objects:"), TXT(""+_api.getDB().getOwnObjects().nItems())) ++   
-                simpleLabel("items", "leftlab", I.tr("Number of clients now:"), TXT(""+(_api.getWebserver().nClients()))) ++  
-                simpleLabel("items", "leftlab", I.tr("Number of HTTP requests:"), TXT(""+(_api.getHttps().getReq()))) }    
+                simpleLabel("items", "leftlab", I.tr("Number of clients now:"), 
+                  TXT(""+(_api.getWebserver().nClients()) + " ("+_api.getWebserver().nLoggedin()+" "+ I.tr("logged in")+")" ) ) ++  
+                simpleLabel("items", "leftlab", I.tr("Number of HTTP requests:"), 
+                  TXT(""+(_api.getWebserver().nHttpReq()))) }    
               { simpleLabel("freemem", "leftlab", I.tr("Used memory:"), 
                   TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
                                 

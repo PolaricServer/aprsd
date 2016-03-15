@@ -22,7 +22,7 @@ public class WebServer implements ServerAPI.Web  {
    private final SocketProcessor _server;
    private final GeoMessages _messages;
    private final MapUpdater  _mapupdate, _smapupdate;
-   
+   private final Container   _wc;
    
    /** 
     * Configure a webserver. 
@@ -48,8 +48,9 @@ public class WebServer implements ServerAPI.Web  {
       /* Create a router that uses the paths of the URLs to select the service. */
       Router wsrouter = new PathRouter (services, null); 
       
+      _wc = wc;
       Container c = new RouterContainer(wc, wsrouter, 6);
-      _server = new ContainerSocketProcessor(c, 12);
+      _server = new ContainerSocketProcessor(c, 24);
       _conn = new SocketConnection(_server);
       _addr = new InetSocketAddress(port);
    }
@@ -58,6 +59,13 @@ public class WebServer implements ServerAPI.Web  {
        return _mapupdate.nClients() + _smapupdate.nClients();
    }
    
+   public int nLoggedin() {
+       return _smapupdate.nClients();
+   }
+   
+   public int  nHttpReq() {
+      return ((WebContainer) _wc).getReq();
+   }
    
    public ServerAPI.Mbox getMbox() {
        return _messages;

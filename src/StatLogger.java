@@ -47,19 +47,20 @@ public class StatLogger extends Thread {
     public void run()
     {
         _api.log().debug("StatLogger", "Starting statistics logger");
-        _out.println("time, hits, client-threads, pos-updates");
+        _out.println("time, hits, clients, pos-updates");
+        
+        ServerAPI.Web ws = _api.getWebserver();        
         long period = 1000 * 60;           // 1 minute
         long _posUpd = TrackerPoint.getPosUpdates();
-        long _req = _api.getHttps().getReq(); 
+        long _req = ws.nHttpReq(); 
         long _clients; 
         
         while(true) {
            try {
                 Thread.sleep(period); 
-                ServerAPI.ServerStats st = _api.getHttps();
-                _out.println(df.format(new Date()) + "," + (st.getReq() - _req) + "," + st.getClients() + "," + 
+                _out.println(df.format(new Date()) + "," + (ws.nHttpReq() - _req) + "," + ws.nClients() + "," + 
                                   (TrackerPoint.getPosUpdates() - _posUpd)); 
-                _req = st.getReq();
+                _req = ws.nHttpReq();
                 _posUpd = TrackerPoint.getPosUpdates();
                 _out.flush();
 

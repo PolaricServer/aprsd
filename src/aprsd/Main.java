@@ -99,6 +99,7 @@ public class Main implements ServerAPI
    public void addHttpHandler(Object obj, String prefix)
     { wc.addHandler(obj, prefix); }
 
+    
    public void addHttpHandlerCls(String cn, String prefix)
     {
        try{
@@ -109,9 +110,6 @@ public class Main implements ServerAPI
        catch (Exception e)
         { log.warn("Main","cannot instantiate class: "+e); }
     }
-    
-   public ServerAPI.ServerStats getHttps()
-    { return wc; } 
     
    public Properties getConfig()
     { return _config; }

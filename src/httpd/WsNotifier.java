@@ -186,7 +186,7 @@ public abstract class WsNotifier extends ServerBase implements Service
          for(long user : _clients.keySet()) {
             Client client = (Client) _clients.get(user);
             try {               
-               if(pred.test(client)) 
+               if(client != null && pred.test(client)) 
                   client.sendText(txt.apply(client));
                
             } catch(Exception e){   

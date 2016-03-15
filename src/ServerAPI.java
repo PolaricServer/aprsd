@@ -21,22 +21,14 @@ import java.util.*;
     * plugins 
     */
    public interface ServerAPI 
-   {
-      /**
-       * Statistics about server.
-       */
-      public interface ServerStats {
-         /** Number of clients. */
-         public int getClients();
-         
-         /** Number of requests. */
-         public int getReq();
-      }
-      
+   { 
       
       /** Interface to web server */
       public interface Web {
          public int  nClients();
+         public int  nLoggedin();
+         public int  nHttpReq(); 
+         
          public Mbox getMbox(); 
          public void start() throws Exception; 
          public void stop() throws Exception;
@@ -85,10 +77,7 @@ import java.util.*;
           
        /** Return current internet channel in igate, etc.. */
        public AprsChannel getInetChannel();
-          
-          
-       /** Get server statistics. */
-       public ServerStats getHttps();
+
        
        
        /** Add HTTP handlers (webservices).
