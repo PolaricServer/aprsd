@@ -139,7 +139,10 @@ public class AprsParser implements AprsChannel.Receiver
             default: 
         }
         }catch (NumberFormatException e)
-          { _api.log().warn("AprsParser", "Cannot parse number in input. Report string probably malformed"); }
+          { _api.log().warn("AprsParser", "Cannot parse number in input. Report string probably malformed"); 
+            _api.log().debug("AprsParser", p.toString());
+         //   e.printStackTrace(System.out);
+          }
         
         // _api.getAprsHandler().handlePacket(p.source, rtime, p.from, p.to, p.via, p.report);
         for (AprsHandler h:_subscribers)
@@ -227,7 +230,10 @@ public class AprsParser implements AprsChannel.Receiver
         int i = msg.lastIndexOf('{');
         if (i >= 0) 
            msgid = msg.substring(i+1, msg.length());
-        
+        if (msg.charAt(10) != ':') {
+             _api.log().warn("AprsParser", "Message format problem: '"+msg+"'");
+             return; 
+        }
         String content = msg.substring(11, (i>=0 ? i : msg.length()));
         
         /* If sender==recipient and no msg id: This is telemetry metadata */
@@ -872,7 +878,10 @@ public class AprsParser implements AprsChannel.Receiver
         
         int seq = Integer.parseInt(data[0].substring(2));    
         for (int i=0; i < Telemetry.ANALOG_CHANNELS; i++)
-           aresult[i] = Float.parseFloat(data[i+1]);
+           if (data[i+1].length() > 0)
+              aresult[i] = Float.parseFloat(data[i+1]);
+           else 
+              aresult[i] = 0;
         
         for (int i=0; i < Telemetry.BINARY_CHANNELS && i < data[6].length(); i++)
            bits[i] = (data[6].charAt(i) == '1'); 
@@ -913,6 +922,10 @@ public class AprsParser implements AprsChannel.Receiver
     private void parseMetadata(Station st, String data)
     {
         Telemetry t = st.getTelemetry();
+        if (data.length() < 5) {
+           _api.log().warn("AprsParser", "Metadata format problem: "+data); 
+           return;
+        }
         String d = data.substring(5);
         
         if (data.matches("PARM.*")) 
@@ -922,10 +935,12 @@ public class AprsParser implements AprsChannel.Receiver
            t.setUnit( d.split(",\\s*") );
            
         else if (data.matches("EQNS.*")) {
-           float[] nd = new float[15];
-           int i=0;
+           // Default is not to change the raw value. Is this correct? 
+           float[] nd = {0,1,0,0,1,0,0,1,0,0,1,0,0,1,0};
+           int i = 0;
            for (String x : d.split(",\\s*")) {
-               nd[i] = Float.parseFloat(x);
+               if (x.length() > 0)
+                  nd[i] = Float.parseFloat(x);
                if (++i >= 15)
                   break;
            }
@@ -940,6 +955,8 @@ public class AprsParser implements AprsChannel.Receiver
            if (bb.length > 1)
               t.setDescr(bb[1]);
         }
+        else
+          _api.log().warn("AprsParser", "Metadata format problem: "+data);
     }
     
     

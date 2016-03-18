@@ -406,6 +406,9 @@ public abstract class ServerBase
         }              
                 
         /* Output APRS objects */
+        if (_api.getDB() == null)
+           _api.log().error("ServerBase", "_api.getDB() returns null");
+        else   
         for (TrackerPoint s: _api.getDB().search(uleft, lright)) 
         {
             Action action = vfilt.apply(s, scale); 
