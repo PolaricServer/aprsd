@@ -133,7 +133,10 @@ public class MapUpdater extends WsNotifier implements Notifier
    { 
        try {
          client.sendText( ((Client)client).getXmlOverlay(true) ); 
-         _api.log().debug("MapUpdater", "Client added: "+uid);
+         
+         _api.log().debug("MapUpdater", "Client added: "+uid+
+                  ", ip="+req.getClientAddress().getAddress() + 
+                  (client._username != null ? ", username='"+client._username+"'" : ""));
          return true;
       }
       catch (IOException e) {
@@ -141,12 +144,12 @@ public class MapUpdater extends WsNotifier implements Notifier
          return false;
       }
    }
-   
-   Timer tick = new Timer();
+
    
    /** Signal of change from a tracker point. */
    public void signal(TrackerPoint st) {      
-      postText( x -> ((Client)x).getXmlOverlay(false), x -> ((Client)x).isInside(st) );
+      postText( x -> ((Client)x).getXmlOverlay(false), 
+                x -> ((Client)x).isInside(st) );
       if (_link != null) 
          _link.signal(st);
    }

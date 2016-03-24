@@ -80,10 +80,10 @@ package no.polaric.aprsd.http
        /** Position info */
        protected def position(req : Request): NodeSeq = 
             simpleLabel("pos", "leftlab", I.tr("Position")+" (UTM):",
-                if (model.getPosition() != null) showUTM(req, model.getPosition())
+                if (model != null && model.getPosition() != null) showUTM(req, model.getPosition())
                 else TXT(I.tr("not registered")) ) ++
             simpleLabel("posll", "leftlab", I.tr("Position")+" (latlong):",
-                if (model.getPosition() != null) TXT( ll2dmString( model.getPosition().toLatLng()))
+                if (model != null && model.getPosition() != null) TXT( ll2dmString( model.getPosition().toLatLng()))
                 else TXT(I.tr("not registered")) )
         
             

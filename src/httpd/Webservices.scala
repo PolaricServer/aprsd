@@ -583,7 +583,6 @@ package no.polaric.aprsd.http
             { for (x:String <- mbox.getUsers) yield
                  <option value={x}>{x}</option>
             }
-            <option value="ALL">ALL</option>
             <option value="ALL-SAR">ALL-SAR</option>
             <option value="ALL-LOGIN">ALL-LOGIN</option>
            </select>

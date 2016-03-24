@@ -51,12 +51,16 @@ public class GeoMessages extends WsNotifier implements ServerAPI.Mbox
     */
    private static long _msgId = 1;
    private List<Message> _lastMsgs = new LinkedList<Message>();
-   private SortedSet<String> _users = new TreeSet<String>(); 
    
    
    
-   public Set<String> getUsers()
-      { return _users; }
+   public Set<String> getUsers() { 
+       Set<String> u = new TreeSet<String>();
+       for (FrameListener x: _clients.values()) 
+          if (x!=null) 
+             u.add(((Client)x).getUsername());
+       return u; 
+   }
       
       
    public GeoMessages(ServerAPI api, boolean trusted) throws IOException
@@ -67,16 +71,6 @@ public class GeoMessages extends WsNotifier implements ServerAPI.Mbox
    @Override public WsNotifier.Client newClient(FrameChannel ch, long uid) 
       { return new Client(ch, uid); }
 
-      
-   /**
-    * Subscribe a client to the service. 
-    * This may include authorization, preferences, etc.. 
-    * @return true if subscription is accepted. False if rejected. 
-    */
-   @Override public boolean subscribe(long uid, WsNotifier.Client client, Request req)  { 
-       _users.add(client.getUsername());
-       return true; 
-   }
    
    
    public void postMessage(String from, String to, String txt)
@@ -101,7 +95,6 @@ public class GeoMessages extends WsNotifier implements ServerAPI.Mbox
            
            postObject(msg, x -> 
                msg.to.equals(x._username) ||
-               msg.to.matches("ALL") || 
               (msg.to.matches("ALL-SAR") && x._sar) ||
               (msg.to.matches("ALL-LOGIN") && x._login)
             );
