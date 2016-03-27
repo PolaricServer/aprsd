@@ -551,7 +551,7 @@ package no.polaric.aprsd.http
                }>
           
                <td>{x.getDisplayId()}</td>
-               <td> { df.format(x.getUpdated()) } </td>
+               <td> { ServerBase.df.format(x.getUpdated()) } </td>
                <td> 
                { if (moving && x.getSpeed() > 0)
                        _directionIcon(x.getCourse(), fprefix) 
@@ -708,7 +708,7 @@ package no.polaric.aprsd.http
                       <tr onmouseover={"histList_hover("+arg+");"} 
                           onmouseout={"histList_hout("+arg+");"}
                           onclick = {"histList_click("+arg+");"} >
-                      <td> { tf.format(x.getTS()) } </td>
+                      <td> { ServerBase.tf.format(x.getTS()) } </td>
                       <td> { if (x.speed >= 0) x.speed.toString else "" } </td>
                       <td> { if (x.speed > 0) _directionIcon(x.course, fp) else ""} </td>
                       <td> {
@@ -735,7 +735,7 @@ package no.polaric.aprsd.http
     def handle_trailpoint(req : Request, res : Response) =
     {
        val I = getI18n(req)
-       val time = xf.parse(req.getParameter("time"))
+       val time = ServerBase.xf.parse(req.getParameter("time"))
        val ident = req.getParameter("id")
        val x:TrackerPoint = _api.getDB().getItem(ident, null)
        val item = _api.getDB().getTrailPoint(ident, time)
@@ -780,7 +780,7 @@ package no.polaric.aprsd.http
              } 
              { if (d.time != null) 
                   simpleLabel("hrd", "lleftlab", I.tr("Last reported")+":", I.tr("Time of last received telemetry report"),
-                     TXT( df.format(d.time))) 
+                     TXT( ServerBase.df.format(d.time))) 
                else EMPTY       
              }
              <div id="bintlm">
@@ -831,7 +831,7 @@ package no.polaric.aprsd.http
              </tr>
              { for (d <- tm.getHistory())  yield       
                 <tr>
-                <td> { df.format(d.time) } </td>
+                <td> { ServerBase.df.format(d.time) } </td>
                  { for (i <- 0 to Telemetry.ANALOG_CHANNELS-1) yield 
                      <td>
                         { ddf.format(d.getAnalog(i)) }

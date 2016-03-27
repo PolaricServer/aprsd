@@ -16,7 +16,10 @@ package no.polaric.aprsd;
 import uk.me.jstott.jcoord.*; 
 import java.util.*;   
 import java.io.Serializable;  
-  
+import java.util.function.*;
+
+
+
   
 /**
  * Movement history of APRS stations. A history has a certain maximum length with
@@ -24,6 +27,7 @@ import java.io.Serializable;
  */  
 public class Trail implements Iterable<TPoint>, Serializable
 {
+   
     /**
      * History item. It is a geographical point with timestamp and some additional info.
      */
@@ -34,7 +38,52 @@ public class Trail implements Iterable<TPoint>, Serializable
        public Item(Date t, Reference p, int sp, int crs, String path)
          { super(t, p); speed = sp; course = crs; pathinfo = path;} 
     }
-    
+       
+       
+    /**
+     * Part of the trail, bounded by a max length (in minutes) and a 
+     * max age. If trail contains no elements newer than the expire time. 
+     * this results in an empty trail. 
+     */
+    public class SubTrail implements Seq<TPoint>
+    {
+        private long expire, length; 
+        private Predicate<TPoint> _pred; 
+       
+        public SubTrail(long exp, long len, Predicate<TPoint> pred) { 
+           expire  = (exp > -1 ? exp*60*1000 : _maxAge);
+           length  = (len > -1 ? len*60*1000 : _maxAge);  
+           _expire = (expire > _expire ? expire : _expire);
+           _length = (length > _length ? length : _length);
+           _pred = pred; 
+        }
+        
+        public boolean isEmpty() 
+          { return Trail.this.isEmpty(); }
+          
+          
+        public void forEach(Consumer<TPoint> f) 
+        { 
+           if (isEmpty())
+             return;
+
+           long t = (new Date()).getTime();
+           long tfirst = getFirst().getTS().getTime();
+           
+           if (tfirst + expire < t) 
+              return;
+       
+           for (TPoint x: _items) {
+             if ( x.getTS().getTime() < tfirst - length ||
+                  !_pred.test(x) )
+                break;
+             f.accept(x);   
+          }
+       } 
+    }
+   
+   
+   
     private static long _maxAge = 1000 * 60 * 15;          // Max age of a history item (default 30 minutes) 
     private static long _maxPause = 1000 * 60 * 10;        // History removed if no movement within this time (15 minutes) 
     private static long _maxAge_ext = 1000 * 60 * 30;      // Max age of a history item - extended
@@ -44,7 +93,8 @@ public class Trail implements Iterable<TPoint>, Serializable
     private LinkedList<TPoint> _items = new LinkedList();
     private boolean _extended;
     private boolean _itemsExpired; 
-    private int _sum_speed = 0;
+    private long _expire, _length; 
+    
     
     public static void setMaxAge(long a)
        { _maxAge = a; }
@@ -55,6 +105,9 @@ public class Trail implements Iterable<TPoint>, Serializable
     public static void setMaxPause_Ext(long p)
        { _maxPause_ext = p; }    
  
+
+    public Trail() 
+      { _expire=_maxPause; _length=_maxAge; }
     
     public boolean itemsExpired() 
         { cleanUp(new Date()); 
@@ -91,7 +144,6 @@ public class Trail implements Iterable<TPoint>, Serializable
     public synchronized boolean add(Date t, Reference p, int sp, int crs, String path)
     { 
         Date now = new Date(); 
-        _sum_speed += sp;
         boolean added = false;
          
         if (length() > 0 && "(GPS)".equals(path) && Math.abs(crs - getFirst().course) < 20 &&
@@ -160,6 +212,10 @@ public class Trail implements Iterable<TPoint>, Serializable
        return _items.iterator();
     }  
 
+ 
+    public Seq<TPoint> subTrail(long exp, long len, Predicate<TPoint> pred) {
+        return new SubTrail(exp, len, pred);
+    }
     
     
     /**
@@ -169,17 +225,14 @@ public class Trail implements Iterable<TPoint>, Serializable
     {
         if (isEmpty())
            return;
-        boolean ext = ((_sum_speed / _items.size()) < 15);
         
-        if ((_items.getFirst().getTS().getTime() + (ext ? _maxPause_ext : _maxPause)) < now.getTime() )
+        if ((_items.getFirst().getTS().getTime() + _expire) < now.getTime() )
         { 
             _items.clear(); 
-            _sum_speed = 0;
             _itemsExpired = true; 
             return; 
         }
-        while (!isEmpty() && (_items.getLast().getTS().getTime() + (ext ? _maxAge_ext : _maxAge)) < now.getTime()) {
-           _sum_speed -= getLast().speed;
+        while (!isEmpty() && (_items.getLast().getTS().getTime() + _length) < now.getTime()) {
            _items.removeLast();
            _itemsExpired = true; 
         }

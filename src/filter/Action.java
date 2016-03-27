@@ -29,11 +29,12 @@ public class Action
      * Null Action. No changes. 
      */
     public static Action NULL()
-          { return new Action(false, false, false, false, false, "", null); }
+          { return new Action(false, false, false, false, false, "", null, -1, -1); }
         
         
     private boolean _hideIdent, _hideTrail, _hideAll, _showPath, _public;
     private String _style = ""; 
+    private long    _trailTime = -1, _trailLen = -1; 
     private String _icon = null;
     
     
@@ -46,10 +47,14 @@ public class Action
      * @param hideall Hide geo object completely (default is to show it).
      * @param showpath Show path of signals (default is to NOT show it).
      * @param style CSS class (used in addition to other classes). 
+     * @param trailtime Timeout for trails in minutes (overrides, -1 means no change).
+     * @param trailtime Trail length in minutes (overrides, -1 means no change).
      */
-    public Action(boolean hideid, boolean hidetrail, boolean hideall, boolean showpath, boolean pub, String style, String icon) { 
+    public Action(boolean hideid, boolean hidetrail, boolean hideall, boolean showpath, 
+                  boolean pub, String style, String icon, long trailtime, long traillen) { 
         _hideIdent = hideid; _hideTrail = hidetrail; _hideAll=hideall; 
         _showPath = showpath; _style = style; _public = pub; _icon = icon;
+        _trailTime = trailtime; _trailLen = traillen; 
     }
  
     
@@ -71,6 +76,12 @@ public class Action
         
         if (!_style.contains(x._style))
            _style = _style + (_style.equals("") ? "": " ") + x._style; 
+           
+        /* Trail time just overrides */
+        if (x._trailTime > -1)
+           _trailTime = x._trailTime; 
+        if (x._trailLen > -1)
+           _trailLen = x._trailLen;
     }
     
     
@@ -99,10 +110,21 @@ public class Action
         { return _style; }
     
     
+    /** Get trail timeout (minutes) */
+    public long getTrailTime()
+        { return _trailTime; }
+        
+    
+    /** Get trail timeout (minutes) */
+    public long getTrailLen()
+        { return _trailLen; }
+        
+        
     public String getIcon(String dfl)
         { return _icon == null ? dfl : _icon; }
     
     
     public String toString()
         { return "Action("+_hideIdent+", "+_hideTrail+", "+_hideAll+", "+_showPath+", "+_public+", '"+_style+"')"; }
+    
 }

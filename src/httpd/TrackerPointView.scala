@@ -108,7 +108,7 @@ package no.polaric.aprsd.http
          <xml:group>
             <label for="tp_ident" class="sleftlab"> {I.tr("Ident")+":"} </label>
             <label id="tp_ident"><b> { model.getIdent() } </b></label>
-            { simpleLabel("tp_time",  "sleftlab", I.tr("Time")+":", TXT( df.format(tp.getTS()))) }
+            { simpleLabel("tp_time",  "sleftlab", I.tr("Time")+":", TXT( ServerBase.df.format(tp.getTS()))) }
          </xml:group>
 
          

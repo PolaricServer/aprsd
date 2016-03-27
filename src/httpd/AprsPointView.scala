@@ -40,7 +40,7 @@ package no.polaric.aprsd.http
        
        protected def reporttime(req: Request): NodeSeq = 
            simpleLabel("hrd", "leftlab", I.tr("Last reported")+":", I.tr("Time of last received APRS report"),
-                 TXT( df.format(model.getUpdated()))) 
+                 TXT( ServerBase.df.format(model.getUpdated()))) 
                  
                  
        override def trailpoint(req: Request, tp: Trail.Item): NodeSeq = {

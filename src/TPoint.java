@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@
 package no.polaric.aprsd;
 import uk.me.jstott.jcoord.*; 
 import java.util.*;
+import java.util.function.*;
+
 
 
 /**

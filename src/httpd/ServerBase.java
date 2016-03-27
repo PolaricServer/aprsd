@@ -44,11 +44,11 @@ public abstract class ServerBase
    
    public static final String _encoding = "UTF-8";
 
-   DateFormat df = new SimpleDateFormat("dd MMM. HH:mm",
+   static DateFormat df = new SimpleDateFormat("dd MMM. HH:mm",
            new DateFormatSymbols(new Locale("no")));
-   DateFormat tf = new SimpleDateFormat("HH:mm",
+   static DateFormat tf = new SimpleDateFormat("HH:mm",
            new DateFormatSymbols(new Locale("no")));
-   DateFormat xf = new SimpleDateFormat("yyyyMMddHHmmss",
+   static DateFormat xf = new SimpleDateFormat("yyyyMMddHHmmss",
            new DateFormatSymbols(new Locale("no")));       
    
    public static Calendar utcTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
@@ -97,7 +97,7 @@ public abstract class ServerBase
        { return _api; }
    
    
-   protected double roundDeg(double x)
+   protected static double roundDeg(double x)
        { return ((double) Math.round(x*100000)) / 100000; 
        }
   
@@ -283,21 +283,20 @@ public abstract class ServerBase
    
    
     protected void printTrailXml(PrintWriter out, String[] tcolor, 
-          Reference firstpos, Iterable<TPoint> h, Reference uleft, Reference lright)  
+          Reference firstpos, Seq<TPoint> h)  
     {
         String pre  = "   <linestring stroke=\"2\" opacity=\"1.0\" color=\""+ tcolor[0] +"\" color2=\""+ tcolor[1] +"\">";
         String post = "   </linestring>";     
-        printPoints(out, pre, post, firstpos, h, uleft, lright); 
+        printPoints(out, pre, post, firstpos, h); 
     }
     
     
     
-    protected void printPointCloud(PrintWriter out, String color, 
-          Iterable<TPoint> h, Reference uleft, Reference lright)  
+    protected void printPointCloud(PrintWriter out, String color, Seq<TPoint> h)  
     {
         String pre  = "   <pointcloud opacity=\"0.6\" color2=\""+color+"\">";
         String post = "   </pointcloud>";    
-        printPoints(out, pre, post, null, h, uleft, lright);
+        printPoints(out, pre, post, null, h);
     }   
    
    
@@ -307,54 +306,13 @@ public abstract class ServerBase
     * Print a history trail of a moving station as a XML linestring object. 
     */
    protected void printPoints(PrintWriter out, String pre, String post, 
-          Reference firstpos, Iterable<TPoint> h, Reference uleft, Reference lright)
+          Reference firstpos, Seq<TPoint> h)
    {
-       boolean first = true;
-       int state = 1, n = 0;
-       LatLng itx = (firstpos == null ? null :  firstpos.toLatLng());  
-       String t = "00000000000000";
-       
-       for (TPoint it : h) 
-       {       
-          if (n==0) 
-              out.println( pre );     
-  
-          if (itx != null) {       
-              if (!first) 
-                  out.print(", "); 
-              else
-                  first = false;   
-              out.println( roundDeg(itx.getLng())+ " " + roundDeg(itx.getLat() ) +
-                          " " + t);           
-          }
-            
-          if (it.isInside(uleft, lright, 0.7, 0.7))
-             state = 2;
-          else
-             if (state == 2) {
-                state = 3; 
-                break;
-             }    
-       
-          if (n++ > 100) {
-              n = 0;
-              out.println(post);
-          }
-          else {
-              itx = it.getPosition().toLatLng();
-              if (it.getTS() == null) 
-                 t = "0";
-              else
-                 t = xf.format(it.getTS());
-          }
-       
-       }
-       if (itx != null && state < 3)
-           out.println(", "+ roundDeg(itx.getLng())+ " " + roundDeg(itx.getLat()) +
-                         " "+t);  // FIXME: get first time
-       if (n > 0) 
-          out.println(post);
+       TrailView tv = new TrailView(out, pre, post, firstpos);
+       h.forEach( it -> tv.addPoint(it) );
+       tv.close();
    }
+ 
  
  
  int _cnt = 0;
@@ -462,11 +420,11 @@ public abstract class ServerBase
                   }
                            
                /* Trail */
-               Trail h = s.getTrail();
-               synchronized(h) {
-                  if (!action.hideTrail() && !h.isEmpty())
-                     printTrailXml(out, s.getTrailColor(), s.getPosition(), h, uleft, lright); 
-               }
+               Seq<TPoint> h = s.getTrail()
+                  .subTrail(action.getTrailTime(), action.getTrailLen(), tp -> tp.isInside(uleft, lright, 0.7, 0.7) );     
+               if (!action.hideTrail() && !h.isEmpty())
+                  printTrailXml(out, s.getTrailColor(), s.getPosition(), h); 
+
                
                if (action.showPath() && s instanceof AprsPoint && ((AprsPoint)s).isInfra())
                   printPathXml(out, (Station) s, uleft, lright);              
