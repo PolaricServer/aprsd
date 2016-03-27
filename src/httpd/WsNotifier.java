@@ -58,7 +58,7 @@ public abstract class WsNotifier extends ServerBase implements Service
          
       public void close() throws IOException { 
          _chan.close(); 
-         _clients.remove(this);
+         _clients.remove(_uid);
       }
       
    
