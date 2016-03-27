@@ -355,14 +355,15 @@ public class MessageProcessor implements Runnable, Serializable
          try {
             Thread.sleep(5000);
             synchronized(this) {
-              for (OutMessage m: _outgoing.values()) {
+              Iterator<OutMessage> iter = _outgoing.values().iterator(); 
+              iter.forEachRemaining(m -> {
                  Date t = new Date();
                  long tdiff = t.getTime() - m.time.getTime();
                  if (tdiff >= _MSG_INTERVAL*1000) {
                    if (m.retry_cnt >= _MSG_MAX_RETRY) {
                       if (m.not != null)
                          m.not.reportFailure(m.recipient);
-                      _outgoing.remove(m.msgid);
+                      iter.remove();
                    }
                    else {
                       sendPacket(m.message, m.recipient);
@@ -370,7 +371,7 @@ public class MessageProcessor implements Runnable, Serializable
                       m.retry_cnt++;
                    } 
                 }
-              }
+              }); 
             }
 
          } catch (Exception e) 
