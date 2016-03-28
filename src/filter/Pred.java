@@ -44,6 +44,15 @@ public abstract class Pred
    public static Pred Scale(long sc, String op)
       { return new Scale(sc, op); }
       
+   public static Pred Speed(long sp, String op)
+      { return new Speed(sp, op); } 
+      
+   public static Pred MaxSpeed(long sp, String op)
+      { return new MaxSpeed(sp, op); } 
+      
+   public static Pred AvgSpeed(long sp, String op)
+      { return new AvgSpeed(sp, op); } 
+      
    public static Pred AprsSym(String regex)
       { return new AprsSym(regex); }
    
@@ -246,6 +255,53 @@ class Scale extends Pred
     } 
 }
 
+
+
+
+class Speed extends Pred
+{
+    private long speed; 
+    private String op;
+    
+    public Speed(long sp, String op)
+       { this.speed = sp; this.op = op; }
+       
+    public boolean eval(TrackerPoint obj, long scale) {
+       return _eval (obj.getSpeed());
+    }
+    
+    
+    public boolean _eval(int ospeed) {
+       switch (op) {
+          case "<": return ospeed < this.speed; 
+          case ">": return ospeed > this.speed;
+          case "<=" : return ospeed <= this.speed; 
+          case ">=" : return ospeed >= this.speed; 
+          default: return false; 
+       }
+    }           
+}
+
+
+class MaxSpeed extends Speed
+{
+    public MaxSpeed(long sp, String op)
+       { super(sp, op); } 
+       
+    public boolean eval(TrackerPoint obj, long scale) {
+       return _eval (obj.getMaxSpeed());
+    }
+}
+
+class AvgSpeed extends Speed
+{
+    public AvgSpeed(long sp, String op)
+       { super(sp, op); }  
+               
+    public boolean eval(TrackerPoint obj, long scale) {
+       return _eval (obj.getAvgSpeed());
+    }
+}
 
 
 

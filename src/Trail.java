@@ -25,7 +25,7 @@ import java.util.function.*;
  * Movement history of APRS stations. A history has a certain maximum length with
  * respect to time span. 
  */  
-public class Trail implements Iterable<TPoint>, Serializable
+public class Trail implements Iterable<Trail.Item>, Serializable
 {
    
     /**
@@ -72,14 +72,16 @@ public class Trail implements Iterable<TPoint>, Serializable
            
            if (tfirst + expire < t) 
               return;
-       
-           for (TPoint x: _items) {
-             if ( x.getTS().getTime() < tfirst - length ||
+              
+           synchronized(Trail.this) {
+             for (TPoint x: _items) {
+               if ( x.getTS().getTime() < tfirst - length ||
                   !_pred.test(x) )
-                break;
-             f.accept(x);   
-          }
-       } 
+                 break;
+               f.accept(x);   
+             }
+           }
+        } 
     }
    
    
@@ -90,11 +92,11 @@ public class Trail implements Iterable<TPoint>, Serializable
     private static long _maxPause_ext = 1000 * 60 * 20;     
         
     
-    private LinkedList<TPoint> _items = new LinkedList();
+    private LinkedList<Item> _items = new LinkedList();
     private boolean _extended;
     private boolean _itemsExpired; 
     private long _expire, _length; 
-    
+    private int  _maxSpeed;    
     
     public static void setMaxAge(long a)
        { _maxAge = a; }
@@ -135,6 +137,25 @@ public class Trail implements Iterable<TPoint>, Serializable
     }
     
     
+    /**
+     * Get the point in the trail with the highest speed
+     */
+    public synchronized int getMaxSpeed() {
+       int max = -1;
+       for (Item x : _items) 
+           max = (x.speed > max ? x.speed : max); 
+       return max; 
+    }
+  
+  
+    public synchronized int getAvgSpeed() {
+       int sum = 0;
+       for (Item x : _items) 
+          if (x.speed >= 0) sum += x.speed; 
+       return (int) Math.round(sum / length());
+    }
+    
+  
     public static final long mindist = 15;
     
     
@@ -159,7 +180,7 @@ public class Trail implements Iterable<TPoint>, Serializable
         else {    
            TPoint x=null, prev=null; 
            /* New report is older than the last report - find the right place and put it there */
-           ListIterator<TPoint> it = _items.listIterator();
+           ListIterator<Item> it = _items.listIterator();
            while (it.hasNext()) {
               x = it.next();
               prev = x;
@@ -177,7 +198,7 @@ public class Trail implements Iterable<TPoint>, Serializable
     }
     
     
-    public List<TPoint> points()
+    public List<Item> points()
        { return _items; }
        
     public Item getFirst()
@@ -193,20 +214,20 @@ public class Trail implements Iterable<TPoint>, Serializable
        
        
        
-    public Item getPointAt(Date t)
+    public synchronized Item getPointAt(Date t)
     {
-        ListIterator<TPoint> it = _items.listIterator();
-        TPoint x; 
+        ListIterator<Item> it = _items.listIterator();
+        Item x; 
         while (it.hasNext()) {
             x = it.next();
             if (t.getTime()-1000 < x.getTS().getTime() && t.getTime()+1000 > x.getTS().getTime())
-              return (Item) x; 
+              return x; 
         }
         return null;
     }
     
     
-    public Iterator<TPoint> iterator()
+    public Iterator<Item> iterator()
     {
        cleanUp(new Date()); 
        return _items.iterator();

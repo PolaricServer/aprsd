@@ -164,6 +164,10 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
         }
 
         
+        if (getSpeed() == -1)
+            setSpeed((int) Math.round(3.6 * (distance(newpos) / tdistance)));
+            
+            
         /*
          * If object has moved, indicate that object is moving/changing, 
          * save the previous position.
@@ -220,6 +224,12 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
        
     public int getSpeed ()
        { return _speed; }
+       
+    public int getAvgSpeed ()
+       { return _trail.getAvgSpeed(); }
+       
+    public int getMaxSpeed ()
+       { return _trail.getMaxSpeed(); }
 
     public void setSpeed (int s)
        { _speed = s; }

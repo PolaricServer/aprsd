@@ -87,8 +87,19 @@ expr : '(' expr ')'           {  $$=$2; }
      |  expr OR expr          {  $$=Pred.OR((Pred)$1, (Pred)$3); }  
      
      |  IDENT RELOP NUM       {   if ($1.matches("scale|SCALE"))
-                                     $$=Pred.Scale((Long) $3, $2); 
+                                     $$=Pred.Scale((Long) $3, $2);
+                                  else if ($1.matches("speed|SPEED"))
+                                     $$=Pred.Speed((Long) $3, $2);
+                                  else if ($1.matches("max-speed|MAX-SPEED"))
+                                     $$=Pred.MaxSpeed((Long) $3, $2);
+                                  else if ($1.matches("((average|avg)-speed)|((AVERAGE|AVG)-SPEED)"))
+                                     $$=Pred.AvgSpeed((Long) $3, $2);   
+                                  else {
+                                      $$=Pred.FALSE(); 
+                                      yyerror("Unknown identifier '"+$1+"'"); 
+                                 }  
                               }
+                              
                               
      |  IDENT '~' STRING      {  if ($1.matches("ident|IDENT")) 
                                       $$=Pred.Ident($3); 
