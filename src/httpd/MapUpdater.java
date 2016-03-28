@@ -105,8 +105,7 @@ public class MapUpdater extends WsNotifier implements Notifier
            }
            else
               _api.log().warn("MapUpdater", "Unknown command from client. uid="+_uid);
-       }
-       
+       }   
    } /* Class client */
      
     
@@ -132,10 +131,11 @@ public class MapUpdater extends WsNotifier implements Notifier
    @Override public boolean subscribe(long uid, WsNotifier.Client client, Request req) 
    { 
        try {
-         client.sendText( ((Client)client).getXmlOverlay(true) ); 
+         client.sendText( ((Client)client).getXmlOverlay(true) );
          
+         String origin = req.getValue("X-Forwarded-For");
          _api.log().debug("MapUpdater", "Client added: "+uid+
-                  ", ip="+req.getClientAddress().getAddress() + 
+                  (origin == null ? req.getClientAddress().getAddress() : ", "+origin) + 
                   (client._username != null ? ", username='"+client._username+"'" : ""));
          return true;
       }
