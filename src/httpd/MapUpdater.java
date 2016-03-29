@@ -134,7 +134,7 @@ public class MapUpdater extends WsNotifier implements Notifier
          client.sendText( ((Client)client).getXmlOverlay(true) );
          
          String origin = req.getValue("X-Forwarded-For");
-         _api.log().debug("MapUpdater", "Client added: "+uid+
+         _api.log().info("MapUpdater", "Client added: "+uid+
                   (origin == null ? req.getClientAddress().getAddress() : ", "+origin) + 
                   (client._username != null ? ", username='"+client._username+"'" : ""));
          return true;
@@ -153,6 +153,7 @@ public class MapUpdater extends WsNotifier implements Notifier
       if (_link != null) 
          _link.signal(st);
    }
+   
 
    /** Link to another instance of this class to receive signal. */
    public void link(MapUpdater n) {

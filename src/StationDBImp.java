@@ -166,7 +166,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     public synchronized void garbageCollect()
     {
          Date now = new Date();  
-         _api.log().info("StationDBImp", "Garbage collection...");
+         _api.log().debug("StationDBImp", "Garbage collection...");
          Iterator<TrackerPoint> stn = _map.values().iterator();
          int n=0;
          while (stn.hasNext()) 
@@ -190,7 +190,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
          s_runtime.runFinalization ();
          s_runtime.gc ();
          Thread.currentThread ().yield ();
-         _api.log().info("StationDBImp", "Garbage collection finished");
+         _api.log().debug("StationDBImp", "Garbage collection finished");
     }
     
     
@@ -258,8 +258,8 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
         for (TrackerPoint x : dupes)
            if (x instanceof AprsObject && !((AprsObject)x).isTimeless() && 
                   !owner.getIdent().equals(((AprsObject)x).getOwner().getIdent())) {
-               _api.log().info("StationDBImp",
-                  "APRS object overtaken/deactivated: "+id+"@"+((AprsObject)x).getOwner().getIdent());
+            //   _api.log().info("StationDBImp",
+            //      "APRS object overtaken/deactivated: "+id+"@"+((AprsObject)x).getOwner().getIdent());
                ((AprsObject)x).kill();
            }
     }

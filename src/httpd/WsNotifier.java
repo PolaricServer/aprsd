@@ -79,17 +79,22 @@ public abstract class WsNotifier extends ServerBase implements Service
    
       public void onError(Session socket, Exception cause) {
          _api.log().error("WsNotifier", "Socket error (" + cause + ")");
-         cause.printStackTrace(System.out);
-         try { close(); } catch (Exception e) {}
+         if (!(cause instanceof org.simpleframework.transport.TransportException))
+            cause.printStackTrace(System.out);
+         try { _clients.remove(_uid); close(); } 
+         catch (Exception e) {}
       }
 
    
       public void onClose(Session session, Reason cause) {
          _api.log().debug("WsNotifier", "Socket closed (" + cause + ")");
-         _clients.remove(this);
+         _api.log().info("WsNotifier", "Unsubscribing closed client channel: "+_uid); 
+         _clients.remove(_uid);
       }
-   }
+      
+   } /* class Client */
 
+   
    /* Is this instance on a trusted configuration. */
    private boolean _trusted = false;
          
