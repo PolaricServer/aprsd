@@ -97,6 +97,11 @@ public abstract class WsNotifier extends ServerBase implements Service
    
    /* Is this instance on a trusted configuration. */
    private boolean _trusted = false;
+   
+   /* Origin site. 
+    * Trusted origin sites (regular expression) */
+   private String _origin;
+   private String _trustedOrigin; 
          
    /* Jackson JSON mapper */ 
    protected final static ObjectMapper mapper = new ObjectMapper();
@@ -107,6 +112,7 @@ public abstract class WsNotifier extends ServerBase implements Service
    
    public WsNotifier(ServerAPI api, boolean trusted) throws IOException {
        super(api);
+      _trustedOrigin = _api.getProperty("trusted.orgin", ".*");
       _trusted = trusted;
       _clients = new ConcurrentHashMap<Long, FrameListener>();
    }  
@@ -129,23 +135,33 @@ public abstract class WsNotifier extends ServerBase implements Service
       try {
           Request req = connection.getRequest();      
           long uid = getSession(req); 
-          FrameChannel chan = connection.getChannel();
-          Client client = newClient(chan, uid); 
-          chan.register(client );
+              
+          /* Check origin */
+          _origin = req.getValue("Origin");
+          if (_origin.matches(_trustedOrigin)) 
+          {
+              FrameChannel chan = connection.getChannel();
+              Client client = newClient(chan, uid); 
+              chan.register(client );
           
-          /* We need to be sure that we can trust that the user
-           * is who he says he is. Can we trust that getAuthUser is authenticated
-           * if not, try to identify and authenticate. 
-           */
-          if (_trusted || trustUser(uid, req))
-                client.setUsername(getAuthUser(req));
+              /* We need to be sure that we can trust that the user
+               * is who he says he is. Can we trust that getAuthUser is authenticated
+               * if not, try to identify and authenticate. 
+               */
+              if (_trusted || trustUser(uid, req))
+                  client.setUsername(getAuthUser(req));
                  
-          if (subscribe(uid, client, req)) {
-             _api.log().info("WsNotifier", "Subscription success. User="+uid+(_trusted ? " (trusted chan)" : ""));
-             _clients.put(uid, client); 
-          }
-          else 
-             _api.log().info("WsNotifier", "Subscription rejected. User="+uid);
+              if (subscribe(uid, client, req)) {
+                 _api.log().info("WsNotifier", "Subscription success. User="+uid+(_trusted ? " (trusted chan)" : ""));
+                 _clients.put(uid, client); 
+              }
+              else {
+                 _api.log().info("WsNotifier", "Subscription rejected. User="+uid);
+                 chan.close();
+              }
+           }
+           else
+              _api.log().info("WsNotifier", "Subscription rejected. Untrusted origin='"+origin+"', user="+uid);
           
       } catch(Exception e) {
           _api.log().warn("WsNotifier", "Subscription failed: " + e);
