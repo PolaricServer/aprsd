@@ -138,7 +138,7 @@ public abstract class WsNotifier extends ServerBase implements Service
               
           /* Check origin */
           _origin = req.getValue("Origin");
-          if (_origin.matches(_trustedOrigin)) 
+          if (_origin != null && _origin.matches(_trustedOrigin)) 
           {
               FrameChannel chan = connection.getChannel();
               Client client = newClient(chan, uid); 
@@ -161,10 +161,12 @@ public abstract class WsNotifier extends ServerBase implements Service
               }
            }
            else
-              _api.log().info("WsNotifier", "Subscription rejected. Untrusted origin='"+origin+"', user="+uid);
+              _api.log().info("WsNotifier", "Subscription rejected. Untrusted origin='"+_origin+"', user="+uid);
           
       } catch(Exception e) {
           _api.log().warn("WsNotifier", "Subscription failed: " + e);
+          if (e instanceof NullPointerException)
+            e.printStackTrace(System.out);
       }  
    }
    
