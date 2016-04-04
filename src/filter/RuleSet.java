@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import no.polaric.aprsd.*;
  * Resulting actions are combined by using the merge method.
  */
 
-public class RuleSet 
+public class RuleSet implements Rule
 {
     private List<Rule> rlist = new LinkedList<Rule>(); 
     private boolean _public = false; 
@@ -44,7 +44,8 @@ public class RuleSet
      * @param r rule to be added. 
      */
     public void add(Rule r)
-       { rlist.add(r); }
+       { if (r != null) 
+           rlist.add(r); }
        
     /**
      * Create and add a rule to the ruleset. 
@@ -52,7 +53,7 @@ public class RuleSet
      * @param a Action of the rule.
      */
     public void add(Pred p, Action a) {
-        Rule r = new Rule(p, a); 
+        Rule r = new Rule.Single(p, a); 
         add(r);
     }
 
@@ -65,7 +66,7 @@ public class RuleSet
     public Action apply(TrackerPoint p, long scale) {
        /* Start with a null action.  An action that changes nothing. */
        Action a = Action.NULL(); 
-       
+
        /*  Actions are additive */
        for (Rule r: rlist)
           a.merge(r.apply(p, scale)); 

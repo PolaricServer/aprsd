@@ -55,6 +55,9 @@ AUTOTAG|autotag
 PUBLIC|"public"
          { return Parser.PUBLIC; }
          
+INCLUDE|include
+         { return Parser.INCLUDE; }
+         
 AND|"and"|\&     
          { return Parser.AND; }
          

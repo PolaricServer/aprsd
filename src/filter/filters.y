@@ -12,7 +12,7 @@ import no.polaric.aprsd.ServerAPI;
 %token <obj>   NUM
 
 %token <obj>   BOOLEAN VALUE
-%token         AND OR NOT ARROW PROFILE AUTOTAG PUBLIC
+%token         AND OR NOT ARROW PROFILE AUTOTAG PUBLIC INCLUDE
 %token         ERROR
 
 %type <obj>  action actions expr rule tag_rule public
@@ -72,7 +72,16 @@ rules : rules rule           { if ($2 != null)
      
      
 rule : expr ARROW '{' actions '}' ';' 
-                              {  $$ = new Rule((Pred) $1, action); } 
+                              { $$ = new Rule.Single((Pred) $1, action); } 
+     | INCLUDE IDENT ';'      
+                              { $$ = profiles.get($2); 
+                                if ($$ == null) 
+                                   yyerror("Tried to INCLUDE unknown profile '"+$2+"'");
+                              }
+                               
+                                   
+                                   
+                             
      | error ';'              {  $$ = null; } 
      ;
 
