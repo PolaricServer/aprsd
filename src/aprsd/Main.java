@@ -189,7 +189,6 @@ public class Main implements ServerAPI
            
            for (File f : files) {
                 Properties xConf = new Properties(); 
-                System.out.println("*** Config file: "+f.getName());
                 FileInputStream ffin = new FileInputStream(f.getAbsolutePath());
                 xConf.load( ffin );
                 ffin.close();
@@ -280,6 +279,7 @@ public class Main implements ServerAPI
            
            TrackerPoint.setApi(api);
            Station.init(api); 
+           Signs.init(api);
            
            /* Add main webservices */
            wc.addHandler(new Webservices(api), null);

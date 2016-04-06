@@ -8,8 +8,8 @@ Homepage: http://aprs.no/dokuwiki
 
 Package: polaric-aprsd
 Architecture: all
-Depends: openjdk-8-jre-headless, jsvc, scala-library (>> 2.11), scala-xml, scala-parser-combinators, gettext-base, libgettext-commons-java, libjackson2-core-java, libjackson2-databind-java, adduser, sudo, ${misc:Depends}
-Recommends: beep, librxtx-java
+Depends: openjdk-8-jre-headless, jsvc, librxtx-java, scala-library (>> 2.11), scala-xml, scala-parser-combinators, gettext-base, libgettext-commons-java, libjackson2-core-java, libjackson2-databind-java, adduser, sudo, ${misc:Depends}
+Recommends: beep
 Description: Polaric Server: APRS daemon part. 
  The "Polaric Server" which is mainly a web based service to present APRS 
  tracking information on maps and where the information is updated at real-

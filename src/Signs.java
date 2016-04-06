@@ -25,8 +25,14 @@ public class Signs extends Source
      * There is only one instance of this class. In future versions we should 
      * consider allowing multiple instances with different access permissions. 
      */
-    private static Signs _signs = 
-       new Signs(System.getProperties().getProperty("confdir", ".")+"/signs");
+    private static Signs _signs;
+    
+    public static void init(ServerAPI api) 
+    { 
+       _signs = 
+          new Signs(api, System.getProperties().getProperty("confdir", ".")+"/signs");  
+    }
+    
     
     
     /**
@@ -91,9 +97,9 @@ public class Signs extends Source
      * Example:  
      *    33W, 123456, 1234567, 30000, symbol.gif, http://mysite.net, This is my site 
      */  
-    protected Signs(String file) 
+    protected Signs(ServerAPI api, String file) 
     {
-        _init ("Signs", false, null);
+        _init (api, "Signs", false, null);
         try {
            _rd = new BufferedReader(new FileReader(file));
            while (_rd.ready())

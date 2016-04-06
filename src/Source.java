@@ -37,8 +37,9 @@ public abstract class Source implements Serializable
      public enum Type {inet, radio, local};
      
      
-     protected void _init (String id, boolean restrict, String tag) 
+     protected void _init (ServerAPI config, String id, boolean restrict, String tag) 
      {
+        _api = config;
         _ident = id; 
         _restrict = restrict; 
         _tag = tag; 
@@ -50,10 +51,9 @@ public abstract class Source implements Serializable
      
      protected void _init(ServerAPI config, String prefix, String id) 
      {
-        _api = config;
         boolean restrict = config.getBoolProperty(prefix+"."+id+".restrict", false);
         String tag = config.getProperty(prefix+"."+id+".tag", _tag); 
-        _init(id, restrict, tag); 
+        _init(config, id, restrict, tag); 
      }
      
      
