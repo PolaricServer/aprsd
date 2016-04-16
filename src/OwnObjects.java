@@ -255,7 +255,7 @@ public class OwnObjects implements Runnable
     {
        while (true) {
          try {
-            Thread.sleep(3000);
+            Thread.sleep(6000);
             synchronized(this) {
               String err = null; 
               for (String oid: _ownObjects) {

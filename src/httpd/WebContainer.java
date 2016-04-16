@@ -45,7 +45,8 @@ public class WebContainer implements Container
    protected  String     _serverurl;
    protected  boolean    _infraonly;
    protected  int        _max_load;
-   protected int _requests = 0, _reqNo = 0;
+   protected  int        _requests = 0; 
+   protected  long       _reqNo = 0;
    
    
    private static class _Handler {
@@ -71,7 +72,7 @@ public class WebContainer implements Container
        }
 
        public void run() {
-         int reqNo;
+         long reqNo;
          synchronized (WebContainer.this) {
             _requests++; _reqNo++;
             reqNo = _reqNo;
@@ -163,7 +164,7 @@ public class WebContainer implements Container
    /**
     * Total number of requests since startup.
     */
-   public int getReq() { return _reqNo; }
+   public long getReq() { return _reqNo; }
    
    
    

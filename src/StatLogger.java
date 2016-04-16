@@ -22,7 +22,7 @@ import java.io.*;
 /*
  * Sample and log some data to a CSV file each minute. 
  */
-public class StatLogger extends Thread {
+public class StatLogger implements Runnable {
 
     private DateFormat df = new SimpleDateFormat("dd MMM yyyy HH:mm:ss",
        new DateFormatSymbols(new Locale("no")));
@@ -38,38 +38,43 @@ public class StatLogger extends Thread {
            String f = System.getProperties().getProperty("logdir", ".")+"/"+logfile;
            _out = new PrintWriter(new FileOutputStream(f, true));
            _api = api;
-           start();
+           Thread t = new Thread(this, "StatLogger");
+           t.start(); 
        }
        catch (Exception e) { _api.log().error("StatLogger", ""+e); }
     }
     
     
+    
     public void run()
     {
-        _api.log().debug("StatLogger", "Starting statistics logger");
-        _out.println("time, hits, clients, pos-updates");
-        
-        ServerAPI.Web ws = _api.getWebserver();        
-        long period = 1000 * 60;           // 1 minute
-        long _posUpd = TrackerPoint.getPosUpdates();
-        long _req = ws.nHttpReq(); 
-        long _clients; 
-        
-        while(true) {
-           try {
-                Thread.sleep(period); 
-                _out.println(df.format(new Date()) + "," + (ws.nHttpReq() - _req) + "," + ws.nClients() + "," + 
-                                  (TrackerPoint.getPosUpdates() - _posUpd)); 
-                _req = ws.nHttpReq();
-                _posUpd = TrackerPoint.getPosUpdates();
-                _out.flush();
-
+        try {
+           _api.log().debug("StatLogger", "Starting statistics logger");
+           _out.println("time, hits, visits, clients, pos-updates, map-updates");
+           _out.flush();
+                       
+           ServerAPI.Web ws = _api.getWebserver();        
+           long period = 1000 * 60 * 10;           // 10 minute
+           long _posUpd = TrackerPoint.getPosUpdates();
+           long _req = ws.nHttpReq(); 
+           long _visits = ws.nVisits();  
+           long _mupdates = ws.nMapUpdates();
+           
+           while(true) { 
+               Thread.sleep(period); 
+               _out.println(df.format(new Date()) + "," + (ws.nHttpReq() - _req) + "," + 
+                    (ws.nVisits() - _visits) + "," + ws.nClients() + "," + (TrackerPoint.getPosUpdates() - _posUpd) + "," +
+                    (ws.nMapUpdates() - _mupdates) ); 
+               _req = ws.nHttpReq();
+               _visits = ws.nVisits();
+               _mupdates = ws.nMapUpdates();
+               _posUpd = TrackerPoint.getPosUpdates();
+               _out.flush();
            }
-           catch (Exception e)
-               { _api.log().error("StatLogger", "Thread: "+e); 
-                  e.printStackTrace(System.out); }                  
-        }  
-    }
-    
+        }
+        catch (Exception e)
+            { _api.log().error("StatLogger", "Thread: "+e); 
+               e.printStackTrace(System.out); }                       
+    }   
 }
 

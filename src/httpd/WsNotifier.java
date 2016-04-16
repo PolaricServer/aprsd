@@ -78,9 +78,12 @@ public abstract class WsNotifier extends ServerBase implements Service
       
    
       public void onError(Session socket, Exception cause) {
-         _api.log().error("WsNotifier", "Socket error (" + cause + ")");
-         if (!(cause instanceof org.simpleframework.transport.TransportException))
+         if (!(cause instanceof org.simpleframework.transport.TransportException)) {
+            _api.log().error("WsNotifier", "Socket error (" + cause + ")");
             cause.printStackTrace(System.out);
+         }
+         else
+           _api.log().error("WsNotifier", "Socket error (" + cause + ")");
          try { _clients.remove(_uid); close(); } 
          catch (Exception e) {}
       }
@@ -94,6 +97,9 @@ public abstract class WsNotifier extends ServerBase implements Service
       
    } /* class Client */
 
+   
+   /* Count number of visits */
+   private long _visits = 0;
    
    /* Is this instance on a trusted configuration. */
    private boolean _trusted = false;
@@ -121,7 +127,12 @@ public abstract class WsNotifier extends ServerBase implements Service
    /** Factory method */
    public abstract Client newClient(FrameChannel ch, long uid);
      
-
+     
+   /** Return number of visits */
+   public long nVisits()
+     { return _visits; }
+     
+     
    /** Return number of clients. */
    public int nClients() 
      { return _clients.size(); }
@@ -154,6 +165,7 @@ public abstract class WsNotifier extends ServerBase implements Service
               if (subscribe(uid, client, req)) {
                  _api.log().info("WsNotifier", "Subscription success. User="+uid+(_trusted ? " (trusted chan)" : ""));
                  _clients.put(uid, client); 
+                 _visits++;
               }
               else {
                  _api.log().info("WsNotifier", "Subscription rejected. User="+uid);
@@ -209,7 +221,7 @@ public abstract class WsNotifier extends ServerBase implements Service
          for(long user : _clients.keySet()) {
             Client client = (Client) _clients.get(user);
             try {               
-               if(client != null && pred.test(client)) 
+               if(client != null && pred.test(client) && txt != null) 
                   client.sendText(txt.apply(client));
                
             } catch(Exception e){   

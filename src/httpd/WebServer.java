@@ -49,12 +49,18 @@ public class WebServer implements ServerAPI.Web  {
       Router wsrouter = new PathRouter (services, null); 
       
       _wc = wc;
-      Container c = new RouterContainer(wc, wsrouter, 6);
+      Container c = new RouterContainer(wc, wsrouter, 8);
       _server = new ContainerSocketProcessor(c, 24);
       _conn = new SocketConnection(_server);
       _addr = new InetSocketAddress(port);
    }
 
+   
+   public long nVisits() {
+       return _mapupdate.nVisits() + _smapupdate.nVisits();
+   }
+   
+   
    public int nClients() {
        return _mapupdate.nClients() + _smapupdate.nClients();
    }
@@ -63,9 +69,14 @@ public class WebServer implements ServerAPI.Web  {
        return _smapupdate.nClients();
    }
    
-   public int  nHttpReq() {
+   public long nHttpReq() {
       return ((WebContainer) _wc).getReq();
    }
+   
+   public long nMapUpdates() {
+     return _mapupdate.nUpdates() + _smapupdate.nUpdates(); 
+   }
+   
    
    public ServerAPI.Mbox getMbox() {
        return _messages;

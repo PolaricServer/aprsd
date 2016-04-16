@@ -25,9 +25,11 @@ import java.util.*;
       
       /** Interface to web server */
       public interface Web {
+         public long nVisits();
          public int  nClients();
          public int  nLoggedin();
-         public int  nHttpReq(); 
+         public long nHttpReq(); 
+         public long nMapUpdates(); 
          
          public Mbox getMbox(); 
          public void start() throws Exception; 
