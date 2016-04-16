@@ -38,15 +38,11 @@ public class MapUpdater extends WsNotifier implements Notifier
         * Returns true if point is inside the client's area of interest 
         * and client wants to be updated, but not more often than once per 10 seconds. 
         */
-       public boolean isInside(TrackerPoint st) {
+       public boolean isInside(TrackerPoint st, boolean postpone ) {
           _pending = _pending || (_subscribe && st != null && st.isInside(_uleft, _lright));
-          if (_pending) {
-             long t = System.currentTimeMillis();
-             if (t > _lastSent + 1000 * 10) {
-                 _lastSent = t;
-                 _pending = false;
-                 return true;
-             }
+          if (!postpone && _pending) {
+             _pending = false; 
+             return true; 
           }
           return false; 
        }
@@ -56,6 +52,8 @@ public class MapUpdater extends WsNotifier implements Notifier
        public String getXmlOverlay(boolean metaonly) {
            StringWriter outs = new StringWriter();
            PrintWriter out = new PrintWriter(outs, false);
+           _updates++;
+           
            String meta = 
                metaTag("login", getUsername()) +
                metaTag("loginuser", (_login ? "true" : "false")) + 
@@ -111,11 +109,17 @@ public class MapUpdater extends WsNotifier implements Notifier
     
    private MapUpdater _link;  
    private Timer hb = new Timer();
-   
+   private long    _updates = 0;
+          
+          
    public MapUpdater(ServerAPI api, boolean trust) throws IOException { 
       super(api, trust); 
       hb.schedule( new TimerTask() 
-        { public void run() { signal(null); } } , 5000, 5000); 
+        { public void run() {       
+              postText( x -> ((Client)x).getXmlOverlay(false), 
+                        x -> ((Client)x).isInside(null, false) ); 
+           } 
+        } , 10000, 10000); 
    }  
     
     
@@ -147,9 +151,13 @@ public class MapUpdater extends WsNotifier implements Notifier
 
    
    /** Signal of change from a tracker point. */
-   public void signal(TrackerPoint st) {      
-      postText( x -> ((Client)x).getXmlOverlay(false), 
-                x -> ((Client)x).isInside(st) );
+   public void signal(TrackerPoint st) {
+      /* 
+       * postText will not generate and send text here. 
+       * This is postponed to a periodic task to avoid 
+       * deadlock problems and to avoid sending too often. 
+       */
+      postText( "", x -> ((Client)x).isInside(st, true) );
       if (_link != null) 
          _link.signal(st);
    }
@@ -158,5 +166,10 @@ public class MapUpdater extends WsNotifier implements Notifier
    /** Link to another instance of this class to receive signal. */
    public void link(MapUpdater n) {
       _link = n; 
+   }
+   
+   
+   public long nUpdates() {
+     return _updates; 
    }
 }
