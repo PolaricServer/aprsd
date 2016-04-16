@@ -267,6 +267,9 @@ public class Main implements ServerAPI
            /* Start parser and connect it to channel(s) if any */
            parser = new AprsParser(api, db.getMsgProcessor());
            
+           /* Initialize signs early since plugins may use it (see below) */
+           Signs.init(api);
+                      
            /* Plugins. Note that plugins are installed and started before main webservices, channels
             * aprs parser and own position/objects. If some core service is to be modified or extended
             * by plugins it must be installed before plugins. 
@@ -279,7 +282,7 @@ public class Main implements ServerAPI
            
            TrackerPoint.setApi(api);
            Station.init(api); 
-           Signs.init(api);
+
            
            /* Add main webservices */
            wc.addHandler(new Webservices(api), null);

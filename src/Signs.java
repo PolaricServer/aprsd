@@ -143,11 +143,12 @@ public class Signs extends Source
     public static synchronized Iterable<Item>
           search(long scale, Reference uleft, Reference lright)
     {
+         LinkedList<Item> result = new LinkedList();
+         if (_signs == null)
+            return result; 
          if (uleft==null || lright==null)
             return _signs._list;
           
-          
-         LinkedList<Item> result = new LinkedList();
          for (Item s: _signs._list)
             if (s.visible(scale) && s.isInside(uleft, lright, 0.1, 0.1))
                 result.add(s);
