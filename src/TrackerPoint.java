@@ -210,7 +210,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     }          
     
     
-    public synchronized Trail getTrail() 
+    public Trail getTrail() 
         { return _trail; }       
     
     public synchronized Trail.Item getHItem()

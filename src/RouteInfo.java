@@ -131,7 +131,7 @@ public class RouteInfo implements Serializable
     /**
      * Remove edges older than the given date from/to the given stn.
      */          
-    public synchronized void removeOldEdges(String stn, Date agelimit)
+    public void removeOldEdges(String stn, Date agelimit)
     {
        if (agelimit == null)
           return;
@@ -155,7 +155,7 @@ public class RouteInfo implements Serializable
     }
     
     
-    public synchronized void removeOldEdges(Date agelimit)
+    public void removeOldEdges(Date agelimit)
     {
         for (String x: _nodes.keySet())
             removeOldEdges(x, agelimit); 
