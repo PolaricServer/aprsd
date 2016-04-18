@@ -138,10 +138,14 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
           FileInputStream fs = new FileInputStream(_file);
           ObjectInput ifs = new ObjectInputStream(fs);
           
+          _api.log().debug("StationDBImp", "Restoring routes...");
           _routes = (RouteInfo) ifs.readObject();
+          _api.log().debug("StationDBImp", "Restoring msgproc and ownobj...");    
           _msgProc.restore();
           _ownobj.restore(ifs);
+          _api.log().debug("StationDBImp", "Restoring tags...");
           PointObject.restoreTags(ifs);
+          _api.log().debug("StationDBImp", "Restoring points...");
           while (true)
           { 
               TrackerPoint st = (TrackerPoint) ifs.readObject(); 
