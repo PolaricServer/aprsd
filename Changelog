@@ -163,4 +163,18 @@ V.1.9
 [C] Add some examples for North America and some help in using Google Maps (thanks W6ELA)
 [C] Allow GPX layers to work with different projections. 
 
- 
+
+
+V.2.0
+-----
+
+* Move to websockets for map updates. Rework of class structure for http server
+* Simple instant messaging
+* Better logging (log levels, etc)
+* Better statistics logging
+* Allow trail length etc.. to be configured in filter scripts
+* Filter scripts: include (inherit) rules from other profiles into a profile. 
+* Some smaller fixes. 
+
+* [C] Logout and time limit for logins
+* [C] Avoid to many/too close trail points

@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Øyvind Hanssen <ohanssen@acm.org>
 Build-Depends: debhelper (>= 8.0.0), gettext-base, libgettext-commons-java, libjackson2-core-java, libjackson2-databind-java, openjdk-8-jdk, scala (>> 2.11)
 Standards-Version: 3.9.6
-Homepage: http://aprs.no/dokuwiki
+Homepage: http://aprs.no/polaricserver
 
 Package: polaric-aprsd
 Architecture: all
@@ -17,7 +17,7 @@ Description: Polaric Server: APRS daemon part.
  and rescue service in Norway. It consists of a web application and a server 
  program (APRS daemon). 
  .
- The APRS daemon gathers data from a TNC or APRS-IS or both. It can present 
- and manipulate the information through a simple HTTP service. The daemon can 
- also be set up as an igate (internet gateway) and can be installed 
- independently of the web app. 
+ The APRS daemon gets data from a TNC or APRS-IS or a combination. It can 
+ present and manipulate the information through a simple HTTP service. 
+ The daemon can also be set up as an igate (internet gateway) and can
+ be installed independently of the web app. 

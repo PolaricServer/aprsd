@@ -114,6 +114,8 @@ public class MapUpdater extends WsNotifier implements Notifier
           
    public MapUpdater(ServerAPI api, boolean trust) throws IOException { 
       super(api, trust); 
+      
+      /* Periodic task to send updates to clients */
       hb.schedule( new TimerTask() 
         { public void run() {       
               postText( x -> ((Client)x).getXmlOverlay(false), 
