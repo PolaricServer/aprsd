@@ -6,6 +6,8 @@
 #
 
 
+slow      = max-speed < 20 AND moving ;
+
 TrackHide = NOT moving AND
             NOT ident~"LE.*|.*@LE.*" AND
             symbol ~ ".#|E0|I0|.&|[/\\]-|/_|/y|/r|\\j|.a" ;
@@ -69,6 +71,9 @@ PUBLIC PROFILE track {
    # Hide ident of non-moving objects if scale is more than 2 million
    scale > 2000000 AND
       NOT moving => { hide-ident };
+      
+   slow OR *slow            => { trail-length = 40, trail-time = 20 };
+   *longtrail               => { trail-length = 120, trail-time = 60 };
 }
 
 
