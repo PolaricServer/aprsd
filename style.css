@@ -12,6 +12,8 @@ h2 {
 
 div.trblock, label {display: block; overflow: hidden; }
 
+table td img {margin: -4px; height: 18px; width: 18px; padding-left: 1px}
+
 td {
     padding-left: 0.5em; 
     padding-right: 0.5em;

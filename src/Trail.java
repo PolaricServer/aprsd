@@ -156,7 +156,7 @@ public class Trail implements Iterable<Trail.Item>, Serializable
     }
     
   
-    public static final long mindist = 15;
+    public static final long mindist = 12;
     
     
     /**
@@ -166,7 +166,7 @@ public class Trail implements Iterable<Trail.Item>, Serializable
     { 
         Date now = new Date(); 
         boolean added = false;
-         
+       
         if (length() > 0 && "(GPS)".equals(path) && Math.abs(crs - getFirst().course) < 20 &&
                  t.getTime() < getFirst().getTS().getTime() + 30000)
            return added;

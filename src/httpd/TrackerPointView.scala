@@ -73,8 +73,11 @@ package no.polaric.aprsd.http
        /** Action for basic settings. */
        /* FIXME: Add trail colour when ready. */
        protected def basicSettings_action(req: Request) = {
+       
+             /* Persistent setting also means that it is to be owned by a user */
              val perm = req.getParameter("pers");
-             model.setPersistent( "true".equals(perm) );  
+             model.setPersistent( "true".equals(perm), getAuthUser(req) );              
+             
              val hide = req.getParameter("hidelabel");
              model.setLabelHidden( "true".equals(hide) );     
 
@@ -87,7 +90,8 @@ package no.polaric.aprsd.http
                 { ch = model.setAlias(null)
                   alias = "NULL"
                 }
-             _api.log().info("TrackerPointView", "ALIAS: '"+alias+"' for '"+model.getIdent()+"' by user '"+getAuthUser(req)+"'")
+             _api.log().info("TrackerPointView", 
+                "ALIAS: '"+alias+"' for '"+model.getIdent()+"' by user '"+getAuthUser(req)+"'")
              if (ch && api.getRemoteCtl() != null)
                  api.getRemoteCtl().sendRequestAll("ALIAS "+model.getIdent()+" "+alias, null);
 

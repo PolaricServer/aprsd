@@ -62,6 +62,13 @@ package no.polaric.aprsd.http
            ;
            
            
+       protected def showIcon(req:Request, icon:String, size:String) = {
+          val siz = if (size==null) "22" else size
+          if (icon == null) EMPTY 
+          else <img src={fprefix(req)+"/icons/"+icon} width={siz} height={siz} />
+       }
+          ;
+          
        protected def label(id:String, cls:String, lbl:String): NodeSeq =
            <label for={id} class={cls}>{lbl}</label>
           ;

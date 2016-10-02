@@ -25,7 +25,7 @@ import java.util.stream.*;
  * In-memory implementation of StationDB.
  * Data is saved to a file. Periodically and when program ends.
  */
-public class StationDBImp implements StationDB, StationDB.Hist, Runnable
+public class StationDBImp implements StationDB, Runnable
 {
     private SortedMap<String, TrackerPoint> _map = new ConcurrentSkipListMap();
     private String     _file;
@@ -62,15 +62,27 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
         { _histData = d; }
 
         
-            
     public TrackerPoint getItem(String id, Date t)
+       { return getItem(id, t, true); }
+            
+    public TrackerPoint getItem(String id, Date t, boolean update)
     { 
-       if (t==null)
-          return _map.get(id); 
+       TrackerPoint x = null;
+       if (t==null) {
+          x = _map.get(id); 
+          if (update && x != null && _histData != null && x.isPersistent())
+             _histData.updateItem(x);
+       }       
        else if (_histData !=null) 
-          return _histData.getItem(id, t); 
-       else 
-          return null;
+          x = _histData.getItem(id, t); 
+       return x;
+     }
+     
+     
+     public void saveItem(TrackerPoint x)
+     {
+        if (_histData != null)
+          _histData.saveItem(x);
      }
        
        
@@ -176,15 +188,24 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
          while (stn.hasNext()) 
          {
              TrackerPoint st = stn.next();
-             if (st.expired() && !st.isPersistent() ) 
-             {
-                st.removeAllTags();
-                removeItem(st.getIdent());
-                _routes.removeNode(st.getIdent()); 
-                n++;
+             if (st.expired()) {
+                 /* 
+                  * If persistent and a backing database is present, save it there. 
+                  * else keep it in memory (and allow it to be saved to file). 
+                  */
+                 if ( st.isPersistent() && _histData != null)
+                    _histData.saveItem(st); 
+                    
+                 /* If nonpersistent or saved to database, remove it. */
+                 if (!st.isPersistent() || _histData != null) {
+                    st.removeAllTags();
+                    removeItem(st.getIdent());
+                    _routes.removeNode(st.getIdent()); 
+                    n++;
+                 }
              } 
              else
-                st.autoTag();
+                 st.autoTag();
          }
          _api.log().info("StationDBImp", "GC Removed: "+n+" items"); 
          Calendar t = Calendar.getInstance();
@@ -210,7 +231,7 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     public synchronized void removeItem(String id)
     {   
            String[] idd = id.split("@");
-           
+          
            if (idd != null && idd.length > 1 && idd[1].equals(_api.getOwnPos().getIdent()))
                  _ownobj.delete(idd[0]);
                  
@@ -228,16 +249,21 @@ public class StationDBImp implements StationDB, StationDB.Hist, Runnable
     }   
 
     
+    
     public Station newStation(String id)
     {  
         Station st = new Station(id);
-        _map.put(id, st); 
+        addPoint(st);
         return st;
     }
         
         
     public void addPoint(TrackerPoint s)
-        { _map.put(s.getIdent(), s); }
+    { 
+       if (_histData != null)
+          _histData.updateItem(s);
+       _map.put(s.getIdent(), s); 
+    }
         
         
     /** 

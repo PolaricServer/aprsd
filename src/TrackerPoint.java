@@ -76,7 +76,8 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
             
     private   String   _alias;    
     private   boolean  _hidelabel = false; 
-    protected boolean  _persistent = false;  
+    protected boolean  _persistent = false; 
+    private   String   _user; 
   
   
   
@@ -138,7 +139,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
         long tdistance = (ts.getTime() - _updated.getTime()) / 1000;          
            
         /* Downsample. Time resolution is 10 seconds or more */
-        if (tdistance < 5)
+        if (tdistance < 5 && tdistance > -5)
              return false; 
         
         /* If moving incredibly fast (i.e. over 500 km/h) ignore, but only 
@@ -158,7 +159,6 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
          * history 
          */
         if (tdistance < 0 && _trail.add(ts, newpos, speed, course, pathinfo)) {
-            _api.log().debug("TrackerPoint", "Old report - update trail");
             setChanging(); 
             return false;
         }
@@ -463,6 +463,11 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
    
    /************ Methods related to persistence and expiry *************/
     
+    public String getUser()
+       { return _user; }
+       
+    public void setUser(String user)
+       { _user = user; }
                        
     public boolean isPersistent()
        { return _persistent; }
@@ -470,10 +475,15 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      
     /**
      * Set object to be persistent. I.e. it is not deleted by garbage collection
-     * even if expired. 
+     * even if expired, OR it may be saved to a database (if supported).
      */
-    public void setPersistent(boolean p)
-       { _persistent = p; }
+    public void setPersistent(boolean p, String user) {
+        /* FIXME: Only owner should have permission to change ? */
+        if (getUser() == null)
+           setUser(user);
+        _persistent = p; 
+        _db.saveItem(this);
+    }
         
             
     /** 

@@ -669,6 +669,7 @@ public class AprsParser implements AprsChannel.Receiver
        if (AprsChannel._dupCheck.checkTS(station.getIdent(), time))
             return;
             
+       _api.log().debug("AprsParser", "Extra report accepted: "+time);
        station.update(time, pd, "", "(EXT)" );        
        // _api.getAprsHandler().handlePosReport(src, station.getIdent(), time, pd, "", "(EXT)" );
        for (AprsHandler h:_subscribers)

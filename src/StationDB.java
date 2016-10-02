@@ -25,6 +25,19 @@ public interface StationDB
     public interface Hist
     {
         /**
+         * Save item info to database. 
+         * @param tp Item to update
+         */
+        public void saveItem(TrackerPoint tp); 
+        
+        /**
+         * Update item from database. 
+         * @param tp Item to update
+         */
+        public void updateItem(TrackerPoint tp); 
+       
+     
+        /**
          * Get item. 
          * @param id identifier (typically a callsign) of item.
          * @param d time of capture, null if realtime
@@ -42,7 +55,12 @@ public interface StationDB
     
 
       public TrackerPoint getItem(String id, Date d);
-        
+      
+      public TrackerPoint getItem(String id, Date t, boolean usedb);
+      
+      public void saveItem(TrackerPoint x);
+      
+      
       public Trail.Item getTrailPoint(String src, java.util.Date t);
         
         
