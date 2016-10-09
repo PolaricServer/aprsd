@@ -32,15 +32,16 @@ package no.polaric.aprsd.http
 
       
 
-      protected def htmlBody (req: Request, head : NodeSeq, content : NodeSeq) : Node =
+      protected def htmlBody (req: Request, head : NodeSeq, content : NodeSeq, mapframe : String) : Node =
          if (req.getParameter("ajax") == null)           
             <html>
             <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
             { head }
             <link href={ fprefix(req)+"/style.css"} rel="stylesheet" type="text/css" />
+            <script type="text/javascript" src="../Aprs/iframeApi.js"></script>
             </head>
-            <body>
+            <body onload={"init_polaric('"+mapframe+"', '*')"} >
             {content} 
             </body>
             </html>
@@ -49,6 +50,10 @@ package no.polaric.aprsd.http
            <xml:group> { content } </xml:group>
         ;
 
+        
+       protected def htmlBody (req: Request, head : NodeSeq, content : NodeSeq) : Node = 
+           htmlBody(req, head, content, "_PARENT_" )
+           ;
         
        protected def br = <br/>
            
@@ -173,6 +178,7 @@ package no.polaric.aprsd.http
                              fields : (Request) => NodeSeq,
                              action : (Request) => NodeSeq,
                              close  : Boolean,
+                             jump   : Integer,
                              submit : (Request) => NodeSeq ) : NodeSeq =
        {
            if (req.getParameter("update") != null) 
@@ -180,7 +186,8 @@ package no.polaric.aprsd.http
                  {
                    if (close)
                      <script source="javascript">setTimeout('window.close()', 2000);</script>
-                   else null  
+                   else
+                     <script source="javascript">{"setTimeout('window.history.go("+jump+")', 2000);"}</script>
                  } 
                  { action(req) }
                </div>;
@@ -196,7 +203,16 @@ package no.polaric.aprsd.http
               </form>
        }
 
-       
+       protected def htmlForm( req  : Request,
+                             prefix : NodeSeq,
+                             fields : (Request) => NodeSeq,
+                             action : (Request) => NodeSeq,
+                             close  : Boolean,
+                             submit : (Request) => NodeSeq ) : NodeSeq =
+           htmlForm(req, prefix, fields, action, close, -2, submit)
+           ; 
+           
+           
        protected def htmlForm( req  : Request,
                              prefix : NodeSeq,
                              fields : (Request) => NodeSeq,
@@ -210,6 +226,7 @@ package no.polaric.aprsd.http
        {        
             val out = getWriter(res);
             res.setValue("Content-Type", "text/html; charset=utf-8");
+            res.setValue("Cache-Control", "no-cache, must-revalidate, max-age=0");
             out.println (doctype + Xhtml.toXhtml(content) )
             out.close()
        }

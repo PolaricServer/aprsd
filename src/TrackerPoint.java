@@ -477,14 +477,18 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * Set object to be persistent. I.e. it is not deleted by garbage collection
      * even if expired, OR it may be saved to a database (if supported).
      */
-    public void setPersistent(boolean p, String user) {
+    public void setPersistent(boolean p, String user, boolean dontsave) {
         /* FIXME: Only owner should have permission to change ? */
         if (getUser() == null)
            setUser(user);
         _persistent = p; 
         _db.saveItem(this);
     }
-        
+    
+    public void setPersistent(boolean p, String user)
+       { setPersistent(p, user, true); }
+       
+     
             
     /** 
      * Return true if object has expired. 

@@ -12,7 +12,7 @@ h2 {
 
 div.trblock, label {display: block; overflow: hidden; }
 
-table td img {margin: -4px; height: 18px; width: 18px; padding-left: 1px}
+table td img {margin: -4px;  padding-left: 2px;padding-right:2px; padding-bottom: 1px}
 
 td {
     padding-left: 0.5em; 
@@ -22,6 +22,25 @@ td {
     background: #f0f5ec;
     min-height: 12px;
 }
+
+fieldset th { 
+  text-align: left;  
+  background: #fb9; 
+  border: #d86 1px solid; 
+  padding: 0 0.4em 0 0.4em
+}
+
+fieldset table {border-collapse: collapse}
+fieldset td {
+  padding-left: 0.5em; 
+  padding-right: 0.5em;
+  padding-bottom: 0.2em;
+  padding-top: 0.2em;
+  line-height: 1em;
+  border: 1px #d86 dotted
+}
+
+fieldset tr:hover td {background: #ff8}
 
 label, input, select, textarea { 
    margin-bottom: 4px; 
