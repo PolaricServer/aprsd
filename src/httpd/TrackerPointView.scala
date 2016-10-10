@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,8 +57,7 @@ package no.polaric.aprsd.http
                <div>
                <br/>
                { label("hidelabel", "leftlab", I.tr("Settings")+":") ++
-                   checkBox("hidelabel", model.isLabelHidden(), TXT(I.tr("Hide ID"))) ++
-                   checkBox("pers", model.isPersistent(), TXT(I.tr("Persistent storage"))) }
+                   checkBox("hidelabel", model.isLabelHidden(), TXT(I.tr("Hide ID"))) }
                <br/>
                <label for="nalias" class="leftlab"> {I.tr("New alias")+":"} </label>
                { textInput("nalias", 10, 20, 
@@ -73,11 +72,7 @@ package no.polaric.aprsd.http
        /** Action for basic settings. */
        /* FIXME: Add trail colour when ready. */
        protected def basicSettings_action(req: Request) = {
-       
-             /* Persistent setting also means that it is to be owned by a user */
-             val perm = req.getParameter("pers");
-             model.setPersistent( "true".equals(perm), getAuthUser(req) );              
-             
+      
              val hide = req.getParameter("hidelabel");
              model.setLabelHidden( "true".equals(hide) );     
 
