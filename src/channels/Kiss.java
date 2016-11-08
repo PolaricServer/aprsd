@@ -36,6 +36,7 @@ public class Kiss
    
    protected InputStream _istream; 
    protected OutputStream _ostream;
+   protected int _port;
   
    
    /** Address field. */
@@ -60,10 +61,14 @@ public class Kiss
    {}
     
     
-   public Kiss(InputStream is, OutputStream os)
+   /** port is the KISS interface port, zero by default.
+    *  multiport KISS TNCs support port 0 to 15
+    */
+   public Kiss(InputStream is, OutputStream os, int port)
    {
        _istream = is; 
        _ostream = os;
+       _port = port;
    }
    
 
@@ -75,7 +80,8 @@ public class Kiss
     {
          /* Start of frame. KISS command = data */
          sendFend(); 
-         sendByte((byte) 0); 
+         /* The high order nibble in the KISS command is the port number */
+         sendByte((byte) (_port * 16) ); 
        
          /* AX.25 UI Header */
          String[] digis = new String[0]; 
@@ -111,7 +117,7 @@ public class Kiss
      
         while (true) {
            try {
-               if (receiveByte() != 0)  
+               if (receiveByte()/16 != _port)  
                   continue;
                Addr a = decodeAddr();
                p.to = a.addr; 
