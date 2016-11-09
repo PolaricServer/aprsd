@@ -27,6 +27,7 @@ public class TcpKissChannel extends TcpChannel
     private transient InputStream  _istream;
     private transient OutputStream _ostream;
     private transient Kiss         _kiss;
+    private transient int          _kissport;
     transient protected Logfile    _log; 
     
     
@@ -38,6 +39,8 @@ public class TcpKissChannel extends TcpChannel
     
     @Override protected void getConfig() {
        super.getConfig();
+       String id = getIdent();
+       _kissport = _api.getIntProperty("channel."+id+".kissport", 0);
        _log = new Logfile(_api, getIdent(), "rf.log");
     }
     
@@ -75,7 +78,7 @@ public class TcpKissChannel extends TcpChannel
     {
          _istream = _sock.getInputStream();
          _ostream = _sock.getOutputStream();
-         _kiss = new Kiss(_istream, _ostream); 
+         _kiss = new Kiss(_istream, _ostream, _kissport); 
         
          while (!_close) 
          {

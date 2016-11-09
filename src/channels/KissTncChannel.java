@@ -27,6 +27,7 @@ public class KissTncChannel extends TncChannel
 
     protected InputStream _istream; 
     protected OutputStream _ostream; 
+    protected int _kissport;
   
     Kiss _kiss; 
 
@@ -36,6 +37,7 @@ public class KissTncChannel extends TncChannel
     {
        super(api, id);
        Properties config = api.getConfig();
+       _kissport = api.getIntProperty("channel."+id+".kissport", 0);
     }
     
     
@@ -79,7 +81,7 @@ public class KissTncChannel extends TncChannel
     {
         _ostream = _serialPort.getOutputStream();
         _istream = _serialPort.getInputStream(); 
-        _kiss = new Kiss(_istream, _ostream); 
+        _kiss = new Kiss(_istream, _ostream, _kissport); 
         
         while (!_close) 
         {
