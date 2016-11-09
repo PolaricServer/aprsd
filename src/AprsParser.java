@@ -437,9 +437,9 @@ public class AprsParser implements AprsChannel.Receiver
             m = msg.charAt(2)-28;
             s = msg.charAt(3)-28;
                     
-            if (d < 0 || d > 99
-                    || m < 0 || m > 99
-                    || s < 0 || s > 99)
+            if (d < 0 || d > 199
+                    || m < 0 || m > 120
+                    || s < 0 || s > 120)
                     return;
 
             // Adjust the degrees value

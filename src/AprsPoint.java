@@ -25,7 +25,7 @@ public abstract class AprsPoint extends TrackerPoint implements Serializable, Cl
 {  
     private   static SymTable  _symTab;
     
-    protected char        _symbol; 
+    protected char        _symbol = '\0'; 
     protected char        _altsym; 
     protected int         _ambiguity = 0;
     

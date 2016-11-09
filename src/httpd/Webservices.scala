@@ -737,7 +737,9 @@ package no.polaric.aprsd.http
        val I = getI18n(req)
        val time = ServerBase.xf.parse(req.getParameter("time"))
        val ident = req.getParameter("id")
-       val x:TrackerPoint = _api.getDB().getItem(ident, null)
+       var x:TrackerPoint = _api.getDB().getItem(ident, time)
+       if (x==null)
+           x = _api.getDB().getItem(ident, null)
        val item = _api.getDB().getTrailPoint(ident, time)
        
        val result : NodeSeq = 
