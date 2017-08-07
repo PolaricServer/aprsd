@@ -155,8 +155,9 @@ public class Trail implements Iterable<Trail.Item>, Serializable
        return (int) Math.round(sum / length());
     }
     
-  
-    public static final long mindist = 12;
+    
+    /* minimum distance: 10 meters */
+    public static final long mindist = 10;
     
     
     /**
@@ -167,11 +168,17 @@ public class Trail implements Iterable<Trail.Item>, Serializable
         Date now = new Date(); 
         boolean added = false;
        
+        /* If position is from own GPS and course change is small and time isn't more than 
+         * 30 seconds after last position, then we just ignore the update. 
+         */
         if (length() > 0 && "(GPS)".equals(path) && Math.abs(crs - getFirst().course) < 20 &&
                  t.getTime() < getFirst().getTS().getTime() + 30000)
            return added;
 
-        /* New report is newer than the last report - put it first */
+      
+        /* If new report is newer than the last report and distance from previous 
+         * position is more than mindist, put it first 
+         */
         if ( _items.size() == 0 || 
             (t.getTime() >= getFirst().getTS().getTime() && getFirst().distance(p) > mindist)) {
             _items.addFirst(new Item(t, p, sp, crs, path)); 
@@ -183,12 +190,12 @@ public class Trail implements Iterable<Trail.Item>, Serializable
            ListIterator<Item> it = _items.listIterator();
            while (it.hasNext()) {
               x = it.next();
-              prev = x;
               if (x.getTS().getTime() < t.getTime())
                  break;
+              prev = x; 
            }
           it.previous();
-          if (x.distance(p) > mindist  && prev != null && prev.distance(p) > mindist) {
+          if (x.distance(p) > mindist  && prev != null && (prev == null || prev.distance(p) > mindist)) {
              it.add(new Item(t, p, sp, crs, path));
              added = true;
           }

@@ -413,7 +413,9 @@ package no.polaric.aprsd.http
    }          
 
    
-
+   /**
+   /* Remove trail from station. 
+    */
    def handle_resetinfo(req : Request, res : Response) =
    {
        val I = getI18n(req)
@@ -446,14 +448,14 @@ package no.polaric.aprsd.http
 
              
    /**
-    * add or edit APRS object.
+    * Add or edit APRS object.
     */          
    def handle_addobject(req : Request, res : Response) =
    {
         val I = getI18n(req)
         val pos = getCoord(req)
         val id = fixText(req.getParameter("objid"))
-        val prefix = <h2> {I.tr("Add object")} </h2>
+        val prefix = <h2> {I.tr("Add/edit object")} </h2>
         
         /* Fields to be filled in */
         def fields(req : Request): NodeSeq =

@@ -52,7 +52,7 @@ package no.polaric.aprsd.http
 
         
        protected def htmlBody (req: Request, head : NodeSeq, content : NodeSeq) : Node = 
-           htmlBody(req, head, content, "_PARENT_" )
+            htmlBody(req, head, content, "_PARENT_" )
            ;
         
        protected def br = <br/>
@@ -173,7 +173,7 @@ package no.polaric.aprsd.http
         * Generic HTML form method.
         * Field content and action to be performed are given as function-arguments
         */
-       protected def htmlForm( req  : Request,
+       def htmlForm( req  : Request,
                              prefix : NodeSeq,
                              fields : (Request) => NodeSeq,
                              action : (Request) => NodeSeq,
@@ -203,7 +203,7 @@ package no.polaric.aprsd.http
               </form>
        }
 
-       protected def htmlForm( req  : Request,
+       def htmlForm( req  : Request,
                              prefix : NodeSeq,
                              fields : (Request) => NodeSeq,
                              action : (Request) => NodeSeq,
@@ -213,7 +213,7 @@ package no.polaric.aprsd.http
            ; 
            
            
-       protected def htmlForm( req  : Request,
+       def htmlForm( req  : Request,
                              prefix : NodeSeq,
                              fields : (Request) => NodeSeq,
                              action : (Request) => NodeSeq) : NodeSeq =
