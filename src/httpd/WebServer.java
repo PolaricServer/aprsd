@@ -21,7 +21,7 @@ public class WebServer implements ServerAPI.Web  {
    private final SocketAddress _addr;  
    private final SocketProcessor _server;
    private final GeoMessages _messages;
-   private final MapUpdater  _mapupdate, _smapupdate;
+   private final MapUpdater  _mapupdate, _jmapupdate, _smapupdate;
    private final Container   _wc;
    
    /** 
@@ -41,9 +41,14 @@ public class WebServer implements ServerAPI.Web  {
       _mapupdate = new MapUpdater(api, false);
       services.put("/mapdata", _mapupdate);
       
+      _jmapupdate = new JsonMapUpdater(api, false);
+      services.put("/jmapdata", _jmapupdate);
+      
       _smapupdate = new MapUpdater(api, true);
       services.put("/mapdata_sec", _smapupdate);
+      
       _smapupdate.link(_mapupdate);
+      _mapupdate.link(_jmapupdate);
       
       /* Create a router that uses the paths of the URLs to select the service. */
       Router wsrouter = new PathRouter (services, null); 

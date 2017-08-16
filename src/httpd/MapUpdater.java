@@ -22,14 +22,15 @@ public class MapUpdater extends WsNotifier implements Notifier
    
    public class Client extends WsNotifier.Client 
    {
-       private LatLng  _uleft;     /* Area of interest: upper left */
-       private LatLng  _lright;    /* Area of interest: lower right */
-       private boolean _subscribe; 
-       private String  _filter;
-       private long    _scale = 0;
-       private long    _lastSent = 0;
-       private boolean _pending = false; 
+       private boolean   _subscribe; 
+       private long      _lastSent = 0;
+       private boolean   _pending = false; 
        
+       protected LatLng  _uleft;     /* Area of interest: upper left */
+       protected LatLng  _lright;    /* Area of interest: lower right */
+       protected String  _filter;
+       protected long    _scale = 0;
+              
        public Client(FrameChannel ch, long uid) 
           { super(ch, uid); }
        
@@ -48,8 +49,8 @@ public class MapUpdater extends WsNotifier implements Notifier
        }
        
        
-       /** Returns the XML overlay. */
-       public String getXmlOverlay(boolean metaonly) {
+       /** Returns the overlay. XML format. */
+       public String getOverlayData(boolean metaonly) {
            StringWriter outs = new StringWriter();
            PrintWriter out = new PrintWriter(outs, false);
            _updates++;
@@ -76,6 +77,10 @@ public class MapUpdater extends WsNotifier implements Notifier
        }
 
        
+       public void subscribe() {}
+       
+       
+       
        /** Receive text frame from client. */
        @Override public void onTextFrame(Request req, String text) 
        {
@@ -89,12 +94,18 @@ public class MapUpdater extends WsNotifier implements Notifier
                  Double x2 = Double.parseDouble( parms[3] );
                  Double x3 = Double.parseDouble( parms[4] );    
                  Double x4 = Double.parseDouble( parms[5] );
+                 if (x1 > 180.0) x1 = 180.0; if (x1 < -180.0) x1 = -180.0;
+                 if (x2 > 180.0) x2 = 180.0; if (x2 < -180.0) x2 = -180.0;
+                 if (x3 > 90.0) x3 = 90.0; if (x3 < -90.0) x3 = -90.0;
+                 if (x4 > 90.0) x4 = 90.0; if (x4 < -90.0) x4 = -90.0;
+                 
                  _uleft  = new LatLng((double) x4, (double) x1); 
                  _lright = new LatLng((double) x2, (double) x3);
                  _scale  = Long.parseLong( parms[6] );
                  _subscribe = true;
+                 subscribe(); 
                  
-                 try { sendText(getXmlOverlay(false) ); }
+                 try { sendText(getOverlayData(false) ); }
                  catch (IOException e) 
                   {  _api.log().error("MapUpdater", "Couldn't sendtext to client "+_uid+": "+e); }
               }
@@ -109,7 +120,7 @@ public class MapUpdater extends WsNotifier implements Notifier
     
    private MapUpdater _link;  
    private Timer hb = new Timer();
-   private long    _updates = 0;
+   protected long    _updates = 0;
           
           
    public MapUpdater(ServerAPI api, boolean trust) throws IOException { 
@@ -118,7 +129,7 @@ public class MapUpdater extends WsNotifier implements Notifier
       /* Periodic task to send updates to clients */
       hb.schedule( new TimerTask() 
         { public void run() {       
-              postText( x -> ((Client)x).getXmlOverlay(false), 
+              postText( x -> ((Client)x).getOverlayData(false), 
                         x -> ((Client)x).isInside(null, false) ); 
            } 
         } , 10000, 10000); 
@@ -137,7 +148,7 @@ public class MapUpdater extends WsNotifier implements Notifier
    @Override public boolean subscribe(long uid, WsNotifier.Client client, Request req) 
    { 
        try {
-         client.sendText( ((Client)client).getXmlOverlay(true) );
+         client.sendText( ((Client)client).getOverlayData(true) );
          
          String origin = req.getValue("X-Forwarded-For");
          _api.log().info("MapUpdater", "Client added: "+uid+
