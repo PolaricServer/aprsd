@@ -50,17 +50,18 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
    class JsLabel {
        public String id;        // May be different from point id because of aliases? 
        public String style;     // This is actually a CSS class
+       public boolean hidden;
    }
    
    
    /* Do we need a more generic linestring as well? Line? */
     
    class JsTrail {
-       public String style;
+       public String[] style;
          // FIXME: Style or colours. Do colour selection on client? 
-         
+        
        public List<JsTPoint> linestring;  
-       public JsTrail(String s) 
+       public JsTrail(String[] s) 
          { style=s; linestring = new LinkedList<JsTPoint>(); }
    }
 
@@ -75,6 +76,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
     }
     
    /* Move this to server Base? */
+   /* FIXME: We already use Jackson in WsNotifier base class. see postObject */
    protected static Genson genson = new Genson();
    
    
@@ -100,7 +102,6 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
            JsOverlay mu = new JsOverlay(_filter, getUid());
            if (!metaonly)
               addPoints(mu);
-           
            return genson.serialize(mu);
        }
        
@@ -160,7 +161,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
            x.ident  = s.getIdent();
            x.label  = createLabel(s, action);
            x.pos    = new double[] {ref.getLongitude(), ref.getLatitude()};
-           x.title  = s.getDescr() == null ? "" : " title=\"" + fixText(s.getDescr()) + "\""; 
+           x.title  = s.getDescr() == null ? "" : fixText(s.getDescr()); 
            x.redraw = s.isChanging();
            x.own    = (s instanceof AprsObject) 
                        && _api.getDB().getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""));
@@ -177,16 +178,16 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
        
        /** Create label or return null if label is to be hidden. */
        private JsLabel createLabel(TrackerPoint s, Action action) {
-          if (!action.hideIdent() && !s.isLabelHidden() ) {
-              JsLabel lbl = new JsLabel();
-              lbl.style = (!(s.getTrail().isEmpty()) ? "lmoving" : "lstill");
-              if (s instanceof AprsObject)
-                 lbl.style = "lobject"; 
-              lbl.style += " "+ action.getStyle();
-              lbl.id = s.getDisplayId(_api.getSar()!=null);
-              return lbl;
-          }
-          else return null;
+           boolean showSarInfo = _login || _api.getSar() == null || !_api.getSar().isAliasHidden();
+           JsLabel lbl = new JsLabel();
+           
+           lbl.style = (!(s.getTrail().isEmpty()) ? "lmoving" : "lstill");
+           if (s instanceof AprsObject)
+              lbl.style = "lobject"; 
+           lbl.style += " "+ action.getStyle();
+           lbl.id = s.getDisplayId(showSarInfo);
+           lbl.hidden = (action.hideIdent() || s.isLabelHidden() );
+           return lbl;
        }
        
        
@@ -197,7 +198,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
                   tp -> tp.isInside(_uleft, _lright, 0.7, 0.7) );     
           
            if (!action.hideTrail() && !h.isEmpty()) {
-               JsTrail res = new JsTrail("nostyle");
+               JsTrail res = new JsTrail(s.getTrailColor()); 
                h.forEach( it -> res.linestring.add(new JsTPoint(it) ) );
                return res;
            }

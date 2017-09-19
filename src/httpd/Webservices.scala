@@ -414,7 +414,7 @@ package no.polaric.aprsd.http
 
    
    /**
-   /* Remove trail from station. 
+    * Remove trail from station. 
     */
    def handle_resetinfo(req : Request, res : Response) =
    {
@@ -530,10 +530,11 @@ package no.polaric.aprsd.http
     protected def itemList(I:I18n, list: List[TrackerPoint], mobile: Boolean, 
                   fprefix: String, loggedIn: Boolean): NodeSeq = 
       <table>
-         <tr>
+         <thead>
            <th>{I.tr("Ident")}</th><th>{I.tr("Updated")}</th>
            <th id="ilist_move">{I.tr("Move")}</th><th id="ilist_descr">{I.tr("Description")}</th>
-         </tr>
+         </thead> 
+         <tbody>
          {
             for ( x:TrackerPoint <- list  
                   if (!x.getSource().isRestricted() || loggedIn || x.hasTag("OPEN"))) yield
@@ -566,6 +567,7 @@ package no.polaric.aprsd.http
                </tr>
            }
         } 
+      </tbody>
       </table>
       ;
 
