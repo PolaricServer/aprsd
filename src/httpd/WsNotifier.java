@@ -1,37 +1,45 @@
 package no.polaric.aprsd.http;
-import no.polaric.aprsd.*;
 
+import spark.*;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.io.IOException;
-import org.simpleframework.http.Cookie;
-import org.simpleframework.http.Request;
-import org.simpleframework.http.socket.*;
-import org.simpleframework.http.socket.service.Service;
-import org.simpleframework.transport.*;
 import java.util.function.*;
-import com.fasterxml.jackson.databind.*;
+import java.net.*;
+import org.eclipse.jetty.websocket.api.annotations.*;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.RemoteEndpoint;
+import org.eclipse.jetty.websocket.api.UpgradeRequest;
+import org.eclipse.jetty.websocket.api.WebSocketException;
+import java.security.Principal;
+import com.owlike.genson.*;
+import no.polaric.aprsd.*;
+import com.mindprod.base64.Base64;
+
+
+
 
 
 /** Send events to clients through WebSockets. Let clients subscribe. */
 
-public abstract class WsNotifier extends ServerBase implements Service
+@WebSocket
+public abstract class WsNotifier extends ServerBase
 {
-
-   public abstract class Client implements FrameListener {
    
-      protected final FrameChannel _chan; 
-      protected final long _uid;
+   public abstract class Client {
+   
+      protected final Session _conn; 
+      protected final InetSocketAddress _uid;
     
       protected boolean _admin=false, _sar=false, _login=false; 
       protected String _username;
    
    
-      public Client(FrameChannel ch, long uid) {
-         _chan = ch;
-         _uid = uid;
+      public Client(Session conn) {
+         _conn = conn;
+         _uid = conn.getRemoteAddress();
       }
    
    
@@ -39,64 +47,40 @@ public abstract class WsNotifier extends ServerBase implements Service
             _username = uname; 
             _admin = authorizedForAdmin(_username);
             _sar = authorizedForUpdate(_username);
+              // FIXME: Should we have an Authorization class? 
+                            
             _login = (_username != null);
        }
        
    
-      public void send(Frame frame) throws IOException
-         { _chan.send(frame); }
-      
+      public void sendText(String text) throws IOException 
+         { _conn.getRemote().sendString(text); }
    
-      public void sendText(String text) throws IOException
-         { send(new DataFrame(FrameType.TEXT, text)); }
-   
-      public long getUid() 
+      public  InetSocketAddress getUid()
          { return _uid; }
+         
+      public Session getSession() 
+         { return _conn; }
          
       public String getUsername()
          { return _username; }
          
       public void close() throws IOException { 
-         _chan.close(); 
+         _conn.close(); 
          _clients.remove(_uid);
       }
       
-   
-      public void onFrame(Session socket, Frame frame) {
-         FrameType type = frame.getType();
-         String text = frame.getText();
-         Request request = socket.getRequest();
-         if(type == FrameType.TEXT) 
-             onTextFrame(request, text);
-      }
 
-      
       /** 
        * Handler for text frame. To be defined in subclass.
        */
-      public abstract void onTextFrame(Request request, String text);
-      
-   
-      public void onError(Session socket, Exception cause) {
-         if (!(cause instanceof org.simpleframework.transport.TransportException)) {
-            _api.log().error("WsNotifier", "Socket error (" + cause + ")");
-            cause.printStackTrace(System.out);
-         }
-         else
-           _api.log().error("WsNotifier", "Socket error (" + cause + ")");
-         try { _clients.remove(_uid); close(); } 
-         catch (Exception e) {}
-      }
-
-   
-      public void onClose(Session session, Reason cause) {
-         _api.log().debug("WsNotifier", "Socket closed (" + cause + ")");
-         _api.log().info("WsNotifier", "Unsubscribing closed client channel: "+_uid); 
-         _clients.remove(_uid);
-      }
+      public abstract void onTextFrame(String text);
       
    } /* class Client */
 
+   
+   
+   
    
    /* Count number of visits */
    private long _visits = 0;
@@ -105,27 +89,30 @@ public abstract class WsNotifier extends ServerBase implements Service
    private boolean _trusted = false;
    
    /* Origin site. 
-    * Trusted origin sites (regular expression) */
+    * Trusted origin sites (regular expression) 
+    */
    private String _origin;
    private String _trustedOrigin; 
          
-   /* Jackson JSON mapper */ 
-   protected final static ObjectMapper mapper = new ObjectMapper();
+
+   /* Genson object mapper */
+   protected final static Genson mapper = new Genson();
+   
    
    /* Map of clients */ 
-   protected final Map<Long, FrameListener> _clients;
+   protected final Map<InetSocketAddress, Client> _clients;
       
    
-   public WsNotifier(ServerAPI api, boolean trusted) throws IOException {
-       super(api);
+   public WsNotifier(ServerAPI api, boolean trusted) {
+       super(api); 
       _trustedOrigin = _api.getProperty("trusted.orgin", ".*");
       _trusted = trusted;
-      _clients = new ConcurrentHashMap<Long, FrameListener>();
+      _clients = new ConcurrentHashMap<InetSocketAddress, Client>();
    }  
      
      
    /** Factory method */
-   public abstract Client newClient(FrameChannel ch, long uid);
+   public abstract Client newClient(Session conn);
      
      
    /** Return number of visits */
@@ -138,38 +125,42 @@ public abstract class WsNotifier extends ServerBase implements Service
      { return _clients.size(); }
      
    
+   
+
+    
    /** 
-    * Connect. Join the room. The user id is a long int which is 
-    * assigned automatically.
+    * Webscoket Connect handler. Subscribe to the service (join the room). 
+    * Use remote IP + port as user id. FIXME: Is this enough? More than one simultaneous user 
+    * per client endpoint? 
     */
-   public void connect(Session connection) {
+   
+   @OnWebSocketConnect
+   public void onConnect(Session conn) {
       try {
-          Request req = connection.getRequest();      
-          long uid = getSession(req); 
-              
-          /* Check origin */
-          _origin = req.getValue("Origin");
-          if (_origin != null && _origin.matches(_trustedOrigin)) 
-          {
-              FrameChannel chan = connection.getChannel();
-              Client client = newClient(chan, uid); 
-              chan.register(client );
+          UpgradeRequest req = conn.getUpgradeRequest();    
+          InetSocketAddress uid = conn.getRemoteAddress();
           
+          /* Check origin */
+          _origin = req.getOrigin();
+          if (_origin != null && _origin.matches(_trustedOrigin)) 
+          { 
+              Client client = newClient(conn); 
+
               /* We need to be sure that we can trust that the user
                * is who he says he is. Can we trust that getAuthUser is authenticated
                * if not, try to identify and authenticate. 
                */
-              if (_trusted || trustUser(uid, req))
+              if (_trusted || trustUser(uid, conn))
                   client.setUsername(getAuthUser(req));
                  
-              if (subscribe(uid, client, req)) {
+              if (subscribe(uid, client)) {
                  _api.log().info("WsNotifier", "Subscription success. User="+uid+(_trusted ? " (trusted chan)" : ""));
                  _clients.put(uid, client); 
                  _visits++;
               }
               else {
                  _api.log().info("WsNotifier", "Subscription rejected. User="+uid);
-                 chan.close();
+                 conn.close();
               }
            }
            else
@@ -183,9 +174,52 @@ public abstract class WsNotifier extends ServerBase implements Service
    }
    
    
+      
+    /**
+     * Websocket close handler.
+     */
+     
+    @OnWebSocketClose
+    public void onClose(Session conn, int statusCode, String reason) {
+       _api.log().info("WsNotifier", "Connection closed: "+reason);
+       _clients.remove(conn.getRemoteAddress());
+    }
+
    
-   protected boolean trustUser(long uid, Request req) {
+   
+    /**
+     * Websocket Message handler.
+     */
+     
+    @OnWebSocketMessage
+    public void onMessage(Session conn, String message) {
+        Client c = _clients.get(conn.getRemoteAddress());
+        if (c != null)
+           c.onTextFrame(message);
+    }
+    
+    
+    
+   /**
+    * Return true if user is to be trusted. To be overridden by subclass. 
+    */
+    
+   protected boolean trustUser(InetSocketAddress uid, Session conn) {
       return false; 
+   }
+
+   
+   
+   /**
+    * Get username of the authenticated user. 
+    * @return username, null if not authenticated. 
+    */
+   protected final String getAuthUser(UpgradeRequest req)
+   {
+         String auth = req.getHeader("authorization");
+         if (auth==null)
+            auth = req.getHeader("Authorization");
+         return getAuthUser(auth);
    }
    
    
@@ -194,22 +228,21 @@ public abstract class WsNotifier extends ServerBase implements Service
     * This may include authorization, preferences, etc.. 
     * @return true if subscription is accepted. False if rejected.
     */
-   public boolean subscribe(long uid, Client client, Request req) 
+   public boolean subscribe(InetSocketAddress uid, Client client) 
       { return true; }
    
    
-     
+          
    /**
     * Distribute a object (as JSON) to the clients for which the 
     * predicate evaluates to true. 
     */
-   public void postObject(Object myObj, Predicate<Client> pred) { 
-      try { postText(mapper.writeValueAsString(myObj), pred); }
-      catch (Exception e) {
-          _api.log().warn("WsNotifier", "Cannot serialize object: " + e);
-      }
+   public void postObject(Object myObj, Predicate<Client> pred) {
+        postText(mapper.serialize(myObj), pred); 
    }
    
+
+
    
    /**
     * Distribute a text to the clients for which the 
@@ -218,14 +251,14 @@ public abstract class WsNotifier extends ServerBase implements Service
    public void postText(Function<Client,String> txt, Predicate<Client> pred) {
       try {          
          /* Distribute to all clients */
-         for(long user : _clients.keySet()) {
+         for(InetSocketAddress user : _clients.keySet()) {
             Client client = (Client) _clients.get(user);
             try {               
                if(client != null && pred.test(client) && txt != null) 
                   client.sendText(txt.apply(client));
                
             } catch(Exception e){   
-               if (e.getCause() instanceof TransportException) {
+               if (e.getCause() instanceof WebSocketException) {
                   _clients.remove(user); 
                   _api.log().info("WsNotifier", "Unsubscribing closed client channel: "+user);       
                }
@@ -237,6 +270,8 @@ public abstract class WsNotifier extends ServerBase implements Service
          e.printStackTrace(System.out);
       }
    } 
+   
+   
    
    public void postText(String txt, Predicate<Client> pred) {
         postText(c->txt, pred);

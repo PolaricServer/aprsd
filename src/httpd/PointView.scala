@@ -16,13 +16,11 @@
 import java.util._
 import java.io._
 import scala.xml._
-import org.simpleframework.transport.connect.Connection
-import org.simpleframework.transport.connect.SocketConnection
-import org.simpleframework.http._
 import uk.me.jstott.jcoord._
 import no.polaric.aprsd._
 import org.xnap.commons.i18n._
-
+import spark.Request;
+import spark.Response;
 
 
 /**
@@ -56,8 +54,8 @@ package no.polaric.aprsd.http
              extends ServerBase(api) with ServerUtils
    {
        val I = getI18n(req);
-       val simple =  ( req.getParameter("simple") != null )
-       val edit  =  ( req.getParameter("edit") != null )
+       val simple =  ( req.queryParams("simple") != null )
+       val edit  =  ( req.queryParams("edit") != null )
     
     
        /** Identifier field. */

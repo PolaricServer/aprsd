@@ -15,12 +15,13 @@
 import java.util._
 import java.io._
 import scala.xml._
-import org.simpleframework.transport.connect.Connection
-import org.simpleframework.transport.connect.SocketConnection
-import org.simpleframework.http._
+
 import uk.me.jstott.jcoord._
 import no.polaric.aprsd._
 import org.xnap.commons.i18n._
+import spark.Request;
+import spark.Response;
+
 
 
 package no.polaric.aprsd.http 
@@ -33,7 +34,7 @@ package no.polaric.aprsd.http
       
 
       protected def htmlBody (req: Request, head : NodeSeq, content : NodeSeq, mapframe : String) : Node =
-         if (req.getParameter("ajax") == null)           
+         if (req.queryParams("ajax") == null)           
             <html>
             <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -63,7 +64,7 @@ package no.polaric.aprsd.http
        /** File name prefix */
        // FIXME: Do we need this anymore??
        protected def fprefix(req: Request) : String = 
-           if ((req.getParameter("ajax") == null)) "../"+_wfiledir else _wfiledir 
+           if ((req.queryParams("ajax") == null)) "../"+_wfiledir else _wfiledir 
            ;
            
            
@@ -181,7 +182,7 @@ package no.polaric.aprsd.http
                              jump   : Integer,
                              submit : (Request) => NodeSeq ) : NodeSeq =
        {
-           if (req.getParameter("update") != null) 
+           if (req.queryParams("update") != null) 
                <div>
                  {
                    if (close)
@@ -222,24 +223,19 @@ package no.polaric.aprsd.http
            
            
 
-       protected def printHtml(res : Response, content : Node ) =
+       protected def printHtml(resp : Response, content : Node ) : String =
        {        
-            val out = getWriter(res);
-            res.setValue("Content-Type", "text/html; charset=utf-8");
-            res.setValue("Cache-Control", "no-cache, must-revalidate, max-age=0");
-            out.println (doctype + Xhtml.toXhtml(content) )
-            out.close()
+            resp.`type`("text/html; charset=utf-8")
+            return doctype + Xhtml.toXhtml(content)
        }
   
 
-       protected def printXml(res : Response, content : Node ) = 
-       {
-           val out = getWriter(res)
-           if (res.getValue("Content-Type") == null)
-               res.setValue("Content-Type", "text/xml; charset=utf-8");
-           out.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>")
-           out.println(content.toString())
-           out.close()
+       protected def printXml(res : Response, content : Node ) : String = 
+       {   
+           if (res.`type` == null)
+               res.`type`("text/xml; charset=utf-8")
+           return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" +
+                   content.toString()
        }
        
        
@@ -253,8 +249,8 @@ package no.polaric.aprsd.http
     */
    protected def getCoord(req : Request) : Reference =
    {
-        val x = req.getParameter("x")
-        val y = req.getParameter("y")
+        val x = req.queryParams("x")
+        val y = req.queryParams("y")
         try {
            if (x != null && y != null)
                new LatLng( y.toDouble, x.toDouble );

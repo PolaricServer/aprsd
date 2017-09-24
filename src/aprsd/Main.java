@@ -27,7 +27,7 @@ import no.polaric.aprsd.filter.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "2.0";
+   public  static String version = "2.0+";
    public static String toaddr  = "APPS20";
    
    private static StationDB db = null;
@@ -40,7 +40,6 @@ public class Main implements ServerAPI
    public static  RemoteCtl rctl;
    public static  SarMode  sarmode = null;
    private static Properties _config, _defaultConf; 
-   private static WebContainer wc;
    private static WebServer ws; 
    private static Channel.Manager _chanManager = new Channel.Manager();
    private static SarUrl sarurl;
@@ -97,19 +96,22 @@ public class Main implements ServerAPI
       
       
    public void addHttpHandler(Object obj, String prefix)
-    { wc.addHandler(obj, prefix); }
+      { ws.addHandler(obj, prefix); }
 
-    
+
    public void addHttpHandlerCls(String cn, String prefix)
     {
        try{
           Class cls = Class.forName(cn); 
           Constructor[] cc = cls.getConstructors();
-          wc.addHandler(cc[0].newInstance(this), prefix);
+          ws.addHandler(cc[0].newInstance(this), prefix);
        }
        catch (Exception e)
         { log.warn("Main","cannot instantiate class: "+e); }
-    }
+    } 
+    
+    
+    
     
    public Properties getConfig()
     { return _config; }
@@ -255,8 +257,7 @@ public class Main implements ServerAPI
                    
            /* Configure and Start HTTP server */
            int http_port = getIntProperty("httpserver.port", 8081);
-           wc = new WebContainer(api); 
-           ws = new WebServer(api, http_port, wc);
+           ws = new WebServer(api, http_port);
            ws.start();
            TrackerPoint.setNotifier(ws.getNotifier());
            log.info("Main", "HTTP/WS server ready on port " + http_port);
@@ -282,11 +283,9 @@ public class Main implements ServerAPI
            
            TrackerPoint.setApi(api);
            Station.init(api); 
-
            
            /* Add main webservices */
-           wc.addHandler(new Webservices(api), null);
-      
+           ws.addHandler(new Webservices(api), "/");
 
            /*
             * default channel setup: one named aprsis type APRSIS and one named tnc type TNC2
@@ -403,7 +402,7 @@ public class Main implements ServerAPI
          log.info("Main", "Stopping HTTP/WS server");
          try {
             ws.stop();
-         } catch (IOException e) {}
+         } catch (Exception e) {}
 
          log.info("Main", "Polaric APRSD shutdown"); 
          PluginManager.deactivateAll();
@@ -416,6 +415,6 @@ public class Main implements ServerAPI
     
     public void destroy()
       // Destroy any object created in init()
-   {}
+       {}
    
 }

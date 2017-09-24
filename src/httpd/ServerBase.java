@@ -16,10 +16,6 @@ package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
 import no.polaric.aprsd.filter.*;
 
-import org.simpleframework.http.core.Container;
-import org.simpleframework.transport.connect.Connection;
-import org.simpleframework.transport.connect.SocketConnection;
-import org.simpleframework.http.*;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.io.PrintStream;
@@ -32,6 +28,10 @@ import java.text.*;
 import com.mindprod.base64.Base64;
 import java.util.concurrent.locks.*; 
 import org.xnap.commons.i18n.*;
+import spark.*;
+
+
+
 
 
 public abstract class ServerBase 
@@ -56,7 +56,7 @@ public abstract class ServerBase
    
    
    
-   public ServerBase(ServerAPI api) throws IOException
+   public ServerBase(ServerAPI api) 
    {
       _api=api; 
       _wfiledir    = api.getProperty("map.web.dir", "aprsd");
@@ -86,7 +86,7 @@ public abstract class ServerBase
    {
         if (base==null)
            base = i18n_base; 
-        String lang = req.getParameter("lang");         
+        String lang = req.queryParams("lang");         
         Locale loc = ((lang != null && lang.length() > 0) ? new Locale(lang) : new Locale("en"));
         return I18nFactory.getI18n(base + ".XX", "i18n.Messages", 
                        getClass().getClassLoader(), loc, I18nFactory.FALLBACK);
@@ -122,19 +122,27 @@ public abstract class ServerBase
     * (we assume that there is a front end webserver which already 
     * did the authentication).  
     */ 
+    // FIXME: DO we need this? Remove? 
    protected final String getAuthUser(Request req)
    {
-         String auth = req.getValue("authorization");
+         String auth = req.headers("authorization");
          if (auth==null)
-            auth = req.getValue("Authorization");
-         if (auth != null) {
+            auth = req.headers("Authorization");
+        return getAuthUser(auth);
+   }
+   
+   
+   protected final String getAuthUser(String auth)
+   {
+       if (auth != null) {
            Base64 b64 = new Base64();
            byte[] dauth = b64.decode(auth.substring(6));
            String[] user = (new String(dauth)).split(":");
            return (user.length == 0 ? null : user[0]);
-         }
-         return null;
+       }
+       return null;
    }
+   
    
 
    protected final boolean authorizedForUpdate(String user) 
@@ -160,8 +168,7 @@ public abstract class ServerBase
    
    protected PrintWriter getWriter(Response resp) throws IOException
    {
-        OutputStream os = resp.getOutputStream();
-        return new PrintWriter(new BufferedWriter(new OutputStreamWriter(os, _encoding)));
+        return null;  // FIXME. Remove this method. 
    }
    
 
@@ -226,20 +233,7 @@ public abstract class ServerBase
       { return showDMstring(llref.getLatitude())+"N, "+showDMstring(llref.getLongitude())+"E"; }
    
    
-   
-   protected static long _sessions = 0;
-   protected synchronized long getSession(Request req)
-      throws IOException
-   {
-      String s_str  = req.getParameter("clientses");
-      if (s_str != null && s_str.matches("[0-9]+")) {
-         long s_id = Long.parseLong(s_str);
-         if (s_id > 0)
-            return s_id;
-      }
-      _sessions = (_sessions +1) % 2000000000;
-      return _sessions;       
-   }
+
    
    
    
@@ -315,7 +309,7 @@ public abstract class ServerBase
  
  
  
- int _cnt = 0;
+  int _cnt = 0;
    /** 
     * Print XML overlay to the given output stream.
     */

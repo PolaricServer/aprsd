@@ -6,10 +6,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.io.IOException;
-import org.simpleframework.http.Cookie;
-import org.simpleframework.http.Request;
-import org.simpleframework.http.socket.*;
-import org.simpleframework.http.socket.service.Service;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.*;
 import uk.me.jstott.jcoord.*; 
 import com.owlike.genson.*; 
 import no.polaric.aprsd.filter.*;
@@ -18,19 +16,19 @@ import no.polaric.aprsd.filter.*;
 /**
  * Map overlay updater using Websockets.  
  */
+
+@WebSocket(maxIdleTime=360000)
 public class JsonMapUpdater extends MapUpdater implements Notifier
 {
-
    class JsOverlay {
       public String  view;       /* filter name */
-      public long    sesId;      /* Client session. Consider a Session or authorization class */
+      /* FIXME: Consider adding som session info here */
       
       List<JsPoint>  points;
       List<String> delete;
       
-      public JsOverlay(String v, long s) {
+      public JsOverlay(String v) {
          view = v;
-         sesId = s;
       }
    }
 
@@ -75,19 +73,15 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
          }
     }
     
-   /* Move this to server Base? */
-   /* FIXME: We already use Jackson in WsNotifier base class. see postObject */
-   protected static Genson genson = new Genson();
-   
-   
+    
    
    
    public class Client extends MapUpdater.Client 
    {
        private Set<String> items = new HashSet<String>();
        
-       public Client(FrameChannel ch, long uid) 
-          {  super(ch, uid); }
+       public Client(Session conn) 
+          {  super(conn); }
    
           
        public void subscribe() {
@@ -99,10 +93,10 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
        /** Returns the overlay. JSON format. */
        @Override public String getOverlayData(boolean metaonly) {
            _updates++;
-           JsOverlay mu = new JsOverlay(_filter, getUid());
+           JsOverlay mu = new JsOverlay(_filter);
            if (!metaonly)
               addPoints(mu);
-           return genson.serialize(mu);
+           return mapper.serialize(mu);
        }
        
        
@@ -211,11 +205,11 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
     
     
    /* Factory method. */
-   @Override public WsNotifier.Client newClient(FrameChannel ch, long uid) 
-      { return new Client(ch, uid); }
+   @Override public WsNotifier.Client newClient(Session ses) 
+      { return new Client(ses); }
     
     
-   public JsonMapUpdater(ServerAPI api, boolean trust) throws IOException { 
+   public JsonMapUpdater(ServerAPI api, boolean trust) { 
       super(api, trust); 
    }
 }

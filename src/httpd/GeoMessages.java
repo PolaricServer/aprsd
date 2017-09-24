@@ -5,40 +5,39 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.io.IOException;
-import org.simpleframework.http.Cookie;
-import org.simpleframework.http.Request;
-import org.simpleframework.http.socket.*;
-import org.simpleframework.http.socket.service.Service;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.*;
+import java.net.*;
 
 
-
-
+/**
+ * Instant messaging. 
+ */
+@WebSocket(maxIdleTime=360000)
 public class GeoMessages extends WsNotifier implements ServerAPI.Mbox
 {
 
    public class Client extends WsNotifier.Client 
    {   
-       public Client(FrameChannel ch, long uid) 
-          { super(ch, uid); }
+       public Client(Session conn) 
+          { super(conn); }
              
        
-       @Override synchronized public void onTextFrame(Request request, String text) {
-          try {
-            Message m = mapper.readValue(text, Message.class);
+       @Override synchronized public void onTextFrame(String text) {
+            Message m = mapper.deserialize(text, Message.class);
             m.senderId = _uid;
             m.msgId = _msgId++;
             if (m.time==null)
                m.time = new Date();
             m.from = _username;
             postMessage(m);
-         } catch (IOException e) 
-             { _api.log().error("GeoMessages", "Cannot parse message: "+e); }
        }
    }
    
    
+   /** Message content to be exchanged */
    public static class Message { 
-       public long senderId;
+       public InetSocketAddress senderId;
        public long msgId;
        public Date time; 
        public String from, to; 
@@ -56,23 +55,23 @@ public class GeoMessages extends WsNotifier implements ServerAPI.Mbox
    
    public Set<String> getUsers() { 
        Set<String> u = new TreeSet<String>();
-       for (FrameListener x: _clients.values()) 
+       for (WsNotifier.Client x: _clients.values()) 
           if (x!=null) 
-             u.add(((Client)x).getUsername());
+             u.add(x.getUsername());
        return u; 
    }
       
       
-   public GeoMessages(ServerAPI api, boolean trusted) throws IOException
+   public GeoMessages(ServerAPI api, boolean trusted)
       { super(api, trusted); }  
     
     
-   /* Factory method */
-   @Override public WsNotifier.Client newClient(FrameChannel ch, long uid) 
-      { return new Client(ch, uid); }
+   /** Factory method. */
+   @Override public WsNotifier.Client newClient(Session conn) 
+      { return new Client(conn); }
 
    
-   
+   /** Create and post a message */  
    public void postMessage(String from, String to, String txt)
    {
        Message m = new Message(); 
@@ -85,6 +84,7 @@ public class GeoMessages extends WsNotifier implements ServerAPI.Mbox
    }
    
    
+   /** Post a message */
    public void postMessage(Message msg) {
         if (msg.to != null) {
            synchronized(this) {

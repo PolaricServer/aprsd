@@ -16,10 +16,6 @@ package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
 import no.polaric.aprsd.filter.*;
 
-import org.simpleframework.http.core.Container;
-import org.simpleframework.transport.connect.Connection;
-import org.simpleframework.transport.connect.SocketConnection;
-import org.simpleframework.http.*;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.io.PrintStream;
@@ -30,7 +26,8 @@ import java.io.*;
 import java.text.*;
 import com.mindprod.base64.Base64;
 import java.util.concurrent.locks.*; 
-
+import spark.Request;
+import spark.Response;
 
 
 public class XmlServices extends ServerBase
@@ -42,6 +39,7 @@ public class XmlServices extends ServerBase
    {
       super(api);
       
+      // FIXME: move to another place? 
       int trailage = api.getIntProperty("map.trail.maxAge", 15);
       Trail.setMaxAge(trailage * 60 * 1000); 
       int trailpause = api.getIntProperty("map.trail.maxPause", 10);
@@ -58,13 +56,13 @@ public class XmlServices extends ServerBase
     * Look up a station/object and return id, x and y coordinates (separated by commas).
     * If not found, return nothing.
     */
-   public void handle_finditem(Request req, Response res)
+   public String handle_finditem(Request req, Response res)
        throws IOException
    { 
-       PrintWriter out = getWriter(res);
-       String ident = req.getParameter("id").toUpperCase();
+       CharArrayWriter buf = new CharArrayWriter();
+       PrintWriter out = new PrintWriter(buf); 
 
-       Query parms = req.getQuery();
+       String ident = req.queryParams("id").toUpperCase();
        TrackerPoint s = _api.getDB().getItem(ident, null);
        if (s==null) {
           int i = ident.lastIndexOf('-');
@@ -78,8 +76,9 @@ public class XmlServices extends ServerBase
           LatLng xpos = s.getPosition().toLatLng(); 
           out.println(s.getIdent()+"," + roundDeg(xpos.getLng()) + "," + roundDeg(xpos.getLat()));   
        }
-       res.setValue("Content-Type", "text/csv; charset=utf-8");
+       res.type("text/csv; charset=utf-8");
        out.close();
+       return buf.toString(); 
    }
    
    

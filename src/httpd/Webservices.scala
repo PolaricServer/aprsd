@@ -18,11 +18,9 @@ import uk.me.jstott.jcoord._
 import scala.xml._
 import scala.collection.JavaConversions._
 import no.polaric.aprsd._
-import org.simpleframework.http.core.Container
-import org.simpleframework.transport.connect.Connection
-import org.simpleframework.transport.connect.SocketConnection
-import org.simpleframework.http._
 import org.xnap.commons.i18n._
+import spark.Request;
+import spark.Response;
 
 
    
@@ -51,11 +49,11 @@ package no.polaric.aprsd.http
     * Admin interface. 
     * To be developed further...
     */
-   def handle_admin(req : Request, res: Response) =
+   def handle_admin(req : Request, res: Response): String =
    {   
        val I = getI18n(req)
        val out = getWriter(res);
-       val cmd = req.getParameter("cmd")
+       val cmd = req.queryParams("cmd")
        val head = <meta http-equiv="refresh" content="60" />
 
 
@@ -117,7 +115,7 @@ package no.polaric.aprsd.http
           else
               <h3>{I.tr("Unknown command")}</h3>
              
-        printHtml (res, htmlBody(req, head, action(req)));    
+          return printHtml (res, htmlBody(req, head, action(req)));    
    }
    
    
@@ -141,7 +139,7 @@ package no.polaric.aprsd.http
     /**
     * set own position
     */          
-   def handle_setownpos(req : Request, res: Response) =
+   def handle_setownpos(req : Request, res: Response): String =
    {
         val I = getI18n(req)
         val pos = getCoord(req)
@@ -173,8 +171,8 @@ package no.polaric.aprsd.http
                if (!authorizedForAdmin(req))
                   <h3> {I.tr("You are not authorized for admin operations")} </h3>
                else {
-                  val osymtab = req.getParameter("osymtab")
-                  val osym  = req.getParameter("osym")
+                  val osymtab = req.queryParams("osymtab")
+                  val osym  = req.queryParams("osym")
                   _api.log().info("Webservices","SET OWN POS by user '"+getAuthUser(req)+"'")
                   p.updatePosition(new Date(), pos, 
                       if (osymtab==null) '/' else osymtab(0), if (osym==null) 'c' else osym(0))
@@ -184,21 +182,21 @@ package no.polaric.aprsd.http
               }
         };
             
-        printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
+        return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
     }   
      
    
    
    
    
-   def handle_sarmode(req : Request, res: Response) =
+   def handle_sarmode(req : Request, res: Response): String =
    {
        val I = getI18n(req)
        val prefix = <h2> {I.tr("Search and rescue mode")} </h2>
-       var filter = req.getParameter("sar_prefix")
-       var reason = req.getParameter("sar_reason")
-       var hidesar = req.getParameter("sar_hidesar")
-       val on = req.getParameter("sar_on")
+       var filter = req.queryParams("sar_prefix")
+       var reason = req.queryParams("sar_reason")
+       var hidesar = req.queryParams("sar_hidesar")
+       val on = req.queryParams("sar_on")
        
        def fields(req : Request): NodeSeq =          
            <xml:group>
@@ -257,16 +255,16 @@ package no.polaric.aprsd.http
        }
             
        
-       printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
+       return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
    }
    
    
    
    
-   def handle_sarurl(req : Request, res: Response) =
+   def handle_sarurl(req : Request, res: Response): String =
    {
        val I = getI18n(req)
-       val url = req.getParameter("url")
+       val url = req.queryParams("url")
        
        def action(req : Request): NodeSeq = 
        {
@@ -281,7 +279,7 @@ package no.polaric.aprsd.http
               <p> { I.tr("Valid 1 day from now")} </p>
           }
        }   
-       printHtml (res, htmlBody(req, null, action(req)));        
+       return printHtml (res, htmlBody(req, null, action(req)));        
    }
    
    
@@ -290,10 +288,10 @@ package no.polaric.aprsd.http
     * Delete APRS object.
     */          
 
-   def handle_deleteobject(req : Request, res: Response) =
+   def handle_deleteobject(req : Request, res: Response): String =
    {
        val I = getI18n(req)
-       var id = req.getParameter("objid")
+       var id = req.queryParams("objid")
        id = if (id != null) id.replaceFirst("@.*", "") else null
        val prefix = <h2> { I.tr("Remove object")} </h2>
        
@@ -321,10 +319,11 @@ package no.polaric.aprsd.http
           }  
           ;
           
-       printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
+       return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
    }          
 
 
+   
    
    def taglist(item: PointObject, args: Array[String], freeField: Boolean): NodeSeq = 
    {
@@ -350,10 +349,10 @@ package no.polaric.aprsd.http
          
          
 
-   def handle_addtag(req : Request, res : Response) =
+   def handle_addtag(req : Request, res : Response): String =
    {
        val I = getI18n(req)
-       val id = req.getParameter("objid")
+       val id = req.queryParams("objid")
        val item = _api.getDB().getItem(id, null);
        val prefix = <h2> {I.tr("Tags for: "+id)} </h2>
        
@@ -379,12 +378,12 @@ package no.polaric.aprsd.http
       
       
        def action(req : Request): NodeSeq = {
-           val newtag = req.getParameter("newtag")
-           val newtagc = req.getParameter("newtagc")
+           val newtag = req.queryParams("newtag")
+           val newtagc = req.queryParams("newtagc")
            val newtagcc = (newtag != null && newtagc != null && newtagc.equals("true"));
            <div>
            { for (x:String <- PointObject.getUsedTags.toSeq) yield {
-               val ux = req.getParameter("tag_"+x);
+               val ux = req.queryParams("tag_"+x);
                val uxx = (ux != null && ux.equals("true"));
                
                if (uxx != item.hasTag(x)) {
@@ -409,17 +408,17 @@ package no.polaric.aprsd.http
          }
           
           
-       printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
+       return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
    }          
 
    
    /**
     * Remove trail from station. 
     */
-   def handle_resetinfo(req : Request, res : Response) =
+   def handle_resetinfo(req : Request, res : Response): String =
    {
        val I = getI18n(req)
-       val id = req.getParameter("objid")
+       val id = req.queryParams("objid")
        val prefix = <h2> {I.tr("Reset info about station/object")} </h2>
        
        def fields(req : Request): NodeSeq =
@@ -441,7 +440,7 @@ package no.polaric.aprsd.http
           } 
           ;
           
-       printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
+       return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
    }          
 
 
@@ -450,11 +449,11 @@ package no.polaric.aprsd.http
    /**
     * Add or edit APRS object.
     */          
-   def handle_addobject(req : Request, res : Response) =
+   def handle_addobject(req : Request, res : Response): String =
    {
         val I = getI18n(req)
         val pos = getCoord(req)
-        val id = fixText(req.getParameter("objid"))
+        val id = fixText(req.queryParams("objid"))
         val prefix = <h2> {I.tr("Add/edit object")} </h2>
         
         /* Fields to be filled in */
@@ -500,10 +499,10 @@ package no.polaric.aprsd.http
                <p>  { I.tr("please give 'objid' as a parameter. This must start with a letter/number")} </p>;
             }
             else {
-               val osymtab = req.getParameter("osymtab")
-               val osym  = req.getParameter("osym")
-               val otxt = req.getParameter("descr")
-               val perm = req.getParameter("perm")
+               val osymtab = req.queryParams("osymtab")
+               val osym  = req.queryParams("osym")
+               val otxt = req.queryParams("descr")
+               val perm = req.queryParams("perm")
                
                _api.log().info("Webservices", "SET OBJECT: '"+id+"' by user '"+getAuthUser(request)+"'")
                if ( _api.getDB().getOwnObjects().add(id, 
@@ -521,7 +520,7 @@ package no.polaric.aprsd.http
             }
             ;
             
-        printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
+        return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
     }
     
 
@@ -575,7 +574,7 @@ package no.polaric.aprsd.http
    /**
     * Send instant message. 
     */
-   protected def handle_sendmsg(req : Request, res : Response) = 
+   protected def handle_sendmsg(req : Request, res : Response): String = 
    {
         val I = getI18n(req)
         val mbox = _api.getWebserver().getMbox()
@@ -605,15 +604,15 @@ package no.polaric.aprsd.http
         /* Action. To be executed when user hits 'submit' button */
         def action(req : Request): NodeSeq = 
         {
-            val to = req.getParameter("msgto")
-            val txt = req.getParameter("msgcontent")
+            val to = req.queryParams("msgto")
+            val txt = req.queryParams("msgcontent")
             mbox.postMessage(getAuthUser(req), to, txt)
             
             <h2>{I.tr("Message posted")}</h2>        
         }
          
             
-        printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
+        return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
     }
    
    
@@ -624,29 +623,29 @@ package no.polaric.aprsd.http
     * Search in the database over point objects. 
     * Returns a list (standard HTML)
     */
-   def handle_search(req : Request, res : Response) = 
-      _handle_search(req, res, false)
+   def handle_search(req : Request, res : Response): String = 
+      return _handle_search(req, res, false)
       ;
       
-   def handle_search_sec(req : Request, res : Response) = 
-      _handle_search(req, res, true)
+   def handle_search_sec(req : Request, res : Response): String = 
+      return _handle_search(req, res, true)
       ;
     
-   def _handle_search(req : Request, res : Response, loggedIn: Boolean) =
+   def _handle_search(req : Request, res : Response, loggedIn: Boolean): String =
    {
        val I = getI18n(req)
-       val filtid = req.getParameter("filter")
-       val tags = req.getParameter("tags")
+       val filtid = req.queryParams("filter")
+       val tags = req.queryParams("tags")
        
-       var arg = req.getParameter("srch")
-       var mob = req.getParameter("mobile");
+       var arg = req.queryParams("srch")
+       var mob = req.queryParams("mobile");
        if (arg == null) 
            arg  = "__NOCALL__"; 
        val infra = "infra".equals(arg)
        val tagList = if (tags==null || tags.equals("")) null else tags.split(",")
       
        val result = itemList(I, _api.getDB().search(arg, tagList), "true".equals(mob), fprefix(req), loggedIn )
-       printHtml (res, htmlBody (req, null, result))
+       return printHtml (res, htmlBody (req, null, result))
    }
  
 
@@ -654,24 +653,24 @@ package no.polaric.aprsd.http
    /** 
     * View one particular point object. 
     */
-   def handle_station(req : Request, res : Response)  = 
-       _handle_station(req, res, false)
+   def handle_station(req : Request, res : Response): String  = 
+       return _handle_station(req, res, false)
        ;
    
    
-   def handle_station_sec(req : Request, res : Response)  = 
-       _handle_station(req, res, authorizedForUpdate(req))
+   def handle_station_sec(req : Request, res : Response): String  = 
+       return _handle_station(req, res, authorizedForUpdate(req))
        ;
   
   
-   def _handle_station(req : Request, res : Response, canUpdate: Boolean) =
+   def _handle_station(req : Request, res : Response, canUpdate: Boolean): String =
    {
-       val simple =  ( req.getParameter("simple") != null )
-       val id = req.getParameter("id")
+       val simple =  ( req.queryParams("simple") != null )
+       val id = req.queryParams("id")
        val x:TrackerPoint = _api.getDB().getItem(id, null)
        val view = PointView.getViewFor(x, api, canUpdate, req)
        
-       printHtml (res, htmlBody ( req, null, 
+       return printHtml (res, htmlBody ( req, null, 
                     if (simple) view.fields(req)
                     else htmlForm(req, null, view.fields, IF_AUTH(view.action), true, default_submit)))
    }
@@ -679,10 +678,10 @@ package no.polaric.aprsd.http
 
    
    
-   def handle_tags(req: Request, res: Response) = {
-       val args = req.getParameter("tags")
+   def handle_tags(req: Request, res: Response): String = {
+       val args = req.queryParams("tags")
        val tags = if (args == null) null else args.split(",")
-       printHtml (res, htmlBody (req, null, taglist(null, tags, false)))
+       return printHtml (res, htmlBody (req, null, taglist(null, tags, false)))
    }
    
    
@@ -690,10 +689,10 @@ package no.polaric.aprsd.http
    /** 
     * Presents a list over last positions and movements (standard HTML)
     */
-   def handle_history(req : Request, res : Response) =
+   def handle_history(req : Request, res : Response): String =
    {        
        val I = getI18n(req)
-       val s = _api.getDB().getItem(req.getParameter("id"), null)
+       val s = _api.getDB().getItem(req.queryParams("id"), null)
        val result: NodeSeq =
           if (s == null)
              <h2>{I.tr("Error")+":"}</h2><p> {I.tr("Couldn't find item")} </p>;
@@ -730,17 +729,17 @@ package no.polaric.aprsd.http
                }
              </table>
 
-        printHtml(res, htmlBody(req, null, result))
+        return printHtml(res, htmlBody(req, null, result))
     } 
   
   
   
 
-    def handle_trailpoint(req : Request, res : Response) =
+    def handle_trailpoint(req : Request, res : Response): String =
     {
        val I = getI18n(req)
-       val time = ServerBase.xf.parse(req.getParameter("time"))
-       val ident = req.getParameter("id")
+       val time = ServerBase.xf.parse(req.queryParams("time"))
+       val ident = req.queryParams("id")
        var x:TrackerPoint = _api.getDB().getItem(ident, time)
        if (x==null)
            x = _api.getDB().getItem(ident, null)
@@ -754,7 +753,7 @@ package no.polaric.aprsd.http
              view.trailpoint(req, item)
           }
       
-      printHtml(res, htmlBody(req, null, result)) 
+      return printHtml(res, htmlBody(req, null, result)) 
     }
     
     
@@ -763,10 +762,10 @@ package no.polaric.aprsd.http
        <xml:group>{x}<span class="dunit">{y}</span></xml:group>
        
        
-    def handle_telemetry(req : Request, res : Response) = 
+    def handle_telemetry(req : Request, res : Response): String = 
     {
          val I = getI18n(req)
-         val id = req.getParameter("id")
+         val id = req.queryParams("id")
          val x:Station = _api.getDB().getItem(id, null).asInstanceOf[Station]
          val tm = x.getTelemetry(); 
          val d = tm.getCurrent();
@@ -802,16 +801,16 @@ package no.polaric.aprsd.http
              <button id="listbutton">{I.tr("Previous Data")}</button>
            </xml:group>
          
-        printHtml(res, htmlBody(req, null, result)) 
+        return printHtml(res, htmlBody(req, null, result)) 
     }
     
 
   
   
-    def handle_telhist(req : Request, res : Response) = 
+    def handle_telhist(req : Request, res : Response): String = 
     {
          val I = getI18n(req)
-         val id = req.getParameter("id")
+         val id = req.queryParams("id")
          val x:Station = _api.getDB().getItem(id, null).asInstanceOf[Station]
          val tm = x.getTelemetry(); 
         
@@ -856,7 +855,7 @@ package no.polaric.aprsd.http
              
            </xml:group>
          
-        printHtml(res, htmlBody(req, null, result)) 
+        return printHtml(res, htmlBody(req, null, result)) 
     }
   }
   

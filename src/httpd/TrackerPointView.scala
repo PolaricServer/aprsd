@@ -16,13 +16,11 @@
 import java.util._
 import java.io._
 import scala.xml._
-import org.simpleframework.transport.connect.Connection
-import org.simpleframework.transport.connect.SocketConnection
-import org.simpleframework.http._
 import uk.me.jstott.jcoord._
 import no.polaric.aprsd._
 import org.xnap.commons.i18n._
-
+import spark.Request;
+import spark.Response;
 
 
    
@@ -73,11 +71,11 @@ package no.polaric.aprsd.http
        /* FIXME: Add trail colour when ready. */
        protected def basicSettings_action(req: Request) = {
       
-             val hide = req.getParameter("hidelabel");
+             val hide = req.queryParams("hidelabel");
              model.setLabelHidden( "true".equals(hide) );     
 
              /* Alias setting */
-             var alias = fixText(req.getParameter("nalias"));
+             var alias = fixText(req.queryParams("nalias"));
              var ch = false;
              if (alias != null && alias.length() > 0)      
                  ch = model.setAlias(alias);
@@ -91,7 +89,7 @@ package no.polaric.aprsd.http
                  api.getRemoteCtl().sendRequestAll("ALIAS "+model.getIdent()+" "+alias, null);
 
              /* Icon setting */
-             var icon = req.getParameter("iconselect");
+             var icon = req.queryParams("iconselect");
              if ("system".equals(icon)) 
                  icon = null; 
              if (model.setIcon(icon) && _api.getRemoteCtl() != null )

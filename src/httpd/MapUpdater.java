@@ -6,16 +6,18 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.io.IOException;
-import org.simpleframework.http.Cookie;
-import org.simpleframework.http.Request;
-import org.simpleframework.http.socket.*;
-import org.simpleframework.http.socket.service.Service;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.*;
+import java.net.*;
 import uk.me.jstott.jcoord.*; 
+import org.eclipse.jetty.websocket.api.UpgradeRequest;
+
 
 
 /**
  * Map overlay updater using Websockets.  
  */
+@WebSocket(maxIdleTime=360000)
 public class MapUpdater extends WsNotifier implements Notifier
 {
 
@@ -31,8 +33,8 @@ public class MapUpdater extends WsNotifier implements Notifier
        protected String  _filter;
        protected long    _scale = 0;
               
-       public Client(FrameChannel ch, long uid) 
-          { super(ch, uid); }
+       public Client(Session conn) 
+          { super(conn); }
        
        
        /**
@@ -82,7 +84,7 @@ public class MapUpdater extends WsNotifier implements Notifier
        
        
        /** Receive text frame from client. */
-       @Override public void onTextFrame(Request req, String text) 
+       @Override public void onTextFrame(String text) 
        {
            _api.log().debug("MapUpdater", "Client "+_uid+": " + text);
            String[] parms = text.split(",");
@@ -123,7 +125,7 @@ public class MapUpdater extends WsNotifier implements Notifier
    protected long    _updates = 0;
           
           
-   public MapUpdater(ServerAPI api, boolean trust) throws IOException { 
+   public MapUpdater(ServerAPI api, boolean trust) { 
       super(api, trust); 
       
       /* Periodic task to send updates to clients */
@@ -138,21 +140,23 @@ public class MapUpdater extends WsNotifier implements Notifier
     
    
    /** Factory method */
-   @Override public WsNotifier.Client newClient(FrameChannel ch, long uid) 
-     { return new Client(ch, uid); }
+   @Override public WsNotifier.Client newClient(Session conn) 
+     { return new Client(conn); }
    
 
+   
    /** 
      * When opening the websocket, send client an overlay with only metainfo. 
      */
-   @Override public boolean subscribe(long uid, WsNotifier.Client client, Request req) 
-   { 
+   @Override public boolean subscribe(InetSocketAddress uid, WsNotifier.Client client) 
+   {
        try {
-         client.sendText( ((Client)client).getOverlayData(true) );
+         client.sendText( ((Client)client).getOverlayData(true) );  
          
-         String origin = req.getValue("X-Forwarded-For");
+         UpgradeRequest req = client.getSession().getUpgradeRequest();  
+         String origin = req.getHeader("X-Forwarded-For");
          _api.log().info("MapUpdater", "Client added: "+uid+
-                  (origin == null ? req.getClientAddress().getAddress() : ", "+origin) + 
+                  (origin != null ? ", "+origin : "") + 
                   (client._username != null ? ", username='"+client._username+"'" : ""));
          return true;
       }

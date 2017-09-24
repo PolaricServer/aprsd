@@ -6,9 +6,8 @@
 ##########################################################################
 
    CLASSDIR = classes
- LIBJACKSON = /usr/share/java/jackson-core.jar:/usr/share/java/jackson-databind.jar
     GETTEXT = /usr/share/java/gettext-commons.jar
-  CLASSPATH = $(GETTEXT):$(LIBJACKSON):jcoord-polaric.jar:utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:simple.jar:genson.jar
+  CLASSPATH = $(GETTEXT):jcoord-polaric.jar:utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:genson-polaric.jar:jetty-polaric.jar:/usr/share/java/sl4j-api.jar:/usr/share/java/sl4j-simple.jar:spark-core.jar
  # INSTALLDIR = /usr/local/polaric-aprsd
       JAVAC = javac -source 1.8 -target 1.8
        YACC = yacc
