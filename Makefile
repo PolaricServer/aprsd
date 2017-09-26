@@ -124,7 +124,7 @@ httpd: core
 	
 .PHONY : scala
 scala: core           
-	scalac -d $(TDIR) -classpath $(LIBDIR):$(CLASSPATH) src/httpd/*.scala
+	scalac -d $(TDIR) -classpath $(LIBDIR):$(CLASSPATH) src/httpd/html/*.scala
 
 	
 clean:
