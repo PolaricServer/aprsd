@@ -7,7 +7,7 @@
 
    CLASSDIR = classes
     GETTEXT = /usr/share/java/gettext-commons.jar
-  CLASSPATH = $(GETTEXT):jcoord-polaric.jar:utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:genson-polaric.jar:jetty-polaric.jar:/usr/share/java/sl4j-api.jar:/usr/share/java/sl4j-simple.jar:spark-core.jar
+  CLASSPATH = $(GETTEXT):lib/jcoord-polaric.jar:lib/utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:lib/genson-polaric.jar:lib/jetty-polaric.jar:/usr/share/java/sl4j-api.jar:/usr/share/java/sl4j-simple.jar:lib/spark-core.jar
  # INSTALLDIR = /usr/local/polaric-aprsd
       JAVAC = javac -source 1.8 -target 1.8
        YACC = yacc
@@ -52,7 +52,8 @@ install: polaric-aprsd.jar
 	install -m 644 symbols $(INSTALL_CONFIG)
 	install -m 644 trailcolours $(INSTALL_CONFIG)
 	install -m 644 view.profiles $(INSTALL_CONFIG)
-	install -m 644 *.jar $(INSTALL_JAR)
+	install -m 644 lib/*.jar $(INSTALL_JAR)
+	install -m 644 polaric-aprsd.jar $(INSTALL_JAR)
 	install -m 644 icons/*.png $(INSTALL_WEB)/icons
 	install -m 644 icons/alt/*.png $(INSTALL_WEB)/icons/alt
 	install -m 644 icons/signs/*.png icons/signs/*.gif $(INSTALL_WEB)/icons/signs
