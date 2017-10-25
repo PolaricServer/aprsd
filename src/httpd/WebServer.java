@@ -1,21 +1,48 @@
- 
+/* 
+ * Copyright (C) 2017 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
 package no.polaric.aprsd.http;
 
 import spark.Request;
 import spark.Response;
 import static spark.Spark.get;
 import static spark.Spark.*;
+import org.pac4j.core.config.Config;
+import org.pac4j.core.profile.CommonProfile;
+import org.pac4j.core.profile.ProfileManager;
+import org.pac4j.sparkjava.CallbackRoute;
+import org.pac4j.sparkjava.LogoutRoute;
+import org.pac4j.sparkjava.SecurityFilter;
+import org.pac4j.sparkjava.SparkWebContext; 
+import java.util.Optional;
 import java.lang.reflect.*;
 import no.polaric.aprsd.*;
 
+
+
+/**
+ * HTTP server. Web services are configured here. Se also AuthService class for login services. 
+ * FIXME: How can we make this more extensible by plugins? 
+ */
 public class WebServer implements ServerAPI.Web 
 {
     private long _nRequests = 0; 
-    private ServerAPI _api; 
     private final GeoMessages _messages;
-    private final MapUpdater  _mapupdate, _jmapupdate, _smapupdate;
-      
-      
+    private final MapUpdater  _mapupdate, _jmapupdate;
+    private ServerAPI _api; 
+    private AuthService _auth;
+ 
       
     public WebServer(ServerAPI api, int port) {
        if (port > 0)
@@ -23,38 +50,63 @@ public class WebServer implements ServerAPI.Web
        _api = api;
              
       _messages   = new GeoMessages(_api, true);
-      _mapupdate  = new MapUpdater(_api, false);
-      _smapupdate = new MapUpdater(_api, true);
-      _jmapupdate = new JsonMapUpdater(_api, false); 
-      _smapupdate.link(_mapupdate);
+      _mapupdate  = new MapUpdater(_api, true);
+      _jmapupdate = new JsonMapUpdater(_api, true);
       _mapupdate.link(_jmapupdate);
-    
+      _auth = new AuthService(api); 
     }
  
-    
+ 
+ 
+    /** 
+     * Start the web server and setup routes to services. 
+     */
+     
     public void start() throws Exception {
-      System.out.println("WebServer: Starting...");
-
-      /* FIXME: Add secure websocket services */
-      webSocket("/messages_sec", _messages);
-      webSocket("/mapdata", _mapupdate);
-      webSocket("/mapdata_sec", _smapupdate);
-      webSocket("/jmapdata", _jmapupdate);
+       System.out.println("WebServer: Starting...");
       
-      afterAfter((request, response) -> {
-         _nRequests++;
-      });
+       /* Serving static files */
+       staticFiles.externalLocation(
+          _api.getProperty("webserver.filedir", "/usr/share/polaric") );  
+       
+       /* 
+        * websocket services. 
+        * Note that these are trusted in the sense that we assume that authorizations and
+        * userid will only be available if properly authenticated. THIS SHOULD BE TESTED. 
+        */
+       webSocket("/messages", _messages);
+       webSocket("/mapdata", _mapupdate);
+       webSocket("/jmapdata", _jmapupdate);
+         
+       /* 
+        * Protect other webservices. We should eventually prefix these and 
+        * just one filter should be sufficient 
+        */
+       before("/station_sec", _auth.conf().filter(null, "csrfToken, isauth"));   
+       before("/addobject", _auth.conf().filter(null, "csrfToken, isauth"));
+       before("/deleteobject", _auth.conf().filter(null, "csrfToken, isauth"));
+       before("/resetinfo", _auth.conf().filter(null, "csrfToken, isauth"));
+       before("/sarmode", _auth.conf().filter(null, "csrfToken, isauth"));
+       before("/sarurl", _auth.conf().filter(null, "csrfToken, isauth"));
+       before("/search_sec", _auth.conf().filter(null, "csrfToken, isauth"));
+         
+       /* 
+        * Put an AuthInfo object on the request. Here we rely on sessions to remember 
+        * user-profiles between requests. IF we use direct clients (stateless server) 
+        * this will not work for paths without authenticators!! 
+        */ 
+       before("*", AuthService::setAuthInfo);
+         
+       afterAfter((request, response) -> {
+          _nRequests++;
+       });
       
-      get("/hello", WebServer::helloWorld);
-      init();
-    }
-         
-         
-         
-    public static String helloWorld(Request req, Response res) {
-       return "Hello world!";
+       _auth.start();
+       init();
     }
     
+    
+
     
     
     public void stop() throws Exception {
@@ -65,25 +117,25 @@ public class WebServer implements ServerAPI.Web
      
      /* Statistics */
      public long nVisits() 
-        { return _mapupdate.nVisits() + _smapupdate.nVisits(); }
+        { return _mapupdate.nVisits() + _jmapupdate.nVisits(); }
      
      public int  nClients() 
-        { return _mapupdate.nClients() + _smapupdate.nClients(); }
+        { return _mapupdate.nClients() + _jmapupdate.nClients(); }
      
      public int  nLoggedin()
-        { return _smapupdate.nClients(); }
+        { return _mapupdate.nClients() + _jmapupdate.nClients(); }
         
      public long nHttpReq() 
         { return _nRequests; } 
      
      public long nMapUpdates() 
-        { return _mapupdate.nUpdates() + _smapupdate.nUpdates(); }
+        { return _mapupdate.nUpdates() + _jmapupdate.nUpdates(); }
         
      public ServerAPI.Mbox getMbox() 
         { return _messages; }
      
      public Notifier getNotifier() 
-        { return _smapupdate; } 
+        { return _mapupdate; } 
    
          
     
@@ -112,10 +164,17 @@ public class WebServer implements ServerAPI.Web
                 prefix = "/" + prefix;
             key = (prefix==null ? "" : prefix) + "/" + key;
             System.out.println("WebServer: Add HTTP handler method: "+key+" --> "+m.getName());
-           
+            
+            /* FIXME: Configure allowed origin(s) */
+            after (key, (req,resp) -> { 
+               resp.header("Access-Control-Allow-Credentials", "true"); 
+               resp.header("Access-Control-Allow-Origin", _auth.conf().getAllowOrigin()); 
+              } 
+            );
+            
             get(key,  (req, resp) -> {return m.invoke(o, req, resp);} );
             post(key, (req, resp) -> {return m.invoke(o, req, resp);} );
-         }
+         }     
    }
 
 }

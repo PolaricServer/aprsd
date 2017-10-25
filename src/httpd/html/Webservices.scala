@@ -52,13 +52,13 @@ package no.polaric.aprsd.http
    def handle_admin(req : Request, res: Response): String =
    {   
        val I = getI18n(req)
-       val out = getWriter(res);
+//       val out = getWriter(res);
        val cmd = req.queryParams("cmd")
        val head = <meta http-equiv="refresh" content="60" />
 
 
        def action(req : Request): NodeSeq =
-          if (!authorizedForUpdate(req))
+          if (!getAuthInfo(req).sar)
               <h3>{I.tr("You are not authorized for such operations")}</h3>
           else if ("gc".equals(cmd)) {
               _api.getDB().garbageCollect()
@@ -168,12 +168,12 @@ package no.polaric.aprsd.http
              
         /* Action. To be executed when user hits 'submit' button */
         def action(req : Request): NodeSeq = {
-               if (!authorizedForAdmin(req))
+               if (!getAuthInfo(req).admin)
                   <h3> {I.tr("You are not authorized for admin operations")} </h3>
                else {
                   val osymtab = req.queryParams("osymtab")
                   val osym  = req.queryParams("osym")
-                  _api.log().info("Webservices","SET OWN POS by user '"+getAuthUser(req)+"'")
+                  _api.log().info("Webservices","SET OWN POS by user '"+getAuthInfo(req).userid+"'")
                   p.updatePosition(new Date(), pos, 
                       if (osymtab==null) '/' else osymtab(0), if (osym==null) 'c' else osym(0))
                   
@@ -235,12 +235,12 @@ package no.polaric.aprsd.http
                val hide = (hidesar != null && "true".equals(hidesar) ) 
                val filt = if ("".equals(filter)) "NONE" else filter;
                
-               api.setSar(reason, getAuthUser(req), filter, hide);
+               api.setSar(reason, getAuthInfo(req).userid, filter, hide);
                
                reason = if (!hide) "[NOHIDE] "+reason 
                         else reason;
                if (api.getRemoteCtl() != null)
-                   api.getRemoteCtl().sendRequestAll("SAR "+getAuthUser(req)+" "+filt+" "+reason, null);
+                   api.getRemoteCtl().sendRequestAll("SAR "+getAuthInfo(req).userid+" "+filt+" "+reason, null);
                
                
                <h3> {I.tr("Activated")} </h3>
@@ -256,30 +256,6 @@ package no.polaric.aprsd.http
             
        
        return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
-   }
-   
-   
-   
-   
-   def handle_sarurl(req : Request, res: Response): String =
-   {
-       val I = getI18n(req)
-       val url = req.queryParams("url")
-       
-       def action(req : Request): NodeSeq = 
-       {
-          if (!authorizedForUpdate(req) && api.getSarUrl() != null )  
-              <h3>{ I.tr("SAR URL not available or you are not authorized")} </h3>
-          else {
-              val sarurl = api.getSarUrl().create(url)
-              <h1> { I.tr("Short URL for search and rescue")} </h1>
-              <h2><a class="sarurl" href={sarurl}>{sarurl}</a></h2>
-              <h1> { I.tr("Key")+":" }</h1>
-              <h2 class="sarurl">{SarUrl.getKey(sarurl)}</h2>
-              <p> { I.tr("Valid 1 day from now")} </p>
-          }
-       }   
-       return printHtml (res, htmlBody(req, null, action(req)));        
    }
    
    
@@ -311,7 +287,7 @@ package no.polaric.aprsd.http
           }
           else {
               if (_api.getDB().getOwnObjects().delete(id)) {
-                  _api.log().info("Webservices", "DELETE OBJECT: '"+id+"' by user '"+getAuthUser(req)+"'")
+                  _api.log().info("Webservices", "DELETE OBJECT: '"+id+"' by user '"+getAuthInfo(req).userid+"'")
                   <h3> {I.tr("Object removed!")} </h3>
               }
               else
@@ -363,7 +339,7 @@ package no.polaric.aprsd.http
        def setTag(item:PointObject, tag:String)
        {
            item.setTag(tag)
-           _api.log().info("Webservices", "TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthUser(req)+"'")
+           _api.log().info("Webservices", "TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthInfo(req).userid+"'")
            if (api.getRemoteCtl() != null)
               api.getRemoteCtl().sendRequestAll("TAG "+item.getIdent()+" "+tag, null);
        }
@@ -371,7 +347,7 @@ package no.polaric.aprsd.http
        def removeTag(item:PointObject, tag:String)
        {
            item.removeTag(tag)
-           _api.log().info("Webservices", "REMOVE TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthUser(req)+"'")
+           _api.log().info("Webservices", "REMOVE TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthInfo(req).userid+"'")
            if (api.getRemoteCtl() != null)
               api.getRemoteCtl().sendRequestAll("RMTAG "+item.getIdent()+" "+tag, null);
        }
@@ -504,7 +480,7 @@ package no.polaric.aprsd.http
                val otxt = req.queryParams("descr")
                val perm = req.queryParams("perm")
                
-               _api.log().info("Webservices", "SET OBJECT: '"+id+"' by user '"+getAuthUser(request)+"'")
+               _api.log().info("Webservices", "SET OBJECT: '"+id+"' by user '"+getAuthInfo(request).userid+"'")
                if ( _api.getDB().getOwnObjects().add(id, 
                       new AprsHandler.PosData( pos,
                          if (osym==null) 'c' else osym(0) ,
@@ -606,7 +582,7 @@ package no.polaric.aprsd.http
         {
             val to = req.queryParams("msgto")
             val txt = req.queryParams("msgcontent")
-            mbox.postMessage(getAuthUser(req), to, txt)
+            mbox.postMessage(getAuthInfo(req).userid, to, txt)
             
             <h2>{I.tr("Message posted")}</h2>        
         }
@@ -659,7 +635,7 @@ package no.polaric.aprsd.http
    
    
    def handle_station_sec(req : Request, res : Response): String  = 
-       return _handle_station(req, res, authorizedForUpdate(req))
+       return _handle_station(req, res, getAuthInfo(req).sar)
        ;
   
   

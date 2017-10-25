@@ -133,7 +133,7 @@ package no.polaric.aprsd.http
                       : (Request) => NodeSeq = 
        {
           def wrapper(req : Request) : NodeSeq = 
-             if (authorizedForUpdate(req))
+             if (getAuthInfo(req).sar)
                 func(req)
              else {
                 val i18n = getI18n(req)
@@ -147,7 +147,7 @@ package no.polaric.aprsd.http
                       : (Request) => NodeSeq = 
        {
           def wrapper(req : Request) : NodeSeq =
-             if (authorizedForAdmin(req))
+             if (getAuthInfo(req).admin)
                 func(req)
              else {
                 val i18n = getI18n(req)

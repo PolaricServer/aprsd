@@ -29,7 +29,7 @@ public class GeoMessages extends WsNotifier implements ServerAPI.Mbox
             m.msgId = _msgId++;
             if (m.time==null)
                m.time = new Date();
-            m.from = _username;
+            m.from = _auth.userid;
             postMessage(m);
        }
    }
@@ -37,7 +37,7 @@ public class GeoMessages extends WsNotifier implements ServerAPI.Mbox
    
    /** Message content to be exchanged */
    public static class Message { 
-       public InetSocketAddress senderId;
+       public String senderId;
        public long msgId;
        public Date time; 
        public String from, to; 
@@ -94,9 +94,9 @@ public class GeoMessages extends WsNotifier implements ServerAPI.Mbox
            } 
            
            postObject(msg, x -> 
-               msg.to.equals(x._username) ||
-              (msg.to.matches("ALL-SAR") && x._sar) ||
-              (msg.to.matches("ALL-LOGIN") && x._login)
+               msg.to.equals(x._auth.userid) ||
+              (msg.to.matches("ALL-SAR") && x._auth.sar) ||
+              (msg.to.matches("ALL-LOGIN") && x.login())
             );
             
         }

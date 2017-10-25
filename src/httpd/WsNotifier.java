@@ -1,3 +1,18 @@
+/* 
+ * Copyright (C) 2017 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+
 package no.polaric.aprsd.http;
 
 import spark.*;
@@ -17,8 +32,7 @@ import java.security.Principal;
 import com.owlike.genson.*;
 import no.polaric.aprsd.*;
 import com.mindprod.base64.Base64;
-
-
+import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 
 
 
@@ -31,39 +45,35 @@ public abstract class WsNotifier extends ServerBase
    public abstract class Client {
    
       protected final Session _conn; 
-      protected final InetSocketAddress _uid;
+      protected final String _uid;
     
-      protected boolean _admin=false, _sar=false, _login=false; 
-      protected String _username;
+      protected AuthInfo _auth;
    
    
       public Client(Session conn) {
          _conn = conn;
-         _uid = conn.getRemoteAddress();
+         _uid = _getUid(conn);
       }
    
    
-      public final void setUsername(String uname) {
-            _username = uname; 
-            _admin = authorizedForAdmin(_username);
-            _sar = authorizedForUpdate(_username);
-              // FIXME: Should we have an Authorization class? 
-                            
-            _login = (_username != null);
-       }
-       
+      public final void setAuthInfo(AuthInfo auth) {
+         _auth = auth;
+      }
+      
+      public final boolean login() 
+         { return _auth != null && _auth.userid != null; }
    
       public void sendText(String text) throws IOException 
          { _conn.getRemote().sendString(text); }
    
-      public  InetSocketAddress getUid()
+      public  String getUid()
          { return _uid; }
          
       public Session getSession() 
          { return _conn; }
          
       public String getUsername()
-         { return _username; }
+         { return (_auth == null ? null : _auth.userid); }
          
       public void close() throws IOException { 
          _conn.close(); 
@@ -100,14 +110,14 @@ public abstract class WsNotifier extends ServerBase
    
    
    /* Map of clients */ 
-   protected final Map<InetSocketAddress, Client> _clients;
+   protected final Map<String, Client> _clients;
       
    
    public WsNotifier(ServerAPI api, boolean trusted) {
        super(api); 
       _trustedOrigin = _api.getProperty("trusted.orgin", ".*");
       _trusted = trusted;
-      _clients = new ConcurrentHashMap<InetSocketAddress, Client>();
+      _clients = new ConcurrentHashMap<String, Client>();
    }  
      
      
@@ -125,7 +135,8 @@ public abstract class WsNotifier extends ServerBase
      { return _clients.size(); }
      
    
-   
+   public boolean trusted()
+     { return _trusted; }
 
     
    /** 
@@ -138,23 +149,18 @@ public abstract class WsNotifier extends ServerBase
    public void onConnect(Session conn) {
       try {
           UpgradeRequest req = conn.getUpgradeRequest();    
-          InetSocketAddress uid = conn.getRemoteAddress();
+          String uid = _getUid(conn);
           
           /* Check origin */
           _origin = req.getOrigin();
           if (_origin != null && _origin.matches(_trustedOrigin)) 
           { 
-              Client client = newClient(conn); 
-
-              /* We need to be sure that we can trust that the user
-               * is who he says he is. Can we trust that getAuthUser is authenticated
-               * if not, try to identify and authenticate. 
-               */
-              if (_trusted || trustUser(uid, conn))
-                  client.setUsername(getAuthUser(req));
+              /* Create client and set authorization info */
+              Client client = newClient(conn);
+              client.setAuthInfo(getAuthInfo(req));
                  
               if (subscribe(uid, client)) {
-                 _api.log().info("WsNotifier", "Subscription success. User="+uid+(_trusted ? " (trusted chan)" : ""));
+                 _api.log().debug("WsNotifier", "Subscription success. User="+uid);
                  _clients.put(uid, client); 
                  _visits++;
               }
@@ -181,7 +187,7 @@ public abstract class WsNotifier extends ServerBase
      
     @OnWebSocketClose
     public void onClose(Session conn, int statusCode, String reason) {
-       _api.log().info("WsNotifier", "Connection closed: "+reason);
+       _api.log().info("WsNotifier", "Connection closed"+(reason==null ? "" : ": "+reason));
        _clients.remove(conn.getRemoteAddress());
     }
 
@@ -193,9 +199,19 @@ public abstract class WsNotifier extends ServerBase
      
     @OnWebSocketMessage
     public void onMessage(Session conn, String message) {
-        Client c = _clients.get(conn.getRemoteAddress());
+        Client c = _clients.get(_getUid(conn));
         if (c != null)
            c.onTextFrame(message);
+    }
+    
+    
+    private String _getUid(Session conn) {
+       UpgradeRequest req = conn.getUpgradeRequest();
+       InetSocketAddress remote = conn.getRemoteAddress();
+       String host = req.getHeader("X-Forwarded-For");
+       if (host == null) 
+          host = remote.getHostString();
+       return host+":"+remote.getPort();
     }
     
     
@@ -204,7 +220,7 @@ public abstract class WsNotifier extends ServerBase
     * Return true if user is to be trusted. To be overridden by subclass. 
     */
     
-   protected boolean trustUser(InetSocketAddress uid, Session conn) {
+   protected boolean trustUser(String uid, Session conn) {
       return false; 
    }
 
@@ -214,13 +230,13 @@ public abstract class WsNotifier extends ServerBase
     * Get username of the authenticated user. 
     * @return username, null if not authenticated. 
     */
-   protected final String getAuthUser(UpgradeRequest req)
+   protected final AuthInfo getAuthInfo(UpgradeRequest req)
    {
-         String auth = req.getHeader("authorization");
-         if (auth==null)
-            auth = req.getHeader("Authorization");
-         return getAuthUser(auth);
+       ServletUpgradeRequest rr = (ServletUpgradeRequest) req; 
+       AuthInfo auth = (AuthInfo) rr.getHttpServletRequest​().getAttribute("authinfo");
+       return auth;
    }
+   
    
    
    /**
@@ -228,7 +244,7 @@ public abstract class WsNotifier extends ServerBase
     * This may include authorization, preferences, etc.. 
     * @return true if subscription is accepted. False if rejected.
     */
-   public boolean subscribe(InetSocketAddress uid, Client client) 
+   public boolean subscribe(String uid, Client client) 
       { return true; }
    
    
@@ -251,18 +267,15 @@ public abstract class WsNotifier extends ServerBase
    public void postText(Function<Client,String> txt, Predicate<Client> pred) {
       try {          
          /* Distribute to all clients */
-         for(InetSocketAddress user : _clients.keySet()) {
+         for(String user : _clients.keySet()) {
             Client client = (Client) _clients.get(user);
             try {               
                if(client != null && pred.test(client) && txt != null) 
                   client.sendText(txt.apply(client));
                
-            } catch(Exception e){   
-               if (e.getCause() instanceof WebSocketException) {
-                  _clients.remove(user); 
-                  _api.log().info("WsNotifier", "Unsubscribing closed client channel: "+user);       
-               }
-               else throw e;
+            } catch(WebSocketException e){   
+                _clients.remove(user); 
+                _api.log().info("WsNotifier", "Unsubscribing closed client channel: "+user);       
             }
          }
       } catch(Exception e) {

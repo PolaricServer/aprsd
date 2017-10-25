@@ -1,3 +1,18 @@
+/* 
+ * Copyright (C) 2017 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
 
@@ -59,17 +74,17 @@ public class MapUpdater extends WsNotifier implements Notifier
            
            String meta = 
                metaTag("login", getUsername()) +
-               metaTag("loginuser", (_login ? "true" : "false")) + 
-               metaTag("adminuser", (_admin ? "true" : "false")) +
-               metaTag("updateuser", (_sar ? "true" : "false")) + 
+               metaTag("loginuser", (login() ? "true" : "false")) + 
+               metaTag("adminuser", (login() &&_auth.admin ? "true" : "false")) +
+               metaTag("updateuser", (login() && _auth.sar ? "true" : "false")) + 
                metaTag("sarmode", (_api.getSar() !=null ? "true" : "false")) +
                metaTag("clientses", ""+getUid());
                
-           boolean showSarInfo = _login || _api.getSar() == null || !_api.getSar().isAliasHidden();
+           boolean showSarInfo = login() || _api.getSar() == null || !_api.getSar().isAliasHidden();
            try {     
               printOverlay( meta, out, 0 /* seq */, 
                    _filter, _scale, _uleft, _lright, 
-                   _login, metaonly, showSarInfo );
+                   (trusted() && login()), metaonly, showSarInfo );
               return outs.toString();
            }
            catch (IOException e) {
@@ -148,7 +163,7 @@ public class MapUpdater extends WsNotifier implements Notifier
    /** 
      * When opening the websocket, send client an overlay with only metainfo. 
      */
-   @Override public boolean subscribe(InetSocketAddress uid, WsNotifier.Client client) 
+   @Override public boolean subscribe(String uid, WsNotifier.Client client) 
    {
        try {
          client.sendText( ((Client)client).getOverlayData(true) );  
@@ -156,8 +171,7 @@ public class MapUpdater extends WsNotifier implements Notifier
          UpgradeRequest req = client.getSession().getUpgradeRequest();  
          String origin = req.getHeader("X-Forwarded-For");
          _api.log().info("MapUpdater", "Client added: "+uid+
-                  (origin != null ? ", "+origin : "") + 
-                  (client._username != null ? ", username='"+client._username+"'" : ""));
+                  (client.getUsername() == null ? "" : ", " + client.getUsername()));
          return true;
       }
       catch (IOException e) {

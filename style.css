@@ -99,3 +99,7 @@ div.taglist {
 }
 
 div.taglist input {margin: 0.1em}
+
+
+.error {color: red; ; padding-left: 4px}
+#login fieldset {max-width: 25em; padding-top: 1.5em; padding-bottom: 1.3em }

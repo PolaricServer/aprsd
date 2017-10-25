@@ -1,3 +1,18 @@
+/* 
+ * Copyright (C) 2017 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
 
@@ -24,6 +39,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
       public String  view;       /* filter name */
       /* FIXME: Consider adding som session info here */
       
+      AuthInfo authorization;
       List<JsPoint>  points;
       List<String> delete;
       
@@ -94,6 +110,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
        @Override public String getOverlayData(boolean metaonly) {
            _updates++;
            JsOverlay mu = new JsOverlay(_filter);
+           mu.authorization = _auth;
            if (!metaonly)
               addPoints(mu);
            return mapper.serialize(mu);
@@ -111,18 +128,20 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
           {
              mu.points = new LinkedList<JsPoint>();
              mu.delete = new LinkedList<String>();
-             RuleSet vfilt = ViewFilter.getFilter(_filter, _login);
+             boolean allowed = (login() && trusted()); 
+             
+             RuleSet vfilt = ViewFilter.getFilter(_filter, allowed);
              for (TrackerPoint s: _api.getDB().search(_uleft, _lright)) 
              {          
                 /* Apply filter. */
                 Action action = vfilt.apply(s, _scale); 
                 if ( s.getPosition() == null ||
-                     ( s.getSource().isRestricted() && !action.isPublic() && !_login) ||
+                     ( s.getSource().isRestricted() && !action.isPublic() && !allowed) ||
                      action.hideAll())
                    continue;
                 
                 /* Add point to delete-list */
-                if (!s.visible() || (_api.getSar() != null && !_login && _api.getSar().filter(s))) {
+                if (!s.visible() || (_api.getSar() != null && !allowed && _api.getSar().filter(s))) {
                    if (items.contains(s.getIdent())) {
                       items.remove(s.getIdent());
                       mu.delete.add(s.getIdent());
@@ -163,7 +182,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
            String icon = action.getIcon(s.getIcon()); 
            if (s.iconOverride() && _api.getSar()!=null) 
               icon = s.getIcon(); 
-           x.icon = _wfiledir + "/icons/"+ (icon != null ? icon : _icon); 
+           x.icon = "/icons/"+ (icon != null ? icon : _icon); 
            x.trail = createTrail(s, action);
            return x;
        }
@@ -172,7 +191,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
        
        /** Create label or return null if label is to be hidden. */
        private JsLabel createLabel(TrackerPoint s, Action action) {
-           boolean showSarInfo = _login || _api.getSar() == null || !_api.getSar().isAliasHidden();
+           boolean showSarInfo = login() || _api.getSar() == null || !_api.getSar().isAliasHidden();
            JsLabel lbl = new JsLabel();
            
            lbl.style = (!(s.getTrail().isEmpty()) ? "lmoving" : "lstill");

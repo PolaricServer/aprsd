@@ -118,58 +118,12 @@ public abstract class ServerBase
    
    
    /**
-    * Get name of user identified using basic authentication.
-    * (we assume that there is a front end webserver which already 
-    * did the authentication).  
-    */ 
-    // FIXME: DO we need this? Remove? 
-   protected final String getAuthUser(Request req)
-   {
-         String auth = req.headers("authorization");
-         if (auth==null)
-            auth = req.headers("Authorization");
-        return getAuthUser(auth);
-   }
-   
-   
-   protected final String getAuthUser(String auth)
-   {
-       if (auth != null) {
-           Base64 b64 = new Base64();
-           byte[] dauth = b64.decode(auth.substring(6));
-           String[] user = (new String(dauth)).split(":");
-           return (user.length == 0 ? null : user[0]);
-       }
-       return null;
-   }
-   
-   
+    * Get username of the authenticated user. 
+    * @return username, null if not authenticated. 
+    */
+   protected final AuthInfo getAuthInfo(Request req)
+      { return (AuthInfo) req.raw().getAttribute("authinfo"); }
 
-   protected final boolean authorizedForUpdate(String user) 
-   {
-       if (user == null)
-          user="_NOLOGIN_";
-       return ( user.matches(_adminuser) ||
-                user.matches(_updateusers) );
-   }
-   
-
-   protected final boolean authorizedForUpdate(Request req)
-      { return authorizedForUpdate(getAuthUser(req)); }
-
-  
-   protected final boolean authorizedForAdmin(String user)
-      { return (user != null && user.matches(_adminuser)); } 
-
-      
-   protected final boolean authorizedForAdmin(Request req)
-      { return authorizedForAdmin(getAuthUser(req)); } 
-   
-   
-   protected PrintWriter getWriter(Response resp) throws IOException
-   {
-        return null;  // FIXME. Remove this method. 
-   }
    
 
    /**
