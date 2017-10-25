@@ -40,10 +40,10 @@ public class AuthConfig {
          /* FIXME: How can we simplify config of this? */
          _host        = api.getProperty("auth.host",        "http://localhost:8081");
          _allowOrigin = api.getProperty("auth.alloworigin", "http://localhost");
-         _passwdFile  = api.getProperty("auth.passwdfile",  "/etc/polaric-webapp/users");
+         _passwdFile  = api.getProperty("auth.passwdfile",  "/etc/polaric-aprsd/passwd");
          
               
-         final Authenticator passwds =  new PasswordFileAuthenticator(_passwdFile);
+         final Authenticator passwds =  new PasswordFileAuthenticator(api, _passwdFile);
      
          /* Indirect basic auth client */     
          final IndirectBasicAuthClient basicClient = new IndirectBasicAuthClient(passwds);

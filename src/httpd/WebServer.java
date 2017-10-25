@@ -110,7 +110,7 @@ public class WebServer implements ServerAPI.Web
     
     
     public void stop() throws Exception {
-       System.out.println("WebServer: Stopping...");
+       _api.log().info("WebServer", "Stopping...");
     }
          
     

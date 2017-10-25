@@ -25,9 +25,9 @@ import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
 import java.io.*; 
 import java.util.*; 
+import no.polaric.aprsd.*;
 import org.apache.commons.codec.digest.*;
-
-
+import java.security.MessageDigest;
 
 
 /**
@@ -37,27 +37,29 @@ import org.apache.commons.codec.digest.*;
 public class PasswordFileAuthenticator implements Authenticator<UsernamePasswordCredentials> {
 
     private Map<String, String> _pwmap = new HashMap<String, String>();
-
     
-    
-    public PasswordFileAuthenticator(String file) {
+    public PasswordFileAuthenticator(ServerAPI api, String file) {
         try {
            BufferedReader rd = new BufferedReader(new FileReader(file));
            while (rd.ready() )
            {
                String line = rd.readLine();
-               if (!line.startsWith("#")) 
-               {                 
-                   String[] x = line.split(":");  
-                   String username = x[0].trim();
-                   String passwd = x[1].trim();
-                   _pwmap.put(username, passwd);
-                   String tt = _pwmap.get(username); 
+               if (!line.startsWith("#") && line.length() > 1) {
+                 if (line.matches(".*:.*"))
+                 {                 
+                    String[] x = line.split(":");  
+                    String username = x[0].trim();
+                    String passwd = x[1].trim();
+                    _pwmap.put(username, passwd);
+                    String tt = _pwmap.get(username); 
+                 }
+                 else
+                    api.log().warn("PasswordFileAuthenticator", "Bad line in password file: "+line);
                }
            }
         }
         catch (IOException e) {
-           AuthService._api.log().log("WARNING: Couldn't open htpasswd file: "+e.getMessage());
+           api.log().warn("PasswordFileAuthenticator", "Couldn't open htpasswd file: "+e.getMessage());
         } 
     }
     
@@ -84,12 +86,19 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
         if (storedPwd == null)
            throwsException("Unknown user: '"+username+"'");
            
+                       
         if (storedPwd.startsWith("$apr1$")) { 
            if (!storedPwd.equals(Md5Crypt.apr1Crypt(password, storedPwd)))
               throwsException("Invalid password");
         }
+        /* Old Crypt(3) algorithm for compatibility. Insecure */
+        else if (storedPwd.length() == 13) {
+            String pw = (password.length() <= 8 ? password : password.substring(0,8));
+            if (!storedPwd.equals(Crypt.crypt(pw, storedPwd.substring(0,2))))
+               throwsException("Invalid password");
+        }
         else
-           throwsException("Unknown password format for user: "+username);
+            throwsException("Unknown password format for user: "+username);
 
         /* Create a user profile */
         final CommonProfile profile = new CommonProfile();
