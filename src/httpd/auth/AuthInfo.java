@@ -56,8 +56,8 @@ public class AuthInfo {
           userid = profile.get().getId();
           String adminusers = api.getProperty("user.admin", "admin");
           String updateusers = api.getProperty("user.update", "");
-          admin = (adminusers.matches(userid)); 
-          sar = (updateusers.matches(userid));
+          admin = (userid.matches(adminusers)); 
+          sar = (userid.matches(updateusers));
        }
     }
 }

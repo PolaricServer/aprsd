@@ -52,7 +52,6 @@ package no.polaric.aprsd.http
    def handle_admin(req : Request, res: Response): String =
    {   
        val I = getI18n(req)
-//       val out = getWriter(res);
        val cmd = req.queryParams("cmd")
        val head = <meta http-equiv="refresh" content="60" />
 
@@ -89,8 +88,12 @@ package no.polaric.aprsd.http
                                 
               { simpleLabel ("plugins", "leftlab", I.tr("Plugin modules")+": ", 
                  <div>
-                    { PluginManager.getPlugins.toSeq.map
-                       { x => TXT(x.getDescr()) ++ br } }
+                    { if (PluginManager.isEmpty())
+                         TXT("---") ++ br
+                      else 
+                         PluginManager.getPlugins.toSeq.map
+                          { x => TXT(x.getDescr()) ++ br } 
+                    }
                  </div> 
               )}
               

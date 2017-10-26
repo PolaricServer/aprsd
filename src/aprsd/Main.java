@@ -286,7 +286,8 @@ public class Main implements ServerAPI
            
            /* Add main webservices */
            ws.addHandler(new Webservices(api), null);
-
+           ws.addHandler(new ConfigService(api), null); 
+           
            /*
             * default channel setup: one named aprsis type APRSIS and one named tnc type TNC2
             */

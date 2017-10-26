@@ -44,6 +44,9 @@ public class PluginManager
      { return _properties; }
       
       
+   public static boolean isEmpty() {
+      return _plugins.isEmpty();
+   }
    
    /** Get interfaces of all registered plugins. */
    public static Plugin[] getPlugins()
