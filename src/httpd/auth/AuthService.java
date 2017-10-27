@@ -42,12 +42,15 @@ public class AuthService {
     
     private AuthConfig _authConf; 
     static ServerAPI _api; // FIXME: This is static. 
+    private static Logfile  _log;
    
    
     public AuthService(ServerAPI api) {
        _authConf = new AuthConfig(api);
        _api = api; 
+       _log = new Logfile(api, "auth", "auth.log");
     }
+   
    
     /** Return the configuration */
     public AuthConfig conf() 
@@ -68,7 +71,10 @@ public class AuthService {
             );
             
       before("/authStatus", new SecurityFilter(conf, null, "csrfToken, isauth"));      
-
+      before("/logout", (req,resp) -> {
+             _log.log("Logout by user: "+ ((AuthInfo) req.raw().getAttribute("authinfo")).userid);
+        }); 
+        
       /* Callback route */
       final CallbackRoute callback = new CallbackRoute(conf, null, true);   
       callback.setRenewSession(true);
@@ -149,6 +155,7 @@ public class AuthService {
        final ProfileManager manager = new ProfileManager(context);
        final Optional<CommonProfile> profile = manager.get(true);
        
+       _log.log("Successful login from: "+req.ip()+": "+ (AuthInfo) req.raw().getAttribute("authinfo"));
        returnToOrigin(req, res, "origin");
        return 
          "<html><head><link rel=\"stylesheet\" href=\"style.css\"></head><body>" + 

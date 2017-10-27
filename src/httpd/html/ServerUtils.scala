@@ -324,21 +324,21 @@ package no.polaric.aprsd.http
    def _directionIcon(direction:Int, fprefix: String): NodeSeq = 
         direction match {
           case x if !(22 until 337 contains x) =>
-              <span><img src= {fprefix+"/dicons/dN.png"}/> N</span>
+              <span><img src= {fprefix+"/images/dN.png"}/> N</span>
           case x if (22 until 67 contains x) =>
-              <span><img src= {fprefix+"/dicons/dNE.png"}/> NE</span>
+              <span><img src= {fprefix+"/images/dNE.png"}/> NE</span>
           case x if (67 until 112 contains x) =>
-              <span><img src= {fprefix+"/dicons/dE.png"}/> E</span>
+              <span><img src= {fprefix+"/images/dE.png"}/> E</span>
           case x if (112 until 157 contains x) =>
-              <span><img src= {fprefix+"/dicons/dSE.png"}/> SE</span>
+              <span><img src= {fprefix+"/images/dSE.png"}/> SE</span>
           case x if (157 until 202 contains x) =>
-              <span><img src= {fprefix+"/dicons/dS.png"}/> S</span>
+              <span><img src= {fprefix+"/images/dS.png"}/> S</span>
           case x if (202 until 247 contains x) =>
-              <span><img src= {fprefix+"/dicons/dSW.png"}/> SW</span>
+              <span><img src= {fprefix+"/images/dSW.png"}/> SW</span>
           case x if (247 until 292 contains x) =>
-              <span><img src= {fprefix+"/dicons/dW.png"}/> W</span>
+              <span><img src= {fprefix+"/images/dW.png"}/> W</span>
           case x if (292 until 337 contains x) =>
-              <span><img src= {fprefix+"/dicons/dNW.png"}/> NW</span>
+              <span><img src= {fprefix+"/images/dNW.png"}/> NW</span>
           case _ => null;
       }
 

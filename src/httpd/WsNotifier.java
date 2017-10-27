@@ -187,8 +187,9 @@ public abstract class WsNotifier extends ServerBase
      
     @OnWebSocketClose
     public void onClose(Session conn, int statusCode, String reason) {
-       _api.log().info("WsNotifier", "Connection closed"+(reason==null ? "" : ": "+reason));
-       _clients.remove(conn.getRemoteAddress());
+       String user = _getUid(conn);
+       _api.log().info("WsNotifier", "Connection closed"+(reason==null ? "" : ": "+reason)+". Unsubscribing user: "+user);
+       _clients.remove(user);
     }
 
    

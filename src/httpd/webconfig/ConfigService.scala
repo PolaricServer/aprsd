@@ -410,7 +410,7 @@ package no.polaric.aprsd.http
              username = if (getAuthInfo(req).admin) req.queryParams("item1") 
                         else username
              val passwd = req.queryParams("item2")             
-             val cmd = "/usr/bin/sudo /usr/bin/htpasswd -b /etc/polaric-webapp/users "+username+" "+passwd
+             val cmd = "/usr/bin/sudo /usr/bin/htpasswd -b /etc/polaric-aprsd/passwd "+username+" "+passwd
              val p = Runtime.getRuntime().exec(cmd)
              val res = p.waitFor()
              
