@@ -123,7 +123,7 @@ public class WebServer implements ServerAPI.Web
         { return _mapupdate.nClients() + _jmapupdate.nClients(); }
      
      public int  nLoggedin()
-        { return _mapupdate.nClients() + _jmapupdate.nClients(); }
+        { return _mapupdate.nLoggedIn() + _jmapupdate.nLoggedIn(); }
         
      public long nHttpReq() 
         { return _nRequests; } 
@@ -137,7 +137,15 @@ public class WebServer implements ServerAPI.Web
      public Notifier getNotifier() 
         { return _mapupdate; } 
    
-         
+     public WsNotifier getMapUpdater()
+        { return _mapupdate; }
+        
+     public WsNotifier getJsonMapUpdater()
+        { return _jmapupdate; }
+        
+     public WsNotifier getMessages()
+        { return _messages; }
+        
     
    /**
     * Adds a HTTP service handler. Go through methods. All public methods that starts 

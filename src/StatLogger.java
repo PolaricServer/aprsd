@@ -20,7 +20,7 @@ import java.io.*;
 
 
 /*
- * Sample and log some data to a CSV file each minute. 
+ * Sample and log some data to a CSV file each hour. 
  */
 public class StatLogger implements Runnable {
 
@@ -54,7 +54,7 @@ public class StatLogger implements Runnable {
            _out.flush();
                        
            ServerAPI.Web ws = _api.getWebserver();        
-           long period = 1000 * 60 * 10;           // 10 minute
+           long period = 1000 * 60 * 60;           // 60 minute
            long _posUpd = TrackerPoint.getPosUpdates();
            long _req = ws.nHttpReq(); 
            long _visits = ws.nVisits();  

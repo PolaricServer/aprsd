@@ -18,6 +18,8 @@ package no.polaric.aprsd.http;
 import spark.*;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collection;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.io.IOException;
@@ -35,10 +37,9 @@ import com.mindprod.base64.Base64;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 
 
-
 /** Send events to clients through WebSockets. Let clients subscribe. */
 
-@WebSocket
+@WebSocket(maxIdleTime=360000)
 public abstract class WsNotifier extends ServerBase
 {
    
@@ -46,13 +47,15 @@ public abstract class WsNotifier extends ServerBase
    
       protected final Session _conn; 
       protected final String _uid;
-    
       protected AuthInfo _auth;
-   
+      protected long _nIn, _nOut; 
+      protected Date _ctime; 
+      
    
       public Client(Session conn) {
          _conn = conn;
          _uid = _getUid(conn);
+         _ctime = new Date();
       }
    
    
@@ -64,7 +67,7 @@ public abstract class WsNotifier extends ServerBase
          { return _auth != null && _auth.userid != null; }
    
       public void sendText(String text) throws IOException 
-         { _conn.getRemote().sendString(text); }
+         { _nOut++; _conn.getRemote().sendString(text); }
    
       public  String getUid()
          { return _uid; }
@@ -75,11 +78,15 @@ public abstract class WsNotifier extends ServerBase
       public String getUsername()
          { return (_auth == null ? null : _auth.userid); }
          
+      // FIXME: Is this used?    
       public void close() throws IOException { 
          _conn.close(); 
          _clients.remove(_uid);
       }
-      
+           
+      public Date created() {return _ctime; }
+      public long nIn() {return _nIn; }
+      public long nOut() {return _nOut; }
 
       /** 
        * Handler for text frame. To be defined in subclass.
@@ -90,7 +97,9 @@ public abstract class WsNotifier extends ServerBase
 
    
    
-   
+   /* Count number of logged in users */
+   private int _nLoggedIn;
+      
    
    /* Count number of visits */
    private long _visits = 0;
@@ -123,18 +132,26 @@ public abstract class WsNotifier extends ServerBase
      
    /** Factory method */
    public abstract Client newClient(Session conn);
-     
+   
      
    /** Return number of visits */
    public long nVisits()
      { return _visits; }
      
+   /** Return number of logged in clients */
+   public int nLoggedIn()
+     { return _nLoggedIn;}
      
    /** Return number of clients. */
    public int nClients() 
      { return _clients.size(); }
      
-   
+
+   /** Return collection of clients */
+   public Collection<Client> clients()
+     { return _clients.values(); }
+     
+     
    public boolean trusted()
      { return _trusted; }
 
@@ -163,6 +180,8 @@ public abstract class WsNotifier extends ServerBase
                  _api.log().debug("WsNotifier", "Subscription success. User="+uid);
                  _clients.put(uid, client); 
                  _visits++;
+                 if (client.login())
+                    _nLoggedIn++;
               }
               else {
                  _api.log().info("WsNotifier", "Subscription rejected. User="+uid);
@@ -189,7 +208,11 @@ public abstract class WsNotifier extends ServerBase
     public void onClose(Session conn, int statusCode, String reason) {
        String user = _getUid(conn);
        _api.log().info("WsNotifier", "Connection closed"+(reason==null ? "" : ": "+reason)+". Unsubscribing user: "+user);
+       Client c = _clients.get(user);
+       if (c.login())
+          _nLoggedIn--;
        _clients.remove(user);
+       
     }
 
    
@@ -201,8 +224,10 @@ public abstract class WsNotifier extends ServerBase
     @OnWebSocketMessage
     public void onMessage(Session conn, String message) {
         Client c = _clients.get(_getUid(conn));
-        if (c != null)
+        if (c != null) {
+           c._nIn++;
            c.onTextFrame(message);
+        }
     }
     
     
@@ -277,6 +302,9 @@ public abstract class WsNotifier extends ServerBase
             } catch(WebSocketException e){   
                 _clients.remove(user); 
                 _api.log().info("WsNotifier", "Unsubscribing closed client channel: "+user);       
+                Client c = _clients.get(user);
+                if (c.login())
+                   _nLoggedIn--;
             }
          }
       } catch(Exception e) {

@@ -42,8 +42,36 @@ package no.polaric.aprsd.http
    PointView.addView(classOf[OwnPosition], classOf[AprsPointView])
    PointView.addView(classOf[GpsPosition], classOf[AprsPointView])
 
-    
-    
+   
+   
+   def handle_listclients(req : Request, res: Response): String =
+   {       
+       val I = getI18n(req)
+       val head = <meta http-equiv="refresh" content="30" />
+       val ws = _api.getWebserver().asInstanceOf[WebServer];
+       
+       def action(req : Request): NodeSeq =
+         if (!getAuthInfo(req).admin)
+              <h3>{I.tr("You are not authorized for such operations")}</h3>
+         else     
+              <h3>Clients active on server</h3>
+              <fieldset>
+              <table>
+              <tr><th>Created</th><th>Client</th><th>In</th><th>Out</th><th>Userid</th><th>Fmt</th></tr>
+        
+              { for (c <- ws.getMapUpdater().clients()) yield
+                   <tr><td>{ServerBase.tf.format(c.created())}</td><td>{c.getUid()}</td>
+                       <td>{c.nIn()}</td><td>{c.nOut()}</td><td>{c.getUsername()}</td><td>XML</td></tr>  }
+                   
+              { for (c <- ws.getJsonMapUpdater().clients()) yield
+                   <tr><td>{ServerBase.tf.format(c.created())}</td><td>{c.getUid()}</td>
+                       <td>{c.nIn()}</td><td>{c.nOut()}</td><td>{c.getUsername()}</td><td>JSON</td></tr> }
+              </table>
+              </fieldset>
+       return printHtml (res, htmlBody(req, head, action(req))); 
+   }
+
+   
     
    /** 
     * Admin interface. 

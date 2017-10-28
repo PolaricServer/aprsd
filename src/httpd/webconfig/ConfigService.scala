@@ -74,9 +74,10 @@ package no.polaric.aprsd.http
              <div id="config_menu">
              <ul class="menu">
                { mitem("config_menu", 1, I.tr("Status info")) ++
-                 mitem("config", 2, I.tr("Server config")) ++
-                 mitem("config_posreport", 3, I.tr("Own position")) ++
-                 mitem("config_mapdisplay", 4, I.tr("Display on map"))
+                 mitem("config_clients", 2, I.tr("Client list")) ++
+                 mitem("config", 3, I.tr("Server config")) ++
+                 mitem("config_posreport", 4, I.tr("Own position")) ++
+                 mitem("config_mapdisplay", 5, I.tr("Display on map"))
                }
                <li>{ I.tr("Data channels...") }</li>
                <ul>
@@ -126,7 +127,23 @@ package no.polaric.aprsd.http
                           
           printHtml (res, htmlBody(req, null, action(req)))
       }
-      
+    
+    
+    
+     /**
+       * This is the first menu choice. It just puts the admin status from aprsd in am iframe 
+       */
+      def handle_config_clients(req : Request, res: Response) =
+      {
+          var lang = req.queryParams("lang")
+          lang = if (lang==null) "en" else lang
+          
+          def action(req : Request): NodeSeq =
+             <iframe id="config_main" name="config_main" src={"listclients"} />
+             ;   
+                          
+          printHtml (res, htmlBody(req, null, action(req)))
+      }
       
       
       /**
@@ -415,7 +432,7 @@ package no.polaric.aprsd.http
              val res = p.waitFor()
              
              if (res == 0)
-                 <h3>{ I.tr("Password for user '{0}' updated", username) }</h3>
+                 <h3>{ I.tr("Password updated for user")+": '"+username+"'" }</h3>
              else if (res == 5)
                  <h3>{ I.tr("Error: Your input is too long") }</h3>
              else if (res == 6)
