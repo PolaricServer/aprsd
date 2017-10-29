@@ -12,7 +12,7 @@
        NAME=polaric-aprsd         
        JLIB=/usr/share/java
     PLUGINS=/etc/polaric-aprsd/plugins
-  CLASSPATH=$JLIB/commons-daemon.jar:$JLIB/libintl.jar:$JLIB/gettext-commons.jar:$JLIB/jcoord-polaric.jar:$JLIB/genson-polaric.jar:$JLIB/jetty-polaric.jar:$JLIB/slf4j-api.jar:$JLIB/slf4j-simple.jar:$JLIB/spark-core.jar:$JLIB/polaric-aprsd.jar:$JLIB/utf8-with-fallback-polaric.jar:$JLIB/RXTXcomm.jar:$JLIB/scala-library.jar:$JLIB/scala-parser-combinators*:$JLIB/scala-xml*:$JLIB/pac4j*:$JLIB/spark-pac4j-2.1.0.jar:$JLIB/commons-codec.jar:$PLUGINS/*
+  CLASSPATH=$JLIB/commons-daemon.jar:$JLIB/libintl.jar:$JLIB/gettext-commons.jar:$JLIB/jcoord-polaric.jar:$JLIB/genson-polaric.jar:$JLIB/jetty-polaric.jar:$JLIB/spark-core-polaric.jar:$JLIB/polaric-aprsd.jar:$JLIB/utf8-with-fallback-polaric.jar:$JLIB/RXTXcomm.jar:$JLIB/scala-library.jar:$JLIB/scala-parser-combinators*:$JLIB/scala-xml*:$JLIB/pac4j*:$JLIB/spark-pac4j-polaric.jar:$JLIB/commons-codec.jar:$PLUGINS/*
 SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB0:/dev/ttyUSB1:/dev/ttyACM0:/dev/ttyACM1
       FLAGS=-Djava.net.preferIPv4Stack=true 
      

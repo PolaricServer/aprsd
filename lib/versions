@@ -1,0 +1,9 @@
+ 
+jcoord-polaric.jar              Based on v.1.1 (2006). Slightly modified. Source included.  
+jetty-polaric.jar               Jetty Uber All compilation. v. 9.3.21.v20170918
+pac4j-core-polaric.jar          v.2.1.0        
+pac4j-http-polaric.jar          v.2.1.0 
+spark-pac4j-polaric.jar         v.2.1.0
+spark-core-polaric.jar          v.2.6.1
+utf8-with-fallback-polaric.jar  Based on v.1.1.0. Slightly modified. Source included. 
+
