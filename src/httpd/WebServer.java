@@ -111,6 +111,7 @@ public class WebServer implements ServerAPI.Web
     
     public void stop() throws Exception {
        _api.log().info("WebServer", "Stopping...");
+       _mapupdate.postText("RESTART!", c->true);
     }
          
     
