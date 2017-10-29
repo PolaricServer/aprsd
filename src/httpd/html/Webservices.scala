@@ -54,7 +54,7 @@ package no.polaric.aprsd.http
          if (!getAuthInfo(req).admin)
               <h3>{I.tr("You are not authorized for such operations")}</h3>
          else     
-              <h3>Clients active on server</h3>
+              <h3>{I.tr("Clients active on server")}</h3>
               <fieldset>
               <table>
               <tr><th>Created</th><th>Client</th><th>In</th><th>Out</th><th>Userid</th><th>Fmt</th></tr>
