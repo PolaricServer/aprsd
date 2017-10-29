@@ -39,7 +39,7 @@ public class AuthConfig {
      
          /* FIXME: How can we simplify config of this? */
          _host        = api.getProperty("auth.host",        "http://localhost:8081");
-         _allowOrigin = api.getProperty("auth.alloworigin", "http://localhost");
+         _allowOrigin = api.getProperty("auth.alloworigin", ".*");
          _passwdFile  = api.getProperty("auth.passwdfile",  "/etc/polaric-aprsd/passwd");
          
               
@@ -50,15 +50,10 @@ public class AuthConfig {
 
          /* Indirect Form client */
          final FormClient formClient = new FormClient(_host+"/loginForm", passwds);
-      
-         /* Cors */
-         CorsAuthorizer cors = new CorsAuthorizer(); 
-         cors.setAllowOrigin(_allowOrigin);  // FIXME Other checks than origin. Testing.. Allow more than one origin? Regex? 
 
          /* Config */      
          _config = new Config (new Clients(_host+"/callback", basicClient, formClient));
          _config.addAuthorizer("isauth", new IsAuthenticatedAuthorizer());
-         _config.addAuthorizer("cors", cors);
          _config.setHttpActionAdapter(new DefaultHttpActionAdapter());
      }
  

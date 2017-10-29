@@ -90,18 +90,13 @@ public class WebServer implements ServerAPI.Web
        before("/sarurl", _auth.conf().filter(null, "csrfToken, isauth"));
        before("/search_sec", _auth.conf().filter(null, "csrfToken, isauth"));
          
-       /* 
-        * Put an AuthInfo object on the request. Here we rely on sessions to remember 
-        * user-profiles between requests. IF we use direct clients (stateless server) 
-        * this will not work for paths without authenticators!! 
-        */ 
-       before("*", AuthService::setAuthInfo);
          
        afterAfter((request, response) -> {
           _nRequests++;
        });
       
        _auth.start();
+    
        init();
     }
     
@@ -177,7 +172,7 @@ public class WebServer implements ServerAPI.Web
             /* FIXME: Configure allowed origin(s) */
             after (key, (req,resp) -> { 
                resp.header("Access-Control-Allow-Credentials", "true"); 
-               resp.header("Access-Control-Allow-Origin", _auth.conf().getAllowOrigin()); 
+               resp.header("Access-Control-Allow-Origin", _auth.getAllowOrigin(req)); 
               } 
             );
             

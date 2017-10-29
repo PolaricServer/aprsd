@@ -61,14 +61,16 @@ public class AuthService {
     public void start() {
       Config conf = _authConf.get();
       before("/formLogin",  new SecurityFilter(conf, "FormClient", "csrfToken, isauth")); 
-     
+        
+       /* 
+        * Put an AuthInfo object on the request. Here we rely on sessions to remember 
+        * user-profiles between requests. IF we use direct clients (stateless server) 
+        * this will not work for paths without authenticators!! 
+        */ 
+      before("*", AuthService::setAuthInfo);
       
-      /* Authorization status. */
-      before ("/authStatus", (req,resp) -> { 
-               resp.header("Access-Control-Allow-Credentials", "true"); 
-               resp.header("Access-Control-Allow-Origin", _authConf.getAllowOrigin()); 
-              } 
-            );
+       /* Authorization status. */
+      before ("/authStatus", (req,resp) -> { corsHeaders(req, resp); } );
             
       before("/authStatus", new SecurityFilter(conf, null, "csrfToken, isauth"));      
       before("/logout", (req,resp) -> {
@@ -100,6 +102,25 @@ public class AuthService {
      /** Genson object mapper. */
     protected final static Genson mapper = new Genson();
 
+    
+    public String getAllowOrigin(Request req) {
+        
+        String allow = _authConf.getAllowOrigin(); 
+        String origin = req.headers("Origin");
+        
+        if (origin.matches(allow))
+           return origin;
+        else
+           return "NO.MATCH";
+    }
+    
+    
+    
+    public void corsHeaders(Request req, Response resp) {
+        resp.header("Access-Control-Allow-Credentials", "true"); 
+        resp.header("Access-Control-Allow-Origin", getAllowOrigin(req)); 
+    }
+    
     
     
     /**
