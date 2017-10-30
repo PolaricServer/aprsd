@@ -31,7 +31,6 @@ import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.WebSocketException;
 import java.security.Principal;
-import com.owlike.genson.*;
 import no.polaric.aprsd.*;
 import com.mindprod.base64.Base64;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
@@ -112,10 +111,6 @@ public abstract class WsNotifier extends ServerBase
     */
    private String _origin;
    private String _trustedOrigin; 
-         
-
-   /* Genson object mapper */
-   protected final static Genson mapper = new Genson();
    
    
    /* Map of clients */ 
@@ -280,7 +275,7 @@ public abstract class WsNotifier extends ServerBase
     * predicate evaluates to true. 
     */
    public void postObject(Object myObj, Predicate<Client> pred) {
-        postText(mapper.serialize(myObj), pred); 
+        postText(serializeJson(myObj), pred); 
    }
    
 

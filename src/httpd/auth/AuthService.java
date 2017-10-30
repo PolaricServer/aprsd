@@ -16,7 +16,6 @@
 
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
-import com.owlike.genson.*;
 import spark.Request;
 import spark.Response;
 import static spark.Spark.get;
@@ -97,10 +96,6 @@ public class AuthService {
       
     }
     
-        
-    
-     /** Genson object mapper. */
-    protected final static Genson mapper = new Genson();
 
     
     public String getAllowOrigin(Request req) {
@@ -108,7 +103,7 @@ public class AuthService {
         String allow = _authConf.getAllowOrigin(); 
         String origin = req.headers("Origin");
         
-        if (origin.matches(allow))
+        if (origin != null && origin.matches(allow))
            return origin;
         else
            return "NO.MATCH";
@@ -128,7 +123,7 @@ public class AuthService {
      */
     public static String authStatus(Request req, Response res) {
         AuthInfo auth = new AuthInfo(_api, req, res);
-        return mapper.serialize(auth);
+        return ServerBase.serializeJson(auth);
     }
     
     

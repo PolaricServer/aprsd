@@ -24,7 +24,6 @@ import java.io.IOException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import uk.me.jstott.jcoord.*; 
-import com.owlike.genson.*; 
 import no.polaric.aprsd.filter.*;
 
 
@@ -113,7 +112,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
            mu.authorization = _auth;
            if (!metaonly)
               addPoints(mu);
-           return mapper.serialize(mu);
+           return serializeJson(mu);
        }
        
        

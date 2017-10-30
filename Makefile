@@ -8,7 +8,8 @@
    CLASSDIR = classes
     GETTEXT = /usr/share/java/gettext-commons.jar
       CODEC = /usr/share/java/commons-codec.jar
-  CLASSPATH = $(GETTEXT):lib/jcoord-polaric.jar:lib/utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:lib/genson-polaric.jar:lib/jetty-polaric.jar:/usr/share/java/sl4j-api.jar:/usr/share/java/sl4j-simple.jar:lib/spark-core-polaric.jar:lib/pac4j-core-polaric.jar:lib/pac4j-http-polaric.jar:lib/spark-pac4j-polaric.jar:$(CODEC)
+    JACKSON = /usr/share/java/jackson-core.jar:/usr/share/java/jackson-databind.jar
+  CLASSPATH = $(GETTEXT):lib/jcoord-polaric.jar:lib/utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:lib/jetty-polaric.jar:/usr/share/java/sl4j-api.jar:/usr/share/java/sl4j-simple.jar:lib/spark-core-polaric.jar:lib/pac4j-core-polaric.jar:lib/pac4j-http-polaric.jar:lib/spark-pac4j-polaric.jar:$(JACKSON):$(CODEC)
  # INSTALLDIR = /usr/local/polaric-aprsd
       JAVAC = javac -source 1.8 -target 1.8
        YACC = yacc
@@ -121,8 +122,7 @@ channels:
 	
 .PHONY : httpd
 httpd: core
-	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/httpd/auth/*.java 
-	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/httpd/*.java 
+	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/httpd/auth/*.java src/httpd/*.java 
 	
 	
 .PHONY : scala

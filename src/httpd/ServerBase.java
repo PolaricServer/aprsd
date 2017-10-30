@@ -29,7 +29,7 @@ import com.mindprod.base64.Base64;
 import java.util.concurrent.locks.*; 
 import org.xnap.commons.i18n.*;
 import spark.*;
-
+import com.fasterxml.jackson.databind.*;
 
 
 
@@ -53,6 +53,31 @@ public abstract class ServerBase
    
    public static Calendar utcTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
    public static Calendar localTime = Calendar.getInstance();
+   
+   
+      /* Jackson JSON mapper */ 
+   protected final static ObjectMapper mapper = new ObjectMapper();
+   
+   
+   
+   public static String serializeJson(Object obj) {
+       try {
+          return mapper.writeValueAsString(obj);
+       }
+       catch (Exception e) {
+          return null;
+       }
+   }
+   
+   
+   public static Object deserializeJson(String text, Class cls) {
+     try {
+        return mapper.readValue(text, cls);
+     }
+     catch (Exception e) {
+        return null;
+     }
+   }
    
    
    

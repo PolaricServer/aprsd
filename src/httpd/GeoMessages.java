@@ -24,7 +24,7 @@ public class GeoMessages extends WsNotifier implements ServerAPI.Mbox
              
        
        @Override synchronized public void onTextFrame(String text) {
-            Message m = mapper.deserialize(text, Message.class);
+            Message m = (Message) deserializeJson(text, Message.class);
             m.senderId = _uid;
             m.msgId = _msgId++;
             if (m.time==null)

@@ -78,6 +78,8 @@ public class WebServer implements ServerAPI.Web
        webSocket("/mapdata", _mapupdate);
        webSocket("/jmapdata", _jmapupdate);
          
+       before("*", (req, res) -> {res.status(200);});
+       
        /* 
         * Protect other webservices. We should eventually prefix these and 
         * just one filter should be sufficient 
@@ -122,7 +124,7 @@ public class WebServer implements ServerAPI.Web
         { return _mapupdate.nLoggedIn() + _jmapupdate.nLoggedIn(); }
         
      public long nHttpReq() 
-        { return _nRequests; } 
+        { return _nRequests; }
      
      public long nMapUpdates() 
         { return _mapupdate.nUpdates() + _jmapupdate.nUpdates(); }
