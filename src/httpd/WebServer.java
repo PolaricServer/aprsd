@@ -13,18 +13,23 @@
  */
 
 package no.polaric.aprsd.http;
-
 import spark.Request;
 import spark.Response;
+import spark.route.Routes;
+import spark.staticfiles.StaticFilesConfiguration;
+import spark.http.matching.MatcherFilter;
+import spark.embeddedserver.EmbeddedServers;
+import spark.embeddedserver.jetty.*;
 import static spark.Spark.get;
 import static spark.Spark.*;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
-import org.pac4j.sparkjava.CallbackRoute;
-import org.pac4j.sparkjava.LogoutRoute;
-import org.pac4j.sparkjava.SecurityFilter;
-import org.pac4j.sparkjava.SparkWebContext; 
+import org.pac4j.sparkjava.*; 
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.SessionManager;
+import org.eclipse.jetty.server.session.SessionHandler;
+import javax.servlet.SessionCookieConfig;
 import java.util.Optional;
 import java.lang.reflect.*;
 import no.polaric.aprsd.*;
@@ -57,7 +62,32 @@ public class WebServer implements ServerAPI.Web
     }
  
  
- 
+   
+    /**
+     * setup handler in the same manner spark does in {@code EmbeddedJettyFactory.create()}.
+     */
+    private static JettyHandler setupHandler(Routes routeMatcher, StaticFilesConfiguration staticFilesConfiguration, boolean hasMultipleHandler) {
+        MatcherFilter matcherFilter = new MatcherFilter(routeMatcher, staticFilesConfiguration, false, hasMultipleHandler);
+        matcherFilter.init(null);
+        return new JettyHandler(matcherFilter);
+    }
+    
+    
+    
+    
+    /** 
+     * Session settings. 
+     */
+    protected void configSession(SessionManager mgr) {
+        mgr.setMaxInactiveInterval(14400);
+        SessionCookieConfig sc = mgr.getSessionCookieConfig(); 
+        sc.setHttpOnly(true);
+        boolean secureses = _api.getBoolProperty("httpserver.securesession", false);
+        sc.setSecure(secureses);
+    }
+    
+    
+    
     /** 
      * Start the web server and setup routes to services. 
      */
@@ -65,9 +95,21 @@ public class WebServer implements ServerAPI.Web
     public void start() throws Exception {
        System.out.println("WebServer: Starting...");
       
+
+       /*  https://blog.codecentric.de/en/2017/07/fine-tuning-embedded-jetty-inside-spark-framework/  */
+       EmbeddedServers.add(EmbeddedServers.Identifiers.JETTY, 
+         (Routes routeMatcher, StaticFilesConfiguration staticFilesConfiguration, boolean hasMultipleHandler) -> {
+             JettyHandler handler = setupHandler(routeMatcher, staticFilesConfiguration, hasMultipleHandler);
+             configSession(handler.getSessionManager());
+             return new EmbeddedJettyServer((int maxThreads, int minThreads, int threadTimeoutMillis) -> new Server(), handler);
+         });
+      
+      
+      
+      
        /* Serving static files */
        staticFiles.externalLocation(
-          _api.getProperty("webserver.filedir", "/usr/share/polaric") );  
+          _api.getProperty("httpserver.filedir", "/usr/share/polaric") );  
        
        /* 
         * websocket services. 
@@ -84,13 +126,13 @@ public class WebServer implements ServerAPI.Web
         * Protect other webservices. We should eventually prefix these and 
         * just one filter should be sufficient 
         */
-       before("/station_sec", _auth.conf().filter(null, "csrfToken, isauth"));   
-       before("/addobject", _auth.conf().filter(null, "csrfToken, isauth"));
-       before("/deleteobject", _auth.conf().filter(null, "csrfToken, isauth"));
-       before("/resetinfo", _auth.conf().filter(null, "csrfToken, isauth"));
-       before("/sarmode", _auth.conf().filter(null, "csrfToken, isauth"));
-       before("/sarurl", _auth.conf().filter(null, "csrfToken, isauth"));
-       before("/search_sec", _auth.conf().filter(null, "csrfToken, isauth"));
+       before("/station_sec", _auth.conf().filter(null, "isauth"));   
+       before("/addobject", _auth.conf().filter(null, "isauth"));
+       before("/deleteobject", _auth.conf().filter(null, "isauth"));
+       before("/resetinfo", _auth.conf().filter(null, "isauth"));
+       before("/sarmode", _auth.conf().filter(null, "isauth"));
+       before("/sarurl", _auth.conf().filter(null, "isauth"));
+       before("/search_sec", _auth.conf().filter(null, "isauth"));
          
          
        afterAfter((request, response) -> {
@@ -145,6 +187,7 @@ public class WebServer implements ServerAPI.Web
         { return _messages; }
         
     
+    
    /**
     * Adds a HTTP service handler. Go through methods. All public methods that starts 
     * with 'handle_' are considered handler-methods and are added to the handler-map. 
@@ -173,8 +216,7 @@ public class WebServer implements ServerAPI.Web
             
             /* FIXME: Configure allowed origin(s) */
             after (key, (req,resp) -> { 
-               resp.header("Access-Control-Allow-Credentials", "true"); 
-               resp.header("Access-Control-Allow-Origin", _auth.getAllowOrigin(req)); 
+               _auth.corsHeaders(req, resp);
               } 
             );
             

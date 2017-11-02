@@ -20,16 +20,12 @@ import spark.Request;
 import spark.Response;
 import static spark.Spark.get;
 import static spark.Spark.*;
-import org.pac4j.sparkjava.CallbackRoute;
-import org.pac4j.sparkjava.LogoutRoute;
-import org.pac4j.sparkjava.SparkWebContext; 
-import org.pac4j.sparkjava.SecurityFilter;
+import org.pac4j.sparkjava.*;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.CommonProfile;
 import java.util.Optional;
-
-
+import javax.servlet.*;
 
 
 /**
@@ -51,15 +47,18 @@ public class AuthService {
     }
    
    
+   
     /** Return the configuration */
     public AuthConfig conf() 
        { return _authConf; }
        
        
+       
     /** Set up the services. */
     public void start() {
       Config conf = _authConf.get();
-      before("/formLogin",  new SecurityFilter(conf, "FormClient", "csrfToken, isauth")); 
+      
+      before("/formLogin",  new SecurityFilter(conf, "FormClient", "isauth")); 
         
        /* 
         * Put an AuthInfo object on the request. Here we rely on sessions to remember 
@@ -71,9 +70,9 @@ public class AuthService {
        /* Authorization status. */
       before ("/authStatus", (req,resp) -> { corsHeaders(req, resp); } );
             
-      before("/authStatus", new SecurityFilter(conf, null, "csrfToken, isauth"));      
+      before("/authStatus", new SecurityFilter(conf, null, "isauth"));      
       before("/logout", (req,resp) -> {
-             _log.log("Logout by user: "+ ((AuthInfo) req.raw().getAttribute("authinfo")).userid);
+           _log.log("Logout by user: "+ ((AuthInfo) req.raw().getAttribute("authinfo")).userid);
         }); 
         
       /* Callback route */
@@ -97,20 +96,26 @@ public class AuthService {
     }
     
 
-    
+    /**
+     * Allowed origin (for CORS). If Origin header from request matches allowed origins regex. 
+     * return it. Otherwise, null.
+     */
     public String getAllowOrigin(Request req) {
         
         String allow = _authConf.getAllowOrigin(); 
         String origin = req.headers("Origin");
-        
         if (origin != null && origin.matches(allow))
            return origin;
         else
-           return "NO.MATCH";
+           return null;
     }
     
     
     
+    /**
+     * Produce CORS headers. If Origin header from request matches allowed origins regex. 
+     * add it to the Allow-Origin response header. 
+     */
     public void corsHeaders(Request req, Response resp) {
         resp.header("Access-Control-Allow-Credentials", "true"); 
         resp.header("Access-Control-Allow-Origin", getAllowOrigin(req)); 

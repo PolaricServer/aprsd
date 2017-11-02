@@ -38,9 +38,9 @@ public class AuthConfig {
      public AuthConfig(ServerAPI api) {
      
          /* FIXME: How can we simplify config of this? */
-         _host        = api.getProperty("auth.host",        "http://localhost:8081");
-         _allowOrigin = api.getProperty("auth.alloworigin", ".*");
-         _passwdFile  = api.getProperty("auth.passwdfile",  "/etc/polaric-aprsd/passwd");
+         _host        = api.getProperty("httpserver.host",        "http://localhost:8081");
+         _allowOrigin = api.getProperty("httpserver.alloworigin", ".*");
+         _passwdFile  = api.getProperty("httpserver.passwdfile",  "/etc/polaric-aprsd/passwd");
          
               
          final Authenticator passwds =  new PasswordFileAuthenticator(api, _passwdFile);
@@ -59,7 +59,6 @@ public class AuthConfig {
  
  
  
-     // FIXME: Consider using origin request header and use a regex to check. 
      public String getAllowOrigin()
         { return _allowOrigin; }
         
