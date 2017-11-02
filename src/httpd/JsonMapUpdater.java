@@ -38,9 +38,9 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
       public String  view;       /* filter name */
       /* FIXME: Consider adding som session info here */
       
-      AuthInfo authorization;
-      List<JsPoint>  points;
-      List<String> delete;
+      public AuthInfo authorization;
+      public List<JsPoint>  points;
+      public List<String> delete;
       
       public JsOverlay(String v) {
          view = v;
