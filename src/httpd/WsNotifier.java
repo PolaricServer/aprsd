@@ -298,7 +298,7 @@ public abstract class WsNotifier extends ServerBase
                 _clients.remove(user); 
                 _api.log().info("WsNotifier", "Unsubscribing closed client channel: "+user);       
                 Client c = _clients.get(user);
-                if (c.login())
+                if (c!= null && c.login())
                    _nLoggedIn--;
             }
          }

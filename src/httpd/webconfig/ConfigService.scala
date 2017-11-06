@@ -26,7 +26,6 @@ package no.polaric.aprsd.http
       def handle_restartServer(req : Request, res: Response) =
       {
           val I = getI18n(req)
-      //    refreshPage(req, res, 15, "config_menu")
           
           def action(req : Request): NodeSeq = {
              val pb = new ProcessBuilder("/usr/bin/sudo", "-n", "/usr/bin/polaric-restart")
@@ -35,7 +34,7 @@ package no.polaric.aprsd.http
              
              <br/>
              <h2>{ I.tr("Restart server...") }</h2>
-             <span>{ I.tr("You will have to close this window and log in again") }</span>
+             <span>{ I.tr("You may have to reload/close window and log in again") }</span>
           }
              
           printHtml (res, htmlBody (req, null, IF_ADMIN(action)(req) ))
@@ -92,6 +91,7 @@ package no.polaric.aprsd.http
                </ul>
              </ul>
              <br/>
+             <button id="logout" onclick={"location.href='logout?url=config_menu'"} >Logout</button>
              <button id="restart" onclick={"location.href='restartServer?lang="+lang+"'"} >RESTART</button>
 
              {

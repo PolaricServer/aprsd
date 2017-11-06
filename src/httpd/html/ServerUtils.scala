@@ -38,11 +38,23 @@ package no.polaric.aprsd.http
             <html>
             <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+            <script> 
+             {
+               " function hideButt(x) { " +
+               "    var b = document.getElementById(x); " +
+               "    if (b!=null) b.style.display='none'; } " +
+               " function loadBody() { "+
+               "   if (typeof(init_polaric) == 'function') { "+
+               "      init_polaric('"+mapframe+"', '*'); " +
+               "      hideButt('logout');" + 
+               "   } else hideButt('cancel'); } " 
+             }
+            </script>
             { head }
             <link href={"style.css"} rel="stylesheet" type="text/css" />
             <script type="text/javascript" src="../Aprs/iframeApi.js"></script>
             </head>
-            <body onload={"init_polaric('"+mapframe+"', '*')"} >
+            <body onload={"loadBody()"} >
             {content} 
             </body>
             </html>
