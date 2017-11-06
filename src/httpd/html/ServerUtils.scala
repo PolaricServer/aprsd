@@ -39,7 +39,7 @@ package no.polaric.aprsd.http
             <head>
             <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
             { head }
-            <link href={ fprefix(req)+"/style.css"} rel="stylesheet" type="text/css" />
+            <link href={"style.css"} rel="stylesheet" type="text/css" />
             <script type="text/javascript" src="../Aprs/iframeApi.js"></script>
             </head>
             <body onload={"init_polaric('"+mapframe+"', '*')"} >

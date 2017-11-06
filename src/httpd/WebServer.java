@@ -121,6 +121,7 @@ public class WebServer implements ServerAPI.Web
        webSocket("/jmapdata", _jmapupdate);
          
        before("*", (req, res) -> {res.status(200);});
+       before("/config_menu", _auth.conf().filter("FormClient", "isauth")); // NEEDS TESTING
        
        /* 
         * Protect other webservices. We should eventually prefix these and 

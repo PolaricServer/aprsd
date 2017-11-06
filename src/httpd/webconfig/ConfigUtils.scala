@@ -137,9 +137,9 @@ package no.polaric.aprsd.http
             case Channel.State.OFF => TXT( I.tr("Inactive (off)"))
             case Channel.State.STARTING => TXT( I.tr("Connecting..."))
             case Channel.State.RUNNING => 
-                <span>{ I.tr("Active (ok)") }<img class="state" src="../aprsd/images/ok.png"/></span>  
+                <span>{ I.tr("Active (ok)") }<img class="state" src="images/ok.png"/></span>  
             case Channel.State.FAILED => 
-                <span>{ I.tr("Inactive (failed)") }<img class="state" src="../aprsd/images/fail.png"/></span>
+                <span>{ I.tr("Inactive (failed)") }<img class="state" src="images/fail.png"/></span>
          }
          ;
          

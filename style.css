@@ -113,6 +113,7 @@ div#config_menu {
   background-position: 4px 10px
 } 
 
+#config_main {max-width: 50em}
 div#config_main {overflow: hidden; height: 43em}
 iframe#config_main {width: 100%; height: 100%; border: none }
 
