@@ -85,6 +85,8 @@ span.fieldsuccess {color: #080;}
 select {margin-left: 5px; border: 1px inset #666; background: #eee}
 input {height: 1.5em; border: 1px inset #666;  margin-left: 5px; padding: 0px 3px 0px 3px}
 button {background: #cdc; font-size: smaller; margin-left: 5px;}
+button#restart, button#logout {width: 8em;margin-bottom: 3px}
+
 
 div.taglist {
    -moz-columns: auto; 

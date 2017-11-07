@@ -3,12 +3,12 @@ Section: hamradio
 Priority: optional
 Maintainer: Øyvind Hanssen <ohanssen@acm.org>
 Build-Depends: debhelper (>= 8.0.0), gettext-base, libgettext-commons-java, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, openjdk-8-jdk, scala (>> 2.11)
-Standards-Version: 3.9.6
+Standards-Version: 3.9.8
 Homepage: http://aprs.no/polaricserver
 
 Package: polaric-aprsd
 Architecture: all
-Depends: openjdk-8-jre-headless, jsvc, librxtx-java, scala-library (>> 2.11), scala-xml, scala-parser-combinators, gettext-base, libgettext-commons-java, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, adduser, apache2-utils, sudo, ${misc:Depends}
+Depends: openjdk-8-jre-headless, jsvc, librxtx-java, scala-library (>> 2.11), scala-xml, scala-parser-combinators, gettext-base, libgettext-commons-java, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, adduser, apache2-utils, sudo, lsb-base, ${misc:Depends}
 Recommends: beep
 Description: Polaric Server: APRS daemon part. 
  The "Polaric Server" which is mainly a web based service to present APRS 

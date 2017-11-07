@@ -2,9 +2,6 @@
 set -e
 INIFILE=/etc/polaric-aprsd/server.ini
 
-# Source debconf library.
-. /usr/share/debconf/confmodule
-
 
 case "$1" in
 
