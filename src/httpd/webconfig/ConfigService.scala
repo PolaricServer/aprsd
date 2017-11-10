@@ -70,19 +70,22 @@ package no.polaric.aprsd.http
            
            
            def body = 
-             <div id="config_menu">
-             <ul class="menu">
-               { mitem("config_menu", 1, I.tr("Status info")) ++
-                 mitem("config_clients", 2, I.tr("Client list")) ++
+              <div id="config_menu">
+              <ul class="menu">
+               { mitem("config_menu", 1, I.tr("Status info")) }
+              <ul>
+               { mitem("config_clients", 2, I.tr("Client list")) }
+              </ul>
+               {
                  mitem("config", 3, I.tr("Server config")) ++
                  mitem("config_posreport", 4, I.tr("Own position")) ++
                  mitem("config_mapdisplay", 5, I.tr("Display on map"))
                }
-               <li>{ I.tr("Data channels...") }</li>
-               <ul>
+              <li>{ I.tr("Data channels...") }</li>
+              <ul>
                {
                   val chs = _api.getProperty("channels", null).split(",(\\s)*")
-                  var mid=4
+                  var mid=5
                   for (ch <- chs) yield {
                      mid += 1;
                      mitem("config_chan?chan="+ch, mid, ch)
@@ -214,7 +217,6 @@ package no.polaric.aprsd.http
               
          def action(req : Request): NodeSeq = 
          {
-               refreshPage(req, res, 3, "config")
                br ++ br ++
                getField(req, "item1", "default.mycall", CALLSIGN) ++ 
                getField(req, "item2", "user.admin", TEXT) ++ 
@@ -266,7 +268,6 @@ package no.polaric.aprsd.http
               
           def action(req : Request): NodeSeq = 
           {
-               refreshPage(req, res, 3, "config_mapdisplay")
                br ++ br ++
                getField(req, "item1", "aprs.expiretime", 0, 1440) ++ 
                getField(req, "item2", "map.trail.maxPause", 0, 1440) ++
@@ -339,7 +340,6 @@ package no.polaric.aprsd.http
               
          def action(req : Request): NodeSeq = 
          {       
-              refreshPage(req, res, 3, "config_posreport")
               br ++ br ++
               getField(req, "item1", "ownposition.tx.on", BOOLEAN) ++
               getField(req, "item2", "ownposition.tx.allowrf", BOOLEAN) ++

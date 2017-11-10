@@ -222,7 +222,7 @@ package no.polaric.aprsd.http
                              action : (Request) => NodeSeq,
                              close  : Boolean,
                              submit : (Request) => NodeSeq ) : NodeSeq =
-           htmlForm(req, prefix, fields, action, close, -2, submit)
+           htmlForm(req, prefix, fields, action, close, -1, submit)
            ; 
            
            
