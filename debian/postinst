@@ -19,11 +19,6 @@ case "$1" in
               chown -R www-data /var/lib/polaric/mapcache
            fi
         fi  
-        
-        db_get polaric-aprsd/callsign
-        sed -e "s/default\.mycall = .*/default\.mycall = $RET/" $INIFILE > $INIFILE.tmp
-        mv $INIFILE.tmp $INIFILE
-        db_stop
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)

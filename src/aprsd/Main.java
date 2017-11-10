@@ -27,8 +27,8 @@ import no.polaric.aprsd.filter.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "2.0+";
-   public static String toaddr  = "APPS20";
+   public  static String version = "2.1";
+   public static String toaddr  = "APPS21";
    
    private static StationDB db = null;
    private static AprsParser parser = null;
