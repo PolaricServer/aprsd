@@ -50,6 +50,7 @@ install: polaric-aprsd.jar
 	install -d $(INSTALL_DATA)
 	install -d $(INSTALL_SUDO)
 	install -m 755 -d $(INSTALL_LOG)
+	install -m 644 passwd $(INSTALL_CONFIG)
 	install -m 644 server.ini $(INSTALL_CONFIG)
 	install -m 644 symbols $(INSTALL_CONFIG)
 	install -m 644 trailcolours $(INSTALL_CONFIG)

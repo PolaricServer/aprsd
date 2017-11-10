@@ -138,9 +138,10 @@ public class AuthService {
      */
     public static String loginForm(Request req, Response res) {
        String err = "";
-       if (req.queryParams("error") != null)
+       if (req.queryParams("error") != null) {
           err = "<span class=\"error\">Sorry. Unknown user and/or password!</span>";
-    
+          _log.log("Unsuccessful login attempt from. " +req.ip());
+       }
        return    
          "<html><head><link rel=\"stylesheet\" href=\"style.css\"></head><body id=\"login\">" + 
          "<h2>Login</h2>" +
@@ -176,7 +177,8 @@ public class AuthService {
        final ProfileManager manager = new ProfileManager(context);
        final Optional<CommonProfile> profile = manager.get(true);
        
-       _log.log("Successful login from: "+req.ip()+": "+ (AuthInfo) req.raw().getAttribute("authinfo"));
+       AuthInfo auth = (AuthInfo) req.raw().getAttribute("authinfo");
+       _log.log("Successful login from: "+req.ip()+": userid="+ auth.userid);
        returnToOrigin(req, res, "origin");
        return 
          "<html><head><link rel=\"stylesheet\" href=\"style.css\"></head><body>" + 

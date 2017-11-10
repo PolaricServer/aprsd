@@ -58,6 +58,8 @@ public class AuthInfo {
           String updateusers = api.getProperty("user.update", "");
           admin = (userid.matches(adminusers)); 
           sar = (userid.matches(updateusers));
+          if (admin)
+             sar=true;
        }
     }
 }
