@@ -144,7 +144,8 @@ public class AuthService {
        }
        return    
          "<html><head><link rel=\"stylesheet\" href=\"style.css\"></head><body id=\"login\">" + 
-         "<h2>Login</h2>" +
+         "<div><img src=\"images/PolaricServer.png\"/>" +
+         "<div>|login|</div></div>" +
          err + 
          "<form method=\"post\" action=\"callback?client_name=FormClient\">" +
             "<fieldset>"+
