@@ -73,9 +73,9 @@ package no.polaric.aprsd.http
               <div id="config_menu">
               <ul class="menu">
                { mitem("config_menu", 1, I.tr("Status info")) }
-              <ul>
-               { mitem("config_clients", 2, I.tr("Client list")) }
-              </ul>
+                 <ul>
+                  { mitem("config_clients", 2, I.tr("Client list")) }
+                 </ul>
                {
                  mitem("config", 3, I.tr("Server config")) ++
                  mitem("config_posreport", 4, I.tr("Own position")) ++
@@ -236,7 +236,7 @@ package no.polaric.aprsd.http
                getField(req, "item16", "message.auth.key", TEXT)
          }
               
-         printHtml (res, htmlBody (req, null, htmlForm(req, prefix, IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
+         printHtml (res, htmlBody (req, null, htmlFormJump(req, prefix, IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
      }
      
      
@@ -274,7 +274,7 @@ package no.polaric.aprsd.http
                getField(req, "item4", "map.trail.maxAge", 0, 1440) 
           }
               
-          printHtml (res, htmlBody (req, null, htmlForm(req, prefix, IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
+          printHtml (res, htmlBody (req, null, htmlFormJump(req, prefix, IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
       }     
       
       
@@ -339,7 +339,7 @@ package no.polaric.aprsd.http
               
               
          def action(req : Request): NodeSeq = 
-         {       
+         {                 
               br ++ br ++
               getField(req, "item1", "ownposition.tx.on", BOOLEAN) ++
               getField(req, "item2", "ownposition.tx.allowrf", BOOLEAN) ++
@@ -357,7 +357,7 @@ package no.polaric.aprsd.http
               getField(req, "item15", "ownposition.maxturn", 0, 360) 
          }
               
-         printHtml (res, htmlBody (req, null, htmlForm(req, prefix, IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
+         printHtml (res, htmlBody (req, null, htmlFormJump(req, prefix, IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
      }
      
      
@@ -387,12 +387,11 @@ package no.polaric.aprsd.http
             view.fields(req)
          }
          def action(req: Request): NodeSeq = {
-            refreshPage(req, res, 3, "config_chan")
             view.action(req)
          }
          
          printHtml (res, htmlBody ( req, null, 
-             htmlForm( req, prefix, IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))    
+             htmlFormJump( req, prefix, IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))    
      }
      
      
@@ -443,7 +442,7 @@ package no.polaric.aprsd.http
           }
  
  
-          printHtml (res, super.htmlBody (req, null, htmlForm(req, prefix, IF_AUTH(fields), IF_AUTH(action))))
+          printHtml (res, super.htmlBody (req, null, htmlFormJump(req, prefix, IF_AUTH(fields), IF_AUTH(action))))
       }
       
      

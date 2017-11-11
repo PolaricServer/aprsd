@@ -221,9 +221,22 @@ public class WebServer implements ServerAPI.Web
               } 
             );
             
-            get(key,  (req, resp) -> {return m.invoke(o, req, resp);} );
-            post(key, (req, resp) -> {return m.invoke(o, req, resp);} );
-         }     
+            get(key,  (req, resp) -> {return invokeMethod(o, m, req, resp);} );
+            post(key, (req, resp) -> {return invokeMethod(o, m, req, resp);} );
+      }
+   }
+   
+   
+   
+   public static String invokeMethod(Object o, Method m, Request req, Response resp) {
+       try {
+          return (String) m.invoke(o, req, resp);
+       }
+       catch (Exception e) {
+          System.out.println("WebServer: Couldn't invoke method: "+e);
+          e.printStackTrace(System.out);
+          return "<H2>Internal error: Couldn't invoke method</H2>"+e;
+       }
    }
 
 }

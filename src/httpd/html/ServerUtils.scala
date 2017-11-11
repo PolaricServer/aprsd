@@ -31,6 +31,24 @@ package no.polaric.aprsd.http
   {
       val doctype = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN \">";
 
+        
+         
+      
+      protected def refreshPage(req: Request, resp: Response, t: Int, url: String) = 
+      {
+         val mid = req.queryParams("mid");
+         val cid = req.queryParams("chan");
+         var lang = req.queryParams("lang");
+         lang = if (lang==null) "en" else lang
+         val uparm = "?lang=" + lang + 
+           { if (mid != null) "&mid="+mid else "" } + 
+           { if (cid != null) "&chan="+cid else "" }
+            
+         resp.header("Refresh", t+";url=\""+url + uparm+"\"")
+      }
+      
+      
+      
       
 
       protected def htmlBody (req: Request, head : NodeSeq, content : NodeSeq, mapframe : String) : Node =
@@ -186,7 +204,7 @@ package no.polaric.aprsd.http
         * Generic HTML form method.
         * Field content and action to be performed are given as function-arguments
         */
-       def htmlForm( req  : Request,
+       def _htmlForm( req  : Request,
                              prefix : NodeSeq,
                              fields : (Request) => NodeSeq,
                              action : (Request) => NodeSeq,
@@ -198,9 +216,13 @@ package no.polaric.aprsd.http
                <div>
                  {
                    if (close)
-                     <script source="javascript">setTimeout('window.close()', 2000);</script>
-                   else
-                     <script source="javascript">{"setTimeout('window.history.go("+jump+")', 2000);"}</script>
+                     <script>setTimeout('window.close()', 2000);</script>
+                   else {
+                      if (jump != 0) 
+                         <script>
+                           {"setTimeout(function() {window.history.go("+jump+")}, 2000);"}
+                         </script>
+                   }
                  } 
                  { action(req) }
                </div>;
@@ -216,14 +238,35 @@ package no.polaric.aprsd.http
               </form>
        }
 
+       
+       def htmlFormJump( req  : Request,
+                             prefix : NodeSeq,
+                             fields : (Request) => NodeSeq,
+                             action : (Request) => NodeSeq,
+                             close  : Boolean,
+                             submit : (Request) => NodeSeq ) : NodeSeq =
+           _htmlForm(req, prefix, fields, action, close, -1, submit)
+           ; 
+           
+           
+           
+       def htmlFormJump( req  : Request,
+                             prefix : NodeSeq,
+                             fields : (Request) => NodeSeq,
+                             action : (Request) => NodeSeq) : NodeSeq =
+           htmlFormJump(req, prefix, fields, action, true, default_submit)
+           ;
+       
+       
        def htmlForm( req  : Request,
                              prefix : NodeSeq,
                              fields : (Request) => NodeSeq,
                              action : (Request) => NodeSeq,
                              close  : Boolean,
                              submit : (Request) => NodeSeq ) : NodeSeq =
-           htmlForm(req, prefix, fields, action, close, -1, submit)
+           _htmlForm(req, prefix, fields, action, close, 0, submit)
            ; 
+           
            
            
        def htmlForm( req  : Request,
@@ -231,9 +274,9 @@ package no.polaric.aprsd.http
                              fields : (Request) => NodeSeq,
                              action : (Request) => NodeSeq) : NodeSeq =
            htmlForm(req, prefix, fields, action, true, default_submit)
-           ;
-           
-           
+           ;   
+       
+       
 
        protected def printHtml(resp : Response, content : Node ) : String =
        {        

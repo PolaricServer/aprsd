@@ -59,22 +59,7 @@ package no.polaric.aprsd.http
       val UTMPOS = "[0-9]{2}[A-Za-z]\\s+[0-9]{6}\\s+[0-9]{7}"
       
 
-  
-         
-      
-      protected def refreshPage(req: Request, resp: Response, t: Int, url: String) = 
-      {
-         val mid = req.queryParams("mid");
-         val cid = req.queryParams("chan");
-         var lang = req.queryParams("lang");
-         lang = if (lang==null) "en" else lang
-         val uparm = "?lang=" + lang + 
-           { if (mid != null) "&mid="+mid else "" } + 
-           { if (cid != null) "&chan="+cid else "" }
-            
-         resp.header("Refresh", t+";url=\""+url + uparm+"\"")
-      }
-      
+
 
                    
       protected def typeField(propname: String, id: String, lbl: String, title: String) : NodeSeq = 
