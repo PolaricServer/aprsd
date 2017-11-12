@@ -74,18 +74,20 @@ package no.polaric.aprsd.http
               <ul class="menu">
                { mitem("config_menu", 1, I.tr("Status info")) }
                  <ul>
-                  { mitem("config_clients", 2, I.tr("Client list")) }
+                  { mitem("config_clients", 2, I.tr("Client list")) ++
+                    mitem("config_users", 3, I.tr("User list")) 
+                  }
                  </ul>
                {
-                 mitem("config", 3, I.tr("Server config")) ++
-                 mitem("config_posreport", 4, I.tr("Own position")) ++
-                 mitem("config_mapdisplay", 5, I.tr("Display on map"))
+                 mitem("config", 4, I.tr("Server config")) ++
+                 mitem("config_posreport", 5, I.tr("Own position")) ++
+                 mitem("config_mapdisplay", 6, I.tr("Display on map"))
                }
               <li>{ I.tr("Data channels...") }</li>
               <ul>
                {
                   val chs = _api.getProperty("channels", null).split(",(\\s)*")
-                  var mid=5
+                  var mid=6
                   for (ch <- chs) yield {
                      mid += 1;
                      mitem("config_chan?chan="+ch, mid, ch)
@@ -114,10 +116,9 @@ package no.polaric.aprsd.http
              super.htmlBody(req, heads, body) 
       }
       
-      
-      
+ 
       /**
-       * This is the first menu choice. It just puts the admin status from aprsd in am iframe 
+       * This is the first menu choice. It just puts the admin status from aprsd in a iframe 
        */
       def handle_config_menu(req : Request, res: Response) =
       {
@@ -134,17 +135,25 @@ package no.polaric.aprsd.http
     
     
      /**
-       * This is the first menu choice. It just puts the admin status from aprsd in am iframe 
+       * The second menu choice: List of active clients. 
        */
       def handle_config_clients(req : Request, res: Response) =
       {
-          var lang = req.queryParams("lang")
-          lang = if (lang==null) "en" else lang
-          
           def action(req : Request): NodeSeq =
              <iframe id="config_main" name="config_main" src={"listclients"} />
              ;   
-                          
+          printHtml (res, htmlBody(req, null, action(req)))
+      }
+      
+      
+     /**
+       * The third menu choice: List of users of the system. 
+       */
+      def handle_config_users(req : Request, res: Response) =
+      {
+          def action(req : Request): NodeSeq =
+             <iframe id="config_main" name="config_main" src={"listusers"} />
+             ;   
           printHtml (res, htmlBody(req, null, action(req)))
       }
       
@@ -236,7 +245,8 @@ package no.polaric.aprsd.http
                getField(req, "item16", "message.auth.key", TEXT)
          }
               
-         printHtml (res, htmlBody (req, null, htmlFormJump(req, prefix, IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
+         printHtml (res, htmlBody (req, null, htmlFormJump(req, prefix, 
+             IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
      }
      
      
@@ -274,7 +284,8 @@ package no.polaric.aprsd.http
                getField(req, "item4", "map.trail.maxAge", 0, 1440) 
           }
               
-          printHtml (res, htmlBody (req, null, htmlFormJump(req, prefix, IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
+          printHtml (res, htmlBody (req, null, htmlFormJump(req, prefix, 
+             IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
       }     
       
       
@@ -357,7 +368,8 @@ package no.polaric.aprsd.http
               getField(req, "item15", "ownposition.maxturn", 0, 360) 
          }
               
-         printHtml (res, htmlBody (req, null, htmlFormJump(req, prefix, IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
+         printHtml (res, htmlBody (req, null, htmlFormJump(req, prefix, 
+             IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
      }
      
      

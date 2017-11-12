@@ -31,9 +31,10 @@ import no.polaric.aprsd.*;
  * Pac4j configuration. 
  */
 public class AuthConfig {
-     private String _host, _allowOrigin, _passwdFile; 
+     private String _host, _allowOrigin, _passwdFile, _userFile; 
      private Config _config;
      private final PasswordFileAuthenticator _passwds;
+     private final LocalUsers _users; 
      
      
      public AuthConfig(ServerAPI api) {
@@ -42,9 +43,10 @@ public class AuthConfig {
          _host        = api.getProperty("httpserver.host",        "http://localhost:8081");
          _allowOrigin = api.getProperty("httpserver.alloworigin", ".*");
          _passwdFile  = api.getProperty("httpserver.passwdfile",  "/etc/polaric-aprsd/passwd");
-         
+         _userFile    = api.getProperty("httpserver.userfile",    "/var/lib/polaric/users.dat");
               
-         _passwds =  new PasswordFileAuthenticator(api, _passwdFile);
+         _users = new LocalUsers(api, _userFile); 
+         _passwds =  new PasswordFileAuthenticator(api, _passwdFile, _users);
      
          /* Indirect basic auth client */     
          final IndirectBasicAuthClient basicClient = new IndirectBasicAuthClient(_passwds);
@@ -58,6 +60,8 @@ public class AuthConfig {
          _config.setHttpActionAdapter(new DefaultHttpActionAdapter());
      }
  
+     public LocalUsers getLocalUsers() 
+        { return _users; }
  
      public void reloadPasswds() {
         _passwds.load();

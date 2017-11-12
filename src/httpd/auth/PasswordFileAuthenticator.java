@@ -41,11 +41,12 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
     private final Map<String, String> _pwmap = new HashMap<String, String>();
     private ServerAPI _api; 
     private final String _file; 
+    private LocalUsers _users;
     
-    
-    public PasswordFileAuthenticator(ServerAPI api, String file) {
+    public PasswordFileAuthenticator(ServerAPI api, String file, LocalUsers lu) {
         _api = api; 
         _file = file; 
+        _users = lu; 
         load();
     }
        
@@ -54,7 +55,7 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
     /**
      * Load passwords (hashes) from file.
      */
-    public final void load() {
+    public void load() {
         try {
            BufferedReader rd = new BufferedReader(new FileReader(_file));
            while (rd.ready() )
@@ -67,7 +68,8 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
                     String username = x[0].trim();
                     String passwd = x[1].trim();
                     _pwmap.put(username, passwd);
-                    String tt = _pwmap.get(username); 
+                    if (_users != null)
+                       _users.add(username);
                  }
                  else
                     _api.log().warn("PasswordFileAuthenticator", "Bad line in password file: "+line);
