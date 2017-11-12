@@ -30,17 +30,33 @@ import org.apache.commons.codec.digest.*;
 import java.security.MessageDigest;
 
 
+
+
 /**
  * Use a simple password file. For small numbers of user/password pairs. 
  * For larger numbers, use a database instead. 
  */
 public class PasswordFileAuthenticator implements Authenticator<UsernamePasswordCredentials> {
 
-    private Map<String, String> _pwmap = new HashMap<String, String>();
+    private final Map<String, String> _pwmap = new HashMap<String, String>();
+    private ServerAPI _api; 
+    private final String _file; 
+    
     
     public PasswordFileAuthenticator(ServerAPI api, String file) {
+        _api = api; 
+        _file = file; 
+        load();
+    }
+       
+
+    
+    /**
+     * Load passwords (hashes) from file.
+     */
+    public final void load() {
         try {
-           BufferedReader rd = new BufferedReader(new FileReader(file));
+           BufferedReader rd = new BufferedReader(new FileReader(_file));
            while (rd.ready() )
            {
                String line = rd.readLine();
@@ -54,18 +70,17 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
                     String tt = _pwmap.get(username); 
                  }
                  else
-                    api.log().warn("PasswordFileAuthenticator", "Bad line in password file: "+line);
+                    _api.log().warn("PasswordFileAuthenticator", "Bad line in password file: "+line);
                }
            }
         }
         catch (IOException e) {
-           api.log().warn("PasswordFileAuthenticator", "Couldn't open htpasswd file: "+e.getMessage());
+           _api.log().warn("PasswordFileAuthenticator", "Couldn't open htpasswd file: "+e.getMessage());
         } 
     }
     
-    
-    
 
+    
     @Override
     public void validate(final UsernamePasswordCredentials credentials, final WebContext context) 
            throws HttpAction, CredentialsException 

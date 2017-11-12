@@ -187,7 +187,11 @@ public class WebServer implements ServerAPI.Web
      public WsNotifier getMessages()
         { return _messages; }
         
-    
+      /* FIXME: What methods should be part of ServerAPI.Web ? */
+     public AuthConfig getAuthConfig()
+        { return _auth.conf(); }
+        
+        
     
    /**
     * Adds a HTTP service handler. Go through methods. All public methods that starts 

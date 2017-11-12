@@ -430,8 +430,10 @@ package no.polaric.aprsd.http
              val p = Runtime.getRuntime().exec(cmd)
              val res = p.waitFor()
              
-             if (res == 0)
+             if (res == 0) {
+                 api.getWebserver().asInstanceOf[WebServer].getAuthConfig().reloadPasswds();
                  <h3>{ I.tr("Password updated for user")+": '"+username+"'" }</h3>
+             }
              else if (res == 5)
                  <h3>{ I.tr("Error: Your input is too long") }</h3>
              else if (res == 6)

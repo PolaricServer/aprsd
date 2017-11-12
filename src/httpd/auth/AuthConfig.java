@@ -33,6 +33,7 @@ import no.polaric.aprsd.*;
 public class AuthConfig {
      private String _host, _allowOrigin, _passwdFile; 
      private Config _config;
+     private final PasswordFileAuthenticator _passwds;
      
      
      public AuthConfig(ServerAPI api) {
@@ -43,13 +44,13 @@ public class AuthConfig {
          _passwdFile  = api.getProperty("httpserver.passwdfile",  "/etc/polaric-aprsd/passwd");
          
               
-         final Authenticator passwds =  new PasswordFileAuthenticator(api, _passwdFile);
+         _passwds =  new PasswordFileAuthenticator(api, _passwdFile);
      
          /* Indirect basic auth client */     
-         final IndirectBasicAuthClient basicClient = new IndirectBasicAuthClient(passwds);
+         final IndirectBasicAuthClient basicClient = new IndirectBasicAuthClient(_passwds);
 
          /* Indirect Form client */
-         final FormClient formClient = new FormClient(_host+"/loginForm", passwds);
+         final FormClient formClient = new FormClient(_host+"/loginForm", _passwds);
 
          /* Config */      
          _config = new Config (new Clients(_host+"/callback", basicClient, formClient));
@@ -58,6 +59,9 @@ public class AuthConfig {
      }
  
  
+     public void reloadPasswds() {
+        _passwds.load();
+     }
  
      public String getAllowOrigin()
         { return _allowOrigin; }
