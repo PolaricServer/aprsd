@@ -27,10 +27,8 @@ import spark.Response;
 
 /**
  * Web view for Channels.
- * This is the top level view class. Extend this for subclasses of PointObject. 
- * It is typically extended by overriding the fields() and action() methods and adding
- * new parts. 
  */
+ 
 package no.polaric.aprsd.http
 {
    object ChannelView {

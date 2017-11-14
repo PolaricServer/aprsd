@@ -7,7 +7,12 @@ program (APRS daemon).
  
 The APRS daemon gets data from a TNC or APRS-IS or a combination. It can present 
 and manipulate the information through a simple HTTP service. The daemon can 
-also be set up as an igate (internet gateway) and can be installed independently of the web app. 
+also be set up as an igate (internet gateway) and can be installed and run independently 
+of the web app. It has its own webserver. 
+
+It is recommended to combine it with polaric-webapp which also uses Apache as a 
+frontend proxy. It supports CORS to allow it to be used with a polaric-webapp on
+another location. 
 
 More documentation on the project can be found here: 
 http://aprs.no/polaricserver
@@ -20,6 +25,9 @@ Linux/Java platform (tested with Debian/Ubuntu/Mint) with
   and scala-parser-combinators packages.
 * jsvc.
 * librxtx-java (if using serial port for communication with TNC or GPS).
+* libjackson2 (for JSON processing)
+* libcommons-codec
+* libgettext-commons
 
 We support automatic installation packages for Debian Linux or derivatives. 
 It shouldn't be too hard to port it to e.g. Windows if anyone wants to do the job. 
@@ -37,7 +45,11 @@ see: http://aprs.no/dokuwiki/?id=install.dev
 More documentation on the project can be found here: 
 http://aprs.no/polaricserver
 
-The polaric-webconfig-plugin is recommended. 
+To configure a standalone server, point your browser to: 
+http://localhost:8081/config_menu
+
+username=admin, password=polaric. Use the command polaric-password
+to change the password and add new users. 
 
 ## Building from source 
 

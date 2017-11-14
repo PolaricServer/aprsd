@@ -158,6 +158,7 @@ package no.polaric.aprsd.http
       }
       
       
+      
       /**
        * The main configuration of aprsd. Callsign, users, channels. Igate. Remote control.
        */
@@ -373,25 +374,32 @@ package no.polaric.aprsd.http
      }
      
      
-     ChannelView.addView(classOf[InetChannel],  classOf[AprsChannelView])
-     ChannelView.addView(classOf[Tnc2Channel],  classOf[AprsChannelView])
+     /* Views of different channel subclasses. Plugins may add more.. */
+     ChannelView.addView(classOf[InetChannel],     classOf[AprsChannelView])
+     ChannelView.addView(classOf[Tnc2Channel],     classOf[AprsChannelView])
      ChannelView.addView(classOf[KissTncChannel],  classOf[AprsChannelView])
      ChannelView.addView(classOf[TcpKissChannel],  classOf[AprsChannelView])
      
      
      /**
-      * Configuration of each individual channel. 
+      * Configuration of each individual channel.
+      * A MVC pattern. 
+      * Could this be a generic method? 
       */
      def handle_config_chan(req: Request, res: Response) = 
      {
          val I = getI18n(req)        
          val cid = req.queryParams("chan")
          val prefix = <h3>{I.tr("Channel")+ " '"+cid+"'"}</h3>
+         
+          /* Get the channel in question */
          val ch = _api.getChanManager().get(cid).asInstanceOf[Channel]
            
+          /* Get or create a view for the channel */
          val view = if (ch == null)
                          new ChannelView(_api, null, req);  
                     else ChannelView.getViewFor(ch, _api, req)
+           
            
          def fields(req: Request): NodeSeq = {
             if (ch != null) 
@@ -406,6 +414,7 @@ package no.polaric.aprsd.http
              htmlFormJump( req, prefix, IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))    
      }
      
+
      
     
      /**

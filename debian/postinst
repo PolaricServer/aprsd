@@ -15,10 +15,20 @@ case "$1" in
            fi
            chown -R polaric:adm /var/log/polaric /var/lib/polaric
            chmod 755 /var/log/polaric
-           if [ -e "/var/lib/polaric/mapcache" ]; then
-              chown -R www-data /var/lib/polaric/mapcache
-           fi
         fi  
+        if [ -e "/etc/polaric-webapp/users" ] ; then
+           echo
+           echo "Found password file in polaric-webapp directory"
+           echo "Making a copy in /etc/polaric-aprsd/passwd.webapp.old"
+           echo
+           cp /etc/polaric-webapp/users /etc/polaric-aprsd/passwd.webapp.old
+        fi
+        echo
+        echo "**** Polaric-aprsd ****"
+        echo "To configure server, point your browser to http://hostname:8081/config_menu"
+        echo "Please remember to set your callsign!" 
+        echo "Use command 'polaric-password' to change password or add new users"
+        echo 
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
