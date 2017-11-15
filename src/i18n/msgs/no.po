@@ -1,929 +1,948 @@
 # Øyvind Hanssen <oh@hans.priv.no>, 2017.
-msgid   ""
-msgstr  "Project-Id-Version: Polaric-aprsd\n"
-        "POT-Creation-Date: \n"
-        "PO-Revision-Date: 2017-10-28 21:54+0100\n"
-        "Last-Translator: Øyvind Hanssen <oh@hans.priv.no>\n"
-        "Language-Team: English <kde-i18n-doc@kde.org>\n"
-        "Language: no\n"
-        "MIME-Version: 1.0\n"
-        "Content-Type: text/plain; charset=UTF-8\n"
-        "Content-Transfer-Encoding: 8bit\n"
-        "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-        "X-Generator: Lokalize 2.0\n"
+msgid ""
+msgstr ""
+"Project-Id-Version: Polaric-aprsd\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2017-11-15 21:57+0100\n"
+"Last-Translator: Øyvind Hanssen <oh@hans.priv.no>\n"
+"Language-Team: English <kde-i18n-doc@kde.org>\n"
+"Language: no\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 2.0\n"
 
 #: src/httpd/html/AprsObjectView.scala:35
-msgid   "Sender"
-msgstr  "Avsender"
+msgid "Sender"
+msgstr "Avsender"
 
 #: src/httpd/html/AprsPointView.scala:38
-msgid   "APRS symbol"
-msgstr  "APRS Symbol"
+msgid "APRS symbol"
+msgstr "APRS Symbol"
 
-#: src/httpd/html/AprsPointView.scala:42 src/httpd/html/Webservices.scala:794
-msgid   "Last reported"
-msgstr  "Sist rapportert"
+#: src/httpd/html/AprsPointView.scala:42 src/httpd/html/Webservices.scala:826
+msgid "Last reported"
+msgstr "Sist rapportert"
 
 #: src/httpd/html/AprsPointView.scala:42
-msgid   "Time of last received APRS report"
-msgstr  "Tidspunkt for sist mottatte APRS rapport"
+msgid "Time of last received APRS report"
+msgstr "Tidspunkt for sist mottatte APRS rapport"
 
 #: src/httpd/html/AprsPointView.scala:48
 #: src/httpd/html/TrackerPointView.scala:115
-msgid   "Speed"
-msgstr  "Fart"
+msgid "Speed"
+msgstr "Fart"
 
 #: src/httpd/html/AprsPointView.scala:50
 #: src/httpd/html/TrackerPointView.scala:117
-msgid   "Heading"
-msgstr  "Retning"
+msgid "Heading"
+msgstr "Retning"
 
-#: src/httpd/html/AprsPointView.scala:53 src/httpd/html/Webservices.scala:708
-msgid   "APRS via"
-msgstr  "APRS via"
+#: src/httpd/html/AprsPointView.scala:53 src/httpd/html/Webservices.scala:740
+msgid "APRS via"
+msgstr "APRS via"
 
 #: src/httpd/html/AprsStationView.scala:43
-msgid   "Wide-Digi"
-msgstr  "Wide-Digi"
+msgid "Wide-Digi"
+msgstr "Wide-Digi"
 
 #: src/httpd/html/AprsStationView.scala:46
-msgid   "Via"
-msgstr  "Via"
+msgid "Via"
+msgstr "Via"
 
 #: src/httpd/html/AprsStationView.scala:46
-msgid   "Which route the last APRS report took"
-msgstr  "Hvilken rute den siste APRS rapporten gikk"
+msgid "Which route the last APRS report took"
+msgstr "Hvilken rute den siste APRS rapporten gikk"
 
 #: src/httpd/html/AprsStationView.scala:48
-msgid   "Infrastructure"
-msgstr  "Infrastruktur"
+msgid "Infrastructure"
+msgstr "Infrastruktur"
 
 #: src/httpd/html/AprsStationView.scala:56
-msgid   "Traffic from"
-msgstr  "Trafikk fra"
+msgid "Traffic from"
+msgstr "Trafikk fra"
 
 #: src/httpd/html/AprsStationView.scala:59
-msgid   "Traffic to"
-msgstr  "Trafikk til"
+msgid "Traffic to"
+msgstr "Trafikk til"
 
-#: src/httpd/html/PointView.scala:74 src/httpd/html/Webservices.scala:248
-#: src/httpd/html/Webservices.scala:479 src/httpd/html/Webservices.scala:541
-#: src/httpd/webconfig/ConfigService.scala:308
-msgid   "Description"
-msgstr  "Beskrivelse"
+#: src/httpd/html/PointView.scala:74 src/httpd/html/Webservices.scala:280
+#: src/httpd/html/Webservices.scala:511 src/httpd/html/Webservices.scala:573
+#: src/httpd/webconfig/ConfigService.scala:321
+msgid "Description"
+msgstr "Beskrivelse"
 
 #: src/httpd/html/PointView.scala:80 src/httpd/html/PointView.scala:83
-msgid   "Position"
-msgstr  "Posisjon"
+msgid "Position"
+msgstr "Posisjon"
 
 #: src/httpd/html/PointView.scala:82 src/httpd/html/PointView.scala:85
-msgid   "not registered"
-msgstr  "ikke registrert"
+msgid "not registered"
+msgstr "ikke registrert"
 
-#: src/httpd/html/ServerUtils.scala:140 src/httpd/html/ServerUtils.scala:154
-msgid   "You are not authorized for this operation"
-msgstr  "Du er ikke autorisert for denne operasjonen"
+#: src/httpd/html/ServerUtils.scala:170 src/httpd/html/ServerUtils.scala:184
+msgid "You are not authorized for this operation"
+msgstr "Du er ikke autorisert for denne operasjonen"
 
-#: src/httpd/html/ServerUtils.scala:162 src/httpd/html/ServerUtils.scala:169
-msgid   "Update"
-msgstr  "Oppdater"
+#: src/httpd/html/ServerUtils.scala:192 src/httpd/html/ServerUtils.scala:199
+msgid "Update"
+msgstr "Oppdater"
 
-#: src/httpd/html/ServerUtils.scala:168 src/httpd/html/Webservices.scala:145
-msgid   "Cancel"
-msgstr  "Avbryt"
+#: src/httpd/html/ServerUtils.scala:198 src/httpd/html/Webservices.scala:177
+msgid "Cancel"
+msgstr "Avbryt"
 
-#: src/httpd/html/ServerUtils.scala:280
-msgid   "(invalid position)"
-msgstr  "(ugyldig posisjon)"
+#: src/httpd/html/ServerUtils.scala:335
+msgid "(invalid position)"
+msgstr "(ugyldig posisjon)"
 
-#: src/httpd/html/ServerUtils.scala:376
-msgid   "Automatic"
-msgstr  "Automatisk"
+#: src/httpd/html/ServerUtils.scala:431
+msgid "Automatic"
+msgstr "Automatisk"
 
 #: src/httpd/html/TrackerPointView.scala:38
-msgid   "Alias"
-msgstr  "Alias"
+msgid "Alias"
+msgstr "Alias"
 
 #: src/httpd/html/TrackerPointView.scala:45
-msgid   "Altitude"
-msgstr  "Høyde (m/oh)"
+msgid "Altitude"
+msgstr "Høyde (m/oh)"
 
 #: src/httpd/html/TrackerPointView.scala:47
-msgid   "Movement"
-msgstr  "Bevegelse"
+msgid "Movement"
+msgstr "Bevegelse"
 
 #: src/httpd/html/TrackerPointView.scala:57
-#: src/httpd/html/Webservices.scala:492
-msgid   "Settings"
-msgstr  "Innstillinger"
+#: src/httpd/html/Webservices.scala:524
+msgid "Settings"
+msgstr "Innstillinger"
 
 #: src/httpd/html/TrackerPointView.scala:58
-msgid   "Hide ID"
-msgstr  "Skjul ID"
+msgid "Hide ID"
+msgstr "Skjul ID"
 
 #: src/httpd/html/TrackerPointView.scala:60
-msgid   "New alias"
-msgstr  "Nytt alias"
+msgid "New alias"
+msgstr "Nytt alias"
 
 #: src/httpd/html/TrackerPointView.scala:100
-#: src/httpd/html/Webservices.scala:540
-msgid   "Updated"
-msgstr  "Oppdatert"
+#: src/httpd/html/Webservices.scala:572
+msgid "Updated"
+msgstr "Oppdatert"
 
 #: src/httpd/html/TrackerPointView.scala:106
-#: src/httpd/html/Webservices.scala:540
-msgid   "Ident"
-msgstr  "Ident"
+#: src/httpd/html/Webservices.scala:572
+msgid "Ident"
+msgstr "Ident"
 
 #: src/httpd/html/TrackerPointView.scala:108
-#: src/httpd/html/Webservices.scala:708
-msgid   "Time"
-msgstr  "Tid"
+#: src/httpd/html/Webservices.scala:740
+msgid "Time"
+msgstr "Tid"
 
-#: src/httpd/html/Webservices.scala:55 src/httpd/html/Webservices.scala:89
-msgid   "You are not authorized for such operations"
-msgstr  "Du er ikke autorisert for slike operasjoner"
+#: src/httpd/html/Webservices.scala:58 src/httpd/html/Webservices.scala:86
+#: src/httpd/html/Webservices.scala:121
+msgid "You are not authorized for such operations"
+msgstr "Du er ikke autorisert for slike operasjoner"
 
-#: src/httpd/html/Webservices.scala:96
-msgid   "Clear own objects, ok"
-msgstr  "Nulstille egne objekter, ok"
+#: src/httpd/html/Webservices.scala:60
+msgid "Users of system"
+msgstr "Brukere av systemet"
 
-#: src/httpd/html/Webservices.scala:100
-msgid   "Clear link information, ok"
-msgstr  "Nullstille lenke-info, ok"
-
-#: src/httpd/html/Webservices.scala:105
-msgid   "Server run since:"
-msgstr  "Tjener kjørt siden:"
-
-#: src/httpd/html/Webservices.scala:106
-msgid   "Server version:"
-msgstr  "Tjener versjon:"
-
-#: src/httpd/html/Webservices.scala:107
-msgid   "Number of items:"
-msgstr  "Antall enheter:"
-
-#: src/httpd/html/Webservices.scala:108
-msgid   "Number of connections:"
-msgstr  "Antall forbindelser:"
-
-#: src/httpd/html/Webservices.scala:109
-msgid   "Own objects:"
-msgstr  "Egne objekter:"
-
-#: src/httpd/html/Webservices.scala:110
-msgid   "Number of clients now:"
-msgstr  "Antall klienter nå:"
-
-#: src/httpd/html/Webservices.scala:111
-msgid   "logged in"
-msgstr  "innlogget"
-
-#: src/httpd/html/Webservices.scala:112
-msgid   "Number of HTTP requests:"
-msgstr  "Antall HTTP forespørsler:"
-
-#: src/httpd/html/Webservices.scala:114
-msgid   "Used memory:"
-msgstr  "Brukt minne:"
-
-#: src/httpd/html/Webservices.scala:117
-msgid   "Plugin modules"
-msgstr  "Plugin moduler"
+#: src/httpd/html/Webservices.scala:88
+msgid "Clients active on server"
+msgstr "Klienter aktive på server"
 
 #: src/httpd/html/Webservices.scala:128
-msgid   "Channels"
-msgstr  "Kanaler"
+msgid "Clear own objects, ok"
+msgstr "Nulstille egne objekter, ok"
 
-#: src/httpd/html/Webservices.scala:133
-msgid   "Active"
-msgstr  "Aktiv"
+#: src/httpd/html/Webservices.scala:132
+msgid "Clear link information, ok"
+msgstr "Nullstille lenke-info, ok"
+
+#: src/httpd/html/Webservices.scala:137
+msgid "Server run since:"
+msgstr "Tjener kjørt siden:"
+
+#: src/httpd/html/Webservices.scala:138
+msgid "Server version:"
+msgstr "Tjener versjon:"
+
+#: src/httpd/html/Webservices.scala:139
+msgid "Number of items:"
+msgstr "Antall enheter:"
+
+#: src/httpd/html/Webservices.scala:140
+msgid "Number of connections:"
+msgstr "Antall forbindelser:"
+
+#: src/httpd/html/Webservices.scala:141
+msgid "Own objects:"
+msgstr "Egne objekter:"
 
 #: src/httpd/html/Webservices.scala:142
-#: src/httpd/webconfig/ConfigService.scala:201
-msgid   "Remote control"
-msgstr  "Fjernkontroll"
+msgid "Number of clients now:"
+msgstr "Antall klienter nå:"
 
-#: src/httpd/html/Webservices.scala:147
-msgid   "Unknown command"
-msgstr  "Ukjent kommando"
+#: src/httpd/html/Webservices.scala:143
+msgid "logged in"
+msgstr "innlogget"
 
-#: src/httpd/html/Webservices.scala:158
-msgid   "Post"
-msgstr  "Post"
+#: src/httpd/html/Webservices.scala:144
+msgid "Number of HTTP requests:"
+msgstr "Antall HTTP forespørsler:"
 
-#: src/httpd/html/Webservices.scala:159
-msgid   "Sign"
-msgstr  "Skilt"
+#: src/httpd/html/Webservices.scala:146
+msgid "Used memory:"
+msgstr "Brukt minne:"
 
-#: src/httpd/html/Webservices.scala:160 src/httpd/html/Webservices.scala:162
-msgid   "Cross"
-msgstr  "Kors"
+#: src/httpd/html/Webservices.scala:149
+msgid "Plugin modules"
+msgstr "Plugin moduler"
 
-#: src/httpd/html/Webservices.scala:161
-msgid   "Triangle"
-msgstr  "Trekant"
+#: src/httpd/html/Webservices.scala:160
+msgid "Channels"
+msgstr "Kanaler"
 
-#: src/httpd/html/Webservices.scala:163
-msgid   "OPS/EOS"
-msgstr  "OBS/KO"
+#: src/httpd/html/Webservices.scala:165
+msgid "Active"
+msgstr "Aktiv"
 
-#: src/httpd/html/Webservices.scala:164
-msgid   "Radio station"
-msgstr  "Radiostasjon"
+#: src/httpd/html/Webservices.scala:174
+#: src/httpd/webconfig/ConfigService.scala:214
+msgid "Remote control"
+msgstr "Fjernkontroll"
 
-#: src/httpd/html/Webservices.scala:177
-msgid   "Set your own position"
-msgstr  "Sett din egen posisjon"
-
-#: src/httpd/html/Webservices.scala:184 src/httpd/html/Webservices.scala:473
-#: src/httpd/webconfig/ConfigService.scala:300
-msgid   "Symbol"
-msgstr  "Symbol"
-
-#: src/httpd/html/Webservices.scala:185 src/httpd/html/Webservices.scala:474
-msgid   "APRS symbol table and symbol. Fill in or chose from the list at the right side."
-msgstr  "APRS symboltabell og symbol. Fyll in eller velg fra liste på høyre side."
-
-#: src/httpd/html/Webservices.scala:190 src/httpd/html/Webservices.scala:482
-msgid   "Pos (UTM)"
-msgstr  "Pos (UTM)"
+#: src/httpd/html/Webservices.scala:179
+msgid "Unknown command"
+msgstr "Ukjent kommando"
 
 #: src/httpd/html/Webservices.scala:190
-msgid   "Position in UTM format."
-msgstr  "Posisjon i UTM format"
+msgid "Post"
+msgstr "Post"
 
-#: src/httpd/html/Webservices.scala:203
-msgid   "You are not authorized for admin operations"
-msgstr  "Du er ikke autorisert for admin operasjoner"
+#: src/httpd/html/Webservices.scala:191
+msgid "Sign"
+msgstr "Skilt"
 
-#: src/httpd/html/Webservices.scala:211
-msgid   "Position registerred"
-msgstr  "Posisjon registrert"
+#: src/httpd/html/Webservices.scala:192 src/httpd/html/Webservices.scala:194
+msgid "Cross"
+msgstr "Kors"
 
-#: src/httpd/html/Webservices.scala:226
-msgid   "Search and rescue mode"
-msgstr  "Søk- og redningsmodus"
+#: src/httpd/html/Webservices.scala:193
+msgid "Triangle"
+msgstr "Trekant"
 
-#: src/httpd/html/Webservices.scala:234
-msgid   "Certain types of info only visible for authorized users."
-msgstr  "Visse typer info bare synlig for autoriserte brukere."
+#: src/httpd/html/Webservices.scala:195
+msgid "OPS/EOS"
+msgstr "OBS/KO"
+
+#: src/httpd/html/Webservices.scala:196
+msgid "Radio station"
+msgstr "Radiostasjon"
+
+#: src/httpd/html/Webservices.scala:209
+msgid "Set your own position"
+msgstr "Sett din egen posisjon"
+
+#: src/httpd/html/Webservices.scala:216 src/httpd/html/Webservices.scala:505
+#: src/httpd/webconfig/ConfigService.scala:313
+msgid "Symbol"
+msgstr "Symbol"
+
+#: src/httpd/html/Webservices.scala:217 src/httpd/html/Webservices.scala:506
+msgid ""
+"APRS symbol table and symbol. Fill in or chose from the list at the right"
+" side."
+msgstr ""
+"APRS symboltabell og symbol. Fyll in eller velg fra liste på høyre side."
+
+#: src/httpd/html/Webservices.scala:222 src/httpd/html/Webservices.scala:514
+msgid "Pos (UTM)"
+msgstr "Pos (UTM)"
+
+#: src/httpd/html/Webservices.scala:222
+msgid "Position in UTM format."
+msgstr "Posisjon i UTM format"
 
 #: src/httpd/html/Webservices.scala:235
-msgid   "SAR mode"
-msgstr  "SAR modus"
+msgid "You are not authorized for admin operations"
+msgstr "Du er ikke autorisert for admin operasjoner"
 
-#: src/httpd/html/Webservices.scala:236
-msgid   "activated"
-msgstr  "aktivert"
+#: src/httpd/html/Webservices.scala:243
+msgid "Position registerred"
+msgstr "Posisjon registrert"
 
-#: src/httpd/html/Webservices.scala:238
-msgid   "Alias/icon"
-msgstr  "Alias/ikon"
+#: src/httpd/html/Webservices.scala:258
+msgid "Search and rescue mode"
+msgstr "Søk- og redningsmodus"
 
-#: src/httpd/html/Webservices.scala:239
-msgid   "hidden"
-msgstr  "skjult"
+#: src/httpd/html/Webservices.scala:266
+msgid "Certain types of info only visible for authorized users."
+msgstr "Visse typer info bare synlig for autoriserte brukere."
 
-#: src/httpd/html/Webservices.scala:242
-msgid   "Hide prefix"
-msgstr  "Skjul prefiks"
+#: src/httpd/html/Webservices.scala:267
+msgid "SAR mode"
+msgstr "SAR modus"
 
-#: src/httpd/html/Webservices.scala:256 src/httpd/html/Webservices.scala:277
-#: src/httpd/webconfig/ChannelView.scala:72
-#: src/httpd/webconfig/ConfigService.scala:295
-#: src/httpd/webconfig/ConfigService.scala:317
-msgid   "Activated"
-msgstr  "Aktivert"
+#: src/httpd/html/Webservices.scala:268
+msgid "activated"
+msgstr "aktivert"
 
-#: src/httpd/html/Webservices.scala:284
-msgid   "Ended"
-msgstr  "Avsluttet"
+#: src/httpd/html/Webservices.scala:270
+msgid "Alias/icon"
+msgstr "Alias/ikon"
 
-#: src/httpd/html/Webservices.scala:303
-msgid   "Remove object"
-msgstr  "Slett objekt"
+#: src/httpd/html/Webservices.scala:271
+msgid "hidden"
+msgstr "skjult"
 
-#: src/httpd/html/Webservices.scala:316 src/httpd/html/Webservices.scala:439
-#: src/httpd/html/Webservices.scala:705
-msgid   "Error"
-msgstr  "Feil"
+#: src/httpd/html/Webservices.scala:274
+msgid "Hide prefix"
+msgstr "Skjul prefiks"
 
-#: src/httpd/html/Webservices.scala:317 src/httpd/html/Webservices.scala:440
-msgid   "'objid' must be given as parameter"
-msgstr  "'objid' må oppgis som parameter"
+#: src/httpd/html/Webservices.scala:288 src/httpd/html/Webservices.scala:309
+#: src/httpd/webconfig/ChannelView.scala:70
+#: src/httpd/webconfig/ConfigService.scala:308
+#: src/httpd/webconfig/ConfigService.scala:330
+msgid "Activated"
+msgstr "Aktivert"
 
-#: src/httpd/html/Webservices.scala:322
-msgid   "Object removed!"
-msgstr  "Objekt slettet!"
+#: src/httpd/html/Webservices.scala:316
+msgid "Ended"
+msgstr "Avsluttet"
 
-#: src/httpd/html/Webservices.scala:325
-msgid   "Couldn't find object"
-msgstr  "Kunne ikke finne objekt"
+#: src/httpd/html/Webservices.scala:335
+msgid "Remove object"
+msgstr "Slett objekt"
 
-#: src/httpd/html/Webservices.scala:364
-msgid   "Tags for: "
-msgstr  "Tags for:"
+#: src/httpd/html/Webservices.scala:348 src/httpd/html/Webservices.scala:471
+#: src/httpd/html/Webservices.scala:737
+msgid "Error"
+msgstr "Feil"
 
-#: src/httpd/html/Webservices.scala:429
-msgid   "Reset info about station/object"
-msgstr  "Nullstill info om stasjon/objekt"
+#: src/httpd/html/Webservices.scala:349 src/httpd/html/Webservices.scala:472
+msgid "'objid' must be given as parameter"
+msgstr "'objid' må oppgis som parameter"
 
-#: src/httpd/html/Webservices.scala:446
-msgid   "Info about object is reset!"
-msgstr  "Info om objektet er nullstilt!"
+#: src/httpd/html/Webservices.scala:354
+msgid "Object removed!"
+msgstr "Objekt slettet!"
 
-#: src/httpd/html/Webservices.scala:464
-msgid   "Add/edit object"
-msgstr  "Rediger/Legg til objekt"
+#: src/httpd/html/Webservices.scala:357
+msgid "Couldn't find object"
+msgstr "Kunne ikke finne objekt"
 
-#: src/httpd/html/Webservices.scala:470
-msgid   "Identifier for object"
-msgstr  "Identifikator for objekt"
+#: src/httpd/html/Webservices.scala:396
+msgid "Tags for: "
+msgstr "Tags for:"
 
-#: src/httpd/html/Webservices.scala:470
-msgid   "Object ID"
-msgstr  "Objekt ID"
+#: src/httpd/html/Webservices.scala:461
+msgid "Reset info about station/object"
+msgstr "Nullstill info om stasjon/objekt"
 
-#: src/httpd/html/Webservices.scala:482
-msgid   "Object's position"
-msgstr  "Objektets posisjon"
+#: src/httpd/html/Webservices.scala:478
+msgid "Info about object is reset!"
+msgstr "Info om objektet er nullstilt!"
 
-#: src/httpd/html/Webservices.scala:493
-msgid   "Timeless (Permanent)"
-msgstr  "Tidløs (Permanent)"
+#: src/httpd/html/Webservices.scala:496
+msgid "Add/edit object"
+msgstr "Rediger/Legg til objekt"
 
-#: src/httpd/html/Webservices.scala:505
-#, java-format
-msgid   "Invalid id {0}"
-msgstr  "Ugyldig id {0}"
+#: src/httpd/html/Webservices.scala:502
+msgid "Identifier for object"
+msgstr "Identifikator for objekt"
 
-#: src/httpd/html/Webservices.scala:506
-msgid   "please give 'objid' as a parameter. This must start with a letter/number"
-msgstr  "du må oppgi 'objid' som parameter. Denne må starte med en bokstav/tall"
+#: src/httpd/html/Webservices.scala:502
+msgid "Object ID"
+msgstr "Objekt ID"
 
-#: src/httpd/html/Webservices.scala:522
-msgid   "Objekt updated"
-msgstr  "Objekt oppdatert"
+#: src/httpd/html/Webservices.scala:514
+msgid "Object's position"
+msgstr "Objektets posisjon"
 
 #: src/httpd/html/Webservices.scala:525
-msgid   "Cannot update"
-msgstr  "Kunne ikke oppdatere"
+msgid "Timeless (Permanent)"
+msgstr "Tidløs (Permanent)"
 
-#: src/httpd/html/Webservices.scala:526
-msgid   "Object '{0}' is already added by someone else"
-msgstr  "Objekt '{0}' er allerede registrert av noen andre"
+#: src/httpd/html/Webservices.scala:537
+#, java-format
+msgid "Invalid id {0}"
+msgstr "Ugyldig id {0}"
 
-#: src/httpd/html/Webservices.scala:541
-msgid   "Move"
-msgstr  "Beveg"
+#: src/httpd/html/Webservices.scala:538
+msgid ""
+"please give 'objid' as a parameter. This must start with a letter/number"
+msgstr "du må oppgi 'objid' som parameter. Denne må starte med en bokstav/tall"
 
-#: src/httpd/html/Webservices.scala:588
-msgid   "Send instant message"
-msgstr  "Send lynmelding"
+#: src/httpd/html/Webservices.scala:554
+msgid "Objekt updated"
+msgstr "Objekt oppdatert"
 
-#: src/httpd/html/Webservices.scala:604
-msgid   "To"
-msgstr  "Til"
+#: src/httpd/html/Webservices.scala:557
+msgid "Cannot update"
+msgstr "Kunne ikke oppdatere"
 
-#: src/httpd/html/Webservices.scala:606
-msgid   "Message"
-msgstr  "Melding"
+#: src/httpd/html/Webservices.scala:558
+msgid "Object '{0}' is already added by someone else"
+msgstr "Objekt '{0}' er allerede registrert av noen andre"
 
-#: src/httpd/html/Webservices.scala:618
-msgid   "Message posted"
-msgstr  "Melding sendt"
+#: src/httpd/html/Webservices.scala:573
+msgid "Move"
+msgstr "Beveg"
 
-#: src/httpd/html/Webservices.scala:705
-msgid   "Couldn't find item"
-msgstr  "Kunne ikke finne objekt"
+#: src/httpd/html/Webservices.scala:620
+msgid "Send instant message"
+msgstr "Send lynmelding"
+
+#: src/httpd/html/Webservices.scala:636
+msgid "To"
+msgstr "Til"
+
+#: src/httpd/html/Webservices.scala:638
+msgid "Message"
+msgstr "Melding"
+
+#: src/httpd/html/Webservices.scala:650
+msgid "Message posted"
+msgstr "Melding sendt"
+
+#: src/httpd/html/Webservices.scala:737
+msgid "Couldn't find item"
+msgstr "Kunne ikke finne objekt"
 
 # Short for direction
-#: src/httpd/html/Webservices.scala:708
-msgid   "Dir"
-msgstr  "Retn"
+#: src/httpd/html/Webservices.scala:740
+msgid "Dir"
+msgstr "Retn"
 
-#: src/httpd/html/Webservices.scala:708
-msgid   "Distance"
-msgstr  "Avstand"
+#: src/httpd/html/Webservices.scala:740
+msgid "Distance"
+msgstr "Avstand"
 
-#: src/httpd/html/Webservices.scala:757
-msgid   "Couldn't find info"
-msgstr  "Kunne ikke finne info"
+#: src/httpd/html/Webservices.scala:789
+msgid "Couldn't find info"
+msgstr "Kunne ikke finne info"
 
-#: src/httpd/html/Webservices.scala:781
-msgid   "Telemetry from"
-msgstr  "Telemetri fra"
+#: src/httpd/html/Webservices.scala:813
+msgid "Telemetry from"
+msgstr "Telemetri fra"
 
-#: src/httpd/html/Webservices.scala:786
-#: src/httpd/webconfig/ChannelView.scala:56
-#: src/httpd/webconfig/ChannelView.scala:71
-#: src/httpd/webconfig/ConfigService.scala:377
-msgid   "Channel"
-msgstr  "Kanal"
+#: src/httpd/html/Webservices.scala:818
+#: src/httpd/webconfig/ChannelView.scala:54
+#: src/httpd/webconfig/ChannelView.scala:69
+#: src/httpd/webconfig/ConfigService.scala:393
+msgid "Channel"
+msgstr "Kanal"
 
-#: src/httpd/html/Webservices.scala:794
-msgid   "Time of last received telemetry report"
-msgstr  "Tidspunkt for sist mottatte telemetri rapport"
+#: src/httpd/html/Webservices.scala:826
+msgid "Time of last received telemetry report"
+msgstr "Tidspunkt for sist mottatte telemetri rapport"
 
-#: src/httpd/html/Webservices.scala:808
-msgid   "Previous Data"
-msgstr  "Historikk"
+#: src/httpd/html/Webservices.scala:840
+msgid "Previous Data"
+msgstr "Historikk"
 
-#: src/httpd/html/Webservices.scala:832
-msgid   "Ch"
-msgstr  "Ch"
+#: src/httpd/html/Webservices.scala:864
+msgid "Ch"
+msgstr "Ch"
 
 #: src/httpd/webconfig/AprsChannelView.scala:42
-msgid   "Heard stations"
-msgstr  "Hørte stasjoner"
+msgid "Heard stations"
+msgstr "Hørte stasjoner"
 
 #: src/httpd/webconfig/AprsChannelView.scala:44
-msgid   "Traffic in"
-msgstr  "Trafikk inn"
+msgid "Traffic in"
+msgstr "Trafikk inn"
 
 #: src/httpd/webconfig/AprsChannelView.scala:44
-msgid   "duplicates"
-msgstr  "Duplikater"
+msgid "duplicates"
+msgstr "Duplikater"
 
 #: src/httpd/webconfig/AprsChannelView.scala:45
-msgid   "Traffic out"
-msgstr  "Trafikk ut"
+msgid "Traffic out"
+msgstr "Trafikk ut"
 
 #: src/httpd/webconfig/AprsChannelView.scala:53
-msgid   "Passcode"
-msgstr  "Passkode"
+msgid "Passcode"
+msgstr "Passkode"
 
 #: src/httpd/webconfig/AprsChannelView.scala:54
-msgid   "APRS/IS verification code"
-msgstr  "APRS/IS verfikasjonskode"
+msgid "APRS/IS verification code"
+msgstr "APRS/IS verfikasjonskode"
 
 #: src/httpd/webconfig/AprsChannelView.scala:56
-msgid   "Filter"
-msgstr  "Filter"
+msgid "Filter"
+msgstr "Filter"
 
 #: src/httpd/webconfig/AprsChannelView.scala:57
-msgid   "APRS/IS filter-string"
-msgstr  "APRS/IS filter"
+msgid "APRS/IS filter-string"
+msgstr "APRS/IS filter"
 
 #: src/httpd/webconfig/AprsChannelView.scala:64
-msgid   "Kiss Port"
-msgstr  "Kiss port"
+msgid "Kiss Port"
+msgstr "Kiss port"
 
 #: src/httpd/webconfig/AprsChannelView.scala:65
-msgid   "Port number (0 by default)"
-msgstr  "Port nummer (default 0)"
+msgid "Port number (0 by default)"
+msgstr "Port nummer (default 0)"
 
-#: src/httpd/webconfig/ChannelView.scala:64
-msgid   "State"
-msgstr  "Tilstand"
+#: src/httpd/webconfig/ChannelView.scala:62
+msgid "State"
+msgstr "Tilstand"
 
-#: src/httpd/webconfig/ChannelView.scala:71
-msgid   "Tick to activate channel"
-msgstr  "Kryss av for å aktivere"
+#: src/httpd/webconfig/ChannelView.scala:69
+msgid "Tick to activate channel"
+msgstr "Kryss av for å aktivere"
 
-#: src/httpd/webconfig/ChannelView.scala:79
-#: src/httpd/webconfig/ChannelView.scala:84
-msgid   "Type"
-msgstr  "Type"
+#: src/httpd/webconfig/ChannelView.scala:77
+#: src/httpd/webconfig/ChannelView.scala:82
+msgid "Type"
+msgstr "Type"
 
-#: src/httpd/webconfig/ChannelView.scala:80
-msgid   "Type (APRSIS, TNC2, KISS or TCPKISS, etc..)"
-msgstr  "Type (APRSIS, TNC2, KISS or TCPKISS, etc..)"
+#: src/httpd/webconfig/ChannelView.scala:78
+msgid "Type (APRSIS, TNC2, KISS or TCPKISS, etc..)"
+msgstr "Type (APRSIS, TNC2, KISS or TCPKISS, etc..)"
 
-#: src/httpd/webconfig/ChannelView.scala:90
-msgid   "Backup channel"
-msgstr  "Backup kanal"
+#: src/httpd/webconfig/ChannelView.scala:88
+msgid "Backup channel"
+msgstr "Backup kanal"
 
-#: src/httpd/webconfig/ChannelView.scala:91
-msgid   "Channel to be tried if this channel fails"
-msgstr  "Alternativ kanal hvis denne kanal feiler"
+#: src/httpd/webconfig/ChannelView.scala:89
+msgid "Channel to be tried if this channel fails"
+msgstr "Alternativ kanal hvis denne kanal feiler"
 
-#: src/httpd/webconfig/ChannelView.scala:98
-msgid   "Server address"
-msgstr  "Tjener adresse:"
+#: src/httpd/webconfig/ChannelView.scala:96
+msgid "Server address"
+msgstr "Tjener adresse:"
+
+#: src/httpd/webconfig/ChannelView.scala:97
+msgid "DNS name or IP address for server"
+msgstr "DNS navn eller IP adresse for tjener"
 
 #: src/httpd/webconfig/ChannelView.scala:99
-msgid   "DNS name or IP address for server"
-msgstr  "DNS navn eller IP adresse for tjener"
+msgid "Server port"
+msgstr "Tjener port"
 
-#: src/httpd/webconfig/ChannelView.scala:101
-msgid   "Server port"
-msgstr  "Tjener port"
+#: src/httpd/webconfig/ChannelView.scala:100
+msgid "Port number"
+msgstr "Port nummer"
 
-#: src/httpd/webconfig/ChannelView.scala:102
-msgid   "Port number"
-msgstr  "Port nummer"
+#: src/httpd/webconfig/ChannelView.scala:112
+msgid "Port"
+msgstr "Port"
 
-#: src/httpd/webconfig/ChannelView.scala:114
-msgid   "Port"
-msgstr  "Port"
+#: src/httpd/webconfig/ChannelView.scala:113
+#: src/httpd/webconfig/ConfigService.scala:335
+msgid "Serial port device-name (e.g. /dev/ttyS0)"
+msgstr "Serieport enhetsnavn (f.eks. /dev/ttyS0)"
 
 #: src/httpd/webconfig/ChannelView.scala:115
-#: src/httpd/webconfig/ConfigService.scala:322
-msgid   "Serial port device-name (e.g. /dev/ttyS0)"
-msgstr  "Serieport enhetsnavn (f.eks. /dev/ttyS0)"
+msgid "Baud"
+msgstr "Baud"
 
-#: src/httpd/webconfig/ChannelView.scala:117
-msgid   "Baud"
-msgstr  "Baud"
+#: src/httpd/webconfig/ChannelView.scala:121
+msgid "Visibility"
+msgstr "Synlighet"
+
+#: src/httpd/webconfig/ChannelView.scala:122
+msgid "Tick to limit access to logged in users"
+msgstr "Kryss av for å avgrense tilgang til autoriserte brukere"
 
 #: src/httpd/webconfig/ChannelView.scala:123
-msgid   "Visibility"
-msgstr  "Synlighet"
+msgid "Only for logged in users"
+msgstr "Bare for autoriserte brukere"
 
 #: src/httpd/webconfig/ChannelView.scala:124
-msgid   "Tick to limit access to logged in users"
-msgstr  "Kryss av for å avgrense tilgang til autoriserte brukere"
+msgid "Tag"
+msgstr "Tag"
 
-#: src/httpd/webconfig/ChannelView.scala:125
-msgid   "Only for logged in users"
-msgstr  "Bare for autoriserte brukere"
+#: src/httpd/webconfig/ChannelView.scala:152
+msgid "Deactivating channel"
+msgstr "Deaktiverer kanal"
 
-#: src/httpd/webconfig/ChannelView.scala:126
-msgid   "Tag"
-msgstr  "Tag"
+#: src/httpd/webconfig/ChannelView.scala:159
+msgid "Creating new channel instance"
+msgstr "Oppretter ny kanal instans"
 
-#: src/httpd/webconfig/ChannelView.scala:154
-msgid   "Deactivating channel"
-msgstr  "Deaktiverer kanal"
+#: src/httpd/webconfig/ChannelView.scala:166
+msgid "Activating channel"
+msgstr "Aktiverer kanal"
 
-#: src/httpd/webconfig/ChannelView.scala:161
-msgid   "Creating new channel instance"
-msgstr  "Oppretter ny kanal instans"
+#: src/httpd/webconfig/ChannelView.scala:180
+msgid "New channel:"
+msgstr "Ny kanal: "
 
-#: src/httpd/webconfig/ChannelView.scala:168
-msgid   "Activating channel"
-msgstr  "Aktiverer kanal"
+#: src/httpd/webconfig/ChannelView.scala:181
+msgid "Select the type of channel to create and press 'Update'."
+msgstr "Velg type for kanalen som skal opprettes og trykk \"Oppdater'."
 
-#: src/httpd/webconfig/ChannelView.scala:182
-msgid   "New channel:"
-msgstr  "Ny kanal: "
-
-#: src/httpd/webconfig/ChannelView.scala:183
-msgid   "Select the type of channel to create and press 'Update'."
-msgstr  "Velg type for kanalen som skal opprettes og trykk \"Oppdater'."
+#: src/httpd/webconfig/ConfigService.scala:36
+msgid "Restart server..."
+msgstr "Restarte tjeneren"
 
 #: src/httpd/webconfig/ConfigService.scala:37
-msgid   "Restart server..."
-msgstr  "Restarte tjeneren"
+msgid "You may have to reload/close window and log in again"
+msgstr "Vennligst lukk dette vinduet og logg inn igjen"
 
-#: src/httpd/webconfig/ConfigService.scala:38
-msgid   "You will have to close this window and log in again"
-msgstr  "Vennligst lukk dette vinduet og logg inn igjen"
-
-#: src/httpd/webconfig/ConfigService.scala:76
-msgid   "Status info"
-msgstr  "Status info"
+#: src/httpd/webconfig/ConfigService.scala:75
+msgid "Status info"
+msgstr "Status info"
 
 #: src/httpd/webconfig/ConfigService.scala:77
-msgid   "Client list"
-msgstr  "Klient liste"
+msgid "Client list"
+msgstr "Klient liste"
 
 #: src/httpd/webconfig/ConfigService.scala:78
-msgid   "Server config"
-msgstr  "Tjener konfig"
-
-#: src/httpd/webconfig/ConfigService.scala:79
-msgid   "Own position"
-msgstr  "Egen posisjon"
-
-#: src/httpd/webconfig/ConfigService.scala:80
-msgid   "Display on map"
-msgstr  "Vise på kart"
+#, fuzzy
+msgid "User list"
+msgstr "Bruker liste"
 
 #: src/httpd/webconfig/ConfigService.scala:82
-msgid   "Data channels..."
-msgstr  "Data kanaler"
+msgid "Server config"
+msgstr "Tjener konfig"
 
-#: src/httpd/webconfig/ConfigService.scala:100
-msgid   "Changes are done. Restart to activate."
-msgstr  "Endringer er utført. Restart server for å aktivere."
+#: src/httpd/webconfig/ConfigService.scala:83
+msgid "Own position"
+msgstr "Egen posisjon"
 
-#: src/httpd/webconfig/ConfigService.scala:155
-msgid   "Configuration of Polaric APRSD"
-msgstr  "Konfigurering av Polaric APRSD"
+#: src/httpd/webconfig/ConfigService.scala:84
+msgid "Display on map"
+msgstr "Vise på kart"
 
-#: src/httpd/webconfig/ConfigService.scala:159
-msgid   "Callsign"
-msgstr  "Kallesignal"
+#: src/httpd/webconfig/ConfigService.scala:86
+msgid "Data channels..."
+msgstr "Data kanaler"
 
-#: src/httpd/webconfig/ConfigService.scala:161
-msgid   "Admin users"
-msgstr  "Admin brukere"
-
-#: src/httpd/webconfig/ConfigService.scala:162
-msgid   "Full admin-rights"
-msgstr  "Fulle admin-rettigheter"
-
-#: src/httpd/webconfig/ConfigService.scala:164
-msgid   "SAR users"
-msgstr  "SAR brukere"
-
-#: src/httpd/webconfig/ConfigService.scala:165
-msgid   "Ordinary SAR users"
-msgstr  "Vanlige SAR brukere"
+#: src/httpd/webconfig/ConfigService.scala:105
+msgid "Changes are done. Restart to activate."
+msgstr "Endringer er utført. Restart server for å aktivere."
 
 #: src/httpd/webconfig/ConfigService.scala:168
-msgid   "Data channels"
-msgstr  "Data kanaler"
+msgid "Configuration of Polaric APRSD"
+msgstr "Konfigurering av Polaric APRSD"
 
-#: src/httpd/webconfig/ConfigService.scala:169
-msgid   "Data channels for tracking"
-msgstr  "Data kanaler for sporing"
+#: src/httpd/webconfig/ConfigService.scala:172
+msgid "Callsign"
+msgstr "Kallesignal"
 
-#: src/httpd/webconfig/ConfigService.scala:171
-msgid   "Primary APRS/IS channel"
-msgstr  "Primær APRS/IS kanal"
+#: src/httpd/webconfig/ConfigService.scala:174
+msgid "Admin users"
+msgstr "Admin brukere"
 
-#: src/httpd/webconfig/ConfigService.scala:173
-msgid   "Primary RF channel"
-msgstr  "Primær RF kanal"
-
-#: src/httpd/webconfig/ConfigService.scala:176
-msgid   "Igate"
-msgstr  "Igate"
+#: src/httpd/webconfig/ConfigService.scala:175
+msgid "Full admin-rights"
+msgstr "Fulle admin-rettigheter"
 
 #: src/httpd/webconfig/ConfigService.scala:177
-msgid   "Tick to activate RF<->internet gateway"
-msgstr  "Kryss av for å aktivere RF<->internett gateway"
+msgid "SAR users"
+msgstr "SAR brukere"
 
-#: src/httpd/webconfig/ConfigService.scala:179
-#: src/httpd/webconfig/ConfigService.scala:184
-#: src/httpd/webconfig/ConfigService.scala:204
-msgid   "Activated."
-msgstr  "Aktivert."
+#: src/httpd/webconfig/ConfigService.scala:178
+msgid "Ordinary SAR users"
+msgstr "Vanlige SAR brukere"
 
 #: src/httpd/webconfig/ConfigService.scala:181
-msgid   "Igating to RF"
-msgstr  "Igater til RF"
+msgid "Data channels"
+msgstr "Data kanaler"
 
 #: src/httpd/webconfig/ConfigService.scala:182
-msgid   "Tick to activate internet->RF igating"
-msgstr  "Kryss av for å aktivere internett->RF igating"
+msgid "Data channels for tracking"
+msgstr "Data kanaler for sporing"
+
+#: src/httpd/webconfig/ConfigService.scala:184
+msgid "Primary APRS/IS channel"
+msgstr "Primær APRS/IS kanal"
 
 #: src/httpd/webconfig/ConfigService.scala:186
-msgid   "RF igating for objects."
-msgstr  "RF igating for objekter"
-
-#: src/httpd/webconfig/ConfigService.scala:188
-msgid   "Radius objects"
-msgstr  "Radius for objekter"
+msgid "Primary RF channel"
+msgstr "Primær RF kanal"
 
 #: src/httpd/webconfig/ConfigService.scala:189
-msgid   "Area for sending of objects RF"
-msgstr  "Område for sending av objekter RF"
+msgid "Igate"
+msgstr "Igate"
 
-#: src/httpd/webconfig/ConfigService.scala:191
-msgid   "Digipeater path, igate"
-msgstr  "Digipeater sti"
+#: src/httpd/webconfig/ConfigService.scala:190
+msgid "Tick to activate RF<->internet gateway"
+msgstr "Kryss av for å aktivere RF<->internett gateway"
 
 #: src/httpd/webconfig/ConfigService.scala:192
-msgid   "Default (see also next field)"
-msgstr  "Default (se også neste felt)"
+#: src/httpd/webconfig/ConfigService.scala:197
+#: src/httpd/webconfig/ConfigService.scala:217
+msgid "Activated."
+msgstr "Aktivert."
 
 #: src/httpd/webconfig/ConfigService.scala:194
-msgid   "Digi path, messages"
-msgstr  "Digi sti, meldinger"
+msgid "Igating to RF"
+msgstr "Igater til RF"
 
 #: src/httpd/webconfig/ConfigService.scala:195
-msgid   "...has also effect for messages to RF igate"
-msgstr  "...har også effekt på meldinger til RF igate"
+msgid "Tick to activate internet->RF igating"
+msgstr "Kryss av for å aktivere internett->RF igating"
 
-#: src/httpd/webconfig/ConfigService.scala:197
-msgid   "Digipeater path, objects"
-msgstr  "Digipeater sti for objekter"
+#: src/httpd/webconfig/ConfigService.scala:199
+msgid "RF igating for objects."
+msgstr "RF igating for objekter"
 
-#: src/httpd/webconfig/ConfigService.scala:198
-msgid   "...has also effect for objects to RF igate"
-msgstr  "...har også effekt for objekter til RF igate"
+#: src/httpd/webconfig/ConfigService.scala:201
+msgid "Radius objects"
+msgstr "Radius for objekter"
 
 #: src/httpd/webconfig/ConfigService.scala:202
-msgid   "Tick to activate remote control"
-msgstr  "Kryss av for å aktivere fjernkontroll"
+msgid "Area for sending of objects RF"
+msgstr "Område for sending av objekter RF"
+
+#: src/httpd/webconfig/ConfigService.scala:204
+msgid "Digipeater path, igate"
+msgstr "Digipeater sti"
+
+#: src/httpd/webconfig/ConfigService.scala:205
+msgid "Default (see also next field)"
+msgstr "Default (se også neste felt)"
 
 #: src/httpd/webconfig/ConfigService.scala:207
-msgid   "Rc server"
-msgstr  "Rc server"
+msgid "Digi path, messages"
+msgstr "Digi sti, meldinger"
 
 #: src/httpd/webconfig/ConfigService.scala:208
-msgid   "Rc server (callsign of another PS instance)"
-msgstr  "Rc server (kallesignal til annen PS instans)"
+msgid "...has also effect for messages to RF igate"
+msgstr "...har også effekt på meldinger til RF igate"
 
 #: src/httpd/webconfig/ConfigService.scala:210
-msgid   "Authentication key"
-msgstr  "Autentiserings nøkkel"
+msgid "Digipeater path, objects"
+msgstr "Digipeater sti for objekter"
 
 #: src/httpd/webconfig/ConfigService.scala:211
-msgid   "Key for authentication (for remote control)"
-msgstr  "Nøkkel for autentisering (for fjernkontroll)"
+msgid "...has also effect for objects to RF igate"
+msgstr "...har også effekt for objekter til RF igate"
 
-#: src/httpd/webconfig/ConfigService.scala:247
-msgid   "Map display settings"
-msgstr  "Kartvisnings innstillinger"
+#: src/httpd/webconfig/ConfigService.scala:215
+msgid "Tick to activate remote control"
+msgstr "Kryss av for å aktivere fjernkontroll"
 
-#: src/httpd/webconfig/ConfigService.scala:251
-msgid   "Max inactivity"
-msgstr  "Maks inaktivitet"
+#: src/httpd/webconfig/ConfigService.scala:220
+msgid "Rc server"
+msgstr "Rc server"
 
-#: src/httpd/webconfig/ConfigService.scala:252
-msgid   "How long can an object be inactive before it disappears"
-msgstr  "Hvor lenge kan et objekt være inaktivt før det forsvinner"
+#: src/httpd/webconfig/ConfigService.scala:221
+msgid "Rc server (callsign of another PS instance)"
+msgstr "Rc server (kallesignal til annen PS instans)"
 
-#: src/httpd/webconfig/ConfigService.scala:253
-#: src/httpd/webconfig/ConfigService.scala:258
-#: src/httpd/webconfig/ConfigService.scala:263
-msgid   "(minutes)"
-msgstr  "(minutter)"
+#: src/httpd/webconfig/ConfigService.scala:223
+msgid "Authentication key"
+msgstr "Autentiserings nøkkel"
 
-#: src/httpd/webconfig/ConfigService.scala:256
-msgid   "Max inactivity for trail"
-msgstr  "Maks inaktivitet for spor"
+#: src/httpd/webconfig/ConfigService.scala:224
+msgid "Key for authentication (for remote control)"
+msgstr "Nøkkel for autentisering (for fjernkontroll)"
 
-#: src/httpd/webconfig/ConfigService.scala:257
-msgid   "How long can an object be inactive before its trail disappears"
-msgstr  "Hvor lenge kan et objekt være inaktivt før sporet forsvinner"
+#: src/httpd/webconfig/ConfigService.scala:260
+msgid "Map display settings"
+msgstr "Kartvisnings innstillinger"
 
-#: src/httpd/webconfig/ConfigService.scala:261
-msgid   "Trail length"
-msgstr  "Spor lengde"
+#: src/httpd/webconfig/ConfigService.scala:264
+msgid "Max inactivity"
+msgstr "Maks inaktivitet"
 
-#: src/httpd/webconfig/ConfigService.scala:262
-msgid   "How long timespan to draw a trail for"
-msgstr  "For hvor langt tidsrom skal vi tegne spor"
+#: src/httpd/webconfig/ConfigService.scala:265
+msgid "How long can an object be inactive before it disappears"
+msgstr "Hvor lenge kan et objekt være inaktivt før det forsvinner"
 
-#: src/httpd/webconfig/ConfigService.scala:288
-msgid   "Tracking of own position"
-msgstr  "Sporing av egen posisjon"
+#: src/httpd/webconfig/ConfigService.scala:266
+#: src/httpd/webconfig/ConfigService.scala:271
+#: src/httpd/webconfig/ConfigService.scala:276
+msgid "(minutes)"
+msgstr "(minutter)"
 
-#: src/httpd/webconfig/ConfigService.scala:292
-msgid   "Position report"
-msgstr  "Posisjons rapport"
+#: src/httpd/webconfig/ConfigService.scala:269
+msgid "Max inactivity for trail"
+msgstr "Maks inaktivitet for spor"
 
-#: src/httpd/webconfig/ConfigService.scala:293
-msgid   "Tick to activate position reporting"
-msgstr  "Kryss av for å aktivere posisjonsrapportering"
+#: src/httpd/webconfig/ConfigService.scala:270
+msgid "How long can an object be inactive before its trail disappears"
+msgstr "Hvor lenge kan et objekt være inaktivt før sporet forsvinner"
 
-#: src/httpd/webconfig/ConfigService.scala:297
-msgid   "Allow transmission on RF"
-msgstr  "Tillate sending på RF"
+#: src/httpd/webconfig/ConfigService.scala:274
+msgid "Trail length"
+msgstr "Spor lengde"
+
+#: src/httpd/webconfig/ConfigService.scala:275
+msgid "How long timespan to draw a trail for"
+msgstr "For hvor langt tidsrom skal vi tegne spor"
 
 #: src/httpd/webconfig/ConfigService.scala:301
-msgid   "APRS symbol-table and symbol"
-msgstr  "APRS symboltabell og symbol"
+msgid "Tracking of own position"
+msgstr "Sporing av egen posisjon"
+
+#: src/httpd/webconfig/ConfigService.scala:305
+msgid "Position report"
+msgstr "Posisjons rapport"
 
 #: src/httpd/webconfig/ConfigService.scala:306
-msgid   "Digipeater path"
-msgstr  "Digipeater sti"
+msgid "Tick to activate position reporting"
+msgstr "Kryss av for å aktivere posisjonsrapportering"
 
 #: src/httpd/webconfig/ConfigService.scala:310
-msgid   "My position"
-msgstr  "Min posisjon"
-
-#: src/httpd/webconfig/ConfigService.scala:311
-msgid   "Server's position in UTM format"
-msgstr  "Serverens posisjon i UTM format"
+msgid "Allow transmission on RF"
+msgstr "Tillate sending på RF"
 
 #: src/httpd/webconfig/ConfigService.scala:314
-msgid   "Tracking with GPS"
-msgstr  "Sporing med GPS"
-
-#: src/httpd/webconfig/ConfigService.scala:315
-msgid   "Tick to use position from GPS"
-msgstr  "Kryss av for å bruke posisjon fra GPS"
+msgid "APRS symbol-table and symbol"
+msgstr "APRS symboltabell og symbol"
 
 #: src/httpd/webconfig/ConfigService.scala:319
-msgid   "Adjust clock from GPS"
-msgstr  "Juster klokke fra GPS"
+msgid "Digipeater path"
+msgstr "Digipeater sti"
 
-#: src/httpd/webconfig/ConfigService.scala:321
-msgid   "GPS Port"
-msgstr  "GPS port"
+#: src/httpd/webconfig/ConfigService.scala:323
+msgid "My position"
+msgstr "Min posisjon"
 
 #: src/httpd/webconfig/ConfigService.scala:324
-msgid   "GPS Baud"
-msgstr  "GPS baud"
-
-#: src/httpd/webconfig/ConfigService.scala:326
-msgid   "Min pause"
-msgstr  "MIn pause"
+msgid "Server's position in UTM format"
+msgstr "Serverens posisjon i UTM format"
 
 #: src/httpd/webconfig/ConfigService.scala:327
-#: src/httpd/webconfig/ConfigService.scala:330
-msgid   "(seconds)"
-msgstr  "(sekunder)"
+msgid "Tracking with GPS"
+msgstr "Sporing med GPS"
 
-#: src/httpd/webconfig/ConfigService.scala:327
-msgid   "Minimum time between transmissions"
-msgstr  "Minimum tid mellom sendinger"
-
-#: src/httpd/webconfig/ConfigService.scala:329
-msgid   "Max pause"
-msgstr  "Maks pause"
-
-#: src/httpd/webconfig/ConfigService.scala:330
-msgid   "Maximum time between transmissions"
-msgstr  "Maksimum tid mellom sendinger"
+#: src/httpd/webconfig/ConfigService.scala:328
+msgid "Tick to use position from GPS"
+msgstr "Kryss av for å bruke posisjon fra GPS"
 
 #: src/httpd/webconfig/ConfigService.scala:332
-msgid   "Min distance"
-msgstr  "Min avstand"
+msgid "Adjust clock from GPS"
+msgstr "Juster klokke fra GPS"
 
-#: src/httpd/webconfig/ConfigService.scala:333
-msgid   "(meter)"
-msgstr  "(meter)"
+#: src/httpd/webconfig/ConfigService.scala:334
+msgid "GPS Port"
+msgstr "GPS port"
 
-#: src/httpd/webconfig/ConfigService.scala:333
-msgid   "Distance between transmissions when speed is low"
-msgstr  "Avstand mellom sendinger når hastighet er lav"
+#: src/httpd/webconfig/ConfigService.scala:337
+msgid "GPS Baud"
+msgstr "GPS baud"
 
-#: src/httpd/webconfig/ConfigService.scala:335
-msgid   "Max turn"
-msgstr  "Maks kursendring"
+#: src/httpd/webconfig/ConfigService.scala:339
+msgid "Min pause"
+msgstr "MIn pause"
 
-#: src/httpd/webconfig/ConfigService.scala:336
-msgid   "(degrees)"
-msgstr  "(grader)"
+#: src/httpd/webconfig/ConfigService.scala:340
+#: src/httpd/webconfig/ConfigService.scala:343
+msgid "(seconds)"
+msgstr "(sekunder)"
 
-#: src/httpd/webconfig/ConfigService.scala:336
-msgid   "Max change in direction before transmission"
-msgstr  "Maks endring i retning før sending"
+#: src/httpd/webconfig/ConfigService.scala:340
+msgid "Minimum time between transmissions"
+msgstr "Minimum tid mellom sendinger"
 
-#: src/httpd/webconfig/ConfigService.scala:406
-msgid   "Register user/password"
-msgstr  "Registrer bruker/passord"
+#: src/httpd/webconfig/ConfigService.scala:342
+msgid "Max pause"
+msgstr "Maks pause"
 
-#: src/httpd/webconfig/ConfigService.scala:412
-msgid   "Username"
-msgstr  "Brukernavn"
+#: src/httpd/webconfig/ConfigService.scala:343
+msgid "Maximum time between transmissions"
+msgstr "Maksimum tid mellom sendinger"
 
-#: src/httpd/webconfig/ConfigService.scala:412
-msgid   "Username for new or existing user"
-msgstr  "Brukernavn for ny eller eksisterende bruker"
+#: src/httpd/webconfig/ConfigService.scala:345
+msgid "Min distance"
+msgstr "Min avstand"
 
-#: src/httpd/webconfig/ConfigService.scala:419
-msgid   "Password"
-msgstr  "Passord"
+#: src/httpd/webconfig/ConfigService.scala:346
+msgid "(meter)"
+msgstr "(meter)"
 
-#: src/httpd/webconfig/ConfigService.scala:435
-msgid   "Password updated for user"
-msgstr  "Passord oppdatert for bruker"
+#: src/httpd/webconfig/ConfigService.scala:346
+msgid "Distance between transmissions when speed is low"
+msgstr "Avstand mellom sendinger når hastighet er lav"
 
-#: src/httpd/webconfig/ConfigService.scala:437
-msgid   "Error: Your input is too long"
-msgstr  "Feil: Din input er for lang"
+#: src/httpd/webconfig/ConfigService.scala:348
+msgid "Max turn"
+msgstr "Maks kursendring"
+
+#: src/httpd/webconfig/ConfigService.scala:349
+msgid "(degrees)"
+msgstr "(grader)"
+
+#: src/httpd/webconfig/ConfigService.scala:349
+msgid "Max change in direction before transmission"
+msgstr "Maks endring i retning før sending"
+
+#: src/httpd/webconfig/ConfigService.scala:426
+msgid "Register user/password"
+msgstr "Registrer bruker/passord"
+
+#: src/httpd/webconfig/ConfigService.scala:432
+msgid "Username"
+msgstr "Brukernavn"
+
+#: src/httpd/webconfig/ConfigService.scala:432
+msgid "Username for new or existing user"
+msgstr "Brukernavn for ny eller eksisterende bruker"
 
 #: src/httpd/webconfig/ConfigService.scala:439
-msgid   "Error: Your input contains illegal characters"
-msgstr  "Feil: Din input inneholder ulovlige tegn"
+msgid "Password"
+msgstr "Passord"
 
-#: src/httpd/webconfig/ConfigService.scala:441
-msgid   "Error: Couldn't update (server problem)"
-msgstr  "Feil: Kunne ikke oppdatere (server problem)"
+#: src/httpd/webconfig/ConfigService.scala:456
+msgid "Password updated for user"
+msgstr "Passord oppdatert for bruker"
 
-#: src/httpd/webconfig/ConfigUtils.scala:137
-msgid   "Inactive (off)"
-msgstr  "Inaktiv (av)"
+#: src/httpd/webconfig/ConfigService.scala:459
+msgid "Error: Your input is too long"
+msgstr "Feil: Din input er for lang"
 
-#: src/httpd/webconfig/ConfigUtils.scala:138
-msgid   "Connecting..."
-msgstr  "Kobler opp..."
+#: src/httpd/webconfig/ConfigService.scala:461
+msgid "Error: Your input contains illegal characters"
+msgstr "Feil: Din input inneholder ulovlige tegn"
 
-#: src/httpd/webconfig/ConfigUtils.scala:140
-msgid   "Active (ok)"
-msgstr  "Aktiv (ok)"
+#: src/httpd/webconfig/ConfigService.scala:463
+msgid "Error: Couldn't update (server problem)"
+msgstr "Feil: Kunne ikke oppdatere (server problem)"
 
-#: src/httpd/webconfig/ConfigUtils.scala:142
-msgid   "Inactive (failed)"
-msgstr  "Inaktiv (feilet)"
+#: src/httpd/webconfig/ConfigUtils.scala:122
+msgid "Inactive (off)"
+msgstr "Inaktiv (av)"
 
-#~ msgid        "Last received APRS status message"
-#~ msgstr       "Sist mottatte APRS statusmelding"
+#: src/httpd/webconfig/ConfigUtils.scala:123
+msgid "Connecting..."
+msgstr "Kobler opp..."
 
-#~ msgid        "Ambiguity"
-#~ msgstr       "Unøyaktighet"
+#: src/httpd/webconfig/ConfigUtils.scala:125
+msgid "Active (ok)"
+msgstr "Aktiv (ok)"
 
-#~ msgid        "Trail"
-#~ msgstr       "Spor"
+#: src/httpd/webconfig/ConfigUtils.scala:127
+msgid "Inactive (failed)"
+msgstr "Inaktiv (feilet)"
 
-#~ msgid        "Find new colour"
-#~ msgstr       "Finn ny farge"
-
-#~ msgid        "Couldn't find station"
-#~ msgstr       "Kunne ikke finne stasjon"
-
-#~ msgid        "Valid 1 day from now"
-#~ msgstr       "Gyldig i 1 døgn fra nå"
-
-#~ msgid        "Key"
-#~ msgstr       "Nøkkel"
-
-#~ msgid        "Short URL for search and rescue"
-#~ msgstr       "Kort URL for søk- og redning"
+#~ msgid        "Persistent storage"
+#~ msgstr       "Varig lagring"
 
 #~ msgid        "SAR URL not available or you are not authorized"
 #~ msgstr       "SAR URL ikke tilgjengelig eller du er ikke autorisert"
 
-#~ msgid        "Persistent storage"
-#~ msgstr       "Varig lagring"
+#~ msgid        "Short URL for search and rescue"
+#~ msgstr       "Kort URL for søk- og redning"
+
+#~ msgid        "Key"
+#~ msgstr       "Nøkkel"
+
+#~ msgid        "Valid 1 day from now"
+#~ msgstr       "Gyldig i 1 døgn fra nå"
+
+#~ msgid        "Couldn't find station"
+#~ msgstr       "Kunne ikke finne stasjon"
+
+#~ msgid        "Find new colour"
+#~ msgstr       "Finn ny farge"
+
+#~ msgid        "Trail"
+#~ msgstr       "Spor"
+
+#~ msgid        "Ambiguity"
+#~ msgstr       "Unøyaktighet"
+
+#~ msgid        "Last received APRS status message"
+#~ msgstr       "Sist mottatte APRS statusmelding"
