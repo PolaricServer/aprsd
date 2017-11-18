@@ -1,10 +1,11 @@
-polaric-aprsd (2.1) UNRELEASED; urgency=medium
+polaric-aprsd (2.1) stable; urgency=medium
 
   * Move to Jetty and Spark framework  
   * Implement login
   * Move webconfig stuff to this package 
+  * Etc. (see Changelog file)
 
- -- Øyvind Hanssen <ohanssen@acm.org>  Tue, 07 Nov 2017 21:44:06 +0100
+ -- Øyvind Hanssen <ohanssen@acm.org>  Thu, 16 Nov 2017 21:50:05 +0100
 
 polaric-aprsd (2.0) stable; urgency=medium
 

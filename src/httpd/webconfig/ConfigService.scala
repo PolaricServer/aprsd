@@ -55,6 +55,7 @@ package no.polaric.aprsd.http
            selected = if (selected==null) "1" else selected
            var lang = req.queryParams("lang")
            lang = if (lang==null) "en" else lang
+           val inapp = if (req.queryParams("inapp") != null) "&inapp=true" else ""
            
            
            def mitem(url:String, id: Integer, txt: String) : Node = 
@@ -63,7 +64,7 @@ package no.polaric.aprsd.http
               val cls = if ((""+id).equals(selected)) "selected" else ""
               
               <li class={cls}>
-                <a href={ url + delim + "lang="+lang+"&mid="+id }>{txt}</a>
+                <a href={ url + delim + "lang="+lang+"&mid="+id+inapp }>{txt}</a>
               </li>
            }
            

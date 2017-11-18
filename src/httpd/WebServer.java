@@ -121,7 +121,7 @@ public class WebServer implements ServerAPI.Web
        webSocket("/jmapdata", _jmapupdate);
          
        before("*", (req, res) -> {res.status(200);});
-       before("/config_menu", _auth.conf().filter("FormClient", "isauth")); // NEEDS TESTING
+       before("/config_menu", _auth.conf().filter("FormClient", "isauth")); 
        
        /* 
         * Protect other webservices. We should eventually prefix these and 
@@ -151,6 +151,7 @@ public class WebServer implements ServerAPI.Web
     
     public void stop() throws Exception {
        _api.log().info("WebServer", "Stopping...");
+       _api.saveConfig();
        _auth.conf().getLocalUsers().save();
        _mapupdate.postText("RESTART!", c->true);
     }

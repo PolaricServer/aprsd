@@ -35,7 +35,9 @@ It shouldn't be too hard to port it to e.g. Windows if anyone wants to do the jo
 We also use the following external libraries. jar files are included: 
 * Jcoord, with some small modifications. Compiled jar and source included.
 * utf8-with-fallback with some small modifications. Compiled jar and source included. 
-* 'Simple' framework. 
+* Jetty and Spark framework (HTTP server)
+* pac4j framework (authentication/authorization)
+
 
 ## Installation
 

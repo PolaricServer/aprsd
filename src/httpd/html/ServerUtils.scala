@@ -70,7 +70,11 @@ package no.polaric.aprsd.http
             </script>
             { head }
             <link href={"style.css"} rel="stylesheet" type="text/css" />
-            <script type="text/javascript" src="../Aprs/iframeApi.js"></script>
+            { if (req.queryParams("inapp") != null)
+                  <script src="../Aprs/iframeApi.js"></script>
+              else 
+                  EMPTY 
+            }
             </head>
             <body onload={"loadBody()"} >
             {content} 

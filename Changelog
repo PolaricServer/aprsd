@@ -178,3 +178,28 @@ V.2.0
 
 * [C] Logout and time limit for logins
 * [C] Avoid to many/too close trail points
+
+
+
+V.2.1
+-----
+
+* Move to Spark and Jetty for webserver implementation
+* Do authentication (login) in aprsd (use pac4j). 
+* Alternative websocket interface for map update using JSON instead of XML. 
+* Support logging in to configure standalone aprsd server
+* Support CORS Ajax requests from clients (current webapp does not support CORS, webapp2 does). 
+* Move webconfig (plugin) stuff to aprsd package.
+* Some monitoring of users. 
+* Add support for multiport Kiss TNCs (thanks W6ELA)
+* Several smaller fixes.
+
+[C] Offline support (polaric-online/polaric-offline scripts) [v.2.0.3]
+[C] Move stuff specific for Norway to separate plugin
+[C] Mouse wheel zoom follows cursor position. 
+[C] Remove dependency of server package. 
+
+Various smaller fixes.. 
+
+
+

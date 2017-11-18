@@ -10,23 +10,44 @@ License: GPL-2.0
 (see /usr/share/common-licenses/GPL-2)
 
 
-Files: jcoord-polaric.jar
+Files: lib/jcoord-polaric.jar
 Copyright: J. M. Stott 
 License: GPL
 (see http://www.jstott.me.uk/jcoord/)
 Modified by Ø.Hanssen for Polaric aprsd.
 Modified source: jcoord-modified.tar.gz
 
-Files: utf8-with-fallback-polaric.jar
+
+Files: lib/utf8-with-fallback-polaric.jar
 Copyright: Rasmus Svensson 
 License: LGPL
 (see /usr/share/common-licenses/LGPL-3)
 Modified by Ø.Hanssen for Polaric aprsd
 Modified source: utf8-with-fallback-modified.tar.gz
 
-Files: simple.jar
-Copyright (C) 2001, Niall Gallagher <niallg@users.sf.net>
-Licence: Apache Licence version 2.0.
-(see /usr/share/common-licenses/Apache-2.0)
 
+Files: lib/jetty-polaric.jar
+Copyright: 2017, Eclipse Jetty Project
+Licence: GPL-2.0 with classpath exception
+Jetty Uber All compilation
+(see /usr/share/common-licenses/GPL-2 and
+ https://www.gnu.org/software/classpath/license.html)
+
+
+Files: lib/pac4j-* 
+Copyright: 2012-2017 pac4j organization
+License: Apache-2.0 
+(See http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+
+Files: lib/spark-pac4j* 
+Copyright: 2012-2017 pac4j organization
+License: Apache-2.0 
+(See http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+
+Files: lib/spark-core-*
+Copyright: Per Wendel and others
+Licence: Apache-2.0
+(See http://www.apache.org/licenses/LICENSE-2.0.txt)
 
