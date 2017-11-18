@@ -104,17 +104,22 @@ public abstract class ServerBase
    
       
    public I18n getI18n(Request req)
-       { return getI18n(req, i18n_base); }
+       { return _getI18n(req, i18n_base); }
        
-      
-   public I18n getI18n(Request req, String base) 
+   public static I18n _getI18n(Request req)
+       { return _getI18n(req, i18n_base); }
+       
+   public I18n getI18n(Request req, String base)
+       { return _getI18n(req, base); }
+         
+   public static I18n _getI18n(Request req, String base) 
    {
         if (base==null)
            base = i18n_base; 
         String lang = req.queryParams("lang");         
         Locale loc = ((lang != null && lang.length() > 0) ? new Locale(lang) : new Locale("en"));
         return I18nFactory.getI18n(base + ".XX", "i18n.Messages", 
-                       getClass().getClassLoader(), loc, I18nFactory.FALLBACK);
+                       ServerBase.class.getClassLoader(), loc, I18nFactory.FALLBACK);
    }
    
    
