@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,12 +75,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        _log = new Logfile(api, "remotectl", "remotectl.log");
        if (_parent != null) 
           _parent = _parent.trim().toUpperCase();
-          
+       if ("".equals(_parent))
+          _parent = null;
        mp.subscribe(myCall, new Subscriber(), true);
        _msg = mp;
        _api = api;
-       if (_parent != null) 
-            _parent.trim();
        _thread = new Thread(this, "RemoteCtl-"+(threadid++));
        _thread.start();
    }
