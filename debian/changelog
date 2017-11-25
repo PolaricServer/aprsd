@@ -1,3 +1,9 @@
+polaric-aprsd (2.1+) UNRELEASED; urgency=medium
+
+  * More hacking 
+
+ -- Øyvind Hanssen <ohanssen@acm.org>  Sat, 25 Nov 2017 01:04:17 +0100
+
 polaric-aprsd (2.1) stable; urgency=medium
 
   * Move to Jetty and Spark framework  
