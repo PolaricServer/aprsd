@@ -55,7 +55,8 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
         public String   title;
         public boolean  redraw;  // true if isChanging()
         public boolean  own;     // May use a tag instead? 
-        public String   icon;   
+        public String   icon;  
+        public String   href;
         public JsLabel  label;      
         public JsTrail  trail;
     }
@@ -176,10 +177,35 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
                            addLines(mu, (Station) s, _uleft, _lright); 
                     }
                 }
+                /* Add signs to list */
+                for (Signs.Item s: Signs.search(_scale, _uleft, _lright)) {
+                    JsPoint p = createSign(s); 
+                    if (p!=null)
+                       mu.points.add(p);
+                } 
             }
         }
+        
 
-       
+        
+        /**
+         * Convert sign to JSON Point.
+         */
+        private JsPoint createSign(Signs.Item s) {
+            LatLng ref = s.getPosition().toLatLng(); 
+            if (ref == null)
+                return null;
+            JsPoint x = new JsPoint(); 
+            
+            x.ident = s.getIdent();
+            x.pos   = new double[] {ref.getLongitude(), ref.getLatitude()};
+            x.title = s.getDescr() == null ? "" : "title=\"" + fixText(s.getDescr()) + "\"";
+            x.href  = s.getUrl() == null ? "" : "href=\"" + s.getUrl() + "\"";
+            x.icon  = "/icons/"+ s.getIcon();
+            return x;
+        }
+        
+        
        
         /** Convert Tracker point to JSON point. 
          * Return null if point has no position.  

@@ -324,7 +324,6 @@ public abstract class ServerBase
          * just a small icon and a title. It may be a better idea to do this
          * in map-layers instead?
          */
-        int i=0;
         for (Signs.Item s: Signs.search(scale, uleft, lright))
         {
             LatLng ref = s.getPosition().toLatLng(); 
@@ -334,7 +333,7 @@ public abstract class ServerBase
             String title = s.getDescr() == null ? "" : "title=\"" + fixText(s.getDescr()) + "\"";
             String icon = _wfiledir + "/icons/"+ s.getIcon();    
            
-            out.println("<point id=\""+ (s.getId() < 0 ? "__sign" + (i++) : "__"+s.getId()) + "\" x=\""
+            out.println("<point id=\""+ s.getIdent() + "\" x=\""
                          + roundDeg(ref.getLng()) + "\" y=\"" + roundDeg(ref.getLat()) + "\" " 
                          + href + " " + title+">");
             out.println(" <icon src=\""+icon+"\"  w=\"22\" h=\"22\" ></icon>");     

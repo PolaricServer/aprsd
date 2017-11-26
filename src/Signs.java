@@ -59,7 +59,7 @@ public class Signs extends Source
           { return _id; }
           
         public String getIdent()
-          { return ""+_id; }
+          { return _id<0 ? "__loc."+(-_id) : "__db."+_id; }
           
         public Source getSource()
           { return null; }
@@ -81,6 +81,7 @@ public class Signs extends Source
     private StringTokenizer _next;
     private List<Item> _list = new ArrayList();
     private ExtDb _extdb = null;
+    private int localId = -1;
     
     
     /* Source methods 
@@ -101,31 +102,33 @@ public class Signs extends Source
     {
         _init (api, "Signs", false, null);
         try {
-           _rd = new BufferedReader(new FileReader(file));
-           while (_rd.ready())
-           {
-               String line = _rd.readLine();
-               if (!line.startsWith("#")) 
-               {                 
-                   String[] x = line.split(",\\s*");  
-                   if (x.length < 7)
-                       continue;
-                   if (!x[0].matches("[0-9]{2}[a-zA-Z]") || 
-                       !x[1].matches("[0-9]{6}") || 
-                       !x[2].matches("[0-9]{7}") ||
-                       !x[3].matches("[0-9]+"))
-                       continue;    
-                   double easting = Long.parseLong(x[1]);
-                   double northing = Long.parseLong(x[2]);
-                   long scale = Long.parseLong(x[3]);
-                   Reference pos = new UTMRef( Integer.parseInt( x[0].substring(0,2)), 
+            _rd = new BufferedReader(new FileReader(file));
+            while (_rd.ready())
+            {
+                String line = _rd.readLine();
+                if (!line.startsWith("#")) 
+                {                 
+                    String[] x = line.split(",\\s*");  
+                    if (x.length < 7)
+                        continue;
+                    if (!x[0].matches("[0-9]{2}[a-zA-Z]") || 
+                        !x[1].matches("[0-9]{6}") || 
+                        !x[2].matches("[0-9]{7}") ||
+                        !x[3].matches("[0-9]+"))
+                        continue;    
+                    double easting = Long.parseLong(x[1]);
+                    double northing = Long.parseLong(x[2]);
+                    long scale = Long.parseLong(x[3]);
+                    Reference pos = new UTMRef( Integer.parseInt( x[0].substring(0,2)), 
                                                x[0].charAt(2),
                                                easting, northing);
-                   if (x.length > 7)
-                     x[6] = x[6] + " "+ x[7];
-                   Item it = new Item(-1, pos, scale, x[4], x[5], x[6]);
-                   _list.add(it);
-               }
+                    if (x.length > 7)
+                       x[6] = x[6] + " "+ x[7];
+                     
+                     /* NOTE: igns from local file gets negative id numbers */
+                    Item it = new Item(localId--, pos, scale, x[4], x[5], x[6]);
+                    _list.add(it);
+                }
             }     
         }
         catch (FileNotFoundException  e) 
