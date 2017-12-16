@@ -199,8 +199,8 @@ public class JsonMapUpdater extends MapUpdater implements Notifier
             
             x.ident = s.getIdent();
             x.pos   = new double[] {ref.getLongitude(), ref.getLatitude()};
-            x.title = s.getDescr() == null ? "" : "title=\"" + fixText(s.getDescr()) + "\"";
-            x.href  = s.getUrl() == null ? "" : "href=\"" + s.getUrl() + "\"";
+            x.title = s.getDescr() == null ? "" : fixText(s.getDescr());
+            x.href  = s.getUrl() == null ? "" : s.getUrl();
             x.icon  = "/icons/"+ s.getIcon();
             return x;
         }
