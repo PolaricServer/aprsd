@@ -59,7 +59,14 @@ public abstract class ServerBase
    protected final static ObjectMapper mapper = new ObjectMapper();
    
    
-   
+   public static String toJson(Object obj) 
+       { return serializeJson(obj); }
+ 
+ 
+    public static Object fromJson(String text, Class cls) 
+       { return deserializeJson(text, cls); }
+ 
+ 
    public static String serializeJson(Object obj) {
        try {
           return mapper.writeValueAsString(obj);

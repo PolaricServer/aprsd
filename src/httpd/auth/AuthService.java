@@ -122,6 +122,7 @@ public class AuthService {
     public void corsHeaders(Request req, Response resp) {
         resp.header("Access-Control-Allow-Credentials", "true"); 
         resp.header("Access-Control-Allow-Origin", getAllowOrigin(req)); 
+        resp.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS"); // FIXME
     }
     
     

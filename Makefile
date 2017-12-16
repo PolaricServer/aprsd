@@ -124,7 +124,7 @@ channels:
 	
 .PHONY : httpd
 httpd: core
-	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/httpd/auth/*.java src/httpd/*.java 
+	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/httpd/auth/*.java  src/httpd/*.java src/httpd/restapi/*.java
 	
 	
 .PHONY : scala

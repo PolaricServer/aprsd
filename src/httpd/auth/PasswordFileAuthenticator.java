@@ -57,24 +57,27 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
      */
     public void load() {
         try {
-           BufferedReader rd = new BufferedReader(new FileReader(_file));
-           while (rd.ready() )
-           {
-               String line = rd.readLine();
-               if (!line.startsWith("#") && line.length() > 1) {
-                 if (line.matches(".*:.*"))
-                 {                 
-                    String[] x = line.split(":");  
-                    String username = x[0].trim();
-                    String passwd = x[1].trim();
-                    _pwmap.put(username, passwd);
-                    if (_users != null)
-                       _users.add(username);
-                 }
-                 else
-                    _api.log().warn("PasswordFileAuthenticator", "Bad line in password file: "+line);
-               }
-           }
+            BufferedReader rd = new BufferedReader(new FileReader(_file));
+            while (rd.ready() )
+            {
+                String line = rd.readLine();
+                if (!line.startsWith("#") && line.length() > 1) {
+                    if (line.matches(".*:.*"))
+                    {                 
+                        String[] x = line.split(":");  
+                        String username = x[0].trim();
+                        String passwd = x[1].trim();
+                        _pwmap.put(username, passwd);
+                        _users.add(username);
+                        if (_users != null) {
+                            LocalUsers.User u = _users.get(username); 
+                            u.setActive(); 
+                        }
+                    }
+                    else
+                        _api.log().warn("PasswordFileAuthenticator", "Bad line in password file: "+line);
+                }
+            }
         }
         catch (IOException e) {
            _api.log().warn("PasswordFileAuthenticator", "Couldn't open htpasswd file: "+e.getMessage());

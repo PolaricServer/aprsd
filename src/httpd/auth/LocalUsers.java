@@ -28,21 +28,43 @@ import java.io.*;
  
 public class LocalUsers {
     
+    
+    /**
+     * User info class. Can be serialized and stored in a file. 
+     */
     public static class User implements Serializable {
        private String userid; 
        private Date lastused; 
+       transient private boolean active = false;
 
-       public String getIdent() {return userid;}
-       public Date   getLastUsed() {return lastused;}
-       public void   updateTime() { lastused = new Date(); }
+       public String  getIdent()    { return userid; }
+       public Date    getLastUsed() { return lastused; }
+       public void    updateTime()  { lastused = new Date(); }
+       public boolean isActive()    { return active; }
+       public void    setActive()   { active = true; }
        
        public User(String id, Date d)
          {userid=id; lastused=d;} 
     }
     
+    
+    /** 
+     * Area. Can be serialized as JSON and sent to client. 
+     */
+    public static class Area implements Serializable {
+        public int index;
+        public String name;
+        public double[] extent;
+    }
+    
+    
+    
     private ServerAPI _api;
-    private SortedMap<String, User> _users = new TreeMap<String, User>(); 
+    private SortedMap<String, User> _users = new TreeMap<String, User>();
+    private Map<String, SortedMap<Integer, Area>> _areas = new HashMap();
     private String _filename; 
+    
+    private int _nextAreaId = 0;
     
     
     public LocalUsers(ServerAPI api, String fname) {
@@ -52,47 +74,101 @@ public class LocalUsers {
     }
   
   
+    /**
+     * Get a single user. 
+     */
     public User get(String id) {
        return _users.get(id); 
     }
   
   
+    /**
+     * Get all users as a collection.
+     */
     public Collection<User> getAll() {
        return _users.values();
     }
     
+    
+    /**
+     * Add a user.
+     * @param user - user id. 
+     */
     public void add(String user) {
-      if (!_users.containsKey(user))
-         _users.put(user, new User(user, null));
+        if (!_users.containsKey(user))
+            _users.put(user, new User(user, null));
+    }
+      
+  
+    /**
+     * Get the areas belonging to a given user.
+     * @param id - user id.
+     * @return collection of areas. 
+     */
+    public Collection<Area> getAreas(String id) {
+        if (!_areas.containsKey(id)) 
+            _areas.put(id, new TreeMap<Integer,Area>());
+        return _areas.get(id).values(); 
     }
     
     
+    /**
+     * Add an area to a given user. 
+     * @param id - user id. 
+     * @param a - area to be added.
+     * @return index of added area. 
+     */
+    public int addArea(String id, Area a) {
+        if (!_areas.containsKey(id)) 
+            _areas.put(id, new TreeMap<Integer,Area>());
+        SortedMap<Integer,Area> l = _areas.get(id);
+        a.index = _nextAreaId; 
+        _nextAreaId = (_nextAreaId + 1) % Integer.MAX_VALUE;
+        l.put(a.index, a);   
+        return a.index;
+    }
+    
+  
+    /**
+     * Remove an area. 
+     * @param id - user id.
+     * @param i - index of area. 
+     */
+    public void removeArea(String id, int i) {
+        if (_areas.containsKey(id))
+            _areas.get(id).remove(i);
+    }
+    
+    
+    /**
+     * Store everything in a file. 
+     */
     public void save() {
-       try {
-          _api.log().info("LocalUsers", "Saving user data...");
-          FileOutputStream fs = new FileOutputStream(_filename);
-          ObjectOutput ofs = new ObjectOutputStream(fs);
-          for (User u: _users.values())
-             { ofs.writeObject(u); }
-
+        try {
+            _api.log().info("LocalUsers", "Saving user data...");
+            FileOutputStream fs = new FileOutputStream(_filename);
+            ObjectOutput ofs = new ObjectOutputStream(fs);
+            ofs.writeObject(_users); 
+            ofs.writeObject(_areas); 
+            ofs.writeObject(_nextAreaId);
         }
         catch (Exception e) {
-          _api.log().warn("LocalUsers", "Cannot save data: "+e);
+            _api.log().warn("LocalUsers", "Cannot save data: "+e);
         } 
     }
     
     
+    /**
+     * Restore from a file. 
+     */
     public void restore() {
-       try {
-          _api.log().info("LocalUsers", "Restoring user data...");
-          FileInputStream fs = new FileInputStream(_filename);
-          ObjectInput ifs = new ObjectInputStream(fs);
-          while (true)
-          { 
-              User u = (User) ifs.readObject(); 
-              if (!_users.containsKey(u.getIdent()))
-                  _users.put(u.getIdent(), u);
-          }
+        try {
+            _api.log().info("LocalUsers", "Restoring user data...");
+            FileInputStream fs = new FileInputStream(_filename);
+            ObjectInput ifs = new ObjectInputStream(fs);
+            _users = (SortedMap) ifs.readObject();
+            _areas = (Map) ifs.readObject();
+            _nextAreaId = (Integer) ifs.readObject();
         }
         catch (EOFException e) { }
         catch (Exception e) {

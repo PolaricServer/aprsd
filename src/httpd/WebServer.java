@@ -141,7 +141,10 @@ public class WebServer implements ServerAPI.Web
        });
       
        _auth.start();
-    
+       UserApi uu = new UserApi(_auth.conf().getLocalUsers()); // FIXME: Add prefix
+       uu.start();
+       after ("/users/*", (req,resp) -> { _auth.corsHeaders(req, resp); } );
+              
        init();
     }
     
@@ -154,6 +157,7 @@ public class WebServer implements ServerAPI.Web
        _api.saveConfig();
        _auth.conf().getLocalUsers().save();
        _mapupdate.postText("RESTART!", c->true);
+       _jmapupdate.postText("RESTART!", c->true);
     }
          
     
