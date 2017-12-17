@@ -53,6 +53,8 @@ public class LocalUsers {
      */
     public static class Area implements Serializable {
         public int index;
+        public int baseLayer;
+        public boolean[] oLayers;
         public String name;
         public double[] extent;
     }
