@@ -43,6 +43,7 @@ import no.polaric.aprsd.*;
 public class WebServer implements ServerAPI.Web 
 {
     private long _nRequests = 0; 
+    private final PubSub _pubsub;
     private final GeoMessages _messages;
     private final MapUpdater  _mapupdate, _jmapupdate;
     private ServerAPI _api; 
@@ -53,7 +54,8 @@ public class WebServer implements ServerAPI.Web
        if (port > 0)
           port (port);
        _api = api;
-             
+       
+      _pubsub     = new PubSub(_api, true); 
       _messages   = new GeoMessages(_api, true);
       _mapupdate  = new MapUpdater(_api, true);
       _jmapupdate = new JsonMapUpdater(_api, true);
@@ -116,7 +118,8 @@ public class WebServer implements ServerAPI.Web
         * Note that these are trusted in the sense that we assume that authorizations and
         * userid will only be available if properly authenticated. THIS SHOULD BE TESTED. 
         */
-       webSocket("/messages", _messages);
+       webSocket("/notify", _pubsub);
+       webSocket("/messages", _messages); // Should be removed eventually
        webSocket("/mapdata", _mapupdate);
        webSocket("/jmapdata", _jmapupdate);
          
@@ -154,10 +157,10 @@ public class WebServer implements ServerAPI.Web
     
     public void stop() throws Exception {
        _api.log().info("WebServer", "Stopping...");
-       _api.saveConfig();
-       _auth.conf().getLocalUsers().save();
        _mapupdate.postText("RESTART!", c->true);
        _jmapupdate.postText("RESTART!", c->true);
+       _api.saveConfig();
+       _auth.conf().getLocalUsers().save();
     }
          
     
