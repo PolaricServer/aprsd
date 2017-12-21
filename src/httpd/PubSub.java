@@ -42,17 +42,23 @@ public class PubSub extends WsNotifier
             _api.log().debug("MapUpdater", "Client "+_uid+": " + text);
             String[] parms = text.split(",", 2);
             switch (parms[0]) {
+                /* subscribe, room */
                 case "SUBSCRIBE": 
+                    System.out.println("*** SUBSCRIBE: "+parms[1]);
                     subscribe(this, parms[1]);
                     break;
-                    
+                   
+                /* unsubscribe, room */   
                 case "UNSUBSCRIBE": 
                     unsubscribe(this, parms[1]);
                     break;
                     
-                case "POST": 
+                /* post, room, message */
+                // FIXME: Maybe there should be a specific permission for posting to rooms? 
+                case "PUT": 
                     String[] arg = parms[1].split(",", 2);
-                    post(arg[0], arg[1]);
+                    System.out.println("*** PUT: "+arg[0]+","+arg[1]);
+                    put(arg[0], arg[1], this);
                     break;
             
                 default: 
@@ -79,12 +85,26 @@ public class PubSub extends WsNotifier
     public static class Room {
         public Class msgClass;
         public Set<String> cset = new HashSet<String>();
+        public boolean login=false, sar=false, admin=false; 
         
         public Room(Class cl)
             { msgClass = cl; }
+        
+        public Room(boolean lg, boolean s, boolean a, Class cl)
+            { login=lg; sar=s; admin=a; msgClass=cl; }
           
-        public boolean addClient(Client c)
-            { return cset.add(c.getUid()); }
+        public boolean authorized(Client c) {
+            return ((!login || c.login()) &&
+                (!sar || c._auth.sar) &&
+                (!admin || c._auth.admin));
+        }
+        
+        public boolean addClient(Client c) { 
+            if (authorized(c))
+                return cset.add(c.getUid()); 
+            else 
+                return false;
+        }
           
         public void removeClient(Client c)
             { cset.remove(c.getUid()); }
@@ -92,6 +112,7 @@ public class PubSub extends WsNotifier
         public boolean hasClient(Client c)
             { return cset.contains(c.getUid()); }
     }
+    
     
     
     /**
@@ -137,31 +158,47 @@ public class PubSub extends WsNotifier
     
     
     
+    /** Create a room */
     public void createRoom(String name, Class cl) 
         { _rooms.put(name, new Room(cl)); }
     
     
+    
+    /** Create a room with restricted access */
+    public void createRoom(String name, boolean lg, boolean sar, boolean adm, Class cl) 
+        { _rooms.put(name, new Room(lg, sar, adm, cl)); }
+    
+    
+    
+    /** Create a room for a given userid */
     public void createUserRoom(String name, String userid, Class cl)
         { _rooms.put(name, new UserRoom(userid, cl)); }
 
     
+    
+    /** Remove a room */
     public void removeRoom(String name) 
         { _rooms.remove(name); }
     
     
     
-    protected void post(Room rm, String msg) {
-        postText(msg, c-> (rm != null && rm.hasClient((PubSub.Client) c)) );
+    /** Post a message to the members of a room, if client is allowed to the room */
+    private void _put(Room rm, String msg, Client client) {
+        if (client==null || rm.authorized(client))
+            postText(msg, c-> (rm != null && rm.hasClient((PubSub.Client) client)) );
     }
     
-          
-    public void post (String rid, String msg)
-        { post(_rooms.get(rid), msg); }
+    
+    
+    /** Post a message to a room (text is prefixed with the room name) */
+    public void put (String rid, String msg, Client c)
+        { _put(_rooms.get(rid), rid+","+msg, c); }
     
     
     
-    public void post(String rid, Object obj) 
-        { post(rid, toJson(obj)); }
+    /** Post a object to a room (JSON encoded) */
+    public void put(String rid, Object obj) 
+        { put(rid, toJson(obj)); }
     
 
         

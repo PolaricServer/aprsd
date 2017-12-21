@@ -148,6 +148,7 @@ public class WebServer implements ServerAPI.Web
        uu.start();
        after ("/users/*", (req,resp) -> { _auth.corsHeaders(req, resp); } );
               
+       _pubsub.createRoom("TEST", true, false, false, null);
        init();
     }
     
@@ -183,6 +184,9 @@ public class WebServer implements ServerAPI.Web
         
      public ServerAPI.Mbox getMbox() 
         { return _messages; }
+        
+     public PubSub getPubSub() 
+        { return _pubsub; }
      
      public Notifier getNotifier() 
         { return _mapupdate; } 
