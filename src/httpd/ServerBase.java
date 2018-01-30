@@ -45,12 +45,14 @@ public abstract class ServerBase
    public static final String _encoding = "UTF-8";
 
    static DateFormat df = new SimpleDateFormat("dd MMM. HH:mm",
-           new DateFormatSymbols(new Locale("no")));
+            new DateFormatSymbols(new Locale("no")));
    static DateFormat tf = new SimpleDateFormat("HH:mm",
-           new DateFormatSymbols(new Locale("no")));
+            new DateFormatSymbols(new Locale("no")));
    static DateFormat xf = new SimpleDateFormat("yyyyMMddHHmmss",
-           new DateFormatSymbols(new Locale("no")));       
-   
+            new DateFormatSymbols(new Locale("no")));       
+   static DateFormat isodf = 
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+            
    public static Calendar utcTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
    public static Calendar localTime = Calendar.getInstance();
    
@@ -69,10 +71,11 @@ public abstract class ServerBase
  
    public static String serializeJson(Object obj) {
        try {
-          return mapper.writeValueAsString(obj);
+            mapper.setDateFormat(isodf);
+            return mapper.writeValueAsString(obj);
        }
        catch (Exception e) {
-          return null;
+            return null;
        }
    }
    

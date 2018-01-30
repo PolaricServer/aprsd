@@ -95,11 +95,11 @@ public class WebServer implements ServerAPI.Web
      */
      
     public void start() throws Exception {
-       System.out.println("WebServer: Starting...");
+        System.out.println("WebServer: Starting...");
       
 
-       /*  https://blog.codecentric.de/en/2017/07/fine-tuning-embedded-jetty-inside-spark-framework/  */
-       EmbeddedServers.add(EmbeddedServers.Identifiers.JETTY, 
+        /*  https://blog.codecentric.de/en/2017/07/fine-tuning-embedded-jetty-inside-spark-framework/  */
+        EmbeddedServers.add(EmbeddedServers.Identifiers.JETTY, 
          (Routes routeMatcher, StaticFilesConfiguration staticFilesConfiguration, boolean hasMultipleHandler) -> {
              JettyHandler handler = setupHandler(routeMatcher, staticFilesConfiguration, hasMultipleHandler);
              configSession(handler.getSessionManager());
@@ -109,47 +109,48 @@ public class WebServer implements ServerAPI.Web
       
       
       
-       /* Serving static files */
-       staticFiles.externalLocation(
-          _api.getProperty("httpserver.filedir", "/usr/share/polaric") );  
+        /* Serving static files */
+        staticFiles.externalLocation(
+            _api.getProperty("httpserver.filedir", "/usr/share/polaric") );  
        
-       /* 
-        * websocket services. 
-        * Note that these are trusted in the sense that we assume that authorizations and
-        * userid will only be available if properly authenticated. THIS SHOULD BE TESTED. 
-        */
-       webSocket("/notify", _pubsub);
-       webSocket("/messages", _messages); // Should be removed eventually
-       webSocket("/mapdata", _mapupdate);
-       webSocket("/jmapdata", _jmapupdate);
+        /* 
+         * websocket services. 
+         * Note that these are trusted in the sense that we assume that authorizations and
+         * userid will only be available if properly authenticated. THIS SHOULD BE TESTED. 
+         */
+        webSocket("/notify", _pubsub);
+        webSocket("/messages", _messages); // Should be removed eventually
+        webSocket("/mapdata", _mapupdate);
+        webSocket("/jmapdata", _jmapupdate);
          
-       before("*", (req, res) -> {res.status(200);});
-       before("/config_menu", _auth.conf().filter("FormClient", "isauth")); 
+        before("*", (req, res) -> {res.status(200);});
+        before("/config_menu", _auth.conf().filter("FormClient", "isauth")); 
        
-       /* 
-        * Protect other webservices. We should eventually prefix these and 
-        * just one filter should be sufficient 
-        */
-       before("/station_sec", _auth.conf().filter(null, "isauth"));   
-       before("/addobject", _auth.conf().filter(null, "isauth"));
-       before("/deleteobject", _auth.conf().filter(null, "isauth"));
-       before("/resetinfo", _auth.conf().filter(null, "isauth"));
-       before("/sarmode", _auth.conf().filter(null, "isauth"));
-       before("/sarurl", _auth.conf().filter(null, "isauth"));
-       before("/search_sec", _auth.conf().filter(null, "isauth"));
+        /* 
+         * Protect other webservices. We should eventually prefix these and 
+         * just one filter should be sufficient 
+         */
+        before("/station_sec", _auth.conf().filter(null, "isauth"));   
+        before("/addobject", _auth.conf().filter(null, "isauth"));
+        before("/deleteobject", _auth.conf().filter(null, "isauth"));
+        before("/resetinfo", _auth.conf().filter(null, "isauth"));
+        before("/sarmode", _auth.conf().filter(null, "isauth"));
+        before("/sarurl", _auth.conf().filter(null, "isauth"));
+        before("/search_sec", _auth.conf().filter(null, "isauth"));
          
          
-       afterAfter((request, response) -> {
-          _nRequests++;
-       });
+        afterAfter((request, response) -> {
+            _nRequests++;
+        });
       
-       _auth.start();
-       UserApi uu = new UserApi(_auth.conf().getLocalUsers()); // FIXME: Add prefix
-       uu.start();
-       after ("/users/*", (req,resp) -> { _auth.corsHeaders(req, resp); } );
-              
-       _pubsub.createRoom("TEST", true, false, false, null);
-       init();
+        _auth.start();
+        UserApi uu = new UserApi(_auth.conf().getLocalUsers()); // FIXME: Add prefix
+        uu.start();
+        after ("/users/*", (req,resp) -> { _auth.corsHeaders(req, resp); } );
+        
+        /* Room for SYSTEM notifications */
+        _pubsub.createRoom("notify:SYSTEM", false, false, false, ServerAPI.Notification.class);
+        init();
     }
     
     
@@ -166,94 +167,100 @@ public class WebServer implements ServerAPI.Web
          
     
      
-     /* Statistics */
-     public long nVisits() 
+    /* Statistics */
+    public long nVisits() 
         { return _mapupdate.nVisits() + _jmapupdate.nVisits(); }
      
-     public int  nClients() 
+    public int  nClients() 
         { return _mapupdate.nClients() + _jmapupdate.nClients(); }
      
-     public int  nLoggedin()
+    public int  nLoggedin()
         { return _mapupdate.nLoggedIn() + _jmapupdate.nLoggedIn(); }
         
-     public long nHttpReq() 
+    public long nHttpReq() 
         { return _nRequests; }
      
-     public long nMapUpdates() 
+    public long nMapUpdates() 
         { return _mapupdate.nUpdates() + _jmapupdate.nUpdates(); }
         
-     public ServerAPI.Mbox getMbox() 
+    public ServerAPI.Mbox getMbox() 
         { return _messages; }
         
-     public PubSub getPubSub() 
+    public PubSub getPubSub() 
         { return _pubsub; }
      
-     public Notifier getNotifier() 
+    public Notifier getNotifier() 
         { return _mapupdate; } 
    
-     public WsNotifier getMapUpdater()
+    public WsNotifier getMapUpdater()
         { return _mapupdate; }
         
-     public WsNotifier getJsonMapUpdater()
+    public WsNotifier getJsonMapUpdater()
         { return _jmapupdate; }
         
-     public WsNotifier getMessages()
+    public WsNotifier getMessages()
         { return _messages; }
         
-      /* FIXME: What methods should be part of ServerAPI.Web ? */
-     public AuthConfig getAuthConfig()
+    /* FIXME: What methods should be part of ServerAPI.Web ? */
+    public AuthConfig getAuthConfig()
         { return _auth.conf(); }
         
         
-    
-   /**
-    * Adds a HTTP service handler. Go through methods. All public methods that starts 
-    * with 'handle_' are considered handler-methods and are added to the handler-map. 
-    * Key (URL target part) is derived from the method name after the 'handle_' prefix. 
-    * Nothing else is assumed of the handler class.
-    *
-    * This is not REST. Register for GET and POST method. 
-    * Future webservices should be RESTful.
-    * 
-    * @param o : Handler object
-    * @param prefix : Prefix of the url target part. If null, no prefix will be assumed. 
-    */
-    
-   public void addHandler(Object o, String prefix)
-   { 
-      for (Method m : o.getClass().getMethods())
+    /* Send notification to a room */    
+    public void notifyUser(String user, ServerAPI.Notification not) {
+        _pubsub.put("notify:"+user, not);
+    }
 
-         /* FIXME: Should consider using annotation to identify what methods are handlers. */
-         if (m.getName().matches("handle_.+")) {
-            /* FIXME: Should check if method is public, type of parameters and return value */
-            String key = m.getName().replaceFirst("handle_", "");
-            if (prefix != null && prefix.charAt(0) != '/')
-                prefix = "/" + prefix;
-            key = (prefix==null ? "" : prefix) + "/" + key;
-            System.out.println("WebServer: Add HTTP handler method: "+key+" --> "+m.getName());
+        
+        
+    
+    /**
+     * Adds a HTTP service handler. Go through methods. All public methods that starts 
+     * with 'handle_' are considered handler-methods and are added to the handler-map. 
+     * Key (URL target part) is derived from the method name after the 'handle_' prefix. 
+     * Nothing else is assumed of the handler class.
+     *
+     * This is not REST. Register for GET and POST method. 
+     * Future webservices should be RESTful.
+     * 
+     * @param o : Handler object
+     * @param prefix : Prefix of the url target part. If null, no prefix will be assumed. 
+     */
+    
+    public void addHandler(Object o, String prefix)
+    { 
+        for (Method m : o.getClass().getMethods())
+
+            /* FIXME: Should consider using annotation to identify what methods are handlers. */
+            if (m.getName().matches("handle_.+")) {
+                /* FIXME: Should check if method is public, type of parameters and return value */
+                String key = m.getName().replaceFirst("handle_", "");
+                if (prefix != null && prefix.charAt(0) != '/')
+                    prefix = "/" + prefix;
+                key = (prefix==null ? "" : prefix) + "/" + key;
+                System.out.println("WebServer: Add HTTP handler method: "+key+" --> "+m.getName());
             
-            /* FIXME: Configure allowed origin(s) */
-            after (key, (req,resp) -> { 
-               _auth.corsHeaders(req, resp);
-              } 
-            );
+                /* FIXME: Configure allowed origin(s) */
+                after (key, (req,resp) -> { 
+                    _auth.corsHeaders(req, resp);
+                });
             
-            get(key,  (req, resp) -> {return invokeMethod(o, m, req, resp);} );
-            post(key, (req, resp) -> {return invokeMethod(o, m, req, resp);} );
-      }
-   }
+                get(key,  (req, resp) -> {return invokeMethod(o, m, req, resp);} );
+                post(key, (req, resp) -> {return invokeMethod(o, m, req, resp);} );
+            }
+    }
    
    
    
-   public static String invokeMethod(Object o, Method m, Request req, Response resp) {
-       try {
-          return (String) m.invoke(o, req, resp);
-       }
-       catch (Exception e) {
-          System.out.println("WebServer: Couldn't invoke method: "+e);
-          e.printStackTrace(System.out);
-          return "<H2>Internal error: Couldn't invoke method</H2>"+e;
-       }
-   }
+    public static String invokeMethod(Object o, Method m, Request req, Response resp) {
+        try {
+            return (String) m.invoke(o, req, resp);
+        }
+        catch (Exception e) {
+            System.out.println("WebServer: Couldn't invoke method: "+e);
+            e.printStackTrace(System.out);
+            return "<H2>Internal error: Couldn't invoke method</H2>"+e;
+        }
+    }
 
 }

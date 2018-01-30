@@ -17,164 +17,184 @@ package no.polaric.aprsd;
 import java.util.*;
 
 
+/** 
+ * This is the main API. The interface to the core server application - to be used by
+ * plugins 
+ */
+public interface ServerAPI 
+{ 
+  
    /** 
-    * This is the main API. The interface to the core server application - to be used by
-    * plugins 
+    * Notifcation content class. 
     */
-   public interface ServerAPI 
-   { 
-      
-      /** Interface to web server */
-      public interface Web {
-         public long nVisits();
-         public int  nClients();
-         public int  nLoggedin();
-         public long nHttpReq(); 
-         public long nMapUpdates(); 
-         
-         public Mbox getMbox(); 
-         public void start() throws Exception; 
-         public void stop() throws Exception;
-      }
-      
-      
-      /** Messaging service */
-      public interface Mbox {
-         public Set<String> getUsers();
-         public void postMessage(String from, String to, String txt);
-      }
-      
-      
-      
-      /* Now, what methods do we need here? Other interfaces.
-       * Do we need StationDB? */
-       
-       public Logfile log();
-       
-       
-       public Web getWebserver(); 
-      
-      
-       /** Get data interface. */
-       public StationDB getDB();
-    
-    
-       /** Get APRS parser */
-       public AprsParser getAprsParser();
-    
-       
-       /** Get channel manager interface. */
-       public Channel.Manager getChanManager(); 
-       
-       
-       /** Get igate. */
-       public Igate getIgate();
-       
-       
-       /** Get message processor interface. */
-       public MessageProcessor getMsgProcessor(); 
-          
-          
-       /** Replace current internet channel in igate, etc.. */   
-       public void setInetChannel(AprsChannel ch);
-          
-       /** Return current internet channel in igate, etc.. */
-       public AprsChannel getInetChannel();
+    public class Notification {
+        public String type; 
+        public String from;
+        public String text; 
+        public Date time; 
+        public int ttl;
+        public Notification (String t, String frm, String txt, Date tm, int tt)
+            { type = t; from = frm; text=txt; time=tm; ttl = tt; }
+    }
+  
+  
+    /** Interface to web server */
+    public interface Web {
+        public long nVisits();
+        public int  nClients();
+        public int  nLoggedin();
+        public long nHttpReq(); 
+        public long nMapUpdates(); 
 
-       
-       
-       /** Add HTTP handlers (webservices).
-        * A http handler is a class/object that offers a set of methods to handle
-        * incoming HTTP requests. A method with prefix <code>handle_</code> that has a Request
-        * and Response parameter are automatically assumed to be webservices. A method 
-        * <code>handle_XXX</code> will then for instance be made available as a
-        * webservice on <code>URL http://server:port/XXX</code>.
-        *
-        * @param obj    Object that offers a set of handler methods. 
-        * @param prefix Optional URL prefix for services of this object. 
-        */
-       public void addHttpHandler(Object obj, String prefix);
-       
-       
-       /** Add HTTP handlers (webservices).
-        * @param cn  Class name. 
-        * @param prefix Optional URL prefix for services of this object. 
-        */
-       public void addHttpHandlerCls(String cn, String prefix);
-       
-       
-       /** Get handler for remote control. */
-       public RemoteCtl getRemoteCtl(); 
-       
-       
-       /** Get handler for own position */
-       public OwnPosition getOwnPos(); 
-       
-       
-       /** Get configuration properties. */
-       public Properties getConfig();
-       
-       
-       /** Save config. Note that this is destructive and should only be called
-        * at shutdown. 
-        */
-       public void saveConfig();
-          
-          
-       /** Get string configuration property. 
-        * @param pn property name.
-        * @param dval default value. 
-        */
-       public String getProperty (String pn, String dval); 
-       
-       
-       /** Get boolean configuration property. 
-        * @param pn property name.
-        * @param dval default value. 
-        */
-       public boolean getBoolProperty (String pn, boolean dval);
-       
-       
-       /** Get integer configuration property. 
-        * @param pn property name.
-        * @param dval default value. 
-        */
-       public int getIntProperty (String pn, int dval);
-       
-       
-       /** Generic dictionary of objects. 
-        * Plugins may use this to exchange references to interfaces to their services. 
-        */
-       public Map<String, Object> properties();
-       
-       
-       /** Get software version. */
-       public String getVersion();
-       
-       
-       /** Get default to-address for APRS packet to be sent. */
-       public String getToAddr();
-       
-       
-       /** Get SAR URL handler. */
-       public SarUrl getSarUrl();
-       
-       
-       /** Get SAR mode info. */
-       public SarMode getSar();
+        public void notifyUser(String user, Notification not);
+     
+        public Mbox getMbox(); 
+        public void start() throws Exception; 
+        public void stop() throws Exception;
+    }
+  
+    /* FIXME: Should we have a interface for user or for notifications? */
+  
+  
+    /** 
+     * Messaging service. 
+     */
+    public interface Mbox {
+        public Set<String> getUsers();
+        public void postMessage(String from, String to, String txt);
+    }
+  
+  
+  
+    /* Now, what methods do we need here? Other interfaces.
+     * Do we need StationDB? */
     
-    
-       /** Set SAR mode. 
-        * @param src Callsign of the user requesting SAR mode. 
-        * @param filt Regular expression for filtering source callsign of pos reports.
-        * @param descr The reason why SAR mode is requested. 
-        */
-       public void setSar(String src, String filt, String descr, boolean h);
-    
-    
-       /**
-        * Clear SAR mode. 
-        */
-       public void clearSar();
-   }
+    public Logfile log();
    
+   
+    public Web getWebserver(); 
+  
+  
+    /** Get data interface. */
+    public StationDB getDB();
+
+
+    /** Get APRS parser */
+    public AprsParser getAprsParser();
+
+   
+    /** Get channel manager interface. */
+    public Channel.Manager getChanManager(); 
+   
+   
+    /** Get igate. */
+    public Igate getIgate();
+   
+   
+    /** Get message processor interface. */
+    public MessageProcessor getMsgProcessor(); 
+      
+      
+    /** Replace current internet channel in igate, etc.. */   
+    public void setInetChannel(AprsChannel ch);
+      
+    /** Return current internet channel in igate, etc.. */
+    public AprsChannel getInetChannel();
+
+   
+   
+    /** Add HTTP handlers (webservices).
+     * A http handler is a class/object that offers a set of methods to handle
+     * incoming HTTP requests. A method with prefix <code>handle_</code> that has a Request
+     * and Response parameter are automatically assumed to be webservices. A method 
+     * <code>handle_XXX</code> will then for instance be made available as a
+     * webservice on <code>URL http://server:port/XXX</code>.
+     *
+     * @param obj    Object that offers a set of handler methods. 
+     * @param prefix Optional URL prefix for services of this object. 
+     */
+    public void addHttpHandler(Object obj, String prefix);
+   
+   
+    /** Add HTTP handlers (webservices).
+     * @param cn  Class name. 
+     * @param prefix Optional URL prefix for services of this object. 
+     */
+    public void addHttpHandlerCls(String cn, String prefix);
+   
+   
+    /** Get handler for remote control. */
+    public RemoteCtl getRemoteCtl(); 
+   
+   
+    /** Get handler for own position */
+    public OwnPosition getOwnPos(); 
+   
+   
+    /** Get configuration properties. */
+    public Properties getConfig();
+   
+   
+    /** Save config. Note that this is destructive and should only be called
+     * at shutdown. 
+     */
+    public void saveConfig();
+      
+      
+    /** Get string configuration property. 
+     * @param pn property name.
+     * @param dval default value. 
+     */
+    public String getProperty (String pn, String dval); 
+   
+   
+    /** Get boolean configuration property. 
+     * @param pn property name.
+     * @param dval default value. 
+     */
+    public boolean getBoolProperty (String pn, boolean dval);
+   
+   
+    /** Get integer configuration property. 
+     * @param pn property name.
+     * @param dval default value. 
+     */
+    public int getIntProperty (String pn, int dval);
+   
+   
+    /** Generic dictionary of objects. 
+     * Plugins may use this to exchange references to interfaces to their services. 
+     */
+    public Map<String, Object> properties();
+   
+   
+    /** Get software version. */
+    public String getVersion();
+   
+   
+    /** Get default to-address for APRS packet to be sent. */
+    public String getToAddr();
+   
+   
+    /** Get SAR URL handler. */
+    public SarUrl getSarUrl();
+   
+   
+    /** Get SAR mode info. */
+    public SarMode getSar();
+
+
+    /** Set SAR mode. 
+     * @param src Callsign of the user requesting SAR mode. 
+     * @param filt Regular expression for filtering source callsign of pos reports.
+     * @param descr The reason why SAR mode is requested. 
+     */
+    public void setSar(String src, String filt, String descr, boolean h);
+
+
+    /**
+     * Clear SAR mode. 
+     */
+    public void clearSar();
+}
+

@@ -40,7 +40,9 @@ public class AuthInfo {
     }
     
     
-    
+    public boolean login() 
+        { return userid != null; }
+       
        
     /**
      * Constructor. Gets userid from a user profile on request and sets authorisations. 
