@@ -350,7 +350,8 @@ package no.polaric.aprsd.http
           }
           else {
               if (_api.getDB().getOwnObjects().delete(id)) {
-                  _api.log().info("Webservices", "DELETE OBJECT: '"+id+"' by user '"+getAuthInfo(req).userid+"'")
+                  _api.log().info("Webservices", "DELETE OBJECT: '"+id+"' by user '"+getAuthInfo(req).userid+"'");
+                  systemNotification("ADMIN", "Object '"+id+"' deleted by user '"+getAuthInfo(req).userid+"'", 0)
                   <h3> {I.tr("Object removed!")} </h3>
               }
               else
@@ -544,15 +545,19 @@ package no.polaric.aprsd.http
                val perm = req.queryParams("perm")
                
                _api.log().info("Webservices", "SET OBJECT: '"+id+"' by user '"+getAuthInfo(request).userid+"'")
+
+                  
                if ( _api.getDB().getOwnObjects().add(id, 
                       new AprsHandler.PosData( pos,
                          if (osym==null) 'c' else osym(0) ,
                          if (osymtab==null) '/' else osymtab(0)),
                       if (otxt==null) "" else otxt,
-                      "true".equals(perm) ))
-                  
-                  <h2> {I.tr("Objekt updated")} </h2>
+                      "true".equals(perm) )) {
+                  systemNotification("ADMIN", "Object '"+id+"' posted by user '"+getAuthInfo(request).userid+"'", 0)
+                      
+                  <h2> {I.tr("Object updated")} </h2>
                   <p>ident={"'"+id+"'"}<br/>pos={showUTM(req, pos) }</p>;
+                }
                else
                   <h2> {I.tr("Cannot update")} </h2>
                   <p>  {I.tr("Object '{0}' is already added by someone else", id)} </p>

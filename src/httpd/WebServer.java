@@ -144,12 +144,13 @@ public class WebServer implements ServerAPI.Web
         });
       
         _auth.start();
-        UserApi uu = new UserApi(_auth.conf().getLocalUsers()); // FIXME: Add prefix
+        UserApi uu = new UserApi(_api, _auth.conf().getLocalUsers()); // FIXME: Add prefix
         uu.start();
         after ("/users/*", (req,resp) -> { _auth.corsHeaders(req, resp); } );
         
-        /* Room for SYSTEM notifications */
+        /* Rooms for SYSTEM and ADMIN notifications */
         _pubsub.createRoom("notify:SYSTEM", false, false, false, ServerAPI.Notification.class);
+        _pubsub.createRoom("notify:ADMIN", false, false, false, ServerAPI.Notification.class);
         init();
     }
     

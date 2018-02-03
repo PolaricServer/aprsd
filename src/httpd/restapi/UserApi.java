@@ -21,13 +21,15 @@ import static spark.Spark.get;
 import static spark.Spark.put;
 import static spark.Spark.*;
 import java.util.*; 
-
+import no.polaric.aprsd.*;
 
 /**
  * Implement REST API for user-related info. Users, areas. 
  */
 public class UserApi {
 
+    private ServerAPI _api; 
+    
     /* 
      * User info as it is sent to clients. 
      */
@@ -42,8 +44,9 @@ public class UserApi {
     private LocalUsers _users; 
     
     
-    public UserApi(LocalUsers u) {
-        _users = u; 
+    public UserApi(ServerAPI api,  LocalUsers u) {
+        _api = api;
+        _users = u;
     }
     
     
@@ -76,11 +79,15 @@ public class UserApi {
             String uid = req.splat()[0];
             LocalUsers.Area a = (LocalUsers.Area) 
                 ServerBase.fromJson(req.body(), LocalUsers.Area.class);
+                
+            _api.getWebserver().notifyUser(uid, 
+                new ServerAPI.Notification
+                  ("system", "system", "Added area '"+a.name+ "' for user '"+uid+"'", new Date(), 10) );    
+                
             if (a != null) 
                 return ""+ _users.addArea(uid, a);
             else 
                 return ERROR(resp, 400, "Invalid input format");
-
         });
         
 

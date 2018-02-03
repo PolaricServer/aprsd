@@ -34,12 +34,13 @@ public class PubSub extends WsNotifier
 
     public class Client extends WsNotifier.Client 
     {   
-        public Client(Session conn) 
-            { super(conn); }
+        public Client(Session conn) { 
+            super(conn); 
+        }
              
        
         @Override synchronized public void onTextFrame(String text) {
-            _api.log().debug("MapUpdater", "Client "+_uid+": " + text);
+            _api.log().debug("PubSub", "Client "+_uid+", userid="+getUsername()+" : " + text);
             String[] parms = text.split(",", 2);
             switch (parms[0]) {
                 /* subscribe, room */
@@ -132,7 +133,7 @@ public class PubSub extends WsNotifier
         }
         
         @Override public boolean addClient(Client c) {
-            if (c.getUsername().equals(userid))
+            if (!c.getUsername().equals(userid))
                 return false;
             return super.addClient(c);
         }
@@ -140,6 +141,16 @@ public class PubSub extends WsNotifier
     
     
     
+    @Override public boolean subscribe(String uid, WsNotifier.Client client) 
+    {
+        if (client.login())
+            createUserRoom("notify:"+client.getUsername(), 
+               client.getUsername(), ServerAPI.Notification.class);
+        return true; 
+    }
+   
+   
+   
     /**
      * subscribe a client to a room. 
      */

@@ -90,6 +90,13 @@ public abstract class ServerBase
    }
    
    
+   public void systemNotification(String user, String txt, int ttl) {
+        _api.getWebserver().notifyUser(user, 
+            new ServerAPI.Notification("system", "system", txt, new Date(), ttl) );  
+   }
+   
+   
+   
    
    public ServerBase(ServerAPI api) 
    {
