@@ -32,7 +32,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */
    protected class Subscriber implements MessageProcessor.MessageHandler
    {
-      public boolean handleMessage(Station sender, String text) {
+      public boolean handleMessage(Station sender, String recipient, String text) {
           return processRequest(sender, text);
       } 
    }

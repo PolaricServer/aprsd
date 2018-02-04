@@ -37,6 +37,7 @@ public class Main implements ServerAPI
    public static  Igate igate  = null;
    public static  OwnObjects ownobjects; 
    public static  OwnPosition ownpos = null; 
+   public static  BullBoard bullboard = null;
    public static  RemoteCtl rctl;
    public static  SarMode  sarmode = null;
    private static Properties _config, _defaultConf; 
@@ -74,6 +75,9 @@ public class Main implements ServerAPI
     
    public MessageProcessor getMsgProcessor()
     { return db.getMsgProcessor(); /* Move from StationDB */ }
+                    
+   public BullBoard getBullBoard() 
+    { return bullboard; }
                     
    public OwnPosition getOwnPos()
     { return ownpos; }       
@@ -266,7 +270,9 @@ public class Main implements ServerAPI
            db  = new StationDBImp(api);   
            
            /* Start parser and connect it to channel(s) if any */
-           parser = new AprsParser(api, db.getMsgProcessor());
+           parser = new AprsParser(api, getMsgProcessor());
+           
+           bullboard = new BullBoard(api, getMsgProcessor());
            
            /* Initialize signs early since plugins may use it (see below) */
            Signs.init(api);

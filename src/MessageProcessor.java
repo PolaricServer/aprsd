@@ -31,7 +31,7 @@ public class MessageProcessor implements Runnable, Serializable
     * Interface for message subscribers. 
     */
    public interface MessageHandler {
-      public boolean handleMessage(Station sender, String text);
+      public boolean handleMessage(Station sender, String recipient, String text);
    }
 
 
@@ -168,6 +168,10 @@ public class MessageProcessor implements Runnable, Serializable
       } 
       
       Subscriber subs = _subscribers.get(recipient);
+      if (subs == null && recipient.matches("BLN.*"))
+         subs = _subscribers.get("BLN");
+         // FIXME: Could we generalize over regex search? 
+         
       if (subs != null) {
          if (!recMessages.containsKey(sender.getIdent()+"#"+msgid)) { 
             boolean result = !subs.verify;
@@ -182,7 +186,7 @@ public class MessageProcessor implements Runnable, Serializable
                result = mac.equals
                   (SecUtils.digestB64(_key+sender.getIdent()+recipient+text+msgid, 8));
             }
-            result = result && subs.recipient.handleMessage(sender, text);
+            result = result && subs.recipient.handleMessage(sender, recipient, text);
             if (!result) 
                _api.log().info("MessageProc", "Message authentication failed. msgid="+msgid);
             recMessages.put(sender.getIdent()+"#"+msgid, result);

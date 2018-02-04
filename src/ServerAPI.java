@@ -93,6 +93,10 @@ public interface ServerAPI
    
     /** Get message processor interface. */
     public MessageProcessor getMsgProcessor(); 
+    
+    
+    /** Get bulletin board */
+    public BullBoard getBullBoard(); 
       
       
     /** Replace current internet channel in igate, etc.. */   
