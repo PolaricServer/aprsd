@@ -168,8 +168,9 @@ public class MessageProcessor implements Runnable, Serializable
       } 
       
       Subscriber subs = _subscribers.get(recipient);
-      if (subs == null && recipient.matches("BLN.*"))
+      if (subs == null && recipient.matches("BLN.*")) 
          subs = _subscribers.get("BLN");
+
          // FIXME: Could we generalize over regex search? 
          
       if (subs != null) {
@@ -186,10 +187,12 @@ public class MessageProcessor implements Runnable, Serializable
                result = mac.equals
                   (SecUtils.digestB64(_key+sender.getIdent()+recipient+text+msgid, 8));
             }
+            
             result = result && subs.recipient.handleMessage(sender, recipient, text);
-            if (!result) 
+            if (!result && msgid != null) 
                _api.log().info("MessageProc", "Message authentication failed. msgid="+msgid);
-            recMessages.put(sender.getIdent()+"#"+msgid, result);
+            if (msgid != null) 
+                recMessages.put(sender.getIdent()+"#"+msgid, result);
          }     
          if (msgid != null)
             sendAck(sender.getIdent(), msgid, recMessages.get(sender.getIdent()+"#"+msgid));
