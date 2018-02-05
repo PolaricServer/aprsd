@@ -230,11 +230,17 @@ public class AprsParser implements AprsChannel.Receiver
         int i = msg.lastIndexOf('{');
         if (i >= 0) 
            msgid = msg.substring(i+1, msg.length());
-        if (msg.charAt(10) != ':') {
-             _api.log().warn("AprsParser", "Message format problem: '"+msg+"'");
-             return; 
-        }
         String content = msg.substring(11, (i>=0 ? i : msg.length()));
+        
+        if (msg.charAt(10) != ':') {
+            int pos = msg.indexOf(':',3);
+            if (pos > 10 || pos < 0) {
+                _api.log().warn("AprsParser", "Message format problem: '"+msg+"'");
+                return; 
+            }
+            recipient = msg.substring(1,pos).trim();
+            content = msg.substring(pos+1, (i>=0 ? i : msg.length()));
+        }
         
         /* If sender==recipient and no msg id: This is telemetry metadata */
         if (msgid==null && station.getIdent().equals(recipient))
