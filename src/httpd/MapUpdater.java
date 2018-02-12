@@ -32,7 +32,7 @@ import org.eclipse.jetty.websocket.api.UpgradeRequest;
 /**
  * Map overlay updater using Websockets.  
  */
-@WebSocket(maxIdleTime=360000)
+@WebSocket(maxIdleTime=600000)
 public class MapUpdater extends WsNotifier implements Notifier
 {
 
@@ -101,6 +101,7 @@ public class MapUpdater extends WsNotifier implements Notifier
        /** Receive text frame from client. */
        @Override public void onTextFrame(String text) 
        {
+           // FIXME: Use JSON encoding! 
            _api.log().debug("MapUpdater", "Client "+_uid+": " + text);
            String[] parms = text.split(",");
            /* SUBSCRIBE filter,x1,x2,x3,x4,scale */

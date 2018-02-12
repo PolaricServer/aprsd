@@ -24,17 +24,21 @@ public class BullBoard implements MessageProcessor.MessageHandler {
             if (b.bullid<_start || b.bullid>_end)
                 return; 
                 
-            _api.log().debug("BullBoard", "Bulletin update: "+sender+" > "+name+"["+b.bullid+"]");
+            _api.log().debug("BullBoard", "Bulletin update: "+sender+" > "+name+"["+b.bullid+"]: "+b.text);
             if (!_map.containsKey(sender))
-                _map.put(sender, new Bull[_size]);
-                
-            _map.get(sender)[b.bullid - _start] = b;  // Replace
+                _map.put(sender, new Bull[_size]);      
             
-            /* FIXME: Don't notify if no real change */
+            Bull orig = _map.get(sender)[b.bullid - _start];  
+            if (orig != null && orig.sender.equals(b.sender) && orig.text.equals(b.text)) {
+                System.out.println("*** Bull already exists. No update.");
+                return; 
+            }
+            /* If there is a change, replace and notify */
+            _map.get(sender)[b.bullid - _start] = b; 
             _api.getWebserver().notifyUser
                ("SYSTEM", new ServerAPI.Notification
                  ("chat", "system", ((b.bullid >= '0' && b.bullid <= '9') ? "Bulletin: " : "Announcement: ")+
-                  sender+" > "+name+"["+b.bullid+"]: "+b.text, new Date(), 60*24));
+                  sender+" > "+name+"["+b.bullid+"]: "+b.text, new Date(), 60*4));
         }
         
         
@@ -61,13 +65,15 @@ public class BullBoard implements MessageProcessor.MessageHandler {
     private SubBoard _bulletins = new SubBoard("", true);
     private SubBoard _announcements = new SubBoard("", false); 
     private SortedMap<String, SubBoard> _groups = new TreeMap(); 
-    private String _grpsel = ".*";
+    private String _grpsel;
+    private String _senders;
     
   
   
     public BullBoard(ServerAPI api, MessageProcessor p) {
         _api = api;
         _grpsel = api.getProperty("bulletin.groups", ".*");
+        _senders = api.getProperty("bulletin.senders", ".*");
         p.subscribe("BLN", this, false);
     }
     
@@ -97,10 +103,14 @@ public class BullBoard implements MessageProcessor.MessageHandler {
             if (!_groups.containsKey(groupid))
                 _groups.put(groupid, new SubBoard(groupid, true));
             _groups.get(groupid).put(bull);
+            return true; 
         }
         
+        if (!sender.getIdent().matches(_senders))
+            return true;
+        
         /* General bulletins */ 
-        else if (bullid >= '0' && bullid <= '9')
+        if (bullid >= '0' && bullid <= '9')
             _bulletins.put(bull);
         /* General announcements */
         else if (bullid >= 'A' && bullid <= 'Z')

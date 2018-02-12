@@ -28,7 +28,7 @@ import java.util.function.*;
 /**
  * Generic publish/subscribe service using websocket. 
  */
-@WebSocket(maxIdleTime=360000)
+@WebSocket(maxIdleTime=600000)
 public class PubSub extends WsNotifier
 {
 
