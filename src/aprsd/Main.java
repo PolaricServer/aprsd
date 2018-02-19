@@ -258,14 +258,7 @@ public class Main implements ServerAPI
     {
         try {
            properties().put("API", this);
-                   
-           /* Configure and Start HTTP server */
-           int http_port = getIntProperty("httpserver.port", 8081);
-           ws = new WebServer(api, http_port);
-           ws.start();
-           TrackerPoint.setNotifier(ws.getNotifier());
-           log.info("Main", "HTTP/WS server ready on port " + http_port);
-           
+                      
            /* Database of stations/objects */
            db  = new StationDBImp(api);   
            
@@ -273,6 +266,16 @@ public class Main implements ServerAPI
            parser = new AprsParser(api, getMsgProcessor());
            
            bullboard = new BullBoard(api, getMsgProcessor());
+                     
+           /* Configure and Start HTTP server */
+           int http_port = getIntProperty("httpserver.port", 8081);
+           ws = new WebServer(api, http_port);
+           ws.start();
+           TrackerPoint.setNotifier(ws.getNotifier());
+           log.info("Main", "HTTP/WS server ready on port " + http_port);
+
+           
+ 
            
            /* Initialize signs early since plugins may use it (see below) */
            Signs.init(api);

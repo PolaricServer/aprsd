@@ -1,52 +1,96 @@
 package no.polaric.aprsd;
 import java.util.*;
- 
+import java.time.*;
+import java.util.concurrent.*;
+import static java.util.concurrent.TimeUnit.*;
+
+
 public class BullBoard implements MessageProcessor.MessageHandler {
- 
- 
-    public static class Bull {
+     
+
+    public class Bull {
         public char bullid; 
-        public Station sender; 
+        public String sender; 
         public String text; 
+        public Date time; 
         public Bull(char id, Station s, String txt)
-            { bullid=id; sender=s; text=txt; }
+            { bullid=id; sender=s.getIdent(); text=txt; time=getUTCtime(); }
+            // FIXME: Time should be in UTC !!!!!
+    }
+    
+    public class SenderBulls {
+        public String sender;
+        public Bull[] bulls;
+        
+        public Bull get(int i)
+            { return bulls[i]; }
+        public void update(int i, Bull b)
+            { bulls[i] = b; }
+        public SenderBulls(String s, int n)
+            { sender=s; bulls=new Bull[n]; }
     }
     
     
     public class SubBoard {
-        private SortedMap<String, Bull[]> _map = new TreeMap();
+        private SortedMap<String, SenderBulls> _map = new TreeMap();
         private int _size = 10;
         private char _start='0', _end='9'; 
         private String name;
         
+        /**
+         * Add a bulletin to the subboard.
+         */
         public void put(Bull b) { 
-            String sender = b.sender.getIdent();
             if (b.bullid<_start || b.bullid>_end)
                 return; 
                 
-            _api.log().debug("BullBoard", "Bulletin update: "+sender+" > "+name+"["+b.bullid+"]: "+b.text);
-            if (!_map.containsKey(sender))
-                _map.put(sender, new Bull[_size]);      
+            _api.log().debug("BullBoard", "Bulletin update: "+b.sender+" > "+name+"["+b.bullid+"]: "+b.text);
+            if (!_map.containsKey(b.sender))
+                _map.put(b.sender, new SenderBulls(b.sender,_size));      
             
-            Bull orig = _map.get(sender)[b.bullid - _start];  
+            Bull orig = _map.get(b.sender).get(b.bullid - _start);  
             if (orig != null && orig.sender.equals(b.sender) && orig.text.equals(b.text)) {
                 System.out.println("*** Bull already exists. No update.");
+                // FIXME: update time
                 return; 
             }
             /* If there is a change, replace and notify */
-            _map.get(sender)[b.bullid - _start] = b; 
+            _map.get(b.sender).update(b.bullid - _start, b); 
             _api.getWebserver().notifyUser
                ("SYSTEM", new ServerAPI.Notification
                  ("chat", "system", ((b.bullid >= '0' && b.bullid <= '9') ? "Bulletin: " : "Announcement: ")+
-                  sender+" > "+name+"["+b.bullid+"]: "+b.text, new Date(), 60*4));
+                  b.sender+" > "+name+"["+b.bullid+"]: "+b.text, getUTCtime(), 60*4));
+        }
+        
+        /** 
+         * Cleanup. Remove bulls older than xx hours
+         */
+        public synchronized void cleanUp(int hours) {
+            for (Object s : _map.keySet().toArray()) {
+                SenderBulls bls = _map.get((String) s); 
+                boolean empty = true;
+                for (int i=0; i<bls.bulls.length; i++) {
+                    if (bls.bulls[i] != null && 
+                            bls.bulls[i].time.getTime() + hours*60*60*1000 < getUTCtime().getTime()) {
+                        _api.log().debug("BullBoard", "Cleanup - removing bull: "+bls.bulls[i].sender);
+                        bls.bulls[i] = null;
+                    }
+                    if (bls.bulls[i] != null)
+                        empty = false;
+                }
+                if (empty)
+                    _map.remove(s);
+            }
         }
         
         
         public Bull[] get(String sender) 
-            { return _map.get(sender); }
+            { return _map.get(sender).bulls; }
         
+        public Set<String> getSenders() 
+            { return _map.keySet(); }
         
-        public Collection<Bull[]> getAll() 
+        public Collection<SenderBulls> getAll() 
             { return _map.values(); }
         
         
@@ -68,13 +112,46 @@ public class BullBoard implements MessageProcessor.MessageHandler {
     private String _grpsel;
     private String _senders;
     
+    // FIXME
+    public static Calendar utcTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
+    
+    
+    // FIXME: Move this to ServerAPI?
+    private Date getUTCtime() {
+        Instant ins = Instant.now(); 
+        return new Date(ins.toEpochMilli());
+    }
+         
+    
+    // FIXME: Move this to ServerAPI
+    private final ScheduledExecutorService scheduler =
+       Executors.newScheduledThreadPool(1);
+  
   
   
     public BullBoard(ServerAPI api, MessageProcessor p) {
         _api = api;
         _grpsel = api.getProperty("bulletin.groups", ".*");
         _senders = api.getProperty("bulletin.senders", ".*");
+        int ttl_bull = _api.getIntProperty("bulletin.ttl.bull", 12);
+        int ttl_ann = _api.getIntProperty("bulletin.ttl.ann", 24);
+        
         p.subscribe("BLN", this, false);
+        
+        /** Shedule cleanup each 10 minutes. */
+        scheduler.scheduleAtFixedRate( () -> 
+            {
+                try {
+                   _bulletins.cleanUp(ttl_bull); 
+                   _announcements.cleanUp(ttl_ann); 
+                   for (SubBoard sb : _groups.values())
+                       sb.cleanUp(ttl_bull);
+                }
+                catch (Exception e) {
+                    _api.log().warn("BullBoard", "Exception in scheduled action: "+e);
+                    e.printStackTrace(System.out);
+                }
+            } ,20, 10, MINUTES); 
     }
     
     
@@ -124,20 +201,41 @@ public class BullBoard implements MessageProcessor.MessageHandler {
     }
  
  
- 
+    /**
+     * Get general bulletins subboard 
+     */
     public SubBoard getBulletins()
         { return _bulletins; }
  
  
+    /**
+     * Get announcements subboard.
+     */
     public SubBoard getAnnouncements()
         { return _announcements; }
  
  
+    /**
+     * Get bulletin group. 
+     */
     public SubBoard getBulletinGroup(String groupid) 
-        { return _groups.get(groupid); }
+    { 
+        if (groupid == null || groupid.equals(""))
+            return getBulletins();
+        else if (groupid.equals("_B_")) 
+            return getBulletins(); 
+        else if (groupid.equals("_A_")) 
+            return getAnnouncements(); 
+        else 
+            return _groups.get(groupid); 
+    }
  
  
+    /**
+     * Get names of all bulletin groups. 
+     */
     public Set<String> getGroupNames()
         { return _groups.keySet(); }
+
 }
  
