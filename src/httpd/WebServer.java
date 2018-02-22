@@ -158,6 +158,9 @@ public class WebServer implements ServerAPI.Web
         /* Rooms for SYSTEM and ADMIN notifications */
         _pubsub.createRoom("notify:SYSTEM", false, false, false, ServerAPI.Notification.class);
         _pubsub.createRoom("notify:ADMIN", false, false, false, ServerAPI.Notification.class);
+        
+        /* Room for pushing updates to bulletin board */
+        _pubsub.createRoom("bullboard", (Class) null); 
         init();
     }
     
@@ -194,7 +197,7 @@ public class WebServer implements ServerAPI.Web
     public ServerAPI.Mbox getMbox() 
         { return _messages; }
         
-    public PubSub getPubSub() 
+    public ServerAPI.PubSub getPubSub() 
         { return _pubsub; }
      
     public Notifier getNotifier() 

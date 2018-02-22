@@ -7,6 +7,7 @@ import static java.util.concurrent.TimeUnit.*;
 
 public class BullBoard implements MessageProcessor.MessageHandler {
      
+    public class Update {}
 
     public class Bull {
         public char bullid; 
@@ -14,7 +15,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
         public String text; 
         public Date time; 
         public Bull(char id, Station s, String txt)
-            { bullid=id; sender=s.getIdent(); text=txt; time=getUTCtime(); }
+            { bullid=id; sender=s.getIdent(); text=txt; time=new Date(); }
             // FIXME: Time should be in UTC !!!!!
     }
     
@@ -46,34 +47,38 @@ public class BullBoard implements MessageProcessor.MessageHandler {
                 
             _api.log().debug("BullBoard", "Bulletin update: "+b.sender+" > "+name+"["+b.bullid+"]: "+b.text);
             if (!_map.containsKey(b.sender))
-                _map.put(b.sender, new SenderBulls(b.sender,_size));      
-            
+                _map.put(b.sender, new SenderBulls(b.sender,_size));    
+                
+            _api.getWebserver().getPubSub().put("bullboard", null);
             Bull orig = _map.get(b.sender).get(b.bullid - _start);  
             if (orig != null && orig.sender.equals(b.sender) && orig.text.equals(b.text)) {
-                System.out.println("*** Bull already exists. No update.");
-                // FIXME: update time
+                orig.time = new Date();
                 return; 
             }
+            
             /* If there is a change, replace and notify */
             _map.get(b.sender).update(b.bullid - _start, b); 
             _api.getWebserver().notifyUser
                ("SYSTEM", new ServerAPI.Notification
-                 ("chat", "system", ((b.bullid >= '0' && b.bullid <= '9') ? "Bulletin: " : "Announcement: ")+
-                  b.sender+" > "+name+"["+b.bullid+"]: "+b.text, getUTCtime(), 60*4));
+                 ("chat", ((b.bullid >= '0' && b.bullid <= '9') ? "Bulletin" : "Announcement"),
+                  b.sender+" > "+name+"["+b.bullid+"]: "+b.text, new Date(), 60*1));
         }
+        
         
         /** 
          * Cleanup. Remove bulls older than xx hours
          */
         public synchronized void cleanUp(int hours) {
+            boolean remove = false; 
             for (Object s : _map.keySet().toArray()) {
                 SenderBulls bls = _map.get((String) s); 
                 boolean empty = true;
                 for (int i=0; i<bls.bulls.length; i++) {
                     if (bls.bulls[i] != null && 
-                            bls.bulls[i].time.getTime() + hours*60*60*1000 < getUTCtime().getTime()) {
+                            bls.bulls[i].time.getTime() + hours*60*60*1000 < (new Date()).getTime()) {
                         _api.log().debug("BullBoard", "Cleanup - removing bull: "+bls.bulls[i].sender);
                         bls.bulls[i] = null;
+                        remove = true; 
                     }
                     if (bls.bulls[i] != null)
                         empty = false;
@@ -81,8 +86,13 @@ public class BullBoard implements MessageProcessor.MessageHandler {
                 if (empty)
                     _map.remove(s);
             }
+            if (remove)
+                _api.getWebserver().getPubSub().put("bullboard", null);
         }
         
+        
+        public boolean isEmpty() 
+            { return (_map.size() == 0); }
         
         public Bull[] get(String sender) 
             { return _map.get(sender).bulls; }
@@ -114,14 +124,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
     
     // FIXME
     public static Calendar utcTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
-    
-    
-    // FIXME: Move this to ServerAPI?
-    private Date getUTCtime() {
-        Instant ins = Instant.now(); 
-        return new Date(ins.toEpochMilli());
-    }
-         
+       
     
     // FIXME: Move this to ServerAPI
     private final ScheduledExecutorService scheduler =
@@ -142,10 +145,14 @@ public class BullBoard implements MessageProcessor.MessageHandler {
         scheduler.scheduleAtFixedRate( () -> 
             {
                 try {
-                   _bulletins.cleanUp(ttl_bull); 
-                   _announcements.cleanUp(ttl_ann); 
-                   for (SubBoard sb : _groups.values())
-                       sb.cleanUp(ttl_bull);
+                    _bulletins.cleanUp(ttl_bull); 
+                    _announcements.cleanUp(ttl_ann); 
+                    for (Object sbn : _groups.keySet().toArray()) {
+                        SubBoard sb = getBulletinGroup((String) sbn); 
+                        sb.cleanUp(ttl_bull);
+                        if (sb.isEmpty())
+                            _groups.remove(sbn);
+                    }
                 }
                 catch (Exception e) {
                     _api.log().warn("BullBoard", "Exception in scheduled action: "+e);
@@ -164,6 +171,8 @@ public class BullBoard implements MessageProcessor.MessageHandler {
     
         if (recipient.length() < 4)
             recipient = "BLN0";
+        if (!recipient.matches("BLN[0-9A-Z][A-Z]*"))
+            return false; 
         char bullid = recipient.charAt(3);
         Bull bull = new Bull(bullid, sender, text); 
         

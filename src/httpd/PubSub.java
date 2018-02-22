@@ -29,10 +29,10 @@ import java.util.function.*;
  * Generic publish/subscribe service using websocket. 
  */
 @WebSocket(maxIdleTime=600000)
-public class PubSub extends WsNotifier
+public class PubSub extends WsNotifier implements ServerAPI.PubSub
 {
 
-    public class Client extends WsNotifier.Client 
+    public class Client extends WsNotifier.Client
     {   
         public Client(Session conn) { 
             super(conn); 

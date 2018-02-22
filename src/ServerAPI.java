@@ -45,15 +45,25 @@ public interface ServerAPI
         public int  nLoggedin();
         public long nHttpReq(); 
         public long nMapUpdates(); 
-
+ 
         public void notifyUser(String user, Notification not);
-     
+        public PubSub getPubSub();
+ 
         public Mbox getMbox(); 
         public void start() throws Exception; 
         public void stop() throws Exception;
     }
   
     /* FIXME: Should we have a interface for user or for notifications? */
+  
+  
+    public interface PubSub {
+        /** Post a message to a room (text is prefixed with the room name) */
+        public void putText (String rid, String msg);
+        
+        /** Post a object to a room (JSON encoded) */
+        public void put(String rid, Object obj);
+    }
   
   
     /** 
