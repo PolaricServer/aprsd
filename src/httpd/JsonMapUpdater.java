@@ -32,75 +32,9 @@ import no.polaric.aprsd.filter.*;
  */
 
 @WebSocket(maxIdleTime=360000)
-public class JsonMapUpdater extends MapUpdater implements Notifier
+public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
 {
-    class JsOverlay {
-        public String  view;       /* filter name */
-        /* FIXME: Consider adding som session info here */
-      
-        public AuthInfo authorization;
-        public List<JsPoint>  points;
-        public List<String> delete;
-        public List<JsLine> lines;
-      
-        public JsOverlay(String v) {
-            view = v;
-        }
-    }
-
-   
-    class JsPoint {
-        public String   ident;
-        public double[] pos;
-        public String   title;
-        public boolean  redraw;  // true if isChanging()
-        public boolean  own;     // May use a tag instead? 
-        public String   icon;  
-        public String   href;
-        public JsLabel  label;      
-        public JsTrail  trail;
-    }
-
-   
-    class JsLabel {
-        public String id;        // May be different from point id because of aliases? 
-        public String style;     // This is actually a CSS class
-        public boolean hidden;
-    }
-   
-   
-    /* Do we need a more generic linestring as well? Line? */
-    
-    class JsTrail {
-        public String[] style;
-         // FIXME: Style or colours. Do colour selection on client? 
-        
-        public List<JsTPoint> linestring;  
-        public JsTrail(String[] s) 
-            { style=s; linestring = new LinkedList<JsTPoint>(); }
-    }
-
-   
-    class JsTPoint {
-        public double[] pos;
-        public Date time;
-        public JsTPoint(TPoint p) { 
-           pos = new double[] { ((LatLng)p.getPosition()).getLongitude(),  
-               ((LatLng)p.getPosition()).getLatitude() };
-               time = p.getTS();
-        }
-    }
-    
-    class JsLine {
-        public String ident;
-        public double[] from, to;
-        public String type;
-        public JsLine(String id, double[] f, double[] t, String typ)
-          { ident=id; from=f; to=t; type=typ; }
-    }
-   
-   
-   
+ 
     public class Client extends MapUpdater.Client 
     {
         private Set<String> items = new HashSet<String>();
