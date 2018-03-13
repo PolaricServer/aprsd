@@ -38,7 +38,7 @@ public interface StationDB
        
      
         /**
-         * Get item. 
+         * Get item at a particular point in time. 
          * @param id identifier (typically a callsign) of item.
          * @param d time of capture, null if realtime
          */

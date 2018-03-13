@@ -24,6 +24,10 @@ import java.io.*;
 /**
  * User info (profile) stored locally. 
  * Currently this is used for keeping track of usage. May add more later. 
+ * Note that there may be users that have not an associated registration here. 
+ * There may also be a database and/or users are authorized by an external service!!!
+ *
+ * FIXME: This may not be the right place for storing areas. 
  */
  
 public class LocalUsers {

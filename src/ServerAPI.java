@@ -40,6 +40,7 @@ public interface ServerAPI
   
     /** Interface to web server */
     public interface Web {
+        public void corsEnable(String uri); 
         public long nVisits();
         public int  nClients();
         public int  nLoggedin();

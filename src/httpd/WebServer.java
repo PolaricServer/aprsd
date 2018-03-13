@@ -148,12 +148,12 @@ public class WebServer implements ServerAPI.Web
         /* Start REST API: Users */
         UserApi uu = new UserApi(_api, _auth.conf().getLocalUsers()); // FIXME: Add prefix
         uu.start();
-        after ("/users/*", (req,resp) -> { _auth.corsHeaders(req, resp); } );
+        corsEnable("/users/*"); 
         
         /* Start REST API: Bulletin board */
         BullBoardApi bb = new BullBoardApi(_api); 
         bb.start(); 
-        after ("/bullboard/*", (req,resp) -> { _auth.corsHeaders(req, resp); } );
+        corsEnable("/bullboard/*");
         
         /* Rooms for SYSTEM and ADMIN notifications */
         _pubsub.createRoom("notify:SYSTEM", false, false, false, ServerAPI.Notification.class);
@@ -164,6 +164,10 @@ public class WebServer implements ServerAPI.Web
         init();
     }
     
+    
+    public void corsEnable(String uri) {
+        after(uri, (req,resp) -> { _auth.corsHeaders(req, resp); } );
+    }
     
 
     

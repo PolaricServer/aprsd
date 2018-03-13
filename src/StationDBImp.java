@@ -57,28 +57,40 @@ public class StationDBImp implements StationDB, Runnable
     public static long usedMemory ()
         { return s_runtime.totalMemory () - s_runtime.freeMemory (); }
 
-    
+        
+    /** Register the implementation of database storage (plugin) */
     public void setHistDB(StationDB.Hist d)
         { _histData = d; }
 
         
+    /** Get item at a particular time. Realtime if t is null. */    
     public TrackerPoint getItem(String id, Date t)
        { return getItem(id, t, true); }
-            
+     
+     
+    /** 
+     * Get item at a particular time. Realtime if t is null.
+     * If requested, check database storage for updates.
+     */ 
     public TrackerPoint getItem(String id, Date t, boolean update)
     { 
        TrackerPoint x = null;
+       
+       /* Real time. */
        if (t==null) {
           x = _map.get(id); 
+          /* If requested, check database storage for updates */
           if (update && x != null && _histData != null && x.isPersistent())
              _histData.updateItem(x);
-       }       
+       }
+       /* Another time in history. We need to get it from database storage plugin */
        else if (_histData !=null) 
           x = _histData.getItem(id, t); 
        return x;
      }
      
      
+     /** Save item to database storage (if present) */
      public void saveItem(TrackerPoint x)
      {
         if (_histData != null)

@@ -66,7 +66,8 @@ public abstract class WsNotifier extends ServerBase
          { return _auth != null && _auth.userid != null; }
    
       public void sendText(String text) throws IOException 
-         { _nOut++; _conn.getRemote().sendString(text); }
+         { if (text == null) text="";
+             _nOut++; _conn.getRemote().sendString(text); }
    
       public  String getUid()
          { return _uid; }
