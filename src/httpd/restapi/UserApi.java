@@ -26,7 +26,7 @@ import no.polaric.aprsd.*;
 /**
  * Implement REST API for user-related info. Users, areas. 
  */
-public class UserApi {
+public class UserApi extends ServerBase {
 
     private ServerAPI _api; 
     
@@ -45,6 +45,7 @@ public class UserApi {
     
     
     public UserApi(ServerAPI api,  LocalUsers u) {
+        super(api);
         _api = api;
         _users = u;
     }
@@ -52,7 +53,8 @@ public class UserApi {
     
     
     /** 
-     * Return an error status message to client 
+     * Return an error status message to client. 
+     * FIXME: Move to superclass. 
      */
     public String ERROR(Response resp, int status, String msg)
       { resp.status(status); return msg; }
@@ -67,25 +69,25 @@ public class UserApi {
         /* Get a list of areas for a given user. */
         get("/users/*/areas", "application/json", (req, resp) -> {
             String uid = req.splat()[0];
-            List<LocalUsers.Area> ul = new ArrayList<LocalUsers.Area>();
-            _users.getAreas(uid).forEach( x-> {ul.add(x);} );
+            List<User.Area> ul = new ArrayList<User.Area>();
+            _users.get(uid).getAreas().forEach( x-> {ul.add(x);} );
             return ul;
         }, ServerBase::toJson );
         
         
         
         /* Add an area to the list */
-        put("/users/*/areas", (req, resp) -> {
+        post("/users/*/areas", (req, resp) -> {
             String uid = req.splat()[0];
-            LocalUsers.Area a = (LocalUsers.Area) 
-                ServerBase.fromJson(req.body(), LocalUsers.Area.class);
+            User.Area a = (User.Area) 
+                ServerBase.fromJson(req.body(), User.Area.class);
                 
             _api.getWebserver().notifyUser(uid, 
                 new ServerAPI.Notification
                   ("system", "system", "Added area '"+a.name+ "' for user '"+uid+"'", new Date(), 10) );    
                 
             if (a != null) 
-                return ""+ _users.addArea(uid, a);
+                return ""+ _users.get(uid).addArea(a);
             else 
                 return ERROR(resp, 400, "Invalid input format");
         });
@@ -97,7 +99,7 @@ public class UserApi {
             String ix = req.splat()[1];
             try {
                int i = Integer.parseInt(ix);
-               _users.removeArea(uid,i);
+               _users.get(uid).removeArea(i);
             }
             catch(Exception e) {
                 return ERROR(resp, 400, ""+e); 
@@ -109,7 +111,7 @@ public class UserApi {
         /* Get a list of users. */
         get("/users", "application/json", (req, resp) -> {
             List<UserInfo> ul = new ArrayList<UserInfo>();
-            for (LocalUsers.User u: _users.getAll())
+            for (User u: _users.getAll())
                ul.add(new UserInfo(u.getIdent(), u.getLastUsed()));
             return ul;
         }, ServerBase::toJson );

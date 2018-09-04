@@ -1,0 +1,81 @@
+
+RELEASE 2.1.1
+
+* BUGFIX: adminWindow function was accidentally deleted. Put it back. 
+    DONE.
+        
+
+     
+DATABASE PLUGIN 2.2
+
+* Fix postgis link in database plugin. Lock it to a specific version? 
+    DONE.
+
+* My Trackers: Reload list on add/delete tracker
+    DONE. 
+    
+* Lintian errors
+
+* User-database, user profiles. 
+
+* Does it work with new client?
+
+* REST API for history search
+    DONE.
+    
+    
+
+
+FOR RELEASE 2.2 (or later)
+
+* Publish/subscribe service using websocket. 
+    DONE. 
+    
+* Notification service. 
+    DONE. What services should use this??
+    
+* Bulletin board receive. 
+    DONE.
+    
+* Bulleting board receive REST API and client
+    DONE.
+    
+* Bulletin board send.
+
+* Bulletin board send REST API and client.
+
+* Bulletin board setup page. 
+
+* User framework. Ready to add database users.
+    IN PROGRESS.
+    
+* Support external authorization service. Oauth. Google. 
+    
+* Allow user-accounts to be set up with callsigns. 
+
+* ServerBase. Move out config stuff and XML stuff. Use for REST APIs 
+
+* Generic APRS messaging with notifications. 
+
+* APRS messaging REST API and client. 
+
+* REST service for my areas
+    DONE.
+    
+* REST service for my layers
+
+* Implement CSRF protection for update-operations. 
+  
+* Reset to default - button/link in config screen
+
+* Move to Java 9. 
+
+* Develop signs. Channels? 
+
+* BUG: If setting "hide ident" in global settings, this is turned off after a while... Fix. 
+
+* BUG? Old aliases (or aliases set in "My trackers") seem to come back? 
+
+
+
+

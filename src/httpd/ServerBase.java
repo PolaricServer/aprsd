@@ -32,7 +32,7 @@ import spark.*;
 import com.fasterxml.jackson.databind.*;
 
 
-
+// FIXME: Move some of this to a ServerConfig object. Move out the XML stuff (remove it later). 
 
 public abstract class ServerBase 
 {
@@ -182,7 +182,7 @@ public abstract class ServerBase
            return t; 
         StringBuilder sb = new StringBuilder(t);
         int length = t.length();
-        for (int i=0; i<length; i++)
+        for (int i=0; i<length; i++) {
            switch (sb.charAt(i)) {
               case '&': 
                    if (sb.substring(i+1).matches("(amp|lt|gt|quot);.*")) 
@@ -210,8 +210,9 @@ public abstract class ServerBase
                    length += 5;
                    break;
            }        
-//        t = t.replaceAll("\\p{Cntrl}", "?");
-
+           if (sb.charAt(i)<' ')
+              sb.setCharAt(i, '?');
+        }
         return sb.toString(); 
    }
    

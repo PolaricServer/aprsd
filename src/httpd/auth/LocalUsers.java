@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import java.io.*;
  * User info (profile) stored locally. 
  * Currently this is used for keeping track of usage. May add more later. 
  * Note that there may be users that have not an associated registration here. 
- * There may also be a database and/or users are authorized by an external service!!!
+ * There may also be a database and/or users authorized by an external service!!!
  *
  * FIXME: This may not be the right place for storing areas. 
  */
@@ -36,38 +36,68 @@ public class LocalUsers {
     /**
      * User info class. Can be serialized and stored in a file. 
      */
-    public static class User implements Serializable {
-       private String userid; 
-       private Date lastused; 
-       transient private boolean active = false;
+    public class User extends no.polaric.aprsd.http.User implements Serializable {
+     
+        private Date lastused; 
+        transient private boolean active = false;
 
-       public String  getIdent()    { return userid; }
-       public Date    getLastUsed() { return lastused; }
-       public void    updateTime()  { lastused = new Date(); }
-       public boolean isActive()    { return active; }
-       public void    setActive()   { active = true; }
+        public Date    getLastUsed() { return lastused; }
+        public void    updateTime()  { lastused = new Date(); }
+        public boolean isActive()    { return active; }
+        public void    setActive()   { active = true; }
        
-       public User(String id, Date d)
-         {userid=id; lastused=d;} 
+       
+       /**
+        * Get the areas belonging to a given user.
+        * @param id - user id.
+        * @return collection of areas. 
+        */
+        public Collection<Area> getAreas(){
+            if (!_areas.containsKey(getIdent())) 
+                _areas.put(getIdent(), new TreeMap<Integer,Area>());
+            return _areas.get(getIdent()).values(); 
+        }
+    
+        
+        /**
+        * Add an area to a given user. 
+        * @param id - user id. 
+        * @param a - area to be added.
+        * @return index of added area. 
+        */
+        public int addArea(Area a) {
+            if (!_areas.containsKey(getIdent())) 
+                _areas.put(getIdent(), new TreeMap<Integer,Area>());
+            SortedMap<Integer,Area> l = _areas.get(getIdent());
+            a.index = _nextAreaId; 
+            _nextAreaId = (_nextAreaId + 1) % Integer.MAX_VALUE;
+            l.put(a.index, a);   
+            return a.index;
+        }
+    
+  
+        /**
+        * Remove an area. 
+        * @param id - user id.
+        * @param i - index of area. 
+        */
+        public void removeArea(int i) {
+            if (_areas.containsKey(getIdent()))
+                _areas.get(getIdent()).remove(i);
+        }
+    
+        
+        public User(String id, Date d)
+            {super(id); lastused=d;} 
     }
     
-    
-    /** 
-     * Area. Can be serialized as JSON and sent to client. 
-     */
-    public static class Area implements Serializable {
-        public int index;
-        public int baseLayer;
-        public boolean[] oLayers;
-        public String name;
-        public double[] extent;
-    }
+
     
     
     
     private ServerAPI _api;
     private SortedMap<String, User> _users = new TreeMap<String, User>();
-    private Map<String, SortedMap<Integer, Area>> _areas = new HashMap();
+    protected Map<String, SortedMap<Integer, User.Area>> _areas = new HashMap();
     private String _filename; 
     
     private int _nextAreaId = 0;
@@ -105,45 +135,6 @@ public class LocalUsers {
             _users.put(user, new User(user, null));
     }
       
-  
-    /**
-     * Get the areas belonging to a given user.
-     * @param id - user id.
-     * @return collection of areas. 
-     */
-    public Collection<Area> getAreas(String id) {
-        if (!_areas.containsKey(id)) 
-            _areas.put(id, new TreeMap<Integer,Area>());
-        return _areas.get(id).values(); 
-    }
-    
-    
-    /**
-     * Add an area to a given user. 
-     * @param id - user id. 
-     * @param a - area to be added.
-     * @return index of added area. 
-     */
-    public int addArea(String id, Area a) {
-        if (!_areas.containsKey(id)) 
-            _areas.put(id, new TreeMap<Integer,Area>());
-        SortedMap<Integer,Area> l = _areas.get(id);
-        a.index = _nextAreaId; 
-        _nextAreaId = (_nextAreaId + 1) % Integer.MAX_VALUE;
-        l.put(a.index, a);   
-        return a.index;
-    }
-    
-  
-    /**
-     * Remove an area. 
-     * @param id - user id.
-     * @param i - index of area. 
-     */
-    public void removeArea(String id, int i) {
-        if (_areas.containsKey(id))
-            _areas.get(id).remove(i);
-    }
     
     
     /**

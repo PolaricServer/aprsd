@@ -1013,7 +1013,7 @@ public class AprsParser implements AprsChannel.Receiver
                 dir = "NW"; 
                 
             return (tempf > -100000 ? String.format("Temp = %.1f\u00b0C", tempf) : "") + 
-                   (speed>0 ? String.format(", Vind=%.1f m/s %s", speed, dir) : "");
+                   (speed>0 ? String.format(", Wind=%.1f m/s %s", speed, dir) : "");
         }
         return data;
     }
