@@ -12,7 +12,7 @@ of the web app. It has its own webserver.
 
 It is recommended to combine it with polaric-webapp which also uses Apache as a 
 frontend proxy. It supports CORS to allow it to be used with a polaric-webapp on
-another location. 
+another location. A new client is under development: See webapp2.
 
 More documentation on the project can be found here: 
 http://aprs.no/polaricserver
@@ -42,7 +42,7 @@ We also use the following external libraries. jar files are included:
 ## Installation
 
 We provide Debian packages. For information on getting started on a Debian/Ubuntu/Mint platform please 
-see: http://aprs.no/dokuwiki/?id=install.dev
+see: http://aprs.no/dokuwiki/doku.php/install.dev
 
 More documentation on the project can be found here: 
 http://aprs.no/polaricserver
