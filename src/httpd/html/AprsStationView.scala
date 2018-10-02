@@ -52,7 +52,7 @@ package no.polaric.aprsd.http
       
        protected def trafficinfo(req: Request): NodeSeq =         
            <div id="traffic">
-              { if (model.isInfra() )
+              { if (model.isInfra() && model.getTrafficFrom != null && !model.getTrafficFrom.isEmpty)
                  {  <label for="hrds" class="leftlab"> {I.tr("Traffic from")+":"} </label>
                     <label id="hrds"> { itemList(model.getTrafficFrom()) } </label> } else null }
               { if (model.getTrafficTo != null && !model.getTrafficTo.isEmpty)

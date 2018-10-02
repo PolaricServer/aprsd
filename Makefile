@@ -8,10 +8,9 @@
    CLASSDIR = classes
     GETTEXT = /usr/share/java/gettext-commons.jar
       CODEC = /usr/share/java/commons-codec.jar
-    JACKSON = /usr/share/java/jackson-core.jar:/usr/share/java/jackson-databind.jar
+    JACKSON = /usr/share/java/jackson-core.jar:/usr/share/java/jackson-databind.jar:/usr/share/java/jackson-annotations.jar
   CLASSPATH = $(GETTEXT):lib/jcoord-polaric.jar:lib/utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:lib/jetty-polaric.jar:/usr/share/java/sl4j-api.jar:/usr/share/java/sl4j-simple.jar:lib/spark-core-polaric.jar:lib/pac4j-core-polaric.jar:lib/pac4j-http-polaric.jar:lib/spark-pac4j-polaric.jar:$(JACKSON):$(CODEC)
- # INSTALLDIR = /usr/local/polaric-aprsd
-      JAVAC = javac -source 1.8 -target 1.8
+      JAVAC = javac -source 1.10 -target 1.10
        YACC = yacc
         LEX = jflex
         JAR = jar
@@ -64,6 +63,7 @@ install: polaric-aprsd.jar
 	install -m 644 style.css $(INSTALL_WEB)
 	install -m 755 polaric-restart $(INSTALL_BIN)
 	install -m 755 polaric-passwd $(INSTALL_BIN)
+	install -m 755 polaric-aprsd-start $(INSTALL_BIN)
 	cp sudoers.d $(INSTALL_SUDO)/polaric-aprsd
 	chmod 644 $(INSTALL_SUDO)/polaric-aprsd
 	

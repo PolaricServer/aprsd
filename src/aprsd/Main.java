@@ -23,11 +23,13 @@ import java.lang.reflect.Constructor;
 import java.nio.charset.Charset;
 import no.polaric.aprsd.http.*;
 import no.polaric.aprsd.filter.*;
+import java.util.concurrent.*;
+
 
 
 public class Main implements ServerAPI
 {
-   public  static String version = "2.1";
+   public  static String version = "2.1+";
    public static String toaddr  = "APPS21";
    
    private static StationDB db = null;
@@ -47,7 +49,9 @@ public class Main implements ServerAPI
    private static String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
    private static StatLogger stats; 
    public  static Logfile log;
-   
+   public  static DeadlockDetector deadlockDetector;
+    
+    
    /* API interface methods 
     * Should they be here or in a separate class ??
     * Should they be static or should the API interface be a static variable? 
@@ -193,6 +197,8 @@ public class Main implements ServerAPI
                        { return x.canRead() && x.getName().matches(".*\\.ini"); }
                  });
            
+           if (files == null)
+                System.out.println("OOPS. files is null");
            for (File f : files) {
                 Properties xConf = new Properties(); 
                 FileInputStream ffin = new FileInputStream(f.getAbsolutePath());
@@ -274,8 +280,9 @@ public class Main implements ServerAPI
            TrackerPoint.setNotifier(ws.getNotifier());
            log.info("Main", "HTTP/WS server ready on port " + http_port);
 
-           
- 
+           /* Deadlock detection */
+           deadlockDetector = new DeadlockDetector(new DeadlockConsoleHandler(), 120, TimeUnit.SECONDS);
+           deadlockDetector.start();
            
            /* Initialize signs early since plugins may use it (see below) */
            Signs.init(api);
@@ -407,7 +414,7 @@ public class Main implements ServerAPI
 
     
     public void stop()
-      // Inform the Thread to terminate the run(), close the ServerSockets
+      /* Stop the webserver, deactivate plugins, close things down... */
     {
          log.info("Main", "Stopping HTTP/WS server");
          try {
@@ -426,5 +433,17 @@ public class Main implements ServerAPI
     public void destroy()
       // Destroy any object created in init()
        {}
+       
+       
+    public static void main(String[] args)
+    { 
+        var main = new Main();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            main.stop();
+        }));
+        main.init(args);
+        main.start(); 
+    }
+    
    
 }
