@@ -33,7 +33,8 @@ import javax.servlet.SessionCookieConfig;
 import java.util.Optional;
 import java.lang.reflect.*;
 import no.polaric.aprsd.*;
-
+import org.eclipse.jetty.util.thread.ThreadPool;
+import org.eclipse.jetty.util.thread.QueuedThreadPool;
 
 
 /**
@@ -42,6 +43,32 @@ import no.polaric.aprsd.*;
  */
 public class WebServer implements ServerAPI.Web 
 {
+
+    class JettyServer implements JettyServerFactory {
+
+        public Server create(int maxThreads, int minThreads, int threadTimeoutMillis) {
+            Server server;
+
+            if (maxThreads > 0) {
+                int max = maxThreads;
+                int min = (minThreads > 0) ? minThreads : 8;
+                int idleTimeout = (threadTimeoutMillis > 0) ? threadTimeoutMillis : 60000;
+                server = new Server(new QueuedThreadPool(max, min, idleTimeout));
+            } else {
+                server = new Server();
+            }
+
+            return server;
+        }
+
+        @Override
+        public Server create(ThreadPool threadPool) {
+            return threadPool != null ? new Server(threadPool) : new Server();
+        }
+    }
+
+
+
     private long _nRequests = 0; 
     private final PubSub _pubsub;
     private final GeoMessages _messages;
@@ -103,11 +130,14 @@ public class WebServer implements ServerAPI.Web
          (Routes routeMatcher, StaticFilesConfiguration staticFilesConfiguration, boolean hasMultipleHandler) -> {
              JettyHandler handler = setupHandler(routeMatcher, staticFilesConfiguration, hasMultipleHandler);
              configSession(handler.getSessionManager());
-             return new EmbeddedJettyServer((int maxThreads, int minThreads, int threadTimeoutMillis) -> new Server(), handler);
+             
+             return new EmbeddedJettyServer(
+               new JettyServer(),           
+               handler);
          });
       
-      
-      
+    
+    
       
         /* Serving static files */
         staticFiles.externalLocation(
