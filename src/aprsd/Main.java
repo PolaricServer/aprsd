@@ -251,6 +251,7 @@ public class Main implements ServerAPI
            log = new Logfile(this);
            
            ViewFilter.init(api);
+           AuthInfo.addService("basic");
         }
         catch( Exception ioe )
         {
@@ -416,12 +417,12 @@ public class Main implements ServerAPI
     public void stop()
       /* Stop the webserver, deactivate plugins, close things down... */
     {
-         log.info("Main", "Stopping HTTP/WS server");
+         System.out.println("*** Stopping HTTP/WS server");
          try {
             ws.stop();
          } catch (Exception e) {}
 
-         log.info("Main", "Polaric APRSD shutdown"); 
+         System.out.println("*** Polaric APRSD shutdown"); 
          PluginManager.deactivateAll();
          if (db  != null) db.save(); 
          if (ch1 != null) ch1.close();

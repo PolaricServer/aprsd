@@ -73,7 +73,7 @@ public class AuthService {
        /* Authorization status. */
       before ("/authStatus", (req,resp) -> { corsHeaders(req, resp); } );
             
-      before("/authStatus", new SecurityFilter(conf, null, "isauth"));      
+//      before("/authStatus", new SecurityFilter(conf, null, "isauth"));      
       before("/logout", (req,resp) -> {
            _log.log("Logout by user: "+ ((AuthInfo) req.raw().getAttribute("authinfo")).userid);
         }); 
@@ -187,6 +187,7 @@ public class AuthService {
        AuthInfo auth = (AuthInfo) req.raw().getAttribute("authinfo");
        _log.log("Successful login from: "+req.ip()+": userid="+ auth.userid);
        returnToOrigin(req, res, "origin");
+       
        return 
          "<html><head><link rel=\"stylesheet\" href=\"style.css\"></head><body>" + 
          "<h2>" + I.tr("You are now logged in") + "</h2>" +

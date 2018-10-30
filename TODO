@@ -19,6 +19,7 @@ DATABASE PLUGIN 2.2
 * User-database, user profiles. 
 
 * Does it work with new client?
+    IN PROGRESS.
 
 * REST API for history search
     DONE.
@@ -60,7 +61,7 @@ FOR RELEASE 2.2 (or later)
 * APRS messaging REST API and client. 
 
 * REST service for my areas
-    DONE.
+    DONE. moved to database plugin.
     
 * REST service for my layers
 
@@ -69,7 +70,8 @@ FOR RELEASE 2.2 (or later)
 * Reset to default - button/link in config screen
 
 * Move to Java 9. 
-
+     DONE. Java 10.
+     
 * Develop signs. Channels? 
 
 * BUG: If setting "hide ident" in global settings, this is turned off after a while... Fix. 

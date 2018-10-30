@@ -222,15 +222,25 @@ class Path extends Pred
     public Path(String regex) 
        { this.regex = regex; }
     
-    public boolean eval(TrackerPoint obj, long scale) 
-       { if (obj instanceof Station) 
-           return ((Station) obj).getPathInfo().matches(regex); 
-         else if (obj instanceof AprsObject && 
-              ((AprsObject) obj).getOwner() != null && ((AprsObject) obj).getOwner().getPathInfo() != null)
-           return ((AprsObject) obj).getOwner().getPathInfo().matches(regex); 
-         else
-           return false; 
-       }
+    public boolean eval(TrackerPoint obj, long scale) { 
+    
+        if (obj instanceof Station) {
+            var path = ((Station) obj).getPathInfo();
+            if (path != null) 
+		return path.matches(regex);
+            else
+		return false; 
+        }
+        else if (obj instanceof AprsObject) {
+            var owner = ((AprsObject) obj).getOwner();       
+            if (owner != null && owner.getPathInfo() != null)       
+                return owner.getPathInfo().matches(regex);
+            else
+                return false; 
+        }
+        else
+            return false; 
+    }
 }
 
 

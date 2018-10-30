@@ -66,7 +66,9 @@ public class UserApi extends ServerBase {
      */
     public void start() {     
        
-        /* Get a list of areas for a given user. */
+        /******************************************
+         * Get a list of areas for a given user. 
+         ******************************************/
         get("/users/*/areas", "application/json", (req, resp) -> {
             String uid = req.splat()[0];
             List<User.Area> ul = new ArrayList<User.Area>();
@@ -76,7 +78,9 @@ public class UserApi extends ServerBase {
         
         
         
-        /* Add an area to the list */
+        /*****************************************
+         * Add an area to the list 
+         *****************************************/
         post("/users/*/areas", (req, resp) -> {
             String uid = req.splat()[0];
             User.Area a = (User.Area) 
@@ -93,7 +97,9 @@ public class UserApi extends ServerBase {
         });
         
 
-        /* Delete an area from the list */
+        /*****************************************
+         * Delete an area from the list 
+         *****************************************/
         delete("/users/*/areas/*", (req, resp) -> {
             String uid = req.splat()[0];
             String ix = req.splat()[1];
@@ -108,7 +114,9 @@ public class UserApi extends ServerBase {
         });
         
         
-        /* Get a list of users. */
+        /******************************************
+         * Get a list of users. 
+         ******************************************/
         get("/users", "application/json", (req, resp) -> {
             List<UserInfo> ul = new ArrayList<UserInfo>();
             for (User u: _users.getAll())

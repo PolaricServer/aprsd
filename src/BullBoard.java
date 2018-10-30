@@ -58,10 +58,13 @@ public class BullBoard implements MessageProcessor.MessageHandler {
             
             /* If there is a change, replace and notify */
             _map.get(b.sender).update(b.bullid - _start, b); 
-            _api.getWebserver().notifyUser
-               ("SYSTEM", new ServerAPI.Notification
-                 ("chat", ((b.bullid >= '0' && b.bullid <= '9') ? "Bulletin" : "Announcement"),
-                  b.sender+" > "+name+"["+b.bullid+"]: "+b.text, new Date(), 60*1));
+            
+            /* FIXME: allow users to subscribe to notifications? */
+            if (false)
+	      _api.getWebserver().notifyUser
+                ("SYSTEM", new ServerAPI.Notification
+                  ("chat", ((b.bullid >= '0' && b.bullid <= '9') ? "Bulletin" : "Announcement"),
+                   b.sender+" > "+name+"["+b.bullid+"]: "+b.text, new Date(), 60*1));
         }
         
         

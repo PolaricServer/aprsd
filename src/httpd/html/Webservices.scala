@@ -680,6 +680,7 @@ package no.polaric.aprsd.http
        val I = getI18n(req)
        val filtid = req.queryParams("filter")
        val tags = req.queryParams("tags")
+       val login = loggedIn || getAuthInfo(req).login();
        
        var arg = req.queryParams("srch")
        var mob = req.queryParams("mobile");
@@ -688,7 +689,7 @@ package no.polaric.aprsd.http
        val infra = "infra".equals(arg)
        val tagList = if (tags==null || tags.equals("")) null else tags.split(",")
       
-       val result = itemList(I, _api.getDB().search(arg, tagList), "true".equals(mob), fprefix(req), loggedIn )
+       val result = itemList(I, _api.getDB().search(arg, tagList), "true".equals(mob), fprefix(req), login )
        return printHtml (res, htmlBody (req, null, result))
    }
  
@@ -698,7 +699,7 @@ package no.polaric.aprsd.http
     * View one particular point object. 
     */
    def handle_station(req : Request, res : Response): String  = 
-       return _handle_station(req, res, false)
+       return _handle_station(req, res, getAuthInfo(req).sar)
        ;
    
    

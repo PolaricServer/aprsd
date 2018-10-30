@@ -19,7 +19,7 @@ import spark.Response;
 import org.pac4j.sparkjava.SparkWebContext; 
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.CommonProfile;
-import java.util.Optional;
+import java.util.*;
 import no.polaric.aprsd.*;
 
 
@@ -32,8 +32,14 @@ import no.polaric.aprsd.*;
 public class AuthInfo {
     public String userid;
     public boolean admin = false, sar = false; 
+    public String[] services = null;
+    private static List<String> _services = new ArrayList<String>();
     
-
+    
+    public static void addService(String srv) {
+       _services.add(srv);
+    }
+    
     
     public String toString() {
        return "AuthInfo [userid="+userid+", admin="+admin+", sar="+sar+"]";
@@ -53,7 +59,12 @@ public class AuthInfo {
        final SparkWebContext context = new SparkWebContext(req, res);
        final ProfileManager manager = new ProfileManager(context);
        final Optional<CommonProfile> profile = manager.get(true);
-        
+      
+       var i = 0;
+       services = new String[_services.size()];
+       for (var x : _services)
+	      services[i++] = x;
+	      
        if (profile.isPresent()) {
           userid = profile.get().getId();
           String adminusers = api.getProperty("user.admin", "admin");

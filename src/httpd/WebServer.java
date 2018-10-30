@@ -175,6 +175,11 @@ public class WebServer implements ServerAPI.Web
       
         _auth.start();
         
+        /* Start REST API: System */
+        SystemApi ss = new SystemApi(_api);
+        ss.start(); 
+        corsEnable("/system/*");
+        
         /* Start REST API: Users */
         UserApi uu = new UserApi(_api, _auth.conf().getLocalUsers()); // FIXME: Add prefix
         uu.start();
