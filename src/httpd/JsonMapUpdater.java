@@ -55,6 +55,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 _updates++;
                 JsOverlay mu = new JsOverlay(_filter);
                 mu.authorization = _auth;
+                mu.sarmode = (_api.getSar() != null);
                 if (!metaonly)
                     addPoints(mu);
                 return serializeJson(mu);

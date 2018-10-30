@@ -21,10 +21,11 @@ public interface JsonPoints
         public String  view;       /* filter name */
         /* FIXME: Consider adding som session info here */
       
-        public AuthInfo authorization;
-        public List<JsPoint>  points;
-        public List<String> delete;
-        public List<JsLine> lines;
+        public AuthInfo      authorization;
+        public boolean       sarmode; 
+        public List<JsPoint> points;
+        public List<String>  delete;
+        public List<JsLine>  lines;
       
         public JsOverlay(String v) {
             view = v;
@@ -81,4 +82,5 @@ public interface JsonPoints
         public JsLine(String id, double[] f, double[] t, String typ)
           { ident=id; from=f; to=t; type=typ; }
     }
+    
 }
