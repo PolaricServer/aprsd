@@ -21,11 +21,12 @@ public interface JsonPoints
         public String  view;       /* filter name */
         /* FIXME: Consider adding som session info here */
       
-        public AuthInfo      authorization;
-        public boolean       sarmode; 
-        public List<JsPoint> points;
-        public List<String>  delete;
-        public List<JsLine>  lines;
+        public AuthInfo       authorization;
+        public boolean        sarmode; 
+        public List<JsPoint>  points;
+        public List<String>   delete;
+        public List<JsLine>   lines;
+        public List<JsTPoint> pcloud;
       
         public JsOverlay(String v) {
             view = v;
@@ -69,9 +70,10 @@ public interface JsonPoints
         public double[] pos;
         public Date time;
         public JsTPoint(TPoint p) { 
-           pos = new double[] { ((LatLng)p.getPosition()).getLongitude(),  
-               ((LatLng)p.getPosition()).getLatitude() };
-               time = p.getTS();
+           pos = new double[] { 
+                ((LatLng)p.getPosition()).getLongitude(),  
+                ((LatLng)p.getPosition()).getLatitude() };
+                time = p.getTS();
         }
     }
     

@@ -56,7 +56,7 @@ public class AuthConfig {
 
          /* Config */      
          _config = new Config (new Clients(_host+"/callback", basicClient, formClient));
-         _config.addAuthorizer("isauth", new IsAuthenticatedAuthorizer());
+         _config.addAuthorizer("isauth", new IsFullyAuthenticatedAuthorizer());
          _config.setHttpActionAdapter(new DefaultHttpActionAdapter());
      }
  

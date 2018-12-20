@@ -49,7 +49,8 @@ public interface ServerAPI
  
         public void notifyUser(String user, Notification not);
         public PubSub getPubSub();
- 
+        public void protectUrl(String prefix);
+        
         public Mbox getMbox(); 
         public void start() throws Exception; 
         public void stop() throws Exception;

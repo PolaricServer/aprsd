@@ -44,8 +44,9 @@ public abstract class User {
     public abstract void    updateTime();
     public abstract boolean isActive();
     public abstract void    setActive();
+    
     public abstract Collection<Area> getAreas();
-    public abstract int addArea(Area a);
+    public abstract int  addArea(Area a);
     public abstract void removeArea(int i);
     
     

@@ -20,6 +20,9 @@ import java.util.*;
 import java.text.*;
 import uk.me.jstott.jcoord.*;
 
+
+
+
 /**
  * Objects owned by this instance of Polaric Server.
  */
@@ -95,6 +98,9 @@ public class OwnObjects implements Runnable
          _api.log().warn("OwnObject", "Object "+id+" already exists somewhere else");
          return false;
     }
+    
+    
+    
     
     /**
      * Delete all own objects. 

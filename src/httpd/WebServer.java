@@ -30,7 +30,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.SessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import javax.servlet.SessionCookieConfig;
-import java.util.Optional;
+import java.util.*;
 import java.lang.reflect.*;
 import no.polaric.aprsd.*;
 import org.eclipse.jetty.util.thread.ThreadPool;
@@ -136,8 +136,6 @@ public class WebServer implements ServerAPI.Web
                handler);
          });
       
-    
-    
       
         /* Serving static files */
         staticFiles.externalLocation(
@@ -153,6 +151,20 @@ public class WebServer implements ServerAPI.Web
         webSocket("/mapdata", _mapupdate);
         webSocket("/jmapdata", _jmapupdate);
          
+        /* 
+         * OPTIONS requests (CORS preflight) are not sent with cookies and should not go 
+         * through the auth check. 
+         * Maybe we do this only for REST APIs and return info more exactly what options
+         * are available? Move it inside the corsEnable method? 
+         */
+        before("*", (req, res) -> {
+            if (req.requestMethod() == "OPTIONS") {
+                _auth.corsHeaders(req, res); 
+                halt(200, "");
+            }
+        });
+         
+         
         before("*", (req, res) -> {res.status(200);});
         before("/config_menu", _auth.conf().filter("FormClient", "isauth")); 
        
@@ -167,8 +179,10 @@ public class WebServer implements ServerAPI.Web
         before("/sarmode", _auth.conf().filter(null, "isauth"));
         before("/sarurl", _auth.conf().filter(null, "isauth"));
         before("/search_sec", _auth.conf().filter(null, "isauth"));
-         
-         
+        before("/users", _auth.conf().filter(null, "isauth"));
+        before("/users/*", _auth.conf().filter(null, "isauth"));
+        
+        
         afterAfter((request, response) -> {
             _nRequests++;
         });
@@ -196,12 +210,17 @@ public class WebServer implements ServerAPI.Web
         
         /* Room for pushing updates to bulletin board */
         _pubsub.createRoom("bullboard", (Class) null); 
+        
         init();
     }
     
+    private Set<String> corsEnabled = new HashSet<String>();
     
     public void corsEnable(String uri) {
-        after(uri, (req,resp) -> { _auth.corsHeaders(req, resp); } );
+        if (!corsEnabled.contains(uri)) {
+            after(uri, (req,resp) -> { _auth.corsHeaders(req, resp); } );
+            corsEnabled.add(uri);
+        }
     }
     
 
@@ -250,11 +269,16 @@ public class WebServer implements ServerAPI.Web
         
     public WsNotifier getMessages()
         { return _messages; }
-        
+    
+    public void protectUrl(String prefix) {
+        before(prefix, _auth.conf().filter(null, "isauth")); 
+    }
+    
     /* FIXME: What methods should be part of ServerAPI.Web ? */
     public AuthConfig getAuthConfig()
         { return _auth.conf(); }
         
+    
         
     /* Send notification to a room */    
     public void notifyUser(String user, ServerAPI.Notification not) {

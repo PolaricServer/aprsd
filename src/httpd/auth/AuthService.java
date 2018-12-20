@@ -72,8 +72,7 @@ public class AuthService {
       
        /* Authorization status. */
       before ("/authStatus", (req,resp) -> { corsHeaders(req, resp); } );
-            
-//      before("/authStatus", new SecurityFilter(conf, null, "isauth"));      
+                
       before("/logout", (req,resp) -> {
            _log.log("Logout by user: "+ ((AuthInfo) req.raw().getAttribute("authinfo")).userid);
         }); 
@@ -95,6 +94,12 @@ public class AuthService {
       get("/formLogin",  AuthService::login);    
       get("/loginForm",  AuthService::loginForm);
       get("/authStatus", AuthService::authStatus);
+      
+              
+        options("*", (req, resp) -> {
+            System.out.println("**** OPTIONS ****");
+            return null;
+        });
       
     }
     

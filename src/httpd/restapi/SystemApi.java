@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
