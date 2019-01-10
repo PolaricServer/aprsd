@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2018 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018-2019 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,8 +31,6 @@ public class SystemApi extends ServerBase {
 
     private ServerAPI _api; 
     
-    
-    
     public SystemApi(ServerAPI api) {
         super(api);
         _api = api;
@@ -47,7 +45,8 @@ public class SystemApi extends ServerBase {
     public String ERROR(Response resp, int status, String msg)
       { resp.status(status); return msg; }
       
-      
+    
+    
     
     /** 
      * Set up the webservices. 
@@ -57,7 +56,6 @@ public class SystemApi extends ServerBase {
         /******************************************
          * Get a list of icons (file paths). 
          ******************************************/
-         
          get("/system/icons/*", "application/json", (req, resp) -> {
             var subdir = req.splat()[0];
             if (subdir.equals("default"))
@@ -81,10 +79,60 @@ public class SystemApi extends ServerBase {
         }, ServerBase::toJson );
         
         
+        /*******************************************
+         * Get alias/icon for a given item
+         *******************************************/
+        get("/tracker/alias/*", "application/json", (req, resp) -> {
+            var ident = req.splat()[0];
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            return new ItemInfo.Alias(st.getAlias(), (st.iconIsNull() ? null : st.getIcon())); 
+        }, ServerBase::toJson );
+        
+        
+        /*******************************************
+         * Update alias/icon for a given item
+         *******************************************/
+        put("/tracker/alias/*", (req, resp) -> {
+            var ident = req.splat()[0];        
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            ItemInfo.Alias a = (ItemInfo.Alias) 
+                ServerBase.fromJson(req.body(), ItemInfo.Alias.class);    
+            if (a==null)
+                return ERROR(resp, 400, "Invalid input format");
+            if ( st.setAlias(a.alias) ) 
+                notifyAlias(ident, a.alias, req); 
+            if ( st.setIcon(a.icon) )
+                notifyIcon(ident, a.icon, req);
+            return "Ok";
+        });
 
     }
-
-
+    
+    
+    private void notifyAlias(String ident, String alias, Request req) {
+        var uid = getAuthInfo(req).userid; 
+        if (_api.getRemoteCtl() != null)
+            _api.getRemoteCtl().sendRequestAll("ALIAS "+ident+" "+alias, null);
+        _api.log().info("SystemApi", 
+            "ALIAS: '"+alias+"' for '"+ident+"' by user '"+uid+"'");    
+        _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
+            ("system", "system", "Alias: '"+alias+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
+    }
+    
+    
+    private void notifyIcon(String ident, String icon, Request req) {
+        var uid = getAuthInfo(req).userid; 
+        if (_api.getRemoteCtl() != null)
+            _api.getRemoteCtl().sendRequestAll("ICON "+ident+" "+icon, null);
+        _api.log().info("SystemApi", 
+            "ICON: '"+icon+"' for '"+ident+"' by user '"+uid+"'");    
+        _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
+            ("system", "system", "Icon: '"+icon+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
+    }
 }
 
 

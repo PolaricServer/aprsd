@@ -181,6 +181,7 @@ public class WebServer implements ServerAPI.Web
         before("/search_sec", _auth.conf().filter(null, "isauth"));
         before("/users", _auth.conf().filter(null, "isauth"));
         before("/users/*", _auth.conf().filter(null, "isauth"));
+        before("/tracker/*", _auth.conf().filter(null, "isauth"));
         
         
         afterAfter((request, response) -> {
@@ -193,11 +194,13 @@ public class WebServer implements ServerAPI.Web
         SystemApi ss = new SystemApi(_api);
         ss.start(); 
         corsEnable("/system/*");
-        
+        corsEnable("/tracker/*"); 
+                
         /* Start REST API: Users */
         UserApi uu = new UserApi(_api, _auth.conf().getLocalUsers()); // FIXME: Add prefix
         uu.start();
         corsEnable("/users/*"); 
+
         
         /* Start REST API: Bulletin board */
         BullBoardApi bb = new BullBoardApi(_api); 
