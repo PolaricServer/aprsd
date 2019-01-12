@@ -288,8 +288,12 @@ public class WebServer implements ServerAPI.Web
         _pubsub.put("notify:"+user, not);
     }
 
-        
-        
+    
+    public final static AuthInfo getAuthInfo(Request req) {
+        return (AuthInfo) req.raw().getAttribute("authinfo");
+    }
+    
+    
     
     /**
      * Adds a HTTP service handler. Go through methods. All public methods that starts 

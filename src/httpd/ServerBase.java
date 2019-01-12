@@ -163,13 +163,42 @@ public abstract class ServerBase
    }
    
    
+       
+    /*
+     * Log, notify admin and other server about change of alias 
+     */
+    protected void notifyAlias(String ident, String alias, Request req) {
+        var uid = getAuthInfo(req).userid; 
+        if (_api.getRemoteCtl() != null)
+            _api.getRemoteCtl().sendRequestAll("ALIAS "+ident+" "+alias, null);
+        _api.log().info("SystemApi", 
+            "ALIAS: '"+alias+"' for '"+ident+"' by user '"+uid+"'");    
+        _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
+            ("system", "system", "Alias: '"+alias+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
+    }
+    
+
+    /*
+     * Log, notify admin and other server about change of icon 
+     */
+    protected void notifyIcon(String ident, String icon, Request req) {
+        var uid = getAuthInfo(req).userid; 
+        if (_api.getRemoteCtl() != null)
+            _api.getRemoteCtl().sendRequestAll("ICON "+ident+" "+icon, null);
+        _api.log().info("SystemApi", 
+            "ICON: '"+icon+"' for '"+ident+"' by user '"+uid+"'");    
+        _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
+            ("system", "system", "Icon: '"+icon+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
+    } 
+   
+   
    
    /**
     * Get username of the authenticated user. 
     * @return username, null if not authenticated. 
     */
    protected final AuthInfo getAuthInfo(Request req)
-      { return (AuthInfo) req.raw().getAttribute("authinfo"); }
+      { return WebServer.getAuthInfo(req); }
 
    
 
