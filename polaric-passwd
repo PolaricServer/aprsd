@@ -1,6 +1,6 @@
 #!/bin/bash
 DIR=/etc/polaric-aprsd
-if [ -e $DIR/users ]; then
+if [ -e $DIR/passwd ]; then
   htpasswd $DIR/passwd $1
 else
   htpasswd -c $DIR/passwd $1
