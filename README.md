@@ -10,9 +10,8 @@ and manipulate the information through a simple HTTP service. The daemon can
 also be set up as an igate (internet gateway) and can be installed and run independently 
 of the web app. It has its own webserver. 
 
-It is recommended to combine it with polaric-webapp which also uses Apache as a 
-frontend proxy. It supports CORS to allow it to be used with a polaric-webapp on
-another location. A new client is under development: See webapp2.
+It is recommended to combine it with polaric-webapp2. It supports CORS to allow it to be used 
+with a polaric-webapp2 on another location.
 
 More documentation on the project can be found here: 
 http://aprs.no/polaricserver
@@ -41,7 +40,7 @@ We also use the following external libraries. jar files are included:
 
 ## Installation
 
-We provide Debian packages. For information on getting started on a Debian/Ubuntu/Mint platform please 
+We provide Debian packages. For information on getting started on a Debian based platform please 
 see: http://aprs.no/dokuwiki/doku.php/install.dev
 
 More documentation on the project can be found here: 
@@ -59,6 +58,6 @@ Build from the source is done by a plain old makefile. Yes I know :)
 Maybe I move to something else a little later. Setup for generating Debian
 packages is included. You may use the 'debuild' command.
 
-You will need JDK (Oracle or OpenJDK) version 8 or later, the Scala
-programming language version 2.11 or later (scala, scala-library scala-xml
+You will need JDK (Oracle or OpenJDK) version 10 or later, the Scala
+programming language version 2.11.12 or later (scala, scala-library scala-xml
 and scala-parser-combinators packages) and librxtx-java. 
