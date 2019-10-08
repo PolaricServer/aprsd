@@ -3,8 +3,39 @@ RELEASE 2.1.1
 
 * BUGFIX: adminWindow function was accidentally deleted. Put it back. 
     DONE.
-        
+ 
+* Move to Java 9. 
+     DONE. Java 10.
+     
+* REST service for my areas
+    DONE. moved to database plugin.
+    
+* REST service for my layers
+    DONE.
+    
+* Publish/subscribe service using websocket. 
+    DONE. 
+    
+* Notification service. 
+    DONE. What services should use this??
+    
+* Bulletin board receive. 
+    DONE.
+    
+* Bulleting board receive REST API and client
+    DONE.   
+    
+     
 
+RELEASE 2.1.2
+
+* fix password file name in polaric-password (Eduard Iten)
+    DONE.
+
+* Deinstallation script removes client config. Fix!  
+    DONE.
+
+    
      
 DATABASE PLUGIN 2.2
 
@@ -28,18 +59,6 @@ DATABASE PLUGIN 2.2
 
 
 FOR RELEASE 2.2 (or later)
-
-* Publish/subscribe service using websocket. 
-    DONE. 
-    
-* Notification service. 
-    DONE. What services should use this??
-    
-* Bulletin board receive. 
-    DONE.
-    
-* Bulleting board receive REST API and client
-    DONE.
     
 * Bulletin board send.
 
@@ -58,20 +77,11 @@ FOR RELEASE 2.2 (or later)
 
 * Generic APRS messaging with notifications. 
 
-* APRS messaging REST API and client. 
-
-* REST service for my areas
-    DONE. moved to database plugin.
-    
-* REST service for my layers
-    DONE. 
+* APRS messaging REST API and client.  
 
 * Implement CSRF protection for update-operations. 
   
 * Reset to default - button/link in config screen
-
-* Move to Java 9. 
-     DONE. Java 10.
      
 * Develop signs. Channels? 
 

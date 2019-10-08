@@ -1,3 +1,9 @@
+polaric-aprsd (2.1.2) stable; urgency=medium
+
+  * Bugfixes
+
+ -- Øyvind Hanssen <ohanssen@acm.org>  Wed, 09 Oct 2019 00:23:24 +0200
+
 polaric-aprsd (2.1.1) stable; urgency=medium
 
   * Move to Java 10

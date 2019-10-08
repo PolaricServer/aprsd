@@ -30,6 +30,7 @@ public interface StationDB
          */
         public void saveItem(TrackerPoint tp); 
         
+        
         /**
          * Update item from database. 
          * @param tp Item to update
@@ -43,6 +44,7 @@ public interface StationDB
          * @param d time of capture, null if realtime
          */
         public TrackerPoint getItem(String id, Date d);
+        
         
         /**
          * Get trail point. 

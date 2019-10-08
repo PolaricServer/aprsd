@@ -51,6 +51,8 @@ public interface ServerAPI
         public PubSub getPubSub();
         public void protectUrl(String prefix);
         
+        
+        
         public Mbox getMbox(); 
         public void start() throws Exception; 
         public void stop() throws Exception;
