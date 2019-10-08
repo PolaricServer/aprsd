@@ -147,7 +147,6 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
          */
         if ( tdistance > 0 && distance(newpos)/tdistance > (500 * 0.27778)) {
             if (!_fastmove) {
-               _api.log().info("TrackerPoint", "Point '"+this.getIdent()+"' moving faster than 500km/h. ignore.");
                _fastmove = true; 
                return false; 
             }
@@ -385,7 +384,8 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
       }
       return false;
     }
-                       
+    
+    
     /**
      * Change the icon explicitly.
      * @param a file path of the icon. 
@@ -400,6 +400,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
       }
       return false;
     }
+    
   
     /* FIXME: do override logic here */
     public abstract String getIcon(boolean override);
@@ -407,6 +408,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     
     @Override public String getIcon()
        { return getIcon(true); }
+    
     
     public boolean iconOverride()
        { return _icon != null; }
