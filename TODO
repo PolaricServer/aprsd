@@ -64,6 +64,7 @@ FOR RELEASE 2.2 (or later)
     DONE. moved to database plugin.
     
 * REST service for my layers
+    DONE. 
 
 * Implement CSRF protection for update-operations. 
   

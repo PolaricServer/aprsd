@@ -16,9 +16,6 @@ case "$1" in
        if [ -d "/var/log/polaric" ]; then
           rm -R /var/log/polaric 
        fi
-       if [ -d "/var/lib/polaric" ]; then
-          rm -R /var/lib/polaric 
-       fi
     ;;
 
     upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
