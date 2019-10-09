@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2019 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import java.util.concurrent.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "2.1+";
+   public  static String version = "2.1.2";
    public static String toaddr  = "APPS21";
    
    private static StationDB db = null;
