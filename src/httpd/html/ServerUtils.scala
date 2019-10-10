@@ -29,8 +29,8 @@ package no.polaric.aprsd.http
 
   trait ServerUtils extends ServerBase
   {
-      val doctype = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN \">";
-
+   //   val doctype = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN \">";
+      val doctype = "<!DOCTYPE html>";
         
          
       

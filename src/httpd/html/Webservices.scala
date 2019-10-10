@@ -329,16 +329,19 @@ package no.polaric.aprsd.http
 
    def handle_deleteobject(req : Request, res: Response): String =
    {
-       val I = getI18n(req)
-       var id = req.queryParams("objid")
-       id = if (id != null) id.replaceFirst("@.*", "") else null
+       val I = getI18n(req)    
+       var id = fixText(req.queryParams("objidx"))
+       if (id==null)
+            id = fixText(req.queryParams("objid"))
+       id = if (id != null) 
+                id.replaceFirst("\\@.*", "") else null       
        val prefix = <h2> { I.tr("Remove object")} </h2>
        
        def fields(req : Request): NodeSeq =
            <xml:group>
            <label for="objid" class="lleftlab">Objekt ID:</label>
-           { textInput("objid", 9, 9, 
-                if (id==null) "" else id.replaceFirst("@.*", "") ) }
+           { textInput("objidx", 9, 9, 
+                if (id==null) "" else id.replaceFirst("\\@.*", "") ) }
            </xml:group>
            ;
       
