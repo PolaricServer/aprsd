@@ -116,6 +116,7 @@ public interface ServerAPI
     /** Replace current internet channel in igate, etc.. */   
     public void setInetChannel(AprsChannel ch);
       
+      
     /** Return current internet channel in igate, etc.. */
     public AprsChannel getInetChannel();
 
@@ -149,6 +150,10 @@ public interface ServerAPI
     public OwnPosition getOwnPos(); 
    
    
+    /** Get handler for own objects */
+    public OwnObjects getOwnObjects(); 
+    
+    
     /** Get configuration properties. */
     public Properties getConfig();
    

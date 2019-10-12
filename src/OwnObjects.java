@@ -67,6 +67,11 @@ public class OwnObjects implements Runnable
     
     
     
+    public Set<String> getItems()
+        { return Set.copyOf(_ownObjects); }
+        
+        
+    
     /**
      * Add an object.
      */  
@@ -117,6 +122,8 @@ public class OwnObjects implements Runnable
         _ownObjects.clear();
     }
 
+    
+    
     /** 
      * Delete object with the given id.
      */

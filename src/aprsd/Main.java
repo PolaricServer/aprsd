@@ -84,7 +84,10 @@ public class Main implements ServerAPI
     { return bullboard; }
                     
    public OwnPosition getOwnPos()
-    { return ownpos; }       
+    { return ownpos; } 
+    
+   public OwnObjects getOwnObjects()
+    { return ownobjects; }
           
    public RemoteCtl getRemoteCtl()
     { return rctl; } 
@@ -261,6 +264,7 @@ public class Main implements ServerAPI
     }
     
     
+    
     public void start()
     {
         try {
@@ -274,12 +278,7 @@ public class Main implements ServerAPI
            
            bullboard = new BullBoard(api, getMsgProcessor());
                      
-           /* Configure and Start HTTP server */
-           int http_port = getIntProperty("httpserver.port", 8081);
-           ws = new WebServer(api, http_port);
-           ws.start();
-           TrackerPoint.setNotifier(ws.getNotifier());
-           log.info("Main", "HTTP/WS server ready on port " + http_port);
+ 
 
            /* Deadlock detection */
            deadlockDetector = new DeadlockDetector(new DeadlockConsoleHandler(), 120, TimeUnit.SECONDS);
@@ -301,9 +300,7 @@ public class Main implements ServerAPI
            TrackerPoint.setApi(api);
            Station.init(api); 
            
-           /* Add main webservices */
-           ws.addHandler(new Webservices(api), null);
-           ws.addHandler(new ConfigService(api), null); 
+
            
            /*
             * default channel setup: one named aprsis type APRSIS and one named tnc type TNC2
@@ -402,6 +399,19 @@ public class Main implements ServerAPI
                log.info("Main", "Activate server statistics");
                stats = new StatLogger(api, "serverstats", "serverstats.log");
            }
+           
+           
+            /* Configure and Start HTTP server */
+           int http_port = getIntProperty("httpserver.port", 8081);
+           ws = new WebServer(api, http_port);
+           ws.start();
+           TrackerPoint.setNotifier(ws.getNotifier());
+           log.info("Main", "HTTP/WS server ready on port " + http_port);
+            
+            /* Add main webservices */
+           ws.addHandler(new Webservices(api), null);
+           ws.addHandler(new ConfigService(api), null); 
+           
             
         }
         catch( Exception ioe )

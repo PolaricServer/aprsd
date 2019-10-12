@@ -20,6 +20,7 @@ import spark.staticfiles.StaticFilesConfiguration;
 import spark.http.matching.MatcherFilter;
 import spark.embeddedserver.EmbeddedServers;
 import spark.embeddedserver.jetty.*;
+import spark.ExceptionMapper; 
 import static spark.Spark.get;
 import static spark.Spark.*;
 import org.pac4j.core.config.Config;
@@ -27,7 +28,7 @@ import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.sparkjava.*; 
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.SessionManager;
+// // import org.eclipse.jetty.server.SessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import javax.servlet.SessionCookieConfig;
 import java.util.*;
@@ -96,7 +97,8 @@ public class WebServer implements ServerAPI.Web
      * setup handler in the same manner spark does in {@code EmbeddedJettyFactory.create()}.
      */
     private static JettyHandler setupHandler(Routes routeMatcher, StaticFilesConfiguration staticFilesConfiguration, boolean hasMultipleHandler) {
-        MatcherFilter matcherFilter = new MatcherFilter(routeMatcher, staticFilesConfiguration, false, hasMultipleHandler);
+        var ex = ExceptionMapper.getInstance(); 
+        var matcherFilter = new MatcherFilter(routeMatcher, staticFilesConfiguration, ex, false, hasMultipleHandler);
         matcherFilter.init(null);
         return new JettyHandler(matcherFilter);
     }
@@ -107,7 +109,7 @@ public class WebServer implements ServerAPI.Web
     /** 
      * Session settings. 
      */
-    protected void configSession(SessionManager mgr) {
+    protected void configSession(SessionHandler mgr) {
         mgr.setMaxInactiveInterval(14400);
         SessionCookieConfig sc = mgr.getSessionCookieConfig(); 
         sc.setHttpOnly(true);
@@ -127,9 +129,10 @@ public class WebServer implements ServerAPI.Web
 
         /*  https://blog.codecentric.de/en/2017/07/fine-tuning-embedded-jetty-inside-spark-framework/  */
         EmbeddedServers.add(EmbeddedServers.Identifiers.JETTY, 
-         (Routes routeMatcher, StaticFilesConfiguration staticFilesConfiguration, boolean hasMultipleHandler) -> {
+         (Routes routeMatcher, StaticFilesConfiguration staticFilesConfiguration, ExceptionMapper ex, boolean hasMultipleHandler) -> 
+         {
              JettyHandler handler = setupHandler(routeMatcher, staticFilesConfiguration, hasMultipleHandler);
-             configSession(handler.getSessionManager());
+             configSession(handler);
              
              return new EmbeddedJettyServer(
                new JettyServer(),           
@@ -196,6 +199,10 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/system/*");
         corsEnable("/tracker/*"); 
                 
+        AprsObjectApi oi = new AprsObjectApi(_api);
+        oi.start();
+        corsEnable("/aprs/*");
+        
         /* Start REST API: Users */
         UserApi uu = new UserApi(_api, _auth.conf().getLocalUsers()); // FIXME: Add prefix
         uu.start();
