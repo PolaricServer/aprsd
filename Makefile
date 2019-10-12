@@ -10,7 +10,7 @@
       CODEC = /usr/share/java/commons-codec.jar
     JACKSON = /usr/share/java/jackson-core.jar:/usr/share/java/jackson-databind.jar:/usr/share/java/jackson-annotations.jar
   CLASSPATH = $(GETTEXT):lib/jcoord-polaric.jar:lib/utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:lib/jetty-polaric.jar:/usr/share/java/sl4j-api.jar:/usr/share/java/sl4j-simple.jar:lib/spark-core-polaric.jar:lib/pac4j-core-polaric.jar:lib/pac4j-http-polaric.jar:lib/spark-pac4j-polaric.jar:$(JACKSON):$(CODEC)
-      JAVAC = javac -source 1.10 -target 1.10
+      JAVAC = javac -source 11 -target 11
        YACC = yacc
         LEX = jflex
         JAR = jar
