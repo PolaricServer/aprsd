@@ -29,7 +29,7 @@ import java.util.concurrent.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "2.1.2";
+   public  static String version = "2.1.2+";
    public static String toaddr  = "APPS21";
    
    private static StationDB db = null;
@@ -278,7 +278,14 @@ public class Main implements ServerAPI
            
            bullboard = new BullBoard(api, getMsgProcessor());
                      
- 
+            
+            /* Configure and Start HTTP server */
+           int http_port = getIntProperty("httpserver.port", 8081);
+           ws = new WebServer(api, http_port);
+           ws.start();
+           TrackerPoint.setNotifier(ws.getNotifier());
+           log.info("Main", "HTTP/WS server ready on port " + http_port);
+           
 
            /* Deadlock detection */
            deadlockDetector = new DeadlockDetector(new DeadlockConsoleHandler(), 120, TimeUnit.SECONDS);
@@ -400,13 +407,6 @@ public class Main implements ServerAPI
                stats = new StatLogger(api, "serverstats", "serverstats.log");
            }
            
-           
-            /* Configure and Start HTTP server */
-           int http_port = getIntProperty("httpserver.port", 8081);
-           ws = new WebServer(api, http_port);
-           ws.start();
-           TrackerPoint.setNotifier(ws.getNotifier());
-           log.info("Main", "HTTP/WS server ready on port " + http_port);
             
             /* Add main webservices */
            ws.addHandler(new Webservices(api), null);
