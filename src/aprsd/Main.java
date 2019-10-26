@@ -279,12 +279,7 @@ public class Main implements ServerAPI
            bullboard = new BullBoard(api, getMsgProcessor());
                      
             
-            /* Configure and Start HTTP server */
-           int http_port = getIntProperty("httpserver.port", 8081);
-           ws = new WebServer(api, http_port);
-           ws.start();
-           TrackerPoint.setNotifier(ws.getNotifier());
-           log.info("Main", "HTTP/WS server ready on port " + http_port);
+ 
            
 
            /* Deadlock detection */
@@ -293,21 +288,10 @@ public class Main implements ServerAPI
            
            /* Initialize signs early since plugins may use it (see below) */
            Signs.init(api);
-                      
-           /* Plugins. Note that plugins are installed and started before main webservices, channels
-            * aprs parser and own position/objects. If some core service is to be modified or extended
-            * by plugins it must be installed before plugins. 
-            *
-            * FIXME: Do this with 'plugins.preinit' before db is created and the rest of the plugins later
-            *  OR add an init function to the plugin that can be called early, OR find another way to solve
-            *  this problem!!!
-            */
-           PluginManager.addList(getProperty("plugins", ""));
-           
+
            TrackerPoint.setApi(api);
            Station.init(api); 
            
-
            
            /*
             * default channel setup: one named aprsis type APRSIS and one named tnc type TNC2
@@ -407,11 +391,20 @@ public class Main implements ServerAPI
                stats = new StatLogger(api, "serverstats", "serverstats.log");
            }
            
-            
+          
+           /* Configure and Start HTTP server */
+           int http_port = getIntProperty("httpserver.port", 8081);
+           ws = new WebServer(api, http_port);
+           ws.start();
+           TrackerPoint.setNotifier(ws.getNotifier());
+           log.info("Main", "HTTP/WS server ready on port " + http_port);
+           
             /* Add main webservices */
            ws.addHandler(new Webservices(api), null);
            ws.addHandler(new ConfigService(api), null); 
-           
+                      
+           PluginManager.addList(getProperty("plugins", ""));
+                      
             
         }
         catch( Exception ioe )

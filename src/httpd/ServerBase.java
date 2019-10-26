@@ -90,6 +90,7 @@ public abstract class ServerBase
    }
    
    
+   /* TTL is in minutes */
    public void systemNotification(String user, String txt, int ttl) {
         _api.getWebserver().notifyUser(user, 
             new ServerAPI.Notification("system", "system", txt, new Date(), ttl) );  

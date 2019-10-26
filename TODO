@@ -35,30 +35,27 @@ RELEASE 2.1.2
 * Deinstallation script removes client config. Fix!  
     DONE.
 
+
     
-     
-DATABASE PLUGIN 2.2
+    
+RELEASE 2.2.  or 2.1.3
 
-* Fix postgis link in database plugin. Lock it to a specific version? 
-    DONE.
-
-* My Trackers: Reload list on add/delete tracker
+* APRS object REST API 
     DONE. 
-    
-* Lintian errors
 
-* User-database, user profiles. 
+* SAR mode REST Api 
 
-* Does it work with new client?
-    IN PROGRESS.
-
-* REST API for history search
+* Update Spark, Jetty and Pac4j
     DONE.
-    
-    
+
+* Move to Java 11
+    DONE.
+
+* Go through documentation 
 
 
-FOR RELEASE 2.2 (or later)
+
+FOR RELEASE 2.3 (or later)
     
 * Bulletin board send.
 
@@ -88,6 +85,31 @@ FOR RELEASE 2.2 (or later)
 * BUG: If setting "hide ident" in global settings, this is turned off after a while... Fix. 
 
 * BUG? Old aliases (or aliases set in "My trackers") seem to come back? 
+
+
+
+
+     
+DATABASE PLUGIN 2.2
+
+* Fix postgis link in database plugin. Lock it to a specific version? 
+    DONE.
+
+* My Trackers: Reload list on add/delete tracker
+    DONE. 
+    
+* Lintian errors
+
+* User-database, user profiles. 
+
+* Does it work with new client?
+    IN PROGRESS.
+
+* REST API for history search
+    DONE.
+    
+    
+
 
 
 

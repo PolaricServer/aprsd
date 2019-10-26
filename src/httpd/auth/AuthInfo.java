@@ -26,11 +26,12 @@ import no.polaric.aprsd.*;
 
 
 /**
- * Authorizations for a given user.
+ * Authorizations and service config for a given user session.
  * This can be sent to the client in JSON format. 
  */
 public class AuthInfo {
     public String userid;
+    public String servercall;
     public boolean admin = false, sar = false; 
     public String[] services = null;
     private static List<String> _services = new ArrayList<String>();
@@ -74,5 +75,7 @@ public class AuthInfo {
           if (admin)
              sar=true;
        }
+       
+       servercall=api.getProperty("default.mycall", "NOCALL");
     }
 }
