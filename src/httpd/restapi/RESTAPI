@@ -1,0 +1,73 @@
+ 
+User management. Users, areas.
+-----------------------------
+
+    /users                              GET       Get the list of users (userids)
+    /users/<userid>/areas 		        GET       Areas owned by user. return List<User.Area>	
+                                        POST      Add area.  body=User.Area.  return area-id.               
+    /users/<userid>/areas/<area-id>     GET 	  Return a specific area (area-id). 
+                                        DELETE 	  Delete a given area. return "OK"
+    /users/<userid>/layers              GET       Map layers owned by user
+                                        POST      Add layer. 
+    /users/<userid>/layers/<layername>  DELETE    Remove layer. return "OK" 
+    
+    
+How can a user share an item with other users?     
+Update a given item = DELETE + POST. May add a PUT or PATCH operation.     
+FIXME: These are handled by database plugin
+    
+    
+Bulletin board.
+--------------
+
+    /bullboard/groups                    GET       Active bulletin groups 
+    /bullboard/<group>/senders.          GET       Callsigns of senders to a given group
+    /bullboard/<group>/messages          GET       All bulletins in a given group
+    /bullboard/<group>/messages/<sender> GET       Bulletins from a given sender in a given group
+
+
+System
+------
+    /system/sarmode                      PUT
+    /system/icons/<subdir>               GET
+    /tracker/alias/<id>                  GET
+    /tracker/alias/<id>                  PUT
+                                         
+    
+APRS objects
+------------
+    /aprs/objects                        GET         Active objects
+    /aprs/objects                        POST        Add object 
+    /aprs/objects/<id>                   DELETE      Delete object
+    
+Update a given item = DELETE + POST. May add a PUT or PATCH operation. 
+
+
+
+
+
+
+
+    
+DATABASE PLUGIN
+---------------
+    
+    /hist/<ident>/trail                  GET         Get historical trail for a given callsign. ?tfrom=...&tto=...
+    /hist/<ident>/hrdvia                 GET         Get heard points for a given callsign. ?tfrom=...&tto=...
+    /users/<userid>/trackers             GET         Get "my trackers" for a given user.
+                                         POST        Save/update a tracker for a given user. Return OK or OK-ACTIVE
+    /users/<userid>/trackers/<ident>     DELETE      Remove a tracker for a user.
+    /users/<userid>/<tag>                GET         List of (JSON) objects for a given user. 
+                                         POST        Add an object for a given user. Return an id for the object
+    /users/<userd>/<tag>/<ident>         DELETE      Remove an object for a given user.
+    /files/gpx/<fileid>                  GET         GPX file
+                                         DELETE
+    /files/gpx                           POST
+    
+    
+    
+    
+    
+    
+    
+    
