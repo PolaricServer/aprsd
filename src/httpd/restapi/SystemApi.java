@@ -36,6 +36,14 @@ public class SystemApi extends ServerBase {
         _api = api;
     }
     
+    public static class SarInfo {
+        public String  filt;
+        public String  descr; 
+        public boolean hide; 
+        public SarInfo() {}
+        public SarInfo(String f, String d, boolean h)
+            { filt=f; descr=d; hide=h; }
+    }
     
     
     /** 
@@ -52,13 +60,57 @@ public class SystemApi extends ServerBase {
      * Set up the webservices. 
      */
     public void start() {     
-       
+    
+        /******************************************
+         * Get SAR mode settings
+         ******************************************/
+         get("/system/sarmode", "application/json", (req, resp) -> {
+            SarMode sm = _api.getSar(); 
+            if (sm==null)
+                return null;
+            else
+                return new SarInfo(sm.getFilter(), sm.getReason(), sm.isAliasHidden()); 
+         }, ServerBase::toJson );
+
+         
+         
+         /*****************************************
+          * Put SAR mode settings
+          *****************************************/
+         put("/system/sarmode", (req, resp) -> {
+            var uid = getAuthInfo(req).userid;
+            var sm = _api.getSar(); 
+            SarInfo si = (SarInfo) 
+                ServerBase.fromJson(req.body(), SarInfo.class);
+                
+            /* Return if no change */
+            if ((si==null && sm==null) || (si != null && sm != null))
+                return "Ok (no change)";
+            if (si==null)
+                _api.clearSar(); 
+            else
+                _api.setSar(si.descr, uid, si.filt, si.hide);
+            
+            /* Consider moving this to the setSar method */
+            _api.log().info("RestApi", "SAR mode changed by '"+uid+"'");
+            systemNotification("ADMIN", "SAR mode changed by '"+uid+"'", 120);
+            if (_api.getRemoteCtl() != null) {
+                if (si==null)
+                    _api.getRemoteCtl().sendRequestAll("SAR OFF", null);
+                else
+                    _api.getRemoteCtl().sendRequestAll("SAR "+uid+" "+si.filt+" "+si.descr, null);
+            }
+            return "Ok";
+         });
+         
+         
+    
         /******************************************
          * Get a list of icons (file paths). 
          ******************************************/
          get("/system/icons/*", "application/json", (req, resp) -> {
             var subdir = req.splat()[0];
-            if (subdir.equals("default"))
+            if (subdir==null || subdir.equals("default"))
                subdir = "";
             var webdir = System.getProperties().getProperty("webdir", ".");
             FilenameFilter flt = (dir, f) -> 
@@ -79,6 +131,7 @@ public class SystemApi extends ServerBase {
         }, ServerBase::toJson );
         
         
+        
         /*******************************************
          * Get alias/icon for a given item
          *******************************************/
@@ -89,6 +142,7 @@ public class SystemApi extends ServerBase {
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
             return new ItemInfo.Alias(st.getAlias(), (st.iconIsNull() ? null : st.getIcon())); 
         }, ServerBase::toJson );
+        
         
         
         /*******************************************

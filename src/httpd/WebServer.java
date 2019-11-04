@@ -186,6 +186,7 @@ public class WebServer implements ServerAPI.Web
         before("/users/*", _auth.conf().filter(null, "isauth"));
         before("/tracker/*", _auth.conf().filter(null, "isauth"));
         before("/aprs/*", _auth.conf().filter(null, "isauth"));
+        before("/system/sarmode", _auth.conf().filter(null, "isauth"));
         
         afterAfter((request, response) -> {
             _nRequests++;
