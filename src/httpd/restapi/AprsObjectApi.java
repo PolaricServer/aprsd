@@ -92,7 +92,7 @@ public class AprsObjectApi extends ServerBase {
             ObjInfo obj = (ObjInfo) 
                 ServerBase.fromJson(req.body(), ObjInfo.class);
                 
-            if ( obj.ident.matches("[a-zA-Z0-9\\.\\/\\-\\_\\#]{1,9}") || 
+            if ( !obj.ident.matches("[a-zA-Z0-9\\.\\/\\-\\_\\#]{1,9}") || 
                      (obj.pos[1]==0 && obj.pos[0]==0))
                 return ERROR(resp, 500, "Invalid object. Couldn't post");
                 
