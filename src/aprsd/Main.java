@@ -278,9 +278,6 @@ public class Main implements ServerAPI
            
            bullboard = new BullBoard(api, getMsgProcessor());
                      
-            
- 
-           
 
            /* Deadlock detection */
            deadlockDetector = new DeadlockDetector(new DeadlockConsoleHandler(), 120, TimeUnit.SECONDS);
@@ -291,45 +288,6 @@ public class Main implements ServerAPI
 
            TrackerPoint.setApi(api);
            Station.init(api); 
-           
-           
-           /*
-            * default channel setup: one named aprsis type APRSIS and one named tnc type TNC2
-            */
-            AprsChannel.init(api);
-           _chanManager.addClass("APRSIS", "no.polaric.aprsd.InetChannel");
-           _chanManager.addClass("TNC2", "no.polaric.aprsd.Tnc2Channel");
-           _chanManager.addClass("KISS", "no.polaric.aprsd.KissTncChannel");
-           _chanManager.addClass("TCPKISS", "no.polaric.aprsd.TcpKissChannel");
-           
-           /* FIXME: IS THIS RIGHT???? */
-           String[] channelns = {"aprsis", "tnc"};
-           if (getProperty("channel.aprsis.type", "").equals(""))
-              _config.setProperty("channel.aprsis.type", "APRSIS"); 
-           if (getProperty("channel.tnc.type", "").equals(""))
-              _config.setProperty("channel.tnc.type", "TNC2");  
-           
-           String[] c = getProperty("channels", "").split(",(\\s*)");
-           if (c.length > 0)
-             channelns = c; 
-           
-           
-           /* Try to instantiate channels in channel list */
-           for (String chan: channelns) {
-                 /* Define and activate channel */
-                 String type = getProperty("channel."+chan+".type", "");
-                 Channel ch = _chanManager.newInstance(api, type, chan);
-                 if (ch != null) {
-                    /* FIXME: add parser in AprsChannel constructor?? */
-                    if (ch instanceof AprsChannel) 
-                        ((AprsChannel)ch).addReceiver(parser);
-                 
-                    if (getBoolProperty("channel."+chan+".on", false))
-                        ch.activate(api);
-                 }
-                 else
-                    log.error("Main", "ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
-           }
 
            
            if (getBoolProperty("remotectl.on", false)) {
@@ -342,56 +300,22 @@ public class Main implements ServerAPI
                sarurl = new SarUrl(api);
            }
   
-           /* 
-            * Default channels
-            */
-           String ch_inet_name = getProperty("channel.default.inet", "aprsis"); 
-           String ch_rf_name = getProperty("channel.default.rf", "tnc");
-           ch1 = (ch_inet_name.length() > 0 ? (AprsChannel) _chanManager.get(ch_inet_name) : null);
-           ch2 = (ch_rf_name.length() > 0  ? (AprsChannel) _chanManager.get(ch_rf_name) : null);          
-
-           /* Igate.
-            * FIXME:  Should create igate object also if not on to allow it to be 
-            * activated by a remote command. Note that if inetchannel or tncchannel does not exist, 
-            * igate will not activate. Should those channels always be created????
-            */     
-           if (getBoolProperty("igate.on", false)) {
-               log.info("Main", "Activate IGATE");
-               igate = new Igate(api);
-               igate.setChannels(ch2, ch1);
-               igate.activate(this);
-           }
+           /* Igate */
+           igate = new Igate(api);
            
-          /* FIXME: There should be a way to set default inet and RF channels (in ChannelManager?)
-           * For now, we use the channels given in igate.channels.
-           */
-          
-          /* Message processing */
-           db.getMsgProcessor().setChannels(ch2, ch1);  
-          
-          /* Own position */
-          if (getBoolProperty("ownposition.gps.on", false)) {
+           /* Own position */
+           if (getBoolProperty("ownposition.gps.on", false)) {
                log.info("Main", "Activate GPS");
                ownpos = new GpsPosition(api);
            }
            else
                ownpos = new OwnPosition(api);
-
-           ownpos.setChannels(ch2, ch1);
            db.addPoint(ownpos); 
            
+                      
            /* APRS objects */
            ownobjects = db.getOwnObjects(); 
-           ownobjects.setChannels(ch2, ch1); 
-
            
-           /* Server statistics */
-           if (getBoolProperty("serverstats.on", false)) {
-               log.info("Main", "Activate server statistics");
-               stats = new StatLogger(api, "serverstats", "serverstats.log");
-           }
-           
-          
            /* Configure and Start HTTP server */
            int http_port = getIntProperty("httpserver.port", 8081);
            ws = new WebServer(api, http_port);
@@ -399,13 +323,50 @@ public class Main implements ServerAPI
            TrackerPoint.setNotifier(ws.getNotifier());
            log.info("Main", "HTTP/WS server ready on port " + http_port);
            
+           
             /* Add main webservices */
            ws.addHandler(new Webservices(api), null);
            ws.addHandler(new ConfigService(api), null); 
-                      
+           
+           /* Plug-ins */           
            PluginManager.addList(getProperty("plugins", ""));
                       
-            
+           
+           /* 
+            * Channel setup. This should be done after plugins are installed since plugins may
+            * add channel types. 
+            */
+           instantiate_channels(); 
+           
+           /* 
+            * Default channels
+            */
+           String ch_inet_name = getProperty("channel.default.inet", "aprsis"); 
+           String ch_rf_name = getProperty("channel.default.rf", "tnc");
+           ch1 = (ch_inet_name.length() > 0 ? (AprsChannel) _chanManager.get(ch_inet_name) : null);
+           ch2 = (ch_rf_name.length() > 0  ? (AprsChannel) _chanManager.get(ch_rf_name) : null);          
+           
+           
+           /* 
+            * Igate 
+            */     
+           if (getBoolProperty("igate.on", false)) {
+               log.info("Main", "Activate IGATE");
+               igate.setChannels(ch2, ch1);
+               igate.activate(this);
+           }
+          
+          /* Set channels on various services */
+           db.getMsgProcessor().setChannels(ch2, ch1);  
+           ownpos.setChannels(ch2, ch1);
+           ownobjects.setChannels(ch2, ch1);           
+                      
+                       
+           /* Server statistics */
+           if (getBoolProperty("serverstats.on", false)) {
+               log.info("Main", "Activate server statistics");
+               stats = new StatLogger(api, "serverstats", "serverstats.log");
+           }
         }
         catch( Exception ioe )
         {
@@ -413,6 +374,49 @@ public class Main implements ServerAPI
              ioe.printStackTrace(System.err);;
         }
         
+    }
+    
+    
+    
+    public void instantiate_channels() 
+    {               
+        /*
+         * default channel setup: one named aprsis type APRSIS and one named tnc type TNC2
+         */
+        AprsChannel.init(api);
+        _chanManager.addClass("APRSIS", "no.polaric.aprsd.InetChannel");
+        _chanManager.addClass("TNC2", "no.polaric.aprsd.Tnc2Channel");
+        _chanManager.addClass("KISS", "no.polaric.aprsd.KissTncChannel");
+        _chanManager.addClass("TCPKISS", "no.polaric.aprsd.TcpKissChannel");
+           
+        /* FIXME: IS THIS RIGHT???? */
+        String[] channelns = {"aprsis", "tnc"};
+        if (getProperty("channel.aprsis.type", "").equals(""))
+            _config.setProperty("channel.aprsis.type", "APRSIS"); 
+        if (getProperty("channel.tnc.type", "").equals(""))
+            _config.setProperty("channel.tnc.type", "TNC2");  
+           
+        String[] c = getProperty("channels", "").split(",(\\s*)");
+        if (c.length > 0)
+            channelns = c; 
+           
+           
+        /* Try to instantiate channels in channel list */
+        for (String chan: channelns) {
+            /* Define and activate channel */
+            String type = getProperty("channel."+chan+".type", "");
+            Channel ch = _chanManager.newInstance(api, type, chan);
+            if (ch != null) {
+                /* FIXME: add parser in AprsChannel constructor?? */
+                if (ch instanceof AprsChannel) 
+                    ((AprsChannel)ch).addReceiver(parser);
+                 
+                if (getBoolProperty("channel."+chan+".on", false))
+                    ch.activate(api);
+            }
+            else
+                log.error("Main", "ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
+        }
     }
   
 
