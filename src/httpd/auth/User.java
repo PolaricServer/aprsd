@@ -22,19 +22,6 @@ import java.io.Serializable;
 
 public abstract class User {
 
-    
-    /** 
-     * Area. Can be stored and serialized as JSON and sent to client. 
-     */
-    public static class Area implements Serializable {
-        public int index;
-        public int baseLayer;
-        public boolean[] oLayers;
-        public String name;
-        public double[] extent;
-    }
-
-
     private String userid; 
        
     public String  getIdent()

@@ -36,16 +36,20 @@ public class LocalUsers {
      */
     public static class User extends no.polaric.aprsd.http.User implements Serializable {
      
+        private String name = "";
         private Date lastused; 
         transient private boolean active = false;
 
-        public Date    getLastUsed() { return lastused; }
-        public void    updateTime()  { lastused = new Date(); }
-        public boolean isActive()    { return active; }
-        public void    setActive()   { active = true; }
+        public Date    getLastUsed()     { return lastused; }
+        public void    updateTime()      { lastused = new Date(); }
+        public boolean isActive()        { return active; }
+        public void    setActive()       { active = true; }
+        public void    setName(String n) { name = n; }
+        public String  getName()         { return name; }
         
         public User(String id, Date d)
             {super(id); lastused=d;} 
+            
     }
     
 
@@ -54,10 +58,8 @@ public class LocalUsers {
     
     private ServerAPI _api;
     private SortedMap<String, User> _users = new TreeMap<String, User>();
-    protected Map<String, SortedMap<Integer, User.Area>> _areas = new HashMap();
     private String _filename; 
-    
-    private int _nextAreaId = 0;
+
     
     
     public LocalUsers(ServerAPI api, String fname) {
@@ -103,8 +105,6 @@ public class LocalUsers {
             FileOutputStream fs = new FileOutputStream(_filename);
             ObjectOutput ofs = new ObjectOutputStream(fs);
             ofs.writeObject(_users); 
-            ofs.writeObject(_areas); 
-            ofs.writeObject(_nextAreaId);
         }
         catch (Exception e) {
             _api.log().warn("LocalUsers", "Cannot save data: "+e);
@@ -121,8 +121,6 @@ public class LocalUsers {
             FileInputStream fs = new FileInputStream(_filename);
             ObjectInput ifs = new ObjectInputStream(fs);
             _users = (SortedMap) ifs.readObject();
-            _areas = (Map) ifs.readObject();
-            _nextAreaId = (Integer) ifs.readObject();
         }
         catch (EOFException e) { }
         catch (Exception e) {
