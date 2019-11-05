@@ -24,7 +24,7 @@ import java.util.*;
 import no.polaric.aprsd.*;
 
 /**
- * Implement REST API for user-related info. Users, areas. 
+ * Implement REST API for user-related info. 
  */
 public class UserApi extends ServerBase {
 
@@ -65,54 +65,6 @@ public class UserApi extends ServerBase {
      * Set up the webservices. 
      */
     public void start() {     
-       
-        /******************************************
-         * Get a list of areas for a given user. 
-         ******************************************/
-        get("/users/*/areas", "application/json", (req, resp) -> {
-            String uid = req.splat()[0];
-            List<User.Area> ul = new ArrayList<User.Area>();
-            _users.get(uid).getAreas().forEach( x-> {ul.add(x);} );
-            return ul;
-        }, ServerBase::toJson );
-        
-        
-        
-        /*****************************************
-         * Add an area to the list 
-         *****************************************/
-        post("/users/*/areas", (req, resp) -> {
-            String uid = req.splat()[0];
-            User.Area a = (User.Area) 
-                ServerBase.fromJson(req.body(), User.Area.class);
-                
-            _api.getWebserver().notifyUser(uid, 
-                new ServerAPI.Notification
-                  ("system", "system", "Added area '"+a.name+ "' for user '"+uid+"'", new Date(), 10) );    
-                
-            if (a != null) 
-                return ""+ _users.get(uid).addArea(a);
-            else 
-                return ERROR(resp, 400, "Invalid input format");
-        });
-        
-
-        /*****************************************
-         * Delete an area from the list 
-         *****************************************/
-        delete("/users/*/areas/*", (req, resp) -> {
-            String uid = req.splat()[0];
-            String ix = req.splat()[1];
-            try {
-               int i = Integer.parseInt(ix);
-               _users.get(uid).removeArea(i);
-            }
-            catch(Exception e) {
-                return ERROR(resp, 400, ""+e); 
-            }
-            return "OK";
-        });
-        
         
         /******************************************
          * Get a list of users. 

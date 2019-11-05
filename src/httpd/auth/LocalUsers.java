@@ -26,8 +26,6 @@ import java.io.*;
  * Currently this is used for keeping track of usage. May add more later. 
  * Note that there may be users that have not an associated registration here. 
  * There may also be a database and/or users authorized by an external service!!!
- *
- * FIXME: This may not be the right place for storing areas. 
  */
  
 public class LocalUsers {
@@ -36,7 +34,7 @@ public class LocalUsers {
     /**
      * User info class. Can be serialized and stored in a file. 
      */
-    public class User extends no.polaric.aprsd.http.User implements Serializable {
+    public static class User extends no.polaric.aprsd.http.User implements Serializable {
      
         private Date lastused; 
         transient private boolean active = false;
@@ -45,47 +43,6 @@ public class LocalUsers {
         public void    updateTime()  { lastused = new Date(); }
         public boolean isActive()    { return active; }
         public void    setActive()   { active = true; }
-       
-       
-       /**
-        * Get the areas belonging to a given user.
-        * @param id - user id.
-        * @return collection of areas. 
-        */
-        public Collection<Area> getAreas(){
-            if (!_areas.containsKey(getIdent())) 
-                _areas.put(getIdent(), new TreeMap<Integer,Area>());
-            return _areas.get(getIdent()).values(); 
-        }
-    
-        
-        /**
-        * Add an area to a given user. 
-        * @param id - user id. 
-        * @param a - area to be added.
-        * @return index of added area. 
-        */
-        public int addArea(Area a) {
-            if (!_areas.containsKey(getIdent())) 
-                _areas.put(getIdent(), new TreeMap<Integer,Area>());
-            SortedMap<Integer,Area> l = _areas.get(getIdent());
-            a.index = _nextAreaId; 
-            _nextAreaId = (_nextAreaId + 1) % Integer.MAX_VALUE;
-            l.put(a.index, a);   
-            return a.index;
-        }
-    
-  
-        /**
-        * Remove an area. 
-        * @param id - user id.
-        * @param i - index of area. 
-        */
-        public void removeArea(int i) {
-            if (_areas.containsKey(getIdent()))
-                _areas.get(getIdent()).remove(i);
-        }
-    
         
         public User(String id, Date d)
             {super(id); lastused=d;} 
