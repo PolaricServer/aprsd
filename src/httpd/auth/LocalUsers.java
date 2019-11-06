@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2018 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018-19 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,9 +89,11 @@ public class LocalUsers {
      * Add a user.
      * @param user - user id. 
      */
-    public void add(String user) {
-        if (!_users.containsKey(user))
-            _users.put(user, new User(user, null));
+    public void add(String userid) {
+        if (!_users.containsKey(userid)) {
+            _users.put(userid, new User(userid, null));
+            _api.log().info("LocalUsers", "add: user '"+userid+"' from passwd file");
+        }
     }
       
     

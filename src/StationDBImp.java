@@ -133,7 +133,7 @@ public class StationDBImp implements StationDB, Runnable
     {
         if (_hasChanged)
           try {
-             _api.log().info("StationDBImp", "Saving point data...");
+             _api.log().info("StationDBImp", "Saving data...");
              FileOutputStream fs = new FileOutputStream(_file);
              ObjectOutput ofs = new ObjectOutputStream(fs);
              
@@ -300,8 +300,6 @@ public class StationDBImp implements StationDB, Runnable
         for (TrackerPoint x : dupes)
            if (x instanceof AprsObject && !((AprsObject)x).isTimeless() && 
                   !owner.getIdent().equals(((AprsObject)x).getOwner().getIdent())) {
-            //   _api.log().info("StationDBImp",
-            //      "APRS object overtaken/deactivated: "+id+"@"+((AprsObject)x).getOwner().getIdent());
                ((AprsObject)x).kill();
            }
     }
