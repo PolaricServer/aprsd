@@ -202,4 +202,39 @@ V.2.1
 Various smaller fixes.. 
 
 
+V.2.1.1
+-------
 
+* adminWindow function was accidentally deleted. Put it back. 
+* Move to Java 10.
+* Publish/subscribe service using websocket. 
+* Notification service.  
+* Implement APRS bulletin board receive and REST API
+* User/area REST API
+* System REST API
+* Alias/icon REST API
+* Add bluetooth devices to list of serial ports known to rxtx
+* Update Spark and Jetty
+* A number of smaller additions and fixes... 
+* Abandoned development on webapp. Use webapp2 instead 
+
+
+V.2.1.2
+-------
+
+* fix password file name in polaric-password (Eduard Iten)
+* Deinstallation script removes client config. Fix! 
+* Logging adjustments
+
+
+V.2.2
+-----
+* Move to Java 11
+* Newer versions of Jetty, Spark and pac4j. 
+* Fix order of startup of channels/services
+* Own objects REST API
+* SAR mode REST API
+* Remove user's areas and fix user serialization problem
+* Various fixes..
+
+    
