@@ -13,10 +13,10 @@ case "$1" in
                    polaric
                usermod -G dialout polaric
            fi
-           chown -R polaric:adm /var/log/polaric /var/lib/polaric
            chmod 755 /var/log/polaric
            if [ -d "/var/lib/polaric/mapcache" ]; then
-              chown -R www-data:www-data /var/lib/polaric/mapcache
+                chown www-data:www-data /var/lib/polaric/mapcache
+                chown www-data:www-data /var/lib/polaric/mapcache/*.db
            fi
         fi  
         if [ -e "/etc/polaric-webapp/users" ] ; then

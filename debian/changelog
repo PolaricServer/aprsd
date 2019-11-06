@@ -1,8 +1,9 @@
-polaric-aprsd (2.1.2+) UNRELEASED; urgency=medium
+polaric-aprsd (2.2) stable; urgency=medium
 
-  * 
+  * Move to Java 11 
+  * etc.. (see Changelog file)
 
- -- Øyvind Hanssen <ohanssen@acm.org>  Thu, 10 Oct 2019 22:20:08 +0200
+ -- Øyvind Hanssen <ohanssen@acm.org>  Wed, 06 Nov 2019 20:51:26 +0100
 
 polaric-aprsd (2.1.2) stable; urgency=medium
 
