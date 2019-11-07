@@ -1,3 +1,9 @@
+polaric-aprsd (2.2.1) stable; urgency=medium
+
+  * Security fix 
+
+ -- Øyvind Hanssen <ohanssen@acm.org>  Thu, 07 Nov 2019 21:22:53 +0100
+
 polaric-aprsd (2.2) stable; urgency=medium
 
   * Move to Java 11 
