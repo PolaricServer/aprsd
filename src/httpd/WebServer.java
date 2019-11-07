@@ -153,7 +153,9 @@ public class WebServer implements ServerAPI.Web
         webSocket("/messages", _messages); // Should be removed eventually
         webSocket("/mapdata", _mapupdate);
         webSocket("/jmapdata", _jmapupdate);
-         
+                 
+        _auth.start();
+                 
         /* 
          * OPTIONS requests (CORS preflight) are not sent with cookies and should not go 
          * through the auth check. 
@@ -169,30 +171,30 @@ public class WebServer implements ServerAPI.Web
          
          
         before("*", (req, res) -> {res.status(200);});
-        before("/config_menu", _auth.conf().filter("FormClient", "isauth")); 
+        before("/config_menu", _auth.conf().filter("FormClient", "isauth, admin")); 
        
         /* 
          * Protect other webservices. We should eventually prefix these and 
          * just one filter should be sufficient 
          */
-        before("/station_sec", _auth.conf().filter(null, "isauth"));   
-        before("/addobject", _auth.conf().filter(null, "isauth"));
-        before("/deleteobject", _auth.conf().filter(null, "isauth"));
-        before("/resetinfo", _auth.conf().filter(null, "isauth"));
-        before("/sarmode", _auth.conf().filter(null, "isauth"));
-        before("/sarurl", _auth.conf().filter(null, "isauth"));
-        before("/search_sec", _auth.conf().filter(null, "isauth"));
-        before("/users", _auth.conf().filter(null, "isauth"));
-        before("/users/*", _auth.conf().filter(null, "isauth"));
-        before("/tracker/*", _auth.conf().filter(null, "isauth"));
-        before("/aprs/*", _auth.conf().filter(null, "isauth"));
-        before("/system/sarmode", _auth.conf().filter(null, "isauth"));
+        before("/station_sec",    _auth.conf().filter(null, "isauth"));   
+        before("/addobject",      _auth.conf().filter(null, "isauth, sar"));
+        before("/deleteobject",   _auth.conf().filter(null, "isauth, sar"));
+        before("/resetinfo",      _auth.conf().filter(null, "isauth, sar"));
+        before("/sarmode",        _auth.conf().filter(null, "isauth, sar"));
+        before("/sarurl",         _auth.conf().filter(null, "isauth"));
+        before("/search_sec",     _auth.conf().filter(null, "isauth"));
+        before("/users",          _auth.conf().filter(null, "isauth, admin"));
+        before("/users/*",        _auth.conf().filter(null, "isauth"));
+        before("/tracker/*",      _auth.conf().filter(null, "isauth, sar"));
+        before("/aprs/*",         _auth.conf().filter(null, "isauth, sar"));
+        before("/system/sarmode", _auth.conf().filter(null, "isauth, sar"));
         
         afterAfter((request, response) -> {
             _nRequests++;
         });
       
-        _auth.start();
+
         
         /* Start REST API: System */
         SystemApi ss = new SystemApi(_api);
