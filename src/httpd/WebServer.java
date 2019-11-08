@@ -73,7 +73,7 @@ public class WebServer implements ServerAPI.Web
     private long _nRequests = 0; 
     private final PubSub _pubsub;
     private final GeoMessages _messages;
-    private final MapUpdater  _mapupdate, _jmapupdate;
+    private final MapUpdater _jmapupdate;
     private ServerAPI _api; 
     private AuthService _auth;
  
@@ -85,9 +85,7 @@ public class WebServer implements ServerAPI.Web
        
       _pubsub     = new PubSub(_api, true); 
       _messages   = new GeoMessages(_api, true);
-      _mapupdate  = new MapUpdater(_api, true);
       _jmapupdate = new JsonMapUpdater(_api, true);
-      _mapupdate.link(_jmapupdate);
       _auth = new AuthService(api); 
     }
  
@@ -151,7 +149,6 @@ public class WebServer implements ServerAPI.Web
          */
         webSocket("/notify", _pubsub);
         webSocket("/messages", _messages); // Should be removed eventually
-        webSocket("/mapdata", _mapupdate);
         webSocket("/jmapdata", _jmapupdate);
                  
         _auth.start();
@@ -241,7 +238,6 @@ public class WebServer implements ServerAPI.Web
     
     public void stop() throws Exception {
        _api.log().info("WebServer", "Stopping...");
-       _mapupdate.postText("RESTART!", c->true);
        _jmapupdate.postText("RESTART!", c->true);
        _api.saveConfig();
        _auth.conf().getLocalUsers().save();
@@ -251,19 +247,19 @@ public class WebServer implements ServerAPI.Web
      
     /* Statistics */
     public long nVisits() 
-        { return _mapupdate.nVisits() + _jmapupdate.nVisits(); }
+        { return _jmapupdate.nVisits(); }
      
     public int  nClients() 
-        { return _mapupdate.nClients() + _jmapupdate.nClients(); }
+        { return _jmapupdate.nClients(); }
      
     public int  nLoggedin()
-        { return _mapupdate.nLoggedIn() + _jmapupdate.nLoggedIn(); }
+        { return _jmapupdate.nLoggedIn(); }
         
     public long nHttpReq() 
         { return _nRequests; }
      
     public long nMapUpdates() 
-        { return _mapupdate.nUpdates() + _jmapupdate.nUpdates(); }
+        { return _jmapupdate.nUpdates(); }
         
     public ServerAPI.Mbox getMbox() 
         { return _messages; }
@@ -272,10 +268,7 @@ public class WebServer implements ServerAPI.Web
         { return _pubsub; }
      
     public Notifier getNotifier() 
-        { return _mapupdate; } 
-   
-    public WsNotifier getMapUpdater()
-        { return _mapupdate; }
+        { return _jmapupdate; } 
         
     public WsNotifier getJsonMapUpdater()
         { return _jmapupdate; }

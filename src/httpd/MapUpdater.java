@@ -33,11 +33,11 @@ import org.eclipse.jetty.websocket.api.UpgradeRequest;
  * Map overlay updater using Websockets.  
  */
 @WebSocket(maxIdleTime=600000)
-public class MapUpdater extends WsNotifier implements Notifier
+public abstract class MapUpdater extends WsNotifier implements Notifier
 {
 
    
-   public class Client extends WsNotifier.Client 
+   public abstract class Client extends WsNotifier.Client 
    {
        private boolean   _subscribe; 
        private long      _lastSent = 0;
@@ -67,31 +67,7 @@ public class MapUpdater extends WsNotifier implements Notifier
        
        
        /** Returns the overlay. XML format. */
-       public String getOverlayData(boolean metaonly) {
-           StringWriter outs = new StringWriter();
-           PrintWriter out = new PrintWriter(outs, false);
-           _updates++;
-           
-           String meta = 
-               metaTag("login", getUsername()) +
-               metaTag("loginuser", (login() ? "true" : "false")) + 
-               metaTag("adminuser", (login() &&_auth.admin ? "true" : "false")) +
-               metaTag("updateuser", (login() && _auth.sar ? "true" : "false")) + 
-               metaTag("sarmode", (_api.getSar() !=null ? "true" : "false")) +
-               metaTag("clientses", ""+getUid());
-               
-           boolean showSarInfo = login() || _api.getSar() == null || !_api.getSar().isAliasHidden();
-           try {     
-              printOverlay( meta, out, 0 /* seq */, 
-                   _filter, _scale, _uleft, _lright, 
-                   (trusted() && login()), metaonly, showSarInfo );
-              return outs.toString();
-           }
-           catch (IOException e) {
-              _api.log().error("MapUpdater", "Error when writing XML: "+e);
-              return "";
-           }
-       }
+       public abstract String getOverlayData(boolean metaonly);
 
        
        public void subscribe() {}
@@ -154,11 +130,6 @@ public class MapUpdater extends WsNotifier implements Notifier
    }  
     
     
-   
-   /** Factory method */
-   @Override public WsNotifier.Client newClient(Session conn) 
-     { return new Client(conn); }
-   
 
    
    /** 
