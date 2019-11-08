@@ -1,3 +1,9 @@
+polaric-aprsd (2.2.1+) UNRELEASED; urgency=medium
+
+  * Development 
+
+ -- Øyvind Hanssen <ohanssen@acm.org>  Thu, 07 Nov 2019 22:04:02 +0100
+
 polaric-aprsd (2.2.1) stable; urgency=medium
 
   * Security fix 

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015-2018 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,10 +90,6 @@ package no.polaric.aprsd.http
               <table>
               <tr><th>Created</th><th>Client</th><th>In</th><th>Out</th><th>Userid</th><th>Fmt</th></tr>
         
-              { for (c <- ws.getMapUpdater().clients()) yield
-                   <tr><td>{ServerBase.tf.format(c.created())}</td><td>{c.getUid()}</td>
-                       <td>{c.nIn()}</td><td>{c.nOut()}</td><td>{c.getUsername()}</td><td>XML</td></tr>  }
-                   
               { for (c <- ws.getJsonMapUpdater().clients()) yield
                    <tr><td>{ServerBase.tf.format(c.created())}</td><td>{c.getUid()}</td>
                        <td>{c.nIn()}</td><td>{c.nOut()}</td><td>{c.getUsername()}</td><td>JSON</td></tr> }
@@ -249,122 +245,7 @@ package no.polaric.aprsd.http
     }   
      
    
-   
-   
-   
-   def handle_sarmode(req : Request, res: Response): String =
-   {
-       val I = getI18n(req)
-       val prefix = <h2> {I.tr("Search and rescue mode")} </h2>
-       var filter = req.queryParams("sar_prefix")
-       var reason = req.queryParams("sar_reason")
-       var hidesar = req.queryParams("sar_hidesar")
-       val on = req.queryParams("sar_on")
-       
-       def fields(req : Request): NodeSeq =          
-           <xml:group>
-           <p> {I.tr("Certain types of info only visible for authorized users.")} </p>
-           <label for="sar_on" class="lleftlab"> {I.tr("SAR mode")+":"} </label>
-           { checkBox("sar_on", api.getSar() !=null, TXT(I.tr("activated"))) }  
-           <br/>
-           <label for="sar_hidesar" class="lleftlab"> {I.tr("Alias/icon")+":"} </label>
-           { checkBox("sar_hidesar", api.getSar()==null || api.getSar().isAliasHidden(), TXT(I.tr("hidden"))) }  
-           <br/>
-           
-           <label for="sar_prefix" class="lleftlab"> {I.tr("Hide prefix")+":"} </label>
-           { textInput("sar_prefix", 25, 50,
-               if ( api.getSar()==null) "" else api.getSar().getFilter() ) }
-           <br/>
-           
-           
-           <label for="sar_reason" class="lleftlab"> {I.tr("Description")+":"} </label>
-           { if (api.getSar() == null)
-                textInput("sar_reason", 25, 50, "")
-             else 
-                <xml:group>
-                <label id="sar_reason">{ api.getSar().getReason() }
-                <em> { "("+api.getSar().getUser()+")" } </em></label>
-                <br/>
-                { simpleLabel("sar_date", "lleftlab", I.tr("Activated")+":", TXT(""+api.getSar().getTime())) }
-                </xml:group>
-           }
-           </xml:group>     
-              
-              
-       def action(req : Request): NodeSeq = 
-       {
-          TrackerPoint.abortWaiters(true);
-          if (on != null && "true".equals(on) ) {
-               val hide = (hidesar != null && "true".equals(hidesar) ) 
-               val filt = if ("".equals(filter)) "NONE" else filter;
-               
-               api.setSar(reason, getAuthInfo(req).userid, filter, hide);
-               
-               reason = if (!hide) "[NOHIDE] "+reason 
-                        else reason;
-               if (api.getRemoteCtl() != null)
-                   api.getRemoteCtl().sendRequestAll("SAR "+getAuthInfo(req).userid+" "+filt+" "+reason, null);
-               
-               
-               <h3> {I.tr("Activated")} </h3>
-               <p>{reason}</p>
-          }
-          else {   
-               api.clearSar();
-               if (api.getRemoteCtl() != null)
-                  api.getRemoteCtl().sendRequestAll("SAR OFF", null);
-               <h3> {I.tr("Ended")} </h3>
-          } 
-       }
-            
-       
-       return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
-   }
-   
-   
-   
-   /**
-    * Delete APRS object.
-    */          
-
-   def handle_deleteobject(req : Request, res: Response): String =
-   {
-       val I = getI18n(req)    
-       var id = fixText(req.queryParams("objidx"))
-       if (id==null)
-            id = fixText(req.queryParams("objid"))
-       id = if (id != null) 
-                id.replaceFirst("\\@.*", "") else null       
-       val prefix = <h2> { I.tr("Remove object")} </h2>
-       
-       def fields(req : Request): NodeSeq =
-           <xml:group>
-           <label for="objid" class="lleftlab">Objekt ID:</label>
-           { textInput("objidx", 9, 9, 
-                if (id==null) "" else id.replaceFirst("\\@.*", "") ) }
-           </xml:group>
-           ;
-      
-      
-       def action(req : Request): NodeSeq =
-          if (id == null) {
-              <h3> {I.tr("Error")+":"} </h3>
-              <p> {I.tr("'objid' must be given as parameter")} </p>;
-          }
-          else {
-              if (_api.getDB().getOwnObjects().delete(id)) {
-                  _api.log().info("Webservices", "DELETE OBJECT: '"+id+"' by user '"+getAuthInfo(req).userid+"'");
-                  systemNotification("ADMIN", "Object '"+id+"' deleted by user '"+getAuthInfo(req).userid+"'", 0)
-                  <h3> {I.tr("Object removed!")} </h3>
-              }
-              else
-                  <h3> {I.tr("Couldn't find object")+": "+id} </h3>
-          }  
-          ;
-          
-       return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action) )))
-   }          
-
+ 
 
    
    
@@ -487,90 +368,6 @@ package no.polaric.aprsd.http
    }          
 
 
-
-             
-   /**
-    * Add or edit APRS object.
-    */          
-   def handle_addobject(req : Request, res : Response): String =
-   {
-        val I = getI18n(req)
-        val pos = getCoord(req)
-        val id = fixText(req.queryParams("objid"))
-        val prefix = <h2> {I.tr("Add/edit object")} </h2>
-        
-        /* Fields to be filled in */
-        def fields(req : Request): NodeSeq =
-            <xml:group>
-            {
-              label("objid", "lleftlab", I.tr("Object ID")+":", I.tr("Identifier for object")) ++
-              textInput("objid", 9, 9, "") ++
-              br ++
-              label("osymtab", "lleftlab", I.tr("Symbol")+":", 
-                     I.tr("APRS symbol table and symbol. Fill in or chose from the list at the right side.")) ++
-              textInput("osymtab", 1, 1, "/") ++
-              textInput("osym", 1, 1, "c") ++
-              symChoice(req) ++
-              br ++
-              label("descr", "lleftlab", I.tr("Description")+":", "") ++
-              textInput("descr", 30, 40, "") ++
-              br ++
-              label("utmz", "lleftlab", I.tr("Pos (UTM)")+":", I.tr("Object's position")) ++
-              {  if (pos==null)
-                   utmForm('W', 34)
-                 else
-                   showUTM(req, pos)
-              }
-            }
-            <br/>
-            <div>
-            {
-              label("perm", "lleftlab", I.tr("Settings")+":", "") ++
-              checkBox("perm", false, TXT(I.tr("Timeless (Permanent)")))
-            }
-            </div>
-            </xml:group>
-            ;
-            
-
-            
-            
-        /* Action. To be executed when user hits 'submit' button */
-        def action(request : Request): NodeSeq =
-            if (id == null || !id.matches("[a-zA-Z0-9_].*\\w*")) {
-               <h2> { I.tr("Invalid id {0}",id)} </h2>
-               <p>  { I.tr("please give 'objid' as a parameter. This must start with a letter/number")} </p>;
-            }
-            else {
-               val osymtab = req.queryParams("osymtab")
-               val osym  = req.queryParams("osym")
-               val otxt = req.queryParams("descr")
-               val perm = req.queryParams("perm")
-               
-               _api.log().info("Webservices", "SET OBJECT: '"+id+"' by user '"+getAuthInfo(request).userid+"'")
-
-                  
-               if ( _api.getDB().getOwnObjects().add(id, 
-                      new AprsHandler.PosData( pos,
-                         if (osym==null) 'c' else osym(0) ,
-                         if (osymtab==null) '/' else osymtab(0)),
-                      if (otxt==null) "" else otxt,
-                      "true".equals(perm) )) {
-                  systemNotification("ADMIN", "Object '"+id+"' posted by user '"+getAuthInfo(request).userid+"'", 0)
-                      
-                  <h2> {I.tr("Object updated")} </h2>
-                  <p>ident={"'"+id+"'"}<br/>pos={showUTM(req, pos) }</p>;
-                }
-               else
-                  <h2> {I.tr("Cannot update")} </h2>
-                  <p>  {I.tr("Object '{0}' is already added by someone else", id)} </p>
-            }
-            ;
-            
-        return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
-    }
-    
-
     
 
     protected def itemList(I:I18n, list: List[TrackerPoint], mobile: Boolean, 
@@ -616,53 +413,6 @@ package no.polaric.aprsd.http
       </tbody>
       </table>
       ;
-
-      
-   /**
-    * Send instant message. 
-    */
-   protected def handle_sendmsg(req : Request, res : Response): String = 
-   {
-        val I = getI18n(req)
-        val mbox = _api.getWebserver().getMbox()
-        val prefix = <h2> {I.tr("Send instant message")} </h2>
-        
-        
-        def userList(id: String): NodeSeq = 
-           <select name={id} id={id}> 
-            { for (x:String <- mbox.getUsers) yield
-                 <option value={x}>{x}</option>
-            }
-            <option value="ALL-SAR">ALL-SAR</option>
-            <option value="ALL-LOGIN">ALL-LOGIN</option>
-           </select>
-        ; 
-        
-        
-        /* Fields to be filled in */
-        def fields(req : Request): NodeSeq =
-            label("msgto", "lleftlab", I.tr("To")+":", "") ++
-            userList("msgto") ++ br ++
-            label("msgcontent", "lleftlab", I.tr("Message")+":", "") ++
-            textArea("msgcontent", 240, "");
-            ;
-            
-            
-        /* Action. To be executed when user hits 'submit' button */
-        def action(req : Request): NodeSeq = 
-        {
-            val to = req.queryParams("msgto")
-            val txt = req.queryParams("msgcontent")
-            mbox.postMessage(getAuthInfo(req).userid, to, txt)
-            
-            <h2>{I.tr("Message posted")}</h2>        
-        }
-         
-            
-        return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
-    }
-   
-   
        
        
    
