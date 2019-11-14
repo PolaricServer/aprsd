@@ -424,10 +424,7 @@ package no.polaric.aprsd.http
       return _handle_search(req, res, false)
       ;
       
-   def handle_search_sec(req : Request, res : Response): String = 
-      return _handle_search(req, res, true)
-      ;
-    
+
    def _handle_search(req : Request, res : Response, loggedIn: Boolean): String =
    {
        val I = getI18n(req)
@@ -456,11 +453,7 @@ package no.polaric.aprsd.http
        ;
    
    
-   def handle_station_sec(req : Request, res : Response): String  = 
-       return _handle_station(req, res, getAuthInfo(req).sar)
-       ;
-  
-  
+
    def _handle_station(req : Request, res : Response, canUpdate: Boolean): String =
    {
        val simple =  ( req.queryParams("simple") != null )
