@@ -1,28 +1,50 @@
 
 
-FOR RELEASE 2.3 (or later)
+FOR RELEASE 2.3 
+
+* Set OwnPos as REST
+
+* Reset info as REST 
+
+* Last movements as REST  
+
+* Item info as REST? Polymorphism? AIS plugin. 
+
+* Search items as REST. 
+
+* Tag management as REST
+
+* Remove webservices not needed anymore - old webapp will break! 
+    IN PROGRESS.
 
 * Add name to local user data. User interface to change it. 
     IN PROGRESS.
 
-* Remove webservices not needed anymore - old webapp will break! 
+* AuthConfig, etc. should be available for plugins.
 
-* Use Java 9 modules !
+* Add icons to feature editor
+
+* Feature editor: Layers
+
+    
+    
+LATER RELEASES
+
+* Use Java 9 modules! What interfaces/classes should be available for plugins? 
+  What should be required from plugins?
+
+* Support external authorization service. Oauth. Google. 
+    
+* Allow user-accounts to be set up with callsigns. 
+
+* Add name to local user. User interface to change it. 
+    IN PROGRESS.
     
 * Bulletin board send.
 
 * Bulletin board send REST API and client.
 
 * Bulletin board setup page. 
-
-* User framework. Ready to add database users.
-    IN PROGRESS.
-    
-* Support external authorization service. Oauth. Google. 
-    
-* Allow user-accounts to be set up with callsigns. 
-
-* ServerBase. Move out config stuff and XML stuff. Use for REST APIs 
 
 * Generic APRS messaging with notifications. 
 
@@ -31,8 +53,6 @@ FOR RELEASE 2.3 (or later)
 * Reset to default - button/link in config screen
      
 * Develop signs. Channels? 
-
-* BUG: If setting "hide ident" in global settings, this is turned off after a while... Fix. 
 
 
 

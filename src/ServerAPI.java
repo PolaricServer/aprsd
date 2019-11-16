@@ -38,7 +38,10 @@ public interface ServerAPI
     }
   
   
-    /** Interface to web server */
+    /** 
+     * Interface to web server. 
+     * FIXME: Consider subtyping this in http package. 
+     */
     public interface Web {
         public void corsEnable(String uri); 
         public long nVisits();

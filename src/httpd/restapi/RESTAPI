@@ -3,14 +3,7 @@ User management. Users, areas.
 -----------------------------
 
     /users                              GET       Get the list of users (userids)
-    /users/<userid>/areas 		        GET       Areas owned by user. return List<User.Area>	
-                                        POST      Add area.  body=User.Area.  return area-id.               
-    /users/<userid>/areas/<area-id>     GET 	  Return a specific area (area-id). 
-                                        DELETE 	  Delete a given area. return "OK"
-    /users/<userid>/layers              GET       Map layers owned by user
-                                        POST      Add layer. 
-    /users/<userid>/layers/<layername>  DELETE    Remove layer. return "OK" 
-    
+
     
 How can a user share an item with other users?     
 Update a given item = DELETE + POST. May add a PUT or PATCH operation.     
@@ -28,16 +21,18 @@ Bulletin board.
 
 System
 ------
+    /system/ownpos                       GET
+        "                                PUT
     /system/sarmode                      PUT
     /system/icons/<subdir>               GET
     /tracker/alias/<id>                  GET
-    /tracker/alias/<id>                  PUT
+        "                                PUT
                                          
     
 APRS objects
 ------------
     /aprs/objects                        GET         Active objects
-    /aprs/objects                        POST        Add object 
+        "                                POST        Add object 
     /aprs/objects/<id>                   DELETE      Delete object
     
 Update a given item = DELETE + POST. May add a PUT or PATCH operation. 
