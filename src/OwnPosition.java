@@ -149,6 +149,8 @@ public class OwnPosition extends Station implements Runnable
      */
     protected void sendPosReport()
     {
+       if ( !_txOn )
+          return;
        AprsPacket p = new AprsPacket();
        p.from = getIdent();
        p.to = _api.getToAddr();

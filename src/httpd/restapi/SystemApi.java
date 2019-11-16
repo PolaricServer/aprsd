@@ -22,6 +22,7 @@ import static spark.Spark.put;
 import static spark.Spark.*;
 import java.util.*; 
 import java.io.*;
+import uk.me.jstott.jcoord.*;
 import no.polaric.aprsd.*;
 
 /**
@@ -36,6 +37,7 @@ public class SystemApi extends ServerBase {
         _api = api;
     }
     
+    /* SAR mode info */
     public static class SarInfo {
         public String  filt;
         public String  descr; 
@@ -45,6 +47,14 @@ public class SystemApi extends ServerBase {
             { filt=f; descr=d; hide=h; }
     }
     
+    public static class OwnPos {
+        public String sym;
+        public String symtab;
+        public double pos[];
+        public OwnPos() {}
+        public OwnPos(double[] p, String st, String s)
+            { pos = p; symtab=st; sym=s; }
+    }
     
     /** 
      * Return an error status message to client. 
@@ -60,6 +70,39 @@ public class SystemApi extends ServerBase {
      * Set up the webservices. 
      */
     public void start() {     
+        
+        /******************************************
+         * Get own position. 
+         ******************************************/
+        get("/system/ownpos", "application/json", (req, resp) -> {
+            var p = _api.getOwnPos();
+            LatLng pos = (LatLng) p.getPosition();
+            double[] cpos = null;
+            if (pos!=null) 
+                cpos = new double[] {pos.getLng(), pos.getLat()};
+            return new OwnPos(cpos, ""+p.getSymtab(), ""+p.getSymbol());
+        }, ServerBase::toJson );
+    
+    
+        /******************************************
+         * Set own position
+         ******************************************/
+        put("/system/ownpos", (req, resp) -> {
+            var uid = getAuthInfo(req).userid;
+            var op = (OwnPos) 
+                ServerBase.fromJson(req.body(), OwnPos.class);
+            if (op==null || op.pos==null)
+                return ERROR(resp, 400, "Invalid input format");   
+            var p = _api.getOwnPos();
+            p.updatePosition(new Date(), 
+                      new LatLng( op.pos[1], op.pos[0]), 
+                      (op.symtab==null ? '/' : op.symtab.charAt(0)),
+                      (op.sym==null ? 'c' : op.sym.charAt(0)));
+            _api.log().info("RestApi", "Own position changed by '"+uid+"'");
+            systemNotification("ADMIN", "Own position changed by '"+uid+"'", 120);
+            return "Ok";
+        });
+    
     
         /******************************************
          * Get SAR mode settings
@@ -80,7 +123,7 @@ public class SystemApi extends ServerBase {
          put("/system/sarmode", (req, resp) -> {
             var uid = getAuthInfo(req).userid;
             var sm = _api.getSar(); 
-            SarInfo si = (SarInfo) 
+            var si = (SarInfo) 
                 ServerBase.fromJson(req.body(), SarInfo.class);
                 
             /* Return if no change */

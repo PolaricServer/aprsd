@@ -321,7 +321,7 @@ package no.polaric.aprsd.http
                 textField("ownposition.tx.comment", "item7", 
                       I.tr("Description")+":", "", 20, 40, TEXT) ++ br ++
                 label("utmz", "leftlab", 
-                      I.tr("My position")+":", 
+                      I.tr("Default position")+":", 
                       I.tr("Server's position in UTM format")) ++        
                 utmField("ownposition.pos") ++ br ++ 
                 br ++
