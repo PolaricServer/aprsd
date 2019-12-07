@@ -13,6 +13,7 @@ case "$1" in
                    polaric
                usermod -G dialout polaric
            fi
+           chown polaric.adm /var/log/polaric
            chmod 755 /var/log/polaric
            if [ -d "/var/lib/polaric/mapcache" ]; then
                 chown www-data:www-data /var/lib/polaric/mapcache
