@@ -56,6 +56,18 @@ public class SystemApi extends ServerBase {
             { pos = p; symtab=st; sym=s; }
     }
     
+    public static class JsTPoint {
+        public Date time;
+        public int speed;
+        public int course;
+        public int dist;
+        public String path;
+        public JsTPoint(Date t, int sp, int c, int d, String pt)
+            { time=t; speed=sp; course=c; dist = d; path=pt; }
+    }
+    
+    
+    
     /** 
      * Return an error status message to client. 
      * FIXME: Move to superclass. 
@@ -63,6 +75,13 @@ public class SystemApi extends ServerBase {
     public String ERROR(Response resp, int status, String msg)
       { resp.status(status); return msg; }
       
+    
+        
+    protected String cleanPath(String txt) { 
+        return txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]*(\\-[0-9]+)?\\*?,?)|(qA.),?", "")
+           .replaceAll("\\*", "").replaceAll(",+|(, )+", ", ");
+    }
+    
     
     
     
@@ -175,6 +194,9 @@ public class SystemApi extends ServerBase {
         
         
         
+        // FIXME: Should be 'item' instead of 'tracker'? 
+        // FIXME: Should be /item/<ident>/alias instead of /item/alias/<item> ? 
+        
         /*******************************************
          * Get alias/icon for a given item
          *******************************************/
@@ -206,9 +228,31 @@ public class SystemApi extends ServerBase {
                 notifyIcon(ident, a.icon, req);
             return "Ok";
         });
+        
+        
+        
+        /*******************************************
+         * Trail items
+         *******************************************/
+        get("/tracker/trail/*", "application/json", (req, resp) -> {
+            var ident = req.splat()[0];
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+                
+            var h = st.getTrail();                     
+            var pp = st.getHItem();
+            var fl = new ArrayList<JsTPoint>(); 
+            for (var x:  h.points()) {
+                var dist = x.getPosition().toLatLng().distance(pp.getPosition().toLatLng());
+                fl.add(new JsTPoint(x.getTS(), x.speed, x.course, (int) Math.round(dist*1000), cleanPath(x.pathinfo)));
+                pp = x; 
+            }
+                
+            return fl;
+        }, ServerBase::toJson );
 
     }
-    
 
 }
 

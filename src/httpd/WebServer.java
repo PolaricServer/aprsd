@@ -174,16 +174,16 @@ public class WebServer implements ServerAPI.Web
          * Protect other webservices. We should eventually prefix these and 
          * just one filter should be sufficient 
          */ 
-        before("/addobject",      _auth.conf().filter(null, "isauth, sar"));
-        before("/deleteobject",   _auth.conf().filter(null, "isauth, sar"));
-        before("/resetinfo",      _auth.conf().filter(null, "isauth, sar"));
-        before("/sarmode",        _auth.conf().filter(null, "isauth, sar"));
-        before("/sarurl",         _auth.conf().filter(null, "isauth"));
-        before("/users",          _auth.conf().filter(null, "isauth, admin"));
-        before("/users/*",        _auth.conf().filter(null, "isauth"));
-        before("/tracker/*",      _auth.conf().filter(null, "isauth, sar"));
-        before("/aprs/*",         _auth.conf().filter(null, "isauth, sar"));
-        before("/system/sarmode", _auth.conf().filter(null, "isauth, sar"));
+        before("/addobject",       _auth.conf().filter(null, "isauth, sar"));
+        before("/deleteobject",    _auth.conf().filter(null, "isauth, sar"));
+        before("/resetinfo",       _auth.conf().filter(null, "isauth, sar"));
+        before("/sarmode",         _auth.conf().filter(null, "isauth, sar"));
+        before("/sarurl",          _auth.conf().filter(null, "isauth"));
+        before("/users",           _auth.conf().filter(null, "isauth, admin"));
+        before("/users/*",         _auth.conf().filter(null, "isauth"));
+        before("/tracker/alias/*", _auth.conf().filter(null, "isauth, sar"));
+        before("/aprs/*",          _auth.conf().filter(null, "isauth, sar"));
+        before("/system/sarmode",  _auth.conf().filter(null, "isauth, sar"));
         
         afterAfter((request, response) -> {
             _nRequests++;

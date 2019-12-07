@@ -194,58 +194,6 @@ package no.polaric.aprsd.http
     }
    
    
-   
-    /**
-    * set own position
-    */          
-   def handle_setownpos(req : Request, res: Response): String =
-   {
-        val I = getI18n(req)
-        val pos = getCoord(req)
-        val prefix = <h2> {I.tr("Set your own position")} </h2>
-        val p = api.getOwnPos()
-       
-        /* Fields to be filled in */
-        def fields(req : Request): NodeSeq =
-            <xml:group>
-            {
-              label("osymtab", "lleftlab", I.tr("Symbol")+":", 
-                    I.tr("APRS symbol table and symbol. Fill in or chose from the list at the right side.")) ++
-              textInput("osymtab", 1, 1, ""+p.getSymtab()) ++
-              textInput("osym", 1, 1, ""+p.getSymbol()) ++
-              symChoice(req) ++
-              br ++
-              label("utmz", "lleftlab", I.tr("Pos (UTM)")+":", I.tr("Position in UTM format.")) ++
-              {  if (pos==null)
-                    utmForm('W', 34)
-                 else
-                    showUTM(req, pos)
-              }
-           }
-           </xml:group>
-           ;  
-             
-        /* Action. To be executed when user hits 'submit' button */
-        def action(req : Request): NodeSeq = {
-               if (!getAuthInfo(req).admin)
-                  <h3> {I.tr("You are not authorized for admin operations")} </h3>
-               else {
-                  val osymtab = req.queryParams("osymtab")
-                  val osym  = req.queryParams("osym")
-                  _api.log().info("Webservices","SET OWN POS by user '"+getAuthInfo(req).userid+"'")
-                  p.updatePosition(new Date(), pos, 
-                      if (osymtab==null) '/' else osymtab(0), if (osym==null) 'c' else osym(0))
-                  
-                 <h2> {I.tr("Position registerred")} </h2>
-                 <p>pos={ showUTM(req, pos) }</p>
-              }
-        };
-            
-        return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
-    }   
-     
-   
- 
 
    
    
@@ -474,56 +422,8 @@ package no.polaric.aprsd.http
        val tags = if (args == null) null else args.split(",")
        return printHtml (res, htmlBody (req, null, taglist(null, tags, false)))
    }
-   
-   
       
-   /** 
-    * Presents a list over last positions and movements (standard HTML)
-    */
-   def handle_history(req : Request, res : Response): String =
-   {        
-       val I = getI18n(req)
-       val s = _api.getDB().getItem(req.queryParams("id"), null)
-       val result: NodeSeq =
-          if (s == null)
-             <h2>{I.tr("Error")+":"}</h2><p> {I.tr("Couldn't find item")} </p>;
-          else
-             <table>
-               <tr><th>{I.tr("Time")} </th><th>Km/h </th><th> {I.tr("Dir")} </th><th> {I.tr("Distance")} </th><th> {I.tr("APRS via")} </th></tr>
-               {
-                   val h = s.getTrail()
-                   var x = s.getHItem()
-                   var i = 0;
-                   var fp = _wfiledir /* FIXME FIXME fprefix(req) */
-                   
-                   for (it <- h.points()) yield {
-                      i += 1
-                      val arg = "'"+s.getIdent()+"', "+i
-                      <tr onmouseover={"histList_hover("+arg+");"} 
-                          onmouseout={"histList_hout("+arg+");"}
-                          onclick = {"histList_click("+arg+");"} >
-                      <td> { ServerBase.tf.format(x.getTS()) } </td>
-                      <td> { if (x.speed >= 0) x.speed.toString else "" } </td>
-                      <td> { if (x.speed > 0) _directionIcon(x.course, fp) else ""} </td>
-                      <td> {
-                         val dist = x.getPosition().toLatLng().distance(it.getPosition().toLatLng())
-                         x = it.asInstanceOf[Trail.Item];
-                         if (dist < 1)
-                             "%3d m" format Math.round(dist*1000)
-                         else
-                             "%.1f km" format dist
-                      }</td>
-                      <td> { 
-                        TXT( cleanPath(x.pathinfo)) } </td>
-                      </tr>
-                   }
-               }
-             </table>
 
-        return printHtml(res, htmlBody(req, null, result))
-    } 
-  
-  
   
 
     def handle_trailpoint(req : Request, res : Response): String =
@@ -546,6 +446,7 @@ package no.polaric.aprsd.http
       
       return printHtml(res, htmlBody(req, null, result)) 
     }
+    
     
     
     val ddf = new java.text.DecimalFormat("##,###.###");
