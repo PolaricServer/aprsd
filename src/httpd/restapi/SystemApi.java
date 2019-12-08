@@ -251,6 +251,19 @@ public class SystemApi extends ServerBase {
                 
             return fl;
         }, ServerBase::toJson );
+        
+        
+        /*******************************************
+         * Reset trail, etc for a given item
+         *******************************************/
+        put("/tracker/*/reset", (req, resp) -> {
+            var ident = req.splat()[0];        
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            st.reset();
+            return "Ok";
+        });
 
     }
 

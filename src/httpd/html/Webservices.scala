@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015-2018 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015-2019 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -283,40 +283,7 @@ package no.polaric.aprsd.http
        return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
    }          
 
-   
-   /**
-    * Remove trail from station. 
-    */
-   def handle_resetinfo(req : Request, res : Response): String =
-   {
-       val I = getI18n(req)
-       val id = req.queryParams("objid")
-       val prefix = <h2> {I.tr("Reset info about station/object")} </h2>
-       
-       def fields(req : Request): NodeSeq =
-           <label for="objid" class="lleftlab">Objekt ID:</label>
-           <input id="objid" name="objid" type="text" size="9" maxlength="9"
-              value={if (id==null) "" else id} />;
-           ;
-      
-       def action(req : Request): NodeSeq =
-          if (id == null) {
-              <h3> {I.tr("Error")+":"} </h3>
-              <p> {I.tr("'objid' must be given as parameter")} </p>;
-          }
-          else {
-             val x = _api.getDB().getItem(id, null);
-             if (x != null)
-                x.reset();
-             <h3> {I.tr("Info about object is reset!")} </h3>
-          } 
-          ;
-          
-       return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
-   }          
 
-
-    
 
     protected def itemList(I:I18n, list: List[TrackerPoint], mobile: Boolean, 
                   fprefix: String, loggedIn: Boolean): NodeSeq = 
