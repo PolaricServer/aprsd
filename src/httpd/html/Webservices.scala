@@ -61,7 +61,7 @@ package no.polaric.aprsd.http
               <fieldset>
               <table>
               <tr><th>Userid</th><th>Last login</th></tr>
-              { for (u <-users.getAll()) yield 
+              { for (u <-users.getAll(); if u.isActive() ) yield 
                    <tr><td>{u.getIdent()}</td><td>{u.getLastUsed()}</td></tr> }
               
               </table>

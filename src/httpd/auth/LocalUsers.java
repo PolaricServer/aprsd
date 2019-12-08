@@ -92,7 +92,7 @@ public class LocalUsers {
     public void add(String userid) {
         if (!_users.containsKey(userid)) {
             _users.put(userid, new User(userid, null));
-            _api.log().info("LocalUsers", "add: user '"+userid+"' from passwd file");
+            _api.log().info("LocalUsers", "add: user '"+userid+"'");
         }
     }
       

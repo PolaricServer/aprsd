@@ -57,9 +57,11 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
      */
     public void load() {
         try {
+            /* Open passwd file */
             BufferedReader rd = new BufferedReader(new FileReader(_file));
             while (rd.ready() )
             {
+                /* Read a line */
                 String line = rd.readLine();
                 if (!line.startsWith("#") && line.length() > 1) {
                     if (line.matches(".*:.*"))
@@ -68,8 +70,8 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
                         String username = x[0].trim();
                         String passwd = x[1].trim();
                         _pwmap.put(username, passwd);
-                        _users.add(username);
                         if (_users != null) {
+                            _users.add(username);
                             LocalUsers.User u = _users.get(username); 
                             u.setActive(); 
                         }
