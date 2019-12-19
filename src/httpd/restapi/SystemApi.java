@@ -200,7 +200,7 @@ public class SystemApi extends ServerBase {
         /*******************************************
          * Get alias/icon for a given item
          *******************************************/
-        get("/tracker/*/alias", "application/json", (req, resp) -> {
+        get("/item/*/alias", "application/json", (req, resp) -> {
             var ident = req.splat()[0];
             var st = _api.getDB().getItem(ident, null);
             if (st==null)
@@ -213,7 +213,7 @@ public class SystemApi extends ServerBase {
         /*******************************************
          * Update alias/icon for a given item
          *******************************************/
-        put("/tracker/*/alias", (req, resp) -> {
+        put("/item/*/alias", (req, resp) -> {
             var ident = req.splat()[0];        
             var st = _api.getDB().getItem(ident, null);
             if (st==null)
@@ -234,7 +234,7 @@ public class SystemApi extends ServerBase {
         /*******************************************
          * Trail items
          *******************************************/
-        get("/tracker/*/trail", "application/json", (req, resp) -> {
+        get("/item/*/trail", "application/json", (req, resp) -> {
             var ident = req.splat()[0];
             var st = _api.getDB().getItem(ident, null);
             if (st==null)
@@ -253,10 +253,12 @@ public class SystemApi extends ServerBase {
         }, ServerBase::toJson );
         
         
+        
+        
         /*******************************************
          * Reset trail, etc for a given item
          *******************************************/
-        put("/tracker/*/reset", (req, resp) -> {
+        put("/item/*/reset", (req, resp) -> {
             var ident = req.splat()[0];        
             var st = _api.getDB().getItem(ident, null);
             if (st==null)

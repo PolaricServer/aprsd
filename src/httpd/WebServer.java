@@ -171,8 +171,7 @@ public class WebServer implements ServerAPI.Web
         before("/config_menu", _auth.conf().filter("FormClient", "isauth, admin")); 
        
         /* 
-         * Protect other webservices. We should eventually prefix these and 
-         * just one filter should be sufficient 
+         * Protect other webservices. 
          */ 
         before("/addobject",       _auth.conf().filter(null, "isauth, sar"));
         before("/deleteobject",    _auth.conf().filter(null, "isauth, sar"));
@@ -181,7 +180,8 @@ public class WebServer implements ServerAPI.Web
         before("/sarurl",          _auth.conf().filter(null, "isauth"));
         before("/users",           _auth.conf().filter(null, "isauth, admin"));
         before("/users/*",         _auth.conf().filter(null, "isauth"));
-        before("/tracker/alias/*", _auth.conf().filter(null, "isauth, sar"));
+        before("/item/*/alias",    _auth.conf().filter(null, "isauth, sar"));
+        before("/item/*/reset",    _auth.conf().filter(null, "isauth, sar"));
         before("/aprs/*",          _auth.conf().filter(null, "isauth, sar"));
         before("/system/sarmode",  _auth.conf().filter(null, "isauth, sar"));
         
@@ -195,7 +195,7 @@ public class WebServer implements ServerAPI.Web
         SystemApi ss = new SystemApi(_api);
         ss.start(); 
         corsEnable("/system/*");
-        corsEnable("/tracker/*"); 
+        corsEnable("/item/*"); 
                 
         AprsObjectApi oi = new AprsObjectApi(_api);
         oi.start();
