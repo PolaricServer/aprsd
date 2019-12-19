@@ -153,6 +153,10 @@ public class AuthService {
           _log.log("Unsuccessful login attempt from. " +req.ip());
        }
        return    
+         "<!doctype html>" +
+         "<meta charset=\"UTF-8\">"+ 
+         "<meta name=\"viewport\" content=\"user-scalable=no, width=device-width, height=device-height\">"+
+       
          "<html><head><link rel=\"stylesheet\" href=\"style.css\"></head><body id=\"login\">" + 
          "<div><img src=\"images/PolaricServer.png\"/>" +
          "<div>|login|</div></div>" +
