@@ -243,4 +243,21 @@ V.2.2.1
 * Security fix 
 
 
+V.2.3
+-----
+
+* Set OwnPos REST service
+* Own Object REST service
+* Last movements REST service
+* Reset info REST service 
+* Remove some old webservice code. Old client not supported anymore. 
+* Permission fixes.. 
+* Style fixes (smartphone)
+* Various small fixes..
+
+
+
+
+
+
     

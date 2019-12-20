@@ -1,12 +1,18 @@
 
 
-FOR RELEASE 2.3 
+Bugs:
+* It complains about slf4j when ais plugin is not installed. 
+    SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+    SLF4J: Defaulting to no-operation (NOP) logger implementation
+    SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
 
-* Set OwnPos as REST
+* ais plugin seems to be active even when de-installed. Purge is necessary to make it go away. 
 
-* Reset info as REST 
 
-* Last movements as REST  
+
+    
+
+FOR RELEASE 2.4
 
 * Item info as REST? Polymorphism? AIS plugin. 
 
