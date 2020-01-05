@@ -89,6 +89,16 @@ public class SystemApi extends ServerBase {
      * Set up the webservices. 
      */
     public void start() {     
+    
+    
+        /******************************************
+         * Get all tags
+         ******************************************/
+        get("/system/tags", "application/json", (req, resp) -> {
+            var tags = PointObject.getUsedTags();
+            return tags;
+        }, ServerBase::toJson );
+        
         
         /******************************************
          * Get own position. 
@@ -254,7 +264,6 @@ public class SystemApi extends ServerBase {
         
         
         
-        
         /*******************************************
          * Reset trail, etc for a given item
          *******************************************/
@@ -266,7 +275,54 @@ public class SystemApi extends ServerBase {
             st.reset();
             return "Ok";
         });
-
+        
+        
+        
+        /******************************************
+         * Get tags for a given item
+         ******************************************/
+        get("/item/*/tags", "application/json", (req, resp) -> {
+            var ident = req.splat()[0];        
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            
+            var tags = st.getTags();
+            return tags;
+        }, ServerBase::toJson );
+        
+        
+        
+        /******************************************
+         * Add tags to a given item
+         ******************************************/
+        post("/item/*/tags", (req, resp) -> {
+            var ident = req.splat()[0];        
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+               
+            String[] a = (String[]) ServerBase.fromJson(req.body(), String[].class);
+            for (String tag: a)
+                st.setTag(tag);
+            return "Ok";   
+        });
+        
+        
+        
+        /******************************************
+         * Remove a tag from a given item
+         ******************************************/
+        delete("/item/*/tags/*", (req, resp) -> {
+            var ident = req.splat()[0];   
+            var tag = req.splat()[1];
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            st.removeTag(tag);
+            return "Ok"; 
+        });
+        
     }
 
 }

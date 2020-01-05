@@ -86,7 +86,13 @@ public abstract class PointObject extends Point implements Cloneable
     public static boolean tagIsUsed(String tag)
        { return _tagUse.get(tag) != null; }
        
-       
+     
+    
+    public Set<String> getTags() {
+        return _tags;
+    }
+    
+     
     /**
      * Set tag on this object. 
      */

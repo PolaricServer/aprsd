@@ -21,6 +21,7 @@ Bulletin board.
 
 System
 ------
+    /system/tags                         GET        Get used tags in system
     /system/ownpos                       GET
         "                                PUT
     /system/sarmode                      PUT
@@ -29,6 +30,11 @@ System
         "                                PUT
     /item/<id>/trail                     GET
     /item/<id>/reset                     PUT
+    
+    /item/<id>/tags                      GET        Get current tags 
+    /item/<id>/tags                      POST       Add tags 
+    /item/<id>/tags/<tag>                DELETE     Remove a tag 
+    
                                          
     
 APRS objects
