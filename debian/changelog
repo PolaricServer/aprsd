@@ -1,3 +1,9 @@
+polaric-aprsd (2.3+) UNRELEASED; urgency=medium
+
+  * Development 
+
+ -- Øyvind Hanssen <ohanssen@acm.org>  Sat, 04 Jan 2020 20:49:50 +0100
+
 polaric-aprsd (2.3) stable; urgency=medium
 
   * More services as REST 

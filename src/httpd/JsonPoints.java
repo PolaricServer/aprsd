@@ -19,7 +19,7 @@ public interface JsonPoints
 
     class JsOverlay {
         public String  view;       /* filter name */
-        /* FIXME: Consider adding som session info here */
+        /* FIXME: Consider adding some session info here */
       
         public AuthInfo       authorization;
         public boolean        sarmode; 
@@ -47,6 +47,7 @@ public interface JsonPoints
     }
 
    
+    /* FIXME: Consider merge with JsPoint */
     class JsLabel {
         public String id;        // May be different from point id because of aliases? 
         public String style;     // This is actually a CSS class

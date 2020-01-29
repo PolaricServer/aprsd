@@ -19,6 +19,7 @@ FOR RELEASE 2.4
 * Search items as REST. 
 
 * Tag management as REST
+    DONE.
 
 * Remove webservices not needed anymore - old webapp will break! 
     IN PROGRESS.
@@ -31,6 +32,12 @@ FOR RELEASE 2.4
 * Add icons to feature editor
 
 * Feature editor: Layers
+
+* Translation updates... 
+
+* Move icons to client
+    DONE.
+
 
     
     
