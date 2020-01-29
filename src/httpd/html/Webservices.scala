@@ -193,95 +193,7 @@ package no.polaric.aprsd.http
          </select>
     }
    
-   
-
-   
-   
-   def taglist(item: PointObject, args: Array[String], freeField: Boolean): NodeSeq = 
-   {
-     def hasTag(x: String): Boolean = if (item!=null) inArgs(x) || item.hasTag(x) 
-                                      else inArgs(x)
-     def inArgs(x: String): Boolean = if (args!= null) args.map(y => y.equals(x)).reduce((y,z) => y || z) 
-                                      else false
-     
-     <div class="taglist"> {
-            for (x <- PointObject.getUsedTags.toSeq) yield {
-               val pfx = x.split('.')(0)
-               if (pfx.length == x.length || hasTag(pfx) || !PointObject.tagIsUsed(pfx))
-                   checkBox("tag_"+x, hasTag(x), 
-                        TXT(x)) ++ br
-               else
-                   EMPTY
-            }
-         }
-         { if (freeField) checkBox("newtagc", false, textInput("newtag", 10, 20, ""))
-           else EMPTY }
-     </div>
-   }
          
-         
-
-   def handle_addtag(req : Request, res : Response): String =
-   {
-       val I = getI18n(req)
-       val id = req.queryParams("objid")
-       val item = _api.getDB().getItem(id, null);
-       val prefix = <h2> {I.tr("Tags for: "+id)} </h2>
-       
-       def fields(req : Request): NodeSeq = 
-          taglist(item, null, true)
-             
-           
-       def setTag(item:PointObject, tag:String)
-       {
-           item.setTag(tag)
-           _api.log().info("Webservices", "TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthInfo(req).userid+"'")
-           if (api.getRemoteCtl() != null)
-              api.getRemoteCtl().sendRequestAll("TAG "+item.getIdent()+" "+tag, null);
-       }
-       
-       def removeTag(item:PointObject, tag:String)
-       {
-           item.removeTag(tag)
-           _api.log().info("Webservices", "REMOVE TAG: '"+tag+"' for '"+item.getIdent()+"' by user '"+getAuthInfo(req).userid+"'")
-           if (api.getRemoteCtl() != null)
-              api.getRemoteCtl().sendRequestAll("RMTAG "+item.getIdent()+" "+tag, null);
-       }
-      
-      
-       def action(req : Request): NodeSeq = {
-           val newtag = req.queryParams("newtag")
-           val newtagc = req.queryParams("newtagc")
-           val newtagcc = (newtag != null && newtagc != null && newtagc.equals("true"));
-           <div>
-           { for (x:String <- PointObject.getUsedTags.toSeq) yield {
-               val ux = req.queryParams("tag_"+x);
-               val uxx = (ux != null && ux.equals("true"));
-               
-               if (uxx != item.hasTag(x)) {
-                   if (uxx)
-                       setTag(item,x)
-                   else 
-                       removeTag(item, x)
-                   <span class="fieldsuccess">{"Tag '"+x+"'. " + 
-                     (if (uxx) "Added" else "Removed") + "."}</span><br/>
-               }
-               else
-                   <span>{"Tag '"+x+"'. No change."}</span><br/>
-           }} 
-           {  if (newtagcc) {
-                setTag(item, newtag)
-                
-                <span class="fieldsuccess">{"Tag '"+newtag+"'. Added."}</span>
-              }
-              else EMPTY
-           }
-           </div>
-         }
-          
-          
-       return printHtml (res, htmlBody (req, null, htmlForm(req, prefix, fields, IF_AUTH(action))))
-   }          
 
 
 
@@ -330,34 +242,6 @@ package no.polaric.aprsd.http
       ;
        
        
-   
-  /** 
-    * Search in the database over point objects. 
-    * Returns a list (standard HTML)
-    */
-   def handle_search(req : Request, res : Response): String = 
-      return _handle_search(req, res, false)
-      ;
-      
-
-   def _handle_search(req : Request, res : Response, loggedIn: Boolean): String =
-   {
-       val I = getI18n(req)
-       val filtid = req.queryParams("filter")
-       val tags = req.queryParams("tags")
-       val login = loggedIn || getAuthInfo(req).login();
-       
-       var arg = req.queryParams("srch")
-       var mob = req.queryParams("mobile");
-       if (arg == null) 
-           arg  = "__NOCALL__"; 
-       val infra = "infra".equals(arg)
-       val tagList = if (tags==null || tags.equals("")) null else tags.split(",")
-      
-       val result = itemList(I, _api.getDB().search(arg, tagList), "true".equals(mob), fprefix(req), login )
-       return printHtml (res, htmlBody (req, null, result))
-   }
- 
 
 
    /** 
@@ -382,14 +266,6 @@ package no.polaric.aprsd.http
    }
   
 
-   
-   
-   def handle_tags(req: Request, res: Response): String = {
-       val args = req.queryParams("tags")
-       val tags = if (args == null) null else args.split(",")
-       return printHtml (res, htmlBody (req, null, taglist(null, tags, false)))
-   }
-      
 
   
 

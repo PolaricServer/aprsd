@@ -182,6 +182,7 @@ public class WebServer implements ServerAPI.Web
         before("/users/*",         _auth.conf().filter(null, "isauth"));
         before("/item/*/alias",    _auth.conf().filter(null, "isauth, sar"));
         before("/item/*/reset",    _auth.conf().filter(null, "isauth, sar"));
+        before("/item/*/tags",     _auth.conf().filter(null, "isauth, sar"));
         before("/aprs/*",          _auth.conf().filter(null, "isauth, sar"));
         before("/system/sarmode",  _auth.conf().filter(null, "isauth, sar"));
         
@@ -196,7 +197,8 @@ public class WebServer implements ServerAPI.Web
         ss.start(); 
         corsEnable("/system/*");
         corsEnable("/item/*"); 
-                
+        corsEnable("/items/*");     
+        
         AprsObjectApi oi = new AprsObjectApi(_api);
         oi.start();
         corsEnable("/aprs/*");

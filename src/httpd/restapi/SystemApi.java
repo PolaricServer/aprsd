@@ -22,8 +22,11 @@ import static spark.Spark.put;
 import static spark.Spark.*;
 import java.util.*; 
 import java.io.*;
+import java.util.stream.*;
 import uk.me.jstott.jcoord.*;
 import no.polaric.aprsd.*;
+
+
 
 /**
  * Implement REST API for system-related info.  
@@ -55,6 +58,20 @@ public class SystemApi extends ServerBase {
         public OwnPos(double[] p, String st, String s)
             { pos = p; symtab=st; sym=s; }
     }
+    
+    
+    public static class JsPoint {
+        public String ident;
+        public String alias;
+        public double pos[];
+        public Date   updated;
+        public String descr;
+        public int    speed; 
+        public int    course; 
+        public JsPoint(String id, String a, double p[], Date u, String d, int sp, int crs) 
+           { ident=id; alias=a; pos=p; updated=u; descr=d; speed=sp; course=crs; }
+    }
+    
     
     public static class JsTPoint {
         public Date time;
@@ -204,8 +221,39 @@ public class SystemApi extends ServerBase {
         
         
         
-        // FIXME: Should be 'item' instead of 'tracker'? 
-        // FIXME: Should be /item/<ident>/alias instead of /item/alias/<item> ? 
+        
+        /*******************************************
+         * Search items. Returns list of items. 
+         * Parameters: 
+         *    tags - comma separated list of tags
+         *    srch - free text search
+         *******************************************/
+        get("/items", "application/json", (req, resp) -> {
+            var srch = req.queryParams("srch");
+            var tags = req.queryParams("tags");
+            if (srch == null) 
+                srch  = "__NOCALL__";
+            var tagList = (tags==null || tags.equals("")) ? null : tags.split(",");
+            
+            try {
+            List<JsPoint> result = 
+                _api.getDB().search(srch, tagList)
+                    .stream()
+                    .map( x -> new JsPoint( 
+                        x.getIdent(), x.getAlias(), 
+                        x.getPosition()==null ? null :
+                            new double[] { ((LatLng)x.getPosition()).getLng(), ((LatLng)x.getPosition()).getLat() }, 
+                        x.getUpdated(), x.getDescr(), x.getSpeed(), x.getCourse() ) )
+                    .collect(Collectors.toList());
+            return result;
+            } catch (Exception e)
+              {e.printStackTrace(System.out); return null;}
+        }, ServerBase::toJson );
+        
+        
+        
+        
+        // FIXME: Should be 'items' instead of 'item'? 
         
         /*******************************************
          * Get alias/icon for a given item
