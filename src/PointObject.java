@@ -54,13 +54,15 @@ public abstract class PointObject extends Point implements Cloneable
      * Increment the count for the given tag. 
      */
     private static void _incrementTag(String tag) {
-       Integer x = _tagUse.get(tag); 
-       if (x != null) {
-          x++;
-          _tagUse.replace(tag, x);
-       }
-       else 
-          _tagUse.put(tag, new Integer(1));
+        synchronized(_tagUse) {
+            Integer x = _tagUse.get(tag); 
+            if (x != null) {
+                x++;
+                _tagUse.replace(tag, x);
+            }
+            else 
+                _tagUse.put(tag, new Integer(1));
+        }
     }
     
     
@@ -68,14 +70,17 @@ public abstract class PointObject extends Point implements Cloneable
      * Decrement the count for the given tag. 
      */
     private static void _decrementTag(String tag) {
-       Integer x = _tagUse.get(tag);
-       if (x == null) return; 
-       x--;
-       if (x <= 0)
-          _tagUse.remove(tag);
-       else 
-          _tagUse.replace(tag, x);
+        synchronized(_tagUse) {
+            Integer x = _tagUse.get(tag);
+            if (x == null) return; 
+            x--;
+            if (x <= 0)
+                _tagUse.remove(tag);
+            else 
+                _tagUse.replace(tag, x);
+        }
     }
+    
     
     /** 
      * Return the set of used tags. 
@@ -128,8 +133,12 @@ public abstract class PointObject extends Point implements Cloneable
     /**
      * Return true if tag exists on this object. 
      */
-    public boolean hasTag(String tag) 
-      { return _tags.contains(tag); }
+    public boolean hasTag(String tag) { 
+        for (String x: _tags)
+            if (x.matches(tag+".*"))
+                return true;
+        return false;
+    }
     
     
     

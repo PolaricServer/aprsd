@@ -70,11 +70,9 @@ public interface JsonPoints
     class JsTPoint {
         public double[] pos;
         public Date time;
-        public JsTPoint(TPoint p) { 
-           pos = new double[] { 
-                ((LatLng)p.getPosition()).getLongitude(),  
-                ((LatLng)p.getPosition()).getLatitude() };
-                time = p.getTS();
+        public JsTPoint(double[] p, Date t) { 
+            pos = p; 
+            time = t;
         }
     }
     

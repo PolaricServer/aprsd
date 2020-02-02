@@ -153,7 +153,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             JsPoint x  = new JsPoint();
             x.ident  = s.getIdent();
             x.label  = createLabel(s, action);
-            x.pos    = new double[] {ref.getLongitude(), ref.getLatitude()};
+            x.pos    = new double[] {roundDeg(ref.getLongitude()), roundDeg(ref.getLatitude())};
             x.title  = s.getDescr() == null ? "" : fixText(s.getDescr()); 
             x.redraw = s.isChanging();
             x.own    = (s instanceof AprsObject) 
@@ -192,7 +192,14 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
           
             if (!action.hideTrail() && !h.isEmpty()) {
                 JsTrail res = new JsTrail(s.getTrailColor()); 
-                h.forEach( it -> res.linestring.add(new JsTPoint(it) ) );
+                h.forEach( it -> {
+                    LatLng pos = (LatLng) it.getPosition();
+                    res.linestring.add( 
+                        new JsTPoint( 
+                          new double[]{roundDeg(pos.getLongitude()), roundDeg(pos.getLatitude())}, it.getTS()
+                        )
+                    );
+                 });
                 return res;
             }
             else return null;

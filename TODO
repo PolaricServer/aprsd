@@ -17,6 +17,7 @@ FOR RELEASE 2.4
 * Item info as REST? Polymorphism? AIS plugin. 
 
 * Search items as REST. 
+    DONE.
 
 * Tag management as REST
     DONE.

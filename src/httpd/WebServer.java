@@ -198,6 +198,7 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/system/*");
         corsEnable("/item/*"); 
         corsEnable("/items/*");     
+        corsEnable("/items");
         
         AprsObjectApi oi = new AprsObjectApi(_api);
         oi.start();
