@@ -102,7 +102,7 @@ public abstract class PointObject extends Point implements Cloneable
      * Set tag on this object. 
      */
     public void setTag(String tag) {
-       if (tag == null) 
+       if (tag == null || tag.equals("")) 
           return; 
        _incrementTag(tag);
        _tags.add(tag); 

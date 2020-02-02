@@ -62,14 +62,15 @@ public class SystemApi extends ServerBase {
     
     public static class JsPoint {
         public String ident;
+        public String name;
         public String alias;
         public double pos[];
         public Date   updated;
         public String descr;
         public int    speed; 
         public int    course; 
-        public JsPoint(String id, String a, double p[], Date u, String d, int sp, int crs) 
-           { ident=id; alias=a; pos=p; updated=u; descr=d; speed=sp; course=crs; }
+        public JsPoint(String id, String nm, String a, double p[], Date u, String d, int sp, int crs) 
+           { ident=id; name = nm; alias=a; pos=p; updated=u; descr=d; speed=sp; course=crs; }
     }
     
     
@@ -240,7 +241,8 @@ public class SystemApi extends ServerBase {
                 _api.getDB().search(srch, tagList)
                     .stream()
                     .map( x -> new JsPoint( 
-                        x.getIdent(), x.getAlias(), 
+                        x.getIdent(), 
+                        x.getDisplayId(), x.getAlias(), 
                         x.getPosition()==null ? null :
                             new double[] { ((LatLng)x.getPosition()).getLng(), ((LatLng)x.getPosition()).getLat() }, 
                         x.getUpdated(), x.getDescr(), x.getSpeed(), x.getCourse() ) )
