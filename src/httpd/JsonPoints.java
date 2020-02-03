@@ -74,6 +74,11 @@ public interface JsonPoints
             pos = p; 
             time = t;
         }
+        public JsTPoint(TPoint p) {
+            LatLng ref = (LatLng) p.getPosition();
+            pos = new double[] {ref.getLongitude(), ref.getLatitude()}; 
+            time = p.getTS();
+        }
     }
     
     class JsLine {
