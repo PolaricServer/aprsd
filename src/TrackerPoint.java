@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-20 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import uk.me.jstott.jcoord.*;
 import java.util.*;
 import java.io.Serializable;
 import no.polaric.aprsd.filter.ViewFilter; 
-  
+import java.time.format.DateTimeFormatter;  
 
 
 /**
@@ -129,11 +129,14 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     public synchronized boolean saveToTrail(Date ts, Reference newpos, int speed, int course, String pathinfo) 
     {         
         /*
-         * If position is null or timestamp is in the future, do nothing.
+         * If timestamp is in the future, do nothing.
          */
-        if (_position == null || newpos == null || ts.getTime() > (new Date()).getTime()+ 10000)
+        if (ts.getTime() > (new Date()).getTime() + 10000)
+            return false;
+        
+        if (_position == null || newpos == null) 
             return (newpos != null);
-           
+        
 
         /* Time distance in seconds */
         long tdistance = (ts.getTime() - _updated.getTime()) / 1000;          
