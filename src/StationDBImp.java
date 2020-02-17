@@ -29,6 +29,7 @@ public class StationDBImp implements StationDB, Runnable
 {
     private SortedMap<String, TrackerPoint> _map = new ConcurrentSkipListMap();
     private String     _file;
+    private String     _stnsave;
     private boolean   _hasChanged = false; 
     private RouteInfo _routes;
     private OwnObjects _ownobj;
@@ -41,6 +42,7 @@ public class StationDBImp implements StationDB, Runnable
     {
         _api = api;
         _file = api.getProperty("stations.file", "stations.dat");
+        _stnsave = api.getProperty("stations.save", ".*");
         if (_file.charAt(0) != '/')
            _file = System.getProperties().getProperty("datadir", ".")+"/"+_file;   
         _ownobj = new OwnObjects(api); 
@@ -141,8 +143,10 @@ public class StationDBImp implements StationDB, Runnable
              _msgProc.save();
              _ownobj.save(ofs);
              PointObject.saveTags(ofs);
-             for (TrackerPoint s: _map.values())
-                { ofs.writeObject(s); }
+             for (TrackerPoint s: _map.values()) { 
+                if (s.getIdent().matches("("+_stnsave+")|.*\\@("+_stnsave+")"))
+                    ofs.writeObject(s); 
+             }
 
            }
            catch (Exception e) {
