@@ -106,7 +106,7 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
               else
                  _api.log().warn("MapUpdater", "SUBSCRIBE command with too few parameters. uid="+_uid); 
            }
-           else
+           else if (!parms[0].equals("****"))
               _api.log().warn("MapUpdater", "Unknown command from client. uid="+_uid);
        }   
    } /* Class client */

@@ -60,8 +60,8 @@ public class PubSub extends WsNotifier implements ServerAPI.PubSub
                     
                     /* Only subscribers are allowed to post */
                     Room rm = _rooms.get(arg[0]);
-                    if (rm != null && rm.hasClient(this))
-                        put(arg[0], arg[1]);
+                    if (rm != null && rm.canPost(this) && rm.hasClient(this))
+                        putText(arg[0], arg[1]);
                     break;
             
                 default: 
@@ -91,11 +91,18 @@ public class PubSub extends WsNotifier implements ServerAPI.PubSub
         public boolean login=false, sar=false, admin=false; 
           // true means that authorization is required 
           
+        public boolean allowPost=false; 
+          // false means that only admin can post. True means that authorized users can post
+          
         public Room(Class cl)
             { msgClass = cl; }
         
-        public Room(boolean lg, boolean s, boolean a, Class cl)
-            { login=lg; sar=s; admin=a; msgClass=cl; }
+        public Room(boolean lg, boolean s, boolean a, boolean ap, Class cl)
+            { login=lg; sar=s; admin=a; allowPost=ap; msgClass=cl; }
+          
+        public boolean canPost(Client c) {
+            return allowPost || c._auth.admin;
+        }
           
         public boolean authorized(Client c) {
             return ((!login || c.login()) &&
@@ -158,7 +165,8 @@ public class PubSub extends WsNotifier implements ServerAPI.PubSub
         Room room = _rooms.get(rid);
         if (room == null)
             return;
-        room.addClient(c);
+        if (!room.addClient(c))
+            _api.log().warn("PubSub", "Client "+c.getUid()+" denied access to room: "+rid);
     }
     
     
@@ -183,9 +191,9 @@ public class PubSub extends WsNotifier implements ServerAPI.PubSub
     
     
     /** Create a room with restricted access */
-    public void createRoom(String name, boolean lg, boolean sar, boolean adm, Class cl) { 
+    public void createRoom(String name, boolean lg, boolean sar, boolean adm, boolean post, Class cl) { 
         if (!_rooms.containsKey(name))
-            _rooms.put(name, new Room(lg, sar, adm, cl)); 
+            _rooms.put(name, new Room(lg, sar, adm, post, cl)); 
     }
     
     
