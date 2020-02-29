@@ -216,8 +216,8 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/bullboard/*");
         
         /* Rooms for SYSTEM and ADMIN notifications */
-        _pubsub.createRoom("notify:SYSTEM", false, false, false, ServerAPI.Notification.class);
-        _pubsub.createRoom("notify:ADMIN", false, false, false, ServerAPI.Notification.class);
+        _pubsub.createRoom("notify:SYSTEM", false, false, false, false, ServerAPI.Notification.class);
+        _pubsub.createRoom("notify:ADMIN", false, false, false, false, ServerAPI.Notification.class);
         
         /* Room for pushing updates to bulletin board */
         _pubsub.createRoom("bullboard", (Class) null); 

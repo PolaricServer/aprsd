@@ -158,6 +158,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             x.redraw = s.isChanging();
             x.own    = (s instanceof AprsObject) 
                        && _api.getDB().getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""));
+            x.aprs   = (s instanceof AprsPoint); 
            
             String icon = action.getIcon(s.getIcon()); 
             if (s.iconOverride() && _api.getSar()!=null) 

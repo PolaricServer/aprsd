@@ -60,9 +60,9 @@ package no.polaric.aprsd.http
               <h3>{I.tr("Users of system")}</h3>
               <fieldset>
               <table>
-              <tr><th>Userid</th><th>Last login</th></tr>
+              <tr><th>Userid</th><th>Last login</th><th>Name</th></tr>
               { for (u <-users.getAll(); if u.isActive() ) yield 
-                   <tr><td>{u.getIdent()}</td><td>{u.getLastUsed()}</td></tr> }
+                   <tr><td>{u.getIdent()}</td><td>{u.getLastUsed()}</td><td>{u.getName()}</td></tr> }
               
               </table>
               </fieldset>
@@ -88,11 +88,11 @@ package no.polaric.aprsd.http
               <h3>{I.tr("Clients active on server")}</h3>
               <fieldset>
               <table>
-              <tr><th>Created</th><th>Client</th><th>In</th><th>Out</th><th>Userid</th><th>Fmt</th></tr>
+              <tr><th>Created</th><th>Client</th><th>In</th><th>Out</th><th>Userid</th></tr>
         
               { for (c <- ws.getJsonMapUpdater().clients()) yield
                    <tr><td>{ServerBase.tf.format(c.created())}</td><td>{c.getUid()}</td>
-                       <td>{c.nIn()}</td><td>{c.nOut()}</td><td>{c.getUsername()}</td><td>JSON</td></tr> }
+                       <td>{c.nIn()}</td><td>{c.nOut()}</td><td>{c.getUsername()}</td></tr> }
               </table>
               </fieldset>
               

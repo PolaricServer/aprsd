@@ -23,16 +23,17 @@ FOR RELEASE 2.4
     DONE.
 
 * Remove webservices not needed anymore - old webapp will break! 
-    IN PROGRESS.
+    DONE.
 
 * Add name to local user data. User interface to change it. 
-    IN PROGRESS.
+    IN PROGRESS. 
 
 * AuthConfig, etc. should be available for plugins.
 
 * Add icons to feature editor
 
 * Feature editor: Layers
+    DONE.  
 
 * Translation updates... 
 
