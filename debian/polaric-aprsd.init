@@ -116,6 +116,8 @@ do_status()
 # Main script 
 #####################################################################
 
+sleep 2
+
 case "$1" in
   start)
   [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
@@ -143,7 +145,7 @@ case "$1" in
 
   log_daemon_msg "Restarting $DESC" "$NAME"
   do_stop
-  sleep 45
+  sleep 25
   case "$?" in
     0|1)
     do_start
