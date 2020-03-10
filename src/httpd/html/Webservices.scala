@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015-2019 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015-2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,35 +42,7 @@ package no.polaric.aprsd.http
    PointView.addView(classOf[OwnPosition], classOf[AprsPointView])
    PointView.addView(classOf[GpsPosition], classOf[AprsPointView])
 
-   
-   /**
-    * Show users. 
-    */
-   def handle_listusers(req : Request, res: Response): String =
-   {       
-       val I = getI18n(req)
-       val head = <meta http-equiv="refresh" content="30" />
-       val ws = _api.getWebserver().asInstanceOf[WebServer];
-       val users = ws.getAuthConfig().getLocalUsers();
-       
-       def action(req : Request): NodeSeq =
-         if (!getAuthInfo(req).admin)
-              <h3>{I.tr("You are not authorized for such operations")}</h3>
-         else     
-              <h3>{I.tr("Users of system")}</h3>
-              <fieldset>
-              <table>
-              <tr><th>Userid</th><th>Last login</th><th>Name</th></tr>
-              { for (u <-users.getAll(); if u.isActive() ) yield 
-                   <tr><td>{u.getIdent()}</td><td>{u.getLastUsed()}</td><td>{u.getName()}</td></tr> }
-              
-              </table>
-              </fieldset>
-              
-         return printHtml (res, htmlBody(req, head, action(req))); 
-              
-   }    
-   
+
    
    /**
     * Show clients that are active just now.

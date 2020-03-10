@@ -75,8 +75,7 @@ package no.polaric.aprsd.http
               <ul class="menu">
                { mitem("config_menu", 1, I.tr("Status info")) }
                  <ul>
-                  { mitem("config_clients", 2, I.tr("Client list")) ++
-                    mitem("config_users", 3, I.tr("User list")) 
+                  { mitem("config_clients", 2, I.tr("Client list"))
                   }
                  </ul>
                {

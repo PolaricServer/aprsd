@@ -31,6 +31,8 @@ public abstract class User implements Serializable {
     public abstract void    updateTime();
     public abstract boolean isActive();
     public abstract void    setActive();
+    public abstract boolean isSar();
+    public abstract boolean isAdmin();
     
     protected User(String id)
         { userid=id; }

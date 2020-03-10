@@ -126,6 +126,7 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
         final CommonProfile profile = new CommonProfile();
         profile.setId(username);
         profile.addAttribute(Pac4jConstants.USERNAME, username);
+        profile.addAttribute("userInfo", _users.get(username));
         credentials.setUserProfile(profile);
     }
 

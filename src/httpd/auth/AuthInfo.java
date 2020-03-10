@@ -68,10 +68,9 @@ public class AuthInfo {
 	      
        if (profile.isPresent()) {
           userid = profile.get().getId();
-          String adminusers = api.getProperty("user.admin", "admin");
-          String updateusers = api.getProperty("user.update", "");
-          admin = (userid.matches(adminusers)); 
-          sar = (userid.matches(updateusers));
+          User u = (User) profile.get().getAttribute("userInfo");
+          admin = u.isAdmin();
+          sar = u.isSar();          
           if (admin)
              sar=true;
        }

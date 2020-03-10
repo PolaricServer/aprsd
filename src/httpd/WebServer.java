@@ -169,7 +169,8 @@ public class WebServer implements ServerAPI.Web
          
         before("*", (req, res) -> {res.status(200);});
         before("/config_menu", _auth.conf().filter("FormClient", "isauth, admin")); 
-       
+
+        
         /* 
          * Protect other webservices. 
          */ 
@@ -179,7 +180,8 @@ public class WebServer implements ServerAPI.Web
         before("/sarmode",         _auth.conf().filter(null, "isauth, sar"));
         before("/sarurl",          _auth.conf().filter(null, "isauth"));
         before("/users",           _auth.conf().filter(null, "isauth, admin"));
-        before("/users/*",         _auth.conf().filter(null, "isauth"));
+        before("/users/*",         _auth.conf().filter(null, "isauth, admin"));
+        before("/users/*/*",       _auth.conf().filter(null, "isauth"));
         before("/item/*/alias",    _auth.conf().filter(null, "isauth, sar"));
         before("/item/*/reset",    _auth.conf().filter(null, "isauth, sar"));
         before("/item/*/tags",     _auth.conf().filter(null, "isauth, sar"));
@@ -205,8 +207,9 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/aprs/*");
         
         /* Start REST API: Users */
-        UserApi uu = new UserApi(_api, _auth.conf().getLocalUsers()); // FIXME: Add prefix
+        UserApi uu = new UserApi(_api, _auth.conf().getLocalUsers());
         uu.start();
+        corsEnable("/users");
         corsEnable("/users/*"); 
 
         
