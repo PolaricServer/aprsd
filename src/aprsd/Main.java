@@ -29,7 +29,7 @@ import java.util.concurrent.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "2.3+";
+   public  static String version = "2.4";
    public static String toaddr  = "APPS23";
    
    private static StationDB db = null;
@@ -49,7 +49,6 @@ public class Main implements ServerAPI
    private static String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
    private static StatLogger stats; 
    public  static Logfile log;
-   public  static DeadlockDetector deadlockDetector;
     
     
    /* API interface methods 
@@ -278,10 +277,6 @@ public class Main implements ServerAPI
            
            bullboard = new BullBoard(api, getMsgProcessor());
                      
-
-           /* Deadlock detection */
-           deadlockDetector = new DeadlockDetector(new DeadlockConsoleHandler(), 120, TimeUnit.SECONDS);
-           deadlockDetector.start();
            
            /* Initialize signs early since plugins may use it (see below) */
            Signs.init(api);
