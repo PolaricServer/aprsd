@@ -101,6 +101,10 @@ public class SystemApi extends ServerBase {
     }
     
     
+    protected boolean authForItem(Request req, PointObject x) {
+        return (!x.getSource().isRestricted() || getAuthInfo(req).login() || x.hasTag("OPEN"));
+    }
+    
     
     
     /** 
@@ -240,6 +244,7 @@ public class SystemApi extends ServerBase {
             List<JsPoint> result = 
                 _api.getDB().search(srch, tagList)
                     .stream()
+                    .filter( x -> authForItem(req, x))
                     .map( x -> new JsPoint( 
                         x.getIdent(), 
                         x.getDisplayId(), x.getAlias(), 
@@ -263,6 +268,8 @@ public class SystemApi extends ServerBase {
         get("/item/*/alias", "application/json", (req, resp) -> {
             var ident = req.splat()[0];
             var st = _api.getDB().getItem(ident, null);
+            if (authForItem(req, st))
+                return ERROR(resp, 401, "Uauthorized for access to item");
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
             return new ItemInfo.Alias(st.getAlias(), (st.iconIsNull() ? null : st.getIcon())); 
