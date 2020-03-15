@@ -120,14 +120,18 @@ package no.polaric.aprsd.http
           
        /** Label with field */   
        protected def simpleLabel(id:String, cls:String, lbl:String, content: NodeSeq): NodeSeq =
-           <label for={id} class={cls}>{lbl}</label>
-           <label id={id}> {content}</label>
+            <div class="field">
+                <label for={id} class={cls}>{lbl}</label>
+                <label id={id}> {content}</label>
+            </div>
           ;
        
        /** Label with field */
        protected def simpleLabel(id:String, cls:String, lbl:String, title:String, content: NodeSeq): NodeSeq =  
-           <label for={id} title={title} class={cls}>{lbl}</label>
-           <label id={id}> {content}</label>
+            <div class="field">
+                <label for={id} title={title} class={cls}>{lbl}</label>
+                <label id={id}> {content}</label>
+            </div>
           ;
           
       /** Input type text */

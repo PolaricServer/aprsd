@@ -60,12 +60,12 @@ package no.polaric.aprsd.http
     
        /** Identifier field. */
        protected def ident(req : Request): NodeSeq =
-           <xml:group>  
+           <div class="field">  
               <label for="ident" class="leftlab">Ident:</label>
               <label id="ident"><b> 
                 { if (model != null && model.getIdent != null) model.getIdent().replaceFirst("@.*","") else "" } 
               </b></label>
-           </xml:group>
+           </div>
            
            
        /** Description. */
