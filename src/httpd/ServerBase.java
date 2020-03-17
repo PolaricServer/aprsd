@@ -195,8 +195,8 @@ public abstract class ServerBase
    
    
    /**
-    * Get username of the authenticated user. 
-    * @return username, null if not authenticated. 
+    * Get info about authorization 
+    * @return AuthInfo. 
     */
    protected final AuthInfo getAuthInfo(Request req)
       { return WebServer.getAuthInfo(req); }

@@ -9,39 +9,21 @@ Bugs:
 * ais plugin seems to be active even when de-installed. Purge is necessary to make it go away. 
 
 
-
     
+FOR RELEASE 2.5
 
-FOR RELEASE 2.4
-
-* Item info as REST? Polymorphism? AIS plugin. 
-
-* Search items as REST. 
-    DONE.
-
-* Tag management as REST
-    DONE.
-
-* Remove webservices not needed anymore - old webapp will break! 
-    DONE.
-
-* Add name to local user data. User interface to change it. 
-    IN PROGRESS. 
+* Simple bicycle wheel model. IPP and distance rings.. 
 
 * AuthConfig, etc. should be available for plugins.
 
 * Add icons to feature editor
 
-* Feature editor: Layers
-    DONE.  
+* Item info as REST? Polymorphism? AIS plugin. 
 
 * Translation updates... 
 
-* Move icons to client
-    DONE.
 
 
-    
     
 LATER RELEASES
 
@@ -52,14 +34,9 @@ LATER RELEASES
     
 * Allow user-accounts to be set up with callsigns. 
 
-* Add name to local user. User interface to change it. 
-    IN PROGRESS.
-    
 * Bulletin board send.
 
 * Bulletin board send REST API and client.
-
-* Bulletin board setup page. 
 
 * Generic APRS messaging with notifications. 
 

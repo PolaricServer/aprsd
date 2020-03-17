@@ -256,6 +256,17 @@ V.2.3
 * Various small fixes..
 
 
+V.2.4
+-----
+* Search items as REST. 
+* Tag management as REST
+* Remove webservices not needed anymore - old webapp will break! 
+* User management as REST service. Allow dynamic changing of name and authorizations. 
+  More safe storage of user-info. 
+* Feature editor: Allow moving to separate layers
+* Move icons to client
+* Allow admin to send notifier messages.
+* Various fixes..
 
 
 

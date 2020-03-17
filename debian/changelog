@@ -1,8 +1,12 @@
-polaric-aprsd (2.3+) UNRELEASED; urgency=medium
+polaric-aprsd (2.4) stable; urgency=medium
 
-  * Development 
+  * More services as REST  
+  * Remove unneeded webservices
+  * User management (as REST API)
+  * Feature editor: Layers
+  * Various fixes
 
- -- Øyvind Hanssen <ohanssen@acm.org>  Sat, 04 Jan 2020 20:49:50 +0100
+ -- Øyvind Hanssen <ohanssen@acm.org>  Fri, 13 Mar 2020 00:11:54 +0100
 
 polaric-aprsd (2.3) stable; urgency=medium
 
