@@ -86,6 +86,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
 
 
    private int _try_parent = 0;
+
+   /* Implements: Interface MessageProcessor.Notification */
    public void reportFailure(String id)
    {
       _api.log().warn("RemoteCtl", "Failed to deliver message to: "+id);
@@ -96,6 +98,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       _children.remove(id);
    }
    
+   
+   /* Implements: Interface MessageProcessor.Notification */
    public void reportSuccess(String id)
    {
       if (!_parentCon && id.equals(_parent)) {
@@ -170,6 +174,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */
    protected boolean processRequest(Station sender, String text)
    {    
+      _api.log().debug("RemoteCtl", "processRequest - from "+sender.getIdent()+": "+text);
       String[] arg = text.split("\\s+", 2);
       if (arg.length == 0)
          return false;
@@ -212,25 +217,33 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
 
 
 
-   /* Commands should perhaps be "plugin" modules or plugin-modules should
-    * be allowed to add commands */
+    /* 
+     * Commands should perhaps be "plugin" modules or plugin-modules should
+     * be allowed to add commands 
+     */
 
-   protected boolean doConnect(Station sender, String arg)
-   {
-      /* If not connected already, add sender to children list.
+    protected boolean doConnect(Station sender, String arg)
+    {
+       /* 
+        * If not connected already, add sender to children list.
         */
-      if ((!_parentCon || !sender.getIdent().equals(_parent)) 
+        
+        _api.log().debug("RemoteCtl", "Got CON from "+sender.getIdent()+": "+arg);
+        
+        if ((!_parentCon || !sender.getIdent().equals(_parent)) 
                && !_children.containsKey(sender.getIdent()))       
-      {
-           _log.info(null, "Connection from child: "+sender.getIdent()+" established");
-           if (!_cmds.isEmpty())
-              _log.info(null, "Playback command log");
-           playbackLog(sender.getIdent());
-      }
-      _children.put(sender.getIdent(), new Date());
-      return true;
+        {
+            _log.info(null, "Connection from child: "+sender.getIdent()+" established");
+            if (!_cmds.isEmpty())
+                _log.info(null, "Playback command log");
+            playbackLog(sender.getIdent());
+        }
+        _children.put(sender.getIdent(), new Date());
+        return true;
    }
 
+   
+   
    /**
     * Set SAR mode. 
     * @param sender The station that sent the commmand.

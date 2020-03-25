@@ -149,55 +149,62 @@ public class MessageProcessor implements Runnable, Serializable
     * @param text Content of the message.
     * @param msgid Message ident.
     */
-   public synchronized void incomingMessage
-      (Station sender, String recipient, String text, String msgid)
-   {
-      if (_myCall.equals(recipient) && text.matches("(ack|rej).+")) {
-         msgid = text.substring(3, text.length());
+    public synchronized void incomingMessage
+        (Station sender, String recipient, String text, String msgid)
+    {
+        /* Is it an ack or rej message? */
+        if (_myCall.equals(recipient) && text.matches("(ack|rej).+")) {
+            msgid = text.substring(3, text.length());
          
-         /* notify recipient about result? */
-         OutMessage m = _outgoing.get(msgid);
-         if (m != null && m.not != null) {
-            if (text.matches("(rej).+"))
-               m.not.reportFailure(m.recipient);
-            else
-               m.not.reportSuccess(m.recipient);
-         }
-         _outgoing.remove(msgid);   
-         return;
-      } 
-      
-      Subscriber subs = _subscribers.get(recipient);
-      if (subs == null && recipient.matches("BLN.*")) 
-         subs = _subscribers.get("BLN");
-
-         // FIXME: Could we generalize over regex search? 
-         
-      if (subs != null) {
-         if (!recMessages.containsKey(sender.getIdent()+"#"+msgid)) { 
-            boolean result = !subs.verify;
-            if (subs.verify &&
-                text.length() > 9 && text.charAt(text.length()-9) == '#')
-            {
-                /* Verify message by extracting MAC field and comparing it
-                 * with a computed MAC
-                 */
-               String mac = text.substring(text.length()-8, text.length());
-               text = text.substring(0, text.length()-9);
-               result = mac.equals
-                  (SecUtils.digestB64(_key+sender.getIdent()+recipient+text+msgid, 8));
+            /* notify recipient about result? */
+            OutMessage m = _outgoing.get(msgid);
+            if (m != null && m.not != null) {
+                if (text.matches("(rej).+"))
+                    m.not.reportFailure(m.recipient);
+                else
+                    m.not.reportSuccess(m.recipient);
             }
+            _outgoing.remove(msgid);   
+            return;
+        } 
+      
+        /* Any subscriber to pass message to? */
+        Subscriber subs = _subscribers.get(recipient);
+        if (subs == null && recipient.matches("BLN.*")) 
+            subs = _subscribers.get("BLN");
+
+         
+        if (subs != null) {
+            /* Have we seen this message-id before? */
+            if (!recMessages.containsKey(sender.getIdent()+"#"+msgid)) { 
+                boolean result = !subs.verify;
+                if (subs.verify &&
+                    text.length() > 9 && text.charAt(text.length()-9) == '#')
+                {
+                   /* Verify message by extracting MAC field and comparing it
+                    * with a computed MAC
+                    */
+                    String mac = text.substring(text.length()-8, text.length());
+                    text = text.substring(0, text.length()-9);
+                    result = mac.equals
+                        (SecUtils.digestB64(_key+sender.getIdent()+recipient+text+msgid, 8));
+                }
             
-            result = result && subs.recipient.handleMessage(sender, recipient, text);
-            if (!result && msgid != null) 
-               _api.log().info("MessageProc", "Message authentication failed. msgid="+msgid);
-            if (msgid != null) 
-                recMessages.put(sender.getIdent()+"#"+msgid, result);
-         }     
-         if (msgid != null)
-            sendAck(sender.getIdent(), msgid, recMessages.get(sender.getIdent()+"#"+msgid));
-      }      
-   }
+                result = result && subs.recipient.handleMessage(sender, recipient, text);
+                if (!result && msgid != null) 
+                    _api.log().info("MessageProc", "Message authentication/processing failed. msgid="+msgid);
+                if (msgid != null) 
+                    recMessages.put(sender.getIdent()+"#"+msgid, result);
+            }
+            else
+                _api.log().debug("MessageProc", "Duplicate message from "+sender.getIdent()+" msgid="+msgid);
+                
+            if (msgid != null)
+                sendAck(sender.getIdent(), msgid, recMessages.get(sender.getIdent()+"#"+msgid));
+        }      
+        else
+            _api.log().debug("MessageProc", "Subscriber not found: "+recipient);
+    }
    
 
 

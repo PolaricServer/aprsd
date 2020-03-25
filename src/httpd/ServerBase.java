@@ -170,6 +170,8 @@ public abstract class ServerBase
      */
     protected void notifyAlias(String ident, String alias, Request req) {
         var uid = getAuthInfo(req).userid; 
+        if (alias==null)
+            alias = "NULL";
         if (_api.getRemoteCtl() != null)
             _api.getRemoteCtl().sendRequestAll("ALIAS "+ident+" "+alias, null);
         _api.log().info("SystemApi", 
@@ -183,7 +185,9 @@ public abstract class ServerBase
      * Log, notify admin and other server about change of icon 
      */
     protected void notifyIcon(String ident, String icon, Request req) {
-        var uid = getAuthInfo(req).userid; 
+        var uid = getAuthInfo(req).userid;
+        if (icon==null)
+            icon="NULL";
         if (_api.getRemoteCtl() != null)
             _api.getRemoteCtl().sendRequestAll("ICON "+ident+" "+icon, null);
         _api.log().info("SystemApi", 

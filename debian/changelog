@@ -1,3 +1,9 @@
+polaric-aprsd (2.4.1) UNRELEASED; urgency=medium
+
+  * Bugfix
+
+ -- Øyvind Hanssen <ohanssen@acm.org>  Wed, 25 Mar 2020 15:19:36 +0100
+
 polaric-aprsd (2.4) stable; urgency=medium
 
   * More services as REST  

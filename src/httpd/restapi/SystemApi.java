@@ -203,25 +203,35 @@ public class SystemApi extends ServerBase {
          * Get a list of icons (file paths). 
          ******************************************/
          get("/system/icons/*", "application/json", (req, resp) -> {
-            var subdir = req.splat()[0];
-            if (subdir==null || subdir.equals("default"))
-               subdir = "";
-            var webdir = System.getProperties().getProperty("webdir", ".");
-            FilenameFilter flt = (dir, f) -> 
-                  { return f.matches(".*\\.(png|gif|jpg)"); } ;
-            Comparator<File> cmp = (f1, f2) -> 
-                  f1.getName().compareTo(f2.getName());       
+            try {
+                var subdir = req.splat()[0];
+                if (subdir==null || subdir.equals("default"))
+                    subdir = "";
+                var webdir = System.getProperties().getProperty("webdir", ".");
+                FilenameFilter flt = (dir, f) -> 
+                    { return f.matches(".*\\.(png|gif|jpg)"); } ;
+                Comparator<File> cmp = (f1, f2) -> 
+                    f1.getName().compareTo(f2.getName());       
             
-            var icondir = new File(webdir+"/icons/"+subdir);
-            var files = icondir.listFiles(flt);
-            Arrays.sort(files, cmp);
-            if (!subdir.equals("")) subdir += "/";
+                var icondir = new File(webdir+"/icons/"+subdir);
+                var files = icondir.listFiles(flt);
+                if (files==null) 
+                    return ERROR(resp, 500, "Invalid file subdirectory for icons");
+                
+                Arrays.sort(files, cmp);
+                if (!subdir.equals("")) subdir += "/";
             
-            List<String> fl = new ArrayList<String>();
-            for (File x: files)
-               fl.add("/icons/"+subdir+x.getName());
+                List<String> fl = new ArrayList<String>();
+                for (File x: files)
+                fl.add("/icons/"+subdir+x.getName());
             
-            return fl;
+                return fl;
+            }
+            catch (Exception e) {
+                e.printStackTrace(System.out);
+                return null;
+            }
+            
         }, ServerBase::toJson );
         
         
@@ -268,7 +278,7 @@ public class SystemApi extends ServerBase {
         get("/item/*/alias", "application/json", (req, resp) -> {
             var ident = req.splat()[0];
             var st = _api.getDB().getItem(ident, null);
-            if (authForItem(req, st))
+            if (!authForItem(req, st))
                 return ERROR(resp, 401, "Uauthorized for access to item");
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
