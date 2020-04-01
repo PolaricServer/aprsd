@@ -187,6 +187,7 @@ public class WebServer implements ServerAPI.Web
         before("/item/*/tags",     _auth.conf().filter(null, "isauth, sar"));
         before("/aprs/*",          _auth.conf().filter(null, "isauth, sar"));
         before("/system/sarmode",  _auth.conf().filter(null, "isauth, sar"));
+        before("/sar/ipp/*",       _auth.conf().filter(null, "isauth"));
         
         afterAfter((request, response) -> {
             _nRequests++;
@@ -212,6 +213,10 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/users");
         corsEnable("/users/*"); 
 
+        /* Start REST API: SAR */
+        SarApi sar = new SarApi(_api); 
+        sar.start();
+        corsEnable("/sar/*");
         
         /* Start REST API: Bulletin board */
         BullBoardApi bb = new BullBoardApi(_api); 
