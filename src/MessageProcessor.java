@@ -202,8 +202,6 @@ public class MessageProcessor implements Runnable, Serializable
             if (msgid != null)
                 sendAck(sender.getIdent(), msgid, recMessages.get(sender.getIdent()+"#"+msgid));
         }      
-        else
-            _api.log().debug("MessageProc", "Subscriber not found: "+recipient);
     }
    
 
