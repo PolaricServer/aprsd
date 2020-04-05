@@ -167,52 +167,6 @@ package no.polaric.aprsd.http
    
          
 
-
-
-    protected def itemList(I:I18n, list: List[TrackerPoint], mobile: Boolean, 
-                  fprefix: String, loggedIn: Boolean): NodeSeq = 
-      <table>
-         <thead>
-           <th>{I.tr("Ident")}</th><th>{I.tr("Updated")}</th>
-           <th id="ilist_move">{I.tr("Move")}</th><th id="ilist_descr">{I.tr("Description")}</th>
-         </thead> 
-         <tbody>
-         {
-            for ( x:TrackerPoint <- list  
-                  if (!x.getSource().isRestricted() || loggedIn || x.hasTag("OPEN"))) yield
-            {
-               val moving = !x.getTrail().isEmpty()
-               var descr = x.getDescr()
-               if (descr != null && descr.length() > 60)
-                  descr = descr.substring(0,60)+"..";
-                  
-               <tr class={
-                 if (x.visible() && x.getPosition() != null) 
-                      "" else "nopos" } 
-                 onclick={
-                 if (x.visible() && x.getPosition() != null) 
-                     "findItem('" + x.getIdent() + "', 'true')"
-                 else "" 
-               }>
-          
-               <td>{x.getDisplayId()}</td>
-               <td> { ServerBase.df.format(x.getUpdated()) } </td>
-               <td> 
-               { if (moving && x.getSpeed() > 0)
-                       _directionIcon(x.getCourse(), fprefix) 
-                  else 
-                      EMPTY } </td>
-
-               { if (!mobile) 
-                  <td> { if (descr != null) descr else "" } </td> 
-                 else null }
-               </tr>
-           }
-        } 
-      </tbody>
-      </table>
-      ;
-       
        
 
 
@@ -238,30 +192,6 @@ package no.polaric.aprsd.http
    }
   
 
-
-  
-
-    def handle_trailpoint(req : Request, res : Response): String =
-    {
-       val I = getI18n(req)
-       val time = ServerBase.xf.parse(req.queryParams("time"))
-       val ident = req.queryParams("id")
-       var x:TrackerPoint = _api.getDB().getItem(ident, time)
-       if (x==null)
-           x = _api.getDB().getItem(ident, null)
-       val item = _api.getDB().getTrailPoint(ident, time)
-       
-       val result : NodeSeq = 
-          if (item == null)
-             TXT(I.tr("Couldn't find info")+": "+ident)
-          else {
-             val view = PointView.getViewFor(x, _api, false, req).asInstanceOf[TrackerPointView]
-             view.trailpoint(req, item)
-          }
-      
-      return printHtml(res, htmlBody(req, null, result)) 
-    }
-    
     
     
     val ddf = new java.text.DecimalFormat("##,###.###");
