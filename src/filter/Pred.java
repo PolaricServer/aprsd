@@ -105,7 +105,7 @@ class Tag extends Pred
       { this.tag=t; }
 
    public boolean eval(TrackerPoint p, long scale)
-      { return p.hasTag(tag);}
+      { return p.tagIsOn(tag);}
 }
 
 
@@ -227,9 +227,9 @@ class Path extends Pred
         if (obj instanceof Station) {
             var path = ((Station) obj).getPathInfo();
             if (path != null) 
-		return path.matches(regex);
+                return path.matches(regex);
             else
-		return false; 
+                return false; 
         }
         else if (obj instanceof AprsObject) {
             var owner = ((AprsObject) obj).getOwner();       

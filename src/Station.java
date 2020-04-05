@@ -103,8 +103,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
               
               
     public boolean isInfra() { 
-        if ((getTrafficFrom() != null && !getTrafficFrom().isEmpty()) 
-            || hasTag("APRS.infra")) {
+        if (getTrafficFrom() != null && !getTrafficFrom().isEmpty()) {
            setTag("APRS.infra");
            return true;
         }

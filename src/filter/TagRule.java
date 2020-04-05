@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015-2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,23 +19,30 @@ import java.util.*;
 
 public class TagRule
 {
-   private Pred pred; 
-   private List<String> action;
+    private Pred pred; 
+    private List<String> action;
    
-   public TagRule(Pred p, List<String> a) {
-      pred = p; 
-      action = a; 
-   }
+    public TagRule(Pred p, List<String> a) {
+        pred = p; 
+        action = a; 
+    }
    
    
    /**
     * Apply the rule.
     * @param obj TrackerPoint object.  
     */
-   public void apply(TrackerPoint obj) {
-       if (pred.eval(obj, 0))
-          for (String t: action)
-             obj.setTag(t);
-   }
+    public void apply(TrackerPoint obj) {
+        if (pred.eval(obj, 0))
+            for (String t: action)
+                obj.setTag(t);
+    }
+    
+    
+    public void applyRemove(TrackerPoint obj) {
+        if (!pred.eval(obj, 0))
+            for (String t: action)
+                obj.removeTag(t);
+    }
 }
 

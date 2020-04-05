@@ -353,7 +353,7 @@ public class StationDBImp implements StationDB, Runnable
                    s.getDisplayId().toUpperCase().matches(_srch) ||
                    s.getDescr().toUpperCase().matches("(.*\\s+)?\\(?("+_srch+")\\)?\\,?(\\s+.*)?") ) &&
               ( tags==null ? true : 
-                   (Arrays.stream(tags).map(x -> s.hasTag(x))
+                   (Arrays.stream(tags).map(x -> s.tagIsOn(x))
                                        .reduce((x,y) -> (x && y))).get())
           ).collect(Collectors.toList());
         

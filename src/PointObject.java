@@ -113,11 +113,12 @@ public abstract class PointObject extends Point implements Cloneable
      * Remove tag. 
      */
     public void removeTag(String tag) { 
-       if (tag == null)
-          return;
-       _decrementTag(tag);
-       _tags.remove(tag); 
+        if (tag == null || !_tags.contains(tag))
+            return;
+        _decrementTag(tag);
+        _tags.remove(tag); 
     }
+    
     
     
     /**
@@ -139,6 +140,19 @@ public abstract class PointObject extends Point implements Cloneable
                 return true;
         return false;
     }
+    
+    
+    public boolean _tagIsOn(String tag) {
+        return ( hasTag( "\\+?(" + tag + ")") && !hasTag("\\-"+tag) );
+    }
+    
+    public boolean tagIsOn(String tag) {
+        if (tag.charAt(0)=='+')
+            return _tagIsOn(tag.substring(1, tag.length()));
+        else
+            return _tagIsOn(tag);
+    }
+    
     
     
     

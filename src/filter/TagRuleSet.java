@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015-2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,8 +42,13 @@ public class TagRuleSet
      * @param p TrackerPoint object.  
      */
     public void apply(TrackerPoint p) {
-       for (TagRule r: rlist)
-          r.apply(p); 
+        /* First, remove tags for rules that evaluates to false */
+        for (TagRule r: rlist)
+            r.applyRemove(p);
+            
+        /* Then, add tags for rules that evaluates to true */
+        for (TagRule r: rlist)
+            r.apply(p); 
     }
     
 }

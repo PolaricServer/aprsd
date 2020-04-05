@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2018-2019 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018-2020 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,7 +102,7 @@ public class SystemApi extends ServerBase {
     
     
     protected boolean authForItem(Request req, PointObject x) {
-        return (!x.getSource().isRestricted() || getAuthInfo(req).login() || x.hasTag("OPEN"));
+        return (!x.getSource().isRestricted() || getAuthInfo(req).login() || x.tagIsOn("OPEN"));
     }
     
     
@@ -370,8 +370,11 @@ public class SystemApi extends ServerBase {
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
                
             String[] a = (String[]) ServerBase.fromJson(req.body(), String[].class);
-            for (String tag: a)
+            for (String tag: a) {
+                if (tag.charAt(0) != '+' && tag.charAt(0) != '-')
+                    tag = "+" + tag;
                 st.setTag(tag);
+            }
             return "Ok";   
         });
         
@@ -386,7 +389,15 @@ public class SystemApi extends ServerBase {
             var st = _api.getDB().getItem(ident, null);
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
-            st.removeTag(tag);
+                
+            System.out.println("DELETE TAG: '"+tag+"'");
+            if (tag.charAt(0) != '+' && tag.charAt(0) != '-' && st.hasTag(tag))
+                st.setTag("-" + tag); 
+            else {
+                if (tag.charAt(0) != '+' && tag.charAt(0) != '-')
+                    tag = "+" + tag;
+                st.removeTag(tag);
+            }
             return "Ok"; 
         });
         
