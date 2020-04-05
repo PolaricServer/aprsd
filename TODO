@@ -13,15 +13,21 @@ Bugs:
 FOR RELEASE 2.5
 
 * Simple bicycle wheel model. IPP and distance rings.. 
+    DONE.
 
-* AuthConfig, etc. should be available for plugins.
-
-* Add icons to feature editor
+* Special treatment for system/auto tags?
 
 * Item info as REST? Polymorphism? AIS plugin. 
 
-* Translation updates... 
+* Telemetry REST API and client.
 
+* Add icons to feature editor
+
+* Generic APRS messaging with notifications. 
+
+* APRS messaging REST API and client. 
+
+* AuthConfig, etc. should be available for plugins.
 
 
     
@@ -36,11 +42,7 @@ LATER RELEASES
 
 * Bulletin board send.
 
-* Bulletin board send REST API and client.
-
-* Generic APRS messaging with notifications. 
-
-* APRS messaging REST API and client.  
+* Bulletin board send REST API and client. 
   
 * Reset to default - button/link in config screen
      
