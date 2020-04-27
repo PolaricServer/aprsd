@@ -53,6 +53,9 @@ public abstract class Pred
    public static Pred AvgSpeed(long sp, String op)
       { return new AvgSpeed(sp, op); } 
       
+   public static Pred TrailLen(long sp, String op)
+      { return new TrailLen(sp, op); } 
+      
    public static Pred AprsSym(String regex)
       { return new AprsSym(regex); }
    
@@ -245,55 +248,52 @@ class Path extends Pred
 
 
 
-
-class Scale extends Pred 
+abstract class NumVal extends Pred
 {
-    private long scale; 
+    private long val; 
     private String op;
     
-    public Scale(long scale, String op) 
-       { this.scale = scale; this.op = op;}
+    protected NumVal(long val, String op)
+       { this.val = val; this.op = op; }
        
-    public boolean eval(TrackerPoint obj, long scale) {
+    protected boolean _eval(long val) {
        switch (op) {
-          case "<": return scale < this.scale; 
-          case ">": return scale > this.scale;
-          case "<=" : return scale <= this.scale; 
-          case ">=" : return scale >= this.scale; 
+          case "<": return val < this.val; 
+          case ">": return val > this.val;
+          case "<=" : return val <= this.val; 
+          case ">=" : return val >= this.val; 
           default: return false; 
        }
     } 
+    
 }
 
 
 
-
-class Speed extends Pred
+class Scale extends NumVal
 {
-    private long speed; 
-    private String op;
-    
+    public Scale(long scale, String op) 
+       { super(scale, op); }
+       
+    public boolean eval(TrackerPoint obj, long scale) {
+        return _eval(scale); 
+    }
+}
+
+
+
+class Speed extends NumVal
+{
     public Speed(long sp, String op)
-       { this.speed = sp; this.op = op; }
+       { super(sp, op); } 
        
     public boolean eval(TrackerPoint obj, long scale) {
        return _eval (obj.getSpeed());
     }
-    
-    
-    public boolean _eval(int ospeed) {
-       switch (op) {
-          case "<": return ospeed < this.speed; 
-          case ">": return ospeed > this.speed;
-          case "<=" : return ospeed <= this.speed; 
-          case ">=" : return ospeed >= this.speed; 
-          default: return false; 
-       }
-    }           
 }
 
 
-class MaxSpeed extends Speed
+class MaxSpeed extends NumVal
 {
     public MaxSpeed(long sp, String op)
        { super(sp, op); } 
@@ -303,7 +303,7 @@ class MaxSpeed extends Speed
     }
 }
 
-class AvgSpeed extends Speed
+class AvgSpeed extends NumVal
 {
     public AvgSpeed(long sp, String op)
        { super(sp, op); }  
@@ -313,6 +313,15 @@ class AvgSpeed extends Speed
     }
 }
 
+class TrailLen extends NumVal
+{
+    public TrailLen(long sp, String op)
+       { super(sp, op); }  
+               
+    public boolean eval(TrackerPoint obj, long scale) {
+       return _eval (obj.getTrailLen());
+    }
+}
 
 
 /**

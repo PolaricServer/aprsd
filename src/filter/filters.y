@@ -95,6 +95,8 @@ expr : '(' expr ')'           {  $$=$2; }
                               
      |  expr OR expr          {  $$=Pred.OR((Pred)$1, (Pred)$3); }  
      
+     |  BOOLEAN               {  $$=(((Boolean) $1) ? Pred.TRUE() : Pred.FALSE()); } 
+     
      |  IDENT RELOP NUM       {   if ($1.matches("scale|SCALE"))
                                      $$=Pred.Scale((Long) $3, $2);
                                   else if ($1.matches("speed|SPEED"))
@@ -102,7 +104,9 @@ expr : '(' expr ')'           {  $$=$2; }
                                   else if ($1.matches("max-speed|MAX-SPEED"))
                                      $$=Pred.MaxSpeed((Long) $3, $2);
                                   else if ($1.matches("((average|avg)-speed)|((AVERAGE|AVG)-SPEED)"))
-                                     $$=Pred.AvgSpeed((Long) $3, $2);   
+                                     $$=Pred.AvgSpeed((Long) $3, $2);
+                                  else if ($1.matches("trail|TRAIL"))
+                                     $$=Pred.TrailLen((Long) $3, $1);
                                   else {
                                       $$=Pred.FALSE(); 
                                       yyerror("Unknown identifier '"+$1+"'"); 
