@@ -13,4 +13,12 @@ public interface ItemInfo {
         public Alias(String a, String ic)
           {alias=a; icon=ic; }
     }
+    
+    
+    public static class Item {
+        public String ident;
+        public String alias;
+        public String description;
+        public long[] pos;
+    }
 }

@@ -374,6 +374,7 @@ public class SystemApi extends ServerBase {
                 if (tag.charAt(0) != '+' && tag.charAt(0) != '-')
                     tag = "+" + tag;
                 st.setTag(tag);
+                notifyTag(st.getIdent(), tag, req);
             }
             return "Ok";   
         });
@@ -390,13 +391,15 @@ public class SystemApi extends ServerBase {
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
                 
-            System.out.println("DELETE TAG: '"+tag+"'");
-            if (tag.charAt(0) != '+' && tag.charAt(0) != '-' && st.hasTag(tag))
+            if (tag.charAt(0) != '+' && tag.charAt(0) != '-' && st.hasTag(tag)) {
                 st.setTag("-" + tag); 
+                notifyTag(st.getIdent(), "-"+tag, req);
+            }
             else {
                 if (tag.charAt(0) != '+' && tag.charAt(0) != '-')
                     tag = "+" + tag;
                 st.removeTag(tag);
+                notifyRmTag(st.getIdent(), tag, req);
             }
             return "Ok"; 
         });

@@ -47,6 +47,12 @@ public class AprsObjectApi extends ServerBase {
     }
     
     
+    public static class ObjUpdate {
+        public double[] pos;
+        public char sym, symtab; 
+        public String comment;
+    }
+    
     
     public AprsObjectApi(ServerAPI api) {
         super(api);
@@ -92,9 +98,12 @@ public class AprsObjectApi extends ServerBase {
             ObjInfo obj = (ObjInfo) 
                 ServerBase.fromJson(req.body(), ObjInfo.class);
                 
+            if (_ownObj.get(obj.ident) != null)
+                return ERROR(resp, 400, "Object already exists");
+                
             if ( !obj.ident.matches("[a-zA-Z0-9\\.\\/\\-\\_\\#]{1,9}") || 
                      (obj.pos[1]==0 && obj.pos[0]==0))
-                return ERROR(resp, 500, "Invalid object. Couldn't post");
+                return ERROR(resp, 400, "Invalid object. Couldn't post");
                 
             var pos = new LatLng( obj.pos[1], obj.pos[0]);
             var pd  = new AprsHandler.PosData (pos, obj.sym, obj.symtab);
@@ -109,6 +118,23 @@ public class AprsObjectApi extends ServerBase {
         } );
         
 
+        /******************************************
+         * Update an object
+         ******************************************/
+        put("/aprs/objects/*",  (req, resp) -> {
+            String ident = req.splat()[0];
+            ObjInfo oi = (ObjInfo) 
+                ServerBase.fromJson(req.body(), ObjUpdate.class);
+            AprsObject obj = _ownObj.get(ident);
+            if (obj==null)
+                return ERROR(resp, 400, "Object not found");
+                
+            var pos = new LatLng( oi.pos[1], oi.pos[0]);
+            var pd  = new AprsHandler.PosData (pos, oi.sym, oi.symtab);
+            obj.update(new Date(), pd, oi.comment, "(own)");
+            return "OK";
+        } );
+        
 
         /*****************************************
          * Delete an object 

@@ -265,7 +265,7 @@ public class LocalUsers {
         }
         catch (EOFException e) { }
         catch (Exception e) {
-            _api.log().warn("StationDBImp", "Cannot restore data: "+e);
+            _api.log().warn("LocalUsers", "Cannot restore data: "+e);
             _users.clear();
         }
     }

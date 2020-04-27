@@ -290,6 +290,7 @@ public class AprsParser implements AprsChannel.Receiver
             obj = _api.getDB().newObject(station, ident);
             obj.setTag("APRS");
             obj.setTag(p.source.getTag());
+            obj.autoTag();
         }
         else if (x instanceof AprsObject)
             obj = (AprsObject) x;

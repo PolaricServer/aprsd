@@ -196,8 +196,35 @@ public abstract class ServerBase
             ("system", "system", "Icon: '"+icon+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
     } 
    
-   
-   
+    /*
+     * Log, notify admin and other server about change of tag 
+     */
+    protected void notifyTag(String ident, String tag, Request req) {
+        var uid = getAuthInfo(req).userid; 
+        if (tag==null)
+            return;
+        if (_api.getRemoteCtl() != null)
+            _api.getRemoteCtl().sendRequestAll("TAG "+ident+" "+tag, null);
+        _api.log().info("SystemApi", 
+            "TAG: '"+tag+"' for '"+ident+"' by user '"+uid+"'");    
+        _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
+            ("system", "system", "Tag: '"+tag+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
+    }
+    
+    
+    protected void notifyRmTag(String ident, String tag, Request req) {
+        var uid = getAuthInfo(req).userid; 
+        if (tag==null)
+            return;
+        if (_api.getRemoteCtl() != null)
+            _api.getRemoteCtl().sendRequestAll("RMTAG "+ident+" "+tag, null);
+        _api.log().info("SystemApi", 
+            "RMTAG: '"+tag+"' for '"+ident+"' by user '"+uid+"'");    
+        _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
+            ("system", "system", "Tag: '"+tag+ "' for '"+ident+"' removed by user '"+uid+"'", new Date(), 10) );     
+    }
+    
+    
    /**
     * Get info about authorization 
     * @return AuthInfo. 

@@ -71,6 +71,14 @@ public class OwnObjects implements Runnable
         { return Set.copyOf(_ownObjects); }
         
         
+        
+    public synchronized AprsObject get(String id) 
+    { 
+        if (!_ownObjects.contains(id))
+            return null;
+        return (AprsObject) _api.getDB().getItem(id, null);
+    }
+        
     
     /**
      * Add an object.
@@ -96,6 +104,7 @@ public class OwnObjects implements Runnable
             obj.setTimeless(perm);
             _ownObjects.add(id);
             obj.setTag("own");
+            obj.autoTag();
             sendObjectReport(obj, false);
             return true;
          }
