@@ -23,7 +23,7 @@ import java.text.*;
 public class Logfile
 {
     public enum Level {
-       DEBUG, INFO, WARNING, ERROR, NONE
+       DEBUG, INFO, WARN, ERROR, NONE
     }
 
     private PrintWriter _out; 
@@ -75,7 +75,7 @@ public class Logfile
       
    
    public void warn(String cls, String text)
-      { log(Level.WARNING, cls, text);}    
+      { log(Level.WARN, cls, text);}    
    
    
    public void info(String cls, String text)

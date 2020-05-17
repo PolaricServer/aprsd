@@ -30,6 +30,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.WebSocketException;
+import org.eclipse.jetty.websocket.api.CloseException;
 import java.security.Principal;
 import no.polaric.aprsd.*;
 import com.mindprod.base64.Base64;
@@ -38,7 +39,7 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 
 /** Send events to clients through WebSockets. Let clients subscribe. */
 
-@WebSocket(maxIdleTime=360000)
+@WebSocket(maxIdleTime=600000)
 public abstract class WsNotifier extends ServerBase
 {
    
@@ -195,23 +196,45 @@ public abstract class WsNotifier extends ServerBase
    }
    
    
-      
     /**
-     * Websocket close handler.
+     * Close the client session.
      */
-     
-    @OnWebSocketClose
-    public void onClose(Session conn, int statusCode, String reason) {
-       String user = _getUid(conn);
-       _api.log().info("WsNotifier", "Connection closed"+(reason==null ? "" : ": "+reason)+". Unsubscribing user: "+user);
-       Client c = _clients.get(user);
-       if (c.login())
+    protected void closeSes(Session conn) {
+        String user = _getUid(conn);
+        if (conn==null || user==null)
+            return;
+        Client c = _clients.get(user);
+        if (c==null) {
+            _api.log().warn("WsNotifier", "closeSes: user "+user+" not found");
+            return;
+        }
+        if (c.login())
           _nLoggedIn--;
-       _clients.remove(user);
-       
+        _clients.remove(user);
     }
-
+    
    
+    
+    /**
+     * Websocket error handler.
+     */
+    @OnWebSocketError
+    public void onError(Session conn, Throwable cause) {   
+        String user = (conn==null ? "(null)" : _getUid(conn));
+        if (cause instanceof CloseException) {
+            _api.log().debug("WsNotifier", "Websocket close ["+user+"]: "+cause.getCause());
+            return; 
+        }
+        else if (cause instanceof NullPointerException) {
+            _api.log().warn("WsNotifier", "Websocket NullPointerException");
+            cause.printStackTrace(System.out);
+        }
+        else {
+            _api.log().warn("WsNotifier", "Websocket ["+user+"]: "+cause);
+            closeSes(conn);
+        }
+    }
+    
    
     /**
      * Websocket Message handler.
@@ -225,9 +248,11 @@ public abstract class WsNotifier extends ServerBase
            c.onTextFrame(message);
         }
     }
+          
+       
+       
     
-    
-    private String _getUid(Session conn) {
+    protected String _getUid(Session conn) {
        UpgradeRequest req = conn.getUpgradeRequest();
        InetSocketAddress remote = conn.getRemoteAddress();
        String host = req.getHeader("X-Forwarded-For");
@@ -292,10 +317,10 @@ public abstract class WsNotifier extends ServerBase
          for(String user : _clients.keySet()) {
             Client client = (Client) _clients.get(user);
             try {               
-               if(client != null && pred.test(client) && txt != null) 
-                  client.sendText(txt.apply(client));
+                if(client != null && pred.test(client) && txt != null) 
+                    client.sendText(txt.apply(client));
                
-            } catch(WebSocketException e){   
+            } catch (java.nio.channels.ClosedChannelException e) {   
                 _clients.remove(user); 
                 _api.log().info("WsNotifier", "Unsubscribing closed client channel: "+user);       
                 Client c = _clients.get(user);
@@ -303,7 +328,8 @@ public abstract class WsNotifier extends ServerBase
                    _nLoggedIn--;
             }
          }
-      } catch(Exception e) {
+      } 
+      catch (Exception e) {
          _api.log().error("WsNotifier", "Cannot distribute string: " + e);
          e.printStackTrace(System.out);
       }

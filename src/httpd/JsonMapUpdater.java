@@ -31,7 +31,7 @@ import no.polaric.aprsd.filter.*;
  * Map overlay updater using Websockets.  
  */
 
-@WebSocket(maxIdleTime=360000)
+@WebSocket(maxIdleTime=600000)
 public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
 {
  

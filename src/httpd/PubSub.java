@@ -157,6 +157,14 @@ public class PubSub extends WsNotifier implements ServerAPI.PubSub
     }
    
    
+    /**
+     * Websocket close handler.
+     */
+    @OnWebSocketClose
+    public void onClose(Session conn, int statusCode, String reason) {
+       String user = _getUid(conn);
+       closeSes(conn);
+    }
    
     /**
      * subscribe a client to a room. 

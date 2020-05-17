@@ -29,7 +29,7 @@ import java.util.concurrent.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "2.4.1";
+   public  static String version = "2.4.1+";
    public static String toaddr  = "APPS24";
    
    private static StationDB db = null;
@@ -181,7 +181,15 @@ public class Main implements ServerAPI
            System.out.println("Usage: Daemon <config-file>");
              
         String confdir = System.getProperties().getProperty("confdir", ".");  
-             
+        
+        System.out.println();
+        System.out.println();
+        System.out.println("*************************************************");
+        System.out.println("***   Polaric APRSD server startup            ***");
+        System.out.println("***   See http://aprs.no/polaricserver        ***");
+        System.out.println("*************************************************");
+        System.out.println();
+           
         try {
            FileInputStream fin = new FileInputStream(args[0]);
            _defaultConf = new Properties();
@@ -200,7 +208,7 @@ public class Main implements ServerAPI
                  });
            
            if (files == null)
-                System.out.println("OOPS. files is null");
+                System.out.println("*** OOPS. files is null");
            for (File f : files) {
                 Properties xConf = new Properties(); 
                 FileInputStream ffin = new FileInputStream(f.getAbsolutePath());
@@ -226,9 +234,9 @@ public class Main implements ServerAPI
                       _defaultConf.setProperty(key, xConf.getProperty(key));
            }
            _defaultConf.setProperty("plugins", plugins);
-           System.out.println("plugins = "+plugins);
+           System.out.println("*** Plugins = "+plugins);
           _defaultConf.setProperty("channels", channels);
-           System.out.println("channels = "+channels);
+           System.out.println("*** Channels = "+channels);
            
            
            /* 
@@ -257,7 +265,7 @@ public class Main implements ServerAPI
         }
         catch( Exception ioe )
         {
-             System.out.println("ERROR: Couldn't init server.");
+             System.out.println("*** ERROR: Couldn't init server.");
              ioe.printStackTrace(System.err);
         }
     }
@@ -267,6 +275,7 @@ public class Main implements ServerAPI
     public void start()
     {
         try {
+
            properties().put("API", this);
                       
            /* Database of stations/objects */

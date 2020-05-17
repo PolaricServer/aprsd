@@ -138,11 +138,15 @@ public class AprsParser implements AprsChannel.Receiver
                
             default: 
         }
-        }catch (NumberFormatException e)
-          { _api.log().warn("AprsParser", "Cannot parse number in input. Report string probably malformed"); 
+        } catch (NumberFormatException e) { 
+            _api.log().debug("AprsParser", "Cannot parse number in input. Report string probably malformed"); 
             _api.log().debug("AprsParser", p.toString());
-         //   e.printStackTrace(System.out);
           }
+          catch (IllegalArgumentException e) {
+            _api.log().warn("AprsParser", "Illegal Argument: "+e.getMessage());
+          }
+          
+          
         
         // _api.getAprsHandler().handlePacket(p.source, rtime, p.from, p.to, p.via, p.report);
         for (AprsHandler h:_subscribers)
@@ -234,8 +238,8 @@ public class AprsParser implements AprsChannel.Receiver
         
         if (msg.charAt(10) != ':') {
             int pos = msg.indexOf(':',3);
-            if (pos > 10 || pos < 0) {
-                _api.log().warn("AprsParser", "Message format problem: '"+msg+"'");
+            if (pos > 11 || pos < 0) {
+                _api.log().debug("AprsParser", "Message without dest: '"+msg+"'");
                 return; 
             }
             recipient = msg.substring(1,pos).trim();
@@ -591,7 +595,7 @@ public class AprsParser implements AprsChannel.Receiver
          }
          /* Sanity check */
          if (day<1||day>31||hour>24||min>59||sec>59) { 
-            _api.log().warn("AprsParser", "Timestamp format problem: "+dstr+tst);
+            _api.log().debug("AprsParser", "Invalid timestamp: "+dstr+tst+" - using current time");
             return new Date();
          }
 
@@ -881,10 +885,13 @@ public class AprsParser implements AprsChannel.Receiver
         boolean[] bits = new boolean[Telemetry.BINARY_CHANNELS];
                 
         String[] data = p.report.split(",\\s*");
-        if (data.length < 7)
+        if (data.length < 7 || data[0].length() < 5)
            return; 
         
-        int seq = Integer.parseInt(data[0].substring(2));    
+        String sseq = data[0].substring(2);
+        if ("MIC".equals(sseq))
+            return;
+        int seq = Integer.parseInt(sseq);    
         for (int i=0; i < Telemetry.ANALOG_CHANNELS; i++)
            if (data[i+1].length() > 0)
               aresult[i] = Float.parseFloat(data[i+1]);
@@ -931,7 +938,7 @@ public class AprsParser implements AprsChannel.Receiver
     {
         Telemetry t = st.getTelemetry();
         if (data.length() < 5) {
-           _api.log().warn("AprsParser", "Metadata format problem: "+data); 
+           _api.log().debug("AprsParser", "Metadata format not recognized: "+data); 
            return;
         }
         String d = data.substring(5);
@@ -964,7 +971,7 @@ public class AprsParser implements AprsChannel.Receiver
               t.setDescr(bb[1]);
         }
         else
-          _api.log().warn("AprsParser", "Metadata format problem: "+data);
+          _api.log().debug("AprsParser", "Metadata format not recognized: "+data);
     }
     
     

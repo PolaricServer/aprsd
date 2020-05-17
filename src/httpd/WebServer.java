@@ -58,7 +58,6 @@ public class WebServer implements ServerAPI.Web
             } else {
                 server = new Server();
             }
-
             return server;
         }
 
@@ -122,7 +121,7 @@ public class WebServer implements ServerAPI.Web
      */
      
     public void start() throws Exception {
-        System.out.println("WebServer: Starting...");
+        System.out.println("*** WebServer: Starting...");
       
 
         /*  https://blog.codecentric.de/en/2017/07/fine-tuning-embedded-jetty-inside-spark-framework/  */
@@ -331,7 +330,6 @@ public class WebServer implements ServerAPI.Web
                 if (prefix != null && prefix.charAt(0) != '/')
                     prefix = "/" + prefix;
                 key = (prefix==null ? "" : prefix) + "/" + key;
-                System.out.println("WebServer: Add HTTP handler method: "+key+" --> "+m.getName());
             
                 /* FIXME: Configure allowed origin(s) */
                 after (key, (req,resp) -> { 
@@ -350,7 +348,7 @@ public class WebServer implements ServerAPI.Web
             return (String) m.invoke(o, req, resp);
         }
         catch (Exception e) {
-            System.out.println("WebServer: Couldn't invoke method: "+e);
+            System.out.println("*** WebServer: Couldn't invoke method: "+e);
             e.printStackTrace(System.out);
             return "<H2>Internal error: Couldn't invoke method</H2>"+e;
         }

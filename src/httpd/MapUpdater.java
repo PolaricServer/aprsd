@@ -71,7 +71,7 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
 
        
        public void subscribe() {}
-       
+      
        
        
        /** Receive text frame from client. */
@@ -117,19 +117,28 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
    protected long    _updates = 0;
           
           
-   public MapUpdater(ServerAPI api, boolean trust) { 
-      super(api, trust); 
+    public MapUpdater(ServerAPI api, boolean trust) { 
+        super(api, trust); 
       
-      /* Periodic task to send updates to clients */
-      hb.schedule( new TimerTask() 
-        { public void run() {       
-              postText( x -> ((Client)x).getOverlayData(false), 
-                        x -> ((Client)x).isInside(null, false) ); 
-           } 
+        /* Periodic task to send updates to clients */
+        hb.schedule( new TimerTask() 
+            { public void run() {       
+                postText( x -> ((Client)x).getOverlayData(false), 
+                          x -> ((Client)x).isInside(null, false) ); 
+            } 
         } , 10000, 10000); 
-   }  
+    }  
     
-    
+          
+    /**
+     * Websocket close handler.
+     */
+    @OnWebSocketClose
+    public void onClose(Session conn, int statusCode, String reason) {
+       String user = _getUid(conn);
+       _api.log().info("MapUpdater", "Connection closed"+(reason==null ? "" : ": "+reason)+". Unsubscribing user: "+user);
+       closeSes(conn);
+    }
 
    
    /** 

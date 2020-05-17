@@ -247,11 +247,13 @@ public abstract class AprsChannel extends Channel
                 return null;
                
           }
-          else if (p.type == ':' || p.type == ';') 
-             /* Special treatment for message type or object
+          else if (p.type == ':' || p.type == ';') {
+             /* 
+              * Special treatment for message type or object
               * Extract recipient/object id
               */
              p.msgto = p.report.substring(1,10).trim();
+          }
          return p;
     }
     
