@@ -1,12 +1,6 @@
 
     
-FOR RELEASE 2.5
-
-* [C] Simple bicycle wheel model. IPP and distance rings.. 
-    DONE.
-
-* Special treatment for system/auto tags?
-    DONE.
+FOR RELEASE 2.6
 
 * Item info as REST? Polymorphism? AIS plugin. 
 
@@ -20,10 +14,7 @@ FOR RELEASE 2.5
 
 * AuthConfig, etc. should be available for plugins.
 
-* Clean up logging? 
-    DONE to some extent.
-
-* view profile compiler. Better error reporting... 
+* view profile compiler: Better error reporting... 
 
 
 
@@ -44,44 +35,3 @@ LATER RELEASES
 * Reset to default - button/link in config screen
      
 * Develop signs. Channels? 
-
-
-
-
-apr. 27 22:58:17 ERROR: In config file '/etc/polaric-aprsd/view.profiles', line 67: syntax error
-
-
-*** Stopping HTTP/WS server
-apr. 27 22:56:07 INFO (WebServer): Stopping...
-apr. 27 22:56:07 ERROR (WsNotifier): Cannot distribute string: java.lang.IllegalStateException: Blocking message pending 10000 for BLOCKING
-java.lang.IllegalStateException: Blocking message pending 10000 for BLOCKING
-        at org.eclipse.jetty.websocket.common.WebSocketRemoteEndpoint.lockMsg(WebSocketRemoteEndpoint.java:130)
-        at org.eclipse.jetty.websocket.common.WebSocketRemoteEndpoint.sendString(WebSocketRemoteEndpoint.java:376)
-        at no.polaric.aprsd.http.WsNotifier$Client.sendText(WsNotifier.java:70)
-        at no.polaric.aprsd.http.WsNotifier.postText(WsNotifier.java:296)
-        at no.polaric.aprsd.http.MapUpdater$1.run(MapUpdater.java:126)
-        at java.base/java.util.TimerThread.mainLoop(Timer.java:556)
-        at java.base/java.util.TimerThread.run(Timer.java:506)
-apr. 27 22:56:07 INFO (LocalUsers): Saving user data...
-*** Polaric APRSD shutdown
-
-
-
-org.postgresql.util.PSQLException: ERROR: invalid byte sequence for encoding "UTF8": 0x00
-        at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2440)
-        at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2183)
-        at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:308)
-        at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:441)
-        at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:365)
-        at org.postgresql.jdbc.PgPreparedStatement.executeWithFlags(PgPreparedStatement.java:143)
-        at org.postgresql.jdbc.PgPreparedStatement.executeUpdate(PgPreparedStatement.java:120)
-        at org.apache.commons.dbcp.DelegatingPreparedStatement.executeUpdate(DelegatingPreparedStatement.java:106)
-        at org.apache.commons.dbcp.DelegatingPreparedStatement.executeUpdate(DelegatingPreparedStatement.java:106)
-        at no.polaric.aprsdb.DatabasePlugin.handlePosReport(DatabasePlugin.java:247)
-        at no.polaric.aprsd.AprsParser.parseStdAprs(AprsParser.java:782)
-        at no.polaric.aprsd.AprsParser.receivePacket(AprsParser.java:104)
-        at no.polaric.aprsd.AprsChannel.receivePacket(AprsChannel.java:315)
-        at no.polaric.aprsd.AprsChannel.receivePacket(AprsChannel.java:279)
-        at no.polaric.aprsd.InetChannel.receiveLoop(InetChannel.java:106)
-        at no.polaric.aprsd.TcpChannel.run(TcpChannel.java:174)
-        at java.base/java.lang.Thread.run(Thread.java:834)

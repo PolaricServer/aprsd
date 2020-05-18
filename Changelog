@@ -269,6 +269,18 @@ V.2.4
 * Various fixes..
 
 
+V.2.4.1
+-------
+* Bugfix
+
+
+V.2.5
+-----
+* Basic SAR (REST) API. Basic support for bicycle wheel model. 
+* Improvements to tag management. System/auto tags. 
+* Filter script fixes
+* Varius fixes..
+
 
 
     
