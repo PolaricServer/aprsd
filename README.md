@@ -18,8 +18,8 @@ http://aprs.no/polaricserver
 
 ## System requirements
 
-Linux/Java platform (tested with Debian/Ubuntu/Mint) with
-* Java Runtime environment version 8 or later. 
+Linux/Java platform (tested with Debian/Ubuntu) with
+* Java Runtime environment version 11 or later. 
 * Scala library version 2.11 or later. You will also need scala-xml
   and scala-parser-combinators packages.
 * jsvc.
@@ -58,6 +58,6 @@ Build from the source is done by a plain old makefile. Yes I know :)
 Maybe I move to something else a little later. Setup for generating Debian
 packages is included. You may use the 'debuild' command.
 
-You will need JDK (Oracle or OpenJDK) version 10 or later, the Scala
+You will need JDK (Oracle or OpenJDK) version 11 or later, the Scala
 programming language version 2.11.12 or later (scala, scala-library scala-xml
 and scala-parser-combinators packages) and librxtx-java. 
