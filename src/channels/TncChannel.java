@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,22 +22,34 @@ import java.util.concurrent.Semaphore;
  * TNC channel. For devices in TNC2 compatible mode.
  */
  
-public abstract class TncChannel extends AprsChannel implements Runnable
+public abstract class TncChannel extends AprsChannel
 {
-    private   String  _portName; 
-    private   int     _baud;
     protected String  _myCall; /* Move this ? */
     
-    transient protected boolean      _close = false;
-    transient private   int          _max_retry;
-    transient private   long         _retry_time;   
-    transient protected SerialPort   _serialPort;
     transient private   Semaphore    _sem = new Semaphore(1, true);
     transient protected Logfile      _log; 
-    transient private   Thread       _thread;
     transient private   int          _chno;
-       
+    transient protected SerialComm   _serial;
+    
     private static int _next_chno = 0;
+    
+    
+    /*
+     * We need to define the receiveLoop method for the SerialComm class. 
+     */
+    protected class Comm extends SerialComm {
+        public @Override void receiveLoop() throws Exception 
+            { receiveLoop(); }
+        public Comm(ServerAPI api, String id, String pname, int bd, int retr, long rtime)
+            { super(api, id, pname, bd, retr, rtime); }
+    }
+       
+    
+    /*
+     * These are to be defined in subclasses 
+     */
+    public abstract void close();   
+    protected abstract void receiveLoop() throws Exception;
     
     
  
@@ -51,29 +63,23 @@ public abstract class TncChannel extends AprsChannel implements Runnable
     }
   
    
-    /**
+   /**
+    * Start the service. 
     * Load/reload configuration parameters. Called each time channel is activated. 
     */
-   protected void getConfig()
-   {
+    public void activate(ServerAPI a) {
         String id = getIdent();
         _myCall = _api.getProperty("channel."+id+".mycall", "").toUpperCase();
         if (_myCall.length() == 0)
-           _myCall = _api.getProperty("default.mycall", "NOCALL").toUpperCase();       
-        _max_retry = _api.getIntProperty("channel."+id+".retry", 0);
-        _retry_time = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
-        _portName = _api.getProperty("channel."+id+".port", "/dev/ttyS0");
-        _baud = _api.getIntProperty("channel."+id+".baud", 9600);
-        // FIXME: set gnu.io.rxtx.SerialPorts property here instead of in startup script
-        _log = new Logfile(_api, id, "rf.log");
-   }
-   
-   
-    /** Start the service */
-    public void activate(ServerAPI a) {
-        getConfig();
-        _thread = new Thread(this, "channel."+getIdent());
-        _thread.start();
+           _myCall = _api.getProperty("default.mycall", "NOCALL").toUpperCase(); 
+        _log = new Logfile(_api, id, "rf.log");   
+        
+        String port = _api.getProperty("channel."+id+".port", "/dev/ttyS0");
+        int baud = _api.getIntProperty("channel."+id+".baud", 9600);
+        int retr = _api.getIntProperty("channel."+id+".retry", 0);
+        long rtime = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
+
+        _serial = new Comm(_api, id, port, baud, retr, rtime);
     }
 
   
@@ -83,8 +89,7 @@ public abstract class TncChannel extends AprsChannel implements Runnable
     }
     
     
-    @Override protected void regHeard(AprsPacket p) 
-    {
+    @Override protected void regHeard(AprsPacket p) {
         _heard.put(p.from, new Heard(new Date(), p.via));
         /* FIXME: Check for TCPxx in third party packets and consider registering 
          * more than one path instance */
@@ -95,94 +100,8 @@ public abstract class TncChannel extends AprsChannel implements Runnable
        { return "rf"+_chno; }
  
 
-   
 
-    /**
-     * Setup the serial port
-     */
-    private SerialPort connect () throws Exception
-    {
-        CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(_portName);
-        if ( portIdentifier.isCurrentlyOwned() )
-            _api.log().error("TncChannel", chId()+"Port "+ _portName + " is currently in use");
-        else
-        {
-            CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);       
-            if ( commPort instanceof SerialPort )
-            {
-                SerialPort serialPort = (SerialPort) commPort;
-                serialPort.setSerialPortParams(_baud, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-                serialPort.enableReceiveTimeout(1000);
-                if (!serialPort.isReceiveTimeoutEnabled())
-                   _api.log().warn("TncChannel", chId()+"Timeout not enabled on serial port");
-                return (SerialPort) commPort;
-            }
-            else
-                _api.log().error("TncChannel", chId()+"Port " + _portName + " is not a serial port.");
-        }    
-        return null; 
-    }
-   
-   
-    
-    
-    public abstract void close();   
-    protected abstract void receiveLoop() throws Exception;
-       
-       
-    public void run()
-    {
-        int retry = 0;       
-        _close = false;
-        _api.log().info("TncChannel", chId()+"Activating...");
-        while (true) 
-        {
-           _state = State.STARTING;
-           if (retry <= _max_retry || _max_retry == 0) 
-               try { 
-                   long sleep = 30000 * (long) retry;
-                   if (sleep > _retry_time) 
-                      sleep = _retry_time; /* Default: Max 30 minutes */
-                   Thread.sleep(sleep); 
-               } 
-               catch (Exception e) {break;} 
-           else break;
-        
-           try {
-               _api.log().debug("TncChannel",chId()+"Initialize TNC on "+_portName);
-               _serialPort = connect();
-               if (_serialPort == null)
-                   continue; 
-               _state = State.RUNNING;
-               receiveLoop();
-           }
-           catch(NoSuchPortException e)
-           {
-                _api.log().error("TncChannel", chId()+"Serial port " + _portName + " not found");
-                e.printStackTrace(System.out);
-           }
-           catch(Exception e)
-           {   
-                e.printStackTrace(System.out); 
-                close();
-           }  
-                   
-           if (_close) {
-              _state = State.OFF;
-              _api.log().info("TncChannel", chId()+"Channel closed");
-              return;
-           }
-           
-           retry++;      
-        }
-         _api.log().warn("TncChannel", chId()+"Couldn't connect to TNC on'"+_portName+"' - giving up");
-        _state = State.FAILED;
-     }
-       
-       
-       
-
-    public String toString() { return "TNC on " + _portName+", "+_baud+" baud]"; }
+    public String toString() { return "TNC Channel"; }
 
 }
 

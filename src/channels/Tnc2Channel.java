@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import java.util.concurrent.Semaphore;
  * TNC2 channel. For devices in TNC2 compatible mode.
  */
  
-public class Tnc2Channel extends TncChannel implements Runnable
+public class Tnc2Channel extends TncChannel
 {
 
     transient private  String         _pathCmd, _unproto; 
@@ -41,8 +41,8 @@ public class Tnc2Channel extends TncChannel implements Runnable
        
        
  
-    @Override protected void getConfig() {
-       super.getConfig();
+    @Override public void activate(ServerAPI a) {
+       super.activate(a);
        _unproto = _api.getToAddr();  
        _pathCmd = _api.getProperty("channel."+getIdent()+".pathcommand", "UNPROTO");  
        _noBreak = _api.getBoolProperty("channel."+getIdent()+".nobreak", false);
@@ -107,7 +107,7 @@ public class Tnc2Channel extends TncChannel implements Runnable
             _ostream.flush();
          }
          else
-            _serialPort.sendBreak(3);
+            _serial.sendBreak(3);
          
          if (reset_retry) {
             Thread.sleep(2000); 
@@ -191,7 +191,6 @@ public class Tnc2Channel extends TncChannel implements Runnable
     }
    
        
-        
     
     /**
      * Close down the channel. 
@@ -200,26 +199,25 @@ public class Tnc2Channel extends TncChannel implements Runnable
     { 
        _api.log().error("TncChannel", chId()+"Closing channel..");
        try {  
-         _close = true;
+         _serial.deActivate(); 
          Thread.sleep(3000);
          getCommandPrompt();
          if (_out != null) _out.close(); 
          if (_in != null)  _in.close(); 
        }
        catch (Exception e) {}
-       if (_serialPort != null) _serialPort.close(); 
     }
     
     
     
     @Override protected void receiveLoop() throws Exception
     {
-        _in = new BufferedReader(new InputStreamReader(_serialPort.getInputStream(), _rx_encoding));
-        _out = new PrintWriter(new OutputStreamWriter(_serialPort.getOutputStream(), _tx_encoding));
-        _ostream = _serialPort.getOutputStream();
+        _in = new BufferedReader(new InputStreamReader(_serial.getInputStream(), _rx_encoding));
+        _out = new PrintWriter(new OutputStreamWriter(_serial.getOutputStream(), _tx_encoding));
+        _ostream = _serial.getOutputStream();
         
         initTnc();
-        while (!_close) 
+        while (_serial.running()) 
         {
             _sem.acquire(); 
             try {

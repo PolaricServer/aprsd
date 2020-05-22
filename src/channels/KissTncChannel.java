@@ -66,24 +66,23 @@ public class KissTncChannel extends TncChannel
     { 
         _api.log().info("KissTncChannel", chId()+"Closing channel");
        try {  
-         _close = true;
+         _serial.deActivate(); 
          Thread.sleep(3000);
          if (_ostream != null) _ostream.close(); 
          if (_istream != null) _istream.close(); 
        }
        catch (Exception e) {}
-       if (_serialPort != null) _serialPort.close(); 
     }
     
     
     
     @Override protected void receiveLoop() throws Exception
     {
-        _ostream = _serialPort.getOutputStream();
-        _istream = _serialPort.getInputStream(); 
+        _ostream = _serial.getOutputStream();
+        _istream = _serial.getInputStream(); 
         _kiss = new Kiss(_istream, _ostream, _kissport); 
         
-        while (!_close) 
+        while (_serial.running()) 
         {
            try { 
                AprsPacket p = _kiss.receivePacket();
