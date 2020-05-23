@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import gnu.io.*;
 import java.util.concurrent.Semaphore;
 
 
+
 /**
  * TNC2 channel. For devices in TNC2 compatible mode.
  */
@@ -26,11 +27,11 @@ import java.util.concurrent.Semaphore;
 public class Tnc2Channel extends TncChannel
 {
 
-    transient private  String         _pathCmd, _unproto; 
-    transient private  boolean        _noBreak = false; 
-    transient private  BufferedReader _in; 
-    transient private  OutputStream   _ostream;    
-    transient private  Semaphore      _sem = new Semaphore(1, true);
+    private  String         _pathCmd, _unproto; 
+    private  boolean        _noBreak = false; 
+    private  BufferedReader _in; 
+    private  OutputStream   _ostream;    
+    private  Semaphore      _sem = new Semaphore(1, true);
    
     private static final String _initfile = System.getProperties().getProperty("confdir", ".")+"/init.tnc";
     
@@ -197,7 +198,7 @@ public class Tnc2Channel extends TncChannel
      */
     @Override public void close() 
     { 
-       _api.log().error("TncChannel", chId()+"Closing channel..");
+       _api.log().info("Tnc2Channel", chId()+"Closing channel..");
        try {  
          _serial.deActivate(); 
          Thread.sleep(3000);

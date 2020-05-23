@@ -18,37 +18,27 @@ import java.util.*;
 import gnu.io.*;
 import java.util.concurrent.Semaphore;
 
+
 /**
  * TNC channel. For devices in TNC2 compatible mode.
  */
  
 public abstract class TncChannel extends AprsChannel
 {
-    protected String  _myCall; /* Move this ? */
-    
-    transient private   Semaphore    _sem = new Semaphore(1, true);
-    transient protected Logfile      _log; 
-    transient private   int          _chno;
-    transient protected SerialComm   _serial;
+    protected String      _myCall; /* Move this ? */
+    private   Semaphore   _sem = new Semaphore(1, true);
+    protected Logfile     _log; 
+    private   int         _chno;
+    protected SerialComm  _serial;
     
     private static int _next_chno = 0;
     
-    
-    /*
-     * We need to define the receiveLoop method for the SerialComm class. 
-     */
-    protected class Comm extends SerialComm {
-        public @Override void receiveLoop() throws Exception 
-            { receiveLoop(); }
-        public Comm(ServerAPI api, String id, String pname, int bd, int retr, long rtime)
-            { super(api, id, pname, bd, retr, rtime); }
-    }
-       
+   
     
     /*
      * These are to be defined in subclasses 
      */
-    public abstract void close();   
+    protected abstract void close();   
     protected abstract void receiveLoop() throws Exception;
     
     
@@ -62,6 +52,16 @@ public abstract class TncChannel extends AprsChannel
         _state = State.OFF;
     }
   
+   
+    /*
+     * State of channel: OFF, STARTING, RUNNING, FAILED
+     */
+    public State getState() {
+        if (_serial == null)
+            return _state;
+        return _state = _serial.getState(); 
+    }
+   
    
    /**
     * Start the service. 
@@ -78,14 +78,20 @@ public abstract class TncChannel extends AprsChannel
         int baud = _api.getIntProperty("channel."+id+".baud", 9600);
         int retr = _api.getIntProperty("channel."+id+".retry", 0);
         long rtime = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
-
-        _serial = new Comm(_api, id, port, baud, retr, rtime);
+        _serial = new SerialComm(_api, id, port, baud, retr, rtime);
+        _serial.activate( ()-> receiveLoop() );
     }
 
   
+    public boolean isActive() 
+        { return (_serial != null) && _serial.running(); }
+  
+  
+  
     /** Stop the service */
     public void deActivate() {
-        close();
+        if (isActive())
+            close();
     }
     
     
@@ -98,10 +104,7 @@ public abstract class TncChannel extends AprsChannel
     
     @Override public String getShortDescr()
        { return "rf"+_chno; }
- 
 
-
-    public String toString() { return "TNC Channel"; }
 
 }
 

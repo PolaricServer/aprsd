@@ -436,8 +436,8 @@ public class Main implements ServerAPI
          System.out.println("*** Polaric APRSD shutdown"); 
          PluginManager.deactivateAll();
          if (db  != null) db.save(); 
-         if (ch1 != null) ch1.close();
-         if (ch2 != null) ch2.close();
+         if (ch1 != null) ch1.deActivate();
+         if (ch2 != null) ch2.deActivate();
     }
     
     

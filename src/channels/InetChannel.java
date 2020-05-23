@@ -24,15 +24,15 @@ import java.util.*;
 public class InetChannel extends TcpChannel
 {
     private  String   _user, _pass, _filter;
-    transient private  BufferedReader _rder = null;
+    private  BufferedReader _rder = null;
 
     
     public InetChannel(ServerAPI api, String id) 
        { super(api, id); }
        
     
-    @Override protected void getConfig() {
-       super.getConfig();
+    @Override public void activate(ServerAPI a) {
+       super.activate(_api);
        String id = getIdent();
        _user = _api.getProperty("channel."+id+".user", "").toUpperCase();
        if (_user.length() == 0)
@@ -72,7 +72,7 @@ public class InetChannel extends TcpChannel
        try { 
           if (_rder != null) _rder.close(); 
           if (_out != null)  _out.close();
-          if (_sock != null) _sock.close(); 
+          if (_comm != null) _comm.deActivate(); 
           Thread.sleep(500);
        } catch (Exception e) {}
     }
@@ -91,15 +91,15 @@ public class InetChannel extends TcpChannel
     
     protected void receiveLoop() throws Exception
     {    
-         _rder = new BufferedReader(new InputStreamReader(_sock.getInputStream(), _rx_encoding));
-         _out = new PrintWriter(new OutputStreamWriter(_sock.getOutputStream(), _tx_encoding));         
+         _rder = new BufferedReader(new InputStreamReader(_comm.getInputStream(), _rx_encoding));
+         _out = new PrintWriter(new OutputStreamWriter(_comm.getOutputStream(), _tx_encoding));         
          _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+_api.getVersion()+"\r\n");
          
          if (_filter.length() > 0)
              _out.print("# filter "+_filter+ "\r\n"); 
          _out.flush();
          
-         while (!_close) 
+         while (_comm.running()) 
          {
              String inp = _rder.readLine(); 
              if (inp != null) 

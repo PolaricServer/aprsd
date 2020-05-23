@@ -18,69 +18,43 @@ import java.util.*;
 import gnu.io.*;
 import java.util.concurrent.Semaphore;
 
+
+
+
 /**
- * Serial comm port
+ * Serial communication device
  */
  
-public abstract class SerialComm implements Runnable
+public class SerialComm extends CommDevice implements Runnable
 {
-    private   String  _portName; 
-    private   int     _baud;
-    
-    private String        _ident;
-    private Channel.State _state;
-    
-    transient protected boolean      _close = false;
-    transient private   int          _max_retry;
-    transient private   long         _retry_time;   
-    transient protected SerialPort   _serialPort;
-    transient private   Thread       _thread;
-    transient private   ServerAPI    _api;
+    private   String     _portName; 
+    private   int        _baud;
+    private   int        _max_retry;
+    private   long       _retry_time;  
+    private   SerialPort _serialPort;
+
     
  
     public SerialComm(ServerAPI api, String id, String pname, int bd, int retr, long rtime) 
     {
-        _ident=id;
-        _portName=pname;
-        _baud=bd;
-        _max_retry=retr;
-        _retry_time=rtime;
-        _api=api;
+        super(api, id);
+        _portName = pname;
+        _baud = bd;
+        _max_retry = retr;
+        _retry_time = rtime;
     }
   
-   
-    public Channel.State getState() 
-        {return _state; }
-        
-   
-    /** Start the service */
-    public void activate() {
-        _thread = new Thread(this, "serial."+_ident);
-        _thread.start();
-    }
-
-  
-    /** Stop the service */
-    public void deActivate() {
-        _close=true;
-    }
-    
-    
-    public boolean running() {
-        return !_close; 
-    }
-    
     
     public OutputStream getOutputStream() throws IOException
-        {return _serialPort.getOutputStream(); }
+        { return _serialPort.getOutputStream(); }
         
         
     public InputStream getInputStream() throws IOException
-        {return _serialPort.getInputStream(); }
+        { return _serialPort.getInputStream(); }
     
 
     public void sendBreak(int n)
-        {_serialPort.sendBreak(n); }
+        { _serialPort.sendBreak(n); }
         
         
         
@@ -110,15 +84,14 @@ public abstract class SerialComm implements Runnable
         return null; 
     }
    
-
-    protected abstract void receiveLoop() throws Exception;
-       
-       
+   
+   
+   
     public void run()
     {
         int retry = 0;       
-        _close = false;
-        _api.log().debug("SerialComm", "Activating...");
+        _api.log().debug("SerialComm", "Activating...");      
+        try { Thread.sleep(500); } catch (Exception e) {}
         while (true) 
         {
             _state = Channel.State.STARTING;
@@ -138,7 +111,8 @@ public abstract class SerialComm implements Runnable
                 if (_serialPort == null)
                     continue; 
                 _state = Channel.State.RUNNING;
-                receiveLoop();
+                if (_worker != null) 
+                    _worker.worker();
             }
             catch(NoSuchPortException e) {
                 _api.log().error("SerialComm", "Serial port " + _portName + " not found");
@@ -149,7 +123,7 @@ public abstract class SerialComm implements Runnable
                 //    close(); FIXME: callback to channel? 
             }  
                    
-            if (_close) {
+            if (!running()) {
                 _state = Channel.State.OFF;
                 _api.log().debug("SerialComm", "Channel closed");
                 return;

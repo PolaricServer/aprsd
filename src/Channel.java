@@ -24,7 +24,7 @@ import java.lang.reflect.Constructor;
 /**
  * Channel for sending/receiving APRS data. 
  */
-public abstract class Channel extends Source implements Serializable, ManagedObject
+public abstract class Channel extends Source implements ManagedObject
 {
  
      /* State. RUNNING if running ok. */
@@ -32,7 +32,7 @@ public abstract class Channel extends Source implements Serializable, ManagedObj
      public enum State {
          OFF, STARTING, RUNNING, FAILED
      }
-     transient protected State _state = State.OFF;
+     protected State _state = State.OFF;
 
      
      

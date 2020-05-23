@@ -29,14 +29,12 @@ public abstract class AprsChannel extends Channel
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      private static boolean _logPackets = false; 
      
-     transient protected ServerAPI _api; 
-     transient protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap();
+     protected ServerAPI _api; 
+     protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap();
     
      /* Statistics */
-     transient protected long _heardPackets, _duplicates, _sent;        
+     protected long _heardPackets, _duplicates, _sent;        
 
-     /* State. RUNNING if running ok. */
- 
 
 
      /**
@@ -107,9 +105,7 @@ public abstract class AprsChannel extends Channel
        return "["+getShortDescr()+"] "; 
     }
 
-    
-    public abstract void close(); 
-    
+   
     
     /**
       * Returns true if callsign is heard on the channel.

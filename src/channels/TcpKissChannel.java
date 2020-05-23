@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,11 +24,11 @@ import java.util.concurrent.Semaphore;
  
 public class TcpKissChannel extends TcpChannel
 {
-    private transient InputStream  _istream;
-    private transient OutputStream _ostream;
-    private transient Kiss         _kiss;
-    private transient int          _kissport;
-    transient protected Logfile    _log; 
+    private   InputStream  _istream;
+    private   OutputStream _ostream;
+    private   Kiss         _kiss;
+    private   int          _kissport;
+    protected Logfile      _log; 
     
     
     
@@ -37,10 +37,9 @@ public class TcpKissChannel extends TcpChannel
         
         
     
-    @Override protected void getConfig() {
-       super.getConfig();
-       String id = getIdent();
-       _kissport = _api.getIntProperty("channel."+id+".kissport", 0);
+    @Override public void activate(ServerAPI a) {
+       super.activate(_api);
+       _kissport = _api.getIntProperty("channel."+getIdent()+".kissport", 0);
        _log = new Logfile(_api, getIdent(), "rf.log");
     }
     
@@ -54,7 +53,7 @@ public class TcpKissChannel extends TcpChannel
        try { 
           if (_istream != null) _istream.close(); 
           if (_ostream != null) _ostream.close();
-          if (_sock != null) _sock.close(); 
+          if (_comm != null) _comm.deActivate(); 
           Thread.sleep(500);
        } catch (Exception e) {}
     }
@@ -76,8 +75,8 @@ public class TcpKissChannel extends TcpChannel
   
     @Override protected void receiveLoop() throws Exception
     {
-         _istream = _sock.getInputStream();
-         _ostream = _sock.getOutputStream();
+         _istream = _comm.getInputStream();
+         _ostream = _comm.getOutputStream();
          _kiss = new Kiss(_istream, _ostream, _kissport); 
         
          while (!_close) 

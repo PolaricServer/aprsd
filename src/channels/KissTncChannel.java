@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@ import java.io.*;
 import java.util.*;
 import gnu.io.*;
 import java.util.concurrent.Semaphore;
+
+
 
 /**
  * TNC channel. For devices in KISS compatible mode.
@@ -40,8 +42,7 @@ public class KissTncChannel extends TncChannel
        _kissport = api.getIntProperty("channel."+id+".kissport", 0);
     }
     
-    
-    
+ 
 
     /**
      * Send packet on RF. 
@@ -76,6 +77,9 @@ public class KissTncChannel extends TncChannel
     
     
     
+    /*
+     * Main loop of channel. Receives packets.. 
+     */
     @Override protected void receiveLoop() throws Exception
     {
         _ostream = _serial.getOutputStream();
@@ -85,6 +89,7 @@ public class KissTncChannel extends TncChannel
         while (_serial.running()) 
         {
            try { 
+               /* Delegate to Kiss decoder */
                AprsPacket p = _kiss.receivePacket();
                receivePacket(p, false);
            }

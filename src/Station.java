@@ -54,7 +54,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     private int         _report_ignored = 0;
     private boolean     _igate, _wdigi;
     private Date        _infra_updated = null;
-    private Source      _source;
+    private String      _source;
        
 
        
@@ -128,10 +128,10 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     
     
     public void setSource(Source src)
-       { _source = src; }
+       { _source = src.getIdent(); }
    
     @Override public Source getSource()
-       { return _source; }
+       { return _api.getChanManager().get(_source); }
        
     
     public boolean isIgate()
