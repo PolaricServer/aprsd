@@ -33,12 +33,7 @@ public class TcpComm extends CommDevice implements Runnable
     private   int      _max_retry;
     private   long     _retry_time;   
     
-    
-    /* To be implemented using a lambda function */
-    interface Worker {
-        void worker() throws Exception; 
-    }
-   
+
    
     public TcpComm(ServerAPI api, String id, String host, int port, int retr, long rtime) 
     {
