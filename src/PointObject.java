@@ -186,5 +186,10 @@ public abstract class PointObject extends Point implements Cloneable
        
     public boolean visible() {return true;}
     
+    public String getSourceId() { 
+        Source s = getSource(); 
+        return (s==null ? "(unknown)" : s.getIdent()); 
+    }
+    
     public abstract Source getSource(); 
 }

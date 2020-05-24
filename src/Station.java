@@ -130,10 +130,15 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     public void setSource(Source src)
        { _source = src.getIdent(); }
    
+   
     @Override public Source getSource()
        { return _api.getChanManager().get(_source); }
        
-    
+       
+    @Override public String getSourceId()
+       { return _source; }
+       
+       
     public boolean isIgate()
        { expireInfra(); 
          return _igate; }

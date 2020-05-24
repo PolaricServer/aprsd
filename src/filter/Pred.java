@@ -126,7 +126,7 @@ class Source extends Pred
        { this.regex = regex; }
     
     public boolean eval(TrackerPoint p, long scale) 
-       { return p.getSource().getIdent().matches(regex); }
+       { return p.getSourceId().matches(regex); }
 }
 
 
