@@ -226,7 +226,7 @@ public abstract class ServerBase
     
     
    /**
-    * Get info about authorization 
+    * Get info about logged-in user and authorization 
     * @return AuthInfo. 
     */
    protected final AuthInfo getAuthInfo(Request req)

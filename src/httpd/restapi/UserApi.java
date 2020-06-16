@@ -71,6 +71,9 @@ public class UserApi extends ServerBase {
       { resp.status(status); return msg; }
       
       
+    /** 
+     * Get user info for serialising as JSON 
+     */
     protected UserInfo getUser(User u) {
         if (u==null)
             return null;

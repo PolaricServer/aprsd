@@ -19,7 +19,9 @@ import java.util.*;
 import java.io.Serializable;
 
 
-
+/**
+ * User info that can be stored on file. 
+ */
 public abstract class User implements Serializable {
 
     private String userid; 

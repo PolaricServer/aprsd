@@ -133,7 +133,7 @@ public class AuthService {
     
     
     /**
-     * Return authorization status 
+     * Return authorization status (as JSON)
      */
     public static String authStatus(Request req, Response res) {
         AuthInfo auth = new AuthInfo(_api, req, res);

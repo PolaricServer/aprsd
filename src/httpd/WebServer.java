@@ -117,7 +117,7 @@ public class WebServer implements ServerAPI.Web
     
     
     /** 
-     * Start the web server and setup routes to services. 
+     * Start the web server and setup services. 
      */
      
     public void start() throws Exception {
@@ -232,6 +232,9 @@ public class WebServer implements ServerAPI.Web
         init();
     }
     
+    
+    
+    
     private Set<String> corsEnabled = new HashSet<String>();
     
     public void corsEnable(String uri) {
@@ -294,12 +297,18 @@ public class WebServer implements ServerAPI.Web
         
     
         
-    /* Send notification to a room */    
+    /**
+     * Send notification to a room 
+     */    
     public void notifyUser(String user, ServerAPI.Notification not) {
         _pubsub.put("notify:"+user, not);
     }
 
     
+    /**
+     * Get info about logged-in user and authorizations. 
+     * This is an attribute on the request object.
+     */
     public final static AuthInfo getAuthInfo(Request req) {
         return (AuthInfo) req.raw().getAttribute("authinfo");
     }
