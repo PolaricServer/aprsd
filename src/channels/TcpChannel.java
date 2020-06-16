@@ -61,11 +61,19 @@ public abstract class TcpChannel extends AprsChannel
         String id = getIdent();
         String host = _api.getProperty("channel."+id+".host", "localhost");
         int port = _api.getIntProperty("channel."+id+".port", 21);
-        int retr  = _api.getIntProperty("channel."+id+".retry", 8);
-        long rtime = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "10")) * 60 * 1000; 
-        _comm = new TcpComm(_api, id, host, port, retr, rtime);
+        int retr  = _api.getIntProperty("channel."+id+".retry", 4);
+        long rtime = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "10")) * 60 * 1000;
         
-        _comm.activate( ()-> receiveLoop() );
+        /* Set up backup channel */
+        _backup = _api.getProperty("channel."+id+".backup", "");
+        _api.getChanManager().addBackup(_backup); 
+        
+        /* Set up comm device */
+        _comm = new TcpComm(_api, id, host, port, retr, rtime);
+        _comm.activate( 
+            ()-> receiveLoop(),
+            ()-> _api.getChanManager().get(_backup).activate(a)
+         );
     }
 
     

@@ -13,14 +13,19 @@
     
     private   boolean       _running = false;
     private   Thread        _thread;
-    protected Worker        _worker; 
+    protected Worker        _worker;
+    protected FailHandler   _failHandler; 
  
     
     /* To be implemented using a lambda function */
     protected interface Worker {
         void worker() throws Exception; 
     }
-       
+    protected interface FailHandler {
+        void handler(); 
+    }
+    
+    
        
     public CommDevice(ServerAPI api, String id) {
         _api= api; 
@@ -29,8 +34,9 @@
     
        
     /** Start the service */
-    public void activate(Worker w) {
+    public void activate(Worker w, FailHandler fh) {
         _worker = w;
+        _failHandler = fh;
         _running = true; 
         _thread = new Thread(this, "commDevice."+_ident);
         _thread.start();
