@@ -95,7 +95,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           _parentCon = false;
           _log.info(null, "Connection to parent: "+id+ " failed");
       }
-      _children.remove(id);
+      /* Try max 3 times before removing it */
+      if (_try_parent++ >= 3) {
+        _log.info(null, "Giving up: "+id);
+        _children.remove(id);
+      }
    }
    
    
@@ -106,6 +110,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           _log.info(null, "Connection to parent: "+id+ " established");
           _parentCon = true;
       }
+      _try_parent = 0;
    }
    
    

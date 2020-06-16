@@ -73,8 +73,8 @@ public class MessageProcessor implements Runnable, Serializable
    }
    
 
-   private static final int _MSG_INTERVAL = 20;
-   private static final int _MSG_MAX_RETRY = 3; 
+   private static final int _MSG_INTERVAL = 30;
+   private static final int _MSG_MAX_RETRY = 4; 
    private static final int _MAX_MSGID = 10000;
    private static final int _MSGID_STORE_SIZE = 512;
    
@@ -324,6 +324,8 @@ public class MessageProcessor implements Runnable, Serializable
           _api.log().warn("MessageProc", "Cannot send message. No channel.");
    }
 
+   
+   
 
     void save()
     { 
@@ -373,11 +375,13 @@ public class MessageProcessor implements Runnable, Serializable
                  long tdiff = t.getTime() - m.time.getTime();
                  if (tdiff >= _MSG_INTERVAL*1000) {
                    if (m.retry_cnt >= _MSG_MAX_RETRY) {
+                      /* After max number of retries report failure */
                       if (m.not != null)
                          m.not.reportFailure(m.recipient);
                       iter.remove();
                    }
                    else {
+                      /* Re-send message */
                       sendPacket(m.message, m.recipient);
                       m.time = t;
                       m.retry_cnt++;

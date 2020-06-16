@@ -64,14 +64,14 @@ public class TcpComm extends CommDevice implements Runnable
     public void run()
     {
         int retry = 0;   
-        _api.log().info("TcpChannel", "Activating...");
+        _api.log().info("TcpComm", "Activating...");
         try { Thread.sleep(500); } catch (Exception e) {}
         while (true) 
         { 
-           _state = Channel.State.STARTING;
-            if (retry <= _max_retry *2 || _max_retry == 0) 
+            _state = Channel.State.STARTING;
+            if (retry < _max_retry || _max_retry == 0) 
                 try { 
-                    long sleep = 60000 * (long) retry;
+                    long sleep = 30000 * (long) retry;
                     if (sleep > _retry_time) 
                         sleep = _retry_time; 
                     Thread.sleep(sleep);
@@ -82,33 +82,34 @@ public class TcpComm extends CommDevice implements Runnable
             try {
                 _sock = new Socket(_host, _port);
 
-                // 5 minutes timeout
+                // 5 minutes timeout on read-calls
                 _sock.setSoTimeout(1000 * 60 * 5);       
                 if (!_sock.isConnected()) {
-                   _api.log().warn("TcpChannel", "Connection to server '"+_host+"' failed");
+                   _api.log().warn("TcpComm", "Connection to server '"+_host+"' failed");
                    retry++;
-                   continue; // WHATS GOING ON HERE?
+                   continue; 
                 }
                
                 retry = 0; 
-                _api.log().info("TcpChannel", "Connection to server '"+_host+"' established");
+                _api.log().info("TcpComm", "Connection to server '"+_host+"' established");
                 _state = Channel.State.RUNNING;
                 if (_worker != null)
                     _worker.worker();  
             }
             catch (java.net.ConnectException e) {
-                _api.log().warn("TcpChannel", "Server '"+_host+"' : "+e.getMessage());
+                _api.log().warn("TcpComm", "Server '"+_host+"' : "+e.getMessage());
             }
             catch (java.net.SocketTimeoutException e) {
-                _api.log().warn("TcpChannel", "Server '"+_host+"' : socket timeout");
+                _api.log().warn("TcpComm", "Server '"+_host+"' : socket timeout");
+                try { _sock.close(); } catch (Exception ex) {}
             }
             catch (java.net.UnknownHostException e) {
-                _api.log().warn("TcpChannel", "Server '"+_host+"' : Unknown host");
+                _api.log().warn("TcpComm", "Server '"+_host+"' : Unknown host");
                 retry = _max_retry-2;
                 /* One more chance. Then give up */
             }
-           catch(Exception e) {   
-                _api.log().error("TcpChannel", "Server '"+_host+"' : "+e); 
+            catch(Exception e) {   
+                _api.log().error("TcpComm", "Server '"+_host+"' : "+e); 
                 e.printStackTrace(System.out);
             }
             finally 
@@ -116,14 +117,15 @@ public class TcpComm extends CommDevice implements Runnable
         
             if (!running()) {
                 _state = Channel.State.OFF;
-                _api.log().info("TcpChannel", "Channel closed");
+                _api.log().info("TcpComm", "Channel closed");
                 return;
             }
                    
             retry++;
         }
-         _api.log().warn("TcpChannel", "Couldn't connect to server '"+_host+"' - giving up");   
+         _api.log().warn("TcpComm", "Couldn't connect to server '"+_host+"' - giving up");   
         _state = Channel.State.FAILED;
+        _failHandler.handler(); 
         
     }
     
