@@ -21,12 +21,13 @@ import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.CommonProfile;
 import java.util.*;
 import no.polaric.aprsd.*;
-
+import com.fasterxml.jackson.annotation.*;
 
 
 
 /**
  * Authorizations and service config for a given user session.
+ * This is instantiated on each request!!
  * This can be sent to the client in JSON format. 
  */
 public class AuthInfo {
@@ -34,6 +35,9 @@ public class AuthInfo {
     public String servercall;
     public boolean admin = false, sar = false; 
     public String[] services = null;
+    
+    @JsonIgnore public MailBox mailbox = null;
+    
     private static List<String> _services = new ArrayList<String>();
     
     
@@ -53,28 +57,43 @@ public class AuthInfo {
        
     /**
      * Constructor. Gets userid from a user profile on request and sets authorisations. 
+     * called from AuthService for each request.
      */
     
     public AuthInfo(ServerAPI api, Request req, Response res) 
     {
-       final SparkWebContext context = new SparkWebContext(req, res);
-       final ProfileManager manager = new ProfileManager(context);
-       final Optional<CommonProfile> profile = manager.get(true);
+        final SparkWebContext context = new SparkWebContext(req, res);
+        final ProfileManager manager = new ProfileManager(context);
+        final Optional<CommonProfile> profile = manager.get(true);
       
-       var i = 0;
-       services = new String[_services.size()];
-       for (var x : _services)
-	      services[i++] = x;
-	      
-       if (profile.isPresent()) {
-          userid = profile.get().getId();
-          User u = (User) profile.get().getAttribute("userInfo");
-          admin = u.isAdmin();
-          sar = u.isSar();          
-          if (admin)
-             sar=true;
-       }
+        var i = 0;
+        services = new String[_services.size()];
+        for (var x : _services)
+            services[i++] = x;
+            
+        
+        /* 
+         * Copy user-information from the user-profile?
+         * The user profile is created by the authenticator and kept as long as the session is active.
+         */
+        if (profile.isPresent()) {
+            userid = profile.get().getId();
+           
+            /* check if there is a mailbox on the session. If not, create one. */
+            mailbox = (MailBox) profile.get().getAttribute("mailbox");
+            if (mailbox==null) {
+                mailbox = new MailBox.User(api); 
+                mailbox.addAddress(userid);
+                profile.get().addAttribute("mailbox", mailbox);
+            }
+
+            User u = (User) profile.get().getAttribute("userInfo");
+            admin = u.isAdmin();
+            sar = u.isSar();          
+            if (admin)
+                sar=true;
+        }
        
-       servercall=api.getProperty("default.mycall", "NOCALL");
+        servercall=api.getProperty("default.mycall", "NOCALL");
     }
 }
