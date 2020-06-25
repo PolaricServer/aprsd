@@ -280,7 +280,7 @@ public class OwnObjects implements Runnable
             Thread.sleep(6000);
             synchronized(this) {
               String err = null; 
-              if (_api.getOwnPos().getIdent()==null)
+              if (_api.getOwnPos()==null || _api.getOwnPos().getIdent()==null)
                 continue;
               for (String oid: _ownObjects) {
                  AprsObject obj = (AprsObject) _api.getDB().getItem(oid+'@'+_api.getOwnPos().getIdent(), null);
