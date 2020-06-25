@@ -54,9 +54,6 @@ public interface ServerAPI
         public PubSub getPubSub();
         public void protectUrl(String prefix);
         
-        
-        
-        public Mbox getMbox(); 
         public void start() throws Exception; 
         public void stop() throws Exception;
     }
@@ -71,16 +68,6 @@ public interface ServerAPI
         /** Post a object to a room (JSON encoded) */
         public void put(String rid, Object obj);
     }
-  
-  
-    /** 
-     * Messaging service. 
-     */
-    public interface Mbox {
-        public Set<String> getUsers();
-        public void postMessage(String from, String to, String txt);
-    }
-  
   
   
     /* Now, what methods do we need here? Other interfaces.

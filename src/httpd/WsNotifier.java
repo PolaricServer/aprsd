@@ -16,10 +16,7 @@
 package no.polaric.aprsd.http;
 
 import spark.*;
-import java.util.Map;
-import java.util.Set;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.io.IOException;
@@ -43,6 +40,13 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 public abstract class WsNotifier extends ServerBase
 {
    
+   /* Handler for changes to clients */
+   public interface CHandler {
+        public void handle(Client c); 
+   }
+   
+   
+   /********* Client *********/
    public abstract class Client {
    
       protected final Session _conn; 
@@ -61,6 +65,10 @@ public abstract class WsNotifier extends ServerBase
    
       public final void setAuthInfo(AuthInfo auth) {
          _auth = auth;
+      }
+      
+      public final AuthInfo getAuthInfo() {
+         return _auth;
       }
       
       public final boolean login() 
@@ -94,7 +102,7 @@ public abstract class WsNotifier extends ServerBase
        */
       public abstract void onTextFrame(String text);
       
-   } /* class Client */
+   } /********* class Client *********/
 
    
    
@@ -118,6 +126,13 @@ public abstract class WsNotifier extends ServerBase
    /* Map of clients */ 
    protected final Map<String, Client> _clients;
       
+   /* Callbacks for open and close of sessions */
+   private List<CHandler> _cOpen = new ArrayList<CHandler>();
+   private List<CHandler> _cClose = new ArrayList<CHandler>();   
+   
+   
+   
+   
    
    public WsNotifier(ServerAPI api, boolean trusted) {
        super(api); 
@@ -154,7 +169,7 @@ public abstract class WsNotifier extends ServerBase
 
     
    /** 
-    * Webscoket Connect handler. Subscribe to the service (join the room). 
+    * Websocket Connect handler. Subscribe to the service (join the room). 
     * Use remote IP + port as user id. FIXME: Is this enough? More than one simultaneous user 
     * per client endpoint? 
     */
@@ -177,6 +192,12 @@ public abstract class WsNotifier extends ServerBase
                  _api.log().debug("WsNotifier", "Subscription success. User="+uid);
                  _clients.put(uid, client); 
                  _visits++;
+                         
+                 
+                 /* Call any functions that are registered for handling this */
+                 for (CHandler c: _cOpen)
+                    c.handle(client);
+                    
                  if (client.login())
                     _nLoggedIn++;
               }
@@ -211,7 +232,31 @@ public abstract class WsNotifier extends ServerBase
         if (c.login())
           _nLoggedIn--;
         _clients.remove(user);
+        
+        /* Call any functions that are registered for handling this */
+        for (CHandler h : _cClose)
+            h.handle(c);
     }
+    
+    
+    
+    
+    /**
+     * Register a callback for open-session events
+     */
+    public void onOpenSes(CHandler h) {
+        _cOpen.add(h);  
+    }
+    
+    
+    /**
+     * Register a callback for close-session events
+     */
+    public void onCloseSes(CHandler h) {
+        _cClose.add(h);  
+    }
+    
+    
     
    
     
@@ -274,7 +319,7 @@ public abstract class WsNotifier extends ServerBase
    
    
    /**
-    * Get username of the authenticated user. 
+    * Get username,etc of the authenticated user. 
     * @return username, null if not authenticated. 
     */
    protected final AuthInfo getAuthInfo(UpgradeRequest req)

@@ -71,7 +71,6 @@ public class WebServer implements ServerAPI.Web
 
     private long _nRequests = 0; 
     private final PubSub _pubsub;
-    private final GeoMessages _messages;
     private final MapUpdater _jmapupdate;
     private ServerAPI _api; 
     private AuthService _auth;
@@ -83,7 +82,6 @@ public class WebServer implements ServerAPI.Web
        _api = api;
        
       _pubsub     = new PubSub(_api, true); 
-      _messages   = new GeoMessages(_api, true);
       _jmapupdate = new JsonMapUpdater(_api, true);
       _auth = new AuthService(api); 
     }
@@ -147,7 +145,6 @@ public class WebServer implements ServerAPI.Web
          * userid will only be available if properly authenticated. THIS SHOULD BE TESTED. 
          */
         webSocket("/notify", _pubsub);
-        webSocket("/messages", _messages); // Should be removed eventually
         webSocket("/jmapdata", _jmapupdate);
                  
         _auth.start();
@@ -229,6 +226,7 @@ public class WebServer implements ServerAPI.Web
         /* Room for pushing updates to bulletin board */
         _pubsub.createRoom("bullboard", (Class) null); 
         
+        AuthInfo.init(_api);
         init();
     }
     
@@ -272,9 +270,6 @@ public class WebServer implements ServerAPI.Web
     public long nMapUpdates() 
         { return _jmapupdate.nUpdates(); }
         
-    public ServerAPI.Mbox getMbox() 
-        { return _messages; }
-        
     public ServerAPI.PubSub getPubSub() 
         { return _pubsub; }
      
@@ -283,9 +278,6 @@ public class WebServer implements ServerAPI.Web
         
     public WsNotifier getJsonMapUpdater()
         { return _jmapupdate; }
-        
-    public WsNotifier getMessages()
-        { return _messages; }
     
     public void protectUrl(String prefix) {
         before(prefix, _auth.conf().filter(null, "isauth")); 
@@ -313,6 +305,18 @@ public class WebServer implements ServerAPI.Web
         return (AuthInfo) req.raw().getAttribute("authinfo");
     }
     
+    
+    /**
+     * Register a handler for user open/close session (logout).
+     * Suitable for using a lambda function.
+     */
+    public void onOpenSes(WsNotifier.CHandler h) {
+        _jmapupdate.onOpenSes(h); 
+    }
+    public void onCloseSes(WsNotifier.CHandler h) {
+        _jmapupdate.onCloseSes(h); 
+    }
+     
     
     
     /**

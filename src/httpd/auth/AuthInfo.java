@@ -31,12 +31,22 @@ import com.fasterxml.jackson.annotation.*;
  * This can be sent to the client in JSON format. 
  */
 public class AuthInfo {
+    
+    /* Wrapper of counter value */
+    protected static class Cnt {
+        int cnt = 0;
+        public int increment() {return ++cnt;}
+        public int decrement() {return --cnt;}
+    }
+    
+    
     public String userid;
     public String servercall;
     public boolean admin = false, sar = false; 
     public String[] services = null;
     
-    @JsonIgnore public MailBox mailbox = null;
+    @JsonIgnore public Cnt clients; 
+    @JsonIgnore public MailBox.User mailbox = null;
     
     private static List<String> _services = new ArrayList<String>();
     
@@ -46,6 +56,25 @@ public class AuthInfo {
     }
     
     
+    public static void init(ServerAPI api) {
+        WebServer ws = (WebServer) api.getWebserver(); 
+        ws.onOpenSes( (c)-> {
+                AuthInfo a = c.getAuthInfo();
+                if (a.clients!=null)
+                    a.clients.increment();
+            }); 
+            
+        ws.onCloseSes( (c)-> {
+                AuthInfo a = c.getAuthInfo();
+                if (a.clients!=null) {
+                    if (a.clients.decrement() == 0 && a.mailbox != null)
+                        a.mailbox.removeAddresses();
+                }
+            }); 
+    }
+    
+    
+    
     public String toString() {
        return "AuthInfo [userid="+userid+", admin="+admin+", sar="+sar+"]";
     }
@@ -53,6 +82,9 @@ public class AuthInfo {
     
     public boolean login() 
         { return userid != null; }
+       
+       
+    
        
        
     /**
@@ -70,7 +102,6 @@ public class AuthInfo {
         services = new String[_services.size()];
         for (var x : _services)
             services[i++] = x;
-            
         
         /* 
          * Copy user-information from the user-profile?
@@ -80,11 +111,12 @@ public class AuthInfo {
             userid = profile.get().getId();
            
             /* check if there is a mailbox on the session. If not, create one. */
-            mailbox = (MailBox) profile.get().getAttribute("mailbox");
+            mailbox = (MailBox.User) profile.get().getAttribute("mailbox");
             if (mailbox==null) {
-                mailbox = new MailBox.User(api); 
+                mailbox = new MailBox.User(api, userid); 
                 mailbox.addAddress(userid);
-                profile.get().addAttribute("mailbox", mailbox);
+                profile.get().addAttribute("mailbox", mailbox); 
+                profile.get().addAttribute("clients", new Cnt() );
             }
 
             User u = (User) profile.get().getAttribute("userInfo");
@@ -92,6 +124,8 @@ public class AuthInfo {
             sar = u.isSar();          
             if (admin)
                 sar=true;
+            /* This is actually an object so updates are done on profile */
+            clients = (Cnt) profile.get().getAttribute("clients"); 
         }
        
         servercall=api.getProperty("default.mycall", "NOCALL");
