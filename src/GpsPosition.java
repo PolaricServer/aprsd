@@ -54,8 +54,14 @@ public class GpsPosition extends OwnPosition
                   _serialPort = connect(); 
                   _in = new BufferedReader(new InputStreamReader(_serialPort.getInputStream()));
                   while (true) {
-                     String inp = _in.readLine();
-                     receivePacket(inp);
+	             try {
+                     	String inp = _in.readLine();
+                        receivePacket(inp);
+		     }
+	       	     catch(IOException e)
+	             {
+		       _api.log().warn("GpsPosition", "read error from " + _portName);
+	             }
                   }
                }
                catch(NoSuchPortException e)
@@ -115,6 +121,9 @@ public class GpsPosition extends OwnPosition
          int i, checksum = 0;
          for (i=1; i < p.length() && p.charAt(i) !='*'; i++) 
             checksum ^= p.charAt(i);
+	 /* Sometime two NMEA lines are merged -> garbage */
+	 if ((p.length() - i) > 3)
+		 return;
          if (p.charAt(i) == '*') {
             int c_checksum = Integer.parseInt(p.substring(i+1, p.length()), 16);
             if (c_checksum != checksum) 
@@ -123,7 +132,7 @@ public class GpsPosition extends OwnPosition
          String[] tok = p.split(",");
          if ( "$GPRMC".equals(tok[0])) 
              do_RMC(tok);
-         else if ("$GPGGA".equals(tok[0])) {}
+	 else if ("$GPGGA".equals(tok[0])) {}
 
     }
 
@@ -132,7 +141,7 @@ public class GpsPosition extends OwnPosition
     private int fcnt=300;
     private void do_RMC(String[] arg)
     {
-       if (arg.length != 12)   /* Ignore if wrong format */
+       if (arg.length != 13)   /* Ignore if wrong format */
           return;
 
        if (!"A".equals(arg[2])) {
