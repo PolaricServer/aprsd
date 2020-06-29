@@ -132,7 +132,7 @@ public class GpsPosition extends OwnPosition
          String[] tok = p.split(",");
          if ( "$GPRMC".equals(tok[0])) 
              do_RMC(tok);
-	 else if ("$GPGGA".equals(tok[0])) {}
+         else if ("$GPGGA".equals(tok[0])) {}
 
     }
 
