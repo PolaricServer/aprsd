@@ -37,6 +37,7 @@ public class GpsPosition extends OwnPosition
 
        public void run() {
            int retry = 0;
+	   int readerror = 0;
            while (true)
            {
                if (retry <= _max_retry || _max_retry == 0) 
@@ -57,10 +58,17 @@ public class GpsPosition extends OwnPosition
 	             try {
                      	String inp = _in.readLine();
                         receivePacket(inp);
+			readerror = 0;
 		     }
 	       	     catch(IOException e)
 	             {
-		       _api.log().warn("GpsPosition", "read error from " + _portName);
+			     if (readerror > 10) {
+		       		_api.log().warn("GpsPosition", "read error from " + _portName);
+                  		e.printStackTrace(System.out);
+				throw new RuntimeException("Too many read errors from " + _portName);
+			     }
+			readerror++;
+			Thread.sleep(30000); 
 	             }
                   }
                }
@@ -141,7 +149,7 @@ public class GpsPosition extends OwnPosition
     private int fcnt=300;
     private void do_RMC(String[] arg)
     {
-       if (arg.length != 13)   /* Ignore if wrong format */
+       if (arg.length != 12 && arg.length != 13)   /* Ignore if wrong format, NMEA 2.3 and beyond use 13 fields */
           return;
 
        if (!"A".equals(arg[2])) {
@@ -172,6 +180,7 @@ public class GpsPosition extends OwnPosition
    
           if (_adjustClock) 
              updateTime(ts);
+	  _api.log().debug("GpsPosition", "Updating position to " + Double.toString(latDeg) + ", " + Double.toString(lngDeg));
           updatePosition(ts, pos, crs, speed);
        }
        catch (Exception e) {e.printStackTrace(System.out);} 
