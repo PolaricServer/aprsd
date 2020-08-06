@@ -30,6 +30,7 @@ public abstract class MailBox {
         public boolean read;
         public String text;
         
+        public Message() {}
         public Message(String f, String t, String txt) {
             from=f; to=t; text=txt;
             time = new Date(); 
@@ -39,7 +40,7 @@ public abstract class MailBox {
  
     protected ServerAPI _api;
     private List<String> _addr = new LinkedList<String>();
-    private static Map<String, MailBox> _addressMapping = new HashMap();
+    private static Map<String, MailBox> _addressMapping = new HashMap<String,MailBox>();
     
     
     public abstract void put(Message m); 
@@ -77,7 +78,6 @@ public abstract class MailBox {
     
         /** Add a message to the mailbox */
         public void put(Message m) {
-            /* Should send notification to user here? */
             _api.getWebserver().notifyUser(_uid, 
                 new ServerAPI.Notification("chat", m.from, m.text, m.time, 60));
             
@@ -126,6 +126,7 @@ public abstract class MailBox {
         /* 
          * Subscribe to APRS messages addressed to user 
          * (registered as callsign@APRS). 
+         * FIXME: Need to send a packet to anounce...
          */
         addr = addr.split("@")[0].toUpperCase();
         _api.getMsgProcessor().subscribe(
@@ -165,12 +166,18 @@ public abstract class MailBox {
     
     /**
      * Send a message. 
+     * Return false if message could not be delivered (unknown to-address). 
      */
-    public static void postMessage(Message msg) {
+    public static boolean postMessage(Message msg) {
+        if (msg.time==null)
+            msg.time = new Date();
+            
         /* Find recipients mailbox and put it there */
         MailBox box = _addressMapping.get(msg.to);
         if (box != null)
-            box.put(msg);            
+            box.put(msg);
+        else return false;
+        return true;
             
         /*
          * TODO: If to address is aprs-address message could be sent

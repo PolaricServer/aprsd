@@ -184,6 +184,8 @@ public class WebServer implements ServerAPI.Web
         before("/aprs/*",          _auth.conf().filter(null, "isauth, sar"));
         before("/system/sarmode",  _auth.conf().filter(null, "isauth, sar"));
         before("/sar/ipp/*",       _auth.conf().filter(null, "isauth"));
+        before("/mailbox",         _auth.conf().filter(null, "isauth"));
+        
         
         afterAfter((request, response) -> {
             _nRequests++;
@@ -218,6 +220,10 @@ public class WebServer implements ServerAPI.Web
         BullBoardApi bb = new BullBoardApi(_api); 
         bb.start(); 
         corsEnable("/bullboard/*");
+        
+        MailBoxApi mb = new MailBoxApi(_api); 
+        mb.start(); 
+        corsEnable("/mailbox/*");
         
         /* Rooms for SYSTEM and ADMIN notifications */
         _pubsub.createRoom("notify:SYSTEM", false, false, false, false, ServerAPI.Notification.class);

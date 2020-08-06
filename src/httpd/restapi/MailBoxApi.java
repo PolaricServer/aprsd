@@ -25,7 +25,7 @@ import no.polaric.aprsd.*;
 
 
 /**
- * Implement REST API for user-related info.  
+ * Implement REST API for messaging.  
  */
  
 public class MailBoxApi extends ServerBase {
@@ -62,16 +62,35 @@ public class MailBoxApi extends ServerBase {
         get("/mailbox", "application/json", (req, resp) -> {
             var box = getAuthInfo(req).mailbox;
             if (box==null)
-                ERROR(resp, 401, "Unauthorized - no mailbox available");
+                return ERROR(resp, 401, "Unauthorized - no mailbox available");
             return box.getMessages();
         }, ServerBase::toJson );
         
         
-        
+        /* 
+         * POST /mailbox 
+         * Post a message. The message will be routed to the proper recipient mailbox. 
+         */
         post("/mailbox", (req, resp) -> {
-            var msg = ServerBase.fromJson(req.body(), MailBox.Message.class);
-            MailBox.postMessage((MailBox.Message) msg);
-            return "Ok";   
+            try {
+                var userid = getAuthInfo(req).userid;
+                var msg = (MailBox.Message) ServerBase.fromJson(req.body(), MailBox.Message.class);       
+                
+                if (msg==null)
+                    return ERROR(resp, 400, "Invalid input format");
+                if (msg.from==null)
+                    msg.from = userid;
+                else if (!userid.equals(msg.from))
+                    return ERROR(resp, 404, "Unknown from-address: "+msg.from);
+                    
+                if (! MailBox.postMessage((MailBox.Message) msg) )
+                    return ERROR(resp, 404, "Couldn't deliver message to: "+msg.to);
+                return "Ok";
+            }
+            catch (Exception e) {
+                e.printStackTrace(System.out);
+                return ERROR(resp, 500, "Exception: "+e.getMessage());
+            }
         });
         
         
