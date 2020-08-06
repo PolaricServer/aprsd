@@ -66,7 +66,13 @@ public abstract class TcpChannel extends AprsChannel
         
         /* Set up backup channel */
         _backup = _api.getProperty("channel."+id+".backup", "");
-        _api.getChanManager().addBackup(_backup); 
+        if (!_api.getChanManager().isBackup(_backup))
+            _api.getChanManager().addBackup(_backup); 
+        
+        /* If backup channel is running, stop it */
+        Channel back = _api.getChanManager().get(_backup);
+        if (back !=null && back.isActive())
+            back.deActivate();
         
         /* Set up comm device */
         _comm = new TcpComm(_api, id, host, port, retr, rtime);

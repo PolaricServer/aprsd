@@ -297,9 +297,9 @@ public class MessageProcessor implements Runnable, Serializable
        boolean sentOnRf = false;
        if (_rfChan != null &&
            /* if recipient is heard on RF and NOT on the internet */
-           (_rfChan.heard(recipient)   &&
+           ((_rfChan.heard(recipient)   &&
             !_rfChan.heard(recipient)) || 
-            recipient.matches(_alwaysRf))
+            recipient.matches(_alwaysRf) || recipient.equals("TEST")))
        {
           /* Now, get a proper path for the packet. 
            * If possible, a reverse of the path last heard from the recipient.
@@ -364,10 +364,20 @@ public class MessageProcessor implements Runnable, Serializable
      * from the outgoing list (if timeout).
      */
     public void run()
-    {
+    {       
+       int n = 0;
        while (true) {
          try {
             Thread.sleep(5000);
+            
+            /* Every 4 hours, send a message to tell APRS-IS that we are here. 
+             */
+            if (n % 2880 == 12) {
+                n=12;
+                sendMessage("TEST", "", false, false);
+            }
+            n++;
+            
             synchronized(this) {
               Iterator<OutMessage> iter = _outgoing.values().iterator(); 
               iter.forEachRemaining(m -> {
