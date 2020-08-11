@@ -60,15 +60,23 @@ public class AuthInfo {
         WebServer ws = (WebServer) api.getWebserver(); 
         ws.onOpenSes( (c)-> {
                 AuthInfo a = c.getAuthInfo();
-                if (a.clients!=null)
+                if (a.clients!=null) {
                     a.clients.increment();
+                    
+                    /* As long as one or more sessions are open, we want 
+                     * address mappings for messages. 
+                     */
+                    a.mailbox.addAddress(a.userid);
+                }
             }); 
             
         ws.onCloseSes( (c)-> {
                 AuthInfo a = c.getAuthInfo();
                 if (a.clients!=null) {
-                    if (a.clients.decrement() == 0 && a.mailbox != null)
+                    if (a.clients.decrement() == 0 && a.mailbox != null) {
+                        /* If last session is closed, remove address mappings for messages. */
                         a.mailbox.removeAddresses();
+                    }
                 }
             }); 
     }
@@ -114,7 +122,6 @@ public class AuthInfo {
             mailbox = (MailBox.User) profile.get().getAttribute("mailbox");
             if (mailbox==null) {
                 mailbox = new MailBox.User(api, userid); 
-                mailbox.addAddress(userid);
                 profile.get().addAttribute("mailbox", mailbox); 
                 profile.get().addAttribute("clients", new Cnt() );
             }

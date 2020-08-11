@@ -28,6 +28,7 @@ public abstract class MailBox {
         public Date time; 
         public String from, to; 
         public boolean read;
+        public boolean outgoing;
         public String text;
         
         public Message() {}
@@ -36,12 +37,20 @@ public abstract class MailBox {
             time = new Date(); 
             read = false;
         }
+        public Message(Message m) {
+            from=m.from; 
+            to=m.to;
+            time=m.time;
+            read=m.read;
+            text=m.text;
+            outgoing=m.outgoing;
+        }
     }
  
     protected ServerAPI _api;
     private List<String> _addr = new LinkedList<String>();
     private static Map<String, MailBox> _addressMapping = new HashMap<String,MailBox>();
-    
+
     
     public abstract void put(Message m); 
         
@@ -55,11 +64,13 @@ public abstract class MailBox {
     
         private List<Message> _messages = new ArrayList<Message>();
         private String _uid;
-        
+        private PubSub _psub; 
     
         public User(ServerAPI api, String uid) {
             _api = api;
             _uid = uid;
+            _psub = (no.polaric.aprsd.http.PubSub) _api.getWebserver().getPubSub();
+            _psub.createRoom("messages:"+uid, Message.class); 
         }
 
     
@@ -78,9 +89,11 @@ public abstract class MailBox {
     
         /** Add a message to the mailbox */
         public void put(Message m) {
-            _api.getWebserver().notifyUser(_uid, 
-                new ServerAPI.Notification("chat", m.from, m.text, m.time, 60));
-            
+            if (!m.outgoing) { 
+                _api.getWebserver().notifyUser(_uid, 
+                    new ServerAPI.Notification("chat", m.from, m.text, m.time, 60));
+            }
+            _psub.put("messages:"+_uid, m); 
             _messages.add(m);
             clean();
         }
@@ -177,6 +190,14 @@ public abstract class MailBox {
         if (box != null)
             box.put(msg);
         else return false;
+        
+        /* Now, archive it senders mailbox as well (as outgoing) */
+        box = _addressMapping.get(msg.from);
+        Message m2 = new Message(msg);
+        m2.outgoing = true;
+        if (box != null)
+            box.put(m2);
+        
         return true;
             
         /*
