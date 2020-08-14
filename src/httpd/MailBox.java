@@ -23,6 +23,11 @@ import java.util.*;
   
 public abstract class MailBox {  
   
+    /* Expire times in minutes */
+    private static final int MSG_EXPIRE = 60*24*7;
+    private static final int NOT_EXPIRE = 60; 
+  
+  
     public static class Message {
     //    public long msgId;
         public Date time; 
@@ -77,25 +82,29 @@ public abstract class MailBox {
         /** Cleanup. Remove outdated messages */
         private void clean() {
             long now = (new Date()).getTime(); 
-            long limit = 1000 * 60 * 60 * 24; 
-            _messages.removeIf( m -> (m.read && m.time.getTime() < now - limit));
+            long limit = 1000 * 60 * MSG_EXPIRE; 
+            _messages.removeIf( m -> (m.time.getTime() < now - limit));
         }
     
     
         /** Return all messages in mailbox */
         public List<Message> getMessages() 
-            {return _messages;}
+            {clean(); return _messages;}
     
     
         /** Add a message to the mailbox */
         public void put(Message m) {
             if (!m.outgoing) { 
                 _api.getWebserver().notifyUser(_uid, 
-                    new ServerAPI.Notification("chat", m.from, m.text, m.time, 60));
+                    new ServerAPI.Notification("chat", m.from, m.text, m.time, NOT_EXPIRE));
             }
             _psub.put("messages:"+_uid, m); 
             _messages.add(m);
             clean();
+        }
+        
+        public String getUid() {
+            return _uid; 
         }
 
     }

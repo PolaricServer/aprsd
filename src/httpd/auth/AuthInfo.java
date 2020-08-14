@@ -20,6 +20,7 @@ import org.pac4j.sparkjava.SparkWebContext;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.CommonProfile;
 import java.util.*;
+import java.util.concurrent.*;
 import no.polaric.aprsd.*;
 import com.fasterxml.jackson.annotation.*;
 
@@ -31,12 +32,21 @@ import com.fasterxml.jackson.annotation.*;
  * This can be sent to the client in JSON format. 
  */
 public class AuthInfo {
+
+    /* Expire time in minutes */
+    public static final int MAILBOX_EXPIRE = 60 * 24 * 7;
     
-    /* Wrapper of counter value */
-    protected static class Cnt {
+    
+    /* Wrapper of Mailbox with counter */
+    public static class SesMailBox extends MailBox.User {
+        long expire = 0;
         int cnt = 0;
         public int increment() {return ++cnt;}
         public int decrement() {return --cnt;}
+        
+        public SesMailBox(ServerAPI api, String userid) {
+            super(api, userid); 
+        }
     }
     
     
@@ -45,11 +55,12 @@ public class AuthInfo {
     public boolean admin = false, sar = false; 
     public String[] services = null;
     
-    @JsonIgnore public Cnt clients; 
-    @JsonIgnore public MailBox.User mailbox = null;
+    @JsonIgnore public SesMailBox mailbox = null;
     
-    private static List<String> _services = new ArrayList<String>();
-    
+    private static List<String> _services = new ArrayList<String>();    
+    private static Queue<SesMailBox> gcbox = new LinkedList<SesMailBox>();
+    private static Map<String, SesMailBox> mboxlist = new HashMap();
+    private static ScheduledExecutorService gc = Executors.newScheduledThreadPool(5);
     
     public static void addService(String srv) {
        _services.add(srv);
@@ -60,8 +71,8 @@ public class AuthInfo {
         WebServer ws = (WebServer) api.getWebserver(); 
         ws.onOpenSes( (c)-> {
                 AuthInfo a = c.getAuthInfo();
-                if (a.clients!=null) {
-                    a.clients.increment();
+                if (a.mailbox!=null) {
+                    a.mailbox.increment();
                     
                     /* As long as one or more sessions are open, we want 
                      * address mappings for messages. 
@@ -72,13 +83,32 @@ public class AuthInfo {
             
         ws.onCloseSes( (c)-> {
                 AuthInfo a = c.getAuthInfo();
-                if (a.clients!=null) {
-                    if (a.clients.decrement() == 0 && a.mailbox != null) {
+                if (a.mailbox!=null) {
+                    if (a.mailbox.decrement() == 0) {
                         /* If last session is closed, remove address mappings for messages. */
                         a.mailbox.removeAddresses();
+                        
+                        /* Put mailbox on expire. Expire after 1 week */
+                        a.mailbox.expire = (new Date()).getTime() + 1000 * 60 * MAILBOX_EXPIRE; 
+                        gcbox.add(a.mailbox);
+                        mboxlist.put(a.mailbox.getUid(), a.mailbox);
                     }
                 }
             }); 
+            
+        /* Start a periodic task that expires mailboxes. */
+        gc.scheduleAtFixedRate( ()-> {
+            while (true) 
+                if (!gcbox.isEmpty() && gcbox.peek().expire < (new Date()).getTime()) {
+                    SesMailBox mb = gcbox.remove();
+                    if (mb!=null && mb.cnt == 0 && mboxlist.get(mb.getUid()) != null)
+                        api.log().info("AuthInfo", "MailBox expired. userid="+mb.getUid());
+                    mboxlist.remove(mb.getUid());   
+                }
+                else
+                    break;
+        }, 60, 60, TimeUnit.SECONDS);
+
     }
     
     
@@ -117,13 +147,21 @@ public class AuthInfo {
          */
         if (profile.isPresent()) {
             userid = profile.get().getId();
-           
-            /* check if there is a mailbox on the session. If not, create one. */
-            mailbox = (MailBox.User) profile.get().getAttribute("mailbox");
+
+            /* check if there is a mailbox on the session. If not, find one that 
+             * matches the user id or create one. 
+             */
+            mailbox = (SesMailBox) profile.get().getAttribute("mailbox");
             if (mailbox==null) {
-                mailbox = new MailBox.User(api, userid); 
+                MailBox mb = MailBox.get(userid); 
+                if (mb==null)
+                    mb = mboxlist.get(userid);
+                if (mb != null && mb instanceof SesMailBox) 
+                    mailbox = (SesMailBox) mb;
+                else 
+                    mailbox = new SesMailBox(api, userid); 
+                    
                 profile.get().addAttribute("mailbox", mailbox); 
-                profile.get().addAttribute("clients", new Cnt() );
             }
 
             User u = (User) profile.get().getAttribute("userInfo");
@@ -131,8 +169,6 @@ public class AuthInfo {
             sar = u.isSar();          
             if (admin)
                 sar=true;
-            /* This is actually an object so updates are done on profile */
-            clients = (Cnt) profile.get().getAttribute("clients"); 
         }
        
         servercall=api.getProperty("default.mycall", "NOCALL");

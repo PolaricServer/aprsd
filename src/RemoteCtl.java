@@ -49,6 +49,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private Map<String, Date> _children = new HashMap<String, Date>();
    private String  _parent;
    private boolean _parentCon = false; 
+   private int     _tryPause = 0;
    private Thread  _thread;
    
    private MessageProcessor _msg;
@@ -94,23 +95,28 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       if (id.equals(_parent)) {
           _parentCon = false;
           _log.info(null, "Connection to parent: "+id+ " failed");
-      }
-      /* Try max 3 times before removing it */
-      if (_try_parent++ >= 3) {
-        _log.info(null, "Giving up: "+id);
-        _children.remove(id);
-      }
+      
+          /* Try max 3 times before taking a pause */
+          if (_try_parent++ >= 3) {
+              _log.info(null, "Giving up - pausing: "+id);
+              _tryPause = 6; /* 2 hours */
+          }
+       }
+       else
+         _log.info(null, "Message to child: "+id+ " failed");
    }
    
    
    /* Implements: Interface MessageProcessor.Notification */
    public void reportSuccess(String id)
    {
-      if (!_parentCon && id.equals(_parent)) {
-          _log.info(null, "Connection to parent: "+id+ " established");
-          _parentCon = true;
+        if (id.equals(_parent)) {
+            if (!_parentCon) {
+                _log.info(null, "Connection to parent: "+id+ " established");
+                _parentCon = true;
+            }
+            _try_parent = 0;
       }
-      _try_parent = 0;
    }
    
    
@@ -120,7 +126,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    public void sendRequest(String dest, String text)
    { 
       _msg.sendMessage(dest, text, true, true, this);
-      _log.log("[> "+dest+"] "+text);
+      _log.info(null, "Send > "+dest+": "+text);
    }
    
      
@@ -138,7 +144,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             { _msg.sendMessage(r, text, true, true, this); n++; }
     
       if (n>0)
-         _log.log("[> ALL("+n+")] " + text + (except==null||n==0 ? "" : " -- (not to "+except+")" ));
+         _log.info(null, "Send > ALL("+n+"): " + text + (except==null||n==0 ? "" : " -- (not to "+except+")" ));
       storeRequest(text);                
    }
 
@@ -209,7 +215,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       /* If command returned true, propagate the request further 
         * to children and parent, except the originating node.
         */
-      _log.log(" [< "+sender.getIdent()+"] "+text+ (p ? " -- OK" : " -- FAILED"));
+      _log.info(null, " Recv < "+sender.getIdent()+": "+text+ (p ? " -- OK" : " -- FAILED"));
       if (!p)
          return false;
      
@@ -432,11 +438,14 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       while (true) 
       try {
          Thread.sleep(20000);
+
          while (true) {
-            if (_parent != null) {
+            if (_parent != null && _tryPause == 0) {
                _api.log().debug("RemoteCtl", "Send CON: "+_parent);
                sendRequest(_parent, "CON");
             }
+            if (_tryPause > 0)
+                _tryPause--;
             
             for (String x : getChildren()) 
                 if (_children.get(x).getTime() + 2400000 <= (new Date()).getTime()) {
