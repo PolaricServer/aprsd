@@ -46,6 +46,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     * filter or area of interest. Based on callsign or geographical
     * position. 
     */
+   private String  _myCall; 
    private Map<String, Date> _children = new HashMap<String, Date>();
    private String  _parent;
    private boolean _parentCon = false; 
@@ -53,11 +54,14 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private Thread  _thread;
    
    private MessageProcessor _msg;
+   private MessageProcessor.MessageHandler _pmsg;
    private ServerAPI _api;
    private Logfile   _log;
     
    private LinkedHashMap<String, String> _cmds = new LinkedHashMap(); 
    
+   public String getMycall()
+       { return _myCall; }
 
    public String getParent()
        { return _parent; }
@@ -69,20 +73,25 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private int threadid=0;    
    public RemoteCtl(ServerAPI api, MessageProcessor mp)
    {
-       String myCall = api.getProperty("remotectl.mycall", "").toUpperCase();
-       if (myCall.length() == 0)
-           myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();
+       _myCall = api.getProperty("remotectl.mycall", "").toUpperCase();
+       if (_myCall.length() == 0)
+           _myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();
        _parent = api.getProperty("remotectl.connect", null);
        _log = new Logfile(api, "remotectl", "remotectl.log");
        if (_parent != null) 
           _parent = _parent.trim().toUpperCase();
        if ("".equals(_parent))
           _parent = null;
-       mp.subscribe(myCall, new Subscriber(), true);
+       mp.subscribe(_myCall, new Subscriber(), true);
        _msg = mp;
        _api = api;
        _thread = new Thread(this, "RemoteCtl-"+(threadid++));
        _thread.start();
+   }
+   
+   
+   public void setMailbox(MessageProcessor.MessageHandler mh) {
+        _pmsg = mh;
    }
 
 
@@ -192,6 +201,12 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
          
       String args = (arg.length==1 ? null : arg[1]);
       boolean p = false, propagate = true;    
+      
+      /* Messaging is a special case. Just pass it on to mailbox */
+      if (arg[0].equals("MSG")) {
+          p = doMessage(sender, args);
+          return p; 
+      }
       if (arg[0].equals("CON")) {
          p = doConnect(sender, args);
          propagate = false;
@@ -200,7 +215,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       /* Fail if not CON and not connected */
       else if ((!_parentCon || !sender.getIdent().equals(_parent)) 
             && !_children.containsKey(sender.getIdent()))
-          p = false;        
+          p = false;      
       else if (arg[0].equals("ALIAS"))
           p = doSetAlias(sender, args);
       else if (arg[0].equals("ICON"))
@@ -219,15 +234,28 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       if (!p)
          return false;
      
-      if (propagate){
+      if (propagate) {
          storeRequest(text);
          sendRequestAll(text, sender.getIdent());
       }
       return true;
    }
+   
+   
+   
+    /* 
+     * Message to user. Just pass it on to a subscriber. 
+     */
+    protected boolean doMessage(Station sender, String arg)
+    {
+        _api.log().debug("RemoteCtl", "Got message from "+sender.getIdent()+": "+arg);
+        if (_pmsg != null) 
+            return _pmsg.handleMessage(sender, null, arg);
+        return false;
+    }
 
-
-
+    
+    
     /* 
      * Commands should perhaps be "plugin" modules or plugin-modules should
      * be allowed to add commands 

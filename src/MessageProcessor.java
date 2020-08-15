@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ public class MessageProcessor implements Runnable, Serializable
    private static final int _MSG_INTERVAL = 30;
    private static final int _MSG_MAX_RETRY = 4; 
    private static final int _MAX_MSGID = 10000;
-   private static final int _MSGID_STORE_SIZE = 512;
+   private static final int _MSGID_STORE_SIZE = 256;
    
    
    
@@ -88,7 +88,7 @@ public class MessageProcessor implements Runnable, Serializable
             { return size() > _MSGID_STORE_SIZE; }
    }
    private RecMessages recMessages = new RecMessages();
-   
+   private Date recMsg_ts = new Date(); 
        
    private Map<String,  Subscriber> _subscribers = new HashMap();
    private Map<String,  OutMessage> _outgoing = new HashMap();
@@ -175,6 +175,10 @@ public class MessageProcessor implements Runnable, Serializable
 
          
         if (subs != null) {
+            /* Clear seen-before map if last entry is older than 20 minutes */
+            if ((new Date()).getTime() > recMsg_ts.getTime() + 1000 * 60 * 60 * 20)
+                recMessages.clear();
+        
             /* Have we seen this message-id before? */
             if (!recMessages.containsKey(sender.getIdent()+"#"+msgid)) { 
                 boolean result = !subs.verify;
@@ -192,13 +196,18 @@ public class MessageProcessor implements Runnable, Serializable
             
                 result = result && subs.recipient.handleMessage(sender, recipient, text);
                 if (!result && msgid != null) 
-                    _api.log().info("MessageProc", "Message authentication/processing failed. msgid="+msgid);
-                if (msgid != null) 
+                    _api.log().info("MessageProc", "Message authentication or processing failed. msgid="+msgid);
+                if (msgid != null) {
                     recMessages.put(sender.getIdent()+"#"+msgid, result);
+                    recMsg_ts = new Date();
+                }
             }
             else
                 _api.log().debug("MessageProc", "Duplicate message from "+sender.getIdent()+" msgid="+msgid);
                 
+            /* 
+             * Send ack or rej. Assume that message is in recMessages if accepted. 
+             */
             if (msgid != null)
                 sendAck(sender.getIdent(), msgid, recMessages.get(sender.getIdent()+"#"+msgid));
         }      

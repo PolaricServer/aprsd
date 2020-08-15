@@ -27,22 +27,34 @@ public abstract class MailBox {
     private static final int MSG_EXPIRE = 60*24*7;
     private static final int NOT_EXPIRE = 60; 
   
+    private static long _lastMsgId = 0;
+    private static long nextMsgId()
+        { return _lastMsgId = (_lastMsgId+1) % 2000000000; }
   
+  
+    /* Message content */
     public static class Message {
-    //    public long msgId;
+        public long msgId;
+        
+        // -1=failure, 1=success
+        public int status = 0; 
         public Date time; 
         public String from, to; 
         public boolean read;
         public boolean outgoing;
         public String text;
         
-        public Message() {}
+        public Message() {
+            msgId = nextMsgId(); 
+        }
         public Message(String f, String t, String txt) {
+            msgId = nextMsgId(); 
             from=f; to=t; text=txt;
             time = new Date(); 
             read = false;
         }
         public Message(Message m) {
+            msgId = nextMsgId(); 
             from=m.from; 
             to=m.to;
             time=m.time;
@@ -52,16 +64,28 @@ public abstract class MailBox {
         }
     }
  
+    /* Status message.  To report delivery success or failure */
+    public static class Status {
+        public long msgId; 
+        public int status; 
+        public String info; 
+        
+        public Status(long id, int st, String inf) {
+            msgId=id; status=st; info=inf;
+        }
+    }
+ 
+ 
     protected ServerAPI _api;
     private List<String> _addr = new LinkedList<String>();
     private static Map<String, MailBox> _addressMapping = new HashMap<String,MailBox>();
-
-    
+ 
     public abstract void put(Message m); 
         
         
         
-    /** Mailbox for a single user. 
+    /** 
+     *  Mailbox for a single user. 
      *  Instances are created and put on the user login session. See AuthInfo.java. 
      */
     
@@ -76,8 +100,16 @@ public abstract class MailBox {
             _uid = uid;
             _psub = (no.polaric.aprsd.http.PubSub) _api.getWebserver().getPubSub();
             _psub.createRoom("messages:"+uid, Message.class); 
+            _psub.createRoom("msgstatus:"+uid, Status.class);
         }
 
+    
+        private void setStatus(Message m, int st, String info) {
+            m.status = st;
+            Status stm = new Status(m.msgId, st, info);
+            _psub.put("msgstatus:"+_uid, stm); 
+        }
+    
     
         /** Cleanup. Remove outdated messages */
         private void clean() {
@@ -141,8 +173,9 @@ public abstract class MailBox {
         _addr.add(addr);
         _addressMapping.put(addr, this);
         
+        
         /* Aprs message handler. Return if not APRS user */
-        if (!addr.matches(".*@(aprs|APRS)"))
+        if (!addr.matches(".*@(aprs|APRS|Aprs)"))
             return;
             
         /* 
@@ -170,7 +203,20 @@ public abstract class MailBox {
     }
     
     
-
+    
+    public static void init(ServerAPI api) {
+        api.getRemoteCtl().setMailbox( (sender, recipient, text) -> {
+            String[] tc = text.split(" ", 2); 
+            String[] addr = tc[0].split(">", 2);
+            return putMessage(new Message(addr[0], addr[1], tc[1]));
+        });
+    }
+    
+    
+    
+    /** 
+     * Get a mailbox for a given address.
+     */
     public static MailBox get(String u) {
         return _addressMapping.get(u);
     }
@@ -180,8 +226,8 @@ public abstract class MailBox {
     /**
      * Send a message. 
      */
-    public static void postMessage(String from, String to, String txt) {
-        postMessage(new Message(from, to, txt));
+    public static boolean postMessage(ServerAPI api, String from, String to, String txt) {
+        return postMessage(api, new Message(from, to, txt));
     }
 
     
@@ -190,31 +236,90 @@ public abstract class MailBox {
      * Send a message. 
      * Return false if message could not be delivered (unknown to-address). 
      */
-    public static boolean postMessage(Message msg) {
+    public static boolean postMessage(ServerAPI api, Message msg) {
         if (msg.time==null)
             msg.time = new Date();
             
+        /* If there is a @-part of the address, it is remote */
+        String[] addr = msg.to.split("@", 2);
+        if (addr[1].equals(api.getRemoteCtl().getMycall())) {
+            addr[1]=null;
+            msg.to = addr[0];
+        }
+            
+        if (addr.length > 1 && addr[1] != null)
+            return postRemoteMessage(api, addr, msg); 
+
+        if (!putMessage(msg))
+            return false;
+        archiveSent(_addressMapping.get(msg.to), msg, 1);
+        return true;
+    }
+    
+    
+    /** 
+     * Put message into a local mailbox. 
+     */
+    public static boolean putMessage(Message msg) {
         /* Find recipients mailbox and put it there */
         MailBox box = _addressMapping.get(msg.to);
         if (box != null)
             box.put(msg);
-        else return false;
-        
-        /* Now, archive it senders mailbox as well (as outgoing) */
-        box = _addressMapping.get(msg.from);
+        else return false; 
+        return true;
+    }
+    
+    
+    
+    /** 
+     * Put a copy of the sent message in the mailbox. Mark as outgoing. 
+     */
+    private static Message archiveSent(MailBox box, Message msg, int status) {
         Message m2 = new Message(msg);
+        m2.status = status; 
         m2.outgoing = true;
         if (box != null)
             box.put(m2);
-        
-        return true;
-            
-        /*
-         * TODO: If to address is aprs-address message could be sent
-         * as an aprs message.  
-         */
+        return m2;
     }
     
+    
+    /**
+     * Send message to another server or elsewhere depending on the @-field. 
+     */
+    private static boolean postRemoteMessage(ServerAPI api, String[] addr, Message msg) {
+        if (addr[1].matches("APRS|aprs|Aprs"))
+            /* 
+             * Message should be sent as a raw APRS message 
+             * TBD 
+             */
+            return false; 
+        else {
+            /* 
+             * @-part of address is another Polaric Server instance. 
+             * Message should be authenticated and acked. 
+             */
+            addr[1]=addr[1].toUpperCase(); 
+            msg.to = addr[0]+"@"+addr[1];
+            MailBox.User mb = (MailBox.User) _addressMapping.get(msg.from);
+            Message m2 = archiveSent(mb, msg, 0); 
+            
+            api.getMsgProcessor().sendMessage(addr[1], "MSG "+msg.from+">"+addr[0]+" "+msg.text, 
+                true, true, new MessageProcessor.Notification() {
+                
+                    public void reportFailure(String id) {
+                        api.log().info("MailBox","Delivery failed: msgid="+msg.msgId+", node="+id);
+                        mb.setStatus(m2, -1, "Delivery failed: "+id);
+                    }
+                
+                    public void reportSuccess(String id) {
+                        api.log().info("MailBox", "Delivery confirmed: msgid="+msg.msgId+", node="+id);
+                        mb.setStatus(m2, 1, "Delivery confirmed: "+id);
+                    }
+                });
+            return true; 
+        }    
+    }
     
 }
 

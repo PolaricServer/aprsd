@@ -83,7 +83,7 @@ public class MailBoxApi extends ServerBase {
                 else if (!userid.equals(msg.from))
                     return ERROR(resp, 404, "Unknown from-address: "+msg.from);
                     
-                if (! MailBox.postMessage((MailBox.Message) msg) )
+                if (! MailBox.postMessage(_api, (MailBox.Message) msg) )
                     return ERROR(resp, 404, "Couldn't deliver message to: "+msg.to);
                 return "Ok";
             }

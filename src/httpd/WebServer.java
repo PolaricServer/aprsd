@@ -233,6 +233,7 @@ public class WebServer implements ServerAPI.Web
         /* Room for pushing updates to bulletin board */
         _pubsub.createRoom("bullboard", (Class) null); 
         
+        MailBox.init(_api);
         AuthInfo.init(_api);
         init();
     }
