@@ -242,7 +242,7 @@ public abstract class MailBox {
             
         /* If there is a @-part of the address, it is remote */
         String[] addr = msg.to.split("@", 2);
-        if (addr[1].equals(api.getRemoteCtl().getMycall())) {
+        if (addr.length > 1 && addr[1].equals(api.getRemoteCtl().getMycall())) {
             addr[1]=null;
             msg.to = addr[0];
         }
