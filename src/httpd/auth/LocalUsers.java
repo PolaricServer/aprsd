@@ -38,6 +38,7 @@ public class LocalUsers {
     public class User extends no.polaric.aprsd.http.User implements Serializable {
      
         private String name = "";
+        private String callsign = "";
         private Date lastused; 
         transient private boolean active = false;
 
@@ -47,6 +48,8 @@ public class LocalUsers {
         public void    setActive()          { active = true; }
         public void    setName(String n)    { name = n; }
         public String  getName()            { return name; }
+        public void    setCallsign(String c){ callsign = c.toUpperCase(); }
+        public String  getCallsign()        { return callsign; }
         public void    setPasswd(String pw) { updatePasswd(getIdent(), pw); }
         
         /* 
@@ -219,7 +222,9 @@ public class LocalUsers {
                     (x.getLastUsed() == null ? "null" : ServerBase.xf.format(x.getLastUsed())) +"," 
                     + x.isSar() + ","
                     + x.isAdmin() + ","
-                    + x.getName());
+                    + x.getName() + "," 
+                    + x.getCallsign())
+                    ;
             }
             out.flush(); 
             out.close();
@@ -247,18 +252,21 @@ public class LocalUsers {
                     String userid = x[0].trim();
                     String lu = x[1].trim();
                     boolean sar, admin;
-                    String name  = ""; 
+                    String name  = "", callsign = ""; 
 
                     sar = ("true".equals(x[2].trim()));
                     admin = ("true".equals(x[3].trim()));
                     if (x.length > 4)
                         name = x[4].trim();
+                    if (x.length > 5)
+                        callsign = x[5].trim();
                         
                     Date   lastupd = ("null".equals(lu) ? null : ServerBase.xf.parse(x[1].trim()));
                     User u = new User(userid, lastupd); 
                     u.setSar(sar);
                     u.setAdmin(admin);
                     u.setName(name);
+                    u.setCallsign(callsign);
                     _users.put(userid,u);
                 }
             }

@@ -36,17 +36,17 @@ public class UserApi extends ServerBase {
     public static class UserInfo {
         public String ident; 
         public Date lastused; 
-        public String name;
+        public String name, callsign;
         public boolean sar, admin; 
         public String passwd;
         public UserInfo() {}
-        public UserInfo(String id, Date lu, String n, boolean s, boolean a)
-           { ident = id; lastused = lu; name=n; sar=s; admin=a; }
+        public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a)
+           { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; }
     }
 
     
     public static class UserUpdate {
-        public String name; 
+        public String name, callsign; 
         public String passwd;
         public boolean sar, admin;
     }
@@ -80,7 +80,8 @@ public class UserApi extends ServerBase {
         String name = "";           
         if (u instanceof LocalUsers.User) {
             var lu = (LocalUsers.User) u; 
-            return new UserInfo(u.getIdent(), u.getLastUsed(), lu.getName(), lu.isSar(), lu.isAdmin());    
+            return new UserInfo(u.getIdent(), u.getLastUsed(), lu.getName(), 
+                lu.getCallsign(), lu.isSar(), lu.isAdmin());    
         }
         else
             return null;
@@ -131,7 +132,9 @@ public class UserApi extends ServerBase {
             
             if (u instanceof LocalUsers.User) {
                 if (uu.name != null)
-                    ((LocalUsers.User) u).setName(uu.name);
+                    ((LocalUsers.User) u).setName(uu.name);           
+                if (uu.callsign != null)
+                    ((LocalUsers.User) u).setCallsign(uu.callsign);
                 if (uu.passwd != null) 
                     ((LocalUsers.User) u).setPasswd(uu.passwd);
                 ((LocalUsers.User) u).setSar(uu.sar);
