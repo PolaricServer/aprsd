@@ -49,8 +49,10 @@ public class AuthInfo {
         }
     }
     
+
     
     public String userid;
+    public String callsign;
     public String servercall;
     public boolean admin = false, sar = false; 
     public String[] services = null;
@@ -78,6 +80,8 @@ public class AuthInfo {
                      * address mappings for messages. 
                      */
                     a.mailbox.addAddress(a.userid);
+                    if (!"".equals(a.callsign))
+                        a.mailbox.addAddress(a.callsign+"@aprs");
                 }
             }); 
             
@@ -120,7 +124,6 @@ public class AuthInfo {
     
     public boolean login() 
         { return userid != null; }
-       
        
     
        
@@ -165,6 +168,8 @@ public class AuthInfo {
             }
 
             User u = (User) profile.get().getAttribute("userInfo");
+            if (u instanceof LocalUsers.User)
+                callsign = ((LocalUsers.User)u).getCallsign();
             admin = u.isAdmin();
             sar = u.isSar();          
             if (admin)

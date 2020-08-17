@@ -186,7 +186,7 @@ public abstract class MailBox {
         addr = addr.split("@")[0].toUpperCase();
         _api.getMsgProcessor().subscribe(
             addr, (sender, recipient, text) -> {
-                put(new Message(sender.getIdent(), recipient, text)); 
+                put(new Message(sender.getIdent()+"@aprs", recipient, text)); 
                 return true;
             }, false );
     }
@@ -242,7 +242,7 @@ public abstract class MailBox {
             
         /* If there is a @-part of the address, it is remote */
         String[] addr = msg.to.split("@", 2);
-        if (addr.length > 1 && addr[1].equals(api.getRemoteCtl().getMycall())) {
+        if (addr.length > 1 && addr[1].toUpperCase().equals(api.getRemoteCtl().getMycall())) {
             addr[1]=null;
             msg.to = addr[0];
         }
@@ -288,12 +288,17 @@ public abstract class MailBox {
      * Send message to another server or elsewhere depending on the @-field. 
      */
     private static boolean postRemoteMessage(ServerAPI api, String[] addr, Message msg) {
-        if (addr[1].matches("APRS|aprs|Aprs"))
+        if (addr[1].matches("APRS|aprs|Aprs")) {
             /* 
              * Message should be sent as a raw APRS message 
-             * TBD 
-             */
-            return false; 
+             * FIXME: Check that from address is a valid callsign.
+             * FIXME: Should we use sequence numbering and ack? 
+             */ 
+            MailBox.User mb = (MailBox.User) _addressMapping.get(msg.from+"@aprs");
+            archiveSent(mb, msg, 0); 
+            api.getMsgProcessor().sendRawMessage(msg.from, msg.text, addr[0]);  
+            return true; 
+        }
         else {
             /* 
              * @-part of address is another Polaric Server instance. 
@@ -303,6 +308,7 @@ public abstract class MailBox {
             msg.to = addr[0]+"@"+addr[1];
             MailBox.User mb = (MailBox.User) _addressMapping.get(msg.from);
             Message m2 = archiveSent(mb, msg, 0); 
+            msg.from = msg.from+"@"+api.getRemoteCtl().getMycall();
             
             api.getMsgProcessor().sendMessage(addr[1], "MSG "+msg.from+">"+addr[0]+" "+msg.text, 
                 true, true, new MessageProcessor.Notification() {

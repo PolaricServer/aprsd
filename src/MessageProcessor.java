@@ -288,14 +288,24 @@ public class MessageProcessor implements Runnable, Serializable
    }
 
 
+   
+   public void sendRawMessage(String from, String text, String recipient) {
+        String message = (recipient+ "         ").substring(0,9) + ":" + text;
+        sendPacketFrom(from, message, recipient);
+   }
+   
+   
 
    /**
     * Encode and send an APRS message packet.
     */
-   private void sendPacket(String message, String recipient)
+   public void sendPacket(String message, String recipient)
+      { sendPacketFrom(_myCall, message, recipient); }
+      
+   public void sendPacketFrom(String from, String message, String recipient)
    {
        AprsPacket p = new AprsPacket();
-       p.from = _myCall;
+       p.from = from;
        p.to = "APRS";
        p.msgto = recipient;
        /* Need to set p.via, and differently for the two channels */

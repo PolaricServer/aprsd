@@ -74,6 +74,8 @@ public class MailBoxApi extends ServerBase {
         post("/mailbox", (req, resp) -> {
             try {
                 var userid = getAuthInfo(req).userid;
+                var callsign = getAuthInfo(req).callsign; 
+                
                 var msg = (MailBox.Message) ServerBase.fromJson(req.body(), MailBox.Message.class);       
                 
                 if (msg==null)
@@ -83,6 +85,12 @@ public class MailBoxApi extends ServerBase {
                 else if (!userid.equals(msg.from))
                     return ERROR(resp, 404, "Unknown from-address: "+msg.from);
                     
+                /* For raw APRS messages we use the user's callsign as a sender-address */
+                if (msg.to.matches(".*@(aprs|APRS|Aprs)")) {
+                    if (callsign == null || "".equals(callsign))
+                        return ERROR(resp, 404, "Callsign is needed for raw APRS messages");
+                    msg.from = callsign;
+                }
                 if (! MailBox.postMessage(_api, (MailBox.Message) msg) )
                     return ERROR(resp, 404, "Couldn't deliver message to: "+msg.to);
                 return "Ok";
