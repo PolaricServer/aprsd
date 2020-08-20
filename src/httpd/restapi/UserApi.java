@@ -30,6 +30,7 @@ public class UserApi extends ServerBase {
 
     private ServerAPI _api; 
     
+    
     /* 
      * User info as it is sent to clients. 
      */
@@ -49,6 +50,16 @@ public class UserApi extends ServerBase {
         public String name, callsign; 
         public String passwd;
         public boolean sar, admin;
+    }
+    
+    
+    public static class Client {
+        public String uid; 
+        public String username;
+        public Date created; 
+        public Client(String id, String uname, Date cr) {
+            uid=id; username=uname; created=cr;
+        }
     }
     
     
@@ -86,12 +97,36 @@ public class UserApi extends ServerBase {
         else
             return null;
     }
-    
+
     
     /** 
      * Set up the webservices. 
      */
     public void start() {     
+        
+        /************************************************
+         * Get (web socket) clients.
+         ************************************************/
+        get("/wsclients", "application/json", (req, resp) -> {
+            List<Client> cli = new ArrayList<Client>();
+            for (WebClient x: ((WebServer)_api.getWebserver()).getClients())
+                cli.add(new Client(x.getUid(), x.getUsername(), x.created()));
+            return cli;
+        }, ServerBase::toJson );
+        
+        
+        
+        /************************************************
+         * Get logged in users (list of usernames).
+         ************************************************/
+        get("/loginusers", "application/json", (req, resp) -> {
+            List<String> us = new ArrayList<String>(); 
+            for (String name : ((WebServer)_api.getWebserver()).getLoginUsers())
+                us.add(name);
+            return us;
+        }, ServerBase::toJson );
+        
+        
         
         /******************************************
          * Get a list of users. 

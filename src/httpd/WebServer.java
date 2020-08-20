@@ -185,7 +185,8 @@ public class WebServer implements ServerAPI.Web
         before("/system/sarmode",  _auth.conf().filter(null, "isauth, sar"));
         before("/sar/ipp/*",       _auth.conf().filter(null, "isauth"));
         before("/mailbox",         _auth.conf().filter(null, "isauth"));
-        
+        before("/wsclients",       _auth.conf().filter(null, "isauth, admin"));
+        before("/loginusers",      _auth.conf().filter(null, "isauth"));
         
         afterAfter((request, response) -> {
             _nRequests++;
@@ -208,6 +209,8 @@ public class WebServer implements ServerAPI.Web
         /* Start REST API: Users */
         UserApi uu = new UserApi(_api, _auth.conf().getLocalUsers());
         uu.start();
+        corsEnable("/wsclients");
+        corsEnable("/loginusers");
         corsEnable("/users");
         corsEnable("/users/*"); 
 
@@ -291,10 +294,29 @@ public class WebServer implements ServerAPI.Web
         before(prefix, _auth.conf().filter(null, "isauth")); 
     }
     
+    
     /* FIXME: What methods should be part of ServerAPI.Web ? */
     public AuthConfig getAuthConfig()
         { return _auth.conf(); }
         
+    
+    public SortedSet<String> getLoginUsers() {
+        SortedSet<String> u = new TreeSet<String>();
+        for (WebClient c :_jmapupdate.clients())
+            if (c.getUsername() != null)
+                u.add(c.getUsername());
+        return u;
+    }
+    
+    
+    public List<WebClient> getClients() {
+        List<WebClient> wclist = new LinkedList();
+        for (WsNotifier.Client c: _jmapupdate.clients())
+            wclist.add((WebClient) c); 
+        return wclist;
+    }
+    
+    
     
         
     /**

@@ -47,7 +47,7 @@ public abstract class WsNotifier extends ServerBase
    
    
    /********* Client *********/
-   public abstract class Client {
+   public abstract class Client implements WebClient {
    
       protected final Session _conn; 
       protected final String _uid;
