@@ -64,6 +64,7 @@ public class UserApi extends ServerBase {
     
     
     private LocalUsers _users; 
+    private SortedSet<String> _remoteUsers = new TreeSet<String>();
     
     
     public UserApi(ServerAPI api,  LocalUsers u) {
@@ -103,6 +104,11 @@ public class UserApi extends ServerBase {
      * Set up the webservices. 
      */
     public void start() {     
+    
+        _api.getRemoteCtl().setUserCallback(
+            (node, uname) -> { _remoteUsers.add(uname+"@"+node); }, 
+            (node, uname) -> { _remoteUsers.remove(uname+"@"+node); }
+        );
         
         /************************************************
          * Get (web socket) clients.
@@ -123,6 +129,9 @@ public class UserApi extends ServerBase {
             List<String> us = new ArrayList<String>(); 
             for (String name : ((WebServer)_api.getWebserver()).getLoginUsers())
                 us.add(name);
+            for (String name : _remoteUsers)
+                us.add(name);    
+                
             return us;
         }, ServerBase::toJson );
         

@@ -79,6 +79,7 @@ public class AuthInfo {
                     /* As long as one or more sessions are open, we want 
                      * address mappings for messages. 
                      */
+                    api.getRemoteCtl().sendRequestAll("USER "+a.userid, null);
                     a.mailbox.addAddress(a.userid);
                     if (!"".equals(a.callsign))
                         a.mailbox.addAddress(a.callsign+"@aprs");
@@ -91,6 +92,7 @@ public class AuthInfo {
                     if (a.mailbox.decrement() == 0) {
                         /* If last session is closed, remove address mappings for messages. */
                         a.mailbox.removeAddresses();
+                        api.getRemoteCtl().sendRequestAll("RMUSER "+a.userid, null);
                         
                         /* Put mailbox on expire. Expire after 1 week */
                         a.mailbox.expire = (new Date()).getTime() + 1000 * 60 * MAILBOX_EXPIRE; 

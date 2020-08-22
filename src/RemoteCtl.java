@@ -36,6 +36,15 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           return processRequest(sender, text);
       } 
    }
+   
+   
+   /**
+    * Callback for user additions/removals. 
+    * Suitable for lambda function.
+    */
+   public static interface UserCb {
+        void cb(String node, String uname);
+   }
 
 
    /*
@@ -57,6 +66,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private MessageProcessor.MessageHandler _pmsg;
    private ServerAPI _api;
    private Logfile   _log;
+   private UserCb    _addUser, _removeUser; 
     
    private LinkedHashMap<String, String> _cmds = new LinkedHashMap(); 
    
@@ -69,6 +79,9 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    public Set<String> getChildren()
        { return _children.keySet(); }
        
+   public void setUserCallback(UserCb a, UserCb r) {
+       _addUser=a; _removeUser=r; 
+   }
    
    private int threadid=0;    
    public RemoteCtl(ServerAPI api, MessageProcessor mp)
@@ -226,7 +239,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           p = doRemoveTag(sender, args);          
       else if (arg[0].equals("SAR"))
           p = doSetSarMode(sender, args);
-           
+      else if (arg[0].equals("USER"))
+          p = doUser(sender, args, true);  
+      else if (arg[0].equals("RMUSER"))
+          p = doUser(sender, args, false);
+          
       /* If command returned true, propagate the request further 
         * to children and parent, except the originating node.
         */
@@ -283,6 +300,24 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
 
    
    
+   
+   protected boolean doUser(Station sender, String args, boolean add)
+   {
+        if (args == null) {
+            _api.log().warn("RemoteCtl", "Missing arguments to remote USER or RMUSER command");
+            return false;
+        }
+        String u = args.trim();
+        if (add)
+            _addUser.cb(sender.getIdent(), u); 
+        else
+            _removeUser.cb(sender.getIdent(), u);
+        return true;
+    }
+    
+    
+       
+       
    /**
     * Set SAR mode. 
     * @param sender The station that sent the commmand.
