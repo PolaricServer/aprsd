@@ -2,31 +2,49 @@
     
 FOR RELEASE 2.6
 
+
+* Allow user-accounts to be set up with callsigns. 
+    DONE.
+
+* Generic APRS messaging with notifications. 
+    DONE.
+    
+* APRS messaging REST API and client. 
+    DONE.
+
+* "Clear all" for alias/icons.
+    DONE.
+    
+* Draw tool: Radius for circles. Measurement info while drawing. 
+
+
+
+FOR RELEASE 2.7
+
+
+
+
+
+LATER RELEASES
+
+* Server failover?
+
+* Allow backup remotectl parent.
+
 * Item info as REST? Polymorphism? AIS plugin. 
 
 * Telemetry REST API and client.
 
 * Add icons to feature editor
 
-* Generic APRS messaging with notifications. 
-
-* APRS messaging REST API and client. 
-
 * AuthConfig, etc. should be available for plugins.
 
 * view profile compiler: Better error reporting... 
-
-
-
-    
-LATER RELEASES
 
 * Use Java 9 modules! What interfaces/classes should be available for plugins? 
   What should be required from plugins?
 
 * Support external authorization service. Oauth. Google. 
-    
-* Allow user-accounts to be set up with callsigns. 
 
 * Bulletin board send.
 
@@ -35,3 +53,11 @@ LATER RELEASES
 * Reset to default - button/link in config screen
      
 * Develop signs. Channels? 
+
+* APRS-IS server (plugin or standalone)
+
+* System admin/config as REST API and client.
+
+
+  
+  
