@@ -79,7 +79,7 @@ public class AuthInfo {
                     /* As long as one or more sessions are open, we want 
                      * address mappings for messages. 
                      */
-                    api.getRemoteCtl().sendRequestAll("USER "+a.userid, null);
+                    api.getRemoteCtl().sendRequestAll("USER "+a.userid+"@"+api.getRemoteCtl().getMycall(), null);
                     a.mailbox.addAddress(a.userid);
                     if (!"".equals(a.callsign))
                         a.mailbox.addAddress(a.callsign+"@aprs");
@@ -92,7 +92,7 @@ public class AuthInfo {
                     if (a.mailbox.decrement() == 0) {
                         /* If last session is closed, remove address mappings for messages. */
                         a.mailbox.removeAddresses();
-                        api.getRemoteCtl().sendRequestAll("RMUSER "+a.userid, null);
+                        api.getRemoteCtl().sendRequestAll("RMUSER "+a.userid+"@"+api.getRemoteCtl().getMycall(), null);
                         
                         /* Put mailbox on expire. Expire after 1 week */
                         a.mailbox.expire = (new Date()).getTime() + 1000 * 60 * MAILBOX_EXPIRE; 
@@ -114,6 +114,11 @@ public class AuthInfo {
                 else
                     break;
         }, 60, 60, TimeUnit.SECONDS);
+        
+        /* At shutdown. Send a message to indicate that all users are logged out */
+        api.addShutdownHandler( ()->  
+            api.getRemoteCtl().sendRequestAll("RMUSER .*@"+api.getRemoteCtl().getMycall(), null) 
+        );
 
     }
     

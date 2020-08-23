@@ -23,7 +23,13 @@ import java.util.*;
  */
 public interface ServerAPI 
 { 
-  
+
+    @FunctionalInterface public interface SimpleCb {
+        void cb(); 
+    }
+            
+            
+            
    /** 
     * Notifcation content class. 
     */
@@ -209,5 +215,13 @@ public interface ServerAPI
      * Clear SAR mode. 
      */
     public void clearSar();
+    
+    
+    /**
+     * Add shutdown handler function. 
+     */
+    public void addShutdownHandler(SimpleCb cb);
+    
+    
 }
 

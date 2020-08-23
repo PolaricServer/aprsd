@@ -106,9 +106,20 @@ public class UserApi extends ServerBase {
     public void start() {     
     
         _api.getRemoteCtl().setUserCallback(
-            (node, uname) -> { _remoteUsers.add(uname+"@"+node); }, 
-            (node, uname) -> { _remoteUsers.remove(uname+"@"+node); }
+            // Add
+            (node, uname) -> { 
+                if (uname.matches(".+@[A-Za-z0-9\\-]+"))
+                    _remoteUsers.add(uname); 
+            },
+            
+            // Remove. Note that we treat the username as a regular expression
+            (node, uname) -> {
+                if (uname.matches(".+@[A-Za-z0-9\\-]+"))
+                    _remoteUsers.removeIf( (x)-> x.matches(uname) );
+            }
         );
+        
+        
         
         /************************************************
          * Get (web socket) clients.

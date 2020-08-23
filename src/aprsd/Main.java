@@ -49,6 +49,7 @@ public class Main implements ServerAPI
    private static String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
    private static StatLogger stats; 
    public  static Logfile log;
+   private static List<ServerAPI.SimpleCb> _shutdown = new ArrayList();
     
     
    /* API interface methods 
@@ -121,6 +122,9 @@ public class Main implements ServerAPI
     } 
     
     
+   public void addShutdownHandler(ServerAPI.SimpleCb h) {
+        _shutdown.add(h);
+   }
     
     
    public Properties getConfig()
@@ -428,8 +432,12 @@ public class Main implements ServerAPI
     public void stop()
       /* Stop the webserver, deactivate plugins, close things down... */
     {
+         for (ServerAPI.SimpleCb f: _shutdown)
+            f.cb(); 
+            
          System.out.println("*** Stopping HTTP/WS server");
          try {
+            Thread.sleep(2000);
             ws.stop();
          } catch (Exception e) {}
 
