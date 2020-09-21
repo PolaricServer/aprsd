@@ -14,22 +14,35 @@ FOR RELEASE 2.6
 
 * "Clear all" for alias/icons.
     DONE.
-    
-* Draw tool: Radius for circles. Measurement info while drawing. 
 
+* Fix backup channel behaviour 
+    DONE.
+
+* Implement short messaging API and client
+    DONE.
+    
+* Allow callsigns in user-accounts
+    DONE.
+    
+* API to get logged-in users, including on remote systems. 
+    DONE.
+    
+* Channels - refactoring
+    DONE.
+    
 
 
 FOR RELEASE 2.7
+    
+* Draw tool: Radius for circles. Measurement info while drawing. 
 
-
+* Allow backup remotectl parent.
 
 
 
 LATER RELEASES
 
 * Server failover?
-
-* Allow backup remotectl parent.
 
 * Item info as REST? Polymorphism? AIS plugin. 
 
@@ -45,8 +58,6 @@ LATER RELEASES
   What should be required from plugins?
 
 * Support external authorization service. Oauth. Google. 
-
-* Bulletin board send.
 
 * Bulletin board send REST API and client. 
   

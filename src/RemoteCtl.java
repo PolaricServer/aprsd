@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ import java.util.regex.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-
+import java.util.concurrent.*;
 
 /**
  * Remote control. Execute commands on associated servers by exchanging
@@ -61,12 +61,13 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private boolean _parentCon = false; 
    private int     _tryPause = 0;
    private Thread  _thread;
-   
+   private static ScheduledExecutorService gc = Executors.newScheduledThreadPool(5);
+       
    private MessageProcessor _msg;
    private MessageProcessor.MessageHandler _pmsg;
    private ServerAPI _api;
    private Logfile   _log;
-   private UserCb    _addUser, _removeUser; 
+   private UserCb    _addUser, _removeUser, _nodeDown; 
     
    private LinkedHashMap<String, String> _cmds = new LinkedHashMap(); 
    
@@ -82,6 +83,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    public void setUserCallback(UserCb a, UserCb r) {
        _addUser=a; _removeUser=r; 
    }
+   public void setNodeCallback(UserCb nd) {
+       _nodeDown = nd;
+   }
+   
+   
    
    private int threadid=0;    
    public RemoteCtl(ServerAPI api, MessageProcessor mp)
@@ -121,11 +127,13 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           /* Try max 3 times before taking a pause */
           if (_try_parent++ >= 3) {
               _log.info(null, "Giving up - pausing: "+id);
-              _tryPause = 6; /* 2 hours */
+              _tryPause = 3; /* 1 hour */
           }
        }
-       else
-         _log.info(null, "Message to child: "+id+ " failed");
+       else {
+         _log.info(null, "Message to child: "+id+ " failed - disconnect");
+         disconnectChild(id);
+       }
    }
    
    
@@ -172,31 +180,52 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
 
 
 
+   /**
+    * Store request in log. 
+    */
    private void storeRequest(String text)
    {
-     /* Log last update to each item */
+     /* 
+      * Log last update to each item. 
+      * Assume those updates are idempotent 
+      */
      String[] arg = text.split("\\s+", 3);
-     String prefix = arg[0], suffix = null;
+     String prefix = arg[0];
   
-     if (arg[0].matches("ALIAS|ICON|TAG|RMTAG")) {
+     if (arg[0].matches("ALIAS|ICON|TAG|RMTAG|USER|RMUSER")) {
+         if (arg[0].matches("RMTAG"))
+            prefix = "TAG";
+         if (arg[0].matches("RMUSER"))
+            prefix = "USER";
          prefix = prefix + " " + arg[1];
-         suffix = arg[2];
+         
+         /* Remove earlier updates for the same item */
+         _cmds.remove(prefix);
+         
      }
-     else if (arg[0].matches("SAR"))
-         suffix = arg[1] + (arg.length > 2 ? " " + arg[2] : "");
-     else
+     else if (!arg[0].matches("RMITEM"))
+         _cmds.values().removeIf( (x)-> x.matches("(ALIAS|ICON|TAG) "+arg[1]));
+     
+     else if (!arg[0].matches("RMNODE"))
+         /* Remove all USER entries with that particular node */
+         _cmds.values().removeIf( (x)-> x.matches("USER .*@"+arg[1]));
+  
+     else if (!arg[0].matches("SAR"))
          return;
-     _cmds.remove(prefix);
-     if (!suffix.matches("NULL|OFF"))
-         _cmds.put(prefix, suffix);
+     
+     /* Don't store deletions */
+     if (!text.matches(".*(NULL|OFF)") && !text.matches("RM.*")) 
+        _cmds.put(prefix, text);
+     
    }
    
 
 
    private void playbackLog(String dest)
    {
-       for (Map.Entry<String, String> entry: _cmds.entrySet())
-          sendRequest(dest, entry.getKey()+" "+entry.getValue());
+        for (Map.Entry<String, String> entry: _cmds.entrySet())
+            if (!entry.getValue().matches("USER .*@"+dest))
+                sendRequest(dest, entry.getValue());
    }
    
    
@@ -243,20 +272,42 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           p = doUser(sender, args, true);  
       else if (arg[0].equals("RMUSER"))
           p = doUser(sender, args, false);
+      else if (arg[0].equals("RMNODE"))
+          p = doRemoveNode(sender, args); 
+      else if (arg[0].equals("RMITEM"))
+          p = doRemoveItem(sender, args);
           
       /* If command returned true, propagate the request further 
         * to children and parent, except the originating node.
         */
-      _log.info(null, " Recv < "+sender.getIdent()+": "+text+ (p ? " -- OK" : " -- FAILED"));
+      _log.info(null, "Recv < "+sender.getIdent()+": "+text+ (p ? " -- OK" : " -- FAILED"));
       if (!p)
          return false;
      
-      if (propagate) {
-         storeRequest(text);
+      if (propagate)
          sendRequestAll(text, sender.getIdent());
-      }
+      
       return true;
    }
+   
+   
+    /** 
+     * Remove tags, aliases and icons associated with an item 
+     */
+    protected boolean doRemoveItem(Station sender, String arg) {
+        _api.log().debug("RemoteCtl", "Got RMNODE from "+sender.getIdent()+": "+arg);
+        _api.getDB().removeItem(arg.trim());
+        return true;
+    }
+    
+    
+    
+   
+    protected boolean doRemoveNode(Station sender, String arg) {
+        _api.log().debug("RemoteCtl", "Got RMNODE from "+sender.getIdent()+": "+arg);
+        _nodeDown.cb(getMycall(), arg);
+        return true;
+    }
    
    
    
@@ -292,7 +343,13 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             _log.info(null, "Connection from child: "+sender.getIdent()+" established");
             if (!_cmds.isEmpty())
                 _log.info(null, "Playback command log");
-            playbackLog(sender.getIdent());
+                
+            /* 
+             * Play back log, but wait until this function has 
+             * returned and reply is sent 
+             */
+            gc.schedule( ()->
+                playbackLog(sender.getIdent()), 3, TimeUnit.SECONDS);
         }
         _children.put(sender.getIdent(), new Date());
         return true;
@@ -462,7 +519,17 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    } 
        
 
-
+       
+   private void disconnectChild(String ident) 
+   {
+        _nodeDown.cb(getMycall(), ident);
+        _children.remove(ident);
+         sendRequestAll("RMNODE "+ident, ident);
+   }
+   
+       
+       
+       
    private AprsPoint newItem(String ident)
    {
        String[] x = ident.split("@");
@@ -513,10 +580,13 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             for (String x : getChildren()) 
                 if (_children.get(x).getTime() + 2400000 <= (new Date()).getTime()) {
                    _log.info(null, ""+x+" disconnected (timeout)");
-                   _children.remove(x);
+                   disconnectChild(x);
                 }
             Thread.sleep(1200000);
          }
       } catch (Exception e) {}
    } 
 }
+
+
+

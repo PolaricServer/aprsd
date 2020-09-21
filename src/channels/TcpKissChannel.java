@@ -64,8 +64,10 @@ public class TcpKissChannel extends TcpChannel
     {
         _log.log(" [>" + this.getShortDescr() + "] " + p);
         try {
-           _kiss.sendPacket(p);
-           _sent++;
+           if (_kiss!=null) {
+              _kiss.sendPacket(p);
+              _sent++;
+           }
         }
         catch (IOException e)
            {  _api.log().error("TcpKissChannel", chId()+"KissTncChannel.sendPacket: "+e); }
@@ -103,4 +105,3 @@ public class TcpKissChannel extends TcpChannel
        { return "rf"+_chno; }
        
 }
-

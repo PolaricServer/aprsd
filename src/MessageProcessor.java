@@ -87,6 +87,7 @@ public class MessageProcessor implements Runnable, Serializable
        protected boolean removeEldestEntry(Map.Entry e)
             { return size() > _MSGID_STORE_SIZE; }
    }
+   
    private RecMessages recMessages = new RecMessages();
    private Date recMsg_ts = new Date(); 
        
@@ -397,7 +398,7 @@ public class MessageProcessor implements Runnable, Serializable
             }
             n++;
             
-            synchronized(this) {
+           //synchronized(this) {
               Iterator<OutMessage> iter = _outgoing.values().iterator(); 
               iter.forEachRemaining(m -> {
                  Date t = new Date();
@@ -417,7 +418,7 @@ public class MessageProcessor implements Runnable, Serializable
                    } 
                 }
               }); 
-            }
+           // }
 
          } catch (Exception e) 
              { _api.log().warn("MessageProc", ""+e);

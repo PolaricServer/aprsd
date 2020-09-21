@@ -214,9 +214,13 @@ public class StationDBImp implements StationDB, Runnable
                     
                  /* If nonpersistent or saved to database, remove it. */
                  if (!st.isPersistent() || _histData != null) {
+                 
+                    // FIXME: what about tags? 
+                    if (st.getAlias() != null || st.iconOverride())
+                        _api.getRemoteCtl().sendRequestAll("RMITEM "+st.getIdent(),null);
                     st.removeAllTags();
                     removeItem(st.getIdent());
-                    _routes.removeNode(st.getIdent()); 
+                    _routes.removeNode(st.getIdent());
                     n++;
                  }
              } 
@@ -250,7 +254,7 @@ public class StationDBImp implements StationDB, Runnable
           
            if (idd != null && idd.length > 1 && idd[1].equals(_api.getOwnPos().getIdent()))
                  _ownobj.delete(idd[0]);
-                 
+             
            _map.remove(id);
            _hasChanged = true; 
     }

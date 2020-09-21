@@ -119,6 +119,13 @@ public class UserApi extends ServerBase {
             }
         );
         
+        _api.getRemoteCtl().setNodeCallback(
+            (t, node) -> {
+                if (node.matches("[A-Za-z0-9\\-]+"))
+                    _remoteUsers.removeIf( (x)-> x.matches(".*@"+node) );
+            }
+        ); 
+        
         
         
         /************************************************

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015-2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ public class Kiss
    protected InputStream _istream; 
    protected OutputStream _ostream;
    protected int _port;
+   protected int received;
   
    
    /** Address field. */
@@ -137,8 +138,10 @@ public class Kiss
            
            }
            catch (Frame_End e) {
-              if (complete) 
-                 return p;        
+              if (complete) {
+                 received = 0;
+                 return p;  
+              }
            }
            catch (Exception e) { }
         }
@@ -239,10 +242,10 @@ public class Kiss
                 else
                    escaped = false;
              } 
+             received++;
              return (byte) x;  
          }
       }   
    }
        
 }
-

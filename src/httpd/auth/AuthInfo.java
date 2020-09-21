@@ -115,9 +115,9 @@ public class AuthInfo {
                     break;
         }, 60, 60, TimeUnit.SECONDS);
         
-        /* At shutdown. Send a message to indicate that all users are logged out */
+        /* At shutdown. Send a message to other nodes */
         api.addShutdownHandler( ()->  
-            api.getRemoteCtl().sendRequestAll("RMUSER .*@"+api.getRemoteCtl().getMycall(), null) 
+            api.getRemoteCtl().sendRequestAll("RMNODE "+api.getRemoteCtl().getMycall(), null) 
         );
 
     }
