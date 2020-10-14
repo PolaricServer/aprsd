@@ -105,26 +105,28 @@ public class UserApi extends ServerBase {
      */
     public void start() {     
     
-        _api.getRemoteCtl().setUserCallback(
-            // Add
-            (node, uname) -> { 
-                if (uname.matches(".+@[A-Za-z0-9\\-]+"))
-                    _remoteUsers.add(uname); 
-            },
+        if (_api.getRemoteCtl() != null) {
+            _api.getRemoteCtl().setUserCallback(
+                // Add
+                (node, uname) -> { 
+                    if (uname.matches(".+@[A-Za-z0-9\\-]+"))
+                        _remoteUsers.add(uname); 
+                },
             
-            // Remove. Note that we treat the username as a regular expression
-            (node, uname) -> {
-                if (uname.matches(".+@[A-Za-z0-9\\-]+"))
-                    _remoteUsers.removeIf( (x)-> x.matches(uname) );
-            }
-        );
+                // Remove. Note that we treat the username as a regular expression
+                (node, uname) -> {
+                    if (uname.matches(".+@[A-Za-z0-9\\-]+"))
+                        _remoteUsers.removeIf( (x)-> x.matches(uname) );
+                }
+            );
         
-        _api.getRemoteCtl().setNodeCallback(
-            (t, node) -> {
-                if (node.matches("[A-Za-z0-9\\-]+"))
-                    _remoteUsers.removeIf( (x)-> x.matches(".*@"+node) );
-            }
-        ); 
+            _api.getRemoteCtl().setNodeCallback(
+                (t, node) -> {
+                    if (node.matches("[A-Za-z0-9\\-]+"))
+                        _remoteUsers.removeIf( (x)-> x.matches(".*@"+node) );
+                }
+            );
+        }
         
         
         

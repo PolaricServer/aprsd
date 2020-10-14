@@ -205,6 +205,8 @@ public abstract class MailBox {
     
     
     public static void init(ServerAPI api) {
+        if (api.getRemoteCtl() == null)
+            return;
         api.getRemoteCtl().setMailbox( (sender, recipient, text) -> {
             String[] tc = text.split(" ", 2); 
             String[] addr = tc[0].split(">", 2);
@@ -288,6 +290,9 @@ public abstract class MailBox {
      * Send message to another server or elsewhere depending on the @-field. 
      */
     private static boolean postRemoteMessage(ServerAPI api, String[] addr, Message msg) {
+        if (api.getRemoteCtl() == null)
+            return false; 
+    
         if (addr[1].matches("APRS|aprs|Aprs")) {
             /* 
              * Message should be sent as a raw APRS message 
