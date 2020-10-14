@@ -19,6 +19,8 @@ import java.net.*;
 import java.util.*;
 import java.text.*;
 import uk.me.jstott.jcoord.*;
+import java.math.BigInteger;
+
 
 /**
  * Parse and interpret APRS datastreams.
@@ -671,23 +673,82 @@ public class AprsParser implements AprsChannel.Receiver
     }
     
     
+    
 
     private void parseExtraReport(Source src, String data, AprsPoint station)
     {
        Date time = new Date();
        time = parseTimestamp(data.substring(0), true);
        AprsHandler.PosData pd = parseCompressedPos(data.substring(3));
+       
        if (AprsChannel._dupCheck.checkTS(station.getIdent(), time))
             return;
             
        _api.log().debug("AprsParser", "Extra report accepted: "+time);
        station.update(time, pd, "", "(EXT)" );        
-       // _api.getAprsHandler().handlePosReport(src, station.getIdent(), time, pd, "", "(EXT)" );
        for (AprsHandler h:_subscribers)
            h.handlePosReport(src, station.getIdent(), time, pd, "", "(EXT)" );
     }
     
     
+    
+    
+    private String parseExtraReport2(Source src, String data, AprsPoint station,  AprsHandler.PosData pd, Date ts)
+    {
+        while (data.length() >= 8) {
+            if (!data.matches("([A-Za-z0-9\\+/]{8})+.*"))
+                break;
+            int ts_delta  = b64to12bit(data.substring(0, 2));
+            int lat_delta = b64to18bit(data.substring(2, 5));
+            int lng_delta = b64to18bit(data.substring(5, 8));
+            
+            long tsx = ( ts.getTime() / 1000 + ts_delta) * 1000;
+            
+            LatLng pp = (LatLng) pd.pos;
+            double lat = pp.getLat() + ((double)lat_delta / 100000); 
+            double lng = pp.getLng() + ((double)lng_delta / 100000);
+            data = data.substring(8);
+
+            
+            Date time = new Date(tsx);
+            if (AprsChannel._dupCheck.checkTS(station.getIdent(), time)) {
+                _api.log().debug("AprsParser", "Extra report type 2 DUPLICATE: "+time);
+                continue;
+            }
+            
+            _api.log().debug("AprsParser", "Extra report type 2 accepted: "+time);
+            AprsHandler.PosData pdx = new AprsHandler.PosData(); 
+            pdx.pos = new LatLng(lat, lng);
+            pdx.symbol = pd.symbol; 
+            pdx.symtab = pd.symtab;
+            pdx.course = pd.speed = -1; 
+            pdx.altitude = -1; 
+            station.update(time, pdx, "", "(EXT)" );        
+            for (AprsHandler h:_subscribers)
+                h.handlePosReport(src, station.getIdent(), time, pdx, "", "(EXT)" );
+        }
+        return data;
+    }
+    
+    
+    private static int b64to12bit(String s) {
+        com.mindprod.base64.Base64 b64 = new com.mindprod.base64.Base64();
+        byte[] bytes = b64.decode(s+"AA");
+        return (new BigInteger(bytes)).intValue() >> 12;
+    }
+    
+    private static int b64to18bit(String s) {
+        com.mindprod.base64.Base64 b64 = new com.mindprod.base64.Base64();
+        byte[] bytes = b64.decode(s+"A");
+        int x =  (new BigInteger(bytes)).intValue() >> 6;
+        
+        if ((bytes[1] & 0x02) > 0) {
+            /* Negative number - turn it to a 32 bit negative number */
+            bytes[0] = (byte) 0xff;
+            bytes[1] |= 0xfc;
+        } 
+        return x;
+    }
     
     /** 
      * Parse standard position data.
@@ -860,6 +921,9 @@ public class AprsParser implements AprsChannel.Receiver
            else if (comment.length() >= 18 && comment.matches("(/\\#.{16})+.*")) {
               parseExtraReport(p.source, comment.substring(2,18), station); 
               comment = comment.substring(18, comment.length());
+           }
+           else if (comment.matches("/\\*([A-Za-z0-9\\+/]{8})+.*")) {
+              comment = parseExtraReport2(p.source, comment.substring(2), station, pd, ts); 
            }
            else break;
         }

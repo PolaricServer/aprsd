@@ -34,7 +34,7 @@ public class DupCheck
         new LinkedHashMap() 
         {
             protected boolean removeEldestEntry(Map.Entry e)
-                { return size() > 2000; }
+                { return size() > 75000; }
         };
     
      
@@ -59,7 +59,7 @@ public class DupCheck
      
      public synchronized boolean checkTS(String from, Date ts)
      {
-         String composed = "TIME:" + from + ":"+_dhmsFormat.format(ts);
+         String composed = from + ":"+_dhmsFormat.format(ts);
          if (_timestamped.containsKey(composed))
              return true;
          _timestamped.put(composed, TRUE);
