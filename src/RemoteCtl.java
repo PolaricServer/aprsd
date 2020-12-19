@@ -567,10 +567,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    {
       while (true) 
       try {
-         Thread.sleep(20000);
+         Thread.sleep(35000);
 
          while (true) {
-            if (_parent != null && _tryPause == 0) {
+            if (_parent != null && _tryPause <= 0) {
                _api.log().debug("RemoteCtl", "Send CON: "+_parent);
                sendRequest(_parent, "CON");
             }

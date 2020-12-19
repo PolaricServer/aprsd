@@ -67,6 +67,21 @@ public class MailBoxApi extends ServerBase {
         }, ServerBase::toJson );
         
         
+        /*
+         * DELETE /mailbox/<msgid>
+         * Delete a message. Returns "Ok" even if message was not found.
+         */
+        delete("/mailbox/*", (req, resp) -> {
+            var msgid = req.splat()[0];
+            var box = getAuthInfo(req).mailbox;
+            if (!msgid.matches("[0-9]+"))            
+                return ERROR(resp, 400, "Message id must be number");
+            box.remove(Long.parseLong(msgid));
+            return "Ok";
+        });
+        
+        
+        
         /* 
          * POST /mailbox 
          * Post a message. The message will be routed to the proper recipient mailbox. 

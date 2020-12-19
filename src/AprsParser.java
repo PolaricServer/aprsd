@@ -236,6 +236,11 @@ public class AprsParser implements AprsChannel.Receiver
         int i = msg.lastIndexOf('{');
         if (i >= 0) 
            msgid = msg.substring(i+1, msg.length());
+        
+        if (i>msg.length() || (i>0 && i<11)) {
+            _api.log().debug("AprsParser", "Message format problem: '"+msg+"'");
+            return;
+        }
         String content = msg.substring(11, (i>=0 ? i : msg.length()));
         
         if (msg.charAt(10) != ':') {

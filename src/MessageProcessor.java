@@ -55,6 +55,7 @@ public class MessageProcessor implements Runnable, Serializable
       Date time;
       Notification not;
       int retry_cnt = 0;
+      boolean deleted = false;
       OutMessage(String mid, String rec, String msg, Notification n)
         { msgid = mid; recipient = rec; message = msg; time = new Date(); not=n; }
    }
@@ -392,33 +393,36 @@ public class MessageProcessor implements Runnable, Serializable
             
             /* Every 4 hours, send a message to tell APRS-IS that we are here. 
              */
-            if (n % 2880 == 12) {
-                n=12;
+            if (n % 2880 == 5) {
+                n=5;
                 sendMessage("TEST", "", false, false);
             }
             n++;
             
-           //synchronized(this) {
-              Iterator<OutMessage> iter = _outgoing.values().iterator(); 
-              iter.forEachRemaining(m -> {
-                 Date t = new Date();
-                 long tdiff = t.getTime() - m.time.getTime();
-                 if (tdiff >= _MSG_INTERVAL*1000) {
-                   if (m.retry_cnt >= _MSG_MAX_RETRY) {
-                      /* After max number of retries report failure */
-                      if (m.not != null)
-                         m.not.reportFailure(m.recipient);
-                      iter.remove();
-                   }
-                   else {
-                      /* Re-send message */
-                      sendPacket(m.message, m.recipient);
-                      m.time = t;
-                      m.retry_cnt++;
-                   } 
+        
+            Iterator<OutMessage> iter = _outgoing.values().iterator(); 
+            iter.forEachRemaining(m -> {
+                Date t = new Date();
+                long tdiff = t.getTime() - m.time.getTime();
+                if (tdiff >= _MSG_INTERVAL*1000 && !m.deleted) {
+                    if (m.retry_cnt >= _MSG_MAX_RETRY) {
+                        /* After max number of retries report failure */
+                        if (m.not != null)
+                            m.not.reportFailure(m.recipient);
+                        m.deleted = true; 
+                    }
+                    else {
+                        /* Re-send message */
+                        sendPacket(m.message, m.recipient);
+                        m.time = t;
+                        m.retry_cnt++;
+                    } 
                 }
-              }); 
-           // }
+            }); 
+           
+            synchronized(this) {
+                _outgoing.values().removeIf((m) -> {return m.deleted;}); 
+            }
 
          } catch (Exception e) 
              { _api.log().warn("MessageProc", ""+e);

@@ -111,11 +111,17 @@ public abstract class MailBox {
         }
     
     
+    
         /** Cleanup. Remove outdated messages */
         private void clean() {
             long now = (new Date()).getTime(); 
             long limit = 1000 * 60 * MSG_EXPIRE; 
             _messages.removeIf( m -> (m.time.getTime() < now - limit));
+        }
+    
+    
+        public void remove(long id) {
+            _messages.removeIf( m -> (m.msgId == id));
         }
     
     
@@ -301,7 +307,7 @@ public abstract class MailBox {
              */ 
             MailBox.User mb = (MailBox.User) _addressMapping.get(msg.from+"@aprs");
             archiveSent(mb, msg, 0); 
-            api.getMsgProcessor().sendRawMessage(msg.from, msg.text, addr[0]);  
+            api.getMsgProcessor().sendRawMessage(msg.from, msg.text, addr[0].toUpperCase());  
             return true; 
         }
         else {

@@ -228,6 +228,7 @@ public class WebServer implements ServerAPI.Web
         MailBoxApi mb = new MailBoxApi(_api); 
         mb.start(); 
         corsEnable("/mailbox");
+        corsEnable("/mailbox/*");
         
         /* Rooms for SYSTEM and ADMIN notifications */
         _pubsub.createRoom("notify:SYSTEM", false, false, false, false, ServerAPI.Notification.class);
