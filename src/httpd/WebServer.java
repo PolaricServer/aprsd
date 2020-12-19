@@ -295,6 +295,12 @@ public class WebServer implements ServerAPI.Web
         before(prefix, _auth.conf().filter(null, "isauth")); 
     }
     
+    public void protectUrl(String prefix, String level) {
+        String lvl = (level==null ? "" : ", "+level);
+        before(prefix, _auth.conf().filter(null, "isauth"+lvl)); 
+    }
+    
+    
     
     /* FIXME: What methods should be part of ServerAPI.Web ? */
     public AuthConfig getAuthConfig()
