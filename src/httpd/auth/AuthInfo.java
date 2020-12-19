@@ -63,6 +63,7 @@ public class AuthInfo {
     private static Queue<SesMailBox> gcbox = new LinkedList<SesMailBox>();
     private static Map<String, SesMailBox> mboxlist = new HashMap();
     private static ScheduledExecutorService gc = Executors.newScheduledThreadPool(5);
+    private static Map<String, ScheduledFuture> closingSessions = new HashMap();
     
     public static void addService(String srv) {
        _services.add(srv);
@@ -73,7 +74,18 @@ public class AuthInfo {
         WebServer ws = (WebServer) api.getWebserver(); 
         ws.onOpenSes( (c)-> {
                 AuthInfo a = c.getAuthInfo();
-                if (a.mailbox!=null) {
+                
+                /* If user has recently closed session and is scheduled for removal, 
+                 * cancel this removal. 
+                 */
+                var closing = closingSessions.get(a.userid); 
+                if (closing != null) {
+                    a.mailbox.increment();
+                    closing.cancel(false); 
+                    closingSessions.remove(a.userid);
+                }
+                
+                else if (a.mailbox!=null) {
                     a.mailbox.increment();
                     
                     /* As long as one or more sessions are open, we want 
@@ -87,17 +99,31 @@ public class AuthInfo {
             }); 
             
         ws.onCloseSes( (c)-> {
+
                 AuthInfo a = c.getAuthInfo();
                 if (a.mailbox!=null) {
                     if (a.mailbox.decrement() == 0) {
-                        /* If last session is closed, remove address mappings for messages. */
-                        a.mailbox.removeAddresses();
-                        api.getRemoteCtl().sendRequestAll("RMUSER "+a.userid+"@"+api.getRemoteCtl().getMycall(), null);
                         
-                        /* Put mailbox on expire. Expire after 1 week */
-                        a.mailbox.expire = (new Date()).getTime() + 1000 * 60 * MAILBOX_EXPIRE; 
-                        gcbox.add(a.mailbox);
-                        mboxlist.put(a.mailbox.getUid(), a.mailbox);
+                        /* 
+                         * Schedule for removing the user and expiring the mailbox - in 10 seconds 
+                         * This is cancelled if session is re-opened within 10 seconds
+                         */
+                        var closing = gc.schedule( () -> {
+                            /* If last session is closed, remove address mappings for messages. */
+                            a.mailbox.removeAddresses();
+                            api.getRemoteCtl().sendRequestAll(
+                                "RMUSER "+a.userid+"@"+api.getRemoteCtl().getMycall(), null);
+                        
+                            /* Put mailbox on expire. Expire after 1 week */
+                            a.mailbox.expire = (new Date()).getTime() + 1000 * 60 * MAILBOX_EXPIRE; 
+                            gcbox.add(a.mailbox);
+                            mboxlist.put(a.mailbox.getUid(), a.mailbox);
+                            
+                            /* Remove the future */
+                            closingSessions.remove(a.userid); 
+                            
+                        }, 10, TimeUnit.SECONDS);
+                        closingSessions.put(a.userid, closing); 
                     }
                 }
             }); 
@@ -116,9 +142,10 @@ public class AuthInfo {
         }, 60, 60, TimeUnit.SECONDS);
         
         /* At shutdown. Send a message to other nodes */
-        api.addShutdownHandler( ()->  
-            api.getRemoteCtl().sendRequestAll("RMNODE "+api.getRemoteCtl().getMycall(), null) 
-        );
+        api.addShutdownHandler( ()-> {
+            if (api.getRemoteCtl() != null)
+                api.getRemoteCtl().sendRequestAll("RMNODE "+api.getRemoteCtl().getMycall(), null); 
+        });
 
     }
     
