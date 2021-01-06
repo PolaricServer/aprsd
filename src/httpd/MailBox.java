@@ -255,12 +255,14 @@ public abstract class MailBox {
             msg.to = addr[0];
         }
             
-        if (addr.length > 1 && addr[1] != null)
-            return postRemoteMessage(api, addr, msg); 
-
-        if (!putMessage(msg))
+        if (addr.length > 1 && addr[1] != null) {
+            if (!postRemoteMessage(api, addr, msg)) 
+                return false;
+        }
+        else if (!putMessage(msg))
             return false;
-        archiveSent(_addressMapping.get(msg.to), msg, 1);
+            
+        archiveSent(_addressMapping.get(msg.from), msg, 1);
         return true;
     }
     
