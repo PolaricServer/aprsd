@@ -1,46 +1,28 @@
 
-    
-FOR RELEASE 2.6
-
-
-* Allow user-accounts to be set up with callsigns. 
-    DONE.
-
-* Generic APRS messaging with notifications. 
-    DONE.
-    
-* APRS messaging REST API and client. 
-    DONE.
-
-* "Clear all" for alias/icons.
-    DONE.
-
-* Fix backup channel behaviour 
-    DONE.
-
-* Implement short messaging API and client
-    DONE.
-    
-* Allow callsigns in user-accounts
-    DONE.
-    
-* API to get logged-in users, including on remote systems. 
-    DONE.
-    
-* Channels - refactoring
-    DONE.
-    
-
-
 FOR RELEASE 2.7
     
 * Draw tool: Radius for circles. Measurement info while drawing. 
 
+* Draw tool: Get features that are moved to layers. 
+
+* Draw tool: Can this be done more intuitive? 
+
+* Share layers etc. with other users
+
 * Allow backup remotectl parent.
+
+* Missions, incidents: Manage trackers, tracks... Replace SAR mode. Replace "My trackers"? 
+
+* Confirm-popup when deleting items. 
+
+* Signs editor: Handle owners.. 
+
 
 
 
 LATER RELEASES
+
+* Groups of users? Roles? 
 
 * Server failover?
 
@@ -62,8 +44,6 @@ LATER RELEASES
 * Bulletin board send REST API and client. 
   
 * Reset to default - button/link in config screen
-     
-* Develop signs. Channels? 
 
 * APRS-IS server (plugin or standalone)
 

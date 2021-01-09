@@ -1,8 +1,13 @@
-polaric-aprsd (2.5+) UNRELEASED; urgency=medium
+polaric-aprsd (2.6) stable; urgency=medium
 
-  * Development 
+  * API for short messaging and APRS messaging
+  * API for editing signs
+  * User management improvements and API
+  * Work on remote control mechanism.. Update logged in users. 
+  * Channel refactoring
+  * Various fixes
 
- -- Øyvind Hanssen <ohanssen@acm.org>  Sat, 23 May 2020 21:50:41 +0200
+ -- Oyvind Hanssen <ohanssen@acm.org>  Sat, 09 Jan 2021 20:30:56 +0100
 
 polaric-aprsd (2.5) stable; urgency=medium
 

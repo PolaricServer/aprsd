@@ -26,8 +26,9 @@ case "$1" in
         fi
         echo
         echo "******* Polaric-aprsd *******"
-        echo "To configure server, point your browser to http://<hostname>:8081/config_menu"
-        echo "Please set your CALLSIGN and restart server!" 
+        echo "To configure server, point your browser to http://localhost:8081/config_menu"
+        echo "If this is the first time installataion, please set your CALLSIGN and restart server!" 
+        echo "Use the command 'polaric-restart' to restart server" 
         echo "Use command 'polaric-password' to change password or add new users"
         echo 
     ;;

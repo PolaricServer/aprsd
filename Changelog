@@ -282,5 +282,16 @@ V.2.5
 * Varius fixes..
 
 
+V.2.6
+-----
+
+* Implement API for short messaging and generic APRS messaging.
+* Remote control fixes..
+* User management improvements and API. Get logged-in users, including on remote systems. 
+* Allow callsigns in user-accounts
+* Channels code - refactoring        
+* API for editing signs.
+* Various fixes...
+
 
     

@@ -29,8 +29,8 @@ import java.util.concurrent.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "2.5+";
-   public static String toaddr  = "APPS25";
+   public  static String version = "2.6";
+   public static String toaddr  = "APPS26";
    
    private static StationDB db = null;
    private static AprsParser parser = null;
@@ -310,7 +310,7 @@ public class Main implements ServerAPI
   
            /* Igate */
            igate = new Igate(api);
-           
+
            /* Own position */
            if (getBoolProperty("ownposition.gps.on", false)) {
                log.info("Main", "Activate GPS");
