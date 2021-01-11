@@ -181,6 +181,7 @@ public class WebServer implements ServerAPI.Web
         before("/item/*/alias",    _auth.conf().filter(null, "isauth, sar"));
         before("/item/*/reset",    _auth.conf().filter(null, "isauth, sar"));
         before("/item/*/tags",     _auth.conf().filter(null, "isauth, sar"));
+        before("/item/*/chcolor",  _auth.conf().filter(null, "isauth, sar"));
         before("/aprs/*",          _auth.conf().filter(null, "isauth, sar"));
         before("/system/sarmode",  _auth.conf().filter(null, "isauth, sar"));
         before("/sar/ipp/*",       _auth.conf().filter(null, "isauth"));

@@ -330,6 +330,18 @@ public class SystemApi extends ServerBase {
         }, ServerBase::toJson );
         
         
+        /*******************************************
+         * Change color of trail
+         *******************************************/
+        put("/item/*/chcolor", "application/json", (req, resp) -> {
+            var ident = req.splat()[0];
+            TrackerPoint st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident);     
+            st.nextTrailColor();
+            return "Ok";
+        });
+        
         
         /*******************************************
          * Reset trail, etc for a given item
@@ -403,6 +415,7 @@ public class SystemApi extends ServerBase {
             }
             return "Ok"; 
         });
+        
         
     }
 
