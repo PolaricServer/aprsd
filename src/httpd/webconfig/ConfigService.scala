@@ -170,12 +170,6 @@ package no.polaric.aprsd.http
           def fields(req : Request): NodeSeq =
                 textField("default.mycall", "item1", 
                       I.tr("Callsign")+":", "", 10, 10, CALLSIGN) ++
-                textField("user.admin", "item2", 
-                      I.tr("Admin users")+":", 
-                      I.tr("Full admin-rights"), 30, 200, TEXT, "(regex)") ++  
-                textField("user.update", "item3", 
-                      I.tr("SAR users")+":", 
-                      I.tr("Ordinary SAR users"), 30, 200, TEXT, "(regex)") ++
                 br ++
                 textField("channels", "item4", 
                       I.tr("Data channels")+":", 
