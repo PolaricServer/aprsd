@@ -91,7 +91,8 @@ public class AuthInfo {
                     /* As long as one or more sessions are open, we want 
                      * address mappings for messages. 
                      */
-                    api.getRemoteCtl().sendRequestAll("USER "+a.userid+"@"+api.getRemoteCtl().getMycall(), null);
+                    if (api.getRemoteCtl() != null)
+                        api.getRemoteCtl().sendRequestAll("USER "+a.userid+"@"+api.getRemoteCtl().getMycall(), null);
                     a.mailbox.addAddress(a.userid);
                     if (!"".equals(a.callsign))
                         a.mailbox.addAddress(a.callsign+"@aprs");
