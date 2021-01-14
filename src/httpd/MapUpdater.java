@@ -46,6 +46,7 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
        protected LatLng  _uleft;     /* Area of interest: upper left */
        protected LatLng  _lright;    /* Area of interest: lower right */
        protected String  _filter;
+       protected String  _tag;
        protected long    _scale = 0;
               
        public Client(Session conn) 
@@ -80,7 +81,9 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
            // FIXME: Use JSON encoding! 
            _api.log().debug("MapUpdater", "Client "+_uid+": " + text);
            String[] parms = text.split(",");
-           /* SUBSCRIBE filter,x1,x2,x3,x4,scale */
+           /* SUBSCRIBE filter,x1,x2,x3,x4,scale,tag
+            * tag is optional
+            */
            if (parms[0].equals("SUBSCRIBE")) {
               if (parms.length > 6) {
                  _filter = parms[1];
@@ -96,6 +99,10 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
                  _uleft  = new LatLng((double) x4, (double) x1); 
                  _lright = new LatLng((double) x2, (double) x3);
                  _scale  = Long.parseLong( parms[6] );
+                 if (parms.length > 7)
+                    /* 7th parameter is tag */
+                    _tag = parms[7].trim();
+                    
                  _subscribe = true;
                  subscribe(); 
                  

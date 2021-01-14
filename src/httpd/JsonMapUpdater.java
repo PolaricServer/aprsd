@@ -88,8 +88,11 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                     /* Apply filter. */
                     Action action = vfilt.apply(s, _scale); 
                     if ( s.getPosition() == null ||
-                         ( s.getSource() != null && s.getSource().isRestricted() && !action.isPublic() && !allowed) ||
-                           action.hideAll() )
+                         ( s.getSource() != null && s.getSource().isRestricted() && !action.isPublic() && 
+                           !allowed) ||
+                           action.hideAll() ||
+                           (_tag != null && !s.hasTag(_tag))
+                        )
                         continue; 
                 
                     /* Add point to delete-list */
