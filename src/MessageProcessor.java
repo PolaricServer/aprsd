@@ -319,8 +319,8 @@ public class MessageProcessor implements Runnable, Serializable
        if (_rfChan != null &&
            /* if recipient is heard on RF and NOT on the internet */
            ((_rfChan.heard(recipient)   &&
-            !_rfChan.heard(recipient)) || 
-            recipient.matches(_alwaysRf) || recipient.equals("TEST")))
+            !_inetChan.heard(recipient))) || 
+            recipient.matches(_alwaysRf) || recipient.equals("TEST") )
        {
           /* Now, get a proper path for the packet. 
            * If possible, a reverse of the path last heard from the recipient.
@@ -330,7 +330,8 @@ public class MessageProcessor implements Runnable, Serializable
              p.via = _defaultPath;
           else
              p.via = AprsChannel.getReversePath(path); 
-         
+             
+          _api.log().debug("MessageProc", "Sending message to "+recipient+" on RF: "+p.via);
           _rfChan.sendPacket(p);
           sentOnRf = true;
        }

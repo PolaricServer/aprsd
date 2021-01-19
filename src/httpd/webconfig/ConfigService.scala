@@ -173,7 +173,7 @@ package no.polaric.aprsd.http
                 br ++
                 textField("channels", "item4", 
                       I.tr("Data channels")+":", 
-                      I.tr("Data channels for tracking"), 30, 50, LIST, "(liste)")   ++
+                      I.tr("Data channels for tracking"), 30, 50, LIST, "(list)")   ++
                 textField("channel.default.inet", "item5", 
                       I.tr("Primary APRS/IS channel")+":", "", 10, 10, NAME) ++ 
                 textField("channel.default.rf", "item6", 
@@ -203,6 +203,9 @@ package no.polaric.aprsd.http
                 textField("objects.rfpath", "item13", 
                       I.tr("Digipeater path, objects")+":", 
                       I.tr("...has also effect for objects to RF igate"), 20, 30, LIST) ++
+                textField("message.alwaysRf", "item13.2", 
+                      I.tr("Always send on RF")+":",
+                      I.tr("messages with dest that matches this will be sent on RF"), 20, 30, TEXT, "(regex)") ++
                 br ++ 
                 label("item14", "leftlab", 
                       I.tr("Remote control")+":", 
