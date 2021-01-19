@@ -85,8 +85,8 @@ public abstract class AprsPoint extends TrackerPoint implements Serializable, Cl
      */    
     public void updatePosition(Date ts, Reference newpos, int ambiguity)
     {
-         updatePosition(ts, newpos);
-         _ambiguity = ambiguity;
+        updatePosition(ts, newpos);
+        _ambiguity = ambiguity;
     }
         
         

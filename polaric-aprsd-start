@@ -20,6 +20,6 @@ SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB
   JAVA_ARGS="$FLAGS $SERIALPORTS -Dconfdir=$CONFDIR -Ddatadir=$DATADIR -Dwebdir=$WEBDIR -Dlogdir=$LOGDIR" 
  
  
- exec $JAVA $JAVA_ARGS -cp "$CLASSPATH" no.polaric.aprsd.Main $INIFILE >> $LOGFILE 2>&1
+ exec $JAVA $JAVA_ARGS -cp "$CLASSPATH" no.polaric.aprsd.Main $INIFILE >> $LOGFILE 2>&1 
  
  
