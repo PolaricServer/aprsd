@@ -378,7 +378,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    /**
     * Set SAR mode. 
     * @param sender The station that sent the commmand.
-    * @param args The arguments of the SAR command: ON or OFF.
+    * @param args The arguments of the SAR command or OFF.
     * @return true if success.
     */
    protected boolean doSetSarMode(Station sender, String args)
@@ -392,17 +392,33 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
            _api.clearSar();
        }
        else {      
+           String arg1, arg2;
            String[] arg = args.split("\\s+", 3);
-           if (arg.length < 3)
-           {
+           if (arg.length < 1) {
                _api.log().warn("RemoteCtl", "Remote SAR command syntax error");
                return false;
            }
-           boolean nohide = arg[2].matches("\\[NOHIDE\\].*");
+           else if (arg.length < 2) {
+                arg1 = "NONE";
+                arg2 = "";
+           }
+           else if (arg.length < 3) {
+                arg1 = arg[1];
+                arg2 = "";
+           }
+           else {
+                arg1 = arg[1]; arg2=arg[2]; 
+           }
+           
+           boolean nohide = false; 
+           if (arg2.matches("\\[NOHIDE\\].*")) {
+                nohide = true; 
+                arg2 = arg2.substring(8); 
+           }
            
            _api.log().debug("RemoteCtl", "Set SAR-mode from "+sender.getIdent());
-           String filter = ("NONE".equals(arg[1]) ? "" : arg[1]);
-           _api.setSar(arg[2], arg[0], filter, !nohide);
+           String filter = ("NONE".equals(arg1) ? "" : arg1);
+           _api.setSar(arg2, arg[0]+"@"+sender.getIdent(), filter, !nohide);
        }
        return true;
    }

@@ -238,6 +238,7 @@ package no.polaric.aprsd.http
                getField(req, "item11", "igate.rfgate.path", LIST) ++ 
                getField(req, "item12", "message.rfpath", LIST) ++
                getField(req, "item13", "objects.rfpath", LIST) ++
+               getField(req, "item13.2", "message.alwaysRf", TEXT) ++
                getField(req, "item14", "remotectl.on", BOOLEAN) ++
                getField(req, "item15", "remotectl.connect", NAME) ++
                getField(req, "item16", "message.auth.key", TEXT)

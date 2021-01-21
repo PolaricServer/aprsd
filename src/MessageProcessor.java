@@ -316,11 +316,13 @@ public class MessageProcessor implements Runnable, Serializable
        
        /* See also Igate gate_to_rf !! Try to share code? */
        boolean sentOnRf = false;
-       if (_rfChan != null &&
+       if ( _rfChan != null && _rfChan.isActive() && (
            /* if recipient is heard on RF and NOT on the internet */
            ((_rfChan.heard(recipient)   &&
             !_inetChan.heard(recipient))) || 
-            recipient.matches(_alwaysRf) || recipient.equals("TEST") )
+            recipient.matches(_alwaysRf) || 
+            _inetChan == null || !_inetChan.isActive() ||
+            recipient.equals("TEST") ) )
        {
           /* Now, get a proper path for the packet. 
            * If possible, a reverse of the path last heard from the recipient.
@@ -335,14 +337,18 @@ public class MessageProcessor implements Runnable, Serializable
           _rfChan.sendPacket(p);
           sentOnRf = true;
        }
-       if (_inetChan != null) {
-          /* If already sent on rf, emulate a igate. Perhaps we
-           * should not send it on internet? FIXME: _myCall.
+       if (_inetChan != null && _inetChan.isActive()) {
+          /* 
+           * If already sent on rf, emulate a igate.
+           * Otherwise, use qAC
            */
-          p.via = sentOnRf ? "qAR,"+_myCall : "TCPIP";
+          p.via = sentOnRf ? "qAR,"+_myCall : "qAC,"+_myCall;
+          _api.log().debug("MessageProc", "Sending message to "+recipient+" on INET: "+p.via);
           _inetChan.sendPacket(p);
-       }   
-       if (_inetChan == null && _rfChan == null)
+       }  
+    
+       if ((_inetChan == null || !_inetChan.isActive()) && 
+           (_rfChan == null || !_rfChan.isActive()))
           _api.log().warn("MessageProc", "Cannot send message. No channel.");
    }
 
