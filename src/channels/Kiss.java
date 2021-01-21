@@ -82,7 +82,7 @@ public class Kiss
          /* Start of frame. KISS command = data */
          sendFend(); 
          /* The high order nibble in the KISS command is the port number */
-         sendByte((byte) (_port * 16) ); 
+         sendByte((byte) (_port << 16) ); 
        
          /* AX.25 UI Header */
          String[] digis = new String[0]; 
@@ -115,35 +115,44 @@ public class Kiss
         AprsPacket p = new AprsPacket();
         p.report = p.via = ""; 
         boolean complete = false;
-     
+        int port = 0; 
+        
         while (true) {
-           try {
-               if (receiveByte()/16 != _port)  
-                  continue;
-               Addr a = decodeAddr();
-               p.to = a.addr; 
-               a = decodeAddr();
-               p.from = a.addr;
-               while (!a.last()) {
-                  a = decodeAddr();
-                  p.via = p.via + a.addr + (a.digipeated() ? "*" : "");
-                  if (!a.last()) 
-                     p.via += ",";
-               } 
+            try {
+                byte rx = receiveByte();   
+                if (rx == 0xff)
+                    continue; 
+                port = rx >> 4; 
+                int cmd = rx & 0x0F; 
+                if (cmd > 0) {
+                    receiveByte(); 
+                    continue; 
+                }
+                p.report = p.via = "";
+                Addr a = decodeAddr();
+                p.to = a.addr; 
+                a = decodeAddr();
+                p.from = a.addr;
+                while (!a.last()) {
+                    a = decodeAddr();
+                    p.via = p.via + a.addr + (a.digipeated() ? "*" : "");
+                    if (!a.last()) 
+                        p.via += ",";
+                } 
 
-               if (receiveByte() == FTYPE_UI && receiveByte() == PID_APRS)
-                  complete = true;
-               while (true)
-                  p.report += (char) receiveByte(); 
-           
-           }
-           catch (Frame_End e) {
-              if (complete) {
-                 received = 0;
-                 return p;  
-              }
-           }
-           catch (Exception e) { }
+                if (receiveByte() == FTYPE_UI && receiveByte() == PID_APRS)
+                    complete = true;
+                while (true)
+                    p.report += (char) receiveByte(); 
+            }
+            catch (Frame_End e) {
+                if (complete) {
+                    received = 0;
+                    if (port == _port) 
+                        return p;
+                }
+            }
+            catch (Exception e) { }
         }
     }
     

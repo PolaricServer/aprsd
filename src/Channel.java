@@ -49,7 +49,7 @@ public abstract class Channel extends Source implements ManagedObject
    
      /** Return true if service is running */
      public boolean isActive() {
-        return _state == State.STARTING || _state == State.RUNNING;
+        return getState() == State.STARTING || _state == State.RUNNING;
      }
  
  

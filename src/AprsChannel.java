@@ -230,15 +230,24 @@ public abstract class AprsChannel extends Channel
          p.type = p.report.charAt(0); 
          
          if (p.report.charAt(p.report.length()-1) == '\r')
-           p.report = p.report.substring(0, p.report.length()-1);
+            p.report = p.report.substring(0, p.report.length()-1);
          if (p.type == '}') {
             /* Special treatment for third-party type. 
              * Strip off type character and apply this function recursively
              * on the wrapped message. 
              */
+             var pfrom=p.from; 
+             var pto=p.to;
+             var pvia=p.via;
+             
              p = AprsPacket.fromString(p.report.substring(1, p.report.length()));
-             if (p != null) 
+             if (p != null) {
+                p.type = p.report.charAt(0);
                 p.thirdparty = true; 
+                p.from_orig = pfrom; 
+                p.to_orig = pto;
+                p.via_orig = pvia;
+             }
              else
                 return null;
                
