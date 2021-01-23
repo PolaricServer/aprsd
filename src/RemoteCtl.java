@@ -46,6 +46,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         void cb(String node, String uname);
    }
 
+   
 
    /*
     * The nodes will form a overlay network organised in a strict
@@ -70,6 +71,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private UserCb    _addUser, _removeUser, _nodeDown; 
     
    private LinkedHashMap<String, String> _cmds = new LinkedHashMap(); 
+   private IndexedSets _users = new IndexedSets();
+   
    
    public String getMycall()
        { return _myCall; }
@@ -113,32 +116,43 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         _pmsg = mh;
    }
 
+   
+   public List<String> getUsers() {
+        return _users.getAll();
+   }
+   
+   
+   
+   
 
    private int _try_parent = 0;
 
    /* Implements: Interface MessageProcessor.Notification */
-   public void reportFailure(String id)
+   public void reportFailure(String id, String msg)
    {
-      _api.log().warn("RemoteCtl", "Failed to deliver message to: "+id);
-      if (id.equals(_parent)) {
-          _parentCon = false;
-          _log.info(null, "Connection to parent: "+id+ " failed");
+        _api.log().warn("RemoteCtl", "Failed to deliver message to: "+id+" ("+msg+")");
+        if (!msg.matches("CON.*"))
+            return;
       
-          /* Try max 3 times before taking a pause */
-          if (_try_parent++ >= 3) {
-              _log.info(null, "Giving up - pausing: "+id);
-              _tryPause = 3; /* 1 hour */
-          }
-       }
-       else {
-         _log.info(null, "Message to child: "+id+ " failed - disconnect");
-         disconnectChild(id);
-       }
+        if (id.equals(_parent)) {
+            disconnectParent();
+            _log.info(null, "Connection to parent: "+id+ " failed: "+msg);
+      
+            /* Try max 3 times before taking a pause */
+            if (_try_parent++ >= 3) {
+                _log.info(null, "Giving up - pausing: "+id);
+                _tryPause = 3; /* 1 hour */
+            }
+        }
+        else {
+            _log.info(null, "Message to child: "+id+ " failed - disconnect");
+            disconnectChild(id);
+        }
    }
    
    
    /* Implements: Interface MessageProcessor.Notification */
-   public void reportSuccess(String id)
+   public void reportSuccess(String id, String msg)
    {
         if (id.equals(_parent)) {
             if (!_parentCon) {
@@ -146,7 +160,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
                 _parentCon = true;
             }
             _try_parent = 0;
-      }
+        }
    }
    
    
@@ -167,7 +181,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    public void sendRequestAll(String text, String except)
    {
       int n = 0;
-      if (_parent != null && !_parent.equals(except))
+      if (_parent != null && !_parent.equals(except) && _parentCon)
         { _msg.sendMessage(_parent, text, true, true, this); n++; }
       for (String r: getChildren() )
          if (!r.equals(except))
@@ -249,7 +263,20 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           p = doMessage(sender, args);
           return p; 
       }
+      
+      /* 
+       * For some commands assume that we are connected if they come from parent. 
+       * CON ack may be lost. 
+       */
+      if (!_parentCon && sender.getIdent().equals(_parent) && 
+           arg[0].matches("ALIAS|ICON|TAG|USER|RMTAG|SAR|RMUSER|RMNODE|RMITEM")) {
+           _parentCon = true; 
+           _log.info(null, "Connection to parent: "+_parent+ " assumed (CON ACK may be lost)");
+      }
+      
+      /* Connect command */
       if (arg[0].equals("CON")) {
+         _api.log().debug("RemoteCtl", "Got CON from "+sender.getIdent()+": "+arg);
          p = doConnect(sender, args);
          propagate = false;
       }
@@ -295,7 +322,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
      * Remove tags, aliases and icons associated with an item 
      */
     protected boolean doRemoveItem(Station sender, String arg) {
-        _api.log().debug("RemoteCtl", "Got RMNODE from "+sender.getIdent()+": "+arg);
+        _api.log().debug("RemoteCtl", "Got RMITEM from "+sender.getIdent()+": "+arg);
         _api.getDB().removeItem(arg.trim());
         return true;
     }
@@ -305,7 +332,18 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    
     protected boolean doRemoveNode(Station sender, String arg) {
         _api.log().debug("RemoteCtl", "Got RMNODE from "+sender.getIdent()+": "+arg);
-        _nodeDown.cb(getMycall(), arg);
+        arg=arg.trim();
+        
+        /* Is the removed node a direct parent or child? */
+        if (sender.getIdent().equals(arg)) {
+            _users.removeAll(arg);
+            if (arg.equals(_parent))
+                disconnectParent(); 
+            else
+                disconnectChild(arg);
+        }
+        else
+            _users.removeMatching(sender.getIdent(), ".+@"+arg);
         return true;
     }
    
@@ -334,10 +372,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        /* 
         * If not connected already, add sender to children list.
         */
-        
-        _api.log().debug("RemoteCtl", "Got CON from "+sender.getIdent()+": "+arg);
-        
-        if ((!_parentCon || !sender.getIdent().equals(_parent)) 
+        if ((_parent == null || !sender.getIdent().equals(_parent)) 
                && !_children.containsKey(sender.getIdent()))       
         {
             _log.info(null, "Connection from child: "+sender.getIdent()+" established");
@@ -349,7 +384,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
              * returned and reply is sent 
              */
             gc.schedule( ()->
-                playbackLog(sender.getIdent()), 3, TimeUnit.SECONDS);
+                playbackLog(sender.getIdent()), 5, TimeUnit.SECONDS);
         }
         _children.put(sender.getIdent(), new Date());
         return true;
@@ -365,10 +400,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             return false;
         }
         String u = args.trim();
-        if (add)
-            _addUser.cb(sender.getIdent(), u); 
-        else
-            _removeUser.cb(sender.getIdent(), u);
+        if (add) 
+            _users.add(sender.getIdent(), u);
+        else 
+            _users.remove(sender.getIdent(), u); 
         return true;
     }
     
@@ -538,12 +573,21 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        
    private void disconnectChild(String ident) 
    {
-        _nodeDown.cb(getMycall(), ident);
+        _users.removeAll(ident);
         _children.remove(ident);
          sendRequestAll("RMNODE "+ident, ident);
    }
    
        
+   private void disconnectParent()
+   {    
+        if (!_parentCon) 
+            return;
+        _users.removeAll(_parent); 
+        _parentCon = false;
+        sendRequestAll("RMNODE "+_parent, _parent);
+   }
+   
        
        
    private AprsPoint newItem(String ident)

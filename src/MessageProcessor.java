@@ -39,8 +39,8 @@ public class MessageProcessor implements Runnable, Serializable
     * Interface for reporting success or failure in delivering messages.
     */
    public interface Notification {
-      public void reportFailure(String id);
-      public void reportSuccess(String id);
+      public void reportFailure(String id, String msg);
+      public void reportSuccess(String id, String msg);
    }
    
    
@@ -52,12 +52,13 @@ public class MessageProcessor implements Runnable, Serializable
       String msgid;
       String recipient;
       String message;
+      String msgtext;
       Date time;
       Notification not;
       int retry_cnt = 0;
       boolean deleted = false;
-      OutMessage(String mid, String rec, String msg, Notification n)
-        { msgid = mid; recipient = rec; message = msg; time = new Date(); not=n; }
+      OutMessage(String mid, String rec, String mtext, String msg, Notification n)
+        { msgid = mid; recipient = rec; msgtext = mtext; message = msg; time = new Date(); not=n; }
    }
 
    
@@ -162,9 +163,9 @@ public class MessageProcessor implements Runnable, Serializable
             OutMessage m = _outgoing.get(msgid);
             if (m != null && m.not != null) {
                 if (text.matches("(rej).+"))
-                    m.not.reportFailure(m.recipient);
+                    m.not.reportFailure(m.recipient, m.msgtext);
                 else
-                    m.not.reportSuccess(m.recipient);
+                    m.not.reportSuccess(m.recipient, m.msgtext);
             }
             _outgoing.remove(msgid);   
             return;
@@ -175,7 +176,7 @@ public class MessageProcessor implements Runnable, Serializable
         if (subs == null && recipient.matches("BLN.*")) 
             subs = _subscribers.get("BLN");
 
-         
+        /* If there is a subscriber to the messasge */ 
         if (subs != null) {
             /* Clear seen-before map if last entry is older than 20 minutes */
             if ((new Date()).getTime() > recMsg_ts.getTime() + 1000 * 60 * 60 * 20)
@@ -210,9 +211,9 @@ public class MessageProcessor implements Runnable, Serializable
             /* 
              * Send ack or rej. Assume that message is in recMessages if accepted. 
              */
-            if (msgid != null)
+            if (msgid != null && (!recipient.matches("BLN.*") ) )
                 sendAck(sender.getIdent(), msgid, recMessages.get(sender.getIdent()+"#"+msgid));
-        }      
+        } /* if subs */     
     }
    
 
@@ -267,7 +268,7 @@ public class MessageProcessor implements Runnable, Serializable
       String message = (recipient+ "         ").substring(0,9) + ":" + text + mac
                        + (msgid != null ? "{"+msgid : "");
       if (acked)
-         _outgoing.put(msgid, new OutMessage(msgid, recipient, message, not));                      
+         _outgoing.put(msgid, new OutMessage(msgid, recipient, text, message, not));                      
       sendPacket(message, recipient);       
    }
    
@@ -314,7 +315,9 @@ public class MessageProcessor implements Runnable, Serializable
        p.type = ':';
        p.report = ":"+message;
        
-       /* See also Igate gate_to_rf !! Try to share code? */
+       /* 
+        * Send on RF
+        */
        boolean sentOnRf = false;
        if ( _rfChan != null && _rfChan.isActive() && (
            /* if recipient is heard on RF and NOT on the internet */
@@ -337,6 +340,9 @@ public class MessageProcessor implements Runnable, Serializable
           _rfChan.sendPacket(p);
           sentOnRf = true;
        }
+       /*
+        * Send on internet (aprs/is)
+        */
        if (_inetChan != null && _inetChan.isActive()) {
           /* 
            * If already sent on rf, emulate a igate.
@@ -415,7 +421,7 @@ public class MessageProcessor implements Runnable, Serializable
                     if (m.retry_cnt >= _MSG_MAX_RETRY) {
                         /* After max number of retries report failure */
                         if (m.not != null)
-                            m.not.reportFailure(m.recipient);
+                            m.not.reportFailure(m.recipient, m.msgtext);
                         m.deleted = true; 
                     }
                     else {

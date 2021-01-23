@@ -104,31 +104,6 @@ public class UserApi extends ServerBase {
      * Set up the webservices. 
      */
     public void start() {     
-    
-        if (_api.getRemoteCtl() != null) {
-            _api.getRemoteCtl().setUserCallback(
-                // Add
-                (node, uname) -> { 
-                    if (uname.matches(".+@[A-Za-z0-9\\-]+"))
-                        _remoteUsers.add(uname); 
-                },
-            
-                // Remove. Note that we treat the username as a regular expression
-                (node, uname) -> {
-                    if (uname.matches(".+@[A-Za-z0-9\\-]+"))
-                        _remoteUsers.removeIf( (x)-> x.matches(uname) );
-                }
-            );
-        
-            _api.getRemoteCtl().setNodeCallback(
-                (t, node) -> {
-                    if (node.matches("[A-Za-z0-9\\-]+"))
-                        _remoteUsers.removeIf( (x)-> x.matches(".*@"+node) );
-                }
-            );
-        }
-        
-        
         
         /************************************************
          * Get (web socket) clients.
@@ -149,8 +124,10 @@ public class UserApi extends ServerBase {
             List<String> us = new ArrayList<String>(); 
             for (String name : ((WebServer)_api.getWebserver()).getLoginUsers())
                 us.add(name);
-            for (String name : _remoteUsers)
-                us.add(name);    
+            if (_api.getRemoteCtl() == null)
+                return us; 
+            for (String name: _api.getRemoteCtl().getUsers())
+                us.add(name);
                 
             return us;
         }, ServerBase::toJson );

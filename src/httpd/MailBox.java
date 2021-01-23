@@ -326,12 +326,12 @@ public abstract class MailBox {
             api.getMsgProcessor().sendMessage(addr[1], "MSG "+msg.from+">"+addr[0]+" "+msg.text, 
                 true, true, new MessageProcessor.Notification() {
                 
-                    public void reportFailure(String id) {
+                    public void reportFailure(String id, String mtext) {
                         api.log().info("MailBox","Delivery failed: msgid="+msg.msgId+", node="+id);
                         mb.setStatus(m2, -1, "Delivery failed: "+id);
                     }
                 
-                    public void reportSuccess(String id) {
+                    public void reportSuccess(String id, String mtext) {
                         api.log().info("MailBox", "Delivery confirmed: msgid="+msg.msgId+", node="+id);
                         mb.setStatus(m2, 1, "Delivery confirmed: "+id);
                     }
