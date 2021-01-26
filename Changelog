@@ -295,7 +295,12 @@ V.2.6
 
 V.2.6.1
 -------
-Use of RF channel for messaging.. Fixes..
-Messaging fixes and improvements..
-Remote control fixes and improvements..
+* Use of RF channel for messaging.. Fixes..
+* Messaging fixes and improvements..
+* Remote control fixes and improvements..
     
+V.2.6.2
+-------
+* More RemoteCtl work. Fixes..
+
+

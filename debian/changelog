@@ -1,3 +1,9 @@
+polaric-aprsd (2.6.2) stable; urgency=medium
+
+  * More RemoteCtl work, fixes..
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Tue, 26 Jan 2021 18:20:28 +0100
+
 polaric-aprsd (2.6.1) stable; urgency=medium
 
   * Use of RF channel for messaging.. Fixes..
