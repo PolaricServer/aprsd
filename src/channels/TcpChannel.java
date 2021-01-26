@@ -78,7 +78,11 @@ public abstract class TcpChannel extends AprsChannel
         _comm = new TcpComm(_api, id, host, port, retr, rtime);
         _comm.activate( 
             ()-> receiveLoop(),
-            ()-> _api.getChanManager().get(_backup).activate(a)
+            ()-> {
+                    var bu = _api.getChanManager().get(_backup);
+                    if (bu != null) 
+                        bu.activate(a);
+               }
          );
     }
 
