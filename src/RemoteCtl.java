@@ -18,6 +18,9 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
+import uk.me.jstott.jcoord.*; 
+
+
 
 /**
  * Remote control. Execute commands on associated servers by exchanging
@@ -57,7 +60,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     * position. 
     */
    private String  _myCall; 
-   private Map<String, Date> _children = new HashMap<String, Date>();
+   private int     _radius;
    private String  _parent;
    private boolean _parentCon = false; 
    private int     _tryPause = 0;
@@ -68,11 +71,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private MessageProcessor.MessageHandler _pmsg;
    private ServerAPI _api;
    private Logfile   _log;
-   private UserCb    _addUser, _removeUser, _nodeDown; 
     
    private LinkedHashMap<String, String> _cmds = new LinkedHashMap(); 
    private IndexedSets _users = new IndexedSets();
-   
+   private Map<String, Child> _children = new HashMap<String, Child>();
    
    public String getMycall()
        { return _myCall; }
@@ -82,13 +84,39 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        
    public Set<String> getChildren()
        { return _children.keySet(); }
+
+   public Child getChild(String id)
+       { return _children.get(id); }
        
-   public void setUserCallback(UserCb a, UserCb r) {
-       _addUser=a; _removeUser=r; 
+   public void addChild(String id, int r, Reference p) 
+       { _children.put(id, new Child(r, p)); }
+   
+   public void updateChildTS(String id) {
+        Child c = getChild(id);
+        if (c != null)
+            c.updateTS(); 
    }
-   public void setNodeCallback(UserCb nd) {
-       _nodeDown = nd;
+   
+   public void removeChild(String id) 
+       { _children.remove(id); }
+       
+   public boolean hasChild(String id) 
+       { return _children.containsKey(id); }
+       
+       
+   
+   public static class Child {
+        Date date;
+        int radius; 
+        Reference pos;
+        void updateTS() 
+            { date = new Date(); }
+        long getTime() 
+            {return date.getTime();}
+        Child(int r, Reference p)
+            {radius=r; pos=p; date=new Date(); }
    }
+   
    
    
    
@@ -98,6 +126,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        _myCall = api.getProperty("remotectl.mycall", "").toUpperCase();
        if (_myCall.length() == 0)
            _myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();
+       _radius = api.getIntProperty("remotectl.radius", -1); 
        _parent = api.getProperty("remotectl.connect", null);
        _log = new Logfile(api, "remotectl", "remotectl.log");
        if (_parent != null) 
@@ -130,7 +159,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    /* Implements: Interface MessageProcessor.Notification */
    public void reportFailure(String id, String msg)
    {
-        _api.log().warn("RemoteCtl", "Failed to deliver message to: "+id+" ("+msg+")");
+        _api.log().debug("RemoteCtl", "Command or msg delivery failed: "+id+" ("+msg+")");
         if (!msg.matches("CON.*"))
             return;
       
@@ -176,15 +205,17 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
      
    /**
     * Send request to all. To parent and children servers. 
-    * may specify an exception. 
+    * may specify an exception. Exceptions are the origin of the request and nodes
+    * that have no interest in the request. 
     */  
    public void sendRequestAll(String text, String except)
    {
       int n = 0;
       if (_parent != null && !_parent.equals(except) && _parentCon)
         { _msg.sendMessage(_parent, text, true, true, this); n++; }
+        
       for (String r: getChildren() )
-         if (!r.equals(except))
+         if (!r.equals(except) && isWithinInterest(r, text) )
             { _msg.sendMessage(r, text, true, true, this); n++; }
     
       if (n>0)
@@ -193,9 +224,28 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    }
 
 
+   /**
+    * Return true if message is with child-node's area of interest. 
+    */
+   private boolean isWithinInterest(String node, String msg) {
+        /* tbd */
+        String[] arg = msg.split("\\s+", 3);
+        if (arg.length < 2 || !arg[0].matches("ALIAS|ICON|TAG|RMTAG"))
+            return true;
+        Point x = _api.getDB().getItem(arg[1], null);
+        Reference pos = _api.getOwnPos().getPosition();
+        if (_radius <= 0 || pos == null) 
+            return true; 
+        if (x != null && x.distance(pos) > _radius*1000)
+            return false;
+        return true;
+   }
+   
+   
+   
 
    /**
-    * Store request in log. 
+    * Store request in log for later playback when new nodes connect. 
     */
    private void storeRequest(String text)
    {
@@ -217,8 +267,9 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
          _cmds.remove(prefix);
          
      }
+     /* This is currently not used and it may not be a good idea to store this */
      else if (!arg[0].matches("RMITEM"))
-         _cmds.values().removeIf( (x)-> x.matches("(ALIAS|ICON|TAG) "+arg[1]));
+         _cmds.values().removeIf( (x)-> x.matches("(ALIAS|ICON|TAG) "+arg[1]+" .*"));
      
      else if (!arg[0].matches("RMNODE"))
          /* Remove all USER entries with that particular node */
@@ -234,12 +285,26 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    }
    
 
-
+   /** 
+    * Play back log entries when new node connect. 
+    */
    private void playbackLog(String dest)
    {
+        if (_cmds.isEmpty())
+            return; 
+        _log.info(null, "Playback command log");
         for (Map.Entry<String, String> entry: _cmds.entrySet())
-            if (!entry.getValue().matches("USER .*@"+dest))
+            if (!entry.getValue().matches("USER .*@"+dest) && isWithinInterest(dest, entry.getValue()) )
                 sendRequest(dest, entry.getValue());
+   }
+   
+   
+   /**
+    * To be called from (StationDBImp) when an item expires. 
+    * Remove ALIAs, ICON, TAG entries for the given item from log. 
+    */
+   public void removeExpired(String id) {
+        _cmds.values().removeIf( (x)-> x.matches("(ALIAS|ICON|TAG) "+id+" .*"));
    }
    
    
@@ -276,14 +341,14 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       
       /* Connect command */
       if (arg[0].equals("CON")) {
-         _api.log().debug("RemoteCtl", "Got CON from "+sender.getIdent()+": "+arg);
+         _api.log().debug("RemoteCtl", "Got CON from "+sender.getIdent());
          p = doConnect(sender, args);
          propagate = false;
       }
          
       /* Fail if not CON and not connected */
       else if ((!_parentCon || !sender.getIdent().equals(_parent)) 
-            && !_children.containsKey(sender.getIdent()))
+            && !hasChild(sender.getIdent()))
           p = false;      
       else if (arg[0].equals("ALIAS"))
           p = doSetAlias(sender, args);
@@ -373,12 +438,32 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         * If not connected already, add sender to children list.
         */
         if ((_parent == null || !sender.getIdent().equals(_parent)) 
-               && !_children.containsKey(sender.getIdent()))       
+               && !hasChild(sender.getIdent()))       
         {
             _log.info(null, "Connection from child: "+sender.getIdent()+" established");
-            if (!_cmds.isEmpty())
-                _log.info(null, "Playback command log");
-                
+         
+            /* 
+             * Now get arguments from CON command. It can be just CON without arguments
+             * or with a radius, a latitude and a longitude
+             */
+            int rad = -1;
+            float lat=0, lng=0;
+            if (arg != null && arg.length() > 0) {
+                if (arg.matches("\\d+\\s+\\d+(\\.(\\d)+)?\\s+\\d+(\\.(\\d)+)?"))
+                {
+                    String[] args = arg.split("\\s+", 3);
+                    if (args.length >= 3) {
+                        rad=Integer.parseInt(args[0]); 
+                        lat=Float.parseFloat(args[1]);
+                        lng=Float.parseFloat(args[2]);
+                        System.out.println("*** radius="+rad+", lat="+lat+", lng="+lng);
+                    }
+                }
+                else
+                    _api.log().warn("RemoteCtl", "Number format error in CON request from "+sender.getIdent());
+            }
+            addChild(sender.getIdent(), rad, new LatLng(lat,lng));
+            
             /* 
              * Play back log, but wait until this function has 
              * returned and reply is sent 
@@ -386,7 +471,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             gc.schedule( ()->
                 playbackLog(sender.getIdent()), 5, TimeUnit.SECONDS);
         }
-        _children.put(sender.getIdent(), new Date());
+        else
+            updateChildTS(sender.getIdent()); 
         return true;
    }
 
@@ -479,7 +565,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       arg[1] = arg[1].trim();
       
       if (item == null)
-          item = newItem(arg[0].trim());   
+          return false;   
       item.setTag(arg[1]);
       return true;
    }
@@ -519,23 +605,23 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */
    protected boolean doSetAlias(Station sender, String args)
    {
-      if (args == null) {
-          _api.log().warn("RemoteCtl", "Missing arguments to remote ALIAS command");
-          return false;
-      }
+        if (args == null) {
+            _api.log().warn("RemoteCtl", "Missing arguments to remote ALIAS command");
+            return false;
+        }
       
-      _api.log().debug("RemoteCtl", "Set ALIAS from "+sender.getIdent());
-      String[] arg = args.split("\\s+", 2);
+        _api.log().debug("RemoteCtl", "Set ALIAS from "+sender.getIdent());
+        String[] arg = args.split("\\s+", 2);
       
-      TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
-      arg[1] = arg[1].trim();
-      if ("NULL".equals(arg[1]))
-         arg[1] = null;
-      
-      if (item == null)
-          item = newItem(arg[0].trim());   
-      item.setAlias(arg[1]);
-      return true;
+        TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
+        if (item==null || item.expired())
+            return false; 
+            
+        arg[1] = arg[1].trim();
+        if ("NULL".equals(arg[1]))
+            arg[1] = null;
+        item.setAlias(arg[1]);
+        return true;
    }
       
 
@@ -557,14 +643,14 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       String[] arg = args.split("\\s+", 2);
       
       TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
+      if (item==null || item.expired())
+        return false; 
+        
       arg[1] = arg[1].trim();
       if ("NULL".equals(arg[1]))
          arg[1] = null;
       else 
          arg[1] = arg[1].trim();
-         
-      if (item == null)
-          item = newItem(arg[0].trim());
       item.setIcon(arg[1]);
       return true;
    } 
@@ -574,8 +660,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private void disconnectChild(String ident) 
    {
         _users.removeAll(ident);
-        _children.remove(ident);
-         sendRequestAll("RMNODE "+ident, ident);
+        removeChild(ident);
+        sendRequestAll("RMNODE "+ident, ident);
    }
    
        
@@ -586,21 +672,6 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         _users.removeAll(_parent); 
         _parentCon = false;
         sendRequestAll("RMNODE "+_parent, _parent);
-   }
-   
-       
-       
-   private AprsPoint newItem(String ident)
-   {
-       String[] x = ident.split("@");
-       if (x.length >= 2) {
-           Station s = _api.getDB().getStation(x[1].trim(), null); 
-           if (s == null)
-              s = _api.getDB().newStation(x[1].trim());
-           return _api.getDB().newObject(s, x[0].trim()); 
-       }
-       else
-           return _api.getDB().newStation(ident);
    }
    
 
@@ -627,18 +698,28 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    {
       while (true) 
       try {
-         Thread.sleep(35000);
+         Thread.sleep(60000);
 
          while (true) {
             if (_parent != null && _tryPause <= 0) {
-               _api.log().debug("RemoteCtl", "Send CON: "+_parent);
-               sendRequest(_parent, "CON");
+                _api.log().debug("RemoteCtl", "Send CON: "+_parent);
+               
+                /* Now get position and radius if set */
+                String arg = "";
+                Reference pos = _api.getOwnPos().getPosition();
+                if (_radius > 0 && pos != null) {
+                    LatLng pp = pos.toLatLng(); 
+                    arg += " "+_radius+" "+ 
+                        ((float) Math.round(pp.getLatitude()*1000))/1000+" "+ 
+                        ((float) Math.round(pp.getLongitude()*1000))/1000;
+                }
+                sendRequest(_parent, "CON"+arg);
             }
             if (_tryPause > 0)
                 _tryPause--;
             
             for (String x : getChildren()) 
-                if (_children.get(x).getTime() + 2400000 <= (new Date()).getTime()) {
+                if (getChild(x).getTime() + 2400000 <= (new Date()).getTime()) {
                    _log.info(null, ""+x+" disconnected (timeout)");
                    disconnectChild(x);
                 }

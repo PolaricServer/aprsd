@@ -213,6 +213,9 @@ package no.polaric.aprsd.http
                 boolField("remotectl.on", "item14", 
                       I.tr("Activated.")) ++
                 br ++
+                textField("remotectl.radius", "item14.2", 
+                      I.tr("Radius of interest")+":", 
+                      I.tr("Radius in which we want to receive item-updates"), 6, 10, NUMBER, "(km)") ++
                 textField("remotectl.connect", "item15", 
                       I.tr("Rc server")+":", 
                       I.tr("Rc server (callsign of another PS instance)"), 10, 10, NAME) ++
@@ -240,6 +243,7 @@ package no.polaric.aprsd.http
                getField(req, "item13", "objects.rfpath", LIST) ++
                getField(req, "item13.2", "message.alwaysRf", TEXT) ++
                getField(req, "item14", "remotectl.on", BOOLEAN) ++
+               getField(req, "item14.2", "remotectl.radius", NUMBER) ++
                getField(req, "item15", "remotectl.connect", NAME) ++
                getField(req, "item16", "message.auth.key", TEXT)
          }

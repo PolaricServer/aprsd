@@ -20,9 +20,9 @@ class IndexedSets {
         Set<String> s = _map.get(key);
         if (s==null)
             return;
-        s.remove(s);
+        s.remove(val);
         if (s.isEmpty())
-        _map.remove(key);
+            _map.remove(key);
     }
     
     public void removeAll(String key) {

@@ -214,10 +214,9 @@ public class StationDBImp implements StationDB, Runnable
                     
                  /* If nonpersistent or saved to database, remove it. */
                  if (!st.isPersistent() || _histData != null) {
-                 
-                    // FIXME: what about tags? 
-                    if (st.getAlias() != null || st.iconOverride())
-                        _api.getRemoteCtl().sendRequestAll("RMITEM "+st.getIdent(),null);
+                    /* Remove expired items from remotectl log */
+                    _api.getRemoteCtl().removeExpired(st.getIdent());
+            
                     st.removeAllTags();
                     removeItem(st.getIdent());
                     _routes.removeNode(st.getIdent());
