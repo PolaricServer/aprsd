@@ -188,6 +188,8 @@ public class WebServer implements ServerAPI.Web
         before("/mailbox",         _auth.conf().filter(null, "isauth"));
         before("/wsclients",       _auth.conf().filter(null, "isauth, admin"));
         before("/loginusers",      _auth.conf().filter(null, "isauth"));
+        before("/scripts",         _auth.conf().filter(null, "isauth, admin"));
+        
         
         afterAfter((request, response) -> {
             _nRequests++;
@@ -202,6 +204,10 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/item/*"); 
         corsEnable("/items/*");     
         corsEnable("/items");
+        
+        ShellScriptApi sa = new ShellScriptApi(_api); 
+        sa.start();
+        corsEnable("/scripts");
         
         AprsObjectApi oi = new AprsObjectApi(_api);
         oi.start();
