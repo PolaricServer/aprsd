@@ -1,3 +1,9 @@
+polaric-aprsd (2.6.2+) UNRELEASED; urgency=medium
+
+  * More hacking....
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Wed, 27 Jan 2021 23:00:32 +0100
+
 polaric-aprsd (2.6.2) stable; urgency=medium
 
   * More RemoteCtl work, fixes..

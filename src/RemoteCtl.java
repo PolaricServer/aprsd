@@ -72,7 +72,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private ServerAPI _api;
    private Logfile   _log;
     
-   private LinkedHashMap<String, String> _cmds = new LinkedHashMap(); 
+   private LinkedHashMap<String, LogEntry> _cmds = new LinkedHashMap(); 
    private IndexedSets _users = new IndexedSets();
    private Map<String, Child> _children = new HashMap<String, Child>();
    
@@ -104,6 +104,13 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        { return _children.containsKey(id); }
        
        
+   public static class LogEntry {
+        String origin; 
+        String cmd;
+        LogEntry(String o, String c) {
+            origin=o; cmd=c; 
+        }
+   }
    
    public static class Child {
         Date date;
@@ -208,19 +215,19 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     * may specify an exception. Exceptions are the origin of the request and nodes
     * that have no interest in the request. 
     */  
-   public void sendRequestAll(String text, String except)
+   public void sendRequestAll(String text, String origin)
    {
       int n = 0;
-      if (_parent != null && !_parent.equals(except) && _parentCon)
+      if (_parent != null && !_parent.equals(origin) && _parentCon)
         { _msg.sendMessage(_parent, text, true, true, this); n++; }
         
       for (String r: getChildren() )
-         if (!r.equals(except) && isWithinInterest(r, text) )
+         if (!r.equals(origin) && isWithinInterest(r, text) )
             { _msg.sendMessage(r, text, true, true, this); n++; }
     
       if (n>0)
-         _log.info(null, "Send > ALL("+n+"): " + text + (except==null||n==0 ? "" : " -- (not to "+except+")" ));
-      storeRequest(text);                
+         _log.info(null, "Send > ALL("+n+"): " + text + (origin==null||n==0 ? "" : " -- (not to "+origin+")" ));
+      storeRequest(text, origin);                
    }
 
 
@@ -247,7 +254,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    /**
     * Store request in log for later playback when new nodes connect. 
     */
-   private void storeRequest(String text)
+   private void storeRequest(String text, String origin)
    {
      /* 
       * Log last update to each item. 
@@ -269,18 +276,18 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
      }
      /* This is currently not used and it may not be a good idea to store this */
      else if (!arg[0].matches("RMITEM"))
-         _cmds.values().removeIf( (x)-> x.matches("(ALIAS|ICON|TAG) "+arg[1]+" .*"));
+         _cmds.values().removeIf( (x)-> x.cmd.matches("(ALIAS|ICON|TAG) "+arg[1]+" .*"));
      
      else if (!arg[0].matches("RMNODE"))
          /* Remove all USER entries with that particular node */
-         _cmds.values().removeIf( (x)-> x.matches("USER .*@"+arg[1]));
+         _cmds.values().removeIf( (x)-> x.cmd.matches("USER .*@"+arg[1]));
   
      else if (!arg[0].matches("SAR"))
          return;
      
      /* Don't store deletions */
      if (!text.matches(".*(NULL|OFF)") && !text.matches("RM.*")) 
-        _cmds.put(prefix, text);
+        _cmds.put(prefix, new LogEntry(text, origin));
      
    }
    
@@ -293,9 +300,9 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         if (_cmds.isEmpty())
             return; 
         _log.info(null, "Playback command log");
-        for (Map.Entry<String, String> entry: _cmds.entrySet())
-            if (!entry.getValue().matches("USER .*@"+dest) && isWithinInterest(dest, entry.getValue()) )
-                sendRequest(dest, entry.getValue());
+        for (Map.Entry<String, LogEntry> entry: _cmds.entrySet())
+            if (!entry.getValue().cmd.matches("USER .*@"+dest) && isWithinInterest(dest, entry.getValue().cmd) )
+                sendRequest(dest, entry.getValue().cmd);
    }
    
    
@@ -304,7 +311,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     * Remove ALIAs, ICON, TAG entries for the given item from log. 
     */
    public void removeExpired(String id) {
-        _cmds.values().removeIf( (x)-> x.matches("(ALIAS|ICON|TAG) "+id+" .*"));
+        if (_cmds !=null && !_cmds.isEmpty())
+            _cmds.values().removeIf( (x)-> x.cmd.matches("(ALIAS|ICON|TAG) "+id+" .*"));
    }
    
    
@@ -345,7 +353,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
          p = doConnect(sender, args);
          propagate = false;
       }
-         
+      else if (!sender.getIdent().equals(_parent) && !hasChild(sender.getIdent())) {
+         _api.log().debug("RemoteCtl", "Got command from unconnected node: "+sender);
+         return false; 
+      }
+      
       /* Fail if not CON and not connected */
       else if ((!_parentCon || !sender.getIdent().equals(_parent)) 
             && !hasChild(sender.getIdent()))
@@ -485,6 +497,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             _api.log().warn("RemoteCtl", "Missing arguments to remote USER or RMUSER command");
             return false;
         }
+        
         String u = args.trim();
         if (add) 
             _users.add(sender.getIdent(), u);
@@ -660,16 +673,19 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private void disconnectChild(String ident) 
    {
         _users.removeAll(ident);
+        _cmds.values().removeIf( (x)-> ident.equals(x.origin));
         removeChild(ident);
         sendRequestAll("RMNODE "+ident, ident);
    }
    
        
+       
    private void disconnectParent()
    {    
         if (!_parentCon) 
             return;
-        _users.removeAll(_parent); 
+        _users.removeAll(_parent);
+        _cmds.values().removeIf( (x)-> _parent.equals(x.origin));
         _parentCon = false;
         sendRequestAll("RMNODE "+_parent, _parent);
    }
