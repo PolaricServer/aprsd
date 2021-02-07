@@ -208,6 +208,7 @@ public class WebServer implements ServerAPI.Web
         ShellScriptApi sa = new ShellScriptApi(_api); 
         sa.start();
         corsEnable("/scripts");
+        corsEnable("/scripts/*");
         
         AprsObjectApi oi = new AprsObjectApi(_api);
         oi.start();

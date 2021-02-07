@@ -26,6 +26,7 @@ INSTALL_CONFIG = $(DESTDIR)/etc/polaric-aprsd
    INSTALL_LOG = $(DESTDIR)/var/log/polaric
   INSTALL_SUDO = $(DESTDIR)/etc/sudoers.d
 INSTALL_PLUGDIR= $(INSTALL_CONFIG)/config.d
+INSTALL_SCPLUG = $(INSTALL_CONFIG)/script-conf.d
  INSTALL_SCDIR = $(INSTALL_CONFIG)/scripts
 
 
@@ -44,6 +45,7 @@ all: aprs
 install: polaric-aprsd.jar
 	install -d $(INSTALL_CONFIG)
 	install -d $(INSTALL_PLUGDIR)
+	install -d $(INSTALL_SCPLUG)
 	install -d $(INSTALL_SCDIR)
 	install -d $(INSTALL_BIN)
 	install -d $(INSTALL_JAR)

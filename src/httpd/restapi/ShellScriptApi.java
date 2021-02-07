@@ -48,11 +48,23 @@ public class ShellScriptApi extends ServerBase {
         String confdir = System.getProperties().getProperty("confdir", "."); 
         _fname = confdir+"/scripts.conf";
         _sdir = System.getProperties().getProperty("scriptdir", confdir+"/scripts");
+        String logfile = System.getProperties().getProperty("logdir", ".")+"/scripts.log";
       
-        if ( readConfig(_fname) ) {
+        if ( readConfig(_fname) ) 
             /* If config file exists, set up log file for script output */
-            String logfile = System.getProperties().getProperty("logdir", ".")+"/scripts.log";
             _slog = new File(logfile);
+        
+        /* Scan subdirectory script-conf.d for additional config files 
+         * placed there by plugins. 
+         */
+        File sconfdir = new File(confdir+"/script-conf.d");
+        File[] files = sconfdir.listFiles( new FileFilter() {
+            public boolean accept(File x)
+                { return x.canRead() && x.getName().matches(".*\\.conf"); }
+        });
+        for (File f : files) {
+            if (readConfig(f.getAbsolutePath()) && _slog == null)
+                _slog = new File(logfile);
         }
     }
     
@@ -62,11 +74,13 @@ public class ShellScriptApi extends ServerBase {
         public String cmd;
         public int nargs;
         public boolean rtext;
-        public Script (String name, String c, int n, boolean t, String descr) {
+        public boolean longrun;
+        public Script (String name, String c, int n, boolean t, boolean lr, String descr) {
             sinfo = new ScriptInfo(name, descr);
             cmd = c;
             nargs = n;
             rtext = t;
+            longrun = lr;
         }
     }
     
@@ -87,6 +101,80 @@ public class ShellScriptApi extends ServerBase {
     }
     
 
+    
+    public static class ProcessRunner {
+        
+        private ProcessBuilder _pb; 
+        private Thread _thread;
+        private Script _script;
+        private String _rtext; 
+        private String _uid; 
+        private ServerAPI _api;   
+        private static final int NOT_EXPIRE = 60; 
+        
+        
+        public ProcessRunner(ServerAPI api, String uid, ProcessBuilder p, Script scr) {
+            _pb = p;
+            _script = scr;
+            _api = api; 
+            _uid = uid;
+        }
+        
+        public String getText() 
+            { return _rtext; }
+            
+        
+        public int runAndWait(int timeout) throws IOException, InterruptedException {
+            Process p = _pb.start();
+            if (p.waitFor(timeout, TimeUnit.SECONDS)) {
+                _rtext = null;
+                        
+                /* If return text (from stdout) is requested */
+                if (_script.rtext) {
+                    _rtext = "";
+                    BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    String line;
+                    while ((line = bri.readLine()) != null)
+                        _rtext += "\r\n" + line;
+                }
+                return p.exitValue(); 
+            }    
+            else {
+                p.destroyForcibly();
+                return -1;
+            }
+        }
+        
+        
+        public void startDetached()  { 
+            Thread thread = new Thread( () -> {
+                try {
+                    int res = runAndWait(14400); 
+                    if (res == 0) {
+                        _api.getWebserver().notifyUser(_uid, 
+                            new ServerAPI.Notification("system", "system", 
+                                _script.sinfo.name +": "+ (getText()!=null ? getText() : "success"), new Date(), NOT_EXPIRE));
+                    }    
+                    else if (res == -1) {
+                        _api.getWebserver().notifyUser(_uid, 
+                            new ServerAPI.Notification("error", "system", 
+                                _script.sinfo.name +": killed (timeout): ", new Date(), NOT_EXPIRE));
+                    }   
+                    else {
+                        _api.getWebserver().notifyUser(_uid, 
+                            new ServerAPI.Notification("error", "system", 
+                                _script.sinfo.name + ": "+(getText()!=null ? "("+res+") "+getText() : "Error ("+res+")"), 
+                                new Date(), NOT_EXPIRE));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace(System.out);
+                }
+                
+            }); 
+            thread.start();
+        }
+        
+    }
     
     
     /** 
@@ -109,18 +197,20 @@ public class ShellScriptApi extends ServerBase {
                 lineno++;
                 String line = rd.readLine();
                 if (!line.startsWith("#") && !(line.length() == 0) && !line.matches("\\s+")) {               
-                    String[] x = line.split("\\s+", 5);  
+                    String[] x = line.split("\\s+", 6);  
                     if (x.length < 5 ||  
                         !x[0].matches("[a-zA-Z0-9\\-\\_]+") || 
                         !x[1].matches("[a-zA-Z0-9\\.\\-\\_]+") || !x[2].matches("[0-9]+") ||
-                        !x[3].toUpperCase().matches("TRUE|FALSE"))
+                        !x[3].toUpperCase().matches("TRUE|FALSE") ||
+                        !x[4].toUpperCase().matches("TRUE|FALSE"))
                     {
                         _api.log().warn("ShellScriptApi", "Syntax error in config. Line: "+lineno);
                         continue;
                     }
                     int nargs = Integer.parseInt(x[2]);
                     boolean txt = Boolean.parseBoolean(x[3]);
-                    _scripts.put(x[0], new Script(x[0], x[1], nargs, txt, x[3]));
+                    boolean longr = Boolean.parseBoolean(x[4]);
+                    _scripts.put(x[0], new Script(x[0], x[1], nargs, txt, longr, x[5]));
                 }
             }
             return true;
@@ -161,6 +251,7 @@ public class ShellScriptApi extends ServerBase {
         post("/scripts/*", (req, resp) -> {
             var name = req.splat()[0];
             var script = _scripts.get(name);
+            var uid = getAuthInfo(req).userid;
             
             try {
                 ScriptArg arg = null;
@@ -192,27 +283,22 @@ public class ShellScriptApi extends ServerBase {
                 if (!script.rtext) 
                     pb.redirectOutput(Redirect.appendTo(_slog));
                 
-                /* We assume that scripts don't run for a long time and not very often. 
-                 * Scripts that start long running things should fork them off
+                /* 
+                 * By default, scripts aren't expected to run for a long time and not very often. 
+                 * Scripts that start long running things are marked as so and will fork them off
                  */
                 synchronized (this) {
-                    /* Run the script and wait for result */
-                    Process p = pb.start();
-                    if (p.waitFor(10, TimeUnit.SECONDS)) {
-                        String res = ""+p.exitValue();
-                        
-                        /* If return text (from stdout) is requested */
-                        if (script.rtext) {
-                            BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                            String line;
-                            while ((line = bri.readLine()) != null)
-                                res+= "\r\n" + line;
-                        }
-                        return res; 
-                    }    
+                    ProcessRunner runner = new ProcessRunner(_api, uid, pb, script);
+                    if (script.longrun) {
+                        runner.startDetached();
+                        return "Script launched ok"; 
+                    }
                     else {
-                        p.destroyForcibly();
-                        return ERROR(resp, 500, "Script "+name+": exceeded max time. Killed!");
+                        int res = runner.runAndWait(10);
+                        if (res == -1) 
+                            return ERROR(resp, 500, "Script "+name+": exceeded max time. Killed!");
+                        else
+                            return res+": "+runner.getText();
                     }
                 }
                 
