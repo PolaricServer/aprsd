@@ -439,7 +439,9 @@ public class Main implements ServerAPI
          try {
             Thread.sleep(2000);
             ws.stop();
-         } catch (Exception e) {}
+         } catch (Exception e) {
+            e.printStackTrace(System.out);
+         }
 
          System.out.println("*** Polaric APRSD shutdown"); 
          PluginManager.deactivateAll();

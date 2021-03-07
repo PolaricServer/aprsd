@@ -275,8 +275,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
          
      }
      /* This is currently not used and it may not be a good idea to store this */
-     else if (!arg[0].matches("RMITEM"))
-         _cmds.values().removeIf( (x)-> x.cmd.matches("(ALIAS|ICON|TAG) "+arg[1]+" .*"));
+     else if (!arg[0].matches("RMITEM") && _cmds != null)
+        _cmds.values().removeIf( (x)-> {
+            return x != null && x.cmd != null && x.cmd.matches("(ALIAS|ICON|TAG) "+arg[1]+" .*");
+        });
      
      else if (!arg[0].matches("RMNODE"))
          /* Remove all USER entries with that particular node */
@@ -312,7 +314,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */
    public void removeExpired(String id) {
         if (_cmds !=null && !_cmds.isEmpty())
-            _cmds.values().removeIf( (x)-> x.cmd.matches("(ALIAS|ICON|TAG) "+id+" .*"));
+            _cmds.values().removeIf( (x)-> { 
+                return x != null && x.cmd != null && x.cmd.matches("(ALIAS|ICON|TAG) "+id+" .*");
+            }
+        );
    }
    
    
