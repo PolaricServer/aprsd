@@ -38,7 +38,12 @@ package no.polaric.aprsd.http
                simpleLabel("alias", "leftlab", I.tr("Alias")+":", <b>{model.getAlias()}</b>) 
            else EMPTY 
        
-                                  
+       /** Show channel. */
+       protected def channel(req: Request): NodeSeq = 
+           if (getAuthInfo(req).admin)
+               simpleLabel("channel", "leftlab", I.tr("Channel")+":", <span>{model.getSourceId()}</span>) 
+           else EMPTY 
+           
        /** Show altitude and course */                    
        protected def heightcourse(req: Request): NodeSeq =
             { if (model.getAltitude() >= 0)
@@ -121,10 +126,11 @@ package no.polaric.aprsd.http
        override def fields(req : Request): NodeSeq = 
            ident(req) ++
            alias(req) ++
+           channel(req) ++
            descr(req) ++
            position(req) ++
            heightcourse(req) ++ 
-           basicSettings(req)
+ //          basicSettings(req)
            ;
               
               

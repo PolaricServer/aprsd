@@ -35,8 +35,9 @@ package no.polaric.aprsd.http
    {
 
        protected def aprssym(req: Request): NodeSeq = 
-           simpleLabel("symbol", "leftlab", I.tr("APRS symbol")+":",TXT( model.getSymtab()+" "+model.getSymbol())) 
-       
+           if (getAuthInfo(req).admin)
+                simpleLabel("symbol", "leftlab", I.tr("APRS symbol")+":",TXT( model.getSymtab()+" "+model.getSymbol())) 
+           else EMPTY 
        
        protected def reporttime(req: Request): NodeSeq = 
            simpleLabel("hrd", "leftlab", I.tr("Last reported")+":", I.tr("Time of last received APRS report"),
@@ -59,7 +60,8 @@ package no.polaric.aprsd.http
        override def fields(req : Request): NodeSeq = 
            ident(req) ++
            alias(req) ++
-           { if (!simple) aprssym(req) else EMPTY } ++
+           channel(req) ++
+           aprssym(req) ++
            descr(req) ++
            position(req) ++
            heightcourse(req) ++ 

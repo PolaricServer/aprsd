@@ -40,8 +40,9 @@ package no.polaric.aprsd.http
            model.update()
            ident(req) ++
            alias(req) ++
-           { if (!simple) aprssym(req) else EMPTY } ++                        
            sender(req) ++
+           channel(req) ++
+           aprssym(req) ++                        
            descr(req) ++
            position(req) ++
            reporttime(req) ++
