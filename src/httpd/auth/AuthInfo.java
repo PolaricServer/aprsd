@@ -54,7 +54,8 @@ public class AuthInfo {
     public String userid;
     public String callsign;
     public String servercall;
-    public boolean admin = false, sar = false; 
+    public boolean admin = false, sar = false;
+    public String allowTracker;
     public String[] services = null;
     
     @JsonIgnore public SesMailBox mailbox = null;
@@ -161,6 +162,13 @@ public class AuthInfo {
         { return userid != null; }
        
     
+        
+    public boolean isTrackerAllowed(String tr, String chan) {
+        if (chan != null)
+            tr = tr+"#"+chan;
+        return sar || admin || 
+            (allowTracker == null && !allowTracker.equals("") && allowTracker.matches(tr)); 
+    }
        
        
     /**
@@ -203,8 +211,10 @@ public class AuthInfo {
             }
 
             User u = (User) profile.get().getAttribute("userInfo");
-            if (u instanceof LocalUsers.User)
+            if (u instanceof LocalUsers.User) {
                 callsign = ((LocalUsers.User)u).getCallsign();
+                allowTracker = ((LocalUsers.User)u).getAllowedTrackers();
+            }
             admin = u.isAdmin();
             sar = u.isSar();          
             if (admin)

@@ -39,6 +39,7 @@ public class LocalUsers {
      
         private String name = "";
         private String callsign = "";
+        private String trackerAllowed = "";
         private Date lastused; 
         transient private boolean active = false;
 
@@ -51,6 +52,7 @@ public class LocalUsers {
         public void    setCallsign(String c){ callsign = c.toUpperCase(); }
         public String  getCallsign()        { return callsign; }
         public void    setPasswd(String pw) { updatePasswd(getIdent(), pw); }
+        public String  getAllowedTrackers() { return trackerAllowed; }
         
         /* 
          * These flags are now stored in this class in addition to 
@@ -63,6 +65,13 @@ public class LocalUsers {
         public final void setSar(boolean s)   { sar=s; }
         public final void setAdmin(boolean a) { admin=a; }
 
+    
+        public void setTrackerAllowed(String expr) {
+            trackerAllowed = expr;
+        }
+        
+        
+        
         public User(String id, Date d) {
             super(id); 
             lastused=d;
@@ -121,7 +130,7 @@ public class LocalUsers {
     }
       
     
-    public User add(String userid, String name, boolean sar, boolean admin, String passwd) {
+    public User add(String userid, String name, boolean sar, boolean admin, String passwd, String atr) {
         User u = add(userid); 
         if (u==null) {
             _api.log().info("LocalUsers", "add: user '"+userid+"' already exists");
@@ -134,6 +143,7 @@ public class LocalUsers {
         u.setName(name);
         u.setSar(sar);
         u.setAdmin(admin);
+        u.setTrackerAllowed(atr);
         return u;
     }
     
@@ -203,7 +213,6 @@ public class LocalUsers {
         return (userid.matches(adminusers)); 
     }
     
-    
         
 
     /**
@@ -223,7 +232,8 @@ public class LocalUsers {
                     + x.isSar() + ","
                     + x.isAdmin() + ","
                     + x.getName() + "," 
-                    + x.getCallsign())
+                    + x.getCallsign() + ","
+                    + x.getAllowedTrackers())
                     ;
             }
             out.flush(); 
@@ -252,7 +262,7 @@ public class LocalUsers {
                     String userid = x[0].trim();
                     String lu = x[1].trim();
                     boolean sar, admin;
-                    String name  = "", callsign = ""; 
+                    String name  = "", callsign = "", tallow = ""; 
 
                     sar = ("true".equals(x[2].trim()));
                     admin = ("true".equals(x[3].trim()));
@@ -260,6 +270,8 @@ public class LocalUsers {
                         name = x[4].trim();
                     if (x.length > 5)
                         callsign = x[5].trim();
+                    if (x.length > 6)
+                        tallow = x[6].trim();
                         
                     Date   lastupd = ("null".equals(lu) ? null : ServerBase.xf.parse(x[1].trim()));
                     User u = new User(userid, lastupd); 
@@ -267,6 +279,7 @@ public class LocalUsers {
                     u.setAdmin(admin);
                     u.setName(name);
                     u.setCallsign(callsign);
+                    u.setTrackerAllowed(tallow);
                     _users.put(userid,u);
                 }
             }

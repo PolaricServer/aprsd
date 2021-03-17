@@ -38,16 +38,20 @@ public class UserApi extends ServerBase {
         public String ident; 
         public Date lastused; 
         public String name, callsign;
+        public String allowTracker="";
         public boolean sar, admin; 
         public String passwd;
         public UserInfo() {}
         public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a)
            { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; }
+        public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a, String tr)
+           { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; allowTracker=tr;}   
     }
 
     
     public static class UserUpdate {
-        public String name, callsign; 
+        public String name, callsign;
+        public String allowTracker;
         public String passwd;
         public boolean sar, admin;
     }
@@ -93,7 +97,7 @@ public class UserApi extends ServerBase {
         if (u instanceof LocalUsers.User) {
             var lu = (LocalUsers.User) u; 
             return new UserInfo(u.getIdent(), u.getLastUsed(), lu.getName(), 
-                lu.getCallsign(), lu.isSar(), lu.isAdmin());    
+                lu.getCallsign(), lu.isSar(), lu.isAdmin(), lu.getAllowedTrackers() );    
         }
         else
             return null;
@@ -178,6 +182,8 @@ public class UserApi extends ServerBase {
                     ((LocalUsers.User) u).setCallsign(uu.callsign);
                 if (uu.passwd != null) 
                     ((LocalUsers.User) u).setPasswd(uu.passwd);
+                if (uu.allowTracker != null)
+                    ((LocalUsers.User) u).setTrackerAllowed(uu.allowTracker);
                 ((LocalUsers.User) u).setSar(uu.sar);
                 ((LocalUsers.User) u).setAdmin(uu.admin);
             }
@@ -193,7 +199,7 @@ public class UserApi extends ServerBase {
             var u = (UserInfo) 
                 ServerBase.fromJson(req.body(), UserInfo.class);
 
-            if (_users.add(u.ident, u.name, u.sar, u.admin, u.passwd)==null) 
+            if (_users.add(u.ident, u.name, u.sar, u.admin, u.passwd, u.allowTracker)==null) 
                 return ERROR(resp, 400, "Probable cause: User exists");
             return "Ok";
         });
