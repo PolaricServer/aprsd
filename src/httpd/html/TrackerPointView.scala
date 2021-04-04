@@ -129,7 +129,7 @@ package no.polaric.aprsd.http
            channel(req) ++
            descr(req) ++
            position(req) ++
-           heightcourse(req) ++ 
+           heightcourse(req) //++ 
  //          basicSettings(req)
            ;
               
