@@ -60,4 +60,4 @@ packages is included. You may use the 'debuild' command.
 
 You will need JDK (Oracle or OpenJDK) version 11 or later, the Scala
 programming language version 2.11.12 or later (scala, scala-library scala-xml
-and scala-parser-combinators packages) and librxtx-java. 
+and scala-parser-combinators packages) and librxtx-java, byacc-j, jflex, gettext, libgettext-commons-java, libjackson2-databind-java, libjackson-annotations-java.

@@ -250,7 +250,7 @@ public abstract class MailBox {
             
         /* If there is a @-part of the address, it is remote */
         String[] addr = msg.to.split("@", 2);
-        if (addr.length > 1 && addr[1].toUpperCase().equals(api.getRemoteCtl().getMycall())) {
+        if (addr.length > 1 && null!= api.getRemoteCtl() && addr[1].toUpperCase().equals(api.getRemoteCtl().getMycall())) {
             addr[1]=null;
             msg.to = addr[0];
         }
@@ -298,8 +298,6 @@ public abstract class MailBox {
      * Send message to another server or elsewhere depending on the @-field. 
      */
     private static boolean postRemoteMessage(ServerAPI api, String[] addr, Message msg) {
-        if (api.getRemoteCtl() == null)
-            return false; 
     
         if (addr[1].matches("APRS|aprs|Aprs")) {
             /* 
@@ -313,6 +311,9 @@ public abstract class MailBox {
             return true; 
         }
         else {
+            if (api.getRemoteCtl() == null)
+                return false;
+
             /* 
              * @-part of address is another Polaric Server instance. 
              * Message should be authenticated and acked. 
