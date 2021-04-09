@@ -1,26 +1,43 @@
 
 FOR RELEASE 2.7
+
+* Call external scripts through REST API. Use for seeding map-tiles. 
+    DONE.
     
 * Draw tool: Radius for circles. Measurement info while drawing. 
 
-* Draw tool: Get features that are moved to layers. 
+* Draw tool: Info about line only shows NaN instead of coordinates. Fix. 
+
+* Draw tool: Get features that are moved to layers. See list of features in layer.
+    DONE.
 
 * Draw tool: Can this be done more intuitive? 
 
-* Share layers etc. with other users
+* Draw tool: Allows labels on features. 
+    DONE. Show label on click.
 
-* Allow backup remotectl parent.
+* Draw tool: Icons
 
-* Missions, incidents: Manage trackers, tracks... Replace SAR mode. Replace "My trackers"? 
-    - Widget for starting incidents
-    - REST call for starting incidents
-    - Database schema and methods for starting incidents
-    - Indicator icon and menu on client
-    - Invitations to users and ability to join incidents
-    
-* Confirm-popup when deleting items. 
+* Share layers etc. with other users [DB plugin]
+
+* Export of history: Include alias and signs [DB plugin]
+
+* Signs: Easier use of scale. 
+
+* Signs: Bug in map reference input? 
 
 * Signs editor: Handle owners.. 
+
+* SAR mode: Hide APRS objects. 
+
+* My trackers Time since heard? How to determine if tracker is active? 
+
+* Review when tracker is regarded inactive? 
+
+* Allow backup remotectl parent.
+    
+* Confirm-popup when deleting items.
+    DONE.
 
 * Check for availability of newer versions of software ! 
 
@@ -28,6 +45,14 @@ FOR RELEASE 2.7
 
 
 LATER RELEASES
+
+* Missions, incidents: Manage trackers, tracks... Replace SAR mode. Replace "My trackers"? 
+    - Widget for starting incidents
+    - REST call for starting incidents
+    - Database schema and methods for starting incidents
+    - Indicator icon and menu on client
+    - Invitations to users and ability to join incidents
+
 
 * Groups of users? Roles? 
 
