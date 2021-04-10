@@ -38,6 +38,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
         private char _start='0', _end='9'; 
         private String name;
         
+        
         /**
          * Add a bulletin to the subboard.
          */
@@ -48,8 +49,8 @@ public class BullBoard implements MessageProcessor.MessageHandler {
             _api.log().debug("BullBoard", "Bulletin update: "+b.sender+" > "+name+"["+b.bullid+"]: "+b.text);
             if (!_map.containsKey(b.sender))
                 _map.put(b.sender, new SenderBulls(b.sender,_size));    
-                
-            _api.getWebserver().getPubSub().put("bullboard", null);
+
+            /* If there is no change, return */
             Bull orig = _map.get(b.sender).get(b.bullid - _start);  
             if (orig != null && orig.sender.equals(b.sender) && orig.text.equals(b.text)) {
                 orig.time = new Date();
@@ -58,13 +59,14 @@ public class BullBoard implements MessageProcessor.MessageHandler {
             
             /* If there is a change, replace and notify */
             _map.get(b.sender).update(b.bullid - _start, b); 
-            
+            _api.getWebserver().getPubSub().put("bullboard", null);
+                        
             /* FIXME: allow users to subscribe to notifications? */
             if (false)
-	      _api.getWebserver().notifyUser
-                ("SYSTEM", new ServerAPI.Notification
-                  ("chat", ((b.bullid >= '0' && b.bullid <= '9') ? "Bulletin" : "Announcement"),
-                   b.sender+" > "+name+"["+b.bullid+"]: "+b.text, new Date(), 60*1));
+                _api.getWebserver().notifyUser
+                    ("SYSTEM", new ServerAPI.Notification
+                        ("chat", ((b.bullid >= '0' && b.bullid <= '9') ? "Bulletin" : "Announcement"),
+                        b.sender+" > "+name+"["+b.bullid+"]: "+b.text, new Date(), 60*1));
         }
         
         
@@ -201,6 +203,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
         /* General bulletins */ 
         if (bullid >= '0' && bullid <= '9')
             _bulletins.put(bull);
+            
         /* General announcements */
         else if (bullid >= 'A' && bullid <= 'Z')
             _announcements.put(bull);
