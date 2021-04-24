@@ -178,6 +178,7 @@ public class WebServer implements ServerAPI.Web
         before("/users",           _auth.conf().filter(null, "isauth, admin"));
         before("/users/*",         _auth.conf().filter(null, "isauth, admin"));
         before("/users/*/*",       _auth.conf().filter(null, "isauth"));
+        before("/mypasswd",        _auth.conf().filter(null, "isauth"));
         before("/item/*/alias",    _auth.conf().filter(null, "isauth, sar"));
         before("/item/*/reset",    _auth.conf().filter(null, "isauth, sar"));
         before("/item/*/tags",     _auth.conf().filter(null, "isauth, sar"));
@@ -221,6 +222,7 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/loginusers");
         corsEnable("/users");
         corsEnable("/users/*"); 
+        corsEnable("/mypasswd");
 
         /* Start REST API: SAR */
         SarApi sar = new SarApi(_api); 

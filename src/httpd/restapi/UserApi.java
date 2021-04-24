@@ -57,6 +57,11 @@ public class UserApi extends ServerBase {
     }
     
     
+    public static class PasswdUpdate {
+        public String passwd; 
+    }
+    
+    
     public static class Client {
         public String uid; 
         public String username;
@@ -108,6 +113,26 @@ public class UserApi extends ServerBase {
      * Set up the webservices. 
      */
     public void start() {     
+        
+        /************************************************
+         * Update user's password.
+         ************************************************/
+        put("/mypasswd", (req, resp) -> {
+            var uid = getAuthInfo(req).userid; 
+            User u = _users.get(uid);
+            if (u==null)
+                return ERROR(resp, 404, "Unknown user: "+uid);
+            var pwd = (PasswdUpdate) 
+                ServerBase.fromJson(req.body(), PasswdUpdate.class);
+            
+            if (u instanceof LocalUsers.User) {
+                if (pwd.passwd != null) 
+                    ((LocalUsers.User) u).setPasswd(pwd.passwd);
+            }
+            return "Ok";
+        });
+        
+        
         
         /************************************************
          * Get (web socket) clients.
