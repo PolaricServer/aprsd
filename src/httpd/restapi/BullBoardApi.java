@@ -26,14 +26,20 @@ import no.polaric.aprsd.*;
 /**
  * Implement REST API for user-related info. Users, areas. 
  */
-public class BullBoardApi {
+public class BullBoardApi extends ServerBase {
 
     private ServerAPI _api; 
     private BullBoard _board;
     
     
+    public static class BullSubmit {
+        public String bullid;
+        public String groupid;
+        public String text; 
+    }
     
     public BullBoardApi(ServerAPI api) {
+        super(api);
         _api = api;
         _board = _api.getBullBoard();
     }
@@ -71,6 +77,29 @@ public class BullBoardApi {
                 return ERROR(resp, 404, "Group '"+sbid+"' not found");
             return sb.getSenders();
         }, ServerBase::toJson );
+        
+        
+        /*
+         * Submit bulletin.
+         */
+        put("/bullboard/*/messages", (req, resp) -> {
+            AuthInfo user = getAuthInfo(req); 
+            String sbid = req.splat()[0];
+            if (user.callsign == null)
+                return ERROR(resp,  401, "No callsign registered for user");
+            
+            var b = (BullSubmit) 
+                ServerBase.fromJson(req.body(), BullSubmit.class);
+            if (b==null)
+                return ERROR(resp, 400, "Input format error");
+            
+            var grp = _board.getBulletinGroup(b.groupid);
+            if (grp == null)
+                grp = _board.createBulletinGroup(b.groupid);
+                
+            grp.post(user.callsign, b.bullid.charAt(0), b.text);
+            return "Ok"; 
+        });
         
         
         /* 

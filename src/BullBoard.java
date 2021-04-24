@@ -13,7 +13,14 @@ public class BullBoard implements MessageProcessor.MessageHandler {
         public char bullid; 
         public String sender; 
         public String text; 
-        public Date time; 
+        public Date time, refresh; 
+        public long resend = 0;
+        public boolean local = false; 
+        
+        public Bull()
+            {}
+        public Bull(char id, String s, String txt)
+            { bullid=id; sender=s; text=txt; time=new Date(); }
         public Bull(char id, Station s, String txt)
             { bullid=id; sender=s.getIdent(); text=txt; time=new Date(); }
             // FIXME: Time should be in UTC !!!!!
@@ -22,11 +29,18 @@ public class BullBoard implements MessageProcessor.MessageHandler {
     public class SenderBulls {
         public String sender;
         public Bull[] bulls;
+        public int nbulls = 0;
+        public boolean local = false;
         
         public Bull get(int i)
             { return bulls[i]; }
         public void update(int i, Bull b)
-            { bulls[i] = b; }
+            { if (bulls[i]==null)
+                 nbulls++; 
+              bulls[i] = b; 
+            }
+        public void remove(int i)
+            { nbulls--; bulls[i] = null; }
         public SenderBulls(String s, int n)
             { sender=s; bulls=new Bull[n]; }
     }
@@ -39,12 +53,61 @@ public class BullBoard implements MessageProcessor.MessageHandler {
         private String name;
         
         
+        /** 
+         * Post a bulletin to the system. 
+         */
+        public void post(String sender, char bullid, String text) {
+            SenderBulls mybulls = _map.get(sender);
+            
+            // check if mybulls exist
+            if (mybulls == null) {
+                /* If not, create them */
+                mybulls = new SenderBulls(sender, _size); 
+                _map.put(sender, mybulls);
+            }
+                 
+            /* Check bullid and compute index */
+            if (bullid < _start || bullid > _end)
+                return;
+            int index = (bullid - _start); 
+
+            /* If text is null or "", remove the bull */
+            if (text == null || text.equals("")) {
+                mybulls.remove(index);
+                if (mybulls.nbulls == 0)
+                    _map.remove(sender);
+                _api.getWebserver().getPubSub().put("bullboard", null);
+                return;
+            }
+            
+            /* If bull already exists for index, reuse it */
+            var bull = mybulls.bulls[index];
+            var bexist = false; 
+            if (bull == null) 
+                bull = new Bull(bullid, sender, text); 
+            else
+                bexist = true; 
+                
+            /* If bull didn't exist or text change, send it to APRS */
+            if (bull.text==null || !bexist || !bull.text.equals(text)) {
+                bull.text = text;
+                sendBulletin(bull, name);
+            }
+ 
+            /* Add to list */ 
+            put(bull);
+        }
+        
+        
         /**
          * Add a bulletin to the subboard.
          */
         public void put(Bull b) { 
             if (b.bullid<_start || b.bullid>_end)
                 return; 
+                
+            if (b.refresh == null)
+                b.refresh = b.time;
                 
             _api.log().debug("BullBoard", "Bulletin update: "+b.sender+" > "+name+"["+b.bullid+"]: "+b.text);
             if (!_map.containsKey(b.sender))
@@ -53,7 +116,8 @@ public class BullBoard implements MessageProcessor.MessageHandler {
             /* If there is no change, return */
             Bull orig = _map.get(b.sender).get(b.bullid - _start);  
             if (orig != null && orig.sender.equals(b.sender) && orig.text.equals(b.text)) {
-                orig.time = new Date();
+                _api.log().debug("BullBoard", "NO CHANGE to bulletin: "+b.sender+" > "+name+"["+b.bullid+"]: "+b.text);
+                orig.refresh = new Date();
                 return; 
             }
             
@@ -75,12 +139,14 @@ public class BullBoard implements MessageProcessor.MessageHandler {
          */
         public synchronized void cleanUp(int hours) {
             boolean remove = false; 
+            /* For each sender */
             for (Object s : _map.keySet().toArray()) {
                 SenderBulls bls = _map.get((String) s); 
                 boolean empty = true;
                 for (int i=0; i<bls.bulls.length; i++) {
                     if (bls.bulls[i] != null && 
-                            bls.bulls[i].time.getTime() + hours*60*60*1000 < (new Date()).getTime()) {
+                        (bls.bulls[i].refresh.getTime() + hours*60*60*1000 < (new Date()).getTime())
+                    ) {
                         _api.log().debug("BullBoard", "Cleanup - removing bull: "+bls.bulls[i].sender);
                         bls.bulls[i] = null;
                         remove = true; 
@@ -99,8 +165,11 @@ public class BullBoard implements MessageProcessor.MessageHandler {
         public boolean isEmpty() 
             { return (_map.size() == 0); }
         
-        public Bull[] get(String sender) 
-            { return _map.get(sender).bulls; }
+        public Bull[] get(String sender) {
+            if (_map.get(sender) == null)
+                return null;
+            return _map.get(sender).bulls; 
+        }
         
         public Set<String> getSenders() 
             { return _map.keySet(); }
@@ -121,11 +190,15 @@ public class BullBoard implements MessageProcessor.MessageHandler {
     
     
     private ServerAPI _api; 
-    private SubBoard _bulletins = new SubBoard("", true);
-    private SubBoard _announcements = new SubBoard("", false); 
+    private SubBoard _bulletins = new SubBoard("_B_", true);
+    private SubBoard _announcements = new SubBoard("_A_", false); 
     private SortedMap<String, SubBoard> _groups = new TreeMap(); 
     private String _grpsel;
     private String _senders;
+    private String _myCall;
+    private MessageProcessor _msg;
+    
+    
     
     // FIXME
     public static Calendar utcTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
@@ -139,31 +212,40 @@ public class BullBoard implements MessageProcessor.MessageHandler {
   
     public BullBoard(ServerAPI api, MessageProcessor p) {
         _api = api;
-        _grpsel = api.getProperty("bulletin.groups", ".*");
-        _senders = api.getProperty("bulletin.senders", ".*");
-        int ttl_bull = _api.getIntProperty("bulletin.ttl.bull", 12);
+        _grpsel = _api.getProperty("bulletin.groups", ".*");
+        _senders = _api.getProperty("bulletin.senders", ".*");
+        int ttl_bull = _api.getIntProperty("bulletin.ttl.bull", 8);
         int ttl_ann = _api.getIntProperty("bulletin.ttl.ann", 24);
-        
+        _myCall = _api.getProperty("message.mycall", "").toUpperCase();
+        if (_myCall.length() == 0)
+           _myCall = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
+           
         p.subscribe("BLN", this, false);
+        _msg = p;
         
-        /** Shedule cleanup each 10 minutes. */
+        /* Shedule cleanup each 10 minutes. */
         scheduler.scheduleAtFixedRate( () -> 
             {
                 try {
                     _bulletins.cleanUp(ttl_bull); 
                     _announcements.cleanUp(ttl_ann); 
+                    
+                    /* Do cleanup for each group. Remove group if empty */
                     for (Object sbn : _groups.keySet().toArray()) {
                         SubBoard sb = getBulletinGroup((String) sbn); 
                         sb.cleanUp(ttl_bull);
                         if (sb.isEmpty())
                             _groups.remove(sbn);
                     }
+                    
+                    /* Re-send messages (if necessary) */
+                    resend();
                 }
                 catch (Exception e) {
                     _api.log().warn("BullBoard", "Exception in scheduled action: "+e);
                     e.printStackTrace(System.out);
                 }
-            } ,20, 10, MINUTES); 
+            } ,5, 5, MINUTES); 
     }
     
     
@@ -216,6 +298,59 @@ public class BullBoard implements MessageProcessor.MessageHandler {
     }
  
  
+ 
+    /**
+     * Send bulletin to APRS.
+     */
+    public void sendBulletin(Bull b, String group) {
+        _api.log().info("BullBoard", "SEND BULL to "+group+": "+b.text);
+        String dest = "BLN"+b.bullid;
+
+        if (group != null && !group.matches("_[AB]_"))
+            dest += group;
+        
+        _msg.sendRawMessage(b.sender, b.text, dest);
+        b.local = true; 
+        b.refresh = new Date();
+    }
+ 
+ 
+ 
+    /**
+     * Go through all messages and se if any sent messages need to be re-sent.
+     */
+    public void resend() {
+        resendGroup(getAnnouncements());
+        resendGroup(getBulletins());
+        for (SubBoard grp : _groups.values())
+            resendGroup(grp);
+    }
+    
+    
+    
+    /**
+     * Resend messages in a group. Announcements after 10 minutes, other bulls after 5 min. 
+     * Time interval doubles each time up to 2 hours. 
+     */
+    public void resendGroup(SubBoard grp) {
+        for (SenderBulls sb : grp.getAll())
+            for (Bull b : sb.bulls) {
+                if (b==null || !b.local)
+                    continue;
+                if (b.resend == 0)
+                    b.resend = (grp.name.equals("_A_") ? 10 : 5) * 60 *1000;
+                if (b.resend > 2*60*60*1000)
+                    b.resend = 2*60*60*1000; /* Max 2 hours */
+                
+                long now = (new Date()).getTime();
+                if (now - b.refresh.getTime() + 60*1000 >= b.resend)
+                    sendBulletin(b, grp.name);
+                b.resend *= 2;
+            }
+    }
+    
+    
+ 
     /**
      * Get general bulletins subboard 
      */
@@ -245,6 +380,15 @@ public class BullBoard implements MessageProcessor.MessageHandler {
             return _groups.get(groupid); 
     }
  
+ 
+    public SubBoard createBulletinGroup(String groupid)
+    {
+        var x = _groups.get(groupid);
+        if (x == null)
+            _groups.put(groupid, new SubBoard(groupid, true));
+        return _groups.get(groupid);
+    }
+    
  
     /**
      * Get names of all bulletin groups. 
