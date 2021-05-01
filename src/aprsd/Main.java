@@ -29,8 +29,8 @@ import java.util.concurrent.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "2.6.2+";
-   public static String toaddr  = "APPS26";
+   public  static String version = "2.7";
+   public static String toaddr  = "APPS27";
    
    private static StationDB db = null;
    private static AprsParser parser = null;

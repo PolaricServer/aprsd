@@ -1,20 +1,11 @@
 
-FOR RELEASE 2.7
+FOR RELEASE 2.8
 
-* Call external scripts through REST API. Use for seeding map-tiles. 
-    DONE.
-    
 * Draw tool: Radius for circles. Measurement info while drawing. 
 
 * Draw tool: Info about line only shows NaN instead of coordinates. Fix. 
 
-* Draw tool: Get features that are moved to layers. See list of features in layer.
-    DONE.
-
 * Draw tool: Can this be done more intuitive? 
-
-* Draw tool: Allows labels on features. 
-    DONE. Show label on click.
 
 * Draw tool: Icons
 
@@ -35,9 +26,6 @@ FOR RELEASE 2.7
 * Review when tracker is regarded inactive? 
 
 * Allow backup remotectl parent.
-    
-* Confirm-popup when deleting items.
-    DONE.
 
 * Check for availability of newer versions of software ! 
 

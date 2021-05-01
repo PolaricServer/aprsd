@@ -2,16 +2,16 @@ Source: polaric-aprsd
 Section: hamradio
 Priority: optional
 Maintainer: Øyvind Hanssen <ohanssen@acm.org>
-Build-Depends: debhelper (>= 10), gettext-base, libgettext-commons-java, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, openjdk-11-jdk|openjdk-12-jdk|openjdk-13-jdk|openjdk-14-jdk, scala (>> 2.11.12), byacc-j, jflex, librxtx-java 
+Build-Depends: debhelper (>= 10), gettext-base, libgettext-commons-java, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, openjdk-11-jdk|openjdk-12-jdk|openjdk-13-jdk|openjdk-14-jdk|openjdk-15-jdk, scala (>> 2.11.12), byacc-j, jflex, librxtx-java 
 Standards-Version: 3.9.8
 Homepage: http://aprs.no/polaricserver
 
 Package: polaric-aprsd
 Architecture: all
-Depends: openjdk-11-jre-headless|openjdk-12-jre-headless|openjdk-13-headless|openjdk-14-jdk, libslf4j-java, librxtx-java, scala-library (>> 2.11.12), scala-xml, scala-parser-combinators, gettext-base, libgettext-commons-java, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, adduser, apache2-utils, sudo, lsb-base, ${misc:Depends}
+Depends: openjdk-11-jre-headless|openjdk-12-jre-headless|openjdk-13-headless|openjdk-14-headless|openjdk-15-headless, libslf4j-java, librxtx-java, scala-library (>> 2.11.12), scala-xml, scala-parser-combinators, gettext-base, libgettext-commons-java, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, adduser, apache2-utils, sudo, lsb-base, ${misc:Depends}
 Conflicts: polaric-database-plugin (<= 2.1), polaric-ais-plugin (<= 2.1.0) 
 Recommends:
-Suggests: polaric-webapp2 (>= 1.4)
+Suggests: polaric-webapp2 (>= 1.6)
 Description: Polaric Server: APRS daemon part. 
  The "Polaric Server" is mainly a web based service to present APRS 
  tracking information on maps and where the information is updated at real-

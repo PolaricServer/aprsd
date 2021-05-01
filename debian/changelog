@@ -1,8 +1,10 @@
-polaric-aprsd (2.6.2+) UNRELEASED; urgency=medium
+polaric-aprsd (2.7) stable; urgency=medium
 
-  * More hacking....
+  * API for calling external script
+  * Bulletin improvements and sending. 
+  * Various fixes..
 
- -- Oyvind Hanssen <ohanssen@acm.org>  Wed, 27 Jan 2021 23:00:32 +0100
+ -- Oyvind Hanssen <ohanssen@acm.org>  Wed, 28 Apr 2021 22:31:57 +0200
 
 polaric-aprsd (2.6.2) stable; urgency=medium
 
