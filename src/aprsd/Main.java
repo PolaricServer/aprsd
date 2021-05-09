@@ -29,7 +29,7 @@ import java.util.concurrent.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "2.7";
+   public  static String version = "2.7+";
    public static String toaddr  = "APPS27";
    
    private static StationDB db = null;
