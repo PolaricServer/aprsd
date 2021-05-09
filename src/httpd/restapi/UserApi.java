@@ -176,6 +176,18 @@ public class UserApi extends ServerBase {
         
         
         
+        /******************************************
+         * Get a list of users. 
+         ******************************************/
+        get("/usernames", "application/json", (req, resp) -> {
+            List<String> ul = new ArrayList<String>();
+            for (User u: _users.getAll())  
+               ul.add(u.getIdent());
+    
+            return ul;
+        }, ServerBase::toJson );
+        
+        
         /*******************************************
          * Get info about a given user.
          *******************************************/

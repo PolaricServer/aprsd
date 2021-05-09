@@ -189,6 +189,7 @@ public class WebServer implements ServerAPI.Web
         before("/mailbox",         _auth.conf().filter(null, "isauth"));
         before("/wsclients",       _auth.conf().filter(null, "isauth, admin"));
         before("/loginusers",      _auth.conf().filter(null, "isauth"));
+        before("/usernames",       _auth.conf().filter(null, "isauth"));
         before("/scripts",         _auth.conf().filter(null, "isauth, admin"));
         
         
@@ -220,6 +221,7 @@ public class WebServer implements ServerAPI.Web
         uu.start();
         corsEnable("/wsclients");
         corsEnable("/loginusers");
+        corsEnable("/usernames");
         corsEnable("/users");
         corsEnable("/users/*"); 
         corsEnable("/mypasswd");
