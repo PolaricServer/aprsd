@@ -226,26 +226,38 @@ public class PubSub extends WsNotifier implements ServerAPI.PubSub
     
     
     
-    /** Post a message to the members of a room */
-    private void _put(Room rm, String msg) {
-        postText(msg, c-> (rm != null && rm.hasClient((PubSub.Client) c)) );
+    /** 
+      * Post a message to members of a room. If uname is given, 
+      * the message will be posted only to the named member
+      */
+    private void _put(Room rm, String msg, String uname) {
+        postText(msg, 
+           c-> (rm != null && rm.hasClient((PubSub.Client) c) && 
+                    (uname==null || uname.equals(((PubSub.Client) c).getUsername()))
+               )
+        );
     }
     
     
     
     /** Post a message to a room (text is prefixed with the room name) */
-    public void putText (String rid, String msg) { 
+    public void putText (String rid, String msg, String uname) { 
         if (hasRoom(rid))
-            _put(_rooms.get(rid), rid+","+msg); 
+            _put(_rooms.get(rid), rid+","+msg, uname); 
     }
     
     
+    public void putText (String rid, String msg)
+        { putText(rid, msg, null); }
+    
     
     /** Post a object to a room (JSON encoded) */
-    public void put(String rid, Object obj) 
-        { putText(rid, toJson(obj)); }
+    public void put(String rid, Object obj, String uname) 
+        { putText(rid, toJson(obj), uname); }
     
-
+    
+    public void put(String rid, Object obj)
+        { put(rid, obj, null); }
         
         
     public PubSub(ServerAPI api, boolean trusted)
