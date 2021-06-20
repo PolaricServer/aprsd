@@ -179,7 +179,8 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
         {
            if (_trail.length() == 1)
                _trailcolor = _colTab.nextColour();
-           _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
+           if (_db.getRoutes() != null)
+              _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
            setChanging();   
         }
         return true;
