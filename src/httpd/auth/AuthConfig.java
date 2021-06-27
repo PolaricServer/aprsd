@@ -20,7 +20,6 @@ import org.pac4j.core.client.Clients;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.authorization.authorizer.*;
-import org.pac4j.sparkjava.DefaultHttpActionAdapter;
 import org.pac4j.sparkjava.SecurityFilter;
 import org.pac4j.http.client.indirect.*;
 import no.polaric.aprsd.*;
@@ -59,7 +58,6 @@ public class AuthConfig {
          _config.addAuthorizer("isauth", new IsFullyAuthenticatedAuthorizer());
          _config.addAuthorizer("sar", new UserAuthorizer(false));
          _config.addAuthorizer("admin", new UserAuthorizer(true));
-         _config.setHttpActionAdapter(new DefaultHttpActionAdapter());
      }
  
      public LocalUsers getLocalUsers() 

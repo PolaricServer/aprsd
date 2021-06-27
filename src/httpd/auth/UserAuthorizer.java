@@ -24,9 +24,13 @@ public class UserAuthorizer implements Authorizer<CommonProfile> {
 
     @Override
     public boolean isAuthorized(final WebContext context, final List<CommonProfile> profile) {
-    
-        var auth = (AuthInfo) context.getRequestAttribute("authinfo");
-        return (admin ? auth.admin : auth.sar); 
+        var aa = context.getRequestAttribute("authinfo"); 
+        if (aa.isPresent()) {
+            var auth = (AuthInfo) aa.get();
+            return (admin ? auth.admin : auth.sar); 
+        }
+        else
+            return false;
     }
 
  

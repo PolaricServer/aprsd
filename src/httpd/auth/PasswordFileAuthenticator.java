@@ -15,10 +15,10 @@
  
 package no.polaric.aprsd.http;
 
-import org.pac4j.core.context.Pac4jConstants;
+//import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.exception.CredentialsException;
-import org.pac4j.core.exception.HttpAction;
+// import org.pac4j.core.exception.HttpAction;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
@@ -90,7 +90,7 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
     
     @Override
     public void validate(final UsernamePasswordCredentials credentials, final WebContext context) 
-           throws HttpAction, CredentialsException 
+           throws CredentialsException 
     {
         if (credentials == null) {
             throwsException("No credential");
@@ -125,7 +125,7 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
         /* Create a user profile */
         final CommonProfile profile = new CommonProfile();
         profile.setId(username);
-        profile.addAttribute(Pac4jConstants.USERNAME, username);
+//        profile.addAttribute(Pac4jConstants.USERNAME, username); FIXME: Do we need something instead? 
         profile.addAttribute("userInfo", _users.get(username));
         credentials.setUserProfile(profile);
     }
