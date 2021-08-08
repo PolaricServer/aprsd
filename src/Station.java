@@ -193,7 +193,8 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     { 
         if (saveToTrail(ts, pd.pos, pd.speed, pd.course, _pathinfo)) {
              updatePosition(ts, pd.pos, pd.ambiguity);
-            _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
+             if (_db != null && _db.getRoutes() != null)
+                _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
            
             setSpeed(pd.speed);
             setCourse(pd.course);

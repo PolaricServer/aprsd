@@ -438,7 +438,7 @@ public class Main implements ServerAPI
          System.out.println("*** Stopping HTTP/WS server");
          try {
             Thread.sleep(2000);
-            ws.stop();
+            if (ws != null) ws.stop();
          } catch (Exception e) {
             e.printStackTrace(System.out);
          }

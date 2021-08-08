@@ -203,9 +203,10 @@ public class AprsParser implements AprsChannel.Receiver
            if (tindex == -1) {
                Station to = _api.getDB().getStation(pp[plen-1], null);
                if (to != null) {
-                   _api.getDB().getRoutes().addEdge(s.getIdent(), to.getIdent(), !duplicate);  
-                   to.setIgate(true);         
-                   /* Igate direct (has not been digipeated) */
+                    if (_api.getDB().getRoutes() !=null)
+                        _api.getDB().getRoutes().addEdge(s.getIdent(), to.getIdent(), !duplicate);  
+                    to.setIgate(true);         
+                    /* Igate direct (has not been digipeated) */
                }  
            }
            else {
@@ -214,7 +215,8 @@ public class AprsParser implements AprsChannel.Receiver
                   last = _api.getDB().getStation(pp[tindex-1], null);
                Station x = _api.getDB().getStation(pp[plen-1], null);
                if (last != null && x != null) {
-                  _api.getDB().getRoutes().addEdge(last.getIdent(), x.getIdent(), !duplicate);
+                  if (_api.getDB().getRoutes() != null)
+                    _api.getDB().getRoutes().addEdge(last.getIdent(), x.getIdent(), !duplicate);
                   x.setIgate(true);
                   /* Path from last digi to igate */
                }
