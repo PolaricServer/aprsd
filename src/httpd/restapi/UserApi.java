@@ -39,13 +39,13 @@ public class UserApi extends ServerBase {
         public Date lastused; 
         public String name, callsign;
         public String allowTracker="";
-        public boolean sar, admin; 
+        public boolean sar, admin, suspend; 
         public String passwd;
         public UserInfo() {}
-        public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a)
-           { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; }
-        public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a, String tr)
-           { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; allowTracker=tr;}   
+        public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a, boolean u)
+           { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; suspend=u; }
+        public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a, boolean u, String tr)
+           { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; suspend=u; allowTracker=tr;}   
     }
 
     
@@ -53,7 +53,7 @@ public class UserApi extends ServerBase {
         public String name, callsign;
         public String allowTracker;
         public String passwd;
-        public boolean sar, admin;
+        public boolean sar, admin, suspend;
     }
     
     
@@ -102,7 +102,7 @@ public class UserApi extends ServerBase {
         if (u instanceof LocalUsers.User) {
             var lu = (LocalUsers.User) u; 
             return new UserInfo(u.getIdent(), u.getLastUsed(), lu.getName(), 
-                lu.getCallsign(), lu.isSar(), lu.isAdmin(), lu.getAllowedTrackers() );    
+                lu.getCallsign(), lu.isSar(), lu.isAdmin(), lu.isSuspended(), lu.getAllowedTrackers() );    
         }
         else
             return null;
@@ -221,8 +221,10 @@ public class UserApi extends ServerBase {
                     ((LocalUsers.User) u).setPasswd(uu.passwd);
                 if (uu.allowTracker != null)
                     ((LocalUsers.User) u).setTrackerAllowed(uu.allowTracker);
+                    
                 ((LocalUsers.User) u).setSar(uu.sar);
                 ((LocalUsers.User) u).setAdmin(uu.admin);
+                ((LocalUsers.User) u).setSuspended(uu.suspend);
             }
             return "Ok";
         });
@@ -236,7 +238,7 @@ public class UserApi extends ServerBase {
             var u = (UserInfo) 
                 ServerBase.fromJson(req.body(), UserInfo.class);
 
-            if (_users.add(u.ident, u.name, u.sar, u.admin, u.passwd, u.allowTracker)==null) 
+            if (_users.add(u.ident, u.name, u.sar, u.admin, u.suspend, u.passwd, u.allowTracker)==null) 
                 return ERROR(resp, 400, "Probable cause: User exists");
             return "Ok";
         });

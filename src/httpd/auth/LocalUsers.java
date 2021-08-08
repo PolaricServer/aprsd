@@ -41,18 +41,21 @@ public class LocalUsers {
         private String callsign = "";
         private String trackerAllowed = "";
         private Date lastused; 
+        private boolean suspended = false; 
         transient private boolean active = false;
 
-        public Date    getLastUsed()        { return lastused; }
-        public void    updateTime()         { lastused = new Date(); }
-        public boolean isActive()           { return active; }
-        public void    setActive()          { active = true; }
-        public void    setName(String n)    { name = n; }
-        public String  getName()            { return name; }
-        public void    setCallsign(String c){ callsign = c.toUpperCase(); }
-        public String  getCallsign()        { return callsign; }
-        public void    setPasswd(String pw) { updatePasswd(getIdent(), pw); }
-        public String  getAllowedTrackers() { return trackerAllowed; }
+        public Date    getLastUsed()           { return lastused; }
+        public void    updateTime()            { lastused = new Date(); }
+        public boolean isActive()              { return active; }
+        public void    setActive()             { active = true; }
+        public boolean isSuspended()           { return suspended; }
+        public void    setSuspended(boolean s) { suspended = s; }
+        public void    setName(String n)       { name = n; }
+        public String  getName()               { return name; }
+        public void    setCallsign(String c)   { callsign = c.toUpperCase(); }
+        public String  getCallsign()           { return callsign; }
+        public void    setPasswd(String pw)    { updatePasswd(getIdent(), pw); }
+        public String  getAllowedTrackers()    { return trackerAllowed; }
         
         /* 
          * These flags are now stored in this class in addition to 
@@ -60,8 +63,8 @@ public class LocalUsers {
          */
         private boolean sar=false, admin=false;
         
-        @Override public boolean isSar()      { return sar || _isSarUser(getIdent()); }
-        @Override public boolean isAdmin()    { return admin || _isAdminUser(getIdent()); }
+        @Override public boolean isSar()      { return sar; }
+        @Override public boolean isAdmin()    { return admin; }
         public final void setSar(boolean s)   { sar=s; }
         public final void setAdmin(boolean a) { admin=a; }
 
@@ -130,7 +133,7 @@ public class LocalUsers {
     }
       
     
-    public User add(String userid, String name, boolean sar, boolean admin, String passwd, String atr) {
+    public User add(String userid, String name, boolean sar, boolean admin, boolean suspend, String passwd, String atr) {
         User u = add(userid); 
         if (u==null) {
             _api.log().info("LocalUsers", "add: user '"+userid+"' already exists");
@@ -143,6 +146,7 @@ public class LocalUsers {
         u.setName(name);
         u.setSar(sar);
         u.setAdmin(admin);
+        u.setSuspended(suspend);
         u.setTrackerAllowed(atr);
         return u;
     }
@@ -200,20 +204,11 @@ public class LocalUsers {
     }
     
     
-    /* FIXME: Remove this in next version */
-    public boolean _isSarUser(String userid) {
-        String updateusers = _api.getProperty("user.update", "");
-        return (userid.matches(updateusers));
+    
+    private String rmComma(String x) {
+        return x.replaceAll("\\,", ""); 
     }
     
-    
-    /* FIXME: Remove this in next version */
-    public boolean _isAdminUser(String userid) {
-        String adminusers = _api.getProperty("user.admin", "admin");
-        return (userid.matches(adminusers)); 
-    }
-    
-        
 
     /**
      * Store everything in a file. 
@@ -231,9 +226,10 @@ public class LocalUsers {
                     (x.getLastUsed() == null ? "null" : ServerBase.xf.format(x.getLastUsed())) +"," 
                     + x.isSar() + ","
                     + x.isAdmin() + ","
-                    + x.getName() + "," 
-                    + x.getCallsign() + ","
-                    + x.getAllowedTrackers())
+                    + rmComma( x.getName()) + "," 
+                    + rmComma( x.getCallsign()) + ","
+                    + rmComma( x.getAllowedTrackers()) + "," 
+                    + x.isSuspended() )
                     ;
             }
             out.flush(); 
@@ -261,7 +257,7 @@ public class LocalUsers {
                     String[] x = line.split(",");  
                     String userid = x[0].trim();
                     String lu = x[1].trim();
-                    boolean sar, admin;
+                    boolean sar, admin, suspend=false;
                     String name  = "", callsign = "", tallow = ""; 
 
                     sar = ("true".equals(x[2].trim()));
@@ -272,6 +268,8 @@ public class LocalUsers {
                         callsign = x[5].trim();
                     if (x.length > 6)
                         tallow = x[6].trim();
+                    if (x.length > 7)
+                        suspend = ("true".equals(x[2].trim()));
                         
                     Date   lastupd = ("null".equals(lu) ? null : ServerBase.xf.parse(x[1].trim()));
                     User u = new User(userid, lastupd); 
@@ -280,6 +278,7 @@ public class LocalUsers {
                     u.setName(name);
                     u.setCallsign(callsign);
                     u.setTrackerAllowed(tallow);
+                    u.setSuspended(suspend); 
                     _users.put(userid,u);
                 }
             }

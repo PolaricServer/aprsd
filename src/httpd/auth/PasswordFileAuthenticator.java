@@ -108,7 +108,10 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
         if (storedPwd == null)
            throwsException("Unknown user: '"+username+"'");
            
-                       
+        LocalUsers.User u = _users.get(username);
+        if (u.isSuspended())
+            throwsException("User is suspended: "+username);
+                  
         if (storedPwd.startsWith("$apr1$")) { 
            if (!storedPwd.equals(Md5Crypt.apr1Crypt(password, storedPwd)))
               throwsException("Invalid password");
@@ -125,7 +128,6 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
         /* Create a user profile */
         final CommonProfile profile = new CommonProfile();
         profile.setId(username);
-//        profile.addAttribute(Pac4jConstants.USERNAME, username); FIXME: Do we need something instead? 
         profile.addAttribute("userInfo", _users.get(username));
         credentials.setUserProfile(profile);
     }
