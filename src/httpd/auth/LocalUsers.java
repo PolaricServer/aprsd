@@ -269,7 +269,7 @@ public class LocalUsers {
                     if (x.length > 6)
                         tallow = x[6].trim();
                     if (x.length > 7)
-                        suspend = ("true".equals(x[2].trim()));
+                        suspend = ("true".equals(x[7].trim()));
                         
                     Date   lastupd = ("null".equals(lu) ? null : ServerBase.xf.parse(x[1].trim()));
                     User u = new User(userid, lastupd); 
