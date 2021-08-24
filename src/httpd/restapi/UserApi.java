@@ -99,14 +99,10 @@ public class UserApi extends ServerBase {
         if (u==null)
             return null;
         String name = "";           
-        if (u instanceof LocalUsers.User) {
-            var lu = (LocalUsers.User) u; 
-            return new UserInfo(u.getIdent(), u.getLastUsed(), lu.getName(), 
-                lu.getCallsign(), lu.isSar(), lu.isAdmin(), lu.isSuspended(), lu.getAllowedTrackers() );    
-        }
-        else
-            return null;
+        return new UserInfo(u.getIdent(), u.getLastUsed(), u.getName(), 
+            u.getCallsign(), u.isSar(), u.isAdmin(), u.isSuspended(), u.getAllowedTrackers() );    
     }
+    
 
     
     /** 
@@ -124,11 +120,9 @@ public class UserApi extends ServerBase {
                 return ERROR(resp, 404, "Unknown user: "+uid);
             var pwd = (PasswdUpdate) 
                 ServerBase.fromJson(req.body(), PasswdUpdate.class);
-            
-            if (u instanceof LocalUsers.User) {
-                if (pwd.passwd != null) 
-                    ((LocalUsers.User) u).setPasswd(pwd.passwd);
-            }
+
+            if (pwd.passwd != null) 
+                    u.setPasswd(pwd.passwd);
             return "Ok";
         });
         
@@ -212,20 +206,19 @@ public class UserApi extends ServerBase {
             var uu = (UserUpdate) 
                 ServerBase.fromJson(req.body(), UserUpdate.class);
             
-            if (u instanceof LocalUsers.User) {
-                if (uu.name != null)
-                    ((LocalUsers.User) u).setName(uu.name);           
-                if (uu.callsign != null)
-                    ((LocalUsers.User) u).setCallsign(uu.callsign);
-                if (uu.passwd != null) 
-                    ((LocalUsers.User) u).setPasswd(uu.passwd);
-                if (uu.allowTracker != null)
-                    ((LocalUsers.User) u).setTrackerAllowed(uu.allowTracker);
+            if (uu.name != null)
+                u.setName(uu.name);           
+            if (uu.callsign != null)
+                u.setCallsign(uu.callsign);
+            if (uu.passwd != null) 
+                u.setPasswd(uu.passwd);
+            if (uu.allowTracker != null)
+                u.setAllowedTrackers(uu.allowTracker);
                     
-                ((LocalUsers.User) u).setSar(uu.sar);
-                ((LocalUsers.User) u).setAdmin(uu.admin);
-                ((LocalUsers.User) u).setSuspended(uu.suspend);
-            }
+            u.setSar(uu.sar);
+            u.setAdmin(uu.admin);
+            u.setSuspended(uu.suspend);
+
             return "Ok";
         });
         

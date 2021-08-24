@@ -25,16 +25,37 @@ import java.io.Serializable;
 public abstract class User implements Serializable {
 
     private String userid; 
-       
-    public String  getIdent()
-        { return userid; }
+    private String name = "";
+    private String callsign = "";
+    
+    public String  getIdent()             { return userid; }
+    public void    setName(String n)      { name = n; }
+    public String  getName()              { return name; }
+    public void    setCallsign(String c)  { callsign = c.toUpperCase(); }
+    public String  getCallsign()          { return callsign; }
     
     public abstract Date    getLastUsed();
     public abstract void    updateTime();
     public abstract boolean isActive();
     public abstract void    setActive();
-    public abstract boolean isSar();
-    public abstract boolean isAdmin();
+    public abstract void    setPasswd(String pw);
+    
+    /* 
+     * Authorisations
+     * These flags are now stored in this class. 
+     */
+    private boolean sar=false, admin=false;
+    private boolean suspended = false; 
+    private String trackerAllowed = "";
+    
+    public boolean isSar()                      { return sar; }
+    public boolean isAdmin()                    { return admin; }
+    public final void setSar(boolean s)         { sar=s; }
+    public final void setAdmin(boolean a)       { admin=a; }
+    public final boolean isSuspended()          { return suspended; }
+    public final void setSuspended(boolean s)   { suspended = s; }
+    public String getAllowedTrackers()          { return trackerAllowed; }
+    public void setAllowedTrackers(String expr) { trackerAllowed = expr; }
     
     protected User(String id)
         { userid=id; }
