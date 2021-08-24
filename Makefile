@@ -23,6 +23,7 @@
 INSTALL_CONFIG = $(DESTDIR)/etc/polaric-aprsd
    INSTALL_WEB = $(DESTDIR)/usr/share/polaric
  INSTALL_DATA  = $(DESTDIR)/var/lib/polaric
+ INSTALL_BACKUP= $(INSTALL_DATA)/backup
    INSTALL_LOG = $(DESTDIR)/var/log/polaric
   INSTALL_SUDO = $(DESTDIR)/etc/sudoers.d
 INSTALL_PLUGDIR= $(INSTALL_CONFIG)/config.d
@@ -51,6 +52,7 @@ install: polaric-aprsd.jar
 	install -d $(INSTALL_JAR)
 	install -d $(INSTALL_WEB)/images
 	install -d $(INSTALL_DATA)
+	install -d $(INSTALL_BACKUP)
 	install -d $(INSTALL_SUDO)
 	install -m 755 -d $(INSTALL_LOG)
 	install -m 644 passwd $(INSTALL_CONFIG)

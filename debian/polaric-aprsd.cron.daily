@@ -1,0 +1,18 @@
+#!/bin/bash
+
+BDIR=/var/lib/polaric/backup
+
+mv $BDIR/config.xml.2 $BDIR/config.xml.3
+mv $BDIR/config.xml.1 $BDIR/config.xml.2
+mv $BDIR/config.xml $BDIR/config.xml.1
+cp /var/lib/polaric/config.xml $BDIR/config.xml
+
+mv $BDIR/users.dat.2 $BDIR/users.dat.3
+mv $BDIR/users.dat.1 $BDIR/users.dat.2
+mv $BDIR/users.dat $BDIR/users.dat.1
+cp /var/lib/polaric/users.dat  $BDIR/users.dat
+
+mv $BDIR/passwd.2 $BDIR/passwd.3
+mv $BDIR/passwd.1 $BDIR/passwd.2
+mv $BDIR/passwd $BDIR/passwd.1
+cp /etc/polaric-aprsd/passwd $BDIR/passwd
