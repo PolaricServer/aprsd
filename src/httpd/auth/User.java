@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2018 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018-21 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,16 +41,19 @@ public abstract class User implements Serializable {
     public abstract void    setPasswd(String pw);
     
     /* 
-     * Authorisations
+     * Group membership and authorisations
      * These flags are now stored in this class. 
      */
-    private boolean sar=false, admin=false;
+    private Group group = Group.DEFAULT;
+    private boolean admin=false;
     private boolean suspended = false; 
     private String trackerAllowed = "";
     
-    public boolean isSar()                      { return sar; }
+    public boolean isSar()                      { return group.isSar(); } 
+    public final void setSar(boolean s)         { group=(s? Group.SAR : Group.DEFAULT); } 
+       /* SetSar will soon go away  - replace with setGroup */
+       
     public boolean isAdmin()                    { return admin; }
-    public final void setSar(boolean s)         { sar=s; }
     public final void setAdmin(boolean a)       { admin=a; }
     public final boolean isSuspended()          { return suspended; }
     public final void setSuspended(boolean s)   { suspended = s; }
