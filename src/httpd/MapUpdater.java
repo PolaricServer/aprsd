@@ -160,7 +160,7 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
          String origin = req.getHeader("X-Forwarded-For");
          WebServer ws = (WebServer) _api.getWebserver(); 
          if (client.getUsername() != null)
-             ws.getAuthConfig().getLocalUsers().get(client.getUsername()).updateTime();
+             ws.getAuthConfig().getUserDb().get(client.getUsername()).updateTime();
          
          _api.log().info("MapUpdater", "Client added: "+uid+
                   (client.getUsername() == null ? "" : ", " + client.getUsername()));

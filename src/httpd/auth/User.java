@@ -22,7 +22,7 @@ import java.io.Serializable;
 /**
  * User info that can be stored on file. 
  */
-public abstract class User implements Serializable {
+public abstract class User {
 
     private String userid; 
     private String name = "";
@@ -36,8 +36,6 @@ public abstract class User implements Serializable {
     
     public abstract Date    getLastUsed();
     public abstract void    updateTime();
-    public abstract boolean isActive();
-    public abstract void    setActive();
     public abstract void    setPasswd(String pw);
     
     /* 
@@ -64,6 +62,6 @@ public abstract class User implements Serializable {
         { userid=id; }
         
     public User() {}
-            
+    
         
 }

@@ -211,10 +211,9 @@ public class AuthInfo {
             }
 
             User u = (User) profile.get().getAttribute("userInfo");
-            if (u instanceof LocalUsers.User) {
-                callsign = ((LocalUsers.User)u).getCallsign();
-                allowTracker = ((LocalUsers.User)u).getAllowedTrackers();
-            }
+            callsign = u.getCallsign();
+            allowTracker = u.getAllowedTrackers();
+            
             admin = u.isAdmin();
             sar = u.isSar();          
             if (admin)

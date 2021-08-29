@@ -217,7 +217,7 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/aprs/*");
         
         /* Start REST API: Users */
-        UserApi uu = new UserApi(_api, _auth.conf().getLocalUsers());
+        UserApi uu = new UserApi(_api, _auth.conf().getUserDb());
         uu.start();
         corsEnable("/wsclients");
         corsEnable("/loginusers");
@@ -273,7 +273,9 @@ public class WebServer implements ServerAPI.Web
        _api.log().info("WebServer", "Stopping...");
        _jmapupdate.postText("RESTART!", c->true);
        _api.saveConfig();
-       _auth.conf().getLocalUsers().save();
+       var u = _auth.conf().getUserDb(); 
+       if (u instanceof LocalUsers) 
+            ((LocalUsers) u).save();
     }
          
     

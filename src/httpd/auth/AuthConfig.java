@@ -30,20 +30,24 @@ import no.polaric.aprsd.*;
  * Pac4j configuration. 
  */
 public class AuthConfig {
+     private ServerAPI _api;
      private String _host, _allowOrigin, _passwdFile, _userFile; 
      private Config _config;
      private final PasswordFileAuthenticator _passwds;
-     private final LocalUsers _users; 
-     
+     private UserDb _users; 
+     private boolean _udbChanged = false; 
+        
      
      public AuthConfig(ServerAPI api) {
-     
+        _api = api;
+        
          /* FIXME: How can we simplify config of this? */
          _host        = api.getProperty("httpserver.host",        "");
          _allowOrigin = api.getProperty("httpserver.alloworigin", ".*");
          _passwdFile  = api.getProperty("httpserver.passwdfile",  "/etc/polaric-aprsd/passwd");
          _userFile    = api.getProperty("httpserver.userfile",    "/var/lib/polaric/users.dat");
               
+         /* Default user database is local file */
          _users = new LocalUsers(api, _userFile); 
          _passwds =  new PasswordFileAuthenticator(api, _passwdFile, _users);
      
@@ -60,7 +64,16 @@ public class AuthConfig {
          _config.addAuthorizer("admin", new UserAuthorizer(true));
      }
  
-     public LocalUsers getLocalUsers() 
+     public void setUserDb(UserDb udb) { 
+        if (_udbChanged) {
+            _api.log().error("AuthConfig", "User DB cannot be changed more than once");
+            return;
+        }
+        _udbChanged = true; 
+        _users = udb; 
+     }
+ 
+     public UserDb getUserDb() 
         { return _users; }
  
      public void reloadPasswds() {

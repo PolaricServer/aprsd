@@ -72,11 +72,11 @@ public class UserApi extends ServerBase {
     }
     
     
-    private LocalUsers _users; 
+    private UserDb _users; 
     private SortedSet<String> _remoteUsers = new TreeSet<String>();
     
     
-    public UserApi(ServerAPI api,  LocalUsers u) {
+    public UserApi(ServerAPI api,  UserDb u) {
         super(api);
         _api = api;
         _users = u;

@@ -41,9 +41,9 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
     private final Map<String, String> _pwmap = new HashMap<String, String>();
     private ServerAPI _api; 
     private final String _file; 
-    private LocalUsers _users;
+    private UserDb _users;
     
-    public PasswordFileAuthenticator(ServerAPI api, String file, LocalUsers lu) {
+    public PasswordFileAuthenticator(ServerAPI api, String file, UserDb lu) {
         _api = api; 
         _file = file; 
         _users = lu; 
@@ -70,11 +70,8 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
                         String username = x[0].trim();
                         String passwd = x[1].trim();
                         _pwmap.put(username, passwd);
-                        if (_users != null) {
+                        if (_users != null) 
                             _users.add(username);
-                            LocalUsers.User u = _users.get(username); 
-                            u.setActive(); 
-                        }
                     }
                     else
                         _api.log().warn("PasswordFileAuthenticator", "Bad line in password file: "+line);
@@ -108,7 +105,7 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
         if (storedPwd == null)
            throwsException("Unknown user: '"+username+"'");
            
-        LocalUsers.User u = _users.get(username);
+        User u = _users.get(username);
         if (u.isSuspended())
             throwsException("User is suspended: "+username);
                   

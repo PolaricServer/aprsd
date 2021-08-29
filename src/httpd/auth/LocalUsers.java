@@ -30,21 +30,19 @@ import static java.util.concurrent.TimeUnit.*;
  * There may also be a database and/or users authorized by an external service!!!
  */
  
-public class LocalUsers {
+public class LocalUsers implements UserDb 
+{
     
     
     /**
      * User info class. Can be serialized and stored in a file. 
      */
-    public class User extends no.polaric.aprsd.http.User implements Serializable {
+    public class User extends no.polaric.aprsd.http.User {
      
         private Date lastused; 
-        transient private boolean active = false;
 
         @Override public Date    getLastUsed()     { return lastused; }
         @Override public void    updateTime()      { lastused = new Date(); }
-        @Override public boolean isActive()        { return active; }
-        @Override public void setActive()          { active = true; }
         @Override public void setPasswd(String pw) { updatePasswd(getIdent(), pw); }
 
         
@@ -72,7 +70,6 @@ public class LocalUsers {
         _filename = fname; 
         restore();
        
-    
         scheduler.scheduleAtFixedRate( () -> 
             {
                 try {
@@ -83,7 +80,6 @@ public class LocalUsers {
                     e.printStackTrace(System.out);
                 }
             } ,2, 2, HOURS);
-       
     }
   
   
@@ -100,8 +96,11 @@ public class LocalUsers {
     /**
      * Get all users as a collection.
      */
-    public Collection<User> getAll() {
-       return _users.values();
+    public Collection<no.polaric.aprsd.http.User> getAll() {
+        List<no.polaric.aprsd.http.User> xl = new ArrayList();
+        for (no.polaric.aprsd.http.User x: _users.values())
+            xl.add(x);
+        return xl;
     }
     
     
