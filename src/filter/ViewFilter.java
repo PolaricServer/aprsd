@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2014-2021 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,16 @@ import java.io.*;
 
 
 
+
 public class ViewFilter {
     
-  private static Map<String, RuleSet> _map = new HashMap();
+  private static Map<String, RuleSet> _map = new LinkedHashMap();
   private static RuleSet _default = new RuleSet(); 
   private static TagRuleSet _tagrules; 
   
   
+  
+  /* Get a single filter (RuleSet) */
   public static RuleSet getFilter(String id, boolean loggedIn)
   {
      RuleSet x  = _map.get(id);
@@ -33,6 +36,39 @@ public class ViewFilter {
         return _default;
      return x;
   }    
+  
+  
+  /* Get a list of available filters: name, description pairs */
+  public static List<String[]> getFilterList(boolean loggedIn) 
+  {
+     List<Map.Entry<String, RuleSet> > list
+            = new ArrayList<Map.Entry<String, RuleSet> >(
+                _map.entrySet());
+     Collections.sort(
+            list,
+            new Comparator<Map.Entry<String, RuleSet> >() {
+                // Comparing two entries by value
+                public int compare(
+                    Map.Entry<String, RuleSet> entry1,
+                    Map.Entry<String, RuleSet> entry2)
+                {
+                    // Substracting the entries
+                    return entry1.getValue().getLine()
+                        - entry2.getValue().getLine();
+                }
+            });
+            
+     List<String[]> res = new ArrayList<String[]>();
+     list.forEach( (Map.Entry<String, RuleSet> e) -> {
+        if ( e.getValue().isExported() && (e.getValue().isPublic() || loggedIn) ) {
+            String[] x = {e.getKey(), e.getValue().getDescr()}; 
+            res.add( x );
+        }
+     });
+     return res;
+  }
+  
+
   
   
   public static TagRuleSet getTagRules() 

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2021 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,8 @@ public class RuleSet implements Rule
 {
     private List<Rule> rlist = new LinkedList<Rule>(); 
     private boolean _public = false; 
-    
+    private String _descr; 
+    private int _line; 
     
     /**
      * Set ruleset to be publicly accessible.
@@ -38,6 +39,20 @@ public class RuleSet implements Rule
     public boolean isPublic()
        { return _public; }
        
+    public void setDescr(String x) 
+       { _descr = x; }
+       
+    public String getDescr() 
+       { return _descr; }
+       
+    public boolean isExported() 
+       { return _descr != null; }
+       
+    public int getLine()
+       { return _line; }
+       
+    public void setLine(int l)
+       { _line = l; }
        
     /**
      * Add a rule to the ruleset.

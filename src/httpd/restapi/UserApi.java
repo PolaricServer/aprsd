@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017-2020 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2021 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,9 @@ import static spark.Spark.put;
 import static spark.Spark.*;
 import java.util.*; 
 import no.polaric.aprsd.*;
+import no.polaric.aprsd.filter.*;
+
+
 
 /**
  * Implement REST API for user-related info. 
@@ -109,7 +112,17 @@ public class UserApi extends ServerBase {
      * Set up the webservices. 
      */
     public void start() {     
-        
+       
+        /************************************************
+         * Get list of filter profiles.
+         ************************************************/
+        get ("/filters", "application/json", (req, resp) -> {
+            var uid = getAuthInfo(req).userid;
+            return ViewFilter.getFilterList(uid!=null);
+        }, ServerBase::toJson);
+       
+       
+       
         /************************************************
          * Update user's password.
          ************************************************/

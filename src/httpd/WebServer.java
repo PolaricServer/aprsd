@@ -225,6 +225,7 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/users");
         corsEnable("/users/*"); 
         corsEnable("/mypasswd");
+        corsEnable("/filters");
 
         /* Start REST API: SAR */
         SarApi sar = new SarApi(_api); 

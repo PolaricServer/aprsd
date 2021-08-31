@@ -46,6 +46,9 @@ FALSE|False|false
              return Parser.STRING; 
          }           
            
+EXPORT|export
+         { return Parser.EXPORT; }
+         
 PROFILE|profile
          { return Parser.PROFILE; }
          
@@ -91,7 +94,7 @@ TAG|"tag"|\*|\+
 [\~\;\(\)\=\{\}\,]
          { return (int) yycharat(0); }
            
-.|\n  
+[^]  
          {   yyparser.yylval = new ParserVal("Unexpected/illegal character '"+ yytext()+"'"); 
              return Parser.ERROR; 
          }
