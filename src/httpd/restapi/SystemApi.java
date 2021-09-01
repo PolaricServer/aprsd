@@ -106,6 +106,11 @@ public class SystemApi extends ServerBase {
     }
     
     
+    protected boolean sarAuthForItem(Request req, PointObject x) {
+        return (authForItem(req, x) && getAuthInfo(req).itemSarAuth(x));
+    }
+    
+    
     
     /** 
      * Set up the webservices. 
@@ -295,6 +300,8 @@ public class SystemApi extends ServerBase {
             var st = _api.getDB().getItem(ident, null);
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            if (!sarAuthForItem(req, st))
+                return ERROR(resp, 401, "Uauthorized for access to item");
             ItemInfo.Alias a = (ItemInfo.Alias) 
                 ServerBase.fromJson(req.body(), ItemInfo.Alias.class);    
             if (a==null)
@@ -337,7 +344,9 @@ public class SystemApi extends ServerBase {
             var ident = req.splat()[0];
             TrackerPoint st = _api.getDB().getItem(ident, null);
             if (st==null)
-                return ERROR(resp, 404, "Unknown tracker item: "+ident);     
+                return ERROR(resp, 404, "Unknown tracker item: "+ident);  
+            if (!sarAuthForItem(req, st))
+                return ERROR(resp, 401, "Uauthorized for access to item");    
             st.nextTrailColor();
             return "Ok";
         });
@@ -351,6 +360,8 @@ public class SystemApi extends ServerBase {
             var st = _api.getDB().getItem(ident, null);
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            if (!sarAuthForItem(req, st))
+                return ERROR(resp, 401, "Uauthorized for access to item");   
             st.reset();
             return "Ok";
         });
@@ -380,7 +391,9 @@ public class SystemApi extends ServerBase {
             var st = _api.getDB().getItem(ident, null);
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
-               
+            if (!sarAuthForItem(req, st))
+                return ERROR(resp, 401, "Uauthorized for access to item");
+                
             String[] a = (String[]) ServerBase.fromJson(req.body(), String[].class);
             for (String tag: a) {
                 if (tag.charAt(0) != '+' && tag.charAt(0) != '-')
@@ -402,6 +415,8 @@ public class SystemApi extends ServerBase {
             var st = _api.getDB().getItem(ident, null);
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            if (!sarAuthForItem(req, st))
+                return ERROR(resp, 401, "Uauthorized for access to item");
                 
             if (tag.charAt(0) != '+' && tag.charAt(0) != '-' && st.hasTag(tag)) {
                 st.setTag("-" + tag); 

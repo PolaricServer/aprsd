@@ -41,6 +41,7 @@ public interface JsonPoints
         public boolean  redraw;  // true if isChanging()
         public boolean  own;     // May use a tag instead? 
         public boolean  aprs;    // May use a tag instead?
+        public boolean  sarAuth=false;
         public String   icon;  
         public String   href;
         public JsLabel  label;      

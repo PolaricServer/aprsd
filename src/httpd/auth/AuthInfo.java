@@ -71,6 +71,12 @@ public class AuthInfo {
     }
     
     
+    /* Authorize to do changes on point (item) */
+    public boolean itemSarAuth(PointObject x) {
+        return sar; 
+    }
+    
+    
     public static void init(ServerAPI api) {
         WebServer ws = (WebServer) api.getWebserver(); 
         ws.onOpenSes( (c)-> {

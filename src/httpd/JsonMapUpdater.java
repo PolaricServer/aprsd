@@ -154,14 +154,18 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 return null;
              
             JsPoint x  = new JsPoint();
-            x.ident  = s.getIdent();
-            x.label  = createLabel(s, action);
-            x.pos    = new double[] {roundDeg(ref.getLongitude()), roundDeg(ref.getLatitude())};
-            x.title  = s.getDescr() == null ? "" : fixText(s.getDescr()); 
-            x.redraw = s.isChanging();
-            x.own    = (s instanceof AprsObject) 
-                       && _api.getDB().getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""));
-            x.aprs   = (s instanceof AprsPoint); 
+            
+            /* Indicate if user has authorization to change point. */
+            x.sarAuth = getAuthInfo().itemSarAuth(s); 
+            
+            x.ident   = s.getIdent();
+            x.label   = createLabel(s, action);
+            x.pos     = new double[] {roundDeg(ref.getLongitude()), roundDeg(ref.getLatitude())};
+            x.title   = s.getDescr() == null ? "" : fixText(s.getDescr()); 
+            x.redraw  = s.isChanging();
+            x.own     = (s instanceof AprsObject) 
+                        && _api.getDB().getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""));
+            x.aprs    = (s instanceof AprsPoint); 
            
             String icon = action.getIcon(s.getIcon()); 
             if (s.iconOverride() && _api.getSar()!=null) 
