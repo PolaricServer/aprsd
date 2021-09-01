@@ -27,21 +27,31 @@ public class Group implements Serializable {
     private String  _groupid; 
     private String  _name = "";
     private boolean _sar;
+    private String  _tags; 
+    
+    // Add: 
+    // - geo area where group authorisations to features or layers are valid
+    // - write/add access for signs, etc..
+    
         
     public String  getIdent()             { return _groupid; }
     public void    setName(String n)      { _name = n; }
     public String  getName()              { return _name; }
+    public String  getTags()              { return _tags; }
+    public void    setTags(String t)      { _tags = t; }
     
     public boolean isSar()                { return _sar; }
     public final void setSar(boolean s)   { _sar=s; }
     
-    public Group(String id, String n, boolean s){
+    public Group(String id, String n, String t, boolean s){
         _groupid = id; 
         _name = n;
+        _tags = t; 
         _sar = s; 
     }
     
     /* Instance "SAR" and DEFAULT */
-    public static Group SAR = new Group("SAR", "SAR Group", true);
-    public static Group DEFAULT = new Group("DEFAULT", "Default group", false);
+    public static Group RKH = new Group("RKH", "Røde Kors", "RKH", false);
+    public static Group SAR = new Group("SAR", "SAR Group", "APRS", true);
+    public static Group DEFAULT = new Group("DEFAULT", "Default group", null, false);
 }

@@ -47,7 +47,9 @@ public abstract class User {
     private boolean suspended = false; 
     private String trackerAllowed = "";
     
-    public boolean isSar()                      { return group.isSar(); } 
+    public boolean isSar()                      { return group.isSar(); }
+    public final Group getGroup()               { return group; }
+    public final void setGroup(Group g)         { group = g; } 
     public final void setSar(boolean s)         { group=(s? Group.SAR : Group.DEFAULT); } 
        /* SetSar will soon go away  - replace with setGroup */
        

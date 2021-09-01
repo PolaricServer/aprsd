@@ -132,11 +132,11 @@ public abstract class PointObject extends Point implements Cloneable
     
     
     /**
-     * Return true if tag exists on this object. 
+     * Return true if regex matches any tag on this object. 
      */
     public boolean hasTag(String tag) { 
         for (String x: _tags)
-            if (x.matches(tag+".*"))
+            if (x.matches(tag+"(\\..*)?"))
                 return true;
         return false;
     }
@@ -145,6 +145,7 @@ public abstract class PointObject extends Point implements Cloneable
     public boolean _tagIsOn(String tag) {
         return ( hasTag( "\\+?(" + tag + ")") && !hasTag("\\-"+tag) );
     }
+    
     
     public boolean tagIsOn(String tag) {
         if (tag.charAt(0)=='+')
