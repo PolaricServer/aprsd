@@ -31,10 +31,11 @@ import no.polaric.aprsd.*;
  */
 public class AuthConfig {
      private ServerAPI _api;
-     private String _host, _allowOrigin, _passwdFile, _userFile; 
+     private String _host, _allowOrigin, _passwdFile, _userFile, _groupFile; 
      private Config _config;
      private final PasswordFileAuthenticator _passwds;
      private UserDb _users; 
+     private GroupDb _groups;
      private boolean _udbChanged = false; 
         
      
@@ -46,9 +47,11 @@ public class AuthConfig {
          _allowOrigin = api.getProperty("httpserver.alloworigin", ".*");
          _passwdFile  = api.getProperty("httpserver.passwdfile",  "/etc/polaric-aprsd/passwd");
          _userFile    = api.getProperty("httpserver.userfile",    "/var/lib/polaric/users.dat");
+         _groupFile   = api.getProperty("httpserver.groupfile",   "/etc/polaric-aprsd/groups");
               
-         /* Default user database is local file */
-         _users = new LocalUsers(api, _userFile); 
+         /* Default user and groups database is local file */
+         _groups = new LocalGroups(api, _groupFile);
+         _users = new LocalUsers(api, _userFile, _groups);
          _passwds =  new PasswordFileAuthenticator(api, _passwdFile, _users);
      
          /* Indirect basic auth client */     
@@ -73,6 +76,9 @@ public class AuthConfig {
         _users = udb; 
      }
  
+     public GroupDb getGroupDb()
+        { return _groups; }
+        
      public UserDb getUserDb() 
         { return _users; }
  

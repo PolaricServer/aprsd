@@ -54,20 +54,21 @@ public class LocalUsers implements UserDb
     }
     
     
-    
-    
     private ServerAPI _api;
     private SortedMap<String, User> _users = new TreeMap<String, User>();
     private String _filename; 
+    private GroupDb _groups;
+    
     
     // FIXME: Move this to ServerAPI ?
     private final ScheduledExecutorService scheduler =
        Executors.newScheduledThreadPool(1);
     
     
-    public LocalUsers(ServerAPI api, String fname) {
+    public LocalUsers(ServerAPI api, String fname, GroupDb gr) {
         _api = api;
         _filename = fname; 
+        _groups = gr; 
         restore();
        
         scheduler.scheduleAtFixedRate( () -> 
@@ -182,8 +183,17 @@ public class LocalUsers implements UserDb
                 _api.log().warn("LocalUsers", "Couldn't update passwd: Input is too long");
             else if (res == 6)
                 _api.log().warn("LocalUsers", "Couldn't update passwd: Input contains illegal characters");
-            else 
+            else if (res == 7)
+                _api.log().warn("LocalUsers", "Couldn't update passwd: Invalid password file");
+            else {
                 _api.log().warn("LocalUsers", "Couldn't update passwd: Internal server problem");
+                BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                String line;
+                while ((line = bri.readLine()) != null)
+                    System.out.println("  "+line);
+            }
+                
+                
         } catch (IOException e) {
             _api.log().warn("LocalUsers", "Couldn't update passwd: "+e.getMessage());
         } catch (InterruptedException e) {}
@@ -204,18 +214,21 @@ public class LocalUsers implements UserDb
         try {
             _api.log().info("LocalUsers", "Saving user data...");
 
+                
             /* Try saving to a text file instead */
             FileOutputStream fs = new FileOutputStream(_filename);
             PrintWriter out = new PrintWriter(fs); 
-            
+            out.println("#");
+            out.println("# Users file. Saved "+ServerBase.isodf.format(new Date()));
+            out.println("#");
             for (User x : _users.values()) {
                 out.println(x.getIdent() + "," + 
                     (x.getLastUsed() == null ? "null" : ServerBase.xf.format(x.getLastUsed())) +"," 
-                    + x.isSar() + ","
+                    + false + "," // For compatibility
                     + x.isAdmin() + ","
                     + rmComma( x.getName()) + "," 
                     + rmComma( x.getCallsign()) + ","
-                    + rmComma( x.getAllowedTrackers()) + "," 
+                    + rmComma( x.getGroup().getIdent() ) + "," 
                     + x.isSuspended() )
                     ;
             }
@@ -245,7 +258,7 @@ public class LocalUsers implements UserDb
                     String userid = x[0].trim();
                     String lu = x[1].trim();
                     boolean sar, admin, suspend=false;
-                    String name  = "", callsign = "", tallow = ""; 
+                    String name  = "", callsign = "", group = ""; 
 
                     sar = ("true".equals(x[2].trim()));
                     admin = ("true".equals(x[3].trim()));
@@ -254,17 +267,16 @@ public class LocalUsers implements UserDb
                     if (x.length > 5)
                         callsign = x[5].trim();
                     if (x.length > 6)
-                        tallow = x[6].trim();
+                        group = x[6].trim();
                     if (x.length > 7)
                         suspend = ("true".equals(x[7].trim()));
                         
                     Date   lastupd = ("null".equals(lu) ? null : ServerBase.xf.parse(x[1].trim()));
                     User u = new User(userid, lastupd); 
-                    u.setSar(sar);
                     u.setAdmin(admin);
                     u.setName(name);
                     u.setCallsign(callsign);
-                    u.setAllowedTrackers(tallow);
+                    u.setGroup(_groups.get(group));
                     u.setSuspended(suspend); 
                     _users.put(userid,u);
                 }
@@ -273,6 +285,7 @@ public class LocalUsers implements UserDb
         catch (EOFException e) { }
         catch (Exception e) {
             _api.log().warn("LocalUsers", "Cannot restore data: "+e);
+            e.printStackTrace(System.out);
             _users.clear();
         }
     }

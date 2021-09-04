@@ -25,8 +25,10 @@ public interface GroupDb
     public Group get(String gid); 
     public Collection<Group> getAll();
     
+    /*
     public User add (String gid);
     public User add (String userid, String name, boolean sar);
     public void remove(String gid);
+    */
 }
 

@@ -55,7 +55,6 @@ public class AuthInfo {
     public String callsign;
     public String servercall;
     public boolean admin = false, sar = false;
-    public String allowTracker;  // FIXME: Remove
     public String tagsAuth;
     public String[] services = null;
     
@@ -74,7 +73,7 @@ public class AuthInfo {
     
     /* Authorize to do changes on point (item) */
     public boolean itemSarAuth(PointObject x) {
-        return x.hasTag(tagsAuth); 
+        return x.hasTag(tagsAuth) || admin; 
     }
     
     
@@ -171,10 +170,7 @@ public class AuthInfo {
     
         
     public boolean isTrackerAllowed(String tr, String chan) {
-        if (chan != null)
-            tr = tr+"#"+chan;
-        return sar || admin || 
-            (allowTracker == null && !allowTracker.equals("") && allowTracker.matches(tr)); 
+        return sar || admin; 
     }
        
        
@@ -220,7 +216,6 @@ public class AuthInfo {
 
             User u = (User) profile.get().getAttribute("userInfo");
             callsign = u.getCallsign();
-            allowTracker = u.getAllowedTrackers();
             tagsAuth = u.getGroup().getTags();
             
             admin = u.isAdmin();

@@ -34,6 +34,15 @@ public class UserApi extends ServerBase {
     private ServerAPI _api; 
     
     
+    public static class GroupInfo {
+        public String ident; 
+        public String name; 
+        public GroupInfo() {}
+        public GroupInfo(String id, String n) 
+            { ident=id; name=n; }
+    }
+    
+    
     /* 
      * User info as it is sent to clients. 
      */
@@ -41,20 +50,20 @@ public class UserApi extends ServerBase {
         public String ident; 
         public Date lastused; 
         public String name, callsign;
-        public String allowTracker="";
+        public String group="DEFAULT";
         public boolean sar, admin, suspend; 
         public String passwd;
         public UserInfo() {}
         public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a, boolean u)
            { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; suspend=u; }
         public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a, boolean u, String tr)
-           { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; suspend=u; allowTracker=tr;}   
+           { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; suspend=u; group=tr;}   
     }
 
     
     public static class UserUpdate {
         public String name, callsign;
-        public String allowTracker;
+        public String group;
         public String passwd;
         public boolean sar, admin, suspend;
     }
@@ -76,13 +85,15 @@ public class UserApi extends ServerBase {
     
     
     private UserDb _users; 
+    private GroupDb _groups; 
     private SortedSet<String> _remoteUsers = new TreeSet<String>();
     
     
-    public UserApi(ServerAPI api,  UserDb u) {
+    public UserApi(ServerAPI api,  UserDb u, GroupDb g) {
         super(api);
         _api = api;
         _users = u;
+        _groups = g; 
     }
     
     
@@ -103,7 +114,7 @@ public class UserApi extends ServerBase {
             return null;
         String name = "";           
         return new UserInfo(u.getIdent(), u.getLastUsed(), u.getName(), 
-            u.getCallsign(), u.isSar(), u.isAdmin(), u.isSuspended(), u.getAllowedTrackers() );    
+            u.getCallsign(), u.isSar(), u.isAdmin(), u.isSuspended(), u.getGroup().getIdent() );    
     }
     
 
@@ -173,6 +184,19 @@ public class UserApi extends ServerBase {
         /******************************************
          * Get a list of users. 
          ******************************************/
+        get("/groups", "application/json", (req, resp) -> {
+            List<GroupInfo> gl = new ArrayList<GroupInfo>();
+            for (Group g: _groups.getAll())  
+                gl.add(new GroupInfo(g.getIdent(), g.getName()));
+    
+            return gl;
+        }, ServerBase::toJson );
+        
+        
+        
+        /******************************************
+         * Get a list of users. 
+         ******************************************/
         get("/users", "application/json", (req, resp) -> {
             List<UserInfo> ul = new ArrayList<UserInfo>();
             for (User u: _users.getAll())  
@@ -219,19 +243,21 @@ public class UserApi extends ServerBase {
             var uu = (UserUpdate) 
                 ServerBase.fromJson(req.body(), UserUpdate.class);
             
+            if (uu.group != null) {
+                Group g = _groups.get(uu.group);
+                if (g==null)
+                    return ERROR(resp, 404, "Unknown group: "+uu.group);
+                u.setGroup(_groups.get(uu.group));
+            }    
             if (uu.name != null)
                 u.setName(uu.name);           
             if (uu.callsign != null)
                 u.setCallsign(uu.callsign);
             if (uu.passwd != null) 
-                u.setPasswd(uu.passwd);
-            if (uu.allowTracker != null)
-                u.setAllowedTrackers(uu.allowTracker);
-                    
+                u.setPasswd(uu.passwd);    
             u.setSar(uu.sar);
             u.setAdmin(uu.admin);
             u.setSuspended(uu.suspend);
-
             return "Ok";
         });
         
@@ -244,7 +270,7 @@ public class UserApi extends ServerBase {
             var u = (UserInfo) 
                 ServerBase.fromJson(req.body(), UserInfo.class);
 
-            if (_users.add(u.ident, u.name, u.sar, u.admin, u.suspend, u.passwd, u.allowTracker)==null) 
+            if (_users.add(u.ident, u.name, u.sar, u.admin, u.suspend, u.passwd, u.group)==null) 
                 return ERROR(resp, 400, "Probable cause: User exists");
             return "Ok";
         });

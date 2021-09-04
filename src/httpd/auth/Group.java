@@ -49,9 +49,6 @@ public class Group implements Serializable {
         _tags = t; 
         _sar = s; 
     }
-    
-    /* Instance "SAR" and DEFAULT */
-    public static Group RKH = new Group("RKH", "Røde Kors", "RKH", false);
-    public static Group SAR = new Group("SAR", "SAR Group", "APRS", true);
-    public static Group DEFAULT = new Group("DEFAULT", "Default group", null, false);
+
+    public static Group DEFAULT = new Group("DEFAULT", "No group", null, false);
 }

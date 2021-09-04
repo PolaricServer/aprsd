@@ -175,6 +175,7 @@ public class WebServer implements ServerAPI.Web
         before("/resetinfo",       _auth.conf().filter(null, "isauth, sar"));
         before("/sarmode",         _auth.conf().filter(null, "isauth, sar"));
         before("/sarurl",          _auth.conf().filter(null, "isauth"));
+        before("/groups",          _auth.conf().filter(null, "isauth, admin"));
         before("/users",           _auth.conf().filter(null, "isauth, admin"));
         before("/users/*",         _auth.conf().filter(null, "isauth, admin"));
         before("/users/*/*",       _auth.conf().filter(null, "isauth"));
@@ -217,11 +218,12 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/aprs/*");
         
         /* Start REST API: Users */
-        UserApi uu = new UserApi(_api, _auth.conf().getUserDb());
+        UserApi uu = new UserApi(_api, _auth.conf().getUserDb(), _auth.conf().getGroupDb());
         uu.start();
         corsEnable("/wsclients");
         corsEnable("/loginusers");
         corsEnable("/usernames");
+        corsEnable("/groups");
         corsEnable("/users");
         corsEnable("/users/*"); 
         corsEnable("/mypasswd");
