@@ -26,11 +26,13 @@ import no.polaric.aprsd.*;
 public class RuleSet implements Rule
 {
     private List<Rule> rlist = new LinkedList<Rule>(); 
+    private Set<String> _groups = new HashSet<String>();
     private boolean _public = false; 
+    private boolean _all = false; 
     private String _descr; 
     private int _line; 
     
-    /**
+    /*
      * Set ruleset to be publicly accessible.
      */
     public void setPublic()
@@ -38,6 +40,14 @@ public class RuleSet implements Rule
        
     public boolean isPublic()
        { return _public; }
+       
+    /* Visible for all logged in users */
+    public void setAll()
+       { _all= true; }
+       
+    public boolean isAll()
+       { return _all; }   
+       
        
     public void setDescr(String x) 
        { _descr = x; }
@@ -48,11 +58,20 @@ public class RuleSet implements Rule
     public boolean isExported() 
        { return _descr != null; }
        
+       
     public int getLine()
        { return _line; }
        
     public void setLine(int l)
        { _line = l; }
+       
+       
+    public void addGroup(String g)
+       { _groups.add(g); }
+       
+    public boolean isGroup(String g) 
+       {  return _groups.contains(g); }
+       
        
     /**
      * Add a rule to the ruleset.

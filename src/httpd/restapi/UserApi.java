@@ -129,7 +129,13 @@ public class UserApi extends ServerBase {
          ************************************************/
         get ("/filters", "application/json", (req, resp) -> {
             var uid = getAuthInfo(req).userid;
-            return ViewFilter.getFilterList(uid!=null);
+            String group = null;
+            if (uid != null) {
+                User u = _users.get(uid);
+                if (u != null)
+                    group = u.getGroup().getIdent(); 
+            }   
+            return ViewFilter.getFilterList(uid!=null, group);
         }, ServerBase::toJson);
        
        

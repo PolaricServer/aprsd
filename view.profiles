@@ -1,7 +1,7 @@
 #
 # This is an example of a filter script.
 #
-# Feel free to modify this for your own needs. 
+# Modify this for your own needs. 
 # See http://aprs.no/dokuwiki/doku.php?id=filter.profiles for more information. 
 #
 
@@ -49,7 +49,8 @@ AUTOTAG {
 # Show all APRS
 ####################################################
 
-PUBLIC PROFILE alle {
+PUBLIC PROFILE all_aprs {
+    EXPORT "ALL APRS" => PUBLIC;
 }
 
 
@@ -62,6 +63,8 @@ PUBLIC PROFILE alle {
 #####################################################
 
 PUBLIC PROFILE track {
+   EXPORT "Tracking" => PUBLIC; 
+   
    TrackHide      => { hide-ident };
    
    # Hide infrasctructure, objects and WX stations if scale is more than 1 million
@@ -83,7 +86,8 @@ PUBLIC PROFILE track {
 ################################################## 
     
 PUBLIC PROFILE sar {
-   NOT *SAR  => { hide-all };
+    EXPORT "Search and Rescue" => ALL;
+    NOT *SAR  => { hide-all };
 }
                                                                           
                                 
@@ -93,6 +97,7 @@ PUBLIC PROFILE sar {
 ###################################################
 
 PUBLIC PROFILE infra {
+   EXPORT "Infrastructure" => PUBLIC;  
    NOT (ident ~ "LD.+" OR symbol ~ "/r|.#" OR IrlpNode OR EchoLink OR infra)
        => { hide-all };
 }
@@ -103,6 +108,7 @@ PUBLIC PROFILE infra {
 ###################################################
 
 PUBLIC PROFILE ainfra {
+   EXPORT "Active infrastructure" => PUBLIC;  
    NOT infra => { hide-all  };
    infra     => { show-path };
    fulldigi  => { style = "wdigi" };
@@ -115,6 +121,7 @@ PUBLIC PROFILE ainfra {
 ###################################################
 
 PUBLIC PROFILE moving {
+    EXPORT "Moving trackers" => PUBLIC;
     NOT moving => { hide-all };
 }
 

@@ -58,6 +58,9 @@ AUTOTAG|autotag
 PUBLIC|"public"
          { return Parser.PUBLIC; }
          
+ALL|all
+         { return Parser.ALL;  }
+         
 INCLUDE|include
          { return Parser.INCLUDE; }
          

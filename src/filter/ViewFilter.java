@@ -39,7 +39,7 @@ public class ViewFilter {
   
   
   /* Get a list of available filters: name, description pairs */
-  public static List<String[]> getFilterList(boolean loggedIn) 
+  public static List<String[]> getFilterList(boolean loggedIn, String group) 
   {
      List<Map.Entry<String, RuleSet> > list
             = new ArrayList<Map.Entry<String, RuleSet> >(
@@ -60,7 +60,11 @@ public class ViewFilter {
             
      List<String[]> res = new ArrayList<String[]>();
      list.forEach( (Map.Entry<String, RuleSet> e) -> {
-        if ( e.getValue().isExported() && (e.getValue().isPublic() || loggedIn) ) {
+        if ( e.getValue().isPublic() 
+                || (loggedIn && e.getValue().isAll())
+                || (loggedIn && group != null && e.getValue().isGroup(group))
+        )
+        {
             String[] x = {e.getKey(), e.getValue().getDescr()}; 
             res.add( x );
         }
