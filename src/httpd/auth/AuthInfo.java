@@ -52,6 +52,7 @@ public class AuthInfo {
 
     
     public String userid;
+    public String groupid;
     public String callsign;
     public String servercall;
     public boolean admin = false, sar = false;
@@ -217,7 +218,7 @@ public class AuthInfo {
             User u = (User) profile.get().getAttribute("userInfo");
             callsign = u.getCallsign();
             tagsAuth = u.getGroup().getTags();
-            
+            groupid = u.getGroup().getIdent();
             admin = u.isAdmin();
             sar = u.isSar();          
             if (admin)
