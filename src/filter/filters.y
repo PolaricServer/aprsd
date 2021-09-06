@@ -167,31 +167,31 @@ actions : actions ',' action  { action.merge((Action) $3); }
        
        
 action : IDENT '=' STRING     { if ($1.matches("STYLE|style")) 
-                                   $$=new Action(false,false,false,false,false,$3,null,-1,-1);
+                                   $$=new Action(false,false, false,false,false,false,$3,null,-1,-1);
                                 else if ($1.matches("ICON|icon"))
-                                   $$=new Action(false,false,false,false,false,"",$3,-1,-1);
+                                   $$=new Action(false,false,false,false,false,false,"",$3,-1,-1);
                                 else {
-                                   $$=new Action(false,false,false,false,false,"",null,-1,-1);
+                                   $$=new Action(false,false,false,false,false,false,"",null,-1,-1);
                                    yyerror("Unknown identifier '"+$1+"'"); 
                                 }
                               }
                               
        | IDENT '=' NUM        { if ($1.matches("trail-time"))
-                                   $$ = new  Action(false,false,false,false,false,"",null, (long) $3, -1);
+                                   $$ = new  Action(false,false,false,false,false,false,"",null, (long) $3, -1);
                                 else if ($1.matches("trail-(len|length)"))
-                                   $$ = new  Action(false,false,false,false,false,"",null, -1, (long) $3);  
+                                   $$ = new  Action(false,false,false,false,false,false,"",null, -1, (long) $3);  
                                 else {
-                                   $$=new Action(false,false,false,false,false,"",null,-1,-1);
+                                   $$=new Action(false,false,false,false,false,false,"",null,-1,-1);
                                    yyerror("Unknown identifier '"+$1+"'"); 
                                 }  
                               }
                               
        | IDENT                { $$=new Action( 
                                    $1.matches("hide-ident"), $1.matches("hide-trail"),
-                                   $1.matches("hide-all"), $1.matches("show-path"),
+                                   $1.matches("hide-all"), $1.matches("hide-alias"), $1.matches("show-path"),
                                    $1.matches("set-public"), "", null, -1, -1);
                                    
-                                if (!$1.matches("(hide-(ident|all|trail))|show-path|set-public"))
+                                if (!$1.matches("(hide-(ident|all|alias|trail))|show-path|set-public"))
                                    yyerror("Unknown identifier '"+$1+"'"); 
                               }
        ; 

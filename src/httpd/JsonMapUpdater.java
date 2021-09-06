@@ -168,7 +168,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             x.aprs    = (s instanceof AprsPoint); 
            
             String icon = action.getIcon(s.getIcon()); 
-            if (s.iconOverride() && _api.getSar()!=null) 
+            if (s.iconOverride() && _api.getSar()!=null)  
                icon = s.getIcon(); 
             x.icon = "/icons/"+ (icon != null ? icon : _icon); 
             x.trail = createTrail(s, action);
@@ -179,7 +179,9 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
        
         /** Create label or return null if label is to be hidden. */
         private JsLabel createLabel(TrackerPoint s, Action action) {
-            boolean showSarInfo = login() || _api.getSar() == null || !_api.getSar().isAliasHidden();
+            boolean showSarInfo = login() || _api.getSar() == null || 
+                !_api.getSar().isAliasHidden() || !action.hideAlias();
+            
             JsLabel lbl = new JsLabel();
            
             lbl.style = (!(s.getTrail().isEmpty()) ? "lmoving" : "lstill");
