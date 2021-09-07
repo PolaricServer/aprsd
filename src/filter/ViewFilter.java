@@ -63,6 +63,7 @@ public class ViewFilter {
         if ( e.getValue().isPublic() 
                 || (loggedIn && e.getValue().isAll())
                 || (loggedIn && group != null && e.getValue().isGroup(group))
+                || (!loggedIn && e.getValue().isGroup("NOLOGIN"))
         )
         {
             String[] x = {e.getKey(), e.getValue().getDescr()}; 

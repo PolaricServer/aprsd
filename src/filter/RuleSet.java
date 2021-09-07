@@ -66,8 +66,11 @@ public class RuleSet implements Rule
        { _line = l; }
        
        
-    public void addGroup(String g)
-       { _groups.add(g); }
+    public void addGroup(String g) { 
+        if (g.equals("NOLOGIN"))
+            setPublic();
+        _groups.add(g); 
+    }
        
     public boolean isGroup(String g) 
        {  return _groups.contains(g); }

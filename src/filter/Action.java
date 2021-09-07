@@ -52,7 +52,8 @@ public class Action
      * @param trailtime Trail length in minutes (overrides, -1 means no change).
      */
     public Action(boolean hideid, boolean hidetrail, boolean hideall, boolean hidealias, boolean showpath, 
-                  boolean pub, String style, String icon, long trailtime, long traillen) { 
+                  boolean pub, String style, String icon, long trailtime, long traillen) 
+    { 
         _hideIdent = hideid; _hideTrail = hidetrail; _hideAll=hideall; _hideAlias=hidealias;
         _showPath = showpath; _style = style; _public = pub; _icon = icon;
         _trailTime = trailtime; _trailLen = traillen; 
