@@ -17,6 +17,11 @@ import java.io.*;
 import java.util.*;
 import java.security.*;
 import com.mindprod.base64.Base64;
+import javax.crypto.*;
+import javax.crypto.spec.*;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.*;
+
 
 
 /**
@@ -41,7 +46,7 @@ public class SecUtils
     /**
      * Generate a random key. 
      */   
-    public final static byte[] getKey(int size)
+    public final static byte[] getRandom(int size)
     {
         if (size < 1)
             return null; // OOPS: Is this secure? 
@@ -94,6 +99,21 @@ public class SecUtils
        return d.substring(0,n); 
     }
      
+     
+    /* FIXME: Can we use Java's own b64 implementation?  Must test! */
+    public final static String b64encode(byte[] x) 
+    {
+        Base64 b64 = new Base64();
+        return b64.encode(x);
+    }
+    public final static byte[] b64decode(String txt) 
+    {
+        Base64 b64 = new Base64();
+        return b64.decode(txt);
+    }
+    
+    
+     
     
     /**
      * Hexadecimal representation of a byte array.
@@ -124,6 +144,8 @@ public class SecUtils
             return ((char) (value + '0'));
 
     }  
+    
+
     
 }
 

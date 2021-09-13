@@ -92,7 +92,7 @@ public final class SarUrl implements Runnable
        }
        try {
            /* A 24 bit key in hexadecimal */
-           String key = SecUtils.b2hex((SecUtils.getKey(3)));
+           String key = SecUtils.b2hex((SecUtils.getRandom(3)));
            synchronized(this) {
                _lastItem =  new Item(key, target, now);
                _mapping.add( _lastItem );  

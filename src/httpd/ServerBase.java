@@ -173,7 +173,7 @@ public abstract class ServerBase
         if (alias==null)
             alias = "NULL";
         if (_api.getRemoteCtl() != null)
-            _api.getRemoteCtl().sendRequestAll("ALIAS "+ident+" "+alias, null);
+            _api.getRemoteCtl().sendRequestAll("ALIAS", ident+" "+alias, null);
         _api.log().info("SystemApi", 
             "ALIAS: '"+alias+"' for '"+ident+"' by user '"+uid+"'");    
         _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
@@ -189,7 +189,7 @@ public abstract class ServerBase
         if (icon==null)
             icon="NULL";
         if (_api.getRemoteCtl() != null)
-            _api.getRemoteCtl().sendRequestAll("ICON "+ident+" "+icon, null);
+            _api.getRemoteCtl().sendRequestAll("ICON", ident+" "+icon, null);
         _api.log().info("SystemApi", 
             "ICON: '"+icon+"' for '"+ident+"' by user '"+uid+"'");    
         _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
@@ -204,7 +204,7 @@ public abstract class ServerBase
         if (tag==null)
             return;
         if (_api.getRemoteCtl() != null)
-            _api.getRemoteCtl().sendRequestAll("TAG "+ident+" "+tag, null);
+            _api.getRemoteCtl().sendRequestAll("TAG", ident+" "+tag, null);
         _api.log().info("SystemApi", 
             "TAG: '"+tag+"' for '"+ident+"' by user '"+uid+"'");    
         _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
@@ -217,7 +217,7 @@ public abstract class ServerBase
         if (tag==null)
             return;
         if (_api.getRemoteCtl() != null)
-            _api.getRemoteCtl().sendRequestAll("RMTAG "+ident+" "+tag, null);
+            _api.getRemoteCtl().sendRequestAll("RMTAG", ident+" "+tag, null);
         _api.log().info("SystemApi", 
             "RMTAG: '"+tag+"' for '"+ident+"' by user '"+uid+"'");    
         _api.getWebserver().notifyUser(uid, new ServerAPI.Notification

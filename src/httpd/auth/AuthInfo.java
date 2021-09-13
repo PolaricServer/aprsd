@@ -99,8 +99,9 @@ public class AuthInfo {
                     /* As long as one or more sessions are open, we want 
                      * address mappings for messages. 
                      */
-                    if (api.getRemoteCtl() != null)
-                        api.getRemoteCtl().sendRequestAll("USER "+a.userid+"@"+api.getRemoteCtl().getMycall(), null);
+                    var rctl = api.getRemoteCtl(); 
+                    if (rctl != null)
+                        rctl.sendRequestAll("USER", a.userid+"@"+api.getRemoteCtl().getMycall(), null);
                     a.mailbox.addAddress(a.userid);
                     if (!"".equals(a.callsign))
                         a.mailbox.addAddress(a.callsign+"@aprs");
@@ -120,8 +121,8 @@ public class AuthInfo {
                         var closing = gc.schedule( () -> {
                             /* If last session is closed, remove address mappings for messages. */
                             a.mailbox.removeAddresses();
-                            api.getRemoteCtl().sendRequestAll(
-                                "RMUSER "+a.userid+"@"+api.getRemoteCtl().getMycall(), null);
+                            var rctl = api.getRemoteCtl(); 
+                            rctl.sendRequestAll("RMUSER", a.userid+"@"+api.getRemoteCtl().getMycall(), null);
                         
                             /* Put mailbox on expire. Expire after 1 week */
                             a.mailbox.expire = (new Date()).getTime() + 1000 * 60 * MAILBOX_EXPIRE; 
@@ -153,7 +154,7 @@ public class AuthInfo {
         /* At shutdown. Send a message to other nodes */
         api.addShutdownHandler( ()-> {
             if (api.getRemoteCtl() != null)
-                api.getRemoteCtl().sendRequestAll("RMNODE "+api.getRemoteCtl().getMycall(), null); 
+                api.getRemoteCtl().sendRequestAll("RMNODE", api.getRemoteCtl().getMycall(), null); 
         });
 
     }

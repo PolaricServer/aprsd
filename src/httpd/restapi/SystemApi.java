@@ -195,9 +195,9 @@ public class SystemApi extends ServerBase {
             systemNotification("ADMIN", "SAR mode changed by '"+uid+"'", 120);
             if (_api.getRemoteCtl() != null) {
                 if (si==null)
-                    _api.getRemoteCtl().sendRequestAll("SAR OFF", null);
+                    _api.getRemoteCtl().sendRequestAll("SAR", "OFF", null);
                 else
-                    _api.getRemoteCtl().sendRequestAll("SAR "+uid+" "+si.filt+" "+si.descr, null);
+                    _api.getRemoteCtl().sendRequestAll("SAR", uid+" "+si.filt+" "+si.descr, null);
             }
             return "Ok";
          });

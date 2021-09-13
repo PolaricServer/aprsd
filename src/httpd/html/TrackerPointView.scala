@@ -91,14 +91,14 @@ package no.polaric.aprsd.http
              _api.log().info("TrackerPointView", 
                 "ALIAS: '"+alias+"' for '"+model.getIdent()+"' by user '"+getAuthInfo(req).userid+"'")
              if (ch && api.getRemoteCtl() != null)
-                 api.getRemoteCtl().sendRequestAll("ALIAS "+model.getIdent()+" "+alias, null);
+                 api.getRemoteCtl().sendRequestAll("ALIAS", model.getIdent()+" "+alias, null);
 
              /* Icon setting */
              var icon = req.queryParams("iconselect");
              if ("system".equals(icon)) 
                  icon = null; 
              if (model.setIcon(icon) && _api.getRemoteCtl() != null )
-                 _api.getRemoteCtl().sendRequestAll("ICON "+model.getIdent() + " " +
+                 _api.getRemoteCtl().sendRequestAll("ICON", model.getIdent() + " " +
                     { if (icon==null) "NULL" else icon }, 
                     null);
             
