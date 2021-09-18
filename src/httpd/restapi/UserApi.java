@@ -188,7 +188,7 @@ public class UserApi extends ServerBase {
         
         
         /******************************************
-         * Get a list of users. 
+         * Get a list of groups. 
          ******************************************/
         get("/groups", "application/json", (req, resp) -> {
             List<GroupInfo> gl = new ArrayList<GroupInfo>();

@@ -178,7 +178,6 @@ public class WebServer implements ServerAPI.Web
         before("/groups",          _auth.conf().filter(null, "isauth, admin"));
         before("/users",           _auth.conf().filter(null, "isauth, admin"));
         before("/users/*",         _auth.conf().filter(null, "isauth, admin"));
-        before("/users/*/*",       _auth.conf().filter(null, "isauth"));
         before("/mypasswd",        _auth.conf().filter(null, "isauth"));
         before("/item/*/alias",    _auth.conf().filter(null, "isauth"));
         before("/item/*/reset",    _auth.conf().filter(null, "isauth"));
