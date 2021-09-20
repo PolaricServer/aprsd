@@ -78,6 +78,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    
    private Encryption _crypt; 
    private String _encryptTo = ""; 
+   private String _userInfo = ".*";
    
    
    public String getMycall()
@@ -141,6 +142,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        _parent = api.getProperty("remotectl.connect", null);
        _log = new Logfile(api, "remotectl", "remotectl.log");
        _encryptTo = api.getProperty("remotectl.encrypt", "");
+       _userInfo = api.getProperty("remotectl.userinfo", ".*");
        String key = api.getProperty("message.auth.key", "NOKEY");
        
        if (_parent != null) 
@@ -223,9 +225,12 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     {
         if (cmd==null)
             return text; 
-        if (cmd.matches("USER|RMUSER") && dest.matches(_encryptTo))
-            text = _crypt.encrypt(text);
-        System.out.println("*** encodeCmd msg= "+cmd+" "+text);
+        if (cmd.matches("USER|RMUSER")) {
+            if (!dest.matches(_userInfo))
+                return null;
+            if (dest.matches(_encryptTo))
+                text = _crypt.encrypt(text);
+        }
         return cmd+" "+text;
     }
     
@@ -247,9 +252,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */
    public void sendRequest(String dest, String cmd, String text)
    { 
-      var msg = encodeCmd(dest, cmd, text); 
-      _msg.sendMessage(dest, msg, true, true, this);
-      _log.info(null, "Send > "+dest+": "+msg);
+        var m = encodeCmd(dest, cmd, text);
+        if (m==null)
+            return; 
+        _msg.sendMessage(dest, m, true, true, this);
+        _log.info(null, "Send > "+dest+": "+m);
    }
    
      
@@ -262,15 +269,17 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     {
         int n = 0;
         if (_parent != null && !_parent.equals(origin) && _parentCon) { 
-            var msg = encodeCmd(_parent, cmd, text);
-            _msg.sendMessage(_parent, msg, true, true, this); 
+            var m = encodeCmd(_parent, cmd, text);
+            if (m != null)
+                _msg.sendMessage(_parent, m, true, true, this); 
             n++; 
         }
         
         for (String r: getChildren() )
             if (!r.equals(origin) && isWithinInterest(r, text) ) {
-                var msg = encodeCmd(r, cmd, text);
-                _msg.sendMessage(r, msg, true, true, this); 
+                var m = encodeCmd(r, cmd, text);
+                if (m != null)
+                    _msg.sendMessage(r, m, true, true, this); 
                 n++; 
             }
     
