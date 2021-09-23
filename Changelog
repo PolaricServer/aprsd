@@ -311,3 +311,16 @@ V.2.7
 * Various fixes..
 
 
+V.2.8
+-----
+* Libraries - use newer versions.
+* Allow suspending of user access
+* Support for role based authorisation (groups) and per item authorisation
+* Filter script updates
+* Auto backup of some important files
+* Encryption of usernames in remotectl protocol
+* Various fixes..
+
+
+
+

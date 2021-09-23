@@ -24,6 +24,12 @@ case "$1" in
            echo "Making a copy in /etc/polaric-aprsd/passwd.webapp.old"
            cp /etc/polaric-webapp/users /etc/polaric-aprsd/passwd.webapp.old
         fi
+        if [[ ! -e "/var/lib/polaric/users.dat" ]] ; then 
+           echo "admin,null,false,true,Admin User,,DEFAULT,false" > /var/lib/polaric/users.dat
+           chown polaric.polaric /var/lib/polaric/users.dat
+           chmod 644 /var/lib/polaric/users.dat
+        fi
+        
         echo
         echo "******* Polaric-aprsd *******"
         echo "To configure server, point your browser to http://localhost:8081/config_menu"

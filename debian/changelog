@@ -1,8 +1,13 @@
-polaric-aprsd (2.7+) UNRELEASED; urgency=medium
+polaric-aprsd (2.8) stable; urgency=medium
 
-  * Hacking..
+  * Encryption of usernames in remotectl protocol
+  * Support for role based authorisation (groups) and per item authorisation
+  * Filter script updates
+  * Auto backup of some important files
+  * Libraries - use newer versions.
+  * Various fixes..
 
- -- Oyvind Hanssen <ohanssen@acm.org>  Sun, 09 May 2021 11:53:41 +0200
+ -- Oyvind Hanssen <ohanssen@acm.org>  Mon, 20 Sep 2021 11:51:31 +0200
 
 polaric-aprsd (2.7) stable; urgency=medium
 

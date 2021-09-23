@@ -56,6 +56,7 @@ install: polaric-aprsd.jar
 	install -d $(INSTALL_SUDO)
 	install -m 755 -d $(INSTALL_LOG)
 	install -m 644 passwd $(INSTALL_CONFIG)
+	install -m 644 groups $(INSTALL_CONFIG)
 	install -m 644 server.ini $(INSTALL_CONFIG)
 	install -m 644 scripts.conf $(INSTALL_CONFIG)
 	install -m 644 symbols $(INSTALL_CONFIG)
@@ -65,6 +66,7 @@ install: polaric-aprsd.jar
 	install -m 644 polaric-aprsd.jar $(INSTALL_JAR)
 	install -m 644 images/* $(INSTALL_WEB)/images
 	install -m 644 style.css $(INSTALL_WEB)
+	install -m 755 polaric-checkfilter $(INSTALL_BIN)
 	install -m 755 polaric-restart $(INSTALL_BIN)
 	install -m 755 polaric-passwd $(INSTALL_BIN)
 	install -m 755 polaric-aprsd-start $(INSTALL_BIN)

@@ -49,7 +49,7 @@ AUTOTAG {
 # Show all APRS
 ####################################################
 
-PUBLIC PROFILE all_aprs {
+PROFILE all_aprs {
     EXPORT "ALL APRS" => PUBLIC;
 }
 
@@ -62,7 +62,7 @@ PUBLIC PROFILE all_aprs {
 # is hidden when zooming out. 
 #####################################################
 
-PUBLIC PROFILE track {
+PROFILE track {
    EXPORT "Tracking" => PUBLIC; 
    
    TrackHide      => { hide-ident };
@@ -85,7 +85,7 @@ PUBLIC PROFILE track {
 # Show only points that are tagged as SAR
 ################################################## 
     
-PUBLIC PROFILE sar {
+PROFILE sar {
     EXPORT "Search and Rescue" => ALL;
     NOT *SAR  => { hide-all };
 }
@@ -96,7 +96,7 @@ PUBLIC PROFILE sar {
 # (In Norway LD prefix is used for infrasstructure)
 ###################################################
 
-PUBLIC PROFILE infra {
+PROFILE infra {
    EXPORT "Infrastructure" => PUBLIC;  
    NOT (ident ~ "LD.+" OR symbol ~ "/r|.#" OR IrlpNode OR EchoLink OR infra)
        => { hide-all };
@@ -107,7 +107,7 @@ PUBLIC PROFILE infra {
 # Active infrastructure.
 ###################################################
 
-PUBLIC PROFILE ainfra {
+PROFILE ainfra {
    EXPORT "Active infrastructure" => PUBLIC;  
    NOT infra => { hide-all  };
    infra     => { show-path };
@@ -120,7 +120,7 @@ PUBLIC PROFILE ainfra {
 # Show only moving points.
 ###################################################
 
-PUBLIC PROFILE moving {
+PROFILE moving {
     EXPORT "Moving trackers" => PUBLIC;
     NOT moving => { hide-all };
 }
