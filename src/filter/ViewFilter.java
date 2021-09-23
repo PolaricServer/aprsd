@@ -94,8 +94,11 @@ public class ViewFilter {
          parser.parse();
          _map = parser.getProfiles();
          _tagrules = parser.getTagRules();
+         api.log().info("ViewFilter", "Done compiling view profiles.");
       }
       catch (FileNotFoundException e)
         { api.log().error("ViewFilter", "File not found '"+filename+"'"); }
   } 
+  
+  
 }
