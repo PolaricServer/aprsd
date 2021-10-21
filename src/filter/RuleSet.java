@@ -28,6 +28,7 @@ public class RuleSet implements Rule
     private List<Rule> rlist = new LinkedList<Rule>(); 
     private Set<String> _groups = new HashSet<String>();
     private boolean _public = false; 
+    private boolean _nologin = false;
     private boolean _all = false; 
     private String _descr; 
     private int _line; 
@@ -40,6 +41,12 @@ public class RuleSet implements Rule
        
     public boolean isPublic()
        { return _public; }
+       
+    public void setNologin()
+       { _nologin = true; }
+       
+    public boolean isNologin()
+       { return _nologin; }
        
     /* Visible for all logged in users */
     public void setAll()
@@ -68,7 +75,7 @@ public class RuleSet implements Rule
        
     public void addGroup(String g) { 
         if (g.equals("NOLOGIN"))
-            setPublic();
+           setNologin();
         _groups.add(g); 
     }
        

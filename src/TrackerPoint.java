@@ -45,6 +45,10 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
        AprsPoint.setApi(api);
     }
        
+    public static ServerAPI getApi() 
+        { return _api; }
+        
+        
     /*
      * Static variables and functions to control expire timeouts 
      * and notifications
