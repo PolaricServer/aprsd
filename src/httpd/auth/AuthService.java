@@ -177,8 +177,7 @@ public class AuthService {
     /**
      * Returns the client to the URL given as query param 'origin'. 
      */
-    private static void returnToOrigin(Request req, Response res, String name) {
-       String origin = req.queryParams(name);
+    private static void returnToOrigin(Request req, Response res, String origin) {
        if (origin != null) 
           res.header("Refresh", "3;"+origin);
     }
@@ -194,8 +193,9 @@ public class AuthService {
        I18n I = ServerBase._getI18n(req);
        
        AuthInfo auth = (AuthInfo) req.raw().getAttribute("authinfo");
-       _log.log("Successful login from: "+req.ip()+": userid="+ auth.userid);
-       returnToOrigin(req, res, "origin");
+       String origin = req.queryParams("origin");
+       _log.log("Successful login from: "+req.ip()+", userid="+ auth.userid+", origin="+origin);
+       returnToOrigin(req, res, origin);
        
        return 
          "<html><head><link rel=\"stylesheet\" href=\"style.css\"></head><body>" + 

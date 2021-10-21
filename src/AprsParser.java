@@ -30,7 +30,7 @@ public class AprsParser implements AprsChannel.Receiver
 
     /* Standard APRS position report format */
     private static Pattern _stdPat = Pattern.compile
-       ("((\\d|\\s)+\\.(\\d|\\s)+)([NS])(\\S)((\\d|\\s)+\\.(\\d|\\s)+)([EW])(\\S)\\s*(.*)");
+       ("((\\d|\\s)+[\\.\\,](\\d|\\s)+)([NS])(\\S)((\\d|\\s)+[\\.\\,](\\d|\\s)+)([EW])(\\S)\\s*(.*)");
 
     /* Weather report format */
     private static Pattern _wxPat = Pattern.compile
@@ -796,6 +796,7 @@ public class AprsParser implements AprsChannel.Receiver
              
              if (!lat.matches("[0-9\\s]{4}.[0-9\\s]{2}") || !lng.matches("[0-9\\s]{5}.[0-9\\s]{2}")) {
                 /* ERROR: couldn't understand Lat/Long field */
+                _api.log().debug("AprsParser", "Could not parse lat/long field: "+lat+" "+lng);
                  return; 
              }
              
@@ -812,6 +813,8 @@ public class AprsParser implements AprsChannel.Receiver
              lng = lng.replaceFirst(" ", "5");
              lat = lat.replaceAll(" ", "0");
              lng = lng.replaceAll(" ", "0");
+             lat = lat.replaceAll(",", ".");
+             lng = lng.replaceAll(",", ".");
              
              latDeg = Integer.parseInt(lat.substring(0,2)) + Double.parseDouble(lat.substring(2,7))/60;
              if (latNS == 'S')
