@@ -65,6 +65,34 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
        { return _posUpdates; }
        
        
+       
+           
+    /* Class for Json encoding info about a point. This is subclassed in AprsPoint */
+    public static class JsInfo extends PointObject.JsInfo {
+        public String alias; 
+        public int altitude, course, speed;
+        public Date updated; 
+        
+        public JsInfo(TrackerPoint p) {
+            super(p);
+            type = "TrackerPoint";
+            alias = p.getAlias();
+            altitude = p.getAltitude();
+            course = p.getCourse();
+            speed = p.getSpeed();     
+            updated = p.getUpdated();
+        }
+    }
+    
+    
+    public JsInfo getJsInfo() {
+        return new JsInfo(this);
+    }
+       
+       
+       
+       
+       
       
     protected Trail     _trail = new Trail(); 
     protected String[]  _trailcolor = new String[] {"dddddd", "ff0000"};   

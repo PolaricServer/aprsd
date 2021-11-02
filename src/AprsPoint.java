@@ -35,6 +35,23 @@ public abstract class AprsPoint extends TrackerPoint implements Serializable, Cl
     }
     
     
+    public static class JsInfo extends TrackerPoint.JsInfo {
+        public char symbol, symtab;
+        
+        public JsInfo(AprsPoint p) {
+            super(p);
+            type = "AprsPoint";
+            symbol = p.getSymbol();
+            symtab = p.getSymtab();
+        }
+    }
+    
+        
+    public JsInfo getJsInfo() {
+        return new JsInfo(this);
+    }
+    
+    
     public AprsPoint(Reference p)
       { super(p); }
 

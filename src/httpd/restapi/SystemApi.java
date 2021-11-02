@@ -278,15 +278,36 @@ public class SystemApi extends ServerBase {
         // FIXME: Should be 'items' instead of 'item'? 
         
         /*******************************************
+         * Get Info about a given item
+         *******************************************/
+        get("/item/*/info", "application/json", (req, resp) -> {
+            try {
+                var ident = req.splat()[0];
+                var st = _api.getDB().getItem(ident, null);
+                if (st==null)
+                    return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+                if (!authForItem(req, st))
+                    return ERROR(resp, 401, "Uauthorized for access to item");
+                return st.getJsInfo();
+            }
+            catch(Exception e) {
+                e.printStackTrace(System.out);
+                return ERROR(resp, 500, "Errror: "+e.getMessage());
+            }
+        }, ServerBase::toJson );
+        
+        
+        
+        /*******************************************
          * Get alias/icon for a given item
          *******************************************/
         get("/item/*/alias", "application/json", (req, resp) -> {
             var ident = req.splat()[0];
             var st = _api.getDB().getItem(ident, null);
-            if (!authForItem(req, st))
-                return ERROR(resp, 401, "Uauthorized for access to item");
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            if (!authForItem(req, st))
+                return ERROR(resp, 401, "Uauthorized for access to item");
             return new ItemInfo.Alias(st.getAlias(), (st.iconIsNull() ? null : st.getIcon())); 
         }, ServerBase::toJson );
         

@@ -25,6 +25,26 @@ public class AprsObject extends AprsPoint implements Serializable
 {
     private static long _expiretime    = 1000 * 60 * 60 * 12;    // Default: 3 hour
     
+    
+        
+    public static class JsInfo extends AprsPoint.JsInfo {
+        public String owner;
+        
+        public JsInfo(AprsObject p) {
+            super(p);
+            type = "AprsObject";
+            owner = p.getOwner().getIdent();
+        }
+    }
+    
+        
+    public JsInfo getJsInfo() {
+        return new JsInfo(this);
+    }
+    
+    
+    
+    
     /*
      * Attributes of object/item record (APRS data)
      */
@@ -36,7 +56,6 @@ public class AprsObject extends AprsPoint implements Serializable
         * to exist with the same name (in another area and with another owner id)
         * Permanence is a proposed APRS 1.2 feature
         */
-        
         
     public AprsObject(Station owner, String id)
        { 

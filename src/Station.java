@@ -38,6 +38,27 @@ public class Station extends AprsPoint implements Serializable, Cloneable
         setExpiretime(exptime * 60 * 1000);
       }
     
+        
+        
+    public static class JsInfo extends AprsPoint.JsInfo {
+        public String status, path;
+        public Set<String> trafficFrom, trafficTo;
+        
+        public JsInfo(Station p) {
+            super(p);
+            type = "Station";
+            status = (p.getStatus()==null ? null : p.getStatus().text);
+            path = p.getPathInfo();
+            trafficFrom = p.getTrafficFrom();
+            trafficTo = p.getTrafficTo();
+        }
+    }
+    
+        
+    public JsInfo getJsInfo() {
+        return new JsInfo(this);
+    }
+    
     
     /*
      * Attributes of a station record (APRS data)

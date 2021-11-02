@@ -91,7 +91,30 @@ public abstract class PointObject extends Point implements Cloneable
     public static boolean tagIsUsed(String tag)
        { return _tagUse.get(tag) != null; }
        
-     
+    
+    
+    /* Class for Json encoding info about a point. This is subclassed in AprsPoint */
+    public static class JsInfo {
+        public String type = "PointObject";
+        public String ident, descr; 
+        public String source;
+        public double pos[]; /* lon, lat */
+        
+        public JsInfo(PointObject p) {
+            ident = p.getIdent();
+            descr = p.getDescr(); 
+            source = p.getSourceId(); 
+            LatLng ref = p.getPosition().toLatLng();
+            pos = new double[] {ref.getLng(), ref.getLat()};
+        }
+    }
+    
+    
+    public JsInfo getJsInfo() {
+        return new JsInfo(this);
+    }
+        
+        
     
     public Set<String> getTags() {
         return _tags;
