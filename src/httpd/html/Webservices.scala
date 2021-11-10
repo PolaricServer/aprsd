@@ -33,17 +33,7 @@ package no.polaric.aprsd.http
  
    val _time = new Date();
    
-   /* 
-    * Register views for position objects. 
-    * addView ( class-of-model, class-of-view )
-    */
-   PointView.addView(classOf[AprsObject],  classOf[AprsObjectView])
-   PointView.addView(classOf[Station],     classOf[AprsStationView])
-   PointView.addView(classOf[OwnPosition], classOf[AprsPointView])
-   PointView.addView(classOf[GpsPosition], classOf[AprsPointView])
 
-
-   
    /**
     * Show clients that are active just now.
     */
@@ -148,51 +138,8 @@ package no.polaric.aprsd.http
              
           return printHtml (res, htmlBody(req, head, action(req)));    
    }
-   
-   
-   
-   def symChoice(req: Request) = {
-        val I = getI18n(req)
-        <select id="symChoice" class="symChoice"
-           onchange="var x=event.target.value;document.getElementById('osymtab').value=x[0];document.getElementById('osym').value=x[1];">
-               <option value="/c" style="background-image:url(../aprsd/icons/orient.png)"> {I.tr("Post")} </option>
-               <option value="\m" style="background-image:url(../aprsd/icons/sign.png)"> {I.tr("Sign")} </option>
-               <option value="\." style="background-image:url(../aprsd/icons/sym00.png)"> {I.tr("Cross")} </option>
-               <option value="\n" style="background-image:url(../aprsd/icons/sym07.png)"> {I.tr("Triangle")} </option>
-               <option value="/+" style="background-image:url(../aprsd/icons/sym02.png)"> {I.tr("Cross")} </option>
-               <option value="/o" style="background-image:url(../aprsd/icons/eoc.png)"> {I.tr("OPS/EOS")} </option>
-               <option value="/r" style="background-image:url(../aprsd/icons/radio.png)"> {I.tr("Radio station")} </option>
-         </select>
-    }
-   
-         
-
-       
 
 
-   /** 
-    * View one particular point object. 
-    */
-   def handle_station(req : Request, res : Response): String  = 
-       return _handle_station(req, res, getAuthInfo(req).sar)
-       ;
-   
-   
-
-   def _handle_station(req : Request, res : Response, canUpdate: Boolean): String =
-   {
-       val simple =  ( req.queryParams("simple") != null )
-       val id = req.queryParams("id")
-       val x:TrackerPoint = _api.getDB().getItem(id, null)
-       val view = PointView.getViewFor(x, api, canUpdate, req)
-       
-       return printHtml (res, htmlBody ( req, null, 
-                    if (simple) view.fields(req)
-                    else htmlForm(req, null, view.fields, IF_AUTH(view.action), true, default_submit)))
-   }
-  
-
-    
     
     val ddf = new java.text.DecimalFormat("##,###.###");
     def dfield(x: String, y: String) = 
