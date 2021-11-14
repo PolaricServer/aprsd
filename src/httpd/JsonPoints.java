@@ -38,9 +38,10 @@ public interface JsonPoints
         public String   ident;
         public double[] pos;
         public String   title;
-        public boolean  redraw;  // true if isChanging()
-        public boolean  own;     // May use a tag instead? 
-        public boolean  aprs;    // May use a tag instead?
+        public boolean  redraw;    // true if isChanging()
+        public boolean  own;       // May use a tag instead? 
+        public boolean  aprs;      // May use a tag instead?
+        public boolean  telemetry; // May use a tag instead? 
         public boolean  sarAuth=false;
         public String   icon;  
         public String   href;

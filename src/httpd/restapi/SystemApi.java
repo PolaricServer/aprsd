@@ -453,6 +453,77 @@ public class SystemApi extends ServerBase {
         });
         
         
+        
+        /*********************************************
+         * Get telemetry description for a given item
+         *********************************************/
+        get("/telemetry/*/descr", "application/json", (req, resp) -> {
+            var ident = req.splat()[0];        
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            if (!(st instanceof Station) || ((Station) st).getTelemetry() == null)
+                return ERROR(resp, 404, "No telemetry found: "+ident); 
+            var tm = ((Station) st).getTelemetry(); 
+            if (!tm.valid())
+                return ERROR(resp, 404, "Telemetry is invalid: "+ident);
+
+            return tm.getDescr();
+        }, ServerBase::toJson );
+        
+        
+        /******************************************
+         * Get telemetry metadata for a given item
+         ******************************************/
+        get("/telemetry/*/meta", "application/json", (req, resp) -> {
+            var ident = req.splat()[0];        
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            if (!(st instanceof Station) || ((Station) st).getTelemetry() == null)
+                return ERROR(resp, 404, "No telemetry found: "+ident); 
+            var tm= ((Station) st).getTelemetry(); 
+            if (!tm.valid())
+                return ERROR(resp, 404, "Telemetry is invalid: "+ident);
+
+            return tm.getMeta();
+        }, ServerBase::toJson );
+        
+        
+        /*************************************************
+         * Get telemetry current report for a given item
+         *************************************************/
+        get("/telemetry/*/current", "application/json", (req, resp) -> {
+            var ident = req.splat()[0];        
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            if (!(st instanceof Station) || ((Station) st).getTelemetry() == null)
+                return ERROR(resp, 404, "No telemetry found: "+ident); 
+            var tm= ((Station) st).getTelemetry(); 
+            if (!tm.valid())
+                return ERROR(resp, 404, "Telemetry is invalid: "+ident);
+
+            return tm.getCurrent();
+        }, ServerBase::toJson );
+        
+        
+        /*************************************************
+         * Get telemetry current report for a given item
+         *************************************************/
+        get("/telemetry/*/history", "application/json", (req, resp) -> {
+            var ident = req.splat()[0];        
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            if (!(st instanceof Station) || ((Station) st).getTelemetry() == null)
+                return ERROR(resp, 404, "No telemetry found: "+ident); 
+            var tm= ((Station) st).getTelemetry(); 
+            if (!tm.valid())
+                return ERROR(resp, 404, "Telemetry is invalid: "+ident);
+
+            return tm.getHistory();
+        }, ServerBase::toJson );
     }
 
 }

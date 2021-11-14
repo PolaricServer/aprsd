@@ -206,6 +206,7 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/item/*"); 
         corsEnable("/items/*");     
         corsEnable("/items");
+        corsEnable("/telemetry/*");
         
         ShellScriptApi sa = new ShellScriptApi(_api); 
         sa.start();

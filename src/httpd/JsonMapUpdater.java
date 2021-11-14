@@ -166,6 +166,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             x.own     = (s instanceof AprsObject) 
                         && _api.getDB().getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""));
             x.aprs    = (s instanceof AprsPoint); 
+            x.telemetry = s.hasTag("APRS.telemetry");
            
             String icon = action.getIcon(s.getIcon()); 
             if (s.iconOverride() && _api.getSar()!=null)  

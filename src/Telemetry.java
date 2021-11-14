@@ -35,7 +35,7 @@ public class Telemetry implements Serializable
     /**
      * Data record. 
      */
-    public class Data implements Serializable {
+    public static class Data implements Serializable {
         public int seq;
         public Date time; 
         public float[] num;
@@ -47,7 +47,7 @@ public class Telemetry implements Serializable
             num = n; 
             bin = b; 
         }
-       
+       /*
         public float getAnalog(int chan) {
             if (num[chan] == -1)
                 return -1;
@@ -59,6 +59,7 @@ public class Telemetry implements Serializable
         public boolean getBinary(int chan) {
             return bin[chan] == _binChanMeta[chan].bit;
         }
+        */
     }
     
     
@@ -88,6 +89,12 @@ public class Telemetry implements Serializable
     }
     
     
+    public static class Meta {
+        public NumChannelMeta[] num; 
+        public BinChannelMeta[] bin;
+    }
+    
+    
     private NumChannelMeta[] _chanMeta = new NumChannelMeta[5];
     private BinChannelMeta[] _binChanMeta = new BinChannelMeta[8]; 
     private Queue<Data> _data = new LinkedList<Data>();
@@ -105,9 +112,20 @@ public class Telemetry implements Serializable
     }
     
     
+    
+    public Meta getMeta() { 
+        Meta m = new Meta(); 
+        m.num = _chanMeta;
+        m.bin = _binChanMeta;
+        return m;
+    }
+    
+    
+    /* Get numeric metadata for a channel */
     public NumChannelMeta getMeta(int ch) 
       { return _chanMeta[ch]; }
-      
+    
+    /* Get binary metadata for a channel */
     public BinChannelMeta getBinMeta(int ch)
       { return _binChanMeta[ch]; }
       
@@ -191,6 +209,7 @@ public class Telemetry implements Serializable
         }
         _lastSeq = seq; 
     }
+    
     
     public Collection<Data> getHistory()
        { return _data; }
