@@ -105,7 +105,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
        
     public Telemetry getTelemetry() {
        if (_telemetry == null)
-          _telemetry = new Telemetry(); 
+          _telemetry = new Telemetry(_api, getIdent()); 
        return _telemetry;
     }
        

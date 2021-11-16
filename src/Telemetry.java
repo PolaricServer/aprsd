@@ -47,19 +47,6 @@ public class Telemetry implements Serializable
             num = n; 
             bin = b; 
         }
-       /*
-        public float getAnalog(int chan) {
-            if (num[chan] == -1)
-                return -1;
-            return _chanMeta[chan].eqns[0] * num[chan] * num[chan] +
-                   _chanMeta[chan].eqns[1] * num[chan] + 
-                   _chanMeta[chan].eqns[2]; 
-        }
-        
-        public boolean getBinary(int chan) {
-            return bin[chan] == _binChanMeta[chan].bit;
-        }
-        */
     }
     
     
@@ -95,19 +82,25 @@ public class Telemetry implements Serializable
     }
     
     
+    private ServerAPI _api;
     private NumChannelMeta[] _chanMeta = new NumChannelMeta[5];
     private BinChannelMeta[] _binChanMeta = new BinChannelMeta[8]; 
     private Queue<Data> _data = new LinkedList<Data>();
     private Data _current; 
+    private String _ident;
     private String _descr; 
     private int    _lastSeq = 0;
     
     
     
-    public Telemetry() {
-       for (int i=0; i < ANALOG_CHANNELS; i++) 
+    public Telemetry(ServerAPI api, String id) {
+        _ident = id;
+        _api = api;
+        _api.getWebserver().getPubSub().createRoom("telemetry:"+id, (Class) null);
+
+        for (int i=0; i < ANALOG_CHANNELS; i++) 
            _chanMeta[i] = new NumChannelMeta(); 
-       for (int i=0; i < BINARY_CHANNELS; i++)
+        for (int i=0; i < BINARY_CHANNELS; i++)
            _binChanMeta[i] = new BinChannelMeta(); 
     }
     
@@ -208,6 +201,9 @@ public class Telemetry implements Serializable
               _data.remove();
         }
         _lastSeq = seq; 
+        
+        /* Notify client about change */
+        _api.getWebserver().getPubSub().put("telemetry:"+_ident, null);
     }
     
     

@@ -28,7 +28,7 @@ import java.util.function.*;
 /**
  * Generic publish/subscribe service using websocket. 
  */
-@WebSocket(maxIdleTime=600000)
+@WebSocket(maxIdleTime=1200000)
 public class PubSub extends WsNotifier implements ServerAPI.PubSub
 {
 
@@ -123,6 +123,10 @@ public class PubSub extends WsNotifier implements ServerAPI.PubSub
         public boolean hasClient(Client c)
             { return cset.contains(c.getUid()); }
             
+        public int nClients() 
+            { return cset.size(); }
+            
+            
         public String toString() {return "Room["+cset.size()+"]"; }
     }
     
@@ -171,8 +175,10 @@ public class PubSub extends WsNotifier implements ServerAPI.PubSub
      */
     protected void subscribe(Client c, String rid) {
         Room room = _rooms.get(rid);
-        if (room == null)
+        if (room == null) {
+            _api.log().warn("PubSub", "Room not found: "+rid);
             return;
+        }
         if (!room.addClient(c))
             _api.log().warn("PubSub", "Client "+c.getUid()+" denied access to room: "+rid);
     }
@@ -231,6 +237,9 @@ public class PubSub extends WsNotifier implements ServerAPI.PubSub
       * the message will be posted only to the named member
       */
     private void _put(Room rm, String msg, String uname) {
+        if (rm == null || rm.nClients() == 0) 
+            return;
+        _api.log().debug("PubSub", "Post message: "+rm+", "+uname+", "+msg);
         postText(msg, 
            c-> (rm != null && rm.hasClient((PubSub.Client) c) && 
                     (uname==null || uname.equals(((PubSub.Client) c).getUsername()))

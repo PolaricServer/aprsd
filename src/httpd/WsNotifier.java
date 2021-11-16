@@ -36,7 +36,7 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 
 /** Send events to clients through WebSockets. Let clients subscribe. */
 
-@WebSocket(maxIdleTime=600000)
+@WebSocket(maxIdleTime=1200000)
 public abstract class WsNotifier extends ServerBase
 {
    
@@ -362,7 +362,7 @@ public abstract class WsNotifier extends ServerBase
          for(String user : _clients.keySet()) {
             Client client = (Client) _clients.get(user);
             try {               
-                if(client != null && pred.test(client) && txt != null) 
+                if (client != null && pred.test(client) && txt != null) 
                     client.sendText(txt.apply(client));
                
             } catch (java.nio.channels.ClosedChannelException e) {   

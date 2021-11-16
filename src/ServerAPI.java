@@ -74,6 +74,9 @@ public interface ServerAPI
         
         /** Post a object to a room (JSON encoded) */
         public void put(String rid, Object obj);
+        
+        /** Create a room */
+        public void createRoom(String name, Class cl);
     }
   
   
