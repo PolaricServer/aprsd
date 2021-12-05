@@ -26,7 +26,7 @@ import java.io.Serializable;
  
 public class Telemetry implements Serializable
 {
-    public static final int MAX_DATA_LENGTH = 100;
+    public static final int MAX_DATA_LENGTH = 200;
     public static final int ANALOG_CHANNELS = 5; 
     public static final int BINARY_CHANNELS = 8;
     public static final int CHANNELS = (ANALOG_CHANNELS+BINARY_CHANNELS);
@@ -53,7 +53,7 @@ public class Telemetry implements Serializable
     /**
      * Base class for metadata. 
      */
-    public static class ChannelMeta {
+    public static class ChannelMeta implements Serializable {
         public String parm; 
         public String unit; 
     }
@@ -82,7 +82,7 @@ public class Telemetry implements Serializable
     }
     
     
-    private ServerAPI _api;
+    transient private ServerAPI _api;
     private NumChannelMeta[] _chanMeta = new NumChannelMeta[5];
     private BinChannelMeta[] _binChanMeta = new BinChannelMeta[8]; 
     private Queue<Data> _data = new LinkedList<Data>();
@@ -209,6 +209,15 @@ public class Telemetry implements Serializable
     
     public Collection<Data> getHistory()
        { return _data; }
+    
+    
+    public Collection<Data> getHistory(int hrs) {
+        List<Data> res = new LinkedList<Data>();
+        for (Data x : _data)
+            if ( x.time.getTime() + 1000 * 60 * 60 * hrs > (new Date()).getTime() )
+                res.add(x);
+        return res;
+    }
        
     public Data getCurrent()
        { return _current; }

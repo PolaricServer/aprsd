@@ -512,17 +512,27 @@ public class SystemApi extends ServerBase {
          * Get telemetry current report for a given item
          *************************************************/
         get("/telemetry/*/history", "application/json", (req, resp) -> {
-            var ident = req.splat()[0];        
+            var ident = req.splat()[0];    
+            var hours = req.queryParams("hours");
+            
             var st = _api.getDB().getItem(ident, null);
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
             if (!(st instanceof Station) || ((Station) st).getTelemetry() == null)
                 return ERROR(resp, 404, "No telemetry found: "+ident); 
-            var tm= ((Station) st).getTelemetry(); 
+            var tm = ((Station) st).getTelemetry(); 
             if (!tm.valid())
                 return ERROR(resp, 404, "Telemetry is invalid: "+ident);
-
-            return tm.getHistory();
+            if (hours==null || hours.equals(""))
+                return tm.getHistory();
+            try {
+                int h = Integer.parseInt(hours);
+                return tm.getHistory(h);
+            }
+            catch (NumberFormatException e) {
+                return ERROR(resp, 400, "Invalid query param: "+hours);
+            }
+                
         }, ServerBase::toJson );
     }
 

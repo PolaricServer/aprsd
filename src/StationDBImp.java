@@ -151,6 +151,7 @@ public class StationDBImp implements StationDB, Runnable
            }
            catch (Exception e) {
                _api.log().warn("StationDBImp", "Cannot save data: "+e);
+               e.printStackTrace();
            } 
          _hasChanged = false; 
     }

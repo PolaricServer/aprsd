@@ -58,6 +58,7 @@ public class AuthInfo {
     public boolean admin = false, sar = false;
     public String tagsAuth;
     public String[] services = null;
+    private ServerAPI _api; 
     
     @JsonIgnore public SesMailBox mailbox = null;
     
@@ -79,6 +80,7 @@ public class AuthInfo {
     
     
     public static void init(ServerAPI api) {
+
         WebServer ws = (WebServer) api.getWebserver(); 
         ws.onOpenSes( (c)-> {
                 AuthInfo a = c.getAuthInfo();
@@ -187,7 +189,8 @@ public class AuthInfo {
         final SparkWebContext context = new SparkWebContext(req, res);
         final ProfileManager manager = new ProfileManager(context);
         final Optional<CommonProfile> profile = manager.get(true);
-      
+        
+        _api = api;
         var i = 0;
         services = new String[_services.size()];
         for (var x : _services)
