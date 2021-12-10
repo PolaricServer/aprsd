@@ -318,6 +318,10 @@ public class WebServer implements ServerAPI.Web
     }
     
     
+    public UserDb getUserDb() {
+        return _auth.conf().getUserDb();
+    }
+    
     
     /* FIXME: What methods should be part of ServerAPI.Web ? */
     public AuthConfig getAuthConfig()

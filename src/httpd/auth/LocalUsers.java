@@ -85,6 +85,11 @@ public class LocalUsers implements UserDb
   
   
   
+    public boolean hasUser(String id) {
+        return get(id) != null; 
+    }
+    
+  
     /**
      * Get a single user. 
      */

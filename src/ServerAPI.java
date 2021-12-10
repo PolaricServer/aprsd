@@ -57,6 +57,7 @@ public interface ServerAPI
         public long nMapUpdates(); 
  
         public void notifyUser(String user, Notification not);
+        public UserDb getUserDb();
         public PubSub getPubSub();
         public void protectUrl(String prefix);
         public void protectUrl(String prefix, String level);
@@ -79,7 +80,12 @@ public interface ServerAPI
         public void createRoom(String name, Class cl);
     }
   
-  
+    public interface UserDb {
+        public boolean hasUser(String id); 
+    }
+
+
+
     /* Now, what methods do we need here? Other interfaces.
      * Do we need StationDB? */
     

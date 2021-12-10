@@ -82,7 +82,6 @@ public class Telemetry implements Serializable
     }
     
     
-    transient private ServerAPI _api;
     private NumChannelMeta[] _chanMeta = new NumChannelMeta[5];
     private BinChannelMeta[] _binChanMeta = new BinChannelMeta[8]; 
     private Queue<Data> _data = new LinkedList<Data>();
@@ -95,8 +94,7 @@ public class Telemetry implements Serializable
     
     public Telemetry(ServerAPI api, String id) {
         _ident = id;
-        _api = api;
-        _api.getWebserver().getPubSub().createRoom("telemetry:"+id, (Class) null);
+        api.getWebserver().getPubSub().createRoom("telemetry:"+id, (Class) null);
 
         for (int i=0; i < ANALOG_CHANNELS; i++) 
            _chanMeta[i] = new NumChannelMeta(); 
@@ -203,7 +201,9 @@ public class Telemetry implements Serializable
         _lastSeq = seq; 
         
         /* Notify client about change */
-        _api.getWebserver().getPubSub().put("telemetry:"+_ident, null);
+        var api = TrackerPoint.getApi();
+        api.getWebserver().getPubSub().createRoom("telemetry:"+_ident, (Class) null);
+        api.getWebserver().getPubSub().put("telemetry:"+_ident, null);
     }
     
     

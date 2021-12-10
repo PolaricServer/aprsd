@@ -16,14 +16,13 @@
  
 package no.polaric.aprsd.http;
 import java.util.*; 
+import no.polaric.aprsd.ServerAPI;
 
 
 
-
-public interface UserDb 
+public interface UserDb extends ServerAPI.UserDb
 {
     public User get(String id); 
-    
     public Collection<User> getAll();
     
     public User add (String userid);
