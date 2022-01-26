@@ -323,6 +323,9 @@ public class SystemApi extends ServerBase {
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
             if (!sarAuthForItem(req, st))
                 return ERROR(resp, 401, "Uauthorized for access to item");
+            if (st.hasTag("MANAGED") || st.hasTag("RMAN"))
+                return ERROR(resp, 401, "Alias can only be set by owner");
+                
             ItemInfo.Alias a = (ItemInfo.Alias) 
                 ServerBase.fromJson(req.body(), ItemInfo.Alias.class);    
             if (a==null)

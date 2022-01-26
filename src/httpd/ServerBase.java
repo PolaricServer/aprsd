@@ -207,8 +207,9 @@ public abstract class ServerBase
             _api.getRemoteCtl().sendRequestAll("TAG", ident+" "+tag, null);
         _api.log().info("SystemApi", 
             "TAG: '"+tag+"' for '"+ident+"' by user '"+uid+"'");    
-        _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
-            ("system", "system", "Tag: '"+tag+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
+        if (!"RMANAGED".equals(tag))
+            _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
+                ("system", "system", "Tag: '"+tag+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
     }
     
     
@@ -220,8 +221,9 @@ public abstract class ServerBase
             _api.getRemoteCtl().sendRequestAll("RMTAG", ident+" "+tag, null);
         _api.log().info("SystemApi", 
             "RMTAG: '"+tag+"' for '"+ident+"' by user '"+uid+"'");    
-        _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
-            ("system", "system", "Tag: '"+tag+ "' for '"+ident+"' removed by user '"+uid+"'", new Date(), 10) );     
+        if (!"RMANAGED".equals(tag))
+            _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
+                ("system", "system", "Tag: '"+tag+ "' for '"+ident+"' removed by user '"+uid+"'", new Date(), 10) );     
     }
     
     

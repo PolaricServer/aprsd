@@ -156,11 +156,13 @@ public abstract class PointObject extends Point implements Cloneable
     
     /**
      * Return true if regex matches any tag on this object. 
+     * Potential security risk! It expects a regex. If input from user which is not expected to be a regex,
+     * input should be properly sanitized using SecUtils.escape4regex()
      */
     public boolean hasTag(String tag) { 
         if (tag==null)
-            return true; 
-        tag = tag.replaceAll("\\.", "\\\\.");
+            return false; 
+       
         for (String x: _tags) {
             if (x.matches("("+tag+")(\\..*)?")) {
                 return true;

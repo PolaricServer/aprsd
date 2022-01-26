@@ -28,6 +28,7 @@ import java.util.stream.*;
 public class StationDBImp implements StationDB, Runnable
 {
     private SortedMap<String, TrackerPoint> _map = new ConcurrentSkipListMap();
+    
     private String     _file;
     private String     _stnsave;
     private boolean   _hasChanged = false; 
@@ -64,6 +65,10 @@ public class StationDBImp implements StationDB, Runnable
     public void setHistDB(StationDB.Hist d)
         { _histData = d; }
 
+    
+    public StationDB.Hist getHistDB() 
+        {return _histData; }
+        
         
     /** Get item at a particular time. Realtime if t is null. */    
     public TrackerPoint getItem(String id, Date t)

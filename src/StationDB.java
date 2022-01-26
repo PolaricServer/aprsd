@@ -52,18 +52,26 @@ public interface StationDB
          * @param t time of capture
          */
         public Trail.Item getTrailPoint(String src, java.util.Date t);
+        
+        
+        /**
+         * Remove item from someone's myTrackers list
+         * @param id identifier (callsign) of item to remove. 
+         */
+        public void removeManagedItem(String id); 
+        
     }
     
-    
+    public StationDB.Hist getHistDB();
 
-      public TrackerPoint getItem(String id, Date d);
+    public TrackerPoint getItem(String id, Date d);
       
-      public TrackerPoint getItem(String id, Date t, boolean usedb);
+    public TrackerPoint getItem(String id, Date t, boolean usedb);
       
-      public void saveItem(TrackerPoint x);
+    public void saveItem(TrackerPoint x);
       
       
-      public Trail.Item getTrailPoint(String src, java.util.Date t);
+    public Trail.Item getTrailPoint(String src, java.util.Date t);
         
         
         

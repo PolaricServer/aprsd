@@ -145,7 +145,12 @@ public class SecUtils
 
     }  
     
-
+    
+    
+    public static String escape4regex(String x) {
+        return x.replaceAll("([\\$\\^\\*\\+\\?\\.\\(\\)\\[\\]\\{\\}])", "\\\\$1");
+    }
+    
     
 }
 

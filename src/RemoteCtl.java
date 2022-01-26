@@ -256,7 +256,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         if (m==null)
             return; 
         _msg.sendMessage(dest, m, true, true, this);
-        _log.info(null, "Send > "+dest+": "+m);
+        _log.info(null, "Send > "+dest+": "+cmd+" "+text);
    }
    
      
@@ -284,7 +284,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             }
     
         if (n>0)
-            _log.info(null, "Send > ALL("+n+"): " + text + (origin==null||n==0 ? "" : " -- (not to "+origin+")" ));
+            _log.info(null, "Send > ALL("+n+"): " + cmd+ " "+text + (origin==null||n==0 ? "" : " -- (not to "+origin+")" ));
         storeRequest(cmd+" "+text, origin);                
     }
 
@@ -320,30 +320,38 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       */
      String[] arg = text.split("\\s+", 3);
      String prefix = arg[0];
-  
-     if (arg[0].matches("ALIAS|ICON|TAG|RMTAG|USER|RMUSER")) {
+     final var arg1_ = SecUtils.escape4regex(arg[1]);
+       
+     if (arg[0].matches("ALIAS|ICON|TAG|RMTAG|USER|RMUSER|RMAN|RMRMAN")) {
          if (arg[0].matches("RMTAG"))
             prefix = "TAG";
          if (arg[0].matches("RMUSER"))
             prefix = "USER";
+        if (arg[0].matches("RMRMAN"))
+            prefix = "RMAN";
          prefix = prefix + " " + arg[1];
          
          /* Remove earlier updates for the same item */
          _cmds.remove(prefix);
          
      }
-     /* This is currently not used and it may not be a good idea to store this */
-     else if (!arg[0].matches("RMITEM") && _cmds != null)
-        _cmds.values().removeIf( (x)-> {
-            return x != null && x.cmd != null && x.cmd.matches("(ALIAS|ICON|TAG) "+arg[1]+" .*");
-        });
-    
      
-     else if (!arg[0].matches("RMNODE"))
+     /* This is currently not used and it may not be a good idea to store this 
+     else if (arg[0].matches("RMITEM") && _cmds != null)
+        _cmds.values().removeIf( (x)-> {
+            return x != null && x.cmd != null && x.cmd.matches("(ALIAS|ICON|TAG) "+arg1_+" .*");
+        });
+     */
+     
+     else if (arg[0].matches("RMNODE"))
          /* Remove all USER entries with that particular node */
          _cmds.values().removeIf( (x)-> x.cmd.matches("USER .*@"+arg[1]));
+         
+     else if (arg[0].matches("RMAN"))
+        /* Remove ALIAS or ICON commands for the item */
+        _cmds.values().removeIf( (x)-> x.cmd.matches("(ALIAS|ICON) "+arg1_+" .*") );
   
-     else if (!arg[0].matches("SAR"))
+     else if (arg[0].matches("SAR"))
          return;
      
      /* Don't store deletions */
@@ -361,8 +369,9 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         if (_cmds.isEmpty())
             return; 
         _log.info(null, "Playback command log");
+        final var dest_ = SecUtils.escape4regex(dest);
         for (Map.Entry<String, LogEntry> entry: _cmds.entrySet())
-            if (!entry.getValue().cmd.matches("USER .*@"+dest) && isWithinInterest(dest, entry.getValue().cmd) )
+            if (!entry.getValue().cmd.matches("USER .*@"+dest_) && isWithinInterest(dest, entry.getValue().cmd) )
                 sendRequest(dest, null, entry.getValue().cmd);
    }
    
@@ -372,7 +381,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     * Remove ALIAs, ICON, TAG entries for the given item from log. 
     */
    public void removeExpired(String id) {
-        final var id_ = id.replaceAll("\\*", "\\\\*");
+        final var id_ = SecUtils.escape4regex(id);
+                    
         if (_cmds !=null && !_cmds.isEmpty())
             _cmds.values().removeIf( (x)-> { 
                 return x != null && x.cmd != null && x.cmd.matches("(ALIAS|ICON|TAG) "+id_+" .*");
@@ -450,6 +460,13 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       else if (arg[0].equals("RMITEM"))
           p = doRemoveItem(sender, args);
           
+      else if (arg[0].equals("RMAN"))
+          p=doRman(sender, args);
+      else if (arg[0].equals("RMRMAN"))
+          p=doRmRman(sender, args);
+      
+      
+      
        /* If command returned true, propagate the request further 
         * to children and parent, except the originating node.
         */
@@ -696,11 +713,9 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
         if (item==null || item.expired())
             return false; 
-            
-        arg[1] = arg[1].trim();
-        if ("NULL".equals(arg[1]))
-            arg[1] = null;
-        item.setAlias(arg[1]);
+        
+        if (!item.hasTag("RMAN") && !item.hasTag("MANAGED"))
+            item.setAlias(trimArg(arg[1]));
         return true;
    }
       
@@ -726,17 +741,73 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       if (item==null || item.expired())
         return false; 
         
-      arg[1] = arg[1].trim();
-      if ("NULL".equals(arg[1]))
-         arg[1] = null;
-      else 
-         arg[1] = arg[1].trim();
-      item.setIcon(arg[1]);
+      if (!item.hasTag("RMAN") && !item.hasTag("MANAGED"))
+          item.setIcon(trimArg(arg[1]));
       return true;
    } 
        
-
        
+       
+   /**
+    * Set alias/icon on a trackerpoint owned by user. 
+    * @param sender The station that sent the commmand.
+    * @param args The arguments of the RMAN command: item, alias, icon
+    * @return true if success.
+    */
+   protected boolean doRman(Station sender, String args)
+   {
+        if (args == null) {
+            _api.log().warn("RemoteCtl", "Missing arguments to remote RMAN command");
+            return false;
+        }
+      
+        _api.log().debug("RemoteCtl", "Set alias/icon (RMAN) from "+sender.getIdent());
+        String[] arg = args.split("\\s+", 3);
+      
+        TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
+        if (item==null || item.expired())
+            return false; 
+            
+        /* If item is already managed, remove.. */
+        if (item.hasTag("MANAGED")) {
+            StationDB.Hist hdb = _api.getDB().getHistDB(); 
+            if (hdb != null)
+                hdb.removeManagedItem(item.getIdent());
+            item.removeTag("MANAGED");
+        }
+            
+        item.setTag("RMAN");
+        item.setAlias(trimArg(arg[1]));
+        item.setIcon(trimArg(arg[2]));
+        return true;
+   }
+   
+   protected boolean doRmRman(Station sender, String args)
+   {
+        if (args == null) {
+            _api.log().warn("RemoteCtl", "Missing arguments to remote RMRMAN command");
+            return false;
+        }
+      
+        _api.log().debug("RemoteCtl", "Remove RMAN from "+sender.getIdent());
+        TrackerPoint item = _api.getDB().getItem(args.trim(), null);
+        if (item==null || item.expired())
+            return false; 
+        item.removeTag("RMAN");
+        return true;
+   }
+   
+   
+   
+   private String trimArg(String arg) {
+        arg = arg.trim();
+        if ("NULL".equals(arg) || "null".equals(arg))
+            return null;
+        return arg;
+   }
+   
+   
+   
    private void disconnectChild(String ident) 
    {
         _users.removeAll(ident);
