@@ -1,8 +1,11 @@
-polaric-aprsd (2.8+) UNRELEASED; urgency=medium
+polaric-aprsd (2.9) stable; urgency=medium
 
-  * Development 
+  * Telemetry API
+  * Filter work
+  * API for info about items
+  * Various fixes.. 
 
- -- Oyvind Hanssen <ohanssen@acm.org>  Wed, 13 Oct 2021 21:36:55 +0200
+ -- Oyvind Hanssen <ohanssen@acm.org>  Thu, 27 Jan 2022 13:35:06 +0100
 
 polaric-aprsd (2.8) stable; urgency=medium
 
