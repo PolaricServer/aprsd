@@ -51,7 +51,7 @@ http://localhost:8081/config_menu
 username=admin, password=polaric. Use the command polaric-password
 to change the password and add new users. 
 
-Se also: [Examples of how to use it with Docker] (https://github.com/PolaricServer/Dockerfiles).
+Se also: [Examples of how to use it with Docker](https://github.com/PolaricServer/Dockerfiles).
 
 ## Building from source 
 
