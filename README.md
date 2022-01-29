@@ -2,18 +2,17 @@
 
 The "Polaric Server" is mainly a web based service to present APRS tracking information on maps and where 
 the information is updated in real-time. It is originally targeted for use by radio amateurs in voluntary 
-search and rescue service in Norway. It consists of a web application and a server 
-program (APRS daemon). 
+search and rescue service in Norway. It consists of a web application and a server program (APRS daemon). 
  
 The APRS daemon gets data from a TNC or APRS-IS or a combination. It can present 
-and manipulate the information through a simple HTTP service. The daemon can 
+and manipulate the information through a simple HTTP service (REST API). The daemon can 
 also be set up as an igate (internet gateway) and can be installed and run independently 
 of the web app. It has its own webserver. 
 
 It is recommended to combine it with polaric-webapp2. It supports CORS to allow it to be used 
 with a polaric-webapp2 on another location.
 
-More documentation on the project can be found here: 
+http://aprs.no runs a recent version of this software. More documentation on the project can be found here: 
 http://aprs.no/polaricserver
 
 ## System requirements
@@ -40,7 +39,7 @@ We also use the following external libraries. jar files are included:
 
 ## Installation
 
-We provide Debian packages. For information on getting started on a Debian based platform please 
+We provide deb (Debian/Ubuntu..) packages. For information on getting started on a Debian based platform please 
 see: http://aprs.no/dokuwiki/doku.php/install.dev
 
 More documentation on the project can be found here: 
@@ -52,10 +51,12 @@ http://localhost:8081/config_menu
 username=admin, password=polaric. Use the command polaric-password
 to change the password and add new users. 
 
+Se also: [Examples of how to use it with Docker] (https://github.com/PolaricServer/Dockerfiles).
+
 ## Building from source 
 
 Build from the source is done by a plain old makefile. Yes I know :)
-Maybe I move to something else a little later. Setup for generating Debian
+Maybe I move to something else a little later. Setup for generating deb
 packages is included. You may use the 'debuild' command.
 
 You will need JDK (Oracle or OpenJDK) version 11 or later, the Scala
