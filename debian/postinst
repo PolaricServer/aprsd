@@ -26,7 +26,7 @@ case "$1" in
         fi
         if [[ ! -e "/var/lib/polaric/users.dat" ]] ; then 
            echo "admin,null,false,true,Admin User,,DEFAULT,false" > /var/lib/polaric/users.dat
-           chown polaric.polaric /var/lib/polaric/users.dat
+           chown polaric:polaric /var/lib/polaric/users.dat
            chmod 644 /var/lib/polaric/users.dat
         fi
         

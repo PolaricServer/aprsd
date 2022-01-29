@@ -102,7 +102,12 @@ public class SystemApi extends ServerBase {
     
     
     protected boolean authForItem(Request req, PointObject x) {
-        return (!x.getSource().isRestricted() || getAuthInfo(req).login() || x.tagIsOn("OPEN"));
+        if (x==null || x.getSource() == null) 
+            return false; 
+
+        return (!x.getSource().isRestricted() 
+           || x.tagIsOn("OPEN") 
+           || (getAuthInfo(req) != null && getAuthInfo(req).login()));
     }
     
     

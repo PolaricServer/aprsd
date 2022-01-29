@@ -1,2 +1,3 @@
 debian/polaric-restart.1 
 debian/polaric-passwd.1
+debian/polaric-checkfilter.1
