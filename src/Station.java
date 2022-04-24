@@ -66,7 +66,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     private String    _callsign; 
     private Status    _status;
     private Telemetry _telemetry; 
-
+    
    
     /* 
      * Other variables (presentation, storage, etc.)
@@ -116,7 +116,9 @@ public class Station extends AprsPoint implements Serializable, Cloneable
        { _pathinfo = p; }
        
     public Set<String> getTrafficFrom()
-       {  return _db.getRoutes().getToEdges(getIdent()); }
+       {  if (_db==null || _db.getRoutes() == null)
+		return null; 
+	  return _db.getRoutes().getToEdges(getIdent()); }
        
                        
     public Set<String> getTrafficTo()

@@ -9,7 +9,7 @@ pac4j-http-polaric.jar          v.4.5.2
 spark-pac4j-polaric.jar         v.4.0.0
 spark-core-polaric.jar          v.2.9.3
 utf8-with-fallback-polaric.jar  Based on v.1.1.0. Slightly modified. Source included. 
-
+JmDNS-polaric.jar               v.3.5.7
 
 
 Spark: 
@@ -20,3 +20,7 @@ http://central.maven.org/maven2/org/eclipse/jetty/aggregate/jetty-all/
 
 Pac4j
 https://repo1.maven.org/maven2/org/pac4j/
+
+JmDNS  
+https://github.com/jmdns/jmdns
+

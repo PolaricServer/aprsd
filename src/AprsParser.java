@@ -88,6 +88,8 @@ public class AprsParser implements AprsChannel.Receiver
         Station station = _api.getDB().getStation(p.from, null);
         if (station == null)
             station = _api.getDB().newStation(p.from); 
+        if (station == null)
+            return;
         station.setSource(p.source);
         station.setTag("APRS");
         station.setTag(p.source.getTag());
@@ -641,6 +643,9 @@ public class AprsParser implements AprsChannel.Receiver
         if (c3<33) c3=33;   
         return (c0-33) * 753571 + (c1-33) * 8281 + (c2-33) * 91 + (c3-33);
     }
+    
+
+
     
     
     private int base91Decode(byte c0, byte c1)

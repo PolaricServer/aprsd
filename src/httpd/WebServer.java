@@ -28,7 +28,6 @@ import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.sparkjava.*; 
 import org.eclipse.jetty.server.Server;
-// // import org.eclipse.jetty.server.SessionManager;
 import org.eclipse.jetty.server.session.SessionHandler;
 import javax.servlet.SessionCookieConfig;
 import java.util.*;
@@ -36,7 +35,9 @@ import java.lang.reflect.*;
 import no.polaric.aprsd.*;
 import org.eclipse.jetty.util.thread.ThreadPool;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.*;
 
 /**
  * HTTP server. Web services are configured here. Se also AuthService class for login services. 
@@ -68,17 +69,21 @@ public class WebServer implements ServerAPI.Web
     }
 
 
-
+    private int _port;
     private long _nRequests = 0; 
     private final PubSub _pubsub;
     private final MapUpdater _jmapupdate;
     private ServerAPI _api; 
     private AuthService _auth;
- 
+    private ZeroConf _zconf = new ZeroConf();
+      
+      
+      
       
     public WebServer(ServerAPI api, int port) {
        if (port > 0)
           port (port);
+       _port = port;
        _api = api;
        
       _pubsub     = new PubSub(_api, true); 
@@ -255,6 +260,7 @@ public class WebServer implements ServerAPI.Web
         MailBox.init(_api);
         AuthInfo.init(_api);
         init();
+        _zconf.registerMdns("_http._tcp.local.", "Polaric aprsd API", _port, "");
     }
     
     
@@ -273,12 +279,15 @@ public class WebServer implements ServerAPI.Web
     
     
     public void stop() throws Exception {
-       _api.log().info("WebServer", "Stopping...");
-       _jmapupdate.postText("RESTART!", c->true);
-       _api.saveConfig();
-       var u = _auth.conf().getUserDb(); 
-       if (u instanceof LocalUsers) 
+        _api.log().info("WebServer", "Stopping...");
+        _jmapupdate.postText("RESTART!", c->true);
+        _api.saveConfig();
+        var u = _auth.conf().getUserDb(); 
+        if (u instanceof LocalUsers) 
             ((LocalUsers) u).save();
+            
+        _api.log().info("WebServer", "Unregistering on mDNS...");
+        _zconf.unregisterMdns();
     }
          
     
