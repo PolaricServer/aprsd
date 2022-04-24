@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2009 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2009-2022 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,14 +58,14 @@ public class SecUtils
     
 
     /**
-     * Compute a MD5 hash from the text. Text can be given as
+     * Compute a hash from the text. Text can be given as
      * an array of bytes, a string or both. A string will be converted
      * to bytes using the UTF-8 encoding before computing the hash.
      */   
-    public final static byte[] digest ( byte[] bytes, String txt )
+    public final static byte[] _digest ( byte[] bytes, String txt, String algo )
     {
        try{
-           MessageDigest dig = MessageDigest.getInstance("MD5");
+           MessageDigest dig = MessageDigest.getInstance(algo);
 	   if (bytes != null) 
 	      dig.update(bytes);
 	   if (txt != null)
@@ -79,14 +79,26 @@ public class SecUtils
       }
     }
 
+    /* Computes MD5 hash */
+    public final static byte[] digest( byte[] bytes, String txt )
+        { return _digest(bytes, txt, "MD5"); }
     
+    /* Computes SHA-256 hash */
+    public final static byte[] xDigest( byte[] bytes, String txt )
+        { return _digest(bytes, txt, "SHA-256"); }
+        
+        
+        
     /**
-     * Compute a MD5 hash from the text, represented as a hexadecimal string.
+     * Compute a hash from the text, represented as a hexadecimal string.
      */ 
     public final static String digestHex(String txt)
         {return b2hex(digest(null, txt));}
+        
+    public final static String xDigestHex(String txt)
+        {return b2hex(xDigest(null, txt));}
 
-
+        
     /**
      * Base 64 encoded digest.
      * Returns n first characters of digest, encoded using
@@ -98,6 +110,14 @@ public class SecUtils
        String d = b64.encode(digest(null, txt));
        return d.substring(0,n); 
     }
+    
+    public final static String xDigestB64(String txt, int n)
+    {
+       Base64 b64 = new Base64();
+       String d = b64.encode(xDigest(null, txt));
+       return d.substring(0,n); 
+    }
+     
      
      
     /* FIXME: Can we use Java's own b64 implementation?  Must test! */

@@ -337,16 +337,16 @@ package no.polaric.aprsd.http
                       I.tr("Serial port device-name (e.g. /dev/ttyS0)"), 12, 20, NAME) ++
                 textField("ownposition.gps.baud", "item11", 
                       I.tr("GPS Baud")+":", "", 6, 8, NUMBER) ++ br ++
-                textField("ownposition.minpause", "item12", 
+                textField("ownposition.tx.minpause", "item12", 
                       I.tr("Min pause")+":", 
                       I.tr("Minimum time between transmissions"), 4, 5, NUMBER, I.tr("(seconds)")) ++
-                textField("ownposition.maxpause", "item13", 
+                textField("ownposition.tx.maxpause", "item13", 
                       I.tr("Max pause")+":", 
                       I.tr("Maximum time between transmissions"), 4, 5, NUMBER, I.tr("(seconds)")) ++
-                textField("ownposition.mindist", "item14", 
+                textField("ownposition.tx.mindist", "item14", 
                       I.tr("Min distance")+":", 
                       I.tr("Distance between transmissions when speed is low"), 4, 5, NUMBER, I.tr("(meter)")) ++
-                textField("ownposition.maxturn", "item15", 
+                textField("ownposition.tx.maxturn", "item15", 
                       I.tr("Max turn")+":", 
                       I.tr("Max change in direction before transmission"), 4, 5, NUMBER, I.tr("(degrees)"))
               ;
@@ -365,10 +365,10 @@ package no.polaric.aprsd.http
               getField(req, "item9", "ownposition.gps.adjustclock", BOOLEAN) ++
               getField(req, "item10", "ownposition.gps.port", NAME) ++
               getField(req, "item11", "ownposition.gps.baud", 300, 999999) ++
-              getField(req, "item12", "ownposition.minpause", 10, 60*60*60) ++
-              getField(req, "item13", "ownposition.maxpause", 20, 60*60*60) ++
-              getField(req, "item14", "ownposition.mindist", 10, 999999) ++
-              getField(req, "item15", "ownposition.maxturn", 0, 360) 
+              getField(req, "item12", "ownposition.tx.minpause", 10, 60*60*60) ++
+              getField(req, "item13", "ownposition.tx.maxpause", 20, 60*60*60) ++
+              getField(req, "item14", "ownposition.tx.mindist", 10, 999999) ++
+              getField(req, "item15", "ownposition.tx.maxturn", 0, 360) 
          }
               
          printHtml (res, htmlBody (req, null, htmlFormJump(req, prefix, 

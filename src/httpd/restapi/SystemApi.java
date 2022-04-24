@@ -96,6 +96,8 @@ public class SystemApi extends ServerBase {
     
         
     protected String cleanPath(String txt) { 
+        if (txt==null)
+            return "";
         return txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]*(\\-[0-9]+)?\\*?,?)|(qA.),?", "")
            .replaceAll("\\*", "").replaceAll(",+|(, )+", ", ");
     }
@@ -322,12 +324,14 @@ public class SystemApi extends ServerBase {
          * Update alias/icon for a given item
          *******************************************/
         put("/item/*/alias", (req, resp) -> {
-            var ident = req.splat()[0];        
+            var ident = req.splat()[0];   
+                
             var st = _api.getDB().getItem(ident, null);
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
             if (!sarAuthForItem(req, st))
                 return ERROR(resp, 401, "Uauthorized for access to item");
+                
             if (st.hasTag("MANAGED") || st.hasTag("RMAN"))
                 return ERROR(resp, 401, "Alias can only be set by owner");
                 
@@ -352,7 +356,7 @@ public class SystemApi extends ServerBase {
             var st = _api.getDB().getItem(ident, null);
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
-                
+            try {
             var h = st.getTrail();                     
             var pp = st.getHItem();
             var fl = new ArrayList<JsTPoint>(); 
@@ -361,8 +365,12 @@ public class SystemApi extends ServerBase {
                 fl.add(new JsTPoint(x.getTS(), x.speed, x.course, (int) Math.round(dist*1000), cleanPath(x.pathinfo)));
                 pp = x; 
             }
-                
             return fl;
+            }
+            catch (Exception e) {
+                e.printStackTrace(System.out);
+            }
+            return null;
         }, ServerBase::toJson );
         
         

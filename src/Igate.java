@@ -130,7 +130,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
     private void gate_to_rf(AprsPacket p)
     {
         if ( ( (  /* Receiver heard on RF */
-                 ( _rfChan.heard(p.to) || (p.msgto!= null && 
+                 ( _rfChan.heard(p.to) || (p.msgto!= null && !"".equals(p.msgto) &&
                     (_rfChan.heard(p.msgto) || p.msgto.matches(_alwaysRf))))
             
                && /* AND Receiver not heard on INET side */ 
@@ -156,21 +156,24 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
           String path = _rfChan.heardPath(p.msgto); 
           p.via_orig = p.via;
           p.via = _defaultPath;
+          
+          /* Object */
           if (p.type == ';' && _pathObj != null)
              p.via = _pathObj;
+             
+          /* Message */
           if (p.type == ':' && path != null) 
              p.via = AprsChannel.getReversePath(path); 
              
+          /* Send as third party report */
           p.report = AprsChannel.thirdPartyReport(p, "TCPIP,"+_myCall+"*");
           p.from = _myCall;
           p.to = _api.getToAddr();
-          p.thirdparty = true; 
-          
-          _log.add("*** Path = '"+p.to+" VIA "+p.via+"' ");                   
+          p.thirdparty = false;               
           _rfChan.sendPacket(p);
        } 
     }
-    
+
     
     
     private boolean object_in_range(AprsPacket p, int range)
