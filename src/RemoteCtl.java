@@ -321,7 +321,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
      String[] arg = text.split("\\s+", 3);
      String prefix = arg[0];
      final var arg1_ = SecUtils.escape4regex(arg[1]);
-       
+    
+     /* FIXME: This shouldn't happen? */
+     _cmds.values().removeIf((x)-> x==null || x.cmd==null);
+     
      if (arg[0].matches("ALIAS|ICON|TAG|RMTAG|USER|RMUSER|RMAN|RMRMAN")) {
          if (arg[0].matches("RMTAG"))
             prefix = "TAG";
@@ -342,6 +345,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             return x != null && x.cmd != null && x.cmd.matches("(ALIAS|ICON|TAG) "+arg1_+" .*");
         });
      */
+
      
      else if (arg[0].matches("RMNODE"))
          /* Remove all USER entries with that particular node */
@@ -749,7 +753,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        
        
    /**
-    * Set alias/icon on a trackerpoint owned by user. 
+    * Remote management of item. 
     * @param sender The station that sent the commmand.
     * @param args The arguments of the RMAN command: item, alias, icon
     * @return true if success.
@@ -793,7 +797,16 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         TrackerPoint item = _api.getDB().getItem(args.trim(), null);
         if (item==null || item.expired())
             return false; 
+            
+        /* If item is already managed, remove.. */
+        if (item.hasTag("MANAGED")) {
+            StationDB.Hist hdb = _api.getDB().getHistDB(); 
+            if (hdb != null)
+                hdb.removeManagedItem(item.getIdent());
+            item.removeTag("MANAGED");
+        }    
         item.removeTag("RMAN");
+        item.removeTag("_srman");
         return true;
    }
    
