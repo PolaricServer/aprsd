@@ -1,3 +1,9 @@
+polaric-aprsd (2.9+) UNRELEASED; urgency=medium
+
+  * Hacking 
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Sun, 20 Mar 2022 13:52:20 +0100
+
 polaric-aprsd (2.9) stable; urgency=medium
 
   * Telemetry API
