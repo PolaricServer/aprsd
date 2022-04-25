@@ -310,6 +310,7 @@ package no.polaric.aprsd.http
                       I.tr("Activated")) ++  
                 boolField("ownposition.tx.allowrf", "item2", 
                       I.tr("Allow transmission on RF")) ++
+                boolField("ownposition.tx.compress", "item3", I.tr("Compress")) ++
                 br ++ br ++
                 label("item4", "leftlab", 
                       I.tr("Symbol")+":", 
@@ -357,6 +358,7 @@ package no.polaric.aprsd.http
               br ++ br ++
               getField(req, "item1", "ownposition.tx.on", BOOLEAN) ++
               getField(req, "item2", "ownposition.tx.allowrf", BOOLEAN) ++
+              getField(req, "item3", "ownposition.tx.compress", BOOLEAN) ++
               getField(req, "item4", "item5", "ownposition.symbol", "..") ++ 
               getField(req, "item6", "ownposition.tx.rfpath", LIST) ++ 
               getField(req, "item7", "ownposition.tx.comment", TEXT) ++ 

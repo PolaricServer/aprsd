@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2022 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,11 +29,12 @@ public class OwnPosition extends Station implements Runnable
     transient private  Thread      _thread;
     transient protected  ServerAPI   _api;
     transient private  int         _tid;
-    transient private  boolean     _txOn, _allowRf;
+    transient private  boolean     _txOn, _allowRf, _compress;
     transient protected String     _pathRf, _comment;
     transient protected int        _maxPause, _minPause;
     
     private final static int _trackTime = 10;
+    private final static byte ASCII_BASE = 33;
     
     
     
@@ -65,6 +66,7 @@ public class OwnPosition extends Station implements Runnable
         _allowRf  = api.getBoolProperty("ownposition.tx.allowrf", false);
         _pathRf   = api.getProperty("ownposition.tx.rfpath", "WIDE1-1"); 
         _comment  = api.getProperty("ownposition.tx.comment", "");
+        _compress = api.getBoolProperty("ownposition.tx.compress", false);
         _maxPause = api.getIntProperty("ownposition.tx.maxpause", 600);
         _minPause = api.getIntProperty("ownposition.tx.minpause", 120);
         if (_minPause == 0)
@@ -74,6 +76,7 @@ public class OwnPosition extends Station implements Runnable
         if (pp.length == 3) {
            Reference p = new UTMRef(Double.parseDouble(pp[1]), Double.parseDouble(pp[2]), pp[0].charAt(2), 
                       Integer.parseInt( pp[0].substring(0,2)));
+           p = p.toLatLng();
            updatePosition(new Date(), p, 0);
            _api.log().info("OwnPosition", "Position is: "+p);
         }
@@ -117,17 +120,45 @@ public class OwnPosition extends Station implements Runnable
       }
        
        
-   protected String showDMstring(float ll, int ndeg)
-   {
-       int deg = (int) Math.floor(ll);
-       float minx = ll - deg;
-       if (ll < 0 && minx != 0.0) 
-          minx = 1 - minx; // FIXME: is this correct. Check code in PT as well?
+    protected String showDMstring(float ll, int ndeg)
+    {
+        int deg = (int) Math.floor(ll);
+        float minx = ll - deg;
+        if (ll < 0 && minx != 0.0) 
+            minx = 1 - minx; // FIXME: is this correct. Check code in PT as well?
           
-       float mins = ((float) Math.round( minx * 60 * 100)) / 100;
-       return String.format((Locale)null, "%0"+ndeg+"d%05.2f", deg, mins);  
-   }  
+        float mins = ((float) Math.round( minx * 60 * 100)) / 100;
+        return String.format((Locale)null, "%0"+ndeg+"d%05.2f", deg, mins); 
+    }  
 
+
+
+    private String compressLL(double pos, boolean is_longitude) {
+        double x = (is_longitude ? 190463 *(180+pos) : 380926 *(90-pos));;
+        byte[] out = new byte[4];
+
+        out[0] = (byte) (Math.floor(x / 753571) + ASCII_BASE);
+        x %= 753571;
+        out[1] = (byte) (Math.floor(x / 8281) + ASCII_BASE);
+        x %= 8281;
+        out[2] = (byte) (Math.floor(x / 91) + ASCII_BASE);
+        x %= 91;
+        out[3] = (byte) (Math.floor(x) + ASCII_BASE);
+        return new String(out);
+    }
+   
+   
+   
+    private String compressCST() {
+        /* Send course/speed (default) */
+       String res="";
+       res += (char) (getCourse() / 4 + ASCII_BASE);
+       res += (char) (Math.round(Math.log(getSpeed()+1)/0.076961) + ASCII_BASE); 
+       res += (char) (0x18 + ASCII_BASE);
+       return res;
+    }
+    
+    
    
    /**
     * Encode position for use in APRS.
@@ -135,40 +166,49 @@ public class OwnPosition extends Station implements Runnable
     protected String encodePos()
     {
         LatLng pos = getPosition().toLatLng();
-        /* Format latitude and longitude values, etc. */
-        char lat_sn = (pos.getLatitude() < 0 ? 'S' : 'N');
-        char long_we = (pos.getLongitude() < 0 ? 'W' : 'E');
-        float latf = Math.abs((float) pos.getLatitude());
-        float longf = Math.abs((float) pos.getLongitude());
-        return showDMstring(latf,2) + lat_sn + getSymtab() + showDMstring(longf, 3)+ long_we + getSymbol();
+        
+        if (_compress) { 
+            var lat_c = compressLL(pos.getLatitude(), false);
+            var lon_c = compressLL(pos.getLongitude(), true);
+            var cst_c = compressCST();
+            return getSymtab() + lat_c + lon_c + getSymbol() + cst_c;
+        }
+        else {
+            /* Format latitude and longitude values, etc. */
+            char lat_sn = (pos.getLatitude() < 0 ? 'S' : 'N');
+            char long_we = (pos.getLongitude() < 0 ? 'W' : 'E');
+            float latf = Math.abs((float) pos.getLatitude());
+            float longf = Math.abs((float) pos.getLongitude());
+            return showDMstring(latf,2) + lat_sn + getSymtab() + showDMstring(longf, 3)+ long_we + getSymbol();
+        }
     }
     
-       
+    
    /**
      * Send APRS position report on the given channel.
      */
     protected void sendPosReport()
     {
-       if ( !_txOn )
-          return;
-       AprsPacket p = new AprsPacket();
-       p.from = getIdent();
-       p.to = _api.getToAddr();
-       p.type = '/';
+        if ( !_txOn )
+            return;
+        AprsPacket p = new AprsPacket();
+        p.from = getIdent();
+        p.to = _api.getToAddr();
+        p.type = '/';
+        
+        _api.log().debug("OwnPosition", "Send position report: "+ p.from+">"+p.to+":"+p.report);
+         p.report = "/" + timeStamp(new Date()) + encodePos() + _comment;
        
-       /* Should type char be part of report ? */
-       p.report = "/" + timeStamp(new Date()) + encodePos()+_comment;
-       _api.log().debug("OwnPosition", "Send position report: "+ p.from+">"+p.to+":"+p.report);
        
-       /* Send object report on RF, if appropriate */
-       p.via = _pathRf; 
-       if (_allowRf && _rfChan != null)
+        /* Send object report on RF, if appropriate */
+        p.via = _pathRf; 
+        if (_allowRf && _rfChan != null)
            _rfChan.sendPacket(p);
        
-       /* Send object report on aprs-is */
-       try { Thread.sleep(2000); } catch (Exception e) {}
-       p.via = null;
-       if (_inetChan != null) 
+        /* Send object report on aprs-is */
+        try { Thread.sleep(2000); } catch (Exception e) {}
+        p.via = null;
+        if (_inetChan != null) 
            _inetChan.sendPacket(p);
             
     }

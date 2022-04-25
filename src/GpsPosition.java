@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2022 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,60 +32,59 @@ public class GpsPosition extends OwnPosition
     public static SimpleDateFormat linuxtimeformat = new SimpleDateFormat("MMddHHmmyy.ss");
 
     public class GpsParser extends Thread {
-       private  SerialPort     _serialPort;
-       private  BufferedReader _in;
+        private  SerialPort     _serialPort;
+        private  BufferedReader _in;
 
-       public void run() {
-           int retry = 0;
-	   int readerror = 0;
-           while (true)
-           {
-               if (retry <= _max_retry || _max_retry == 0) 
-                  try { 
-                     long sleep = 30000 * (long) retry;
-                     if (sleep > _retry_time) 
-                        sleep = _retry_time; /* Default: Max 30 minutes */
-                     Thread.sleep(sleep); 
-                  } 
-                  catch (Exception e) {break;} 
-               else break;
+        public void run() {
+            int retry = 0;
+            int readerror = 0;
+            while (true)
+            {
+                if (retry <= _max_retry || _max_retry == 0) 
+                    try { 
+                        long sleep = 60000 * (long) retry;
+                        if (sleep > _retry_time) 
+                            sleep = _retry_time; /* Default: Max 30 minutes */
+                        Thread.sleep(sleep); 
+                    } 
+                    catch (Exception e) {break;} 
+                else break;
 
-               try {
-                  _api.log().info("GpsPosition", "Initialize GPS on "+_portName);
-                  _serialPort = connect(); 
-                  _in = new BufferedReader(new InputStreamReader(_serialPort.getInputStream()));
-                  while (true) {
-	             try {
-                     	String inp = _in.readLine();
-                        receivePacket(inp);
-			readerror = 0;
-		     }
-	       	     catch(IOException e)
-	             {
-			     if (readerror > 10) {
-		       		_api.log().warn("GpsPosition", "read error from " + _portName);
-                  		e.printStackTrace(System.out);
-				throw new RuntimeException("Too many read errors from " + _portName);
-			     }
-			readerror++;
-			Thread.sleep(30000); 
-	             }
-                  }
-               }
-               catch(NoSuchPortException e)
-               {
-                  _api.log().warn("GpsPosition", "serial port " + _portName + " not found");
-                  e.printStackTrace(System.out);
-               }
-               catch(Exception e)
-               {   
-                   e.printStackTrace(System.out); 
-                   _serialPort.close();
-               }
-               retry++;
-          }
-          _api.log().error("GpsPosition", "Couldn't connect to GPS on'"+_portName+"' - giving up");
-       }
+                try {
+                    _api.log().info("GpsPosition", "Initialize GPS on "+_portName);
+                    _serialPort = connect(); 
+                    _in = new BufferedReader(new InputStreamReader(_serialPort.getInputStream()));
+                    while (true) {
+                        try {
+                            String inp = _in.readLine();
+                            receivePacket(inp);
+                            readerror = 0;
+                        }
+                        catch(IOException e)
+                        {
+                            if (readerror > 10) {
+                                _api.log().warn("GpsPosition", "read error from " + _portName);
+                                e.printStackTrace(System.out);
+                                throw new RuntimeException("Too many read errors from " + _portName);
+                            }
+                            readerror++;
+                            Thread.sleep(30000); 
+                        }
+                    }
+                }
+                catch(NoSuchPortException e)
+                {
+                    _api.log().warn("GpsPosition", "serial port " + _portName + " not found");
+                }
+                catch(Exception e)
+                {   
+                    e.printStackTrace(System.out); 
+                    _serialPort.close();
+                }
+                retry++;
+            }
+            _api.log().error("GpsPosition", "Couldn't connect to GPS on'"+_portName+"' - giving up");
+        }
     }
 
 
@@ -122,26 +121,28 @@ public class GpsPosition extends OwnPosition
 
     private void receivePacket (String p)
     {
-         if (p.charAt(0) != '$')
+        if (p.charAt(0) != '$')
             return;
 
-         /* Checksum (optional) */
-         int i, checksum = 0;
-         for (i=1; i < p.length() && p.charAt(i) !='*'; i++) 
-            checksum ^= p.charAt(i);
-	 /* Sometime two NMEA lines are merged -> garbage */
-	 if ((p.length() - i) > 3)
-		 return;
-         if (p.charAt(i) == '*') {
+        /* Checksum (optional) */
+        int i, checksum = 0;
+        for (i=1; i < p.length() && p.charAt(i) !='*'; i++) 
+        checksum ^= p.charAt(i);
+        
+        /* Sometimes two NMEA lines are merged -> garbage */
+        if (i >= p.length())
+            return;
+        if ((p.length() - i) > 3)
+            return;
+        if (p.charAt(i) == '*') {
             int c_checksum = Integer.parseInt(p.substring(i+1, p.length()), 16);
             if (c_checksum != checksum) 
-               return;
-         } 
-         String[] tok = p.split(",");
-         if ( "$GPRMC".equals(tok[0])) 
-             do_RMC(tok);
-         else if ("$GPGGA".equals(tok[0])) {}
-
+                return;
+        } 
+        String[] tok = p.split(",");
+        if ( "$GPRMC".equals(tok[0])) 
+            do_RMC(tok);
+        else if ("$GPGGA".equals(tok[0])) {}
     }
 
 
@@ -149,42 +150,41 @@ public class GpsPosition extends OwnPosition
     private int fcnt=300;
     private void do_RMC(String[] arg)
     {
-       if (arg.length != 12 && arg.length != 13)   /* Ignore if wrong format, NMEA 2.3 and beyond use 13 fields */
-          return;
+        if (arg.length != 12 && arg.length != 13)   /* Ignore if wrong format, NMEA 2.3 and beyond use 13 fields */
+            return;
 
-       if (!"A".equals(arg[2])) {
-          _gpx_fix = false;
-          if (++fcnt>=360) {
-              _api.log().info("GpsPosition", "Still waiting for GPS to get fix...");
-              fcnt=0;
-          }
-          return;
-       }
-       _gpx_fix = true;
-       try {
-          nmeatimeformat.setTimeZone(TimeZone.getTimeZone("UTC"));
-          Date ts = nmeatimeformat.parse(arg[9]+" "+arg[1]);
+        if (!"A".equals(arg[2])) {
+            _gpx_fix = false;
+            if (++fcnt>=360) {
+                _api.log().info("GpsPosition", "Still waiting for GPS to get fix...");
+                fcnt=0;
+            }
+            return;
+        }
+        _gpx_fix = true;
+        try {
+            nmeatimeformat.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date ts = nmeatimeformat.parse(arg[9]+" "+arg[1]);
 
-          /* Position parsing is taken from AprsParser.java */
-          Double latDeg = Integer.parseInt(arg[3].substring(0,2)) + Double.parseDouble(arg[3].substring(2,7))/60;
-          if (arg[4].equals("S"))
+            /* Position parsing is taken from AprsParser.java */
+            Double latDeg = Integer.parseInt(arg[3].substring(0,2)) + Double.parseDouble(arg[3].substring(2,7))/60;
+            if (arg[4].equals("S"))
                 latDeg *= -1;
-          Double lngDeg = Integer.parseInt(arg[5].substring(0,3)) + Double.parseDouble(arg[5].substring(3,8))/60;
-          if (arg[6].equals("W"))
+            Double lngDeg = Integer.parseInt(arg[5].substring(0,3)) + Double.parseDouble(arg[5].substring(3,8))/60;
+            if (arg[6].equals("W"))
                 lngDeg *= -1;
-          Reference pos = new LatLng(latDeg, lngDeg); 
+            Reference pos = new LatLng(latDeg, lngDeg); 
           
-          /* Speed and course */
-          int speed = Math.round( Float.parseFloat(arg[7]) * KNOTS2KMH);
-          int crs = (arg[8].equals("") ? 0 : Math.round( Float.parseFloat(arg[8]) ));   // FIXME??       
+            /* Speed and course */
+            int speed = Math.round( Float.parseFloat(arg[7]) * KNOTS2KMH);
+            int crs = (arg[8].equals("") ? 0 : Math.round( Float.parseFloat(arg[8]) ));   // FIXME??       
    
-          if (_adjustClock) 
-             updateTime(ts);
-	  _api.log().debug("GpsPosition", "Updating position to " + Double.toString(latDeg) + ", " + Double.toString(lngDeg));
-          updatePosition(ts, pos, crs, speed);
-       }
-       catch (Exception e) {e.printStackTrace(System.out);} 
-
+            if (_adjustClock) 
+                updateTime(ts);
+            _api.log().debug("GpsPosition", "Updating position to " + Double.toString(latDeg) + ", " + Double.toString(lngDeg));
+            updatePosition(ts, pos, crs, speed);
+        }
+        catch (Exception e) {e.printStackTrace(System.out);}    
     }
 
 
@@ -192,7 +192,8 @@ public class GpsPosition extends OwnPosition
     private int cnt = 0;
     private void updatePosition(Date t, Reference pos, int crs, int speed)
     {
-        if (++cnt >= 5 || speed > 1 && ( course_change(crs, getCourse(), 30) && cnt >= 3)) {
+        /* Update position locally on map */
+        if (++cnt >= 6 || speed > 1 && ( course_change(crs, getCourse(), 30) && cnt >= 3)) {
            cnt = 0;
            AprsHandler.PosData pd = new AprsHandler.PosData(pos, crs, speed, (char) 0, (char) 0); 
            update(t, pd, _comment, "(GPS)");
@@ -216,46 +217,68 @@ public class GpsPosition extends OwnPosition
 
 
 
-    /* Adapted from polaric tracker code */
+    /* Adapted from Polaric Tracker/Arctic Tracker code */
 
     @Override protected boolean should_update() 
     {
-      float dist = (_prev_pos == null ? 0 : distance(_prev_pos));
-      long tdist = (_prev_timestamp == null  ?
-                          getUpdated().getTime() : (getUpdated().getTime() - _prev_timestamp.getTime())) / 1000;
-      float est_speed  = (tdist==0) ? 0 : ((float) dist / (float) tdist);
-     /* Note that est_speed is in m/s while
-      * the other speed fields are in km/h 
-      */  
- 
-      if ( _timeSinceReport >= _maxPause
+        float dist = (_prev_pos == null ? 0 : distance(_prev_pos));
+        long tdist = (_prev_timestamp == null  ?
+            getUpdated().getTime() : (getUpdated().getTime() - _prev_timestamp.getTime())) / 1000;
+        float est_speed  = (tdist==0) ? 0 : ((float) dist / (float) tdist);
+       
+       /* 
+        * Note that est_speed is in m/s while
+        * the other speed fields are in km/h 
+        */  
 
-          /* Change in course */   
-         || ( est_speed > 0.8 && getCourse() >= 0 && _prev_course >= 0 && 
+        if ( _timeSinceReport >= _maxPause
+
+            /* Change in course */   
+            || ( est_speed > 0.8 && getCourse() >= 0 && _prev_course >= 0 && 
                 course_change(getCourse(), _prev_course, _turnLimit))
                 
-        /* Send report when starting or stopping */             
-         || ( _timeSinceReport >= _minPause &&
-             (( getSpeed() < 3  &&  _prev_speed > 15 ) ||
-              ( _prev_speed < 3  &&  getSpeed() > 15 )))
+            /* Send report when starting or stopping */             
+            || ( _timeSinceReport >= _minPause &&
+               (( getSpeed() < 3  &&  _prev_speed > 15 ) ||
+                ( _prev_speed < 3  &&  getSpeed() > 15 )))                      
 
-        /* Distance threshold on low speeds */
-         || ( _timeSinceReport >= _minPause && est_speed <= 1 && dist >= _minDist )
+            /* Distance threshold on low speeds */
+            || ( _timeSinceReport >= _minPause && est_speed <= 1 && dist >= _minDist )
          
-        /* Time period based on average speed */
-         || ( getSpeed()>0 && _timeSinceReport >= 
-                           ((_minDist * 2 / est_speed) + _minPause)) )  
-       { 
-           _prev_course = getCourse();
-           _prev_speed = getSpeed();
-           _prev_pos = getPosition();
-           _prev_timestamp = getUpdated();
-           return true; 
-       }
-       return false; 
+            /* Time period based on average speed */
+            // || ( getSpeed()>0 && _timeSinceReport >= 
+            //               ((_minDist * 2 / est_speed) + _minPause)) )  
+                           
+            /* Time period based on average speed */
+            || ( est_speed>0 && _timeSinceReport >= smartbeacon(_minDist, est_speed, _minPause ))              
+        )                   
+        { 
+            _prev_course = getCourse();
+            _prev_speed = getSpeed();
+            _prev_pos = getPosition();
+            _prev_timestamp = getUpdated();
+            return true; 
+        }
+        return false; 
+    }
+
+    /* Updated smartbeaconing calculation - from Arctic Tracker code */
+    private int smartbeacon(int mindist, float speed, int minpause) {
+        float k = 0.5f;
+        if (minpause > 30)
+            k = 0.3f;
+    
+        double x = mindist - Math.log10(speed*k) * (mindist-32); 
+        if (speed < 4)
+            x -= (5-speed)*4;
+        if (x < minpause)
+            x = minpause;
+        return (int) Math.round(x);
     }
 
 
+
+    
     /**
      * Setup the serial port.
      * FIXME: There is an identical function in TncChannel.java
