@@ -39,7 +39,6 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
     public Igate(ServerAPI api) 
     {
         _api = api;
-    
         _allowRf     = api.getBoolProperty("igate.rfgate.allow", true);
         _gateObj     = api.getBoolProperty("igate.rfgate.objects", false);
         _pathObj     = api.getProperty("objects.rfgate.path", ""); 
@@ -209,7 +208,8 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
      */
     public synchronized void receivePacket(AprsPacket p, boolean dup)
     {
-        if (dup || _api.getOwnPos().getIdent().equals(p.msgto))
+        if (dup || p==null || 
+            (_api.getOwnPos().getIdent() != null && _api.getOwnPos().getIdent().equals(p.msgto)))
            return;
         if (p.source == _rfChan) {
            if (p.report.matches("\\?IGATE\\?.*"))

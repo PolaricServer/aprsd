@@ -286,9 +286,10 @@ public class StationDBImp implements StationDB, Runnable
         
     public void addPoint(TrackerPoint s)
     { 
-       if (_histData != null)
-          _histData.updateItem(s);
-       _map.put(s.getIdent(), s); 
+        if (_histData != null && s != null && s.getIdent() != null)
+            _histData.updateItem(s);
+        if ( s != null && s.getIdent() != null)
+            _map.put(s.getIdent(), s); 
     }
         
         
