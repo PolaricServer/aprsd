@@ -31,15 +31,26 @@ public class GpsPosition extends OwnPosition
     public static SimpleDateFormat nmeatimeformat = new SimpleDateFormat("ddMMyy HHmmss.SSS");
     public static SimpleDateFormat linuxtimeformat = new SimpleDateFormat("MMddHHmmyy.ss");
 
+    
     public class GpsParser extends Thread {
         private  SerialPort     _serialPort;
         private  BufferedReader _in;
+        private  boolean        _running = true;
 
+        
+        public void deactivate() {
+            _running = false;
+            interrupt();
+            try { join(); } catch(Exception e) {} ; 
+        }
+        
+        
         public void run() {
             int retry = 0;
             int readerror = 0;
-            while (true)
+            while (_running)
             {
+                var running = true;
                 if (retry <= _max_retry || _max_retry == 0) 
                     try { 
                         long sleep = 60000 * (long) retry;
@@ -47,29 +58,39 @@ public class GpsPosition extends OwnPosition
                             sleep = _retry_time; /* Default: Max 30 minutes */
                         Thread.sleep(sleep); 
                     } 
-                    catch (Exception e) {break;} 
-                else break;
+                    catch (Exception e) 
+                        {break;} 
+                else {
+                    _api.log().error("GpsPosition", "Couldn't connect to GPS on'"+_portName+"' - giving up");
+                    break;
+                }
 
                 try {
+                    Thread.sleep(2000);
                     _api.log().info("GpsPosition", "Initialize GPS on "+_portName);
                     _serialPort = connect(); 
-                    _in = new BufferedReader(new InputStreamReader(_serialPort.getInputStream()));
-                    while (true) {
-                        try {
-                            String inp = _in.readLine();
-                            receivePacket(inp);
-                            readerror = 0;
-                        }
-                        catch(IOException e)
-                        {
-                            if (readerror > 10) {
-                                _api.log().warn("GpsPosition", "read error from " + _portName);
-                                e.printStackTrace(System.out);
-                                throw new RuntimeException("Too many read errors from " + _portName);
+                    if (_serialPort != null) {
+                        _in = new BufferedReader(new InputStreamReader(_serialPort.getInputStream()));
+                        while (_running) {
+                            try {
+                                String inp = _in.readLine();
+                                receivePacket(inp);
+                                readerror = 0;
                             }
-                            readerror++;
-                            Thread.sleep(30000); 
+                            catch(IOException e)
+                            {
+                                if (readerror > 10) {
+                                    _api.log().warn("GpsPosition", "read error from " + _portName);
+                                    e.printStackTrace(System.out);
+                                    throw new RuntimeException("Too many read errors from " + _portName);
+                                }
+                                readerror++;
+                                Thread.sleep(30000); 
+                            }
                         }
+                        /* Close port */
+                        _in.close();
+                        _serialPort.close();
                     }
                 }
                 catch(NoSuchPortException e)
@@ -83,7 +104,6 @@ public class GpsPosition extends OwnPosition
                 }
                 retry++;
             }
-            _api.log().error("GpsPosition", "Couldn't connect to GPS on'"+_portName+"' - giving up");
         }
     }
 
@@ -96,6 +116,7 @@ public class GpsPosition extends OwnPosition
     transient private   int       _minDist, _turnLimit; 
     transient private   boolean   _adjustClock; 
     transient private   GpsParser _gpsParser;
+    transient private   boolean   _gpsOn = false;
     transient private   boolean   _gpx_fix = false;
     transient private   int       _course = 0, _prev_course = 0, _prev_speed = 0;
     transient private   Reference _prev_pos = null;
@@ -106,18 +127,32 @@ public class GpsPosition extends OwnPosition
     public GpsPosition(ServerAPI api) 
     {
         super(api);    
-        _portName = api.getProperty("ownposition.gps.port", "/dev/ttyS1");
-        _baud = api.getIntProperty("ownposition.gps.baud", 9600);
-        _minDist = api.getIntProperty("ownposition.tx.mindist", 150);
-        _turnLimit = api.getIntProperty("ownposition.tx.turnlimit", 30);
-        _max_retry = api.getIntProperty("ownposition.gps.retry", 0);
-        _retry_time = Long.parseLong(api.getProperty("ownposition.gps.retry.time", "30")) * 60 * 1000;         
-        _adjustClock = api.getBoolProperty("ownposition.gps.adjustclock", false); 
-        _gpsParser = new GpsParser(); 
-        _gpsParser.start();
     }
 
-       
+    
+    
+    @Override public void init() {
+        super.init();
+        _gpsOn = _api.getBoolProperty("ownposition.gps.on", false);
+        _portName = _api.getProperty("ownposition.gps.port", "/dev/ttyS1");
+        _baud = _api.getIntProperty("ownposition.gps.baud", 9600);
+        _minDist = _api.getIntProperty("ownposition.tx.mindist", 150);
+        _turnLimit = _api.getIntProperty("ownposition.tx.turnlimit", 30);
+        _max_retry = _api.getIntProperty("ownposition.gps.retry", 0);
+        _retry_time = Long.parseLong(_api.getProperty("ownposition.gps.retry.time", "30")) * 60 * 1000;         
+        _adjustClock = _api.getBoolProperty("ownposition.gps.adjustclock", false); 
+        
+
+        if (_gpsParser!=null)
+            _gpsParser.deactivate();
+        _gpsParser = null;
+        if (_gpsOn) {
+            _gpsParser = new GpsParser();
+            _gpsParser.start();
+        }
+    }
+    
+    
 
     private void receivePacket (String p)
     {
@@ -181,7 +216,6 @@ public class GpsPosition extends OwnPosition
    
             if (_adjustClock) 
                 updateTime(ts);
-            _api.log().debug("GpsPosition", "Updating position to " + Double.toString(latDeg) + ", " + Double.toString(lngDeg));
             updatePosition(ts, pos, crs, speed);
         }
         catch (Exception e) {e.printStackTrace(System.out);}    
@@ -201,10 +235,10 @@ public class GpsPosition extends OwnPosition
     }
 
 
-    private int tcnt = 300;
+    private int tcnt = 660;
     private void updateTime(Date t)
     {
-       if (++tcnt >= 360) { /* 6 minutes */
+       if (++tcnt >= 720) { /* 12 minutes */
           tcnt = 0;
           try {
              String cmd = "sudo date " + linuxtimeformat.format(t); 
@@ -221,6 +255,9 @@ public class GpsPosition extends OwnPosition
 
     @Override protected boolean should_update() 
     {
+        if (_gpsOn) 
+            return super.should_update();
+        
         float dist = (_prev_pos == null ? 0 : distance(_prev_pos));
         long tdist = (_prev_timestamp == null  ?
             getUpdated().getTime() : (getUpdated().getTime() - _prev_timestamp.getTime())) / 1000;
@@ -244,11 +281,7 @@ public class GpsPosition extends OwnPosition
 
             /* Distance threshold on low speeds */
             || ( _timeSinceReport >= _minPause && est_speed <= 1 && dist >= _minDist )
-         
-            /* Time period based on average speed */
-            // || ( getSpeed()>0 && _timeSinceReport >= 
-            //               ((_minDist * 2 / est_speed) + _minPause)) )  
-                           
+           
             /* Time period based on average speed */
             || ( est_speed>0 && _timeSinceReport >= smartbeacon(_minDist, est_speed, _minPause ))              
         )                   
@@ -262,6 +295,7 @@ public class GpsPosition extends OwnPosition
         return false; 
     }
 
+    
     /* Updated smartbeaconing calculation - from Arctic Tracker code */
     private int smartbeacon(int mindist, float speed, int minpause) {
         float k = 0.5f;

@@ -245,9 +245,11 @@ package no.polaric.aprsd.http
                getField(req, "item14", "remotectl.on", BOOLEAN) ++
                getField(req, "item14.2", "remotectl.radius", NUMBER) ++
                getField(req, "item15", "remotectl.connect", NAME) ++
-               getField(req, "item16", "message.auth.key", TEXT)
+               getField(req, "item16", "message.auth.key", TEXT) 
          }
-              
+
+         
+         
          printHtml (res, htmlBody (req, null, htmlFormJump(req, prefix, 
              IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
      }
@@ -310,6 +312,8 @@ package no.polaric.aprsd.http
                       I.tr("Activated")) ++  
                 boolField("ownposition.tx.allowrf", "item2", 
                       I.tr("Allow transmission on RF")) ++
+                br ++
+                label("item3", "leftlab", "", "") ++
                 boolField("ownposition.tx.compress", "item3", I.tr("Compress")) ++
                 br ++ br ++
                 label("item4", "leftlab", 
@@ -370,9 +374,16 @@ package no.polaric.aprsd.http
               getField(req, "item12", "ownposition.tx.minpause", 10, 60*60*60) ++
               getField(req, "item13", "ownposition.tx.maxpause", 20, 60*60*60) ++
               getField(req, "item14", "ownposition.tx.mindist", 10, 999999) ++
-              getField(req, "item15", "ownposition.tx.maxturn", 0, 360) 
+              getField(req, "item15", "ownposition.tx.maxturn", 0, 360) ++
+              _action
          }
-              
+                       
+         def _action: NodeSeq = 
+         {
+            changed=false
+            _api.getOwnPos().init();
+            <span></span>
+         }
          printHtml (res, htmlBody (req, null, htmlFormJump(req, prefix, 
              IF_ADMIN(fields), IF_ADMIN(action), false, default_submit)))
      }

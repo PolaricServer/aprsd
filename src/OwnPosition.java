@@ -27,7 +27,7 @@ public class OwnPosition extends Station implements Runnable
 {
     transient private  AprsChannel _inetChan, _rfChan;
     transient private  Thread      _thread;
-    transient protected  ServerAPI   _api;
+    transient protected  ServerAPI _api;
     transient private  int         _tid;
     transient private  boolean     _txOn, _allowRf, _compress;
     transient protected String     _pathRf, _comment;
@@ -55,40 +55,49 @@ public class OwnPosition extends Station implements Runnable
         _api = api;
         
         setSource(new LocalSource(api, "localsrc", "ownposition"));
-        String ownpos = api.getProperty("ownposition.pos", ""); 
-        String myCall = api.getProperty("ownposition.mycall", "").toUpperCase();
-        if (myCall.length() == 0)
-           myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();
-        String sym = api.getProperty("ownposition.symbol", "/."); 
-        setSymtab(sym.charAt(0));
-        setSymbol(sym.charAt(1));
-        _txOn     = api.getBoolProperty("ownposition.tx.on", false);        
-        _allowRf  = api.getBoolProperty("ownposition.tx.allowrf", false);
-        _pathRf   = api.getProperty("ownposition.tx.rfpath", "WIDE1-1"); 
-        _comment  = api.getProperty("ownposition.tx.comment", "");
-        _compress = api.getBoolProperty("ownposition.tx.compress", false);
-        _maxPause = api.getIntProperty("ownposition.tx.maxpause", 600);
-        _minPause = api.getIntProperty("ownposition.tx.minpause", 120);
-        if (_minPause == 0)
-           _minPause = _maxPause; 
-           
-        String[] pp = ownpos.split("[-\\s]+");
-        if (pp.length == 3) {
-           Reference p = new UTMRef(Double.parseDouble(pp[1]), Double.parseDouble(pp[2]), pp[0].charAt(2), 
-                      Integer.parseInt( pp[0].substring(0,2)));
-           p = p.toLatLng();
-           updatePosition(new Date(), p, 0);
-           _api.log().info("OwnPosition", "Position is: "+p);
-        }
-        setId(myCall);
-        setAltitude(-1);
-        _description = _comment;
+        init();
         
         if (_txOn) {
            _thread = new Thread(this, "OwnPosition-"+(_tid++));
            _thread.start();
         }
     }
+    
+    
+    
+    public void init() {
+        String ownpos = _api.getProperty("ownposition.pos", ""); 
+        String myCall = _api.getProperty("ownposition.mycall", "").toUpperCase();
+        if (myCall.length() == 0)
+           myCall = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
+        String sym = _api.getProperty("ownposition.symbol", "/."); 
+        setSymtab(sym.charAt(0));
+        setSymbol(sym.charAt(1));
+        _txOn     = _api.getBoolProperty("ownposition.tx.on", false);        
+        _allowRf  = _api.getBoolProperty("ownposition.tx.allowrf", false);
+        _pathRf   = _api.getProperty("ownposition.tx.rfpath", "WIDE1-1"); 
+        _comment  = _api.getProperty("ownposition.tx.comment", "");
+        _compress = _api.getBoolProperty("ownposition.tx.compress", false);
+        _maxPause = _api.getIntProperty("ownposition.tx.maxpause", 600);
+        _minPause = _api.getIntProperty("ownposition.tx.minpause", 120);
+        if (_minPause == 0)
+           _minPause = _maxPause;
+        _description = _comment;
+        
+        String[] pp = ownpos.split("[-\\s]+");
+        if (pp.length == 3) {
+           Reference p = new UTMRef(Double.parseDouble(pp[1]), Double.parseDouble(pp[2]), pp[0].charAt(2), 
+                      Integer.parseInt( pp[0].substring(0,2)));
+           p = p.toLatLng();
+           /* FIXME: Don't reset pos if GPS is active */
+           updatePosition(new Date(), p, 0);
+           _api.log().info("OwnPosition", "Position is: "+p);
+        }
+        setId(myCall);
+        setAltitude(-1);
+    }
+    
+    
     
     /**
      * Set channels for APRS position updates. 
@@ -195,10 +204,9 @@ public class OwnPosition extends Station implements Runnable
         p.from = getIdent();
         p.to = _api.getToAddr();
         p.type = '/';
-        
-        _api.log().debug("OwnPosition", "Send position report: "+ p.from+">"+p.to+":"+p.report);
-         p.report = "/" + timeStamp(new Date()) + encodePos() + _comment;
-       
+
+        p.report = "/" + timeStamp(new Date()) + encodePos() + _comment;
+        _api.log().debug("OwnPosition", "Send position report: "+ p.from+">"+p.to+": "+p.report);
        
         /* Send object report on RF, if appropriate */
         p.via = _pathRf; 
@@ -252,7 +260,7 @@ public class OwnPosition extends Station implements Runnable
        /* 
         * Simple periodic reporting of position if it exists. Note that this 
         * could easily be extended to do real tracking, possibly with smart
-        * beaconing. 
+        * beaconing.
         */
        while (true) {
          try {  
