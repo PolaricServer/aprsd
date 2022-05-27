@@ -39,18 +39,24 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
     public Igate(ServerAPI api) 
     {
         _api = api;
-        _allowRf     = api.getBoolProperty("igate.rfgate.allow", true);
-        _gateObj     = api.getBoolProperty("igate.rfgate.objects", false);
-        _pathObj     = api.getProperty("objects.rfgate.path", ""); 
-        _rangeObj    = api.getIntProperty("objects.rfgate.range", 0);
-        _myCall      = api.getProperty("igate.mycall", "").trim().toUpperCase();
-        _defaultPath = api.getProperty("message.rfpath", "WIDE1-1");
-        _alwaysRf    = api.getProperty("message.alwaysRf", "");       
-        if (_myCall.length() == 0)
-           _myCall   = api.getProperty("default.mycall", "NOCALL").toUpperCase();      
-        _log         = new Logfile(api, "igate", "igate.log");   
+        init();
     }  
        
+       
+    public void init() 
+    {
+        _allowRf     = _api.getBoolProperty("igate.rfgate.allow", true);
+        _gateObj     = _api.getBoolProperty("igate.rfgate.objects", false);
+        _pathObj     = _api.getProperty("objects.rfgate.path", ""); 
+        _rangeObj    = _api.getIntProperty("objects.rfgate.range", 0);
+        _myCall      = _api.getProperty("igate.mycall", "").trim().toUpperCase();
+        _defaultPath = _api.getProperty("message.rfpath", "WIDE1-1");
+        _alwaysRf    = _api.getProperty("message.alwaysRf", "");       
+        if (_myCall.length() == 0)
+           _myCall   = _api.getProperty("default.mycall", "NOCALL").toUpperCase();      
+        _log         = new Logfile(_api, "igate", "igate.log");  
+    }
+    
        
     /**
      * Start the service.    

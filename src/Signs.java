@@ -48,18 +48,18 @@ public class Signs extends Source
      * Sign item. A pointobject plus scale and url.
      */
     public static class Item extends PointObject {
-        protected int _id;
+        protected String _id;
         protected long _maxScale;
         protected String _url;
         
         public boolean visible(long scale)
           { return scale <= _maxScale; }
           
-        public int getId() 
+        public String getId() 
           { return _id; }
           
         public String getIdent()
-          { return _id<0 ? "__loc."+(-_id) : "__db."+_id; }
+          { return _id.matches(".*@local") ? "__loc."+(_id) : "__db."+_id; }
           
         public Source getSource()
           { return null; }
@@ -70,7 +70,7 @@ public class Signs extends Source
         public String getUrl()
           { return _url; }
         
-        public Item (int i, Reference r, long sc, String ic, String url, String txt)
+        public Item (String i, Reference r, long sc, String ic, String url, String txt)
           { super(r);  _id = i; _maxScale = sc; _icon = ic; _url = url; _description = txt; 
             if (_url.matches("-|null|none")) 
                  _url = null; }   
@@ -125,8 +125,8 @@ public class Signs extends Source
                     if (x.length > 7)
                        x[6] = x[6] + " "+ x[7];
                      
-                     /* NOTE: igns from local file gets negative id numbers */
-                    Item it = new Item(localId--, pos, scale, x[4], x[5], x[6]);
+                     /* NOTE: signs from local file get suffix @local */
+                    Item it = new Item(""+(localId++), pos, scale, x[4], x[5], x[6]);
                     _list.add(it);
                 }
             }     

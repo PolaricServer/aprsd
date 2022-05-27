@@ -291,6 +291,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
 
    /**
     * Return true if message is with child-node's area of interest. 
+    * Only messages regarding points with positions (aliases, icons, tags)
+    * is filtered this way. 
     */
    private boolean isWithinInterest(String node, String msg) {
         /* tbd */
@@ -372,7 +374,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    {
         if (_cmds.isEmpty())
             return; 
-        _log.info(null, "Playback command log");
+        _log.info(null, "Playback command log: "+dest);
         final var dest_ = SecUtils.escape4regex(dest);
         for (Map.Entry<String, LogEntry> entry: _cmds.entrySet())
             if (!entry.getValue().cmd.matches("USER .*@"+dest_) && isWithinInterest(dest, entry.getValue().cmd) )
