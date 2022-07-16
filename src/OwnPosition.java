@@ -129,6 +129,7 @@ public class OwnPosition extends Station implements Runnable
       }
        
        
+       
     protected String showDMstring(float ll, int ndeg)
     {
         int deg = (int) Math.floor(ll);
@@ -193,6 +194,15 @@ public class OwnPosition extends Station implements Runnable
     }
     
     
+    
+    /* Extra reports (in comment field) */
+    protected String xReports(Date ts, LatLng pos) {
+        return "";
+    }
+    
+    
+    
+    
    /**
      * Send APRS position report on the given channel.
      */
@@ -200,24 +210,35 @@ public class OwnPosition extends Station implements Runnable
     {
         if ( !_txOn )
             return;
+        boolean sentRf = false;
         AprsPacket p = new AprsPacket();
         p.from = getIdent();
         p.to = _api.getToAddr();
         p.type = '/';
 
-        p.report = "/" + timeStamp(new Date()) + encodePos() + _comment;
+        String xrep = xReports(new Date(), getPosition().toLatLng());
+        p.report = "/" + timeStamp(new Date()) + encodePos() + xrep + _comment;
+        
         _api.log().debug("OwnPosition", "Send position report: "+ p.from+">"+p.to+": "+p.report);
-       
+        _api.log().debug("OwnPosition", "XREP: "+ xrep);
+        
         /* Send object report on RF, if appropriate */
         p.via = _pathRf; 
-        if (_allowRf && _rfChan != null)
+        if (_allowRf && _rfChan != null) {
            _rfChan.sendPacket(p);
-       
-        /* Send object report on aprs-is */
+           sentRf = true;
+        }
+        
+        /* Send pos report on aprs-is */
         try { Thread.sleep(2000); } catch (Exception e) {}
         p.via = null;
-        if (_inetChan != null) 
-           _inetChan.sendPacket(p);
+          
+        Igate ig = _api.getIgate();
+        if (sentRf && ig != null && ig.isActive()) 
+            ig.gate_to_inet(p);
+        else
+            if (_inetChan != null) 
+                _inetChan.sendPacket(p);
             
     }
 
@@ -247,7 +268,7 @@ public class OwnPosition extends Station implements Runnable
      * Can be overridden in subclasses to do advanced tracking, smart beaconing, etc..
      */
     protected boolean should_update () 
-    {
+    {       
        int t = Math.min(_maxPause, 120); 
        t = Math.max(_minPause, t); 
        return (isChanging() && _timeSinceReport >= t); 
@@ -268,7 +289,7 @@ public class OwnPosition extends Station implements Runnable
             synchronized (this) {
               _timeSinceReport += _trackTime;
               if (getPosition() != null  && 
-                  (_timeSinceReport >= _maxPause || should_update())) {
+                  (should_update())) {
                  _timeSinceReport = 0;
                  sendPosReport();
               }

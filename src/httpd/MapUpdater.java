@@ -55,7 +55,7 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
        
        /**
         * Returns true if point is inside the client's area of interest 
-        * and client wants to be updated, but not more often than once per 10 seconds. 
+        * and client wants to be updated, but not more often than once per 5 seconds. 
         */
        public boolean isInside(TrackerPoint st, boolean postpone ) {
           _pending = _pending || (_subscribe && st != null && st.isInside(_uleft, _lright));
@@ -133,7 +133,7 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
                 postText( x -> ((Client)x).getOverlayData(false), 
                           x -> ((Client)x).isInside(null, false) ); 
             } 
-        } , 10000, 10000); 
+        } , 10000, 5000); 
     }  
     
           

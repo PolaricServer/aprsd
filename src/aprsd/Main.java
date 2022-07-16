@@ -317,6 +317,11 @@ public class Main implements ServerAPI
            igate = new Igate(api);
 
            /* Own position */
+           
+           
+           System.out.println("GPS ON = "+getBoolProperty("ownposition.gps.on", false));
+           
+           
            ownpos = new GpsPosition(api);
            db.addPoint(ownpos); 
            
