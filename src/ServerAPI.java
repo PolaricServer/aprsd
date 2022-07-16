@@ -51,6 +51,7 @@ public interface ServerAPI
     public interface Web {
         public void corsEnable(String uri); 
         public long nVisits();
+        public long nLogins(); 
         public int  nClients();
         public int  nLoggedin();
         public long nHttpReq(); 

@@ -32,6 +32,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     protected static StationDB   _db  = null;
     protected static ColourTable _colTab = null;
     private   static long        _posUpdates = 0;
+    protected static long        _aprsPosUpdates = 0;
     
     
     public static void setNotifier(Notifier n)
@@ -64,7 +65,8 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     public static long getPosUpdates()
        { return _posUpdates; }
        
-       
+    public static long getAprsPosUpdates()
+       { return _aprsPosUpdates; }
        
            
     /* Class for Json encoding info about a point. This is subclassed in AprsPoint */

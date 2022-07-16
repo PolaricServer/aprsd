@@ -110,8 +110,9 @@ public abstract class WsNotifier extends ServerBase
    private int _nLoggedIn;
       
    
-   /* Count number of visits */
+   /* Count number of visits and logins */
    private long _visits = 0;
+   private long _logins = 0;
    
    /* Is this instance on a trusted configuration. */
    private boolean _trusted = false;
@@ -149,6 +150,9 @@ public abstract class WsNotifier extends ServerBase
    /** Return number of visits */
    public long nVisits()
      { return _visits; }
+     
+   public long nLogins()
+     { return _logins; }
      
    /** Return number of logged in clients */
    public int nLoggedIn()
@@ -198,8 +202,11 @@ public abstract class WsNotifier extends ServerBase
                  for (CHandler c: _cOpen)
                     c.handle(client);
                     
-                 if (client.login())
+                 if (client.login()) {
                     _nLoggedIn++;
+                    _logins++;
+                }
+                
               }
               else {
                  _api.log().info("WsNotifier", "Subscription rejected. User="+uid);

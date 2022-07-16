@@ -109,13 +109,13 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
     /**
      * Gate packet (from RF) to internet.
      */
-    private void gate_to_inet(AprsPacket p)
+    public void gate_to_inet(AprsPacket p)
     {
        /* Note, we assume that third-party headers are stripped 
         * by the channel-implementation.  
         */
        if ( p.type == '?' /* QUERY */ ||
-            p.via.matches(".*((TCP[A-Z0-9]{2})|NOGATE|RFONLY|NO_TX).*") ) 
+            (p.via != null && p.via.matches(".*((TCP[A-Z0-9]{2})|NOGATE|RFONLY|NO_TX).*") ) )
            return;
             
        _msgcnt++;

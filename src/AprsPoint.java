@@ -104,6 +104,7 @@ public abstract class AprsPoint extends TrackerPoint implements Serializable, Cl
     {
         updatePosition(ts, newpos);
         _ambiguity = ambiguity;
+        _aprsPosUpdates++;
     }
         
         

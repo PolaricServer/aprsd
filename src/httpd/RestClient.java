@@ -30,7 +30,7 @@ public class RestClient {
     
 
     
-    RestClient(String url) {
+    public RestClient(String url) {
         _url=url;
         _client = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
@@ -40,7 +40,7 @@ public class RestClient {
     }
     
     
-    RestClient(String url, Authenticator auth) {
+    public RestClient(String url, Authenticator auth) {
         _url=url;
         _client = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
@@ -56,7 +56,8 @@ public class RestClient {
     
     
  
-    public HttpResponse GET(String resource) {
+ 
+    public HttpResponse GET(String resource, boolean stream) {
     
         try {
             HttpRequest request = HttpRequest.newBuilder()
@@ -66,14 +67,24 @@ public class RestClient {
                 .build();
             
             /* Send the request and get the response */
-            HttpResponse<String> response = _client
-                .send(request, HttpResponse.BodyHandlers.ofString());
-            return response;
+            if (stream) { 
+                HttpResponse<InputStream> response = _client
+                    .send(request, HttpResponse.BodyHandlers.ofInputStream());
+                return response;
+            }
+            else {
+                HttpResponse<String> response = _client
+                    .send(request, HttpResponse.BodyHandlers.ofString());
+                return response;
+            }
+            
+            
         }
         catch (Exception e) { return null; }
     }
     
-    
+    public HttpResponse GET(String resource) 
+        { return GET(resource, false); }
     
     
     public HttpResponse POST(String resource, String body) {

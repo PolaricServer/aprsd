@@ -288,8 +288,10 @@ public class StationDBImp implements StationDB, Runnable
     { 
         if (_histData != null && s != null && s.getIdent() != null)
             _histData.updateItem(s);
-        if ( s != null && s.getIdent() != null)
-            _map.put(s.getIdent(), s); 
+        if ( s != null && s.getIdent() != null) {
+            _map.remove(s.getIdent());
+            _map.put(s.getIdent(), s);
+        }
     }
         
         
@@ -375,7 +377,7 @@ public class StationDBImp implements StationDB, Runnable
     /**
      * Geographical search in the database of trackerpoints. 
      * Return list of stations within the rectangle defined by uleft (upper left 
-     * corner) and lright (lower right corner). 
+     * corner) and lright (lower right corner) 
      */   
     public List<TrackerPoint>
           search(Reference uleft, Reference lright)

@@ -56,6 +56,7 @@ public class StatLogger implements Runnable {
            ServerAPI.Web ws = _api.getWebserver();        
            long period = 1000 * 60 * 60;           // 60 minute
            long _posUpd = TrackerPoint.getPosUpdates();
+           long _aprsPosUpd = TrackerPoint.getAprsPosUpdates();
            long _req = ws.nHttpReq(); 
            long _visits = ws.nVisits();  
            long _mupdates = ws.nMapUpdates();
@@ -64,11 +65,13 @@ public class StatLogger implements Runnable {
                Thread.sleep(period); 
                _out.println(df.format(new Date()) + "," + (ws.nHttpReq() - _req) + "," + 
                     (ws.nVisits() - _visits) + "," + ws.nClients() + "," + (TrackerPoint.getPosUpdates() - _posUpd) + "," +
+                    (TrackerPoint.getAprsPosUpdates() - _aprsPosUpd) + "," +
                     (ws.nMapUpdates() - _mupdates) ); 
                _req = ws.nHttpReq();
                _visits = ws.nVisits();
                _mupdates = ws.nMapUpdates();
                _posUpd = TrackerPoint.getPosUpdates();
+               _aprsPosUpd = TrackerPoint.getAprsPosUpdates();
                _out.flush();
            }
         }

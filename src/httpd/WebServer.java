@@ -295,7 +295,10 @@ public class WebServer implements ServerAPI.Web
     /* Statistics */
     public long nVisits() 
         { return _jmapupdate.nVisits(); }
-     
+        
+    public long nLogins() 
+        { return _jmapupdate.nLogins(); }
+        
     public int  nClients() 
         { return _jmapupdate.nClients(); }
      

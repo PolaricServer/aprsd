@@ -104,8 +104,10 @@ public class SystemApi extends ServerBase {
     
     
     protected boolean authForItem(Request req, PointObject x) {
-        if (x==null || x.getSource() == null) 
+        if (x==null)
             return false; 
+        if (x.getSource() == null) 
+            return true; /* FIXME */ 
 
         return (!x.getSource().isRestricted() 
            || x.tagIsOn("OPEN") 
