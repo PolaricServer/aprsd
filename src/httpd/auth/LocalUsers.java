@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2018-19 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018-22 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,10 +41,14 @@ public class LocalUsers implements UserDb
      
         private Date lastused; 
 
-        @Override public Date    getLastUsed()     { return lastused; }
-        @Override public void    updateTime()      { lastused = new Date(); }
+        @Override public Date getLastUsed()        { return lastused; }
+        @Override public void setLastUsed(Date d)  { lastused = d;}
         @Override public void setPasswd(String pw) { updatePasswd(getIdent(), pw); }
-
+        
+        @Override public void updateTime() { 
+            lastused = new Date(); 
+            _syncer.updateTs(getIdent(), lastused);
+        }
         
         public User(String id, Date d) {
             super(id); 
@@ -58,6 +62,7 @@ public class LocalUsers implements UserDb
     private SortedMap<String, User> _users = new TreeMap<String, User>();
     private String _filename; 
     private GroupDb _groups;
+    private UserDb.Syncer _syncer;
     
     
     // FIXME: Move this to ServerAPI ?
@@ -67,6 +72,7 @@ public class LocalUsers implements UserDb
     
     public LocalUsers(ServerAPI api, String fname, GroupDb gr) {
         _api = api;
+        _syncer = new UserDb.DummySyncer();
         _filename = fname; 
         _groups = gr; 
         restore();
@@ -83,6 +89,15 @@ public class LocalUsers implements UserDb
             } ,2, 2, HOURS);
     }
   
+  
+    public void setSyncer(Syncer s)
+        { _syncer = s; }
+        
+    public Syncer getSyncer()
+        { return _syncer; }
+        
+    public GroupDb getGroupDb()
+        { return _groups; }
   
   
     public boolean hasUser(String id) {
@@ -126,7 +141,7 @@ public class LocalUsers implements UserDb
       
     
     public synchronized 
-    User add (String userid, String name, boolean sar, boolean admin, boolean suspend, String passwd, String atr) {
+    User add (String userid, String name, boolean sar, boolean admin, boolean suspend, String passwd, String group) {
         User u = add(userid); 
         if (u==null) {
             _api.log().info("LocalUsers", "add: user '"+userid+"' already exists");
@@ -140,7 +155,10 @@ public class LocalUsers implements UserDb
         u.setSar(sar);
         u.setAdmin(admin);
         u.setSuspended(suspend);
-        u.setAllowedTrackers(atr);
+        Group g = _groups.get(group);
+        if (g == null)
+            _api.log().info("LocalUsers", "group '"+group+"' not found");
+        u.setGroup(g);
         return u;
     }
     

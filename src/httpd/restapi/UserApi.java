@@ -66,6 +66,9 @@ public class UserApi extends ServerBase {
         public String group;
         public String passwd;
         public boolean sar, admin, suspend;
+        public UserUpdate() {}
+        public UserUpdate(String n, String c, String g, String p, boolean s, boolean a, boolean u) 
+            { name=n; callsign=c; group=g; passwd=p; sar=s; admin=a; suspend=u; }
     }
     
     
@@ -153,6 +156,9 @@ public class UserApi extends ServerBase {
 
             if (pwd.passwd != null) 
                     u.setPasswd(pwd.passwd);
+                    
+            _users.getSyncer().update(uid, new UserUpdate
+                (null, null, null, pwd.passwd, u.isAdmin(), u.isSar(), u.isSuspended())); 
             return "Ok";
         });
         
@@ -264,6 +270,7 @@ public class UserApi extends ServerBase {
             u.setSar(uu.sar);
             u.setAdmin(uu.admin);
             u.setSuspended(uu.suspend);
+            _users.getSyncer().update(ident, uu);
             return "Ok";
         });
         
@@ -278,6 +285,7 @@ public class UserApi extends ServerBase {
 
             if (_users.add(u.ident, u.name, u.sar, u.admin, u.suspend, u.passwd, u.group)==null) 
                 return ERROR(resp, 400, "Probable cause: User exists");
+            _users.getSyncer().add(u.ident, u);
             return "Ok";
         });
         
@@ -289,6 +297,7 @@ public class UserApi extends ServerBase {
         delete("/users/*", (req, resp) -> {
             var ident = req.splat()[0];  
             _users.remove(ident);
+            _users.getSyncer().remove(ident);
             return "Ok";
         });
         

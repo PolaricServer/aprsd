@@ -1,6 +1,6 @@
   
 /* 
- * Copyright (C) 2021- by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2021-2022 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,14 +22,43 @@ import no.polaric.aprsd.ServerAPI;
 
 public interface UserDb extends ServerAPI.UserDb
 {
-    public User get(String id); 
-    public Collection<User> getAll();
+
+    public interface Syncer {
+        void updateTs(String id, Date ts);
+        void add(String userid, Object obj );
+        void update(String userid, Object obj);
+        void remove(String userid);
+    }
     
-    public User add (String userid);
-    public User add (String userid, String name, boolean sar, boolean admin, boolean suspend, String passwd, String atr);
-    public void remove(String username);
     
-    /* FIXME: Should there be a default implementation of this? */
-    public boolean updatePasswd(String username, String passwd);
+    
+    public static class DummySyncer implements Syncer {
+        
+        public void updateTs(String id, Date ts)
+          {}
+        public void add(String userid, Object obj)
+          {}
+        public void update(String userid, Object obj)
+          {}
+        public void remove(String userid)
+          {}
+    }
+    
+
+
+    User get(String id); 
+    Collection<User> getAll();
+    
+    User add (String userid);
+    User add (String userid, String name, boolean sar, boolean admin, boolean suspend, String passwd, String grp);
+    void remove(String username);
+    
+    /* Should there be a default implementation of this? */
+    boolean updatePasswd(String username, String passwd);
+    
+    Syncer getSyncer();
+    void setSyncer(Syncer syncer);
+    
+    GroupDb getGroupDb();
 }
 

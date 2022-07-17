@@ -35,6 +35,7 @@ public abstract class User {
     public String  getCallsign()          { return callsign; }
     
     public abstract Date    getLastUsed();
+    public abstract void    setLastUsed(Date d);
     public abstract void    updateTime();
     public abstract void    setPasswd(String pw);
     
