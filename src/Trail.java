@@ -34,9 +34,8 @@ public class Trail implements Iterable<Trail.Item>, Serializable
     public static class Item extends TPoint {
        public int speed;
        public int course; 
-       public String pathinfo;
        public Item(Date t, Reference p, int sp, int crs, String path)
-         { super(t, p); speed = sp; course = crs; pathinfo = path;} 
+         { super(t, p, path); speed = sp; course = crs; } 
     }
        
        

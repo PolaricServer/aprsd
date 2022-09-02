@@ -69,26 +69,35 @@ public abstract class ServerBase
        { return deserializeJson(text, cls); }
  
  
-   public static String serializeJson(Object obj) {
-       try {
+    public static String serializeJson(Object obj) {
+        try {
             mapper.setDateFormat(isodf);
             return mapper.writeValueAsString(obj);
-       }
-       catch (Exception e) {
+        }
+        catch (Exception e) {
             return null;
-       }
-   }
+        }
+    }
    
    
-   public static Object deserializeJson(String text, Class cls) {
-     try {
-        return mapper.readValue(text, cls);
-     }
-     catch (Exception e) {
-        return null;
-     }
-   }
-   
+    public static Object deserializeJson(String text, Class cls) {
+        try {
+            return mapper.readValue(text, cls);
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
+    
+    
+    public static String cleanPath(String txt) { 
+        if (txt==null)
+            return "";
+        return txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]*(\\-[0-9]+)?\\*?,?)|(qA.),?", "")
+           .replaceAll("\\*", "").replaceAll(",+|(, )+", ", ");
+    }
+    
+    
    
    /* TTL is in minutes */
    public void systemNotification(String user, String txt, int ttl) {

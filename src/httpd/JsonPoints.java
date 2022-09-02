@@ -73,6 +73,8 @@ public interface JsonPoints
     class JsTPoint {
         public double[] pos;
         public Date time;
+        public String path;
+        
         public JsTPoint(double[] p, Date t) { 
             pos = p; 
             time = t;
@@ -81,6 +83,7 @@ public interface JsonPoints
             LatLng ref = (LatLng) p.getPosition();
             pos = new double[] {ref.getLongitude(), ref.getLatitude()}; 
             time = p.getTS();
+            path = ServerBase.cleanPath(p.getPath());
         }
     }
     

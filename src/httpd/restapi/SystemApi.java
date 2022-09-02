@@ -94,14 +94,6 @@ public class SystemApi extends ServerBase {
       { resp.status(status); return msg; }
       
     
-        
-    protected String cleanPath(String txt) { 
-        if (txt==null)
-            return "";
-        return txt.replaceAll("((WIDE|TRACE|SAR|NOR)[0-9]*(\\-[0-9]+)?\\*?,?)|(qA.),?", "")
-           .replaceAll("\\*", "").replaceAll(",+|(, )+", ", ");
-    }
-    
     
     protected boolean authForItem(Request req, PointObject x) {
         if (x==null)
@@ -364,7 +356,7 @@ public class SystemApi extends ServerBase {
             var fl = new ArrayList<JsTPoint>(); 
             for (var x:  h.points()) {
                 var dist = x.getPosition().toLatLng().distance(pp.getPosition().toLatLng());
-                fl.add(new JsTPoint(x.getTS(), x.speed, x.course, (int) Math.round(dist*1000), cleanPath(x.pathinfo)));
+                fl.add(new JsTPoint(x.getTS(), x.speed, x.course, (int) Math.round(dist*1000), cleanPath(x.getPath())));
                 pp = x; 
             }
             return fl;

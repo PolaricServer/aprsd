@@ -26,7 +26,6 @@ public class ZeroConf
                     InetAddress addr = f.getAddress();
                     if ( addr.isSiteLocalAddress() && !addr.isMulticastAddress() && !addr.isLinkLocalAddress() ) {
                         JmDNS dd = JmDNS.create(addr);
-                        System.out.println("*** ADDR: "+addr+ " IF: "+nif);
                         _ifaces.add(dd);
                     }
                 }
@@ -43,7 +42,6 @@ public class ZeroConf
             for (JmDNS d : _ifaces) {
                 ServiceInfo serviceInfo = ServiceInfo.create(type, name, port, attrs);
                 d.registerService(serviceInfo);
-                System.out.println("*** Register service ok");
             }
         } catch (Exception e) {
             e.printStackTrace();

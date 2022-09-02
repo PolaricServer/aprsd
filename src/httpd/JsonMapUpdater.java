@@ -205,16 +205,13 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 JsTrail res = new JsTrail(s.getTrailColor()); 
                 h.forEach( it -> {
                     LatLng pos = (LatLng) it.getPosition();
-                    res.linestring.add( 
-                        new JsTPoint( 
-                          new double[]{roundDeg(pos.getLongitude()), roundDeg(pos.getLatitude())}, it.getTS()
-                        )
-                    );
+                    res.linestring.add(new JsTPoint(it));
                  });
                 return res;
             }
             else return null;
         }
+       
        
        
         /**

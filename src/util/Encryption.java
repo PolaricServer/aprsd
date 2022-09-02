@@ -1,4 +1,4 @@
- 
+    
 package no.polaric.aprsd; 
 import java.util.*;
 import java.security.*;
@@ -21,7 +21,7 @@ public class Encryption {
         try {
             _cipher = Cipher.getInstance(_algorithm);
 
-            /* Generate AES key from shared secret. */
+            /* Generate AES key from shared secret and a salt:q. */
             _key = getKeyFromPassword(k, "PoLaR1c"); 
             
         } catch(Exception e) {
