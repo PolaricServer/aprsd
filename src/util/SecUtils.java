@@ -64,21 +64,21 @@ public class SecUtils
      */   
     public final static byte[] _digest ( byte[] bytes, String txt, String algo )
     {
-       try{
-           MessageDigest dig = MessageDigest.getInstance(algo);
-	   if (bytes != null) 
-	      dig.update(bytes);
-	   if (txt != null)
-	      dig.update(txt.getBytes("UTF-8"));
-	    
-           return dig.digest();
-      }
-      catch (Exception e) {
-          System.out.println("*** Cannot generate message digest: "+e);
-          return null;
-      }
+        try{
+            MessageDigest dig = MessageDigest.getInstance(algo);
+            if (bytes != null) 
+                dig.update(bytes);
+            if (txt != null)
+                dig.update(txt.getBytes("UTF-8"));
+            return dig.digest();
+        }
+        catch (Exception e) {
+            System.out.println("*** Cannot generate message digest: "+e);
+            return null;
+        }
     }
 
+    
     /* Computes MD5 hash */
     public final static byte[] digest( byte[] bytes, String txt )
         { return _digest(bytes, txt, "MD5"); }
@@ -87,7 +87,25 @@ public class SecUtils
     public final static byte[] xDigest( byte[] bytes, String txt )
         { return _digest(bytes, txt, "SHA-256"); }
         
-        
+      
+
+      
+      
+    public final static byte[] hmac(String data, String key)
+    {
+        try {
+            SecretKeySpec secretKeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "HMAC_SHA256");
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(secretKeySpec);
+            return mac.doFinal(data.getBytes("UTF-8"));
+        }
+        catch (Exception e) {
+            System.out.println("*** Cannot generate HMAC: "+e);
+            return null;
+        }
+    }
+
+
         
     /**
      * Compute a hash from the text, represented as a hexadecimal string.
@@ -98,6 +116,9 @@ public class SecUtils
     public final static String xDigestHex(String txt)
         {return b2hex(xDigest(null, txt));}
 
+    public final static String hmacHex(String txt, String key)
+        {return b2hex(hmac(txt, key)); }
+        
         
     /**
      * Base 64 encoded digest.
@@ -117,6 +138,14 @@ public class SecUtils
        String d = b64.encode(xDigest(null, txt));
        return d.substring(0,n); 
     }
+     
+    public final static String hmacB64(String txt, String key, int n)
+    {
+       Base64 b64 = new Base64();
+       String d = b64.encode(hmac(txt, key));
+       return d.substring(0,n); 
+    }
+    
      
      
      
