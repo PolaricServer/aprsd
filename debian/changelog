@@ -1,8 +1,15 @@
-polaric-aprsd (2.9+) UNRELEASED; urgency=medium
+polaric-aprsd (2.10) stable; urgency=medium
 
-  * Hacking 
+  * Adaptations for DbSync - allow syncing user-db with DbSync
+  * REST client 
+  * Allow HMAC based authentication in REST client and API
+  * Use cuckoo filter for nonce duplicate checking...
+  * Own position and GPS work (tracking, smart beaconing, extra/redundant reports)
+  * Announce server using mDNS (Zeroconf)
+  * Tracker management fix
+  * Various fixes..  
 
- -- Oyvind Hanssen <ohanssen@acm.org>  Sun, 20 Mar 2022 13:52:20 +0100
+ -- Oyvind Hanssen <ohanssen@acm.org>  Tue, 06 Sep 2022 20:05:08 +0200
 
 polaric-aprsd (2.9) stable; urgency=medium
 

@@ -329,3 +329,16 @@ V.2.9
 * API for info about items
 * Various fixes..
 
+
+V.2.10
+------
+* Adaptations for DbSync - allow syncing user-db with DbSync (see Database plugin)
+* REST client 
+* Allow HMAC based authentication in REST client and APIs (See Arctic Tracker and Database plugin)
+* Use cuckoo filter for nonce duplicate checking...
+* Own position and GPS work (tracking, smart beaconing, extra/redundant reports)
+* Announce server using mDNS (Zeroconf)
+* Tracker management fix
+* Various fixes..
+
+
