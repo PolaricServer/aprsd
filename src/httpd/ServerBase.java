@@ -27,7 +27,6 @@ import java.io.*;
 import java.text.*;
 import com.mindprod.base64.Base64;
 import java.util.concurrent.locks.*; 
-import org.xnap.commons.i18n.*;
 import spark.*;
 import com.fasterxml.jackson.databind.*;
 
@@ -124,29 +123,6 @@ public abstract class ServerBase
           df.setTimeZone(z);
           tf.setTimeZone(z);
       }
-   }
-   
-   
-   private static final String i18n_base = "no.polaric.aprsd.http";
-   
-      
-   public I18n getI18n(Request req)
-       { return _getI18n(req, i18n_base); }
-       
-   public static I18n _getI18n(Request req)
-       { return _getI18n(req, i18n_base); }
-       
-   public I18n getI18n(Request req, String base)
-       { return _getI18n(req, base); }
-         
-   public static I18n _getI18n(Request req, String base) 
-   {
-        if (base==null)
-           base = i18n_base; 
-        String lang = req.queryParams("lang");         
-        Locale loc = ((lang != null && lang.length() > 0) ? new Locale(lang) : new Locale("en"));
-        return I18nFactory.getI18n(base + ".XX", "i18n.Messages", 
-                       ServerBase.class.getClassLoader(), loc, I18nFactory.FALLBACK);
    }
    
    

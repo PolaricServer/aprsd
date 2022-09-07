@@ -18,7 +18,6 @@ import java.io._
 import scala.xml._
 import uk.me.jstott.jcoord._
 import no.polaric.aprsd._
-import org.xnap.commons.i18n._
 import spark.Request;
 import spark.Response;
 
@@ -39,10 +38,10 @@ package no.polaric.aprsd.http
          def is_kiss = wasType.equals("KISS");
             
          protected def aprstraffic: NodeSeq = 
-             simpleLabel("info1", "leftlab", I.tr("Heard stations")+":", TXT(""+model.nHeard())) ++
+             simpleLabel("info1", "leftlab", "Heard stations:", TXT(""+model.nHeard())) ++
              simpleLabel("info2", "leftlab", 
-                I.tr("Traffic in")+":", TXT(""+model.nHeardPackets()+"  ("+model.nDuplicates()+" "+I.tr("duplicates")+")")) ++
-             simpleLabel("info3", "leftlab", I.tr("Traffic out")+":", TXT(""+model.nSentPackets())) ++ br     
+                "Traffic in:", TXT(""+model.nHeardPackets()+"  ("+model.nDuplicates()+" duplicates)")) ++
+             simpleLabel("info3", "leftlab", "Traffic out:", TXT(""+model.nSentPackets())) ++ br     
              ;
          
                     
@@ -50,19 +49,19 @@ package no.polaric.aprsd.http
          protected def aprsis: NodeSeq = 
              if (is_aprsis)
                  textField(chp+".pass", "item6", 
-                    I.tr("Passcode")+":", 
-                    I.tr("APRS/IS verification code"), 6, 6, NUMBER) ++
+                    "Passcode:", 
+                    "APRS/IS verification code", 6, 6, NUMBER) ++
                  textField(chp+".filter", "item7", 
-                    I.tr("Filter")+":", 
-                    I.tr("APRS/IS filter-string"), 30, 50, TEXT) 
+                    "Filter:", 
+                    "APRS/IS filter-string", 30, 50, TEXT) 
              else EMPTY
              ;
            
         protected def kissport: NodeSeq =
             if (is_tcpkiss || is_kiss)
                textField(chp+".kissport", "item17",
-                  I.tr("Kiss Port")+":",
-                  I.tr("Port number (0 by default)"), 2, 2, NUMBER)
+                  "Kiss Port:",
+                  "Port number (0 by default)", 2, 2, NUMBER)
              else EMPTY
              ;
              

@@ -4,7 +4,6 @@ import java.io._
 import scala.xml._
 import scala.collection.JavaConversions._
 import no.polaric.aprsd._
-import org.xnap.commons.i18n._
 import spark.Request;
 import spark.Response;
 
@@ -25,16 +24,14 @@ package no.polaric.aprsd.http
        */
       def handle_restartServer(req : Request, res: Response) =
       {
-          val I = getI18n(req)
-          
           def action(req : Request): NodeSeq = {
              val pb = new ProcessBuilder("/usr/bin/sudo", "-n", "/usr/bin/polaric-restart")
              pb.inheritIO();
              pb.start(); 
              
              <br/>
-             <h2>{ I.tr("Restart server...") }</h2>
-             <span>{ I.tr("You may have to reload/close window and log in again") }</span>
+             <h2>{ "Restart server..." }</h2>
+             <span>{ "You may have to reload/close window and log in again" }</span>
           }
              
           printHtml (res, htmlBody (req, null, IF_ADMIN(action)(req) ))
@@ -48,7 +45,6 @@ package no.polaric.aprsd.http
        */
       override def htmlBody(req: Request, xhead : NodeSeq, content : NodeSeq) : Node =
       {
-           val I = getI18n(req)
            val heads = xhead
            
            var selected = req.queryParams("mid")           
@@ -73,17 +69,17 @@ package no.polaric.aprsd.http
            def body = 
               <div id="config_menu">
               <ul class="menu">
-               { mitem("config_menu", 1, I.tr("Status info")) }
+               { mitem("config_menu", 1, "Status info") }
                  <ul>
-                  { mitem("config_clients", 2, I.tr("Client list"))
+                  { mitem("config_clients", 2, "Client list")
                   }
                  </ul>
                {
-                 mitem("config", 4, I.tr("Server config")) ++
-                 mitem("config_posreport", 5, I.tr("Own position")) ++
-                 mitem("config_mapdisplay", 6, I.tr("Display on map"))
+                 mitem("config", 4, "Server config") ++
+                 mitem("config_posreport", 5, "Own position") ++
+                 mitem("config_mapdisplay", 6,"Display on map")
                }
-              <li>{ I.tr("Data channels...") }</li>
+              <li>{ "Data channels..." }</li>
               <ul>
                {
                   val chs = _api.getProperty("channels", null).split(",(\\s)*")
@@ -102,7 +98,7 @@ package no.polaric.aprsd.http
              {
                 if (changed)
                    <div class="status">
-                      { I.tr("Changes are done. Restart to activate.") }
+                      { "Changes are done. Restart to activate." }
                    </div>
                 else null
              }
@@ -164,64 +160,63 @@ package no.polaric.aprsd.http
        */
       def handle_config(req : Request, res: Response) =
       {            
-          val I = getI18n(req)
-          val prefix = <h3>{I.tr("Configuration of Polaric APRSD")}</h3>
+          val prefix = <h3>{"Configuration of Polaric APRSD"}</h3>
           
           def fields(req : Request): NodeSeq =
                 textField("default.mycall", "item1", 
-                      I.tr("Callsign")+":", "", 10, 10, CALLSIGN) ++
+                      "Callsign:", "", 10, 10, CALLSIGN) ++
                 br ++
                 textField("channels", "item4", 
-                      I.tr("Data channels")+":", 
-                      I.tr("Data channels for tracking"), 30, 50, LIST, "(list)")   ++
+                      "Data channels"+":", 
+                      "Data channels for tracking", 30, 50, LIST, "(list)")   ++
                 textField("channel.default.inet", "item5", 
-                      I.tr("Primary APRS/IS channel")+":", "", 10, 10, NAME) ++ 
+                      "Primary APRS/IS channel"+":", "", 10, 10, NAME) ++ 
                 textField("channel.default.rf", "item6", 
-                      I.tr("Primary RF channel")+":", "", 10, 10, NAME) ++ 
+                      "Primary RF channel:", "", 10, 10, NAME) ++ 
                 br ++
                 label("item7", "leftlab", 
-                      I.tr("Igate")+":", 
-                      I.tr("Tick to activate RF<->internet gateway")) ++
+                      "Igate:", 
+                      "Tick to activate RF<->internet gateway") ++
                 boolField("igate.on", "item7", 
-                      I.tr("Activated.")) ++ br ++ 
+                      "Activated.") ++ br ++ 
                 label("item8", "leftlab", 
-                      I.tr("Igating to RF")+":", 
-                      I.tr("Tick to activate internet->RF igating")) ++
+                      "Igating to RF:", 
+                      "Tick to activate internet->RF igating") ++
                 boolField("igate.rfgate.allow", "item8", 
-                      I.tr("Activated.")) ++
+                      "Activated.") ++
                 boolField("objects.rfgate.allow", "item9", 
-                      I.tr("RF igating for objects.")) ++ br ++
+                      "RF igating for objects.") ++ br ++
                 textField("objects.rfgate.range", "item10", 
-                      I.tr("Radius objects")+":", 
-                      I.tr("Area for sending of objects RF"), 6, 10, NUMBER, "(km)") ++
+                      "Radius objects:", 
+                      "Area for sending of objects RF", 6, 10, NUMBER, "(km)") ++
                 textField("igate.rfgate.path", "item11", 
-                      I.tr("Digipeater path, igate")+":", 
-                      I.tr("Default (see also next field)"), 20, 30, LIST) ++
+                      "Digipeater path, igate:", 
+                      "Default (see also next field)", 20, 30, LIST) ++
                 textField("message.rfpath", "item12", 
-                      I.tr("Digi path, messages")+":", 
-                      I.tr("...has also effect for messages to RF igate"), 20, 30, LIST) ++
+                      "Digi path, messages:", 
+                      "...has also effect for messages to RF igate", 20, 30, LIST) ++
                 textField("objects.rfpath", "item13", 
-                      I.tr("Digipeater path, objects")+":", 
-                      I.tr("...has also effect for objects to RF igate"), 20, 30, LIST) ++
+                      "Digipeater path, objects:", 
+                      "...has also effect for objects to RF igate", 20, 30, LIST) ++
                 textField("message.alwaysRf", "item13.2", 
-                      I.tr("Always send on RF")+":",
-                      I.tr("messages with dest that matches this will be sent on RF"), 20, 30, TEXT, "(regex)") ++
+                      "Always send on RF:",
+                      "messages with dest that matches this will be sent on RF", 20, 30, TEXT, "(regex)") ++
                 br ++ 
                 label("item14", "leftlab", 
-                      I.tr("Remote control")+":", 
-                      I.tr("Tick to activate remote control")) ++
+                      "Remote control:", 
+                      "Tick to activate remote control") ++
                 boolField("remotectl.on", "item14", 
-                      I.tr("Activated.")) ++
+                      "Activated.") ++
                 br ++
                 textField("remotectl.radius", "item14.2", 
-                      I.tr("Radius of interest")+":", 
-                      I.tr("Radius in which we want to receive item-updates"), 6, 10, NUMBER, "(km)") ++
+                      "Radius of interest:", 
+                      "Radius in which we want to receive item-updates", 6, 10, NUMBER, "(km)") ++
                 textField("remotectl.connect", "item15", 
-                      I.tr("Rc server")+":", 
-                      I.tr("Rc server (callsign of another PS instance)"), 10, 10, NAME) ++
+                      "Rc server:", 
+                      "Rc server (callsign of another PS instance)", 10, 10, NAME) ++
                 textField("message.auth.key", "item16", 
-                      I.tr("Authentication key")+":", 
-                      I.tr("Key for authentication (for remote control)"), 20, 30, TEXT)
+                      "Authentication key:", 
+                      "Key for authentication (for remote control)", 20, 30, TEXT)
                ;
               
               
@@ -260,24 +255,23 @@ package no.polaric.aprsd.http
        */
       def handle_config_mapdisplay(req : Request, res: Response) =
       {          
-          val I = getI18n(req)
-          val prefix = <h3>{ I.tr("Map display settings") }</h3>
+          val prefix = <h3>{ "Map display settings" }</h3>
           
           def fields(req : Request): NodeSeq =
                 textField("aprs.expiretime", "item1", 
-                     I.tr("Max inactivity")+":", 
-                     I.tr("How long can an object be inactive before it disappears"), 
-                     4, 4, NUMBER, I.tr("(minutes)")) ++
+                     "Max inactivity:", 
+                     "How long can an object be inactive before it disappears", 
+                     4, 4, NUMBER, "(minutes)") ++
                 br ++
                 textField("map.trail.maxPause", "item2", 
-                     I.tr("Max inactivity for trail")+":", 
-                     I.tr("How long can an object be inactive before its trail disappears"), 
-                     4, 4, NUMBER, I.tr("(minutes)")) ++        
+                     "Max inactivity for trail:", 
+                     "How long can an object be inactive before its trail disappears", 
+                     4, 4, NUMBER, "(minutes)") ++        
                 br ++
                 textField("map.trail.maxAge", "item4", 
-                     I.tr("Trail length")+":", 
-                     I.tr("How long timespan to draw a trail for"), 
-                     4, 4, NUMBER, I.tr("(minutes)")) 
+                     "Trail length:", 
+                     "How long timespan to draw a trail for", 
+                     4, 4, NUMBER, "(minutes)") 
          ;
               
               
@@ -301,59 +295,58 @@ package no.polaric.aprsd.http
        */
       def handle_config_posreport(req : Request, res: Response) =
       {   
-          val I = getI18n(req)
-          val prefix = <h3>{ I.tr("Tracking of own position") }</h3>
+          val prefix = <h3>{ "Tracking of own position" }</h3>
           
           def fields(req : Request): NodeSeq =
                 label("item1", "leftlab", 
-                      I.tr("Position report")+":", 
-                      I.tr("Tick to activate position reporting")) ++
+                      "Position report:", 
+                      "Tick to activate position reporting") ++
                 boolField("ownposition.tx.on", "item1", 
-                      I.tr("Activated")) ++  
+                      "Activated") ++  
                 boolField("ownposition.tx.allowrf", "item2", 
-                      I.tr("Allow transmission on RF")) ++
+                      "Allow transmission on RF") ++
                 br ++
                 label("item3", "leftlab", "", "") ++
-                boolField("ownposition.tx.compress", "item3", I.tr("Compress")) ++
+                boolField("ownposition.tx.compress", "item3", "Compress") ++
                 br ++ br ++
                 label("item4", "leftlab", 
-                      I.tr("Symbol")+":", 
-                      I.tr("APRS symbol-table and symbol")) ++
+                      "Symbol:", 
+                      "APRS symbol-table and symbol") ++
                 textInput("item4", 1, 1, ".", ""+_api.getProperty("ownposition.symbol", "/c")(0)) ++
                 textInput("item5", 1, 1, ".", ""+_api.getProperty("ownposition.symbol", "/c")(1)) ++
                 br ++
                 textField("ownposition.tx.rfpath", "item6", 
-                      I.tr("Digipeater path")+":", "", 20, 30, LIST) ++
+                      "Digipeater path:", "", 20, 30, LIST) ++
                 textField("ownposition.tx.comment", "item7", 
-                      I.tr("Description")+":", "", 20, 40, TEXT) ++ br ++
+                      "Description"+":", "", 20, 40, TEXT) ++ br ++
                 label("utmz", "leftlab", 
-                      I.tr("Default position")+":", 
-                      I.tr("Server's position in UTM format")) ++        
+                      "Default position:", 
+                      "Server's position in UTM format") ++        
                 utmField("ownposition.pos") ++ br ++ 
                 br ++
-                label("item8", "leftlab", I.tr("Tracking with GPS")+":", 
-                      I.tr("Tick to use position from GPS")) ++
+                label("item8", "leftlab", "Tracking with GPS"+":", 
+                      "Tick to use position from GPS") ++
                 boolField("ownposition.gps.on", "item8", 
-                      I.tr("Activated")) ++ 
+                      "Activated") ++ 
                 boolField("ownposition.gps.adjustclock", "item9", 
-                      I.tr("Adjust clock from GPS")) ++ br ++
+                      "Adjust clock from GPS") ++ br ++
                 textField("ownposition.gps.port", "item10", 
-                      I.tr("GPS Port")+":", 
-                      I.tr("Serial port device-name (e.g. /dev/ttyS0)"), 12, 20, NAME) ++
+                      "GPS Port:", 
+                      "Serial port device-name (e.g. /dev/ttyS0)", 12, 20, NAME) ++
                 textField("ownposition.gps.baud", "item11", 
-                      I.tr("GPS Baud")+":", "", 6, 8, NUMBER) ++ br ++
+                      "GPS Baud:", "", 6, 8, NUMBER) ++ br ++
                 textField("ownposition.tx.minpause", "item12", 
-                      I.tr("Min pause")+":", 
-                      I.tr("Minimum time between transmissions"), 4, 5, NUMBER, I.tr("(seconds)")) ++
+                      "Min pause:", 
+                      "Minimum time between transmissions", 4, 5, NUMBER, "(seconds)") ++
                 textField("ownposition.tx.maxpause", "item13", 
-                      I.tr("Max pause")+":", 
-                      I.tr("Maximum time between transmissions"), 4, 5, NUMBER, I.tr("(seconds)")) ++
+                      "Max pause:", 
+                      "Maximum time between transmissions", 4, 5, NUMBER, "(seconds)") ++
                 textField("ownposition.tx.mindist", "item14", 
-                      I.tr("Min distance")+":", 
-                      I.tr("Distance between transmissions when speed is low"), 4, 5, NUMBER, I.tr("(meter)")) ++
+                      "Min distance:", 
+                      "Distance between transmissions when speed is low", 4, 5, NUMBER, "(meter)") ++
                 textField("ownposition.tx.maxturn", "item15", 
-                      I.tr("Max turn")+":", 
-                      I.tr("Max change in direction before transmission"), 4, 5, NUMBER, I.tr("(degrees)"))
+                      "Max turn:", 
+                      "Max change in direction before transmission", 4, 5, NUMBER, "(degrees)")
               ;
               
               
@@ -403,9 +396,8 @@ package no.polaric.aprsd.http
       */
      def handle_config_chan(req: Request, res: Response) = 
      {
-         val I = getI18n(req)        
          val cid = req.queryParams("chan")
-         val prefix = <h3>{I.tr("Channel")+ " '"+cid+"'"}</h3>
+         val prefix = <h3>{"Channel"+ " '"+cid+"'"}</h3>
          
           /* Get the channel in question */
          val ch = _api.getChanManager().get(cid).asInstanceOf[Channel]
@@ -437,21 +429,20 @@ package no.polaric.aprsd.http
       */
       def handle_passwd(req: Request, res: Response) = 
       {
-          val I = getI18n(req)
-          val prefix = <h3>{ I.tr("Register user/password") }</h3>
+          val prefix = <h3>{ "Register user/password" }</h3>
           var username = getAuthInfo(req).userid
           
           
           
           def fields(req : Request): NodeSeq =
-             label("item1", "lleftlab", I.tr("Username")+":", I.tr("Username for new or existing user")) ++
+             label("item1", "lleftlab", "Username:", "Username for new or existing user") ++
              { if (getAuthInfo(req).admin)
                   textInput("item1", 20, 20, NAME, "")
                else 
                   <label id="item1">{username}</label>
              } ++
              br ++
-             label("item2", "lleftlab", I.tr("Password")+":", "") ++
+             label("item2", "lleftlab", "Password:", "") ++
              textInput("item2", 20, 30, ".*", "")
           ;
           
@@ -468,14 +459,14 @@ package no.polaric.aprsd.http
              
              if (res == 0) {
                  api.getWebserver().asInstanceOf[WebServer].getAuthConfig().reloadPasswds();
-                 <h3>{ I.tr("Password updated for user")+": '"+username+"'" }</h3>
+                 <h3>{ "Password updated for user"+": '"+username+"'" }</h3>
              }
              else if (res == 5)
-                 <h3>{ I.tr("Error: Your input is too long") }</h3>
+                 <h3>{ "Error: Your input is too long" }</h3>
              else if (res == 6)
-                 <h3>{ I.tr("Error: Your input contains illegal characters") }</h3>
+                 <h3>{ "Error: Your input contains illegal characters" }</h3>
              else 
-                 <h3>{ I.tr("Error: Couldn't update (server problem)") }</h3>
+                 <h3>{ "Error: Couldn't update (server problem)" }</h3>
        
           }
  

@@ -6,10 +6,9 @@
 ##########################################################################
 
    CLASSDIR = classes
-    GETTEXT = /usr/share/java/gettext-commons.jar
       CODEC = /usr/share/java/commons-codec.jar
     JACKSON = /usr/share/java/jackson-core.jar:/usr/share/java/jackson-databind.jar:/usr/share/java/jackson-annotations.jar
-  CLASSPATH = $(GETTEXT):lib/jcoord-polaric.jar:lib/utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:lib/jetty-polaric.jar:/usr/share/java/sl4j-api.jar:/usr/share/java/sl4j-simple.jar:lib/spark-core-polaric.jar:lib/pac4j-core-polaric.jar:lib/pac4j-http-polaric.jar:lib/spark-pac4j-polaric.jar:lib/jmdns-polaric.jar:lib/nano-cuckoo-polaric.jar:$(JACKSON):$(CODEC)
+  CLASSPATH = lib/jcoord-polaric.jar:lib/utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:lib/jetty-polaric.jar:/usr/share/java/sl4j-api.jar:/usr/share/java/sl4j-simple.jar:lib/spark-core-polaric.jar:lib/pac4j-core-polaric.jar:lib/pac4j-http-polaric.jar:lib/spark-pac4j-polaric.jar:lib/jmdns-polaric.jar:lib/nano-cuckoo-polaric.jar:$(JACKSON):$(CODEC)
       JAVAC = javac -source 11 -target 11
        YACC = yacc
         LEX = jflex
@@ -37,7 +36,7 @@ INSTALL_SCPLUG = $(INSTALL_CONFIG)/script-conf.d
 ##################################################
     LIBDIR = _lib
  JAVAFLAGS =
- PACKAGES  = core i18n util channels httpd scala aprsd
+ PACKAGES  = core util channels httpd scala aprsd
  LANGUAGES = no
 
 
@@ -96,12 +95,6 @@ src/filter/Lexer.java : src/filter/filters.lex src/filter/filters.y
 src/filter/Parser.java : src/filter/filters.y
 	cd src/filter;$(YACC) -Jpackage=no.polaric.aprsd.filter filters.y
 	
-	
-	
-.PHONY : i18n
-i18n: 
-	bash msg-compile.sh $(LANGUAGES)
-	
 
 .PHONY : util
 util: 
@@ -123,6 +116,10 @@ channels:
 	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/channels/*.java 
 	
 
+#.PHONY : points
+#points: 
+#	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/points/*.java 
+	
 	
 #filter: core  src/filter/Parser.java src/filter/Lexer.java
 #	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/filter/*.java

@@ -19,7 +19,6 @@ import uk.me.jstott.jcoord._
 import no.polaric.aprsd._
 import spark.Request;
 import spark.Response;
-import org.xnap.commons.i18n._
 
 
 
@@ -117,14 +116,14 @@ package no.polaric.aprsd.http
         
        
       
-      protected def printState(st: Channel.State, I:I18n): NodeSeq = 
+      protected def printState(st: Channel.State): NodeSeq = 
          st match {
-            case Channel.State.OFF => TXT( I.tr("Inactive (off)"))
-            case Channel.State.STARTING => TXT( I.tr("Connecting..."))
+            case Channel.State.OFF => TXT( "Inactive (off)")
+            case Channel.State.STARTING => TXT( "Connecting...")
             case Channel.State.RUNNING => 
-                <span>{ I.tr("Active (ok)") }<img class="state" src="images/ok.png"/></span>  
+                <span>{ "Active (ok)" }<img class="state" src="images/ok.png"/></span>  
             case Channel.State.FAILED => 
-                <span>{ I.tr("Inactive (failed)") }<img class="state" src="images/fail.png"/></span>
+                <span>{ "Inactive (failed)" }<img class="state" src="images/fail.png"/></span>
          }
          ;
          

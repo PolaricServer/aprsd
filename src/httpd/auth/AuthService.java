@@ -26,7 +26,6 @@ import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.CommonProfile;
 import java.util.Optional;
 import javax.servlet.*;
-import org.xnap.commons.i18n.*;
 
 
 
@@ -127,7 +126,7 @@ public class AuthService {
     public void corsHeaders(Request req, Response resp) {
         resp.header("Access-Control-Allow-Credentials", "true"); 
         resp.header("Access-Control-Allow-Origin", getAllowOrigin(req)); 
-        resp.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS"); // FIXME
+        resp.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
     }
     
     
@@ -146,10 +145,9 @@ public class AuthService {
      * Generate a login form in HTML. 
      */
     public static String loginForm(Request req, Response res) {
-       I18n I = ServerBase._getI18n(req);
        String err = "";
        if (req.queryParams("error") != null) {
-          err = "<span class=\"error\">" + I.tr("Sorry. Unknown user and/or password!") + "</span>";
+          err = "<span class=\"error\">" + "Sorry. Unknown user and/or password!" + "</span>";
           _log.log("Unsuccessful login attempt from. " +req.ip());
        }
        return    
@@ -163,10 +161,10 @@ public class AuthService {
          err + 
          "<form method=\"post\" action=\"callback?client_name=FormClient\">" +
             "<fieldset>"+
-              "<label class=\"leftlab sleftlab\"><b>" + I.tr("Username") + "</b></label>" +
-              "<input type=\"text\" placeholder=\"" + I.tr("Enter Username") + "\" name=\"username\" required><br>" +
+              "<label class=\"leftlab sleftlab\"><b>" + "Username" + "</b></label>" +
+              "<input type=\"text\" placeholder=\"" + "Enter Username" + "\" name=\"username\" required><br>" +
               "<label class=\"leftlab sleftlab\"><b>Password</b></label>" +
-              "<input type=\"password\" placeholder=\""+ I.tr("Enter Password") + "\" name=\"password\" required><br>" +
+              "<input type=\"password\" placeholder=\""+ "Enter Password" + "\" name=\"password\" required><br>" +
             "</fieldset>" +     
             "<button type=\"submit\">Login</button>" +
          "</form></body></html>";
@@ -190,7 +188,6 @@ public class AuthService {
        final SparkWebContext context = new SparkWebContext(req, res);
        final ProfileManager manager = new ProfileManager(context);
        final Optional<CommonProfile> profile = manager.get(true);
-       I18n I = ServerBase._getI18n(req);
        
        AuthInfo auth = (AuthInfo) req.raw().getAttribute("authinfo");
        String origin = req.queryParams("origin");
@@ -199,7 +196,7 @@ public class AuthService {
        
        return 
          "<html><head><link rel=\"stylesheet\" href=\"style.css\"></head><body>" + 
-         "<h2>" + I.tr("You are now logged in") + "</h2>" +
+         "<h2>" + "You are now logged in" + "</h2>" +
          "userid='"+profile.get().getId() +"'" +
          "</body></html>";
     }
@@ -209,12 +206,11 @@ public class AuthService {
      * Indicate the result of a successful logout and return to origin URL.
      */
     public static String logout(Request req, Response res) {
-       I18n I = ServerBase._getI18n(req);
        returnToOrigin(req, res, "url"); 
        return 
          "<html><head><link rel=\"stylesheet\" href=\"style.css\"></head><body>" + 
          "<html><body>" + 
-         "<h1>" + I.tr("You are now logged out") + "</h1>" +
+         "<h1>" + "You are now logged out" + "</h1>" +
          "</body></html>";
     }
     

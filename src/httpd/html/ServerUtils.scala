@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015-2022 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import scala.xml._
 
 import uk.me.jstott.jcoord._
 import no.polaric.aprsd._
-import org.xnap.commons.i18n._
 import spark.Request;
 import spark.Response;
 
@@ -174,8 +173,7 @@ package no.polaric.aprsd.http
              if (getAuthInfo(req).sar)
                 func(req)
              else {
-                val i18n = getI18n(req)
-                <h2> {i18n.tr("You are not authorized for this operation")} </h2>
+                <h2> {"You are not authorized for this operation"} </h2>
              }
           wrapper
        }
@@ -188,23 +186,20 @@ package no.polaric.aprsd.http
              if (getAuthInfo(req).admin)
                 func(req)
              else {
-                val i18n = getI18n(req)
-                <h2> {i18n.tr("You are not authorized for this operation")} </h2>
+                <h2> {"You are not authorized for this operation"} </h2>
              }
           wrapper
        }
        
 
        def simple_submit(req: Request): NodeSeq = {
-           val i18n = getI18n(req)
-           <button type="submit" name="update" id="update"> {i18n.tr("Update")} </button>
+           <button type="submit" name="update" id="update"> {"Update"} </button>
        }
            
            
        def default_submit(req: Request): NodeSeq = {
-           val i18n = getI18n(req)
-           <button type="submit" onclick="window.close()" id="cancel"> {i18n.tr("Cancel")} </button>
-           <button type="submit" name="update" id="update"> {i18n.tr("Update")} </button>
+           <button type="submit" onclick="window.close()" id="cancel"> {"Cancel"} </button>
+           <button type="submit" name="update" id="update"> {"Update"} </button>
        }
            
            
@@ -330,7 +325,6 @@ package no.polaric.aprsd.http
     * Print reference as UTM reference. 
     */
    protected def showUTM(req: Request, ref: Reference) : NodeSeq = {
-      val i18n = getI18n(req)
       try {
          val sref = ref.toLatLng().toUTMRef().toString()
          <span class="utmref">
@@ -340,7 +334,7 @@ package no.polaric.aprsd.http
          </span>  
       }
       catch {
-          case e:Exception => Text(i18n.tr("(invalid position)"))
+          case e:Exception => Text("(invalid position)")
       }
    }
   
