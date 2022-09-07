@@ -2,7 +2,7 @@ Source: polaric-aprsd
 Section: hamradio
 Priority: optional
 Maintainer: Øyvind Hanssen <ohanssen@acm.org>
-Build-Depends: debhelper (>= 10), gettext-base, libgettext-commons-java, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, openjdk-11-jdk|openjdk-12-jdk|openjdk-13-jdk|openjdk-14-jdk|openjdk-15-jdk, scala (>> 2.11.12), byacc-j, jflex, librxtx-java 
+Build-Depends: debhelper (>= 10), libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, openjdk-11-jdk|openjdk-12-jdk|openjdk-13-jdk|openjdk-14-jdk|openjdk-15-jdk, scala (>> 2.11.12), byacc-j, jflex, librxtx-java 
 Standards-Version: 3.9.8
 Homepage: http://aprs.no/polaricserver
 
