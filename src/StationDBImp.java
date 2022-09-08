@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2022 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,54 +25,24 @@ import java.util.stream.*;
  * In-memory implementation of StationDB.
  * Data is saved to a file. Periodically and when program ends.
  */
-public class StationDBImp implements StationDB, Runnable
+public class StationDBImp extends StationDBBase implements StationDB, Runnable
 {
     private SortedMap<String, TrackerPoint> _map = new ConcurrentSkipListMap();
-   
     private String     _file;
     private String     _stnsave;
-    private boolean    _hasChanged = false; 
-    private RouteInfo  _routes;
-    private OwnObjects _ownobj;
-    private MessageProcessor _msgProc;
-    private StationDB.Hist _histData = null;
-    private ServerAPI  _api; 
-
     
     public StationDBImp(ServerAPI api)
     {
-        _api = api;
+        super(api);
         _file = api.getProperty("stations.file", "stations.dat");
         _stnsave = api.getProperty("stations.save", ".*");
         if (_file.charAt(0) != '/')
            _file = System.getProperties().getProperty("datadir", ".")+"/"+_file;   
-        _ownobj = new OwnObjects(api); 
-        _msgProc = new MessageProcessor(api);
         restore();
         Thread t = new Thread(this, "StationDBImp");
         t.start(); 
     }
     
-
-    
-    
-    private static final Runtime s_runtime = Runtime.getRuntime ();
-    public static long usedMemory ()
-        { return s_runtime.totalMemory () - s_runtime.freeMemory (); }
-
-    
-    public MessageProcessor getMsgProcessor()
-        { return _msgProc; }
-        
-        
-    /** Register the implementation of database storage (plugin) */
-    public void setHistDB(StationDB.Hist d)
-        { _histData = d; }
-        
-
-    /** Get interface to database storage (plugin) */
-    public StationDB.Hist getHistDB() 
-        {return _histData; }
         
     
     
@@ -81,7 +51,6 @@ public class StationDBImp implements StationDB, Runnable
      * Item methods (get/add, remove)
      ***********************************/
     
-    
     /** 
      * Return the number of realtime items. 
      */   
@@ -89,117 +58,31 @@ public class StationDBImp implements StationDB, Runnable
         { return _map.size(); }
         
         
-        
-    /**
-     * Get an item.  At a specific time or if d is null, get realtime item. 
-     * @param id identifier (typically a callsign) of item.
-     * @param d time of capture, null if realtime.
-     */
-    public TrackerPoint getItem(String id, Date t)
-       { return getItem(id, t, false); }
      
-     
-     
-    /** 
-     * Get item at a particular time. Realtime if t is null.
-     * If requested, check database for updates (if item is managed).
-     * @param id identifier (typically a callsign) of item.
-     * @param t time of capture, null if realtime.
-     * @param checkdb Check for updates on managed object...
-     */ 
-    public TrackerPoint getItem(String id, Date t, boolean checkdb)
-    { 
-       TrackerPoint x = null;
-       
-       /* Real time. */
-       if (t==null) {
-          x = _map.get(id); 
-          /* If requested, check database storage for updates */
-          if (checkdb && x != null && _histData != null && x.hasTag("MANAGED"))
-             _histData.updateManagedItem(x);
-       }
-       /* Another time in history. We need to get it from database storage plugin */
-       else if (_histData !=null) 
-          x = _histData.getItem(id, t); 
-       return x;
+    @Override protected TrackerPoint _getRtItem(String id) {
+        return _map.get(id);
     }
+        
      
-     
-                 
-    /**
-      * Get an APRS station. 
-      * @param id identifier (typically a callsign) of item.
-      * @param t time of capture, null if realtime.
-      */ 
-    public Station getStation(String id, Date t)
-    { 
-         TrackerPoint x = getItem(id, t);
-         if (x instanceof Station) return (Station) x;
-         else return null;
-    }      
-     
+    @Override protected void _addRtItem(TrackerPoint s) {
+        if ( s != null && s.getIdent() != null) 
+            _map.remove(s.getIdent());
+        _map.put(s.getIdent(), s);
+    }
     
     
     /**
-     * Add an existing tracker point. 
+     * Update an existing tracker point. 
      * @param s existing station
      */
-    public void addItem(TrackerPoint s)
-    { 
-        if (_histData != null && s != null && s.getIdent() != null)
-            _histData.updateManagedItem(s);
-        if ( s != null && s.getIdent() != null) {
-            _map.remove(s.getIdent());
-            _map.put(s.getIdent(), s);
-        }
+    public void updateItem(TrackerPoint s) {
+        /* Dummy */
     }
+
     
-    
-   
-    /**
-     * Create a new APRS station. 
-     * @param id identifier (typically a callsign) of item.
-     */
-    public Station newStation(String id)
-    {  
-        Station st = new Station(id);
-        addItem(st);
-        return st;
-    }
-         
-    
-    
-    /**
-     * Create a new APRS object. 
-     * @param owner identifier (typically a callsign) of owner station.
-     * @param id identifier of object.
-     */    
-    public AprsObject newObject(Station owner, String id)
-    {
-        AprsObject st = new AprsObject(owner, id);
-        _map.put(id+'@'+owner.getIdent(), st); 
-        return st;
-    }
-    
-        
-    
-    /**
-     * Remove item.
-     * @param id identifier (typically a callsign) of item.
-     */
-    public synchronized void removeItem(String id)
-    {   
-        String[] idd = id.split("@");
-          
-        if (idd != null && idd.length > 1 && idd[1].equals(_api.getOwnPos().getIdent()))
-            _ownobj.delete(idd[0]);
-            
-        TrackerPoint x = _map.get(id);
+    @Override protected void _removeRtItem(String id) {
         _map.remove(id);
-        _hasChanged = true; 
-    }
-        
-        
+    }    
         
         
         
@@ -234,24 +117,24 @@ public class StationDBImp implements StationDB, Runnable
      */
     public List<TrackerPoint> search(String srch, String[] tags)
     {
-         LinkedList<TrackerPoint> result = new LinkedList();
-         srch = srch.toUpperCase();
-         if (srch.matches("REG:.*"))
+        LinkedList<TrackerPoint> result = new LinkedList();
+        srch = srch.toUpperCase();
+        if (srch.matches("REG:.*"))
            srch = srch.substring(4);
-         else {
+        else {
            srch = srch.replaceAll("\\.", Matcher.quoteReplacement("\\."));
            srch = srch.replaceAll("\\*", Matcher.quoteReplacement("(\\S*)"));
-         }
+        }
          
-         final String _srch = srch;
-         return _map.values().stream().filter( s -> 
-              ( s.getIdent().toUpperCase().matches(_srch) ||
-                   s.getDisplayId().toUpperCase().matches(_srch) ||
-                   s.getDescr().toUpperCase().matches("(.*\\s+)?\\(?("+_srch+")\\)?\\,?(\\s+.*)?") ) &&
-              ( tags==null ? true : 
-                   (Arrays.stream(tags).map(x -> s.tagIsOn(x))
-                                       .reduce((x,y) -> (x && y))).get())
-          ).collect(Collectors.toList());
+        final String _srch = srch;
+        return _map.values().stream().filter( s -> 
+            ( s.getIdent().toUpperCase().matches(_srch) ||
+                s.getDisplayId().toUpperCase().matches(_srch) ||
+                s.getDescr().toUpperCase().matches("(.*\\s+)?\\(?("+_srch+")\\)?\\,?(\\s+.*)?") ) &&
+            ( tags==null ? true : 
+                (Arrays.stream(tags).map(x -> s.tagIsOn(x))
+                                    .reduce((x,y) -> (x && y))).get())
+        ).collect(Collectors.toList());
     } 
      
      
@@ -263,18 +146,18 @@ public class StationDBImp implements StationDB, Runnable
      * @param lright Lower right corner.
      */
     public List<TrackerPoint>
-          search(Reference uleft, Reference lright)
+        search(Reference uleft, Reference lright)
     { 
-          long start = System.nanoTime();
+        long start = System.nanoTime();
 
-          var res = _map.values().stream().filter( s ->
-               (uleft==null || lright==null || s.isInside(uleft, lright, 0.1, 0.1))
-          ).collect(Collectors.toList()); 
+        var res = _map.values().stream().filter( s ->
+            (uleft==null || lright==null || s.isInside(uleft, lright, 0.1, 0.1))
+        ).collect(Collectors.toList()); 
           
-          long finish = System.nanoTime();
-          long timeElapsed = finish - start;
-          System.out.println("Search Trackerpoints - Time Elapsed (us): " + timeElapsed/1000);
-          return res;
+        long finish = System.nanoTime();
+        long timeElapsed = finish - start;
+        System.out.println("Search Trackerpoints - Time Elapsed (us): " + timeElapsed/1000);
+        return res;
     }
     
     
@@ -284,42 +167,6 @@ public class StationDBImp implements StationDB, Runnable
     /****************************
      * Other methods
      ****************************/
-    
-    /**
-     * Get trail point for an item at a particular time.
-     * @param id identifier (typically a callsign) of item.
-     * @param d time of capture
-     */
-    public Trail.Item getTrailPoint(String src, java.util.Date t)
-    {
-        TrackerPoint st = getItem(src, null);
-        if (st != null && st.getTrail() != null) {
-           Trail.Item x = st.getTrail().getPointAt(t);
-           if (x != null)
-              return x;
-        }
-        if (_histData != null)
-           return _histData.getTrailPoint(src, t);
-        return null;
-    }
-   
-    
-    
-    /**
-     * Get info on routes. Where APRS packets have travelled.
-     */
-    public RouteInfo getRoutes()
-        { return _routes; }
-        
-    
-    
-    /**
-     * Get APRS objects owned by this server. 
-     */    
-    public OwnObjects getOwnObjects()
-        { return _ownobj; }
-
-    
     
     /**
      * Deactivate objects having the given owner and id.

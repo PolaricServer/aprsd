@@ -290,41 +290,6 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     
     /************** Methods related to tracking of changes ***************/
           
-    /** 
-     * Abort all waiters. See Notifier class. 
-     * @param retval Return value: true=ok, false=was aborted.
-     */
-    public static void abortWaiters(boolean retval)
-      { /* _change.abortAll(retval); */ }
-     
-     /* FIXME: Remove this. */ 
-      
-      
-    /**
-     * Wait for change of state. Blocks the calling thread until there is 
-     * a change in at least one object. 
-     *
-     * @param clientid Unique numbe for calling thread.
-     * @return true=ok, false=was aborted.
-     */
-    public static boolean waitChange(long clientid)
-       { return waitChange(null, null, clientid); }
-    /* FIXME: Remove this */   
-       
-       
-     /**
-     * Wait for change of state within an area. Blocks calling thread until any object
-     * inside the specified area changes. 
-     *
-     * @param uleft Upper left corner of the rectangular area of interest.
-     * @param lright Lower right corner of the rectangular area of interest.
-     * @param clientid Unique numbe for calling thread.
-     * @return true=ok, false=was aborted.
-     */
-    public static boolean waitChange(Reference uleft, Reference lright, long clientid) 
-       { return false; /* _change.waitSignal(uleft, lright, clientid); */ } 
-    /* FIXME: Remove this */
-       
      
     /** Return time of last significant change in position, etc.. */
     public Date getLastChanged()
@@ -358,11 +323,13 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      */
     public synchronized void setChanging()
     {
-         _changing = true;
-         _lastChanged = new Date();  
-         if ( _change!= null ) 
+        _changing = true;
+        _lastChanged = new Date();  
+        if ( _change!= null ) 
             _change.signal(this); 
-    }
+            
+        _db.updateItem(this);
+    } 
            
    
    
@@ -372,6 +339,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     public boolean isChanging() 
        { return isChanging(false); }
        
+      
       
     /**
      * Return true and signal a change if position etc. is updated recently.

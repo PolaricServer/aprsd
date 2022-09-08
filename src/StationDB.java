@@ -122,8 +122,8 @@ public interface StationDB
      
      
     /**
-     * Add an existing tracker point. 
-     * @param s existing station
+     * Add a tracker point. 
+     * @param s existing item
      */
     public void addItem(TrackerPoint s);
     
@@ -144,6 +144,12 @@ public interface StationDB
      */    
     public AprsObject newObject(Station owner, String id);
     
+    
+    /**
+     * Update an existing tracker point. 
+     * @param s existing station
+     */
+    public void updateItem(TrackerPoint s); 
     
     
     /**

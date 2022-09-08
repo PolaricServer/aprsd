@@ -96,7 +96,7 @@ package no.polaric.aprsd.http
                 simpleLabel("items", "leftlab", "Number of HTTP requests:", 
                   TXT(""+(_api.getWebserver().nHttpReq()))) }    
               { simpleLabel("freemem", "leftlab", "Used memory:", 
-                  TXT( Math.round(StationDBImp.usedMemory()/1000)+" KBytes")) }   
+                  TXT( Math.round(StationDBBase.usedMemory()/1000)+" KBytes")) }   
                                 
               { simpleLabel ("plugins", "leftlab", "Plugin modules"+": ", 
                  <div>
