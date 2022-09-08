@@ -28,15 +28,15 @@ import java.util.stream.*;
 public class StationDBImp implements StationDB, Runnable
 {
     private SortedMap<String, TrackerPoint> _map = new ConcurrentSkipListMap();
-    
+   
     private String     _file;
     private String     _stnsave;
-    private boolean   _hasChanged = false; 
-    private RouteInfo _routes;
+    private boolean    _hasChanged = false; 
+    private RouteInfo  _routes;
     private OwnObjects _ownobj;
     private MessageProcessor _msgProc;
     private StationDB.Hist _histData = null;
-    private ServerAPI _api; 
+    private ServerAPI  _api; 
 
     
     public StationDBImp(ServerAPI api)
@@ -60,26 +60,54 @@ public class StationDBImp implements StationDB, Runnable
     public static long usedMemory ()
         { return s_runtime.totalMemory () - s_runtime.freeMemory (); }
 
+    
+    public MessageProcessor getMsgProcessor()
+        { return _msgProc; }
+        
         
     /** Register the implementation of database storage (plugin) */
     public void setHistDB(StationDB.Hist d)
         { _histData = d; }
+        
 
-    
+    /** Get interface to database storage (plugin) */
     public StationDB.Hist getHistDB() 
         {return _histData; }
         
+    
+    
+    
+    /***********************************
+     * Item methods (get/add, remove)
+     ***********************************/
+    
+    
+    /** 
+     * Return the number of realtime items. 
+     */   
+    public int nItems() 
+        { return _map.size(); }
         
-    /** Get item at a particular time. Realtime if t is null. */    
+        
+        
+    /**
+     * Get an item.  At a specific time or if d is null, get realtime item. 
+     * @param id identifier (typically a callsign) of item.
+     * @param d time of capture, null if realtime.
+     */
     public TrackerPoint getItem(String id, Date t)
-       { return getItem(id, t, true); }
+       { return getItem(id, t, false); }
+     
      
      
     /** 
      * Get item at a particular time. Realtime if t is null.
-     * If requested, check database storage for updates.
+     * If requested, check database for updates (if item is managed).
+     * @param id identifier (typically a callsign) of item.
+     * @param t time of capture, null if realtime.
+     * @param checkdb Check for updates on managed object...
      */ 
-    public TrackerPoint getItem(String id, Date t, boolean update)
+    public TrackerPoint getItem(String id, Date t, boolean checkdb)
     { 
        TrackerPoint x = null;
        
@@ -87,24 +115,181 @@ public class StationDBImp implements StationDB, Runnable
        if (t==null) {
           x = _map.get(id); 
           /* If requested, check database storage for updates */
-          if (update && x != null && _histData != null && x.isPersistent())
-             _histData.updateItem(x);
+          if (checkdb && x != null && _histData != null && x.hasTag("MANAGED"))
+             _histData.updateManagedItem(x);
        }
        /* Another time in history. We need to get it from database storage plugin */
        else if (_histData !=null) 
           x = _histData.getItem(id, t); 
        return x;
-     }
+    }
      
      
-     /** Save item to database storage (if present) */
-     public void saveItem(TrackerPoint x)
-     {
-        if (_histData != null)
-          _histData.saveItem(x);
-     }
-       
-       
+                 
+    /**
+      * Get an APRS station. 
+      * @param id identifier (typically a callsign) of item.
+      * @param t time of capture, null if realtime.
+      */ 
+    public Station getStation(String id, Date t)
+    { 
+         TrackerPoint x = getItem(id, t);
+         if (x instanceof Station) return (Station) x;
+         else return null;
+    }      
+     
+    
+    
+    /**
+     * Add an existing tracker point. 
+     * @param s existing station
+     */
+    public void addItem(TrackerPoint s)
+    { 
+        if (_histData != null && s != null && s.getIdent() != null)
+            _histData.updateManagedItem(s);
+        if ( s != null && s.getIdent() != null) {
+            _map.remove(s.getIdent());
+            _map.put(s.getIdent(), s);
+        }
+    }
+    
+    
+   
+    /**
+     * Create a new APRS station. 
+     * @param id identifier (typically a callsign) of item.
+     */
+    public Station newStation(String id)
+    {  
+        Station st = new Station(id);
+        addItem(st);
+        return st;
+    }
+         
+    
+    
+    /**
+     * Create a new APRS object. 
+     * @param owner identifier (typically a callsign) of owner station.
+     * @param id identifier of object.
+     */    
+    public AprsObject newObject(Station owner, String id)
+    {
+        AprsObject st = new AprsObject(owner, id);
+        _map.put(id+'@'+owner.getIdent(), st); 
+        return st;
+    }
+    
+        
+    
+    /**
+     * Remove item.
+     * @param id identifier (typically a callsign) of item.
+     */
+    public synchronized void removeItem(String id)
+    {   
+        String[] idd = id.split("@");
+          
+        if (idd != null && idd.length > 1 && idd[1].equals(_api.getOwnPos().getIdent()))
+            _ownobj.delete(idd[0]);
+            
+        TrackerPoint x = _map.get(id);
+        _map.remove(id);
+        _hasChanged = true; 
+    }
+        
+        
+        
+        
+        
+        
+    /****************************
+     * Item search methods
+     ****************************/
+     
+    /**
+     * Return a list of trackerpoints where the ident has the given prefix. 
+     * @Param srch Prefix 
+     */
+    public List<TrackerPoint> searchPrefix(String srch)
+    {
+        if (srch == null)
+           return new LinkedList();
+        return _map.values().stream().filter( s ->
+           ( s.getIdent().toUpperCase().startsWith(srch) )).collect(Collectors.toList());
+    }
+     
+     
+    /**
+     * Search in the database of trackerpoints. 
+     * Return a list of trackerpoints where ident or description matches the given search 
+     * expression AND all the tags in the list.
+     *
+     * If the search expression is prefixed with "REG:", it is regarded as a regular 
+     * expression, otherwise it is a simple wildcard expression.
+     *
+     * @param srch Search expression.
+     * @param tags Array of tags (keywords). 
+     */
+    public List<TrackerPoint> search(String srch, String[] tags)
+    {
+         LinkedList<TrackerPoint> result = new LinkedList();
+         srch = srch.toUpperCase();
+         if (srch.matches("REG:.*"))
+           srch = srch.substring(4);
+         else {
+           srch = srch.replaceAll("\\.", Matcher.quoteReplacement("\\."));
+           srch = srch.replaceAll("\\*", Matcher.quoteReplacement("(\\S*)"));
+         }
+         
+         final String _srch = srch;
+         return _map.values().stream().filter( s -> 
+              ( s.getIdent().toUpperCase().matches(_srch) ||
+                   s.getDisplayId().toUpperCase().matches(_srch) ||
+                   s.getDescr().toUpperCase().matches("(.*\\s+)?\\(?("+_srch+")\\)?\\,?(\\s+.*)?") ) &&
+              ( tags==null ? true : 
+                   (Arrays.stream(tags).map(x -> s.tagIsOn(x))
+                                       .reduce((x,y) -> (x && y))).get())
+          ).collect(Collectors.toList());
+    } 
+     
+     
+    /**
+     * Geographical search in the database of trackerpoints. 
+     * Return list of stations within the rectangle defined by uleft (upper left 
+     * corner) and lright (lower right corner).
+     * @param uleft Upper left corner.
+     * @param lright Lower right corner.
+     */
+    public List<TrackerPoint>
+          search(Reference uleft, Reference lright)
+    { 
+          long start = System.nanoTime();
+
+          var res = _map.values().stream().filter( s ->
+               (uleft==null || lright==null || s.isInside(uleft, lright, 0.1, 0.1))
+          ).collect(Collectors.toList()); 
+          
+          long finish = System.nanoTime();
+          long timeElapsed = finish - start;
+          System.out.println("Search Trackerpoints - Time Elapsed (us): " + timeElapsed/1000);
+          return res;
+    }
+    
+    
+    
+    
+    
+    /****************************
+     * Other methods
+     ****************************/
+    
+    /**
+     * Get trail point for an item at a particular time.
+     * @param id identifier (typically a callsign) of item.
+     * @param d time of capture
+     */
     public Trail.Item getTrailPoint(String src, java.util.Date t)
     {
         TrackerPoint st = getItem(src, null);
@@ -118,25 +303,56 @@ public class StationDBImp implements StationDB, Runnable
         return null;
     }
    
-   
-   
-    public int nItems() 
-        { return _map.size(); }
+    
+    
+    /**
+     * Get info on routes. Where APRS packets have travelled.
+     */
+    public RouteInfo getRoutes()
+        { return _routes; }
         
+    
+    
+    /**
+     * Get APRS objects owned by this server. 
+     */    
     public OwnObjects getOwnObjects()
         { return _ownobj; }
 
-    public MessageProcessor getMsgProcessor()
-        { return _msgProc; }
     
-    public RouteInfo getRoutes()
-        { return _routes; }
     
+    /**
+     * Deactivate objects having the given owner and id.
+     */
+    public void deactivateSimilarObjects(String id, Station owner)
+    {
+        Collection<TrackerPoint> dupes =  _map.subMap(id+'@', id+'@'+"zzzzz").values();
+        for (TrackerPoint x : dupes)
+           if (x instanceof AprsObject && !((AprsObject)x).isTimeless() && 
+                  !owner.getIdent().equals(((AprsObject)x).getOwner().getIdent())) {
+               ((AprsObject)x).kill();
+           }
+    }
+    
+    
+    
+    /**
+     * Shutdown. May save state, etc.. 
+     */
+    public void shutdown()
+       { save(); }
+    
+    
+    
+    
+    /******************************
+     * Private helper methods
+     ******************************/
     
     /** 
      * Save (checkpoint) station data to disk file. 
      */
-    public synchronized void save()
+    private synchronized void save()
     {
         if (_hasChanged)
           try {
@@ -162,6 +378,7 @@ public class StationDBImp implements StationDB, Runnable
     }
     
     
+    
     /**
      * Restore station data from disk file. 
      */
@@ -183,8 +400,9 @@ public class StationDBImp implements StationDB, Runnable
           while (true)
           { 
               TrackerPoint st = (TrackerPoint) ifs.readObject(); 
-              if (!_map.containsKey(st.getIdent()))
+              if (!_map.containsKey(st.getIdent())) {
                   _map.put(st.getIdent(), st);
+              }
           }
         }
         catch (EOFException e) { }
@@ -201,7 +419,7 @@ public class StationDBImp implements StationDB, Runnable
      * Removes expired objects and tries to to a little more
      * agressive JVM garbage collection. 
      */
-    public synchronized void garbageCollect()
+    private synchronized void garbageCollect()
     {
          Date now = new Date();  
          _api.log().debug("StationDBImp", "Garbage collection...");
@@ -212,14 +430,14 @@ public class StationDBImp implements StationDB, Runnable
              TrackerPoint st = stn.next();
              if (st.expired()) {
                  /* 
-                  * If persistent and a backing database is present, save it there. 
+                  * If managed and a backing database is present, save it there. 
                   * else keep it in memory (and allow it to be saved to file). 
                   */
-                 if ( st.isPersistent() && _histData != null)
-                    _histData.saveItem(st); 
+                 if ( st.hasTag("MANAGED") && _histData != null)
+                    _histData.saveManagedItem(st); 
                     
-                 /* If nonpersistent or saved to database, remove it. */
-                 if (!st.isPersistent() || _histData != null) {
+                 /* If not managed or saved to database, remove it. */
+                 if (!st.hasTag("MANAGED") || _histData != null) {
                     /* Remove expired items from remotectl log */
                     if (_api.getRemoteCtl() != null)
                         _api.getRemoteCtl().removeExpired(st.getIdent());
@@ -244,150 +462,16 @@ public class StationDBImp implements StationDB, Runnable
          _api.log().debug("StationDBImp", "Garbage collection finished");
     }
     
-    
+        
     
     private synchronized void checkMoving()
     {
+         // FIXME. We do not need to do this for all?? 
          for (TrackerPoint s: _map.values())
             if (s.isChanging(true))
                 _hasChanged = true;
     }
     
-    
-    public synchronized void removeItem(String id)
-    {   
-           String[] idd = id.split("@");
-          
-           if (idd != null && idd.length > 1 && idd[1].equals(_api.getOwnPos().getIdent()))
-                 _ownobj.delete(idd[0]);
-             
-           _map.remove(id);
-           _hasChanged = true; 
-    }
-        
-                
-       
-    public Station getStation(String id, Date t)
-    { 
-         TrackerPoint x = getItem(id, t);
-         if (x instanceof Station) return (Station) x;
-         else return null;
-    }   
-
-    
-    
-    public Station newStation(String id)
-    {  
-        Station st = new Station(id);
-        addPoint(st);
-        return st;
-    }
-        
-        
-    public void addPoint(TrackerPoint s)
-    { 
-        if (_histData != null && s != null && s.getIdent() != null)
-            _histData.updateItem(s);
-        if ( s != null && s.getIdent() != null) {
-            _map.remove(s.getIdent());
-            _map.put(s.getIdent(), s);
-        }
-    }
-        
-        
-    /** 
-     * Create a new APRS object.
-     * Note that an object is in this database identified by 'ident@owner'
-     */
-    public AprsObject newObject(Station owner, String id)
-    {
-        AprsObject st = new AprsObject(owner, id);
-        _map.put(id+'@'+owner.getIdent(), st); 
-        return st;
-    }
-    
-    
-    
-    /**
-     * Deactivate objects having the same name. 
-     */
-    public void deactivateSimilarObjects(String id, Station owner)
-    {
-        Collection<TrackerPoint> dupes =  _map.subMap(id+'@', id+'@'+"zzzzz").values();
-        for (TrackerPoint x : dupes)
-           if (x instanceof AprsObject && !((AprsObject)x).isTimeless() && 
-                  !owner.getIdent().equals(((AprsObject)x).getOwner().getIdent())) {
-               ((AprsObject)x).kill();
-           }
-    }
-    
-    
-    
-    
-    /**
-     * Return a list of trackerpoints where the ident has the given prefix. 
-     * @Param srch Prefix 
-     */
-    public List<TrackerPoint> getAllPrefix(String srch)
-    {
-        if (srch == null)
-           return new LinkedList();
-        return _map.values().stream().filter( s ->
-           ( s.getIdent().toUpperCase().startsWith(srch) )).collect(Collectors.toList());
-    }    
-            
-
-    
-    /**
-     * Search in the database of trackerpoints. 
-     * Return a list of trackerpoints where ident or description matches the given search 
-     * expression AND all the tags in the list.
-     *
-     * If the search expression is prefixed with "REG:", it is regarded as a regular 
-     * expression, otherwise it is a simple wildcard expression.
-     *
-     * @Param srch Search expression.
-     * @Param tags Array of tags (keywords). 
-     */
-    public List<TrackerPoint> search(String srch, String[] tags)
-    {
-         LinkedList<TrackerPoint> result = new LinkedList();
-         srch = srch.toUpperCase();
-         if (srch.matches("REG:.*"))
-           srch = srch.substring(4);
-         else {
-           srch = srch.replaceAll("\\.", Matcher.quoteReplacement("\\."));
-           srch = srch.replaceAll("\\*", Matcher.quoteReplacement("(\\S*)"));
-         }
-         
-         final String _srch = srch;
-         return _map.values().stream().filter( s -> 
-              ( s.getIdent().toUpperCase().matches(_srch) ||
-                   s.getDisplayId().toUpperCase().matches(_srch) ||
-                   s.getDescr().toUpperCase().matches("(.*\\s+)?\\(?("+_srch+")\\)?\\,?(\\s+.*)?") ) &&
-              ( tags==null ? true : 
-                   (Arrays.stream(tags).map(x -> s.tagIsOn(x))
-                                       .reduce((x,y) -> (x && y))).get())
-          ).collect(Collectors.toList());
-        
-    }
-    
-    
-       
-    /**
-     * Geographical search in the database of trackerpoints. 
-     * Return list of stations within the rectangle defined by uleft (upper left 
-     * corner) and lright (lower right corner) 
-     */   
-    public List<TrackerPoint>
-          search(Reference uleft, Reference lright)
-    { 
-         return _map.values().stream().filter( s ->
-               (uleft==null || lright==null || s.isInside(uleft, lright, 0.1, 0.1))
-          ).collect(Collectors.toList()); 
-    }
-    
-       
     
     /**
      * Thread to periodically checkpoint station data to disk, and remove

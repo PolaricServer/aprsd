@@ -74,10 +74,7 @@ package no.polaric.aprsd.http
        def action(req : Request): NodeSeq =
           if (!getAuthInfo(req).sar)
               <h3>{"You are not authorized for such operations"}</h3>
-          else if ("gc".equals(cmd)) {
-              _api.getDB().garbageCollect()
-              <h3>GC, ok</h3>
-          }
+
           else if ("clearobj".equals(cmd)) {
               _api.getDB().getOwnObjects().clear()
               <h3>{"Clear own objects, ok"}</h3>

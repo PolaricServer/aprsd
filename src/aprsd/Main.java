@@ -67,7 +67,10 @@ public class Main implements ServerAPI
     
    public StationDB getDB() 
     { return db; }
-   
+       
+   public void setDB(StationDB d)
+    { db=d; }
+       
    public AprsParser getAprsParser()
     { return parser; }
        
@@ -316,18 +319,6 @@ public class Main implements ServerAPI
            /* Igate */
            igate = new Igate(api);
 
-           /* Own position */
-           
-           
-           System.out.println("GPS ON = "+getBoolProperty("ownposition.gps.on", false));
-           
-           
-           ownpos = new GpsPosition(api);
-           db.addPoint(ownpos); 
-           
-                      
-           /* APRS objects */
-           ownobjects = db.getOwnObjects(); 
            
            /* Configure and Start HTTP server */
            int http_port = getIntProperty("httpserver.port", 8081);
@@ -368,13 +359,22 @@ public class Main implements ServerAPI
                igate.setChannels(ch2, ch1);
                igate.activate(this);
            }
-          
+         
+         
+           /* Own position */
+           System.out.println("GPS ON = "+getBoolProperty("ownposition.gps.on", false));
+           ownpos = new GpsPosition(api);
+           db.addItem(ownpos); 
+           
+           /* APRS objects */
+           ownobjects = db.getOwnObjects(); 
+                     
           /* Set channels on various services */
            db.getMsgProcessor().setChannels(ch2, ch1);  
            ownpos.setChannels(ch2, ch1);
-           ownobjects.setChannels(ch2, ch1);           
-                      
-                       
+           ownobjects.setChannels(ch2, ch1);  
+           
+           
            /* Server statistics */
            if (getBoolProperty("serverstats.on", false)) {
                log.info("Main", "Activate server statistics");
@@ -450,7 +450,7 @@ public class Main implements ServerAPI
 
          System.out.println("*** Polaric APRSD shutdown"); 
          PluginManager.deactivateAll();
-         if (db  != null) db.save(); 
+         if (db  != null) db.shutdown(); 
          if (ch1 != null) ch1.deActivate();
          if (ch2 != null) ch2.deActivate();
     }

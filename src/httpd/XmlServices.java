@@ -68,7 +68,7 @@ public class XmlServices extends ServerBase
           int i = ident.lastIndexOf('-');
           if (i > -1)    
              ident = ident.substring(0, i);
-          List<TrackerPoint> l = _api.getDB().getAllPrefix(ident);
+          List<TrackerPoint> l = _api.getDB().searchPrefix(ident);
           if (l.size() > 0)
               s = l.get(0);
        }

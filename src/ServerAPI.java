@@ -99,6 +99,10 @@ public interface ServerAPI
     /** Get data interface. */
     public StationDB getDB();
 
+    
+    /** Set data interface */
+    public void setDB(StationDB db);
+    
 
     /** Get APRS parser */
     public AprsParser getAprsParser();
