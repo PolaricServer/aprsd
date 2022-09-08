@@ -1,3 +1,9 @@
+polaric-aprsd (2.10+) UNRELEASED; urgency=medium
+
+  * Development 
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Tue, 06 Sep 2022 23:19:53 +0200
+
 polaric-aprsd (2.10) stable; urgency=medium
 
   * Adaptations for DbSync - allow syncing user-db with DbSync
