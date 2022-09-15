@@ -66,14 +66,6 @@ public interface StationDB
     
     
         
-    
-    /**
-     * Get messaging processor.
-     */
-    public MessageProcessor getMsgProcessor();
-    
-    
-        
     /** 
      * Get interface to database storage (plugin) 
      */

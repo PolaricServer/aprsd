@@ -131,6 +131,7 @@ class Source extends Pred
 
 
 
+
 /**
  * Regex match of APRS symbol. 
  * 

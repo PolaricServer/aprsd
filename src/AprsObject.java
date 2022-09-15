@@ -49,7 +49,7 @@ public class AprsObject extends AprsPoint implements Serializable
      * Attributes of object/item record (APRS data)
      */
     private String    _ident; 
-    private Station   _owner;
+    private Station   _owner; // FIXME: use ident instead
     private boolean   _killed = false;
     private boolean   _timeless = false;
        /* If an object is timeless it also permanent, i.e. it allows other permanent objects 
@@ -149,7 +149,8 @@ public class AprsObject extends AprsPoint implements Serializable
         _symbol = pd.symbol; 
         _altsym = pd.symtab;
         _killed = false;  
-        _owner.setUpdated(new Date());
+        _owner.setUpdated(new Date());      
+        _api.getDB().updateItem(this);
     }
     
     

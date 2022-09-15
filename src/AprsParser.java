@@ -749,6 +749,7 @@ public class AprsParser implements AprsChannel.Receiver
         return (new BigInteger(bytes)).intValue() >> 12;
     }
     
+    
     private static int b64to18bit(String s) {
         com.mindprod.base64.Base64 b64 = new com.mindprod.base64.Base64();
         byte[] bytes = b64.decode(s+"A");
@@ -761,6 +762,8 @@ public class AprsParser implements AprsChannel.Receiver
         } 
         return x;
     }
+    
+    
     
     /** 
      * Parse standard position data.
@@ -855,10 +858,10 @@ public class AprsParser implements AprsChannel.Receiver
           comment = comment.trim();
           if (comment.length() < 1 || comment.equals(" "))
              comment = null;
-            
-           station.update(time, pd, comment, pathinfo );           
-           station.autoTag();
-           for (AprsHandler h:_subscribers)
+             
+          station.autoTag();
+          station.update(time, pd, comment, pathinfo );           
+          for (AprsHandler h:_subscribers)
               h.handlePosReport(p.source, station.getIdent(), time, pd, comment, pathinfo ); 
     }
     

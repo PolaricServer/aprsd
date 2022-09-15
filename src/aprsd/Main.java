@@ -37,6 +37,7 @@ public class Main implements ServerAPI
    public  static AprsChannel ch1 = null;
    public  static AprsChannel ch2 = null;
    public static  Igate igate  = null;
+   public static  MessageProcessor msgProc = null; 
    public static  OwnObjects ownobjects; 
    public static  OwnPosition ownpos = null; 
    public static  BullBoard bullboard = null;
@@ -81,7 +82,7 @@ public class Main implements ServerAPI
     { return igate; }
     
    public MessageProcessor getMsgProcessor()
-    { return db.getMsgProcessor(); /* Move from StationDB */ }
+    { return msgProc; }
                     
    public BullBoard getBullBoard() 
     { return bullboard; }
@@ -100,7 +101,7 @@ public class Main implements ServerAPI
        ch1 = ch; 
        if (igate != null) 
            igate.setChannels(ch2, ch1);
-       db.getMsgProcessor().setChannels(ch2, ch1);
+       msgProc.setChannels(ch2, ch1);
        ownpos.setChannels(ch2, ch1);
        ownobjects.setChannels(ch2, ch1); 
    }
@@ -290,13 +291,9 @@ public class Main implements ServerAPI
 
            properties().put("API", this);
                       
-           /* Database of stations/objects */
-           db  = new StationDBImp(api);   
-           
-           /* Start parser and connect it to channel(s) if any */
-           parser = new AprsParser(api, getMsgProcessor());
-           
-           bullboard = new BullBoard(api, getMsgProcessor());
+           msgProc = new MessageProcessor(this);
+           parser = new AprsParser(api, msgProc);
+           bullboard = new BullBoard(api, msgProc);
                      
            
            /* Initialize signs early since plugins may use it (see below) */
@@ -308,7 +305,7 @@ public class Main implements ServerAPI
            
            if (getBoolProperty("remotectl.on", false)) {
                log.info("Main", "Activate Remote Control");
-               rctl = new RemoteCtl(api, db.getMsgProcessor());
+               rctl = new RemoteCtl(api, msgProc);
            }
             
            if (getBoolProperty("sarurl.on", false)) {
@@ -331,10 +328,12 @@ public class Main implements ServerAPI
             /* Add main webservices */
            ws.addHandler(new Webservices(api), null);
            ws.addHandler(new ConfigService(api), null); 
-           
+            
+
            /* Plug-ins */           
            PluginManager.addList(getProperty("plugins", ""));
-                      
+           if (db == null)
+                new StationDBImp(api);
            
            /* 
             * Channel setup. This should be done after plugins are installed since plugins may
@@ -370,7 +369,7 @@ public class Main implements ServerAPI
            ownobjects = db.getOwnObjects(); 
                      
           /* Set channels on various services */
-           db.getMsgProcessor().setChannels(ch2, ch1);  
+           msgProc.setChannels(ch2, ch1);  
            ownpos.setChannels(ch2, ch1);
            ownobjects.setChannels(ch2, ch1);  
            

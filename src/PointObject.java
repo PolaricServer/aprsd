@@ -16,13 +16,17 @@ package no.polaric.aprsd;
 import uk.me.jstott.jcoord.*; 
 import java.util.*;
 import java.io.*;
+import org.nustaq.serialization.FSTConfiguration;
+
+
+
 
 /**
  * Object at a single location.
  * Every point has a location, icon and description. 
  */
  
-public abstract class PointObject extends Point implements Cloneable
+public abstract class PointObject extends Point implements Cloneable, Serializable
 {             
 
     /* 
@@ -43,12 +47,26 @@ public abstract class PointObject extends Point implements Cloneable
       
       
     /**
+     * Save tags to byte array
+     */
+    public static byte[] saveTags(FSTConfiguration fst) 
+      { return fst.asByteArray(_tagUse); }
+    
+    
+    /**
      * Restore tags from file. 
      */
     public static void restoreTags(ObjectInput ifs) 
      throws IOException,ClassNotFoundException
-      { _tagUse = (SortedMap<String,Integer>) ifs.readObject(); }
-    
+      { _tagUse = (SortedMap<String, Integer>) ifs.readObject(); }
+      
+      
+    /**
+     * Restore tags from byte array. 
+     */
+    public static void restoreTags(FSTConfiguration fst, byte[] b) 
+      { _tagUse = (SortedMap<String, Integer>) fst.asObject(b); }
+      
         
     /**
      * Increment the count for the given tag. 

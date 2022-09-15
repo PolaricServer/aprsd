@@ -208,7 +208,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
              ObjectOutput ofs = new ObjectOutputStream(fs);
              
              ofs.writeObject(_routes);
-             _msgProc.save();
+             _api.getMsgProcessor().save();
              _ownobj.save(ofs);
              PointObject.saveTags(ofs);
              for (TrackerPoint s: _map.values()) { 
@@ -239,7 +239,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
           _api.log().debug("StationDBImp", "Restoring routes...");
           _routes = (RouteInfo) ifs.readObject();
           _api.log().debug("StationDBImp", "Restoring msgproc and ownobj...");    
-          _msgProc.restore();
+          _api.getMsgProcessor().restore();
           _ownobj.restore(ifs);
           _api.log().debug("StationDBImp", "Restoring tags...");
           PointObject.restoreTags(ifs);
@@ -283,7 +283,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
                  if ( st.hasTag("MANAGED") && _histData != null)
                     _histData.saveManagedItem(st); 
                     
-                 /* If not managed or saved to database, remove it. */
+                 /* If not managed or if saved to database, remove it. */
                  if (!st.hasTag("MANAGED") || _histData != null) {
                     /* Remove expired items from remotectl log */
                     if (_api.getRemoteCtl() != null)
@@ -314,6 +314,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     private synchronized void checkMoving()
     {
          // FIXME. We do not need to do this for all?? 
+         // FIXME. Do we need to do this? 
          for (TrackerPoint s: _map.values())
             if (s.isChanging(true))
                 _hasChanged = true;

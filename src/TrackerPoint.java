@@ -29,7 +29,6 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     private   static long        _nonMovingTime = 1000 * 60 * 5; 
     private   static Notifier    _change;
     protected static ServerAPI   _api = null;
-    protected static StationDB   _db  = null;
     protected static ColourTable _colTab = null;
     private   static long        _posUpdates = 0;
     protected static long        _aprsPosUpdates = 0;
@@ -41,7 +40,6 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     public static void setApi(ServerAPI api) { 
        
        _api = api; 
-       _db = _api.getDB(); 
        _colTab = new ColourTable (api, System.getProperties().getProperty("confdir", ".")+"/trailcolours");
        AprsPoint.setApi(api);
     }
@@ -110,7 +108,6 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
             
     private   String   _alias;    
     private   boolean  _hidelabel = false; 
-    protected boolean  _persistent = false; 
     private   String   _user; 
   
   
@@ -139,6 +136,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
 
     public synchronized void updatePosition(Date ts, Reference newpos)
     { 
+         _expired = false;
          if (_position == null)
              setChanging();
          setUpdated(ts == null ? new Date() : ts);
@@ -213,8 +211,8 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
         {
            if (_trail.length() == 1)
                _trailcolor = _colTab.nextColour();
-           if (_db.getRoutes() != null)
-              _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
+           if (_api.getDB().getRoutes() != null)
+              _api.getDB().getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
            setChanging();   
         }
         return true;
@@ -327,8 +325,6 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
         _lastChanged = new Date();  
         if ( _change!= null ) 
             _change.signal(this); 
-            
-        _db.updateItem(this);
     } 
            
    
@@ -345,6 +341,8 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * Return true and signal a change if position etc. is updated recently.
      * This must be called periodically to ensure that asyncronous waiters
      * are updated when a station has stopped updating. 
+     *
+     * FIXME: Maybe this signalling is not necessary? We can wait a couple of minutes. 
      */ 
     public synchronized boolean isChanging(boolean signal) 
     {

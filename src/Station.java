@@ -115,14 +115,16 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     public void setPathInfo(String p)
        { _pathinfo = p; }
        
-    public Set<String> getTrafficFrom()
-       {  if (_db==null || _db.getRoutes() == null)
-		return null; 
-	  return _db.getRoutes().getToEdges(getIdent()); }
+    public Set<String> getTrafficFrom() { 
+        StationDB db = _api.getDB();
+        if (db==null || db.getRoutes() == null)
+            return null; 
+        return db.getRoutes().getToEdges(getIdent()); 
+    }
        
                        
     public Set<String> getTrafficTo()
-       { return _db.getRoutes().getFromEdges(getIdent());}
+       { return _api.getDB().getRoutes().getFromEdges(getIdent());}
               
               
     public boolean isInfra() { 
@@ -201,7 +203,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     
     @Override public synchronized void reset()
     {  
-        _db.getRoutes().removeNode(this.getIdent());
+        _api.getDB().getRoutes().removeNode(this.getIdent());
         super.reset(); 
     }
      
@@ -214,10 +216,11 @@ public class Station extends AprsPoint implements Serializable, Cloneable
         
     public synchronized void update(Date ts, AprsHandler.PosData pd, String descr, String pathinfo)
     { 
+        StationDB db = _api.getDB();
         if (saveToTrail(ts, pd.pos, pd.speed, pd.course, _pathinfo)) {
              updatePosition(ts, pd.pos, pd.ambiguity);
-             if (_db != null && _db.getRoutes() != null)
-                _db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
+             if (db != null && db.getRoutes() != null)
+                db.getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
            
             setSpeed(pd.speed);
             setCourse(pd.course);
@@ -236,7 +239,8 @@ public class Station extends AprsPoint implements Serializable, Cloneable
             _expired = false;
             setChanging();
         }
-        isChanging(); 
+        isChanging();         
+        _api.getDB().updateItem(this);
     }
     
 
@@ -246,9 +250,9 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     {
         if (!super._expired()) 
             return false;
-        if (!_db.getOwnObjects().mayExpire(this))
+        if (!_api.getDB().getOwnObjects().mayExpire(this))
             return false;
-        _db.getRoutes().removeNode(this.getIdent());
+        _api.getDB().getRoutes().removeNode(this.getIdent());
         return true; 
     }
     

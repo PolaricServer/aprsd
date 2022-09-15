@@ -29,7 +29,6 @@ public abstract class StationDBBase
     protected boolean    _hasChanged = false; 
     protected RouteInfo  _routes;
     protected OwnObjects _ownobj; 
-    protected MessageProcessor _msgProc; 
     protected StationDB.Hist _histData = null;
     protected ServerAPI  _api; 
 
@@ -37,8 +36,8 @@ public abstract class StationDBBase
     public StationDBBase(ServerAPI api)
     {
         _api = api;
+        _routes = new RouteInfo();
         _ownobj = new OwnObjects(api); 
-        _msgProc = new MessageProcessor(api);
     }
     
 
@@ -50,10 +49,6 @@ public abstract class StationDBBase
     public static long usedMemory ()
         { return s_runtime.totalMemory () - s_runtime.freeMemory (); }
 
-    
-    public MessageProcessor getMsgProcessor()
-        { return _msgProc; }
-        
         
     /** Register the implementation of database storage (plugin) */
     public void setHistDB(StationDB.Hist d)
