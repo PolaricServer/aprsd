@@ -19,6 +19,8 @@ import uk.me.jstott.jcoord.*;
 import java.util.concurrent.*;
 import java.util.regex.*;
 import java.util.stream.*;
+import org.nustaq.serialization.FSTConfiguration;
+
 
 
 /**
@@ -31,7 +33,21 @@ public abstract class StationDBBase
     protected OwnObjects _ownobj; 
     protected StationDB.Hist _histData = null;
     protected ServerAPI  _api; 
-
+    protected static final FSTConfiguration fst = FSTConfiguration.createDefaultConfiguration();
+    
+    static {
+        /* 
+         * Register classes of objects that are serialized/deserialized with FST. 
+         * Remember that changes to this list invalidates the data stored and the order is 
+         * significant. 
+         */
+        fst.registerClass(LatLng.class, Trail.class, TPoint.class, Trail.Item.class, 
+            Station.Status.class, TrackerPoint.class, Station.class, Station.Status.class,
+            AprsObject.class, Telemetry.class, Telemetry.Data.class, Telemetry.ChannelMeta.class, 
+            Telemetry.BinChannelMeta.class, Telemetry.NumChannelMeta.class, 
+            HashMap.class, HashSet.class, TreeMap.class );
+    }
+    
     
     public StationDBBase(ServerAPI api)
     {

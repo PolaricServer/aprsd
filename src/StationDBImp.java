@@ -19,6 +19,8 @@ import uk.me.jstott.jcoord.*;
 import java.util.concurrent.*;
 import java.util.regex.*;
 import java.util.stream.*;
+import org.nustaq.serialization.*;
+
 
 
 /**
@@ -205,17 +207,18 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
           try {
              _api.log().info("StationDBImp", "Saving data...");
              FileOutputStream fs = new FileOutputStream(_file);
-             ObjectOutput ofs = new ObjectOutputStream(fs);
+             FSTObjectOutput ofs = new FSTObjectOutput(fs);
              
              ofs.writeObject(_routes);
              _api.getMsgProcessor().save();
              _ownobj.save(ofs);
              PointObject.saveTags(ofs);
+             ofs.writeInt(_map.size());
              for (TrackerPoint s: _map.values()) { 
                 if (s.getIdent().matches("("+_stnsave+")|.*\\@("+_stnsave+")"))
                     ofs.writeObject(s); 
              }
-
+             ofs.close();
            }
            catch (Exception e) {
                _api.log().warn("StationDBImp", "Cannot save data: "+e);
@@ -231,10 +234,11 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
      */
     private synchronized void restore()
     {
+        FSTObjectInput ifs = null; 
         try {
           _api.log().info("StationDBImp", "Restoring point data...");
           FileInputStream fs = new FileInputStream(_file);
-          ObjectInput ifs = new ObjectInputStream(fs);
+          ifs = new FSTObjectInput(fs);
           
           _api.log().debug("StationDBImp", "Restoring routes...");
           _routes = (RouteInfo) ifs.readObject();
@@ -244,15 +248,16 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
           _api.log().debug("StationDBImp", "Restoring tags...");
           PointObject.restoreTags(ifs);
           _api.log().debug("StationDBImp", "Restoring points...");
-          while (true)
+          int size = ifs.readInt();
+          for (int i=0; i<size; i++)
           { 
               TrackerPoint st = (TrackerPoint) ifs.readObject(); 
               if (!_map.containsKey(st.getIdent())) {
                   _map.put(st.getIdent(), st);
               }
           }
+          ifs.close();
         }
-        catch (EOFException e) { }
         catch (Exception e) {
             _api.log().warn("StationDBImp", "Cannot restore data: "+e);
             _map.clear();
