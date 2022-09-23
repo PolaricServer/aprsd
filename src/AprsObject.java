@@ -74,7 +74,8 @@ public class AprsObject extends AprsPoint implements Serializable
       
     
     public String getIdent()
-       { return _ident+'@'+_owner.getIdent(); }
+       { return _ident+'@'+
+           (_owner!= null ? _owner.getIdent() : "UNKNOWN"); }
        
        
     public void setOwner(Station o)

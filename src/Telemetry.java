@@ -202,6 +202,8 @@ public class Telemetry implements Serializable
         
         /* Notify client about change */
         var api = TrackerPoint.getApi();
+        if (_ident == null)
+            return;
         api.getWebserver().getPubSub().createRoom("telemetry:"+_ident, (Class) null);
         api.getWebserver().getPubSub().put("telemetry:"+_ident, null);
     }
