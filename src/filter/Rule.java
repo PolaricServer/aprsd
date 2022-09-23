@@ -15,6 +15,8 @@
 package no.polaric.aprsd.filter;
 import no.polaric.aprsd.*;
 
+
+
 /**
  * A rule is something that results in an action when applied to a point and a scale. 
  * It is a recursive structure meaning that a rule can contain other rules (see RuleSet). 

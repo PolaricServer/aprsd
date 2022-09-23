@@ -27,6 +27,7 @@ public class RuleSet implements Rule
 {
     private List<Rule> rlist = new LinkedList<Rule>(); 
     private Set<String> _groups = new HashSet<String>();
+    private List<String> _tags   = new ArrayList<String>(); 
     private boolean _public = false; 
     private boolean _nologin = false;
     private boolean _all = false; 
@@ -101,6 +102,18 @@ public class RuleSet implements Rule
         add(r);
     }
 
+    
+    public void addTag(String tag) {
+        _tags.add(tag);
+    }
+    
+    
+    public String[] getTags() {
+        return _tags.toArray(new String[0]);
+    }
+    
+    
+    
     /**
      * Apply the ruleset to a point.
      * @param p TrackerPoint object.  

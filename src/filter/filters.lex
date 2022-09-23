@@ -51,6 +51,9 @@ EXPORT|export
          
 PROFILE|profile
          { return Parser.PROFILE; }
+  
+TAGS|tags
+         { return Parser.TAGS; }
          
 AUTOTAG|autotag
          { return Parser.AUTOTAG; }
@@ -62,6 +65,9 @@ ALL|all
          { return Parser.ALL;  }
          
 INCLUDE|include
+         { return Parser.INCLUDE; }
+
+EXCLUDE|exclude
          { return Parser.INCLUDE; }
          
 AND|"and"|\&     

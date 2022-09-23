@@ -12,7 +12,7 @@ import no.polaric.aprsd.ServerAPI;
 %token <obj>   NUM
 
 %token <obj>   BOOLEAN VALUE
-%token         AND OR NOT ARROW PROFILE AUTOTAG PUBLIC ALL INCLUDE EXPORT TAG
+%token         AND OR NOT ARROW PROFILE AUTOTAG PUBLIC ALL INCLUDE EXPORT TAG TAGS
 %token         ERROR
 
 %type <obj>  action actions expr rule tag_rule public
@@ -76,6 +76,8 @@ rules : rules rule           { if ($2 != null)
 rule : expr ARROW '{' actions '}' ';' 
                               { $$ = new Rule.Single((Pred) $1, action); } 
                               
+     | INCLUDE TAGS '{' taglist '}' ';' 
+                              
      | EXPORT STRING ARROW permissions ';'
                               { ruleset.setDescr($2); ruleset.setLine(lexer.line()); $$ = null; }
                               
@@ -91,7 +93,10 @@ rule : expr ARROW '{' actions '}' ';'
      ;
 
      
-     
+taglist:  taglist ',' IDENT  { ruleset.addTag($3); }
+        | IDENT              { ruleset.addTag($1); }
+        ; 
+        
 permissions : PUBLIC          { ruleset.setPublic(); }
             | ALL             { ruleset.setAll(); }
             | '{' groups '}' 
