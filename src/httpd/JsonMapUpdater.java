@@ -83,7 +83,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 boolean allowed = (login() && trusted()); 
              
                 RuleSet vfilt = ViewFilter.getFilter(_filter, allowed);
-                for (TrackerPoint s: _api.getDB().search(_uleft, _lright)) 
+                for (TrackerPoint s: _api.getDB().search(_uleft, _lright, vfilt)) 
                 {          
                     /* Apply filter. */
                     Action action = vfilt.apply(s, _scale); 
@@ -93,7 +93,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                            action.hideAll() ||
                            (_tag != null && !s.hasTag(_tag))
                         )
-                        continue; 
+                      continue; 
                 
                     /* Add point to delete-list */
                     if (!s.visible() || (_api.getSar() != null && !allowed && _api.getSar().filter(s))) {

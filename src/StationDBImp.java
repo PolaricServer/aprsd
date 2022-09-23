@@ -20,7 +20,7 @@ import java.util.concurrent.*;
 import java.util.regex.*;
 import java.util.stream.*;
 import org.nustaq.serialization.*;
-
+import no.polaric.aprsd.filter.*;
 
 
 /**
@@ -148,7 +148,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
      * @param lright Lower right corner.
      */
     public List<TrackerPoint>
-        search(Reference uleft, Reference lright)
+        search(Reference uleft, Reference lright, RuleSet filter)
     { 
         long start = System.nanoTime();
 
