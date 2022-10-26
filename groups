@@ -1,0 +1,9 @@
+#
+# Groups config
+# Modify this for your own needs. 
+#
+# Id, name, Tags (regex), SAR-level access
+#
+SAR, SAR-level access, .*, true 
+
+
