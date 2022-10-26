@@ -87,8 +87,9 @@ public class AprsObject extends AprsPoint implements Serializable
        
     
     @Override
-    public Source getSource()
-       { return _owner.getSource(); }
+    public Source getSource() { 
+        return (_owner==null ? null : _owner.getSource()); 
+    }
        
        
     /**
