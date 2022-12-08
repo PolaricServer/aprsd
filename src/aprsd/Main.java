@@ -288,97 +288,99 @@ public class Main implements ServerAPI
     public void start()
     {
         try {
-
-           properties().put("API", this);
-                      
-           msgProc = new MessageProcessor(this);
-           parser = new AprsParser(api, msgProc);
-           bullboard = new BullBoard(api, msgProc);
+            properties().put("API", this);
+            msgProc = new MessageProcessor(this);
+            parser = new AprsParser(api, msgProc);
+            bullboard = new BullBoard(api, msgProc);
                      
            
-           /* Initialize signs early since plugins may use it (see below) */
-           Signs.init(api);
+            /* Initialize signs early since plugins may use it (see below) */
+            Signs.init(api);
+            TrackerPoint.setApi(api);
+            Station.init(api); 
 
-           TrackerPoint.setApi(api);
-           Station.init(api); 
-
-           
-           if (getBoolProperty("remotectl.on", false)) {
+            if (getBoolProperty("remotectl.on", false)) {
                log.info("Main", "Activate Remote Control");
                rctl = new RemoteCtl(api, msgProc);
-           }
+            }
             
-           if (getBoolProperty("sarurl.on", false)) {
+            if (getBoolProperty("sarurl.on", false)) {
                log.info("Main", "Activate Sar URL");
                sarurl = new SarUrl(api);
-           }
+            }
   
-           /* Igate */
-           igate = new Igate(api);
+            /* Igate */
+            igate = new Igate(api);
 
-           
-           /* Configure and Start HTTP server */
-           int http_port = getIntProperty("httpserver.port", 8081);
-           ws = new WebServer(api, http_port);
-           ws.start();
-           TrackerPoint.setNotifier(ws.getNotifier());
-           log.info("Main", "HTTP/WS server ready on port " + http_port);
-           
-           
-            /* Add main webservices */
-           ws.addHandler(new Webservices(api), null);
-           ws.addHandler(new ConfigService(api), null); 
             
+            /* Configure and Start HTTP server */
+            int http_port = getIntProperty("httpserver.port", 8081);
+            ws = new WebServer(api, http_port);
 
-           /* Plug-ins */           
-           PluginManager.addList(getProperty("plugins", ""));
-           if (db == null)
-                new StationDBImp(api);
+            db = new StationDBImp(api);
+            
+            /* APRS objects */
+            ownobjects = db.getOwnObjects(); 
+            
+            /* 
+             * Plug-ins. These are started after the webserver is instantiated since they may use it or
+             * start websockets 
+             */           
+            PluginManager.addList(getProperty("plugins", ""));
+            ws.start();
+            
+            /* Start webservices (REST API) of plugins after Webserver is started */
+            PluginManager.startWebservices();
+            
+            /* Add main webservices */
+            ws.addHandler(new Webservices(api), null);
+            ws.addHandler(new ConfigService(api), null); 
+            TrackerPoint.setNotifier(ws.getNotifier());
+            log.info("Main", "HTTP/WS server ready on port " + http_port);
            
-           /* 
-            * Channel setup. This should be done after plugins are installed since plugins may
-            * add channel types. 
-            */
-           instantiate_channels(); 
            
-           /* 
-            * Default channels
-            */
-           String ch_inet_name = getProperty("channel.default.inet", "aprsis"); 
-           String ch_rf_name = getProperty("channel.default.rf", "tnc");
-           ch1 = (ch_inet_name.length() > 0 ? (AprsChannel) _chanManager.get(ch_inet_name) : null);
-           ch2 = (ch_rf_name.length() > 0  ? (AprsChannel) _chanManager.get(ch_rf_name) : null);          
+            /* 
+             * Channel setup. This should be done after plugins are installed since plugins may
+             * add channel types. 
+             */
+            instantiate_channels(); 
+           
+            /* 
+             * Default channels
+             */
+            String ch_inet_name = getProperty("channel.default.inet", "aprsis"); 
+            String ch_rf_name = getProperty("channel.default.rf", "tnc");
+            ch1 = (ch_inet_name.length() > 0 ? (AprsChannel) _chanManager.get(ch_inet_name) : null);
+            ch2 = (ch_rf_name.length() > 0  ? (AprsChannel) _chanManager.get(ch_rf_name) : null);          
            
            
-           /* 
-            * Igate 
-            */     
-           if (getBoolProperty("igate.on", false)) {
+            /* 
+             * Igate 
+             */     
+            if (getBoolProperty("igate.on", false)) {
                log.info("Main", "Activate IGATE");
                igate.setChannels(ch2, ch1);
                igate.activate(this);
-           }
+            }
          
          
-           /* Own position */
-           System.out.println("GPS ON = "+getBoolProperty("ownposition.gps.on", false));
-           ownpos = new GpsPosition(api);
-           db.addItem(ownpos); 
-           
-           /* APRS objects */
-           ownobjects = db.getOwnObjects(); 
+            /* Own position */
+            System.out.println("GPS ON = "+getBoolProperty("ownposition.gps.on", false));
+            ownpos = new GpsPosition(api);
+            db.addItem(ownpos); 
+
                      
-          /* Set channels on various services */
-           msgProc.setChannels(ch2, ch1);  
-           ownpos.setChannels(ch2, ch1);
-           ownobjects.setChannels(ch2, ch1);  
+           /* Set channels on various services */
+            msgProc.setChannels(ch2, ch1);  
+            ownpos.setChannels(ch2, ch1);
+            ownobjects.setChannels(ch2, ch1);  
            
            
-           /* Server statistics */
-           if (getBoolProperty("serverstats.on", false)) {
+            /* Server statistics */
+            if (getBoolProperty("serverstats.on", false)) {
                log.info("Main", "Activate server statistics");
                stats = new StatLogger(api, "serverstats", "serverstats.log");
-           }
+            }
         }
         catch( Exception ioe )
         {

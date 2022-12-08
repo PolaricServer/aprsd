@@ -27,6 +27,9 @@ public class PluginManager
        
        /** Return a description of plugin */
        public String getDescr();
+       
+       /** Start webservices (REST APIs) */
+       public default void startWebservice(ServerAPI a) {} 
    }
    
   
@@ -115,8 +118,17 @@ public class PluginManager
         for (String x : plugins)
            add(x);
     }
+    
  
  
+ 
+    public static void startWebservices() {
+        for (Plugin p : _plugins.values())
+            p.startWebservice(api);
+    }
+    
+    
+    
  
     public static void deactivateAll()
     {

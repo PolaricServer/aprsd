@@ -86,9 +86,36 @@ public class WebServer implements ServerAPI.Web
        _port = port;
        _api = api;
        
-      _pubsub     = new PubSub(_api, true); 
-      _jmapupdate = new JsonMapUpdater(_api, true);
-      _auth = new AuthService(api); 
+       _pubsub     = new PubSub(_api, true); 
+       _jmapupdate = new JsonMapUpdater(_api, true);
+       _auth = new AuthService(api); 
+      
+        /*  https://blog.codecentric.de/en/2017/07/fine-tuning-embedded-jetty-inside-spark-framework/  */
+        EmbeddedServers.add(EmbeddedServers.Identifiers.JETTY, 
+         (Routes routeMatcher, StaticFilesConfiguration staticFilesConfiguration, ExceptionMapper ex, boolean hasMultipleHandler) -> 
+         {
+             JettyHandler handler = setupHandler(routeMatcher, staticFilesConfiguration, hasMultipleHandler);
+             configSession(handler);
+             
+             return new EmbeddedJettyServer(
+               new JettyServer(),           
+               handler);
+         });
+        
+        /* Serving static files */
+        staticFiles.externalLocation(
+            _api.getProperty("httpserver.filedir", "/usr/share/polaric") );  
+            
+        
+       
+        /* 
+         * websocket services. 
+         * Note that these are trusted in the sense that we assume that authorizations and
+         * userid will only be available if properly authenticated. THIS SHOULD BE TESTED. 
+         */
+        webSocket("/notify", _pubsub);
+        webSocket("/jmapdata", _jmapupdate);
+
     }
  
  
@@ -125,35 +152,9 @@ public class WebServer implements ServerAPI.Web
      
     public void start() throws Exception {
         System.out.println("*** WebServer: Starting...");
-      
-
-        /*  https://blog.codecentric.de/en/2017/07/fine-tuning-embedded-jetty-inside-spark-framework/  */
-        EmbeddedServers.add(EmbeddedServers.Identifiers.JETTY, 
-         (Routes routeMatcher, StaticFilesConfiguration staticFilesConfiguration, ExceptionMapper ex, boolean hasMultipleHandler) -> 
-         {
-             JettyHandler handler = setupHandler(routeMatcher, staticFilesConfiguration, hasMultipleHandler);
-             configSession(handler);
-             
-             return new EmbeddedJettyServer(
-               new JettyServer(),           
-               handler);
-         });
-      
-      
-        /* Serving static files */
-        staticFiles.externalLocation(
-            _api.getProperty("httpserver.filedir", "/usr/share/polaric") );  
-       
-        /* 
-         * websocket services. 
-         * Note that these are trusted in the sense that we assume that authorizations and
-         * userid will only be available if properly authenticated. THIS SHOULD BE TESTED. 
-         */
-        webSocket("/notify", _pubsub);
-        webSocket("/jmapdata", _jmapupdate);
-                 
+                     
         _auth.start();
-                 
+        
         /* 
          * OPTIONS requests (CORS preflight) are not sent with cookies and should not go 
          * through the auth check. 
