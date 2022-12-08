@@ -84,6 +84,8 @@ public class AuthInfo {
         WebServer ws = (WebServer) api.getWebserver(); 
         ws.onOpenSes( (c)-> {
                 AuthInfo a = c.getAuthInfo();
+                if (a==null)
+                    return;
                 
                 /* If user has recently closed session and is scheduled for removal, 
                  * cancel this removal. 
@@ -113,6 +115,8 @@ public class AuthInfo {
         ws.onCloseSes( (c)-> {
 
                 AuthInfo a = c.getAuthInfo();
+                if (a==null)
+                    return;
                 if (a.mailbox!=null) {
                     if (a.mailbox.decrement() == 0) {
                         
@@ -202,7 +206,8 @@ public class AuthInfo {
          */
         if (profile.isPresent()) {
             userid = profile.get().getId();
-
+            api.log().debug("AuthInfo", "Found user profile: "+userid);
+            
             /* check if there is a mailbox on the session. If not, find one that 
              * matches the user id or create one. 
              */

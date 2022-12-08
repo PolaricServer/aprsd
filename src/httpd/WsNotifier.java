@@ -74,9 +74,15 @@ public abstract class WsNotifier extends ServerBase
       public final boolean login() 
          { return _auth != null && _auth.userid != null; }
    
-      public void sendText(String text) throws IOException 
-         { if (text == null) text="";
-             _nOut++; _conn.getRemote().sendString(text); }
+      public void sendText(String text) throws IOException {
+          if (_conn == null || _conn.getRemote() == null) {
+              _api.log().warn("WsNotifier", "sendText. Connection is null");
+              return;
+          }
+          if (text == null) text="";
+          _nOut++; 
+          _conn.getRemote().sendString(text); 
+       }
    
       public  String getUid()
          { return _uid; }
@@ -86,12 +92,6 @@ public abstract class WsNotifier extends ServerBase
          
       public String getUsername()
          { return (_auth == null ? null : _auth.userid); }
-         
-      // FIXME: Is this used?    
-      public void close() throws IOException { 
-         _conn.close(); 
-         _clients.remove(_uid);
-      }
            
       public Date created() {return _ctime; }
       public long nIn() {return _nIn; }
@@ -186,7 +186,8 @@ public abstract class WsNotifier extends ServerBase
           
           /* Check origin */
           _origin = req.getOrigin();
-          if (_origin != null && _origin.matches(_trustedOrigin)) 
+          if (_origin == null || _origin.matches(_trustedOrigin))
+            // FIXME: Is this secure enough for web-browser clients?
           { 
               /* Create client and set authorization info */
               Client client = newClient(conn);
