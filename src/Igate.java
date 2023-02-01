@@ -175,7 +175,8 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
           p.from = _myCall;
           p.to = _api.getToAddr();
           p.thirdparty = false;               
-          _rfChan.sendPacket(p);
+          if (_rfChan.isRf()) 
+              _rfChan.sendPacket(p);
        } 
     }
 
@@ -218,9 +219,9 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
             (_api.getOwnPos().getIdent() != null && _api.getOwnPos().getIdent().equals(p.msgto)))
            return;
         if (p.source == _rfChan) {
-           if (p.report.matches("\\?IGATE\\?.*"))
+            if (p.report.matches("\\?IGATE\\?.*"))
                answer_query();
-           else if (_inetChan.isActive())
+            else if (_inetChan.isActive())
                gate_to_inet(p);
         }
         else

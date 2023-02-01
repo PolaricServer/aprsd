@@ -29,8 +29,8 @@ import java.util.concurrent.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "2.10";
-   public  static String toaddr  = "APPS2a";
+   public  static String version = "2.11";
+   public  static String toaddr  = "APPS2b";
    
    private static StationDB db = null;
    private static AprsParser parser = null;
@@ -352,8 +352,10 @@ public class Main implements ServerAPI
             String ch_rf_name = getProperty("channel.default.rf", "tnc");
             ch1 = (ch_inet_name.length() > 0 ? (AprsChannel) _chanManager.get(ch_inet_name) : null);
             ch2 = (ch_rf_name.length() > 0  ? (AprsChannel) _chanManager.get(ch_rf_name) : null);          
-           
-           
+            if (!ch2.isRf()) {
+                log.warn("Main", "Channel " + ch_rf_name + " isn't a proper APRS RF channel - disabling");
+                ch2 = null;
+            }
             /* 
              * Igate 
              */     

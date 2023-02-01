@@ -43,8 +43,15 @@ public class TcpKissChannel extends TcpChannel
        _log = new Logfile(_api, getIdent(), "rf.log");
     }
     
-    
    
+   
+   /* Return true if this is a RF channel */
+    @Override public boolean isRf() {
+        return true; 
+    }
+    
+    
+    
     /**
      * Close down the channel. 
      */

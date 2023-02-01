@@ -52,7 +52,13 @@ public abstract class TncChannel extends AprsChannel
         _state = State.OFF;
     }
   
-   
+    
+    /* Return true if this is a RF channel */
+    @Override public boolean isRf() {
+        return true; 
+    }
+    
+    
     /*
      * State of channel: OFF, STARTING, RUNNING, FAILED
      */

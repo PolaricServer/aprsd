@@ -105,6 +105,11 @@ public abstract class AprsChannel extends Channel
        return "["+getShortDescr()+"] "; 
     }
 
+    
+    /* Return true if this is a RF channel */
+    public boolean isRf() {
+        return false; 
+    }
    
     
     /**
