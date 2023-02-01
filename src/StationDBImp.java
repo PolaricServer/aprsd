@@ -150,15 +150,15 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     public List<TrackerPoint>
         search(Reference uleft, Reference lright, RuleSet filter)
     { 
-        long start = System.nanoTime();
+    //    long start = System.nanoTime();
 
         var res = _map.values().stream().filter( s ->
             (uleft==null || lright==null || s.isInside(uleft, lright, 0.1, 0.1))
         ).collect(Collectors.toList()); 
           
-        long finish = System.nanoTime();
-        long timeElapsed = finish - start;
-        System.out.println("Search Trackerpoints - Time Elapsed (us): " + timeElapsed/1000);
+    //    long finish = System.nanoTime();
+    //    long timeElapsed = finish - start;
+    //    System.out.println("Search Trackerpoints - Time Elapsed (us): " + timeElapsed/1000);
         return res;
     }
     
