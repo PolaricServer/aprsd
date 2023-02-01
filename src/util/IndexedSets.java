@@ -31,6 +31,8 @@ class IndexedSets {
     
     public void removeMatching(String key, String ex) {
         Set<String> s = _map.get(key);
+        if (s==null)
+            return; 
         s.removeIf( (x)-> x.matches(ex) );
     }
     
