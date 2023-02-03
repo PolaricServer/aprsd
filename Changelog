@@ -341,4 +341,15 @@ V.2.10
 * Tracker management fix
 * Various fixes..
 
+V.2.11
+------
+  * Remove unused i18n stuff and gettext dependency
+  * Use FST for serialization and saving data to file
+  * Allow to specify tags for search in filter script
+  * Allow using filter in db search
+  * Add some missing icons..
+  * Websocket work (between server nodes)
+  * Check rf-channel when used in igate (security)
+  * group config file
+  * various fixes 
 

@@ -1,8 +1,16 @@
-polaric-aprsd (2.10+) UNRELEASED; urgency=medium
+polaric-aprsd (2.11) stable; urgency=high
 
-  * Development 
+  * Remove unused i18n stuff and gettext dependency
+  * Use FST for serialization and saving data to file
+  * Allow to specify tags for search in filter script
+  * Allow using filter in db search
+  * Add some missing icons..
+  * Websocket work (between server nodes)
+  * group config file
+  * Check rf-channel when used in igate (security) !! 
+  * various fixes..
 
- -- Oyvind Hanssen <ohanssen@acm.org>  Tue, 06 Sep 2022 23:19:53 +0200
+ -- Oyvind Hanssen <ohanssen@acm.org>  Wed, 01 Feb 2023 23:12:24 +0100
 
 polaric-aprsd (2.10) stable; urgency=medium
 
