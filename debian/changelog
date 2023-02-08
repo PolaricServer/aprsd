@@ -1,3 +1,15 @@
+polaric-aprsd (2.11.1+) UNRELEASED; urgency=medium
+
+  * Development 
+
+ -- Oyvind Hanssen <oivindh@la7eca>  Mon, 06 Feb 2023 22:07:58 +0100
+
+polaric-aprsd (2.11.1) stable; urgency=medium
+
+  * Use uppercase letters in DEST address.
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Mon, 06 Feb 2023 21:57:18 +0100
+
 polaric-aprsd (2.11) stable; urgency=high
 
   * Remove unused i18n stuff and gettext dependency
