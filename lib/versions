@@ -1,13 +1,13 @@
  
 jcoord-polaric.jar              Based on v.1.1 (2006). Slightly modified. Source included.  
 
-jetty-polaric.jar               Jetty Uber All compilation. v. 9.4.42.v20210604
+jetty-polaric.jar               Jetty Uber All compilation v. 9.4.50.v20221201 
 
 
-pac4j-core-polaric.jar          v.4.5.2 
+pac4j-core-polaric.jar          v.4.5.2
 pac4j-http-polaric.jar          v.4.5.2
 spark-pac4j-polaric.jar         v.4.0.0
-spark-core-polaric.jar          v.2.9.3
+spark-core-polaric.jar          v.2.9.4
 utf8-with-fallback-polaric.jar  Based on v.1.1.0. Slightly modified. Source included. 
 JmDNS-polaric.jar               v.3.5.7
 nano-cuckoo-polaric.jar         v.3.0.2
@@ -15,11 +15,15 @@ lz4-polaric.jar                 v.1.3.0
 fst-polaric.jar                 v.2.57
 objenesis-polaric.jar           v.3.1
 
+
+---------------------------------------------------------------------------------------
+
 Spark: 
 https://repo1.maven.org/maven2/com/sparkjava/spark-core/
 
 Jetty: 
-http://central.maven.org/maven2/org/eclipse/jetty/aggregate/jetty-all/
+https://www.eclipse.org/jetty/download.php
+https://repo.maven.apache.org/maven2/org/eclipse/jetty/
 
 Pac4j
 https://repo1.maven.org/maven2/org/pac4j/
