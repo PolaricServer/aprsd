@@ -24,6 +24,7 @@ import org.pac4j.sparkjava.*;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.CommonProfile;
+import org.pac4j.jee.context.session.*;
 import java.util.Optional;
 import javax.servlet.*;
 
@@ -186,8 +187,8 @@ public class AuthService {
      */
     public static String login(Request req, Response res) {
        final SparkWebContext context = new SparkWebContext(req, res);
-       final ProfileManager manager = new ProfileManager(context);
-       final Optional<CommonProfile> profile = manager.get(true);
+       final ProfileManager manager = new ProfileManager(context, JEESessionStore.INSTANCE);  
+       final Optional<CommonProfile> profile = manager.getProfile(CommonProfile.class);
        
        AuthInfo auth = (AuthInfo) req.raw().getAttribute("authinfo");
        String origin = req.queryParams("origin");

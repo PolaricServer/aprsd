@@ -16,11 +16,14 @@
 package no.polaric.aprsd.http;
 
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.exception.CredentialsException;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.util.CommonHelper;
+import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.credentials.UsernamePasswordCredentials;
 import org.pac4j.core.credentials.authenticator.Authenticator;
+
 import java.io.*; 
 import java.util.*; 
 import no.polaric.aprsd.*;
@@ -34,7 +37,7 @@ import java.security.MessageDigest;
  * Use a simple password file. For small numbers of user/password pairs. 
  * For larger numbers, use a database instead. 
  */
-public class PasswordFileAuthenticator implements Authenticator<UsernamePasswordCredentials> {
+public class PasswordFileAuthenticator implements Authenticator {
 
     private final Map<String, String> _pwmap = new HashMap<String, String>();
     private ServerAPI _api; 
@@ -81,15 +84,19 @@ public class PasswordFileAuthenticator implements Authenticator<UsernamePassword
         } 
     }
     
-
+    
     
     @Override
-    public void validate(final UsernamePasswordCredentials credentials, final WebContext context) 
+    public void validate(Credentials cred, WebContext context, SessionStore sstore) 
            throws CredentialsException 
     {
-        if (credentials == null) {
+        if (cred == null) 
             throwsException("No credential");
-        }
+        if (! (cred instanceof UsernamePasswordCredentials))
+            throwsException("Credentials is not username/password type");
+            
+        UsernamePasswordCredentials credentials = (UsernamePasswordCredentials) cred;
+        
         String username = credentials.getUsername();
         String password = credentials.getPassword();
         if (CommonHelper.isBlank(username)) {

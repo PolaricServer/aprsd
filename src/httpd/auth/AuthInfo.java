@@ -19,6 +19,7 @@ import spark.Response;
 import org.pac4j.sparkjava.SparkWebContext; 
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.CommonProfile;
+import org.pac4j.jee.context.session.*;
 import java.util.*;
 import java.util.concurrent.*;
 import no.polaric.aprsd.*;
@@ -191,8 +192,9 @@ public class AuthInfo {
     public AuthInfo(ServerAPI api, Request req, Response res) 
     {
         final SparkWebContext context = new SparkWebContext(req, res);
-        final ProfileManager manager = new ProfileManager(context);
-        final Optional<CommonProfile> profile = manager.get(true);
+        
+        final ProfileManager manager = new ProfileManager(context, JEESessionStore.INSTANCE); 
+        final Optional<CommonProfile> profile = manager.getProfile(CommonProfile.class);
         
         _api = api;
         var i = 0;
