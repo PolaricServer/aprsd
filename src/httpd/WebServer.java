@@ -38,6 +38,8 @@ import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.*;
+import java.nio.file.*;
+
 
 /**
  * HTTP server. Web services are configured here. Se also AuthService class for login services. 
@@ -107,6 +109,21 @@ public class WebServer implements ServerAPI.Web
             _api.getProperty("httpserver.filedir", "/usr/share/polaric") );  
             
         
+        /*
+         * Set up for using HTTPS
+         * Note, we need to set up a keystore with a proper certificate and a password
+         */
+                 
+        boolean https_on = api.getBoolProperty("httpserver.secure", false);
+        String pw = api.getProperty("httpserver.keystore.pw", "password");
+        
+
+        if (https_on) 
+            if (Files.exists( Paths.get("/etc/polaric-aprsd/keys/keystore.jks")))
+                secure("/etc/polaric-aprsd/keys/keystore.jks", pw, null, null);
+            else
+                _api.log().warn("WebServer", "Keystore file not found - https not activated");
+       
        
         /* 
          * websocket services. 
