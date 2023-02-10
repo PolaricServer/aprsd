@@ -65,10 +65,7 @@ install: polaric-aprsd.jar
 	install -m 644 polaric-aprsd.jar $(INSTALL_JAR)
 	install -m 644 images/* $(INSTALL_WEB)/images
 	install -m 644 style.css $(INSTALL_WEB)
-	install -m 755 polaric-checkfilter $(INSTALL_BIN)
-	install -m 755 polaric-restart $(INSTALL_BIN)
-	install -m 755 polaric-passwd $(INSTALL_BIN)
-	install -m 755 polaric-aprsd-start $(INSTALL_BIN)
+	install -m 755 scripts/* $(INSTALL_BIN)
 	cp sudoers.d $(INSTALL_SUDO)/polaric-aprsd
 	chmod 644 $(INSTALL_SUDO)/polaric-aprsd
 	
