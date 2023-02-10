@@ -1,0 +1,25 @@
+#!/bin/bash
+
+
+     JLIB=/usr/share/java
+  PLUGINS=/etc/polaric-aprsd/plugins
+
+CLASSPATH=$JLIB/commons-daemon.jar:$JLIB/libintl.jar:$JLIB/gettext-commons.jar:$JLIB/slf4j-api.jar:$JLIB/jcoord-polaric.jar:$JLIB/jetty-polaric.jar:$JLIB/spark-core-polaric.jar:$JLIB/polaric-aprsd.jar:$JLIB/utf8-with-fallback-polaric.jar:$JLIB/RXTXcomm.jar:$JLIB/scala-library.jar:$JLIB/scala-parser-combinators_2.11.jar:$JLIB/scala-xml_2.11.jar:$JLIB/pac4j-core-polaric.jar:$JLIB/pac4j-http-polaric.jar:$JLIB/spark-pac4j-polaric.jar:$JLIB/jackson-core.jar:$JLIB/jackson-databind.jar:$JLIB/commons-codec.jar:$PLUGINS/*
+
+SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB0:/dev/ttyUSB1:/dev/ttyACM0:/dev/ttyACM1:/dev/rfcomm0:/dev/rfcomm1
+
+      FLAGS=-Djava.net.preferIPv4Stack=true      
+     LOGDIR=/var/log/polaric
+    CONFDIR=/etc/polaric-aprsd
+     WEBDIR=/usr/share/polaric
+    DATADIR=/var/lib/polaric  
+    LOGFILE=$LOGDIR/aprsd.log
+    INIFILE=$CONFDIR/server.ini
+
+       JAVA=/usr/bin/java
+  JAVA_ARGS="$FLAGS $SERIALPORTS -Dconfdir=$CONFDIR -Ddatadir=$DATADIR -Dwebdir=$WEBDIR -Dlogdir=$LOGDIR" 
+ 
+ 
+$JAVA $JAVA_ARGS -cp "$CLASSPATH" no.polaric.aprsd.CheckFilter
+ 
+ 

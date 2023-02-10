@@ -1,0 +1,24 @@
+#!/bin/bash
+
+if [ ! $# -eq 3 ]; then
+    echo "This commands needs 3 parameters"
+    echo "    File name"
+    echo "    Line to be inserted after (regex)"
+    echo "    Line to be inserted"
+    exit 1
+fi
+
+if [[ $(sed -n "/$3/=" $1) != "" ]]; then 
+    echo "already there"
+	exit 0
+fi
+
+linenr=$(sed -n "/$2/=" $1 | head -n 1)
+
+if [[ $linenr == "" ]]; then 
+	echo "Insert point not found" 
+	exit 0
+fi
+
+sed -i "$((linenr + 1)) i \ " $1
+sed -i "$((linenr + 2)) i $3" $1
