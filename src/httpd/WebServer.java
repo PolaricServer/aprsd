@@ -119,10 +119,12 @@ public class WebServer implements ServerAPI.Web
         
 
         if (https_on) 
-            if (Files.exists( Paths.get("/etc/polaric-aprsd/keys/keystore.jks")))
+            if (Files.exists( Paths.get("/etc/polaric-aprsd/keys/keystore.jks"))) {
+                _api.log().info("WebServer", "Activating HTTPS mode");
                 secure("/etc/polaric-aprsd/keys/keystore.jks", pw, null, null);
+            }
             else
-                _api.log().warn("WebServer", "Keystore file not found - https not activated");
+                _api.log().warn("WebServer", "Keystore file not found - HTTPS not activated");
        
        
         /* 
@@ -230,6 +232,10 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/items/*");     
         corsEnable("/items");
         corsEnable("/telemetry/*");
+        
+        SysAdminApi saa = new SysAdminApi(_api);
+        saa.start();
+
         
         ShellScriptApi sa = new ShellScriptApi(_api); 
         sa.start();
