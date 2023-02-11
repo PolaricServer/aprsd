@@ -38,7 +38,6 @@ public abstract class ServerBase
    protected  ServerAPI  _api;
    private    String     _timezone;
    protected  String     _wfiledir;
-   private    String     _adminuser, _updateusers;
    protected  String     _icon;    
    
    public static final String _encoding = "UTF-8";
@@ -113,8 +112,6 @@ public abstract class ServerBase
       _wfiledir    = api.getProperty("map.web.dir", "aprsd");
       _icon        = api.getProperty("map.icon.default", "sym.gif");
       _timezone    = api.getProperty("timezone", "");
-      _adminuser   = api.getProperty("user.admin", "admin");
-      _updateusers = api.getProperty("user.update", "");
                 
       TimeZone.setDefault(null);
       if (_timezone.length() > 1) {

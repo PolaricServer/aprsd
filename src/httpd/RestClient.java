@@ -65,9 +65,10 @@ public class RestClient {
     
     
     
+    
     private HttpRequest.Builder addAuth(HttpRequest.Builder bld, String body) {
         if (_hmacAuth) {
-            String key = _api.getProperty("system.auth.key", "NOKEY");
+            String key = _api.getProperty("httpserver.auth.key", "NOKEY");
             String nonce = SecUtils.b64encode( SecUtils.getRandom(8) );
             bld.header("Arctic-Nonce", nonce );
             bld.header("Arctic-Hmac", SecUtils.hmacB64(nonce+body, key, 44));
@@ -76,6 +77,8 @@ public class RestClient {
     }
     
     
+    
+ 
  
     public HttpResponse GET(String resource, boolean stream) {
     

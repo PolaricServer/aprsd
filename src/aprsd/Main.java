@@ -352,7 +352,7 @@ public class Main implements ServerAPI
             String ch_rf_name = getProperty("channel.default.rf", "tnc");
             ch1 = (ch_inet_name.length() > 0 ? (AprsChannel) _chanManager.get(ch_inet_name) : null);
             ch2 = (ch_rf_name.length() > 0  ? (AprsChannel) _chanManager.get(ch_rf_name) : null);          
-            if (!ch2.isRf()) {
+            if (ch2 != null && !ch2.isRf()) {
                 log.warn("Main", "Channel " + ch_rf_name + " isn't a proper APRS RF channel - disabling");
                 ch2 = null;
             }

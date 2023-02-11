@@ -47,7 +47,7 @@ public class NodeWsClient implements WebSocket.Listener{
         _api=api;
         _nodeid=nodeid;
         _retry = retry;
-        _auth = new HmacAuth(_api, "system.auth.key");
+        _auth = new HmacAuth(_api, "httpserver.auth.key");
         try {
             _url=new URI(url);
             _ht = HttpClient.newHttpClient();

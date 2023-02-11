@@ -94,7 +94,7 @@ public class NodeWs extends WsNotifier
         
     public NodeWs(ServerAPI api, NodeWsApi.Handler hdl) { 
         super(api, false); 
-        _hmauth = new HmacAuth(api, "system.auth.key");
+        _hmauth = new HmacAuth(api, "httpserver.auth.key");
         _handler = hdl;
     }  
    
