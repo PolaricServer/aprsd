@@ -209,6 +209,19 @@ public class UserApi extends ServerBase {
         /******************************************
          * Get a list of users. 
          ******************************************/
+        get("/usernames", "application/json", (req, resp) -> {
+            List<String> ul = new ArrayList<String>();
+            for (User u: _users.getAll())  
+               ul.add(u.getIdent());
+    
+            return ul;
+        }, ServerBase::toJson );
+        
+        
+        
+        /******************************************
+         * Get a list of users. 
+         ******************************************/
         get("/users", "application/json", (req, resp) -> {
             List<UserInfo> ul = new ArrayList<UserInfo>();
             for (User u: _users.getAll())  
@@ -219,18 +232,22 @@ public class UserApi extends ServerBase {
         
         
         
-        /******************************************
-         * Get a list of users. 
-         ******************************************/
-        get("/usernames", "application/json", (req, resp) -> {
-            List<String> ul = new ArrayList<String>();
-            for (User u: _users.getAll())  
-               ul.add(u.getIdent());
-    
-            return ul;
-        }, ServerBase::toJson );
+        /*******************************************
+         * Add user
+         *******************************************/
+        post("/users", (req, resp) -> {
+            var u = (UserInfo) 
+                ServerBase.fromJson(req.body(), UserInfo.class);
+
+            if (_users.add(u.ident, u.name, u.sar, u.admin, u.suspend, u.passwd, u.group)==null) 
+                return ERROR(resp, 400, "Probable cause: User exists");
+            _users.getSyncer().add(u.ident, u);
+            return "Ok";
+        });
         
+                
         
+
         /*******************************************
          * Get info about a given user.
          *******************************************/
@@ -274,22 +291,7 @@ public class UserApi extends ServerBase {
             return "Ok";
         });
         
-        
-        
-        /*******************************************
-         * Add user
-         *******************************************/
-        post("/users", (req, resp) -> {
-            var u = (UserInfo) 
-                ServerBase.fromJson(req.body(), UserInfo.class);
 
-            if (_users.add(u.ident, u.name, u.sar, u.admin, u.suspend, u.passwd, u.group)==null) 
-                return ERROR(resp, 400, "Probable cause: User exists");
-            _users.getSyncer().add(u.ident, u);
-            return "Ok";
-        });
-        
-        
         
         /*******************************************
          * Delete user

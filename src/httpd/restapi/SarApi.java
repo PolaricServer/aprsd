@@ -121,6 +121,21 @@ public class SarApi extends ServerBase {
             return list;
         }, ServerBase::toJson );
         
+                
+        
+        /*******************************************
+         * Add a IPP 
+         *******************************************/
+        post("/sar/ipp", (req, resp) -> {
+            var auth = getAuthInfo(req); 
+            if (auth == null)
+                return ERROR(resp, 500, "No authorization info found");
+            var ipp = (IppInfo) 
+                ServerBase.fromJson(req.body(), IppInfo.class);
+            var ident = addIpp(auth.userid, ipp);
+            return ident;
+        });
+        
         
         
         /*******************************************
@@ -136,21 +151,6 @@ public class SarApi extends ServerBase {
                 return ERROR(resp, 404, "Not found");
             return ipp;
         }, ServerBase::toJson );
-        
-        
-        
-        /*******************************************
-         * Add a IPP 
-         *******************************************/
-        post("/sar/ipp", (req, resp) -> {
-            var auth = getAuthInfo(req); 
-            if (auth == null)
-                return ERROR(resp, 500, "No authorization info found");
-            var ipp = (IppInfo) 
-                ServerBase.fromJson(req.body(), IppInfo.class);
-            var ident = addIpp(auth.userid, ipp);
-            return ident;
-        });
         
         
         

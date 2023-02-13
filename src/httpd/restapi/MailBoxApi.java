@@ -66,21 +66,7 @@ public class MailBoxApi extends ServerBase {
             return box.getMessages();
         }, ServerBase::toJson );
         
-        
-        /*
-         * DELETE /mailbox/<msgid>
-         * Delete a message. Returns "Ok" even if message was not found.
-         */
-        delete("/mailbox/*", (req, resp) -> {
-            var msgid = req.splat()[0];
-            var box = getAuthInfo(req).mailbox;
-            if (!msgid.matches("[0-9]+"))            
-                return ERROR(resp, 400, "Message id must be number");
-            box.remove(Long.parseLong(msgid));
-            return "Ok";
-        });
-        
-        
+
         
         /* 
          * POST /mailbox 
@@ -114,6 +100,20 @@ public class MailBoxApi extends ServerBase {
                 e.printStackTrace(System.out);
                 return ERROR(resp, 500, "Exception: "+e.getMessage());
             }
+        });
+        
+                
+        /*
+         * DELETE /mailbox/<msgid>
+         * Delete a message. Returns "Ok" even if message was not found.
+         */
+        delete("/mailbox/*", (req, resp) -> {
+            var msgid = req.splat()[0];
+            var box = getAuthInfo(req).mailbox;
+            if (!msgid.matches("[0-9]+"))            
+                return ERROR(resp, 400, "Message id must be number");
+            box.remove(Long.parseLong(msgid));
+            return "Ok";
         });
         
         

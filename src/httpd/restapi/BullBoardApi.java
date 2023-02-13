@@ -78,11 +78,24 @@ public class BullBoardApi extends ServerBase {
             return sb.getSenders();
         }, ServerBase::toJson );
         
+                
+        /* 
+         * GET /bullboard/<group>/messages
+         * Get all messages in a group. Note that this returns a list of lists.  
+         */
+        get("/bullboard/*/messages", "application/json", (req, resp) -> {
+            String sbid = req.splat()[0];
+            BullBoard.SubBoard sb = _board.getBulletinGroup(sbid); 
+            if (sb==null)
+                return ERROR(resp, 404, "Group '"+sbid+"' not found");
+            return sb.getAll();
+        }, ServerBase::toJson );
+        
         
         /*
          * Submit bulletin.
          */
-        put("/bullboard/*/messages", (req, resp) -> {
+        post("/bullboard/*/messages", (req, resp) -> {
             AuthInfo user = getAuthInfo(req); 
             String sbid = req.splat()[0];
             if (user.callsign == null)
@@ -101,20 +114,7 @@ public class BullBoardApi extends ServerBase {
             return "Ok"; 
         });
         
-        
-        /* 
-         * GET /bullboard/<group>/messages
-         * Get all messages in a group. Note that this returns a list of lists.  
-         */
-        get("/bullboard/*/messages", "application/json", (req, resp) -> {
-            String sbid = req.splat()[0];
-            BullBoard.SubBoard sb = _board.getBulletinGroup(sbid); 
-            if (sb==null)
-                return ERROR(resp, 404, "Group '"+sbid+"' not found");
-            return sb.getAll();
-        }, ServerBase::toJson );
-        
-        
+
         /* 
          * GET /bullboard/<group>/messages/<sender>
          * Get messages in a group from a given sender 
