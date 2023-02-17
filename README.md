@@ -13,7 +13,7 @@ It is recommended to combine it with polaric-webapp2. It supports CORS to allow 
 with a polaric-webapp2 on another location.
 
 http://aprs.no runs a recent version of this software. More documentation on the project can be found here: 
-http://aprs.no/polaricserver
+http://aprs.no/polaricserver or https://polaricserver.readthedocs.io
 
 ## System requirements
 
@@ -25,9 +25,8 @@ Linux/Java platform (tested with Debian/Ubuntu) with
 * librxtx-java (if using serial port for communication with TNC or GPS).
 * libjackson2 (for JSON processing)
 * libcommons-codec
-* libgettext-commons
 
-We support automatic installation packages for Debian Linux or derivatives. 
+We support deb installation packages for Linux distros that can use it (Debian, Ubuntu, ..) 
 It shouldn't be too hard to port it to e.g. Windows if anyone wants to do the job. 
 
 We also use the following external libraries. jar files are included: 
@@ -35,14 +34,17 @@ We also use the following external libraries. jar files are included:
 * utf8-with-fallback with some small modifications. Compiled jar and source included. 
 * Jetty and Spark framework (HTTP server)
 * pac4j framework (authentication/authorization)
+* nano-cuckoo with lz4
+* jMDNS
+* fst with objenesis
 
 
 ## Installation
 
 We provide deb (Debian/Ubuntu..) packages. For information on getting started on a Debian based platform please 
-see: http://aprs.no/dokuwiki/doku.php/install.dev
+see: https://polaricserver.readthedocs.io/en/latest/gettingstarted.html
 
-More documentation on the project can be found here: 
+Documentation on the project can be found here: 
 http://aprs.no/polaricserver
 
 To configure a standalone server, point your browser to: 
@@ -53,6 +55,7 @@ to change the password and add new users.
 
 Se also: [Examples of how to use it with Docker](https://github.com/PolaricServer/Dockerfiles).
 
+
 ## Building from source 
 
 Build from the source is done by a plain old makefile. Yes I know :)
@@ -60,5 +63,4 @@ Maybe I move to something else a little later. Setup for generating deb
 packages is included. You may use the 'debuild' command.
 
 You will need JDK (Oracle or OpenJDK) version 11 or later, the Scala
-programming language version 2.11.12 or later (scala, scala-library scala-xml
-and scala-parser-combinators packages) and librxtx-java, byacc-j, jflex, gettext, libgettext-commons-java, libjackson2-databind-java, libjackson-annotations-java.
+programming language version 2.11.12 or later. 

@@ -26,20 +26,21 @@ Jetty:
 https://www.eclipse.org/jetty/download.php
 https://repo.maven.apache.org/maven2/org/eclipse/jetty/
 
-Pac4j
+Pac4j:
+www.pac4j.org
 https://repo1.maven.org/maven2/org/pac4j/
 
-JmDNS  
+JmDNS:  
 https://github.com/jmdns/jmdns
 
-nano-cuckoo 
+nano-cuckoo: 
 https://github.com/cinnom/nano-cuckoo
 
-lz4 and XxHash
+lz4 and XxHash:
 https://github.com/lz4/lz4-java
 
-fst
+fst:
 https://github.com/RuedigerMoeller/fast-serialization/wiki/Serialization
 
-objenesis
+objenesis:
 http://objenesis.org/
