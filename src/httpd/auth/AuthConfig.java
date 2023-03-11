@@ -43,7 +43,7 @@ public class AuthConfig {
         _api = api;
         
          /* FIXME: How can we simplify config of this? */
-         _host        = api.getProperty("httpserver.host",        "");
+         _host        = "";
          _allowOrigin = api.getProperty("httpserver.alloworigin", ".*");
          _passwdFile  = api.getProperty("httpserver.passwdfile",  "/etc/polaric-aprsd/passwd");
          _userFile    = api.getProperty("httpserver.userfile",    "/var/lib/polaric/users.dat");

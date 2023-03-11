@@ -154,7 +154,7 @@ public class NodeWsClient implements WebSocket.Listener{
     
     @Override
     public CompletionStage<?> onClose​(WebSocket webSocket, int statusCode, String reason) {
-        _api.log().debug("NodeWsClient", "onClose: "+ statusCode + " - "+reason);
+        _api.log().debug("NodeWsClient", "Connection closed. Statuscode: "+ statusCode + " "+reason);
         _connected = false;
         retry();
         return null;

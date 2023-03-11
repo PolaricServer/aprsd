@@ -226,7 +226,9 @@ public class WebServer implements ServerAPI.Web
         
         /* Start REST API: System */
         SystemApi ss = new SystemApi(_api);
+        ItemApi ia = new ItemApi(_api);
         ss.start(); 
+        ia.start();
         corsEnable("/system/*");
         corsEnable("/item/*"); 
         corsEnable("/items/*");     
