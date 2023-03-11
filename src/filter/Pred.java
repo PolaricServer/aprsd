@@ -97,6 +97,8 @@ class TRUE extends Pred
         }
 }
 
+
+
 /**
  * Check for tag
  */
@@ -256,16 +258,29 @@ abstract class NumVal extends Pred
 {
     private long val; 
     private String op;
+    private byte _op;
+    
+    private byte opVal(String op) {
+        switch (op) {
+          case "<": return 1; 
+          case ">": return 2;
+          case "<=" : return 3; 
+          case ">=" : return 4; 
+          default: return 0; 
+        }
+    }
+    
     
     protected NumVal(long val, String op)
-       { this.val = val; this.op = op; }
+       { this.val = val; this._op = opVal(op); }
+       
        
     protected boolean _eval(long val) {
-       switch (op) {
-          case "<": return val < this.val; 
-          case ">": return val > this.val;
-          case "<=" : return val <= this.val; 
-          case ">=" : return val >= this.val; 
+       switch (_op) {
+          case 1: return val < this.val; 
+          case 2: return val > this.val;
+          case 3 : return val <= this.val; 
+          case 4 : return val >= this.val; 
           default: return false; 
        }
     } 

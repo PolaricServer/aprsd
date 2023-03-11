@@ -25,7 +25,7 @@ import no.polaric.aprsd.*;
 
 public class TagRuleSet 
 {
-    private List<TagRule> rlist = new LinkedList<TagRule>(); 
+    private List<TagRule> rlist = new ArrayList<TagRule>(); 
     
        
     /**

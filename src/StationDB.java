@@ -143,7 +143,7 @@ public interface StationDB
      * Update an existing tracker point. 
      * @param s existing station
      */
-    public void updateItem(TrackerPoint s); 
+    public void updateItem(TrackerPoint s, LatLng prevpos); 
     
     
     /**

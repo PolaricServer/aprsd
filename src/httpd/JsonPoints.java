@@ -23,6 +23,7 @@ public interface JsonPoints
       
         public AuthInfo       authorization;
         public boolean        sarmode; 
+        public boolean        overload;
         public List<JsPoint>  points;
         public List<String>   delete;
         public List<JsLine>   lines;
@@ -30,6 +31,7 @@ public interface JsonPoints
       
         public JsOverlay(String v) {
             view = v;
+            overload = false;
         }
     }
 

@@ -37,14 +37,16 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
  
     public class Client extends MapUpdater.Client 
     {
-        private Set<String> items = new HashSet<String>();
+        private Set<String> items = new HashSet<String>(1000);
        
         public Client(Session conn) 
             {  super(conn); }
    
           
         public void subscribe() {
-            // It is possible to remove only items that move out of the viewport? */
+            /* It is possible to remove only items that move out of the viewport? 
+             * Or could items be expired. Use a LRU cache semantics? 
+             */
             items.clear();
         }
           
@@ -82,45 +84,67 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 mu.lines = new LinkedList<JsLine>();
                 boolean allowed = (login() && trusted()); 
              
-                RuleSet vfilt = ViewFilter.getFilter(_filter, allowed);
-                for (TrackerPoint s: _api.getDB().search(_uleft, _lright, vfilt)) 
+                RuleSet vfilt = ViewFilter.getFilter(_filter, allowed);      
+                
+//                long start = System.nanoTime();
+//                int n=0, n2=0, del=0, ins=0;
+                List<TrackerPoint> itemlist =  _api.getDB().search(_uleft, _lright, vfilt);
+                if (itemlist.size() > 10000) {
+                    _api.log().error("JsonMapUpdater", "Too many points: "+itemlist.size());
+                    mu.overload = true;
+                    return;
+                }
+                for (TrackerPoint s:itemlist) 
                 {          
-                    /* Apply filter. */
+//                    n++;
+                    if (!s.isChanging() && items.contains(s.getIdent()))
+                        continue;
+                    
+//                    n2++;                
+                    items.add(s.getIdent());
+                    /* Apply filter. */ 
                     Action action = vfilt.apply(s, _scale); 
                     if ( s.getPosition() == null ||
-                         ( s.getSource() != null && s.getSource().isRestricted() && !action.isPublic() && 
-                           !allowed) ||
+                         ( s.getSource() != null && s.getSource().isRestricted() && !action.isPublic() && !allowed) ||
                            action.hideAll() ||
                            (_tag != null && !s.hasTag(_tag))
                         )
                       continue; 
-                
+
                     /* Add point to delete-list */
                     if (!s.visible() || (_api.getSar() != null && !allowed && _api.getSar().filter(s))) {
                         if (items.contains(s.getIdent())) {
+                            del++;
                             items.remove(s.getIdent());
                             mu.delete.add(s.getIdent());
                         }
                     }
                     else {  
-                        /* Add point to list */
-                        if (s.isChanging() || !items.contains(s.getIdent())) {
-                            items.add(s.getIdent());
-                            JsPoint p = createPoint(s, action);
-                            if (p!=null) 
-                                mu.points.add(p);
-                        }
+                        /* Add item to overlay */
+//                        ins++;
+                        JsPoint p = createPoint(s, action);
+                        if (p!=null) 
+                            mu.points.add(p);
+                                
                         /* Add lines (that connect points) to list */
                         if (action.showPath() && s instanceof Station && ((AprsPoint)s).isInfra())
                            addLines(mu, (Station) s, _uleft, _lright); 
                     }
                 }
+                 
+//                long finish = System.nanoTime();
+//                long timeElapsed = finish - start;
+//                System.out.println("JSON Trackerpoints - Time Elapsed (us): " + timeElapsed/1000+", n: "+n+", n2: "+n2+", added: "
+//                    +ins+", deleted: "+del);
+//                System.out.println("JSTRPT2,"+_filter+","+n+","+n2+","+ins+","+del+","+timeElapsed/1000);
+                
                 /* Add signs to list */
                 for (Signs.Item s: Signs.search(_scale, _uleft, _lright)) {
                     JsPoint p = createSign(s); 
                     if (p!=null)
                        mu.points.add(p);
                 } 
+                
             }
         }
         
@@ -144,6 +168,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
         }
         
         
+
        
         /** Convert Tracker point to JSON point. 
          * Return null if point has no position.  

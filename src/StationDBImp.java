@@ -22,6 +22,12 @@ import java.util.stream.*;
 import org.nustaq.serialization.*;
 import no.polaric.aprsd.filter.*;
 
+import com.github.davidmoten.rtree2.*;
+import static com.github.davidmoten.rtree2.geometry.Geometries.point;
+import com.github.davidmoten.rtree2.geometry.Point;
+import com.github.davidmoten.rtree2.geometry.Geometries;
+import static com.github.davidmoten.rtree2.Entries.entry;
+
 
 /**
  * In-memory implementation of StationDB.
@@ -32,6 +38,8 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     private SortedMap<String, TrackerPoint> _map = new ConcurrentSkipListMap();
     private String     _file;
     private String     _stnsave;
+    RTree<TrackerPoint, Point> _geoindex = RTree.star().maxChildren(6).create();
+    
     
     public StationDBImp(ServerAPI api)
     {
@@ -67,9 +75,16 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
         
      
     @Override protected void _addRtItem(TrackerPoint s) {
+        if (s == null || s.getPosition() == null)
+            return;
+        
         if ( s != null && s.getIdent() != null) 
             _map.remove(s.getIdent());
         _map.put(s.getIdent(), s);
+
+        LatLng pos = s.getPosition().toLatLng();
+        var point = Geometries.pointGeographic(pos.getLng(), pos.getLat());
+        _geoindex = _geoindex.add(s, point);
     }
     
     
@@ -77,12 +92,29 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
      * Update an existing tracker point. 
      * @param s existing station
      */
-    public void updateItem(TrackerPoint s) {
-        /* Dummy */
+    public void updateItem(TrackerPoint s, LatLng prevpos) {
+        /* Remove existing point in r-tree index */
+        _removeGItem(s, prevpos);
+        _map.remove(s.getIdent());
+        
+        /* Add it with new position */
+        _addRtItem(s);
     }
 
     
+    private void _removeGItem(TrackerPoint s, LatLng pos) {
+        if (s != null && pos != null) {
+            var point = Geometries.pointGeographic(pos.getLng(), pos.getLat());
+            _geoindex = _geoindex.delete(s, point, true);
+        }
+    }
+    
+    
+    
     @Override protected void _removeRtItem(String id) {
+        TrackerPoint pt = _getRtItem(id);
+        if (pt.getPosition()!=null)
+            _removeGItem(pt, pt.getPosition().toLatLng());
         _map.remove(id);
     }    
         
@@ -140,6 +172,9 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     } 
      
      
+     
+     
+     
     /**
      * Geographical search in the database of trackerpoints. 
      * Return list of stations within the rectangle defined by uleft (upper left 
@@ -150,15 +185,21 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     public List<TrackerPoint>
         search(Reference uleft, Reference lright, RuleSet filter)
     { 
-    //    long start = System.nanoTime();
+      //  long start = System.nanoTime();
 
-        var res = _map.values().stream().filter( s ->
-            (uleft==null || lright==null || s.isInside(uleft, lright, 0.1, 0.1))
-        ).collect(Collectors.toList()); 
-          
-    //    long finish = System.nanoTime();
-    //    long timeElapsed = finish - start;
-    //    System.out.println("Search Trackerpoints - Time Elapsed (us): " + timeElapsed/1000);
+        LatLng ul = uleft.toLatLng();
+        LatLng lr = lright.toLatLng();
+        
+        List res = new ArrayList(2000);
+        Iterable<Entry<TrackerPoint, Point>> entries =
+            _geoindex.search(Geometries.rectangleGeographic(ul.getLng(), lr.getLat(), lr.getLng(), ul.getLat()));  
+
+        for (Entry<TrackerPoint, Point> pt : entries) 
+            res.add(pt.value());
+
+      //  long finish = System.nanoTime();
+      //  long timeElapsed = finish - start;
+      //  System.out.println("Search Trackerpoints - Time Elapsed (us): " + timeElapsed/1000);
         return res;
     }
     
@@ -252,9 +293,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
           for (int i=0; i<size; i++)
           { 
               TrackerPoint st = (TrackerPoint) ifs.readObject(); 
-              if (!_map.containsKey(st.getIdent())) {
-                  _map.put(st.getIdent(), st);
-              }
+             _addRtItem(st);
           }
           ifs.close();
         }
@@ -318,11 +357,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     
     private synchronized void checkMoving()
     {
-         // FIXME. We do not need to do this for all?? 
-         // FIXME. Do we need to do this? 
-         for (TrackerPoint s: _map.values())
-            if (s.isChanging(true))
-                _hasChanged = true;
+        _hasChanged = true;
     }
     
     

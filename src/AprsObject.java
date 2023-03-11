@@ -145,6 +145,7 @@ public class AprsObject extends AprsPoint implements Serializable
             setTimeless(true);
             ts = new Date();
         }
+        LatLng prevpos = (getPosition()==null ? null : getPosition().toLatLng());
         saveToTrail(ts, pd.pos, 0, 0, "(obj)");
         updatePosition(ts, pd.pos, pd.ambiguity);        
         setDescr(descr); 
@@ -152,7 +153,7 @@ public class AprsObject extends AprsPoint implements Serializable
         _altsym = pd.symtab;
         _killed = false;  
         _owner.setUpdated(new Date());      
-        _api.getDB().updateItem(this);
+        _api.getDB().updateItem(this, prevpos);
     }
     
     

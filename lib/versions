@@ -15,7 +15,8 @@ nano-cuckoo-polaric.jar         v.3.0.2
 lz4-polaric.jar                 v.1.3.0
 fst-polaric.jar                 v.2.57
 objenesis-polaric.jar           v.3.1
-
+rtree2-polaric.jar              v.0.9.3
+guava-mini-polaric.jar          v.0.1.4
 
 ---------------------------------------------------------------------------------------
 
@@ -44,3 +45,9 @@ https://github.com/RuedigerMoeller/fast-serialization/wiki/Serialization
 
 objenesis:
 http://objenesis.org/
+
+rtree2:
+https://github.com/davidmoten/rtree2
+
+guava-mini:
+https://github.com/davidmoten/guava-mini

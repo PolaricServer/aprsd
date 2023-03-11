@@ -217,6 +217,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     public synchronized void update(Date ts, AprsHandler.PosData pd, String descr, String pathinfo)
     { 
         StationDB db = _api.getDB();
+        LatLng prevpos = (getPosition()==null ? null : getPosition().toLatLng());
         if (saveToTrail(ts, pd.pos, pd.speed, pd.course, _pathinfo)) {
              updatePosition(ts, pd.pos, pd.ambiguity);
              if (db != null && db.getRoutes() != null)
@@ -240,7 +241,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
             setChanging();
         }
         isChanging();         
-        _api.getDB().updateItem(this);
+        _api.getDB().updateItem(this, prevpos);
     }
     
 
