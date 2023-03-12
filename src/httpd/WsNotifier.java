@@ -28,6 +28,7 @@ import org.eclipse.jetty.websocket.api.RemoteEndpoint;
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 import org.eclipse.jetty.websocket.api.WebSocketException;
 import org.eclipse.jetty.websocket.api.CloseException;
+import org.eclipse.jetty.websocket.api.WriteCallback;
 import java.security.Principal;
 import no.polaric.aprsd.*;
 import com.mindprod.base64.Base64;
@@ -55,6 +56,15 @@ public abstract class WsNotifier extends ServerBase
       protected long _nIn, _nOut; 
       protected Date _ctime; 
       
+      protected class _CB implements WriteCallback {
+        public void writeFailed(Throwable x) {
+            _api.log().warn("WsNotifier", "sendText write failed: "+x.getMessage());
+        }
+        public void writeSuccess() {
+        }
+        
+      }
+      
    
       public Client(Session conn) {
          _conn = conn;
@@ -81,7 +91,7 @@ public abstract class WsNotifier extends ServerBase
           }
           if (text == null) text="";
           _nOut++; 
-          _conn.getRemote().sendString(text); 
+          _conn.getRemote().sendString(text, new _CB()); 
        }
    
       public  String getUid()
