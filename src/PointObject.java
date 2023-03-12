@@ -16,6 +16,7 @@ package no.polaric.aprsd;
 import uk.me.jstott.jcoord.*; 
 import java.util.*;
 import java.io.*;
+import java.util.regex.*;
 import org.nustaq.serialization.FSTConfiguration;
 
 
@@ -177,17 +178,22 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
      * Potential security risk! It expects a regex. If input from user which is not expected to be a regex,
      * input should be properly sanitized using SecUtils.escape4regex()
      */
-    public boolean hasTag(String tag) { 
-        if (tag==null)
-            return false; 
-       
+    public boolean _hasTag(Pattern tag) { 
+        Pattern pattern = Pattern.compile("("+tag+")(\\..*)?");
         for (String x: _tags) {
-            if (x.matches("("+tag+")(\\..*)?")) {
+            if (pattern.matcher(x).matches()) 
                 return true;
-            }
         }
         return false;
     }
+
+    public boolean hasTag(String tag) {
+        if (tag==null)
+            return false; 
+        Pattern pattern = Pattern.compile("("+tag+")(\\..*)?");
+        return _hasTag(pattern);
+    }
+    
     
     
     public boolean _tagIsOn(String tag) {

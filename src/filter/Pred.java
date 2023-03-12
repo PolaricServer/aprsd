@@ -16,7 +16,7 @@
 package no.polaric.aprsd.filter;
 import java.util.*;
 import no.polaric.aprsd.*;
-
+import java.util.regex.*;
 
 
 public abstract class Pred
@@ -104,13 +104,18 @@ class TRUE extends Pred
  */
 class Tag extends Pred
 {
-   private String tag;
+    private Pattern plustag, minustag;
 
-   public Tag(String t)
-      { this.tag=t; }
+    public Tag(String t) { 
+        if (t.charAt(0)=='+')
+            t = t.substring(1, t.length());
+        plustag = Pattern.compile("\\+?(" + t + ")");
+        minustag = Pattern.compile("\\-"+t);
+    }
 
-   public boolean eval(TrackerPoint p, long scale)
-      { return p.tagIsOn(tag);}
+    public boolean eval(TrackerPoint p, long scale) { 
+        return ( p._hasTag(plustag) && !p._hasTag(minustag) );
+    }
 }
 
 
@@ -122,15 +127,18 @@ class Tag extends Pred
 
 class Source extends Pred 
 {   
-    private String regex;  
+    private Pattern pattern;
     
-    public Source(String regex) 
-       { this.regex = regex; }
+    public Source(String regex) {     
+        if (regex==null)
+            return;
+        pattern = Pattern.compile(regex);
+    }
     
     public boolean eval(TrackerPoint p, long scale) { 
-        if (regex== null || p==null || p.getSourceId() == null)
+        if (pattern== null || p==null || p.getSourceId() == null)
             return false;
-        return p.getSourceId().matches(regex); 
+        return pattern.matcher(p.getSourceId()).matches(); 
     }
 }
 
@@ -147,16 +155,18 @@ class Source extends Pred
  */
 class AprsSym extends Pred 
 {
-    private String regex;  
+    private Pattern pattern;
     
-    public AprsSym(String regex) 
-       { this.regex = regex; }
+    public AprsSym(String regex) { 
+        pattern = Pattern.compile(regex);
+    }
     
-        public boolean eval(TrackerPoint p, long scale) { 
-           if (p instanceof AprsPoint) 
-              return (""+((AprsPoint)p).getSymtab()+((AprsPoint)p).getSymbol()).matches(regex); 
-           else return false;
+    public boolean eval(TrackerPoint p, long scale) { 
+        if (p instanceof AprsPoint) {
+            return pattern.matcher(""+((AprsPoint)p).getSymtab()+((AprsPoint)p).getSymbol()).matches();
         }
+        else return false;
+    }
 }
 
 
@@ -192,9 +202,9 @@ class Infra extends Pred
      { fulldigi = igate = false; }
      
    public boolean eval(TrackerPoint p, long scale) {
-           if (!(p instanceof Station))
-                   return false; 
-           Station s = (Station) p; 
+        if (!(p instanceof Station))
+            return false; 
+        Station s = (Station) p; 
            
        boolean iwd = (fulldigi ? s.isWideDigi() : s.isInfra()); 
        boolean igt = (igate ? s.isIgate() : s.isInfra()); 
@@ -210,13 +220,17 @@ class Infra extends Pred
  */
 class Ident extends Pred
 {   
-    private String regex;  
+    private Pattern pattern;
     
-    public Ident(String regex) 
-       { this.regex = regex; }
+    public Ident(String regex) { 
+        pattern = Pattern.compile(regex);
+    }
     
-    public boolean eval(TrackerPoint obj, long scale) 
-       { return obj.getIdent().matches(regex); }
+    public boolean eval(TrackerPoint obj, long scale) {
+        if (obj.getIdent() == null)
+            return false;
+        return pattern.matcher(obj.getIdent()).matches(); 
+    }
 }
 
 
@@ -226,24 +240,26 @@ class Ident extends Pred
  */
 class Path extends Pred
 {   
-    private String regex;  
+    private Pattern pattern;
     
-    public Path(String regex) 
-       { this.regex = regex; }
+    public Path(String regex) { 
+        pattern = Pattern.compile(regex);
+    }
     
     public boolean eval(TrackerPoint obj, long scale) { 
-    
         if (obj instanceof Station) {
             var path = ((Station) obj).getPathInfo();
-            if (path != null) 
-                return path.matches(regex);
+            if (path != null) {
+                return pattern.matcher(path).matches();
+            }
             else
                 return false; 
         }
         else if (obj instanceof AprsObject) {
             var owner = ((AprsObject) obj).getOwner();       
-            if (owner != null && owner.getPathInfo() != null)       
-                return owner.getPathInfo().matches(regex);
+            if (owner != null && owner.getPathInfo() != null) {       
+                return pattern.matcher(owner.getPathInfo()).matches();
+            }
             else
                 return false; 
         }
