@@ -38,6 +38,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     private SortedMap<String, TrackerPoint> _map = new ConcurrentSkipListMap();
     private String     _file;
     private String     _stnsave;
+    private boolean    _kill = false; 
     RTree<TrackerPoint, Point> _geoindex = RTree.star().maxChildren(6).create();
     
     
@@ -55,6 +56,9 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     
         
     
+    public void kill() {
+        _kill = true; 
+    }
     
     
     /***********************************
@@ -74,7 +78,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     }
         
      
-    @Override protected void _addRtItem(TrackerPoint s) {
+    @Override protected synchronized void _addRtItem(TrackerPoint s) {
         if (s == null || s.getPosition() == null)
             return;
         
@@ -84,7 +88,8 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
 
         LatLng pos = s.getPosition().toLatLng();
         var point = Geometries.pointGeographic(pos.getLng(), pos.getLat());
-        _geoindex = _geoindex.add(s, point);
+        _geoindex = _geoindex.delete(s, point, true)
+                             .add(s, point);
     }
     
     
@@ -92,7 +97,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
      * Update an existing tracker point. 
      * @param s existing station
      */
-    public void updateItem(TrackerPoint s, LatLng prevpos) {
+    public synchronized void updateItem(TrackerPoint s, LatLng prevpos) {
         /* Remove existing point in r-tree index */
         _removeGItem(s, prevpos);
         _map.remove(s.getIdent());
@@ -111,9 +116,9 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     
     
     
-    @Override protected void _removeRtItem(String id) {
+    @Override protected synchronized void _removeRtItem(String id) {
         TrackerPoint pt = _getRtItem(id);
-        if (pt.getPosition()!=null)
+        if (pt.getPosition() != null)
             _removeGItem(pt, pt.getPosition().toLatLng());
         _map.remove(id);
     }    
@@ -185,8 +190,6 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     public List<TrackerPoint>
         search(Reference uleft, Reference lright, RuleSet filter)
     { 
-      //  long start = System.nanoTime();
-
         LatLng ul = uleft.toLatLng();
         LatLng lr = lright.toLatLng();
         
@@ -196,10 +199,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
 
         for (Entry<TrackerPoint, Point> pt : entries) 
             res.add(pt.value());
-
-      //  long finish = System.nanoTime();
-      //  long timeElapsed = finish - start;
-      //  System.out.println("Search Trackerpoints - Time Elapsed (us): " + timeElapsed/1000);
+            
         return res;
     }
     
@@ -305,12 +305,24 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     }
     
     
+    
+    private synchronized void rebuildIndex() {
+        _geoindex = RTree.star().maxChildren(6).create();
+        for (TrackerPoint s: _map.values()) { 
+            LatLng pos = s.getPosition().toLatLng();
+            var point = Geometries.pointGeographic(pos.getLng(), pos.getLat());
+            _geoindex = _geoindex.add(s, point);
+        }
+    }
+    
+    
+    
     /**
      * Garbage collection.
      * Removes expired objects and tries to to a little more
      * agressive JVM garbage collection. 
      */
-    private synchronized void garbageCollect()
+    private void garbageCollect()
     {
          Date now = new Date();  
          _api.log().debug("StationDBImp", "Garbage collection...");
@@ -326,9 +338,9 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
                   */
                  if ( st.hasTag("MANAGED") && _histData != null)
                     _histData.saveManagedItem(st); 
-                    
-                 /* If not managed or if saved to database, remove it. */
-                 if (!st.hasTag("MANAGED") || _histData != null) {
+                
+                 /* If not managed, remove it. */
+                 if (!st.hasTag("MANAGED")) {
                     /* Remove expired items from remotectl log */
                     if (_api.getRemoteCtl() != null)
                         _api.getRemoteCtl().removeExpired(st.getIdent());
@@ -347,6 +359,9 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
          t.add(Calendar.DAY_OF_YEAR, -1);
          _routes.removeOldEdges(t.getTime());
                     
+         _api.log().info("StationDBImp", "rebuilding index");
+         rebuildIndex();
+         
          s_runtime.runFinalization ();
          s_runtime.gc ();
          Thread.currentThread ().yield ();
@@ -355,9 +370,11 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     
         
     
-    private synchronized void checkMoving()
+    private void checkMoving()
     {
-        _hasChanged = true;
+        for (TrackerPoint s: _map.values())
+            if (s.isChanging(true))
+                _hasChanged = true;
     }
     
     
@@ -367,23 +384,27 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
      */   
     public void run()
     {
-        long period = 1000 * 60;           // 1 minute
-        long periods_gc = 30;              // 30 minutes
-           
+        long period = 1000 * 60 * 1;       // 1 minutes
+        long periods_gc = 15;              // 15 minutes
+        
         while(true) {
-           try {
+           if (_kill) 
+               break;
+           try { 
               for (int count=0; count < periods_gc; count++) 
               {
                   Thread.sleep(period); 
                   checkMoving(); 
-              }
+              } 
               garbageCollect();            
+              rebuildIndex();
               save();
            }
            catch (Exception e)
              {  _api.log().error("StationDBImp", "GC thread: "+e); 
-                e.printStackTrace(System.out); }                  
+                e.printStackTrace(System.out);}                  
         }  
+        _api.log().error("StationDBImp", "GC thread finishing.. "); 
     }   
 
 }

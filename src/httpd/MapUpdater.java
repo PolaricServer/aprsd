@@ -47,6 +47,7 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
        protected LatLng  _lright;    /* Area of interest: lower right */
        protected String  _filter;
        protected String  _tag;
+       protected boolean _keep = false;
        protected long    _scale = 0;
               
        public Client(Session conn) 
@@ -99,10 +100,15 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
                  _uleft  = new LatLng((double) x4, (double) x1); 
                  _lright = new LatLng((double) x2, (double) x3);
                  _scale  = Long.parseLong( parms[6] );
-                 if (parms.length > 7)
-                    /* 7th parameter is tag */
-                    _tag = parms[7].trim();
-                    
+                 _keep = false;
+                 
+                 if (parms.length > 7) {
+                    _keep = "true".equals(parms[7]);
+                    if (!parms[7].matches("true|false"))     
+                        _tag = parms[7].trim();
+                    else if (parms.length > 8)
+                        _tag = parms[8].trim();
+                 }
                  _subscribe = true;
                  subscribe(); 
                  

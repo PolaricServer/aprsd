@@ -32,10 +32,10 @@ public class ViewFilter {
   public static RuleSet getFilter(String id, boolean loggedIn)
   {
      RuleSet x  = _map.get(id);
-     if (!loggedIn && x.isNologin()) 
-         return x;
      if (x==null || (!x.isPublic() && !loggedIn) ) 
          return _default;
+     if (!loggedIn && x.isNologin()) 
+         return x;
      return x;
   }    
   

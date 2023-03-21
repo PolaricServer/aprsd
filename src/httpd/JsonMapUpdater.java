@@ -34,7 +34,9 @@ import no.polaric.aprsd.filter.*;
 @WebSocket(maxIdleTime=600000)
 public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
 {
- 
+    int _max_ovr_size = 20000;
+    
+    
     public class Client extends MapUpdater.Client 
     {
         private Set<String> items = new HashSet<String>(1000);
@@ -47,7 +49,8 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             /* It is possible to remove only items that move out of the viewport? 
              * Or could items be expired. Use a LRU cache semantics? 
              */
-            items.clear();
+            if (!_keep) 
+                items.clear();
         }
           
    
@@ -56,6 +59,10 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             try {
                 _updates++;
                 JsOverlay mu = new JsOverlay(_filter);
+                if (mu==null) {
+                    _api.log().error("JsonMapUpdater", "Cannot allocate JsOverlay object.");
+                    return null;
+                }
                 mu.authorization = _auth;
                 mu.sarmode = (_api.getSar() != null);
                 if (!metaonly)
@@ -83,25 +90,26 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 mu.delete = new LinkedList<String>();
                 mu.lines = new LinkedList<JsLine>();
                 boolean allowed = (login() && trusted()); 
-             
                 RuleSet vfilt = ViewFilter.getFilter(_filter, allowed);      
                 
-//                long start = System.nanoTime();
-//                int n=0, n2=0, del=0, ins=0;
+                long start = System.nanoTime();
+                int n=0, n2=0, del=0, ins=0;
                 List<TrackerPoint> itemlist =  _api.getDB().search(_uleft, _lright, vfilt);
-                if (itemlist.size() > 10000) {
-                    _api.log().error("JsonMapUpdater", "Too many points: "+itemlist.size());
+                if (itemlist.size() > _max_ovr_size) {
+                    _api.log().info("JsonMapUpdater", "Too many points: "+itemlist.size());
                     mu.overload = true;
                     return;
                 }
+                
                 for (TrackerPoint s:itemlist) 
                 {          
-//                    n++;
+                    n++;
                     if (!s.isChanging() && items.contains(s.getIdent()))
                         continue;
                     
-//                    n2++;                
+                    n2++;                
                     items.add(s.getIdent());
+                    
                     /* Apply filter. */ 
                     Action action = vfilt.apply(s, _scale); 
                     if ( s.getPosition() == null ||
@@ -113,15 +121,15 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
 
                     /* Add point to delete-list */
                     if (!s.visible() || (_api.getSar() != null && !allowed && _api.getSar().filter(s))) {
-                        if (items.contains(s.getIdent())) {
-                            del++;
-                            items.remove(s.getIdent());
-                            mu.delete.add(s.getIdent());
-                        }
+                        if (!_keep) 
+                            continue;
+                        
+                        del++;
+                        mu.delete.add(s.getIdent());
                     }
                     else {  
                         /* Add item to overlay */
-//                        ins++;
+                        ins++;
                         JsPoint p = createPoint(s, action);
                         if (p!=null) 
                             mu.points.add(p);
@@ -131,13 +139,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                            addLines(mu, (Station) s, _uleft, _lright); 
                     }
                 }
-                 
-//                long finish = System.nanoTime();
-//                long timeElapsed = finish - start;
-//                System.out.println("JSON Trackerpoints - Time Elapsed (us): " + timeElapsed/1000+", n: "+n+", n2: "+n2+", added: "
-//                    +ins+", deleted: "+del);
-//                System.out.println("JSTRPT2,"+_filter+","+n+","+n2+","+ins+","+del+","+timeElapsed/1000);
-                
+ 
                 /* Add signs to list */
                 for (Signs.Item s: Signs.search(_scale, _uleft, _lright)) {
                     JsPoint p = createSign(s); 

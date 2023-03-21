@@ -69,8 +69,12 @@ public class Main implements ServerAPI
    public StationDB getDB() 
     { return db; }
        
-   public void setDB(StationDB d)
-    { db=d; }
+   public void setDB(StationDB d) { 
+       if (db != null && db instanceof StationDBImp)
+          ((StationDBImp) db).kill(); 
+       db=d; 
+    }
+       
        
    public AprsParser getAprsParser()
     { return parser; }
@@ -329,6 +333,9 @@ public class Main implements ServerAPI
             PluginManager.addList(getProperty("plugins", ""));
             ws.start();
             
+            
+            
+
             /* Start webservices (REST API) of plugins after Webserver is started */
             PluginManager.startWebservices();
             

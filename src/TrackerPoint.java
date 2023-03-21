@@ -26,7 +26,7 @@ import java.time.format.DateTimeFormatter;
  */
 public abstract class TrackerPoint extends PointObject implements Serializable, Cloneable
 {
-    private   static long        _nonMovingTime = 1000 * 60 * 5; 
+    private   static long        _nonMovingTime = 1000 * 60 * 4; 
     private   static Notifier    _change;
     protected static ServerAPI   _api = null;
     protected static ColourTable _colTab = null;
