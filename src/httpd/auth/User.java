@@ -44,6 +44,7 @@ public abstract class User {
      * These flags are now stored in this class. 
      */
     private Group group = Group.DEFAULT;
+    private Group altgroup = Group.DEFAULT;
     
     private boolean admin=false;
     private boolean suspended = false; 
@@ -52,6 +53,8 @@ public abstract class User {
     public boolean isSar()                      { return group.isSar(); }
     public final Group getGroup()               { return group; }
     public final void setGroup(Group g)         { group = g; } 
+    public final Group getAltGroup()            { return altgroup; }
+    public final void setAltGroup(Group g)      { altgroup = g; } 
     public final void setSar(boolean s)         { } 
        /* SetSar will soon go away  - replace with setGroup */
     

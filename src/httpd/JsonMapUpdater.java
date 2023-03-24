@@ -121,9 +121,14 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
 
                     /* Add point to delete-list */
                     if (!s.visible() || (_api.getSar() != null && !allowed && _api.getSar().filter(s))) {
-                        if (!_keep) 
+                        if (!_keep) {
+                            boolean found = (_api.getDB().getItem(s.getIdent(),null) != null);
+                            boolean same = (_api.getDB().getItem(s.getIdent(), null) == s);
+                            
+                             _api.log().info("JsonMapUpdater", "EXPIRED: "+s.getIdent()
+                                + " "+tf.format(s.getUpdated())+", "+tf.format(new Date())+(found? " YES": " NO")+(same?" same":""));
                             continue;
-                        
+                        }
                         del++;
                         mu.delete.add(s.getIdent());
                     }
@@ -139,7 +144,11 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                            addLines(mu, (Station) s, _uleft, _lright); 
                     }
                 }
- 
+                 
+                long finish = System.nanoTime();
+                long timeElapsed = finish - start;
+                System.out.println("JSTRPT,"+_filter+","+n+","+n2+","+ins+","+del+","+timeElapsed/1000);
+                
                 /* Add signs to list */
                 for (Signs.Item s: Signs.search(_scale, _uleft, _lright)) {
                     JsPoint p = createSign(s); 

@@ -141,7 +141,8 @@ public class LocalUsers implements UserDb
       
     
     public synchronized 
-    User add (String userid, String name, boolean sar, boolean admin, boolean suspend, String passwd, String group) {
+    User add (String userid, String name, boolean sar, boolean admin, boolean suspend, 
+              String passwd, String group, String agrp) {
         User u = add(userid); 
         if (u==null) {
             _api.log().info("LocalUsers", "add: user '"+userid+"' already exists");
@@ -159,8 +160,22 @@ public class LocalUsers implements UserDb
         if (g == null)
             _api.log().info("LocalUsers", "group '"+group+"' not found");
         u.setGroup(g);
+        
+        if (agrp==null)
+            return u;
+        
+        Group ag = _groups.get(agrp);
+        if (ag == null)
+            _api.log().info("LocalUsers", "group '"+agrp+"' not found");    
+            
+        u.setAltGroup(g);
         return u;
     }
+    
+    
+    public synchronized 
+    User add (String userid, String name, boolean sar, boolean admin, boolean suspend, String passwd, String group)
+        { return add(userid,name,sar,admin,suspend,passwd,group,null); }
     
     
     
@@ -252,6 +267,7 @@ public class LocalUsers implements UserDb
                     + rmComma( x.getName()) + "," 
                     + rmComma( x.getCallsign()) + ","
                     + rmComma( x.getGroup().getIdent() ) + "," 
+                    + rmComma( x.getAltGroup().getIdent() ) + ","
                     + x.isSuspended() )
                     ;
             }
@@ -281,7 +297,7 @@ public class LocalUsers implements UserDb
                     String userid = x[0].trim();
                     String lu = x[1].trim();
                     boolean sar, admin, suspend=false;
-                    String name  = "", callsign = "", group = ""; 
+                    String name  = "", callsign = "", group = "", group2 = "";
 
                     sar = ("true".equals(x[2].trim()));
                     admin = ("true".equals(x[3].trim()));
@@ -291,15 +307,20 @@ public class LocalUsers implements UserDb
                         callsign = x[5].trim();
                     if (x.length > 6)
                         group = x[6].trim();
-                    if (x.length > 7)
+                    if (x.length == 8)
                         suspend = ("true".equals(x[7].trim()));
-                        
+                    else if (x.length > 8) {    
+                        group2 = x[7].trim();
+                        suspend = ("true".equals(x[8].trim()));
+                    }
                     Date   lastupd = ("null".equals(lu) ? null : ServerBase.xf.parse(x[1].trim()));
                     User u = new User(userid, lastupd); 
                     u.setAdmin(admin);
                     u.setName(name);
                     u.setCallsign(callsign);
                     u.setGroup(_groups.get(group));
+                    if (group2 != null && !group2.equals(""))
+                        u.setAltGroup(_groups.get(group2));
                     u.setSuspended(suspend); 
                     _users.put(userid,u);
                 }

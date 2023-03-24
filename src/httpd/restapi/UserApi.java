@@ -52,6 +52,7 @@ public class UserApi extends ServerBase {
         public Date lastused; 
         public String name, callsign;
         public String group="DEFAULT";
+        public String altgroup="DEFAULT";
         public boolean sar, admin, suspend; 
         public String passwd;
         public UserInfo() {}
@@ -59,12 +60,15 @@ public class UserApi extends ServerBase {
            { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; suspend=u; }
         public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a, boolean u, String tr)
            { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; suspend=u; group=tr;}   
+        public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a, boolean u, String tr, String tr2)
+           { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; suspend=u; group=tr; altgroup=tr2;}   
     }
 
     
     public static class UserUpdate {
         public String name, callsign;
         public String group;
+        public String altgroup;
         public String passwd;
         public boolean sar, admin, suspend;
         public UserUpdate() {}
@@ -123,7 +127,7 @@ public class UserApi extends ServerBase {
             return null;
         String name = "";           
         return new UserInfo(u.getIdent(), u.getLastUsed(), u.getName(), 
-            u.getCallsign(), u.isSar(), u.isAdmin(), u.isSuspended(), u.getGroup().getIdent() );    
+            u.getCallsign(), u.isSar(), u.isAdmin(), u.isSuspended(), u.getGroup().getIdent(), u.getAltGroup().getIdent() );    
     }
     
 
@@ -131,8 +135,14 @@ public class UserApi extends ServerBase {
     protected boolean groupAllowed(Group g, User u, boolean includedef) {
         if (u==null)
             return false;
-        return  u.isAdmin() || g.getIdent().equals(u.getGroup().getIdent()) 
-                      || (includedef && g.getIdent().equals("DEFAULT"));
+        String group =  u.getGroup().getIdent();
+        String altgroup =  u.getAltGroup().getIdent();
+        boolean usealt = (!includedef && altgroup.equals("DEFAULT"));
+        
+        return  u.isAdmin() 
+                    || g.getIdent().equals(group) 
+                    || usealt && g.getIdent().equals(altgroup) 
+                    || (includedef && g.getIdent().equals("DEFAULT"));
     }
     
     
@@ -286,7 +296,7 @@ public class UserApi extends ServerBase {
             var u = (UserInfo) 
                 ServerBase.fromJson(req.body(), UserInfo.class);
 
-            if (_users.add(u.ident, u.name, u.sar, u.admin, u.suspend, u.passwd, u.group)==null) 
+            if (_users.add(u.ident, u.name, u.sar, u.admin, u.suspend, u.passwd, u.group, u.altgroup)==null) 
                 return ERROR(resp, 400, "Probable cause: User exists");
             _users.getSyncer().add(u.ident, u);
             return "Ok";
@@ -325,6 +335,13 @@ public class UserApi extends ServerBase {
                     return ERROR(resp, 404, "Unknown group: "+uu.group);
                 u.setGroup(_groups.get(uu.group));
             }    
+            if (uu.altgroup != null) {
+                Group g = _groups.get(uu.altgroup);
+                if (g==null)
+                    return ERROR(resp, 404, "Unknown group: "+uu.altgroup);
+                u.setAltGroup(_groups.get(uu.altgroup));
+            } 
+            
             if (uu.name != null)
                 u.setName(uu.name);           
             if (uu.callsign != null)

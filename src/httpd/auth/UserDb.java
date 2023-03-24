@@ -51,6 +51,7 @@ public interface UserDb extends ServerAPI.UserDb
     
     User add (String userid);
     User add (String userid, String name, boolean sar, boolean admin, boolean suspend, String passwd, String grp);
+    User add (String userid, String name, boolean sar, boolean admin, boolean suspend, String passwd, String grp, String agrp);
     void remove(String username);
     
     /* Should there be a default implementation of this? */
