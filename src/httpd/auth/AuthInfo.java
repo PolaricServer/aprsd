@@ -62,6 +62,7 @@ public class AuthInfo {
     private ServerAPI _api; 
     
     @JsonIgnore public SesMailBox mailbox = null;
+    @JsonIgnore public Group group;
     
     private static List<String> _services = new ArrayList<String>();    
     private static Queue<SesMailBox> gcbox = new LinkedList<SesMailBox>();
@@ -181,8 +182,14 @@ public class AuthInfo {
     public boolean isTrackerAllowed(String tr, String chan) {
         return sar || admin; 
     }
-       
-       
+
+    public static Optional<CommonProfile> getSessionProfile(Request req, Response res) {
+        final SparkWebContext context = new SparkWebContext(req, res);
+        final ProfileManager manager = new ProfileManager(context, JEESessionStore.INSTANCE); 
+        final Optional<CommonProfile> profile = manager.getProfile(CommonProfile.class);
+        return profile;
+    }
+    
        
     /**
      * Constructor. Gets userid from a user profile on request and sets authorisations. 
@@ -191,11 +198,7 @@ public class AuthInfo {
     
     public AuthInfo(ServerAPI api, Request req, Response res) 
     {
-        final SparkWebContext context = new SparkWebContext(req, res);
-        
-        final ProfileManager manager = new ProfileManager(context, JEESessionStore.INSTANCE); 
-        final Optional<CommonProfile> profile = manager.getProfile(CommonProfile.class);
-        
+        Optional<CommonProfile> profile = getSessionProfile(req, res);
         _api = api;
         var i = 0;
         services = new String[_services.size()];
@@ -228,12 +231,15 @@ public class AuthInfo {
 
             User u = (User) profile.get().getAttribute("userInfo");
             callsign = u.getCallsign();
-            tagsAuth = u.getGroup().getTags();
-            groupid = u.getGroup().getIdent();
+            
+            Group grp = (Group) profile.get().getAttribute("role");
+            if (grp == null) 
+                grp = u.getGroup();
+            groupid = grp.getIdent();
+            tagsAuth = grp.getTags();
+            
             admin = u.isAdmin();
-            sar = u.isSar();          
-            if (admin)
-                sar=true;
+            sar = grp.isSar();          
         }
        
         servercall=api.getProperty("default.mycall", "NOCALL");

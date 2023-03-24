@@ -200,7 +200,8 @@ public class WebServer implements ServerAPI.Web
         before("/resetinfo",       _auth.conf().filter(null, "isauth, sar"));
         before("/sarmode",         _auth.conf().filter(null, "isauth, sar"));
         before("/sarurl",          _auth.conf().filter(null, "isauth"));
-        before("/groups",          _auth.conf().filter(null, "isauth, admin"));
+        before("/mygroup",         _auth.conf().filter(null, "isauth"));
+        before("/groups",          _auth.conf().filter(null, "isauth"));
         before("/users",           _auth.conf().filter(null, "isauth, admin"));
         before("/users/*",         _auth.conf().filter(null, "isauth, admin"));
         before("/mypasswd",        _auth.conf().filter(null, "isauth"));
@@ -255,6 +256,7 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/loginusers");
         corsEnable("/usernames");
         corsEnable("/groups");
+        corsEnable("/mygroup");
         corsEnable("/users");
         corsEnable("/users/*"); 
         corsEnable("/mypasswd");

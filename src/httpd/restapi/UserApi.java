@@ -23,7 +23,7 @@ import static spark.Spark.*;
 import java.util.*; 
 import no.polaric.aprsd.*;
 import no.polaric.aprsd.filter.*;
-
+import org.pac4j.core.profile.CommonProfile;
 
 
 /**
@@ -37,9 +37,10 @@ public class UserApi extends ServerBase {
     public static class GroupInfo {
         public String ident; 
         public String name; 
+        public boolean avail;
         public GroupInfo() {}
-        public GroupInfo(String id, String n) 
-            { ident=id; name=n; }
+        public GroupInfo(String id, String n, boolean av) 
+            { ident=id; name=n; avail=av;}
     }
     
     
@@ -75,7 +76,9 @@ public class UserApi extends ServerBase {
     public static class PasswdUpdate {
         public String passwd; 
     }
-    
+    public static class GroupUpdate {
+        public String group; 
+    }
     
     public static class Client {
         public String uid; 
@@ -90,6 +93,8 @@ public class UserApi extends ServerBase {
     private UserDb _users; 
     private GroupDb _groups; 
     private SortedSet<String> _remoteUsers = new TreeSet<String>();
+    private PubSub _psub;
+    
     
     
     public UserApi(ServerAPI api,  UserDb u, GroupDb g) {
@@ -97,6 +102,7 @@ public class UserApi extends ServerBase {
         _api = api;
         _users = u;
         _groups = g; 
+        _psub = (no.polaric.aprsd.http.PubSub) _api.getWebserver().getPubSub();
     }
     
     
@@ -122,6 +128,16 @@ public class UserApi extends ServerBase {
     
 
     
+    protected boolean groupAllowed(Group g, User u, boolean includedef) {
+        if (u==null)
+            return false;
+        return  u.isAdmin() || g.getIdent().equals(u.getGroup().getIdent()) 
+                      || (includedef && g.getIdent().equals("DEFAULT"));
+    }
+    
+    
+    
+    
     /** 
      * Set up the webservices. 
      */
@@ -131,14 +147,8 @@ public class UserApi extends ServerBase {
          * Get list of filter profiles.
          ************************************************/
         get ("/filters", "application/json", (req, resp) -> {
-            var uid = getAuthInfo(req).userid;
-            String group = null;
-            if (uid != null) {
-                User u = _users.get(uid);
-                if (u != null)
-                    group = u.getGroup().getIdent(); 
-            }   
-            return ViewFilter.getFilterList(uid!=null, group);
+            AuthInfo auth = getAuthInfo(req);
+            return ViewFilter.getFilterList(auth.userid !=null, auth.groupid);
         }, ServerBase::toJson);
        
        
@@ -198,11 +208,48 @@ public class UserApi extends ServerBase {
          ******************************************/
         get("/groups", "application/json", (req, resp) -> {
             List<GroupInfo> gl = new ArrayList<GroupInfo>();
+            
+            var uid = getAuthInfo(req).userid; 
+            User u = _users.get(uid);
+     
             for (Group g: _groups.getAll())  
-                gl.add(new GroupInfo(g.getIdent(), g.getName()));
-    
+                gl.add(new GroupInfo(g.getIdent(), g.getName(), 
+                  groupAllowed(g, u,false) ));
+   
+            _psub.createRoom("auth:"+uid, null);
             return gl;
         }, ServerBase::toJson );
+        
+        
+        
+        /************************************************
+         * Change role (group) for current user session
+         ************************************************/
+        put("/mygroup", (req, resp) -> {
+            AuthInfo auth = getAuthInfo(req);
+            String uid = auth.userid; 
+            Optional<CommonProfile> profile = AuthInfo.getSessionProfile(req, resp);
+            
+            /* FIXME: Do we need this? */
+            User u = _users.get(uid);
+            if (u==null)
+                return ERROR(resp, 404, "Unknown user: "+uid);
+                
+            var grp = (GroupUpdate) 
+                ServerBase.fromJson(req.body(), GroupUpdate.class);
+            Group g = _groups.get(grp.group);
+            if (g==null)
+                return ERROR(resp, 404, "Unknown group: "+grp.group);
+            if (!groupAllowed(g, u, true))
+                return ERROR(resp, 403, "Group is not allowed: "+grp.group);
+                
+            if (profile.isPresent())
+                profile.get().addAttribute("role", g);
+            _psub.put("auth:"+uid, null);
+                 
+            return "Ok";
+        });
+        
         
         
         

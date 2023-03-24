@@ -44,6 +44,7 @@ public abstract class User {
      * These flags are now stored in this class. 
      */
     private Group group = Group.DEFAULT;
+    
     private boolean admin=false;
     private boolean suspended = false; 
     private String trackerAllowed = "";
@@ -53,7 +54,7 @@ public abstract class User {
     public final void setGroup(Group g)         { group = g; } 
     public final void setSar(boolean s)         { } 
        /* SetSar will soon go away  - replace with setGroup */
-       
+    
     public boolean isAdmin()                    { return admin; }
     public final void setAdmin(boolean a)       { admin=a; }
     public final boolean isSuspended()          { return suspended; }
@@ -64,7 +65,8 @@ public abstract class User {
     protected User(String id)
         { userid=id; }
         
-    public User() {}
+    public User() 
+        { }
     
         
 }
