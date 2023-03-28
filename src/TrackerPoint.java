@@ -109,11 +109,14 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     private   String   _alias;    
     private   boolean  _hidelabel = false; 
     private   String   _user; 
-  
+    private   boolean  _nodb = false;
   
   
     public TrackerPoint(Reference p)
       { super(p); }
+    
+    public void setNoDb(boolean ndb)
+      { _nodb = ndb; }
     
     
     public void autoTag()
@@ -386,6 +389,9 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     {  
       if (changeOf(_alias, a)) {
         _alias = a;
+        StationDB.Hist hdb = _api.getDB().getHistDB(); 
+        if (hdb != null && !_nodb)
+            hdb.setAlias(getIdent(), a);
          setChanging();
          return true;
       }
@@ -401,7 +407,10 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     public synchronized boolean setIcon(String a)
     {  
       if (changeOf(_icon, a)) {
-        _icon = a;
+        _icon = a;    
+        StationDB.Hist hdb = _api.getDB().getHistDB(); 
+        if (hdb != null && !_nodb)
+            hdb.setIcon(getIdent(), a);
         setChanging();
         return true;
       }
@@ -485,7 +494,12 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     public boolean expired() {
         if (_expired) 
             return true;
-        return _expired = _expired();
+        _expired = _expired();
+        if (_expired) {
+            setAlias(null);
+            setIcon(null);
+        }
+        return _expired;
     }
     
     protected boolean _expired() {

@@ -63,6 +63,21 @@ public interface StationDB
          * @param t time of capture
          */
         public Trail.Item getTrailPoint(String src, java.util.Date t);
+        
+        
+        /**
+         * Set alias
+         * @param src identifier
+         * @param alias Alias is set now. null to delete it. 
+         */
+         public void setAlias(String src, String alias); 
+         
+        /**
+         * Set icon
+         * @param src identifier
+         * @param alias Icon filename is set now. null to delete it. 
+         */
+         public void setIcon(String src, String icon); 
     }
     
     
