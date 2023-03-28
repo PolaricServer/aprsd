@@ -91,9 +91,6 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 mu.lines = new LinkedList<JsLine>();
                 boolean allowed = (login() && trusted()); 
                 RuleSet vfilt = ViewFilter.getFilter(_filter, allowed);      
-                
-                long start = System.nanoTime();
-                int n=0, n2=0, del=0, ins=0;
                 List<TrackerPoint> itemlist =  _api.getDB().search(_uleft, _lright, vfilt);
                 if (itemlist.size() > _max_ovr_size) {
                     _api.log().info("JsonMapUpdater", "Too many points: "+itemlist.size());
@@ -103,11 +100,9 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 
                 for (TrackerPoint s:itemlist) 
                 {          
-                    n++;
                     if (!s.isChanging() && items.contains(s.getIdent()))
                         continue;
-                    
-                    n2++;                
+                                  
                     items.add(s.getIdent());
                     
                     /* Apply filter. */ 
@@ -121,20 +116,13 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
 
                     /* Add point to delete-list */
                     if (!s.visible() || (_api.getSar() != null && !allowed && _api.getSar().filter(s))) {
-                        if (!_keep) {
-                            boolean found = (_api.getDB().getItem(s.getIdent(),null) != null);
-                            boolean same = (_api.getDB().getItem(s.getIdent(), null) == s);
-                            
-                             _api.log().info("JsonMapUpdater", "EXPIRED: "+s.getIdent()
-                                + " "+tf.format(s.getUpdated())+", "+tf.format(new Date())+(found? " YES": " NO")+(same?" same":""));
+                        if (!_keep) 
                             continue;
-                        }
-                        del++;
+                        
                         mu.delete.add(s.getIdent());
                     }
                     else {  
                         /* Add item to overlay */
-                        ins++;
                         JsPoint p = createPoint(s, action);
                         if (p!=null) 
                             mu.points.add(p);
@@ -144,10 +132,6 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                            addLines(mu, (Station) s, _uleft, _lright); 
                     }
                 }
-                 
-                long finish = System.nanoTime();
-                long timeElapsed = finish - start;
-                System.out.println("JSTRPT,"+_filter+","+n+","+n2+","+ins+","+del+","+timeElapsed/1000);
                 
                 /* Add signs to list */
                 for (Signs.Item s: Signs.search(_scale, _uleft, _lright)) {
