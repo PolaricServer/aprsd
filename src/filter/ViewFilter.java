@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014-2021 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2014-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,11 +31,12 @@ public class ViewFilter {
   /* Get a single filter (RuleSet) */
   public static RuleSet getFilter(String id, boolean loggedIn)
   {
-     RuleSet x  = _map.get(id);
+     RuleSet x  = _map.get(id); 
+     
+     if (!loggedIn && x != null && x.isNologin()) 
+         return x;
      if (x==null || (!x.isPublic() && !loggedIn) ) 
          return _default;
-     if (!loggedIn && x.isNologin()) 
-         return x;
      return x;
   }    
   
