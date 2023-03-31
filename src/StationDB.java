@@ -66,18 +66,30 @@ public interface StationDB
         
         
         /**
-         * Set alias
+         * Log setting of alias
          * @param src identifier
          * @param alias Alias is set now. null to delete it. 
          */
-         public void setAlias(String src, String alias); 
-         
+        public void setAlias(TrackerPoint tp, String alias); 
+        
+        
         /**
-         * Set icon
+         * Log setting of icon
          * @param src identifier
          * @param alias Icon filename is set now. null to delete it. 
          */
-         public void setIcon(String src, String icon); 
+        public void setIcon(TrackerPoint tp, String icon); 
+         
+        
+        
+        /**
+         * Log setting of tag
+         * @param src identifier
+         * @param tag Icon 
+         * @param delete false if tag is to be added, true if it is to be removed
+         */
+        public void setTag(PointObject tp, String tag, boolean delete); 
+        
     }
     
     

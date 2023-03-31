@@ -397,7 +397,6 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
                   checkMoving(); 
               } 
               garbageCollect();            
-              rebuildIndex();
               save();
            }
            catch (Exception e)

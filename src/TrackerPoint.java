@@ -28,7 +28,6 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
 {
     private   static long        _nonMovingTime = 1000 * 60 * 4; 
     private   static Notifier    _change;
-    protected static ServerAPI   _api = null;
     protected static ColourTable _colTab = null;
     private   static long        _posUpdates = 0;
     protected static long        _aprsPosUpdates = 0;
@@ -109,14 +108,12 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     private   String   _alias;    
     private   boolean  _hidelabel = false; 
     private   String   _user; 
-    private   boolean  _nodb = false;
+
   
   
     public TrackerPoint(Reference p)
       { super(p); }
-    
-    public void setNoDb(boolean ndb)
-      { _nodb = ndb; }
+
     
     
     public void autoTag()
@@ -391,7 +388,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
         _alias = a;
         StationDB.Hist hdb = _api.getDB().getHistDB(); 
         if (hdb != null && !_nodb)
-            hdb.setAlias(getIdent(), a);
+            hdb.setAlias(this, a);
          setChanging();
          return true;
       }
@@ -410,7 +407,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
         _icon = a;    
         StationDB.Hist hdb = _api.getDB().getHistDB(); 
         if (hdb != null && !_nodb)
-            hdb.setIcon(getIdent(), a);
+            hdb.setIcon(this, a);
         setChanging();
         return true;
       }
@@ -498,6 +495,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
         if (_expired) {
             setAlias(null);
             setIcon(null);
+            removeAllTags();
         }
         return _expired;
     }

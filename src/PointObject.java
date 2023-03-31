@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2014-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,14 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
      */
     protected Set<String> _tags = new HashSet<String>();
     protected static SortedMap<String, Integer> _tagUse = new TreeMap<String, Integer>();
-    
-    
+    protected static ServerAPI   _api = null;
+        
+    protected boolean  _nodb = false;
+            
+    public void setNoDb(boolean ndb)
+      { _nodb = ndb; }
+        
+        
     /** 
      * Save tags on file.
      */
@@ -144,10 +150,14 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
      * Set tag on this object. 
      */
     public void setTag(String tag) {
-       if (tag == null || tag.equals("")) 
+       if (tag == null || tag.equals("") || _tags.contains(tag)) 
           return; 
-       _incrementTag(tag);
-       _tags.add(tag); 
+       _incrementTag(tag);      
+        _tags.add(tag); 
+        
+        StationDB.Hist hdb = _api.getDB().getHistDB(); 
+        if (hdb != null && !_nodb)
+            hdb.setTag(this, tag, false);
     }
     
     
@@ -159,6 +169,10 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
             return;
         _decrementTag(tag);
         _tags.remove(tag); 
+        
+        StationDB.Hist hdb = _api.getDB().getHistDB(); 
+        if (hdb != null && !_nodb)
+            hdb.setTag(this, tag, true);
     }
     
     
@@ -167,8 +181,13 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
      * Remove all tags associated with this object. 
      */
     public void removeAllTags() {
-        for (String x : _tags)
-           _decrementTag(x);
+        for (String x : _tags) {
+           _decrementTag(x);   
+            /* Mark as removed in hist db, if necessary */
+            StationDB.Hist hdb = _api.getDB().getHistDB(); 
+            if (hdb != null && !_nodb)
+                hdb.setTag(this, x, true);
+        }
         _tags.clear();
     }
     
@@ -178,8 +197,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
      * Potential security risk! It expects a regex. If input from user which is not expected to be a regex,
      * input should be properly sanitized using SecUtils.escape4regex()
      */
-    public boolean _hasTag(Pattern tag) { 
-        Pattern pattern = Pattern.compile("("+tag+")(\\..*)?");
+    public boolean _hasTag(Pattern pattern) { 
         for (String x: _tags) {
             if (pattern.matcher(x).matches()) 
                 return true;
