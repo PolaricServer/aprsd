@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2016-2022 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -235,7 +235,7 @@ public class GpsPosition extends OwnPosition
         /* Update position locally on map */
         if (++cnt >= 5 || speed > 1 && ( course_change(crs, getCourse(), 30) && cnt >= 2)) {
            cnt = 0;
-           AprsHandler.PosData pd = new AprsHandler.PosData(pos, crs, speed, (char) 0, (char) 0); 
+           ReportHandler.PosData pd = new ReportHandler.PosData(pos, crs, speed, (char) 0, (char) 0); 
            update(t, pd, _comment, "(GPS)");
         }
     }

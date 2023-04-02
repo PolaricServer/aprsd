@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -214,7 +214,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
       
       
         
-    public synchronized void update(Date ts, AprsHandler.PosData pd, String descr, String pathinfo)
+    public synchronized void update(Date ts, ReportHandler.PosData pd, String descr, String pathinfo)
     { 
         StationDB db = _api.getDB();
         LatLng prevpos = (getPosition()==null ? null : getPosition().toLatLng());

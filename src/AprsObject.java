@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2012 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2012-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,7 +129,7 @@ public class AprsObject extends AprsPoint implements Serializable
      * @param descr Comment field. 
      * @param path Digipeater path of containing packet. 
      */
-    public synchronized void update(Date ts, AprsHandler.PosData pd, String descr, String path)
+    public synchronized void update(Date ts, ReportHandler.PosData pd, String descr, String path)
     { 
         /* Should try to share code with Station class ?*/
         if (_symbol != pd.symbol || _altsym != pd.symtab || 

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,7 +83,7 @@ public class OwnObjects implements Runnable
     /**
      * Add an object.
      */  
-    public synchronized boolean add(String id, AprsHandler.PosData pos,
+    public synchronized boolean add(String id, ReportHandler.PosData pos,
                         String comment, boolean perm)
     {
          AprsObject obj = (AprsObject) _api.getDB().getItem(id, null);

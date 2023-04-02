@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2016-2022 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,8 +86,10 @@ public class OwnPosition extends Station implements Runnable
         
         String[] pp = ownpos.split("[-\\s]+");
         if (pp.length == 3) {
+        
            Reference p = new UTMRef(Double.parseDouble(pp[1]), Double.parseDouble(pp[2]), pp[0].charAt(2), 
                       Integer.parseInt( pp[0].substring(0,2)));
+                      
            p = p.toLatLng();
            /* FIXME: Don't reset pos if GPS is active */
            updatePosition(new Date(), p, 0);
@@ -256,7 +258,7 @@ public class OwnPosition extends Station implements Runnable
      */
     public synchronized void updatePosition(Date t, Reference pos, char symtab, char symbol)
     {
-          update(new Date(),new AprsHandler.PosData(pos, symbol, symtab), _comment, "");
+          update(new Date(),new ReportHandler.PosData(pos, symbol, symtab), _comment, "");
           _timeSinceReport = 0;
           sendPosReport();
     }

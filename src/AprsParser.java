@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public class AprsParser implements AprsChannel.Receiver
      
     private ServerAPI _api   = null;
     private MessageProcessor _msg;
-    private List<AprsHandler> _subscribers = new LinkedList<AprsHandler>();
+    private List<ReportHandler> _subscribers = new LinkedList<ReportHandler>();
 
     
     public AprsParser(ServerAPI a, MessageProcessor msg) 
@@ -65,10 +65,10 @@ public class AprsParser implements AprsChannel.Receiver
     
     
     
-    public void subscribe(AprsHandler subscriber)
+    public void subscribe(ReportHandler subscriber)
       { _subscribers.add(subscriber); }
       
-    public void unsubscribe(AprsHandler subscriber)
+    public void unsubscribe(ReportHandler subscriber)
       { _subscribers.remove(subscriber); }
     
     
@@ -152,8 +152,7 @@ public class AprsParser implements AprsChannel.Receiver
           
           
         
-        // _api.getAprsHandler().handlePacket(p.source, rtime, p.from, p.to, p.via, p.report);
-        for (AprsHandler h:_subscribers)
+        for (ReportHandler h:_subscribers)
             h.handlePacket(p);
         parsePath(station, p.via, duplicate);   
     }
@@ -263,7 +262,7 @@ public class AprsParser implements AprsChannel.Receiver
         
         if (_msg != null)
            _msg.incomingMessage(station, recipient, content, msgid);  
-        for (AprsHandler h:_subscribers)
+        for (ReportHandler h:_subscribers)
             h.handleMessage(p.source, new Date(), station.getIdent(), recipient, content);
     }
 
@@ -281,8 +280,8 @@ public class AprsParser implements AprsChannel.Receiver
            d = parseTimestamp(msg, false);
            msg = msg.substring(7);
         }
-        // _api.getAprsHandler().handleStatus(src, d, msg);
-        for (AprsHandler h:_subscribers)
+
+        for (ReportHandler h:_subscribers)
            h.handleStatus(p.source, d, msg);
         station.setStatus(d, msg);
     }
@@ -372,7 +371,7 @@ public class AprsParser implements AprsChannel.Receiver
             String msg = p.report;
             int j, k;
             Double pos_lat, pos_long; 
-            AprsHandler.PosData pd = new AprsHandler.PosData();
+            ReportHandler.PosData pd = new ReportHandler.PosData();
 
             if (toField.length() < 6 || msg.length() < 9) 
                 return;
@@ -533,7 +532,7 @@ public class AprsParser implements AprsChannel.Receiver
             
             station.update(new Date(), pd, comment, p.via);
             station.autoTag();
-            for (AprsHandler h:_subscribers)
+            for (ReportHandler h:_subscribers)
                h.handlePosReport(p.source, station.getIdent(), new Date(), pd, comment, p.report );
             return;
     }
@@ -655,9 +654,9 @@ public class AprsParser implements AprsChannel.Receiver
     
     
     
-    private AprsHandler.PosData parseCompressedPos(String data)
+    private ReportHandler.PosData parseCompressedPos(String data)
     {
-          AprsHandler.PosData pd = new AprsHandler.PosData();
+          ReportHandler.PosData pd = new ReportHandler.PosData();
           double latDeg, lngDeg;
           pd.symtab = data.charAt(0);
           pd.symbol = data.charAt(9);
@@ -691,21 +690,21 @@ public class AprsParser implements AprsChannel.Receiver
     {
        Date time = new Date();
        time = parseTimestamp(data.substring(0), true);
-       AprsHandler.PosData pd = parseCompressedPos(data.substring(3));
+       ReportHandler.PosData pd = parseCompressedPos(data.substring(3));
        
        if (AprsChannel._dupCheck.checkTS(station.getIdent(), time))
             return;
             
        _api.log().debug("AprsParser", "Extra report accepted: "+time);
        station.update(time, pd, "", "(EXT)" );        
-       for (AprsHandler h:_subscribers)
+       for (ReportHandler h:_subscribers)
            h.handlePosReport(src, station.getIdent(), time, pd, "", "(EXT)" );
     }
     
     
     
     
-    private String parseExtraReport2(Source src, String data, AprsPoint station,  AprsHandler.PosData pd, Date ts)
+    private String parseExtraReport2(Source src, String data, AprsPoint station,  ReportHandler.PosData pd, Date ts)
     {
         while (data.length() >= 8) {
             if (!data.matches("([A-Za-z0-9\\+/]{8})+.*"))
@@ -729,14 +728,14 @@ public class AprsParser implements AprsChannel.Receiver
             }
             
             _api.log().debug("AprsParser", "Extra report type 2 accepted: "+time);
-            AprsHandler.PosData pdx = new AprsHandler.PosData(); 
+            ReportHandler.PosData pdx = new ReportHandler.PosData(); 
             pdx.pos = new LatLng(lat, lng);
             pdx.symbol = pd.symbol; 
             pdx.symtab = pd.symtab;
             pdx.course = pd.speed = -1; 
             pdx.altitude = -1; 
             station.update(time, pdx, "", "(EXT)" );        
-            for (AprsHandler h:_subscribers)
+            for (ReportHandler h:_subscribers)
                 h.handlePosReport(src, station.getIdent(), time, pdx, "", "(EXT)" );
         }
         return data;
@@ -788,11 +787,11 @@ public class AprsParser implements AprsChannel.Receiver
          /*
           * Now, extract position info and comment
           */     
-         AprsHandler.PosData pd;
+         ReportHandler.PosData pd;
          Matcher m = _stdPat.matcher(data);
          if (m.matches())
          {
-             pd = new AprsHandler.PosData();
+             pd = new ReportHandler.PosData();
              
              String lat     = m.group(1);
              char   latNS   = m.group(4).charAt(0);
@@ -861,7 +860,7 @@ public class AprsParser implements AprsChannel.Receiver
              
           station.autoTag();
           station.update(time, pd, comment, pathinfo );           
-          for (AprsHandler h:_subscribers)
+          for (ReportHandler h:_subscribers)
               h.handlePosReport(p.source, station.getIdent(), time, pd, comment, pathinfo ); 
     }
     
@@ -871,7 +870,7 @@ public class AprsParser implements AprsChannel.Receiver
     /** 
      * Parse comment field 
      */
-    private String parseComment(String comment, Date ts, AprsPoint station, AprsHandler.PosData pd, AprsPacket p)
+    private String parseComment(String comment, Date ts, AprsPoint station, ReportHandler.PosData pd, AprsPacket p)
     {        
         if (comment==null)
            return null;

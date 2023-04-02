@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,7 +116,7 @@ public abstract class AprsPoint extends TrackerPoint implements Serializable, Cl
      * @param descr Comment field. 
      * @param path Digipeater path of containing packet. 
      */    
-    public abstract void update(Date ts, AprsHandler.PosData pd, String descr, String path);        
+    public abstract void update(Date ts, ReportHandler.PosData pd, String descr, String path);        
         
 
 }

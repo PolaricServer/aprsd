@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2019-2023 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,7 +106,7 @@ public class AprsObjectApi extends ServerBase {
                 return ERROR(resp, 400, "Invalid object. Couldn't post");
                 
             var pos = new LatLng( obj.pos[1], obj.pos[0]);
-            var pd  = new AprsHandler.PosData (pos, obj.sym, obj.symtab);
+            var pd  = new ReportHandler.PosData (pos, obj.sym, obj.symtab);
             
             if (_ownObj.add(obj.ident, pd, obj.comment, obj.perm)) {
                 _api.log().info("RestApi", "POST OBJECT: '"+obj.ident+"' by user '"+getAuthInfo(req).userid+"'");
@@ -130,7 +130,7 @@ public class AprsObjectApi extends ServerBase {
                 return ERROR(resp, 400, "Object not found");
                 
             var pos = new LatLng( oi.pos[1], oi.pos[0]);
-            var pd  = new AprsHandler.PosData (pos, oi.sym, oi.symtab);
+            var pd  = new ReportHandler.PosData (pos, oi.sym, oi.symtab);
             obj.update(new Date(), pd, oi.comment, "(own)");
             return "OK";
         } );

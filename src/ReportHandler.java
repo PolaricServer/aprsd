@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2014-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import uk.me.jstott.jcoord.*;
  * FIXME: Consider using a more flexible asynchronous event handler pattern. 
  */
  
-public interface AprsHandler
+public interface ReportHandler
 {
     /**
      * Information typically associated with an APRS position report.
@@ -91,7 +91,7 @@ public interface AprsHandler
     /**
      * Dummy Aprs handler class. Does nothing. 
      */
-    public class Dummy implements AprsHandler 
+    public class Dummy implements ReportHandler 
     {
        public void handlePosReport(Source s, String sender, Date ts, PosData newpos,  
                String descr, String pathinfo) {};
