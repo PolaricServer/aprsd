@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2018-2021 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018-2023 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,7 +106,7 @@ public class SystemApi extends ServerBase {
             var op = (OwnPos) 
                 ServerBase.fromJson(req.body(), OwnPos.class);
             if (op==null || op.pos==null)
-                return ERROR(resp, 400, "Invalid input format");   
+                return ERROR(resp, 400, "Couldn't parse input");   
             var p = _api.getOwnPos();
             p.updatePosition(new Date(), 
                       new LatLng( op.pos[1], op.pos[0]), 

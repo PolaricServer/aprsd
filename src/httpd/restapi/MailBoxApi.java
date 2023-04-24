@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2020 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2020-2023 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ public class MailBoxApi extends ServerBase {
                 var msg = (MailBox.Message) ServerBase.fromJson(req.body(), MailBox.Message.class);       
                 
                 if (msg==null)
-                    return ERROR(resp, 400, "Invalid input format");
+                    return ERROR(resp, 400, "Cannot parse input");
                 if (msg.from==null)
                     msg.from = userid;
                 else if (!userid.equals(msg.from))

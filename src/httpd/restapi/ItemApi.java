@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2018-2021 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018-2023 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -189,9 +189,11 @@ public class ItemApi extends ServerBase {
             ItemInfo.Alias a = (ItemInfo.Alias) 
                 ServerBase.fromJson(req.body(), ItemInfo.Alias.class);    
             if (a==null)
-                return ERROR(resp, 400, "Invalid input format");
+                return ERROR(resp, 400, "Cannot parse input");
+                
             if ( st.setAlias(a.alias) ) 
-                notifyAlias(ident, a.alias, req); 
+                notifyAlias(ident, a.alias, req);
+            
             if ( st.setIcon(a.icon) )
                 notifyIcon(ident, a.icon, req);
             return "Ok";
@@ -313,7 +315,7 @@ public class ItemApi extends ServerBase {
             else {
                 if (tag.charAt(0) != '+' && tag.charAt(0) != '-')
                     tag = "+" + tag;
-                st.removeTag(tag);
+                st.removeTag(tag); 
                 notifyRmTag(st.getIdent(), tag, req);
             }
             return "Ok"; 
@@ -357,7 +359,7 @@ public class ItemApi extends ServerBase {
         }, ServerBase::toJson );
         
         
-        /*************************************************
+        /************************************************
          * Get telemetry current report for a given item
          *************************************************/
         get("/telemetry/*/current", "application/json", (req, resp) -> {

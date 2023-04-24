@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2020 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2020-2023 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,11 +61,12 @@ public class SarApi extends ServerBase {
     }
     
     
-    protected void updateIpp(String user, String ident, IppInfo ii) {
+    protected boolean updateIpp(String user, String ident, IppInfo ii) {
         var umap = _ippMap.get(user); 
         if (umap==null) 
-            return;
+            return false;
         umap.replace(ident, ii);
+        return true;
     }
     
     
@@ -131,7 +132,9 @@ public class SarApi extends ServerBase {
             if (auth == null)
                 return ERROR(resp, 500, "No authorization info found");
             var ipp = (IppInfo) 
-                ServerBase.fromJson(req.body(), IppInfo.class);
+                ServerBase.fromJson(req.body(), IppInfo.class);       
+            if (ipp==null)
+                return ERROR(resp, 400, "Cannot parse input");   
             var ident = addIpp(auth.userid, ipp);
             return ident;
         });
@@ -164,7 +167,10 @@ public class SarApi extends ServerBase {
                 return ERROR(resp, 500, "No authorization info found");
             var ipp = (IppInfo) 
                 ServerBase.fromJson(req.body(), IppInfo.class);
-            updateIpp(auth.userid, ident, ipp);
+            if (ipp==null)
+                return ERROR(resp, 400, "Cannot parse input");   
+            if (!updateIpp(auth.userid, ident, ipp))
+                return ERROR(resp, 404, "Not found");
             return "Ok";
         });
         

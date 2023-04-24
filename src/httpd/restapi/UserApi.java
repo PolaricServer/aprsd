@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017-2021 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2023 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -324,11 +324,14 @@ public class UserApi extends ServerBase {
         put("/users/*", (req, resp) -> {
             var ident = req.splat()[0];        
             User u = _users.get(ident);
+
             if (u==null)
                 return ERROR(resp, 404, "Unknown user: "+ident);
             var uu = (UserUpdate) 
                 ServerBase.fromJson(req.body(), UserUpdate.class);
-            
+            if (uu==null)
+                return ERROR(resp, 400, "Cannot parse input");
+                
             if (uu.group != null) {
                 Group g = _groups.get(uu.group);
                 if (g==null)
@@ -338,7 +341,7 @@ public class UserApi extends ServerBase {
             if (uu.altgroup != null) {
                 Group g = _groups.get(uu.altgroup);
                 if (g==null)
-                    return ERROR(resp, 404, "Unknown group: "+uu.altgroup);
+                    return ERROR(resp, 404, "Unknown alt group: "+uu.altgroup);
                 u.setAltGroup(_groups.get(uu.altgroup));
             } 
             

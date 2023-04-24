@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2020 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2020-2023 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -259,7 +259,7 @@ public class ShellScriptApi extends ServerBase {
                     arg = (ScriptArg) 
                         ServerBase.fromJson(req.body(), ScriptArg.class);
                     if (arg==null)
-                        return ERROR(resp, 400, "Invalid input format");   
+                        return ERROR(resp, 400, "Couldn't parse input");   
                 }
                 if (script == null)
                     return ERROR(resp, 404, "Script "+name+" not found");   

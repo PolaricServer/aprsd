@@ -104,7 +104,7 @@ public class BullBoardApi extends ServerBase {
             var b = (BullSubmit) 
                 ServerBase.fromJson(req.body(), BullSubmit.class);
             if (b==null)
-                return ERROR(resp, 400, "Input format error");
+                return ERROR(resp, 400, "Cannot parse input");
             
             var grp = _board.getBulletinGroup(b.groupid);
             if (grp == null)
