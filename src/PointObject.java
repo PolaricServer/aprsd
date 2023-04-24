@@ -17,7 +17,6 @@ import uk.me.jstott.jcoord.*;
 import java.util.*;
 import java.io.*;
 import java.util.regex.*;
-import org.nustaq.serialization.FSTConfiguration;
 
 
 
@@ -53,13 +52,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
       { ofs.writeObject(_tagUse); }
       
       
-    /**
-     * Save tags to byte array
-     */
-    public static byte[] saveTags(FSTConfiguration fst) 
-      { return fst.asByteArray(_tagUse); }
-    
-    
+ 
     /**
      * Restore tags from file. 
      */
@@ -67,14 +60,8 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
      throws IOException,ClassNotFoundException
       { _tagUse = (SortedMap<String, Integer>) ifs.readObject(); }
       
+
       
-    /**
-     * Restore tags from byte array. 
-     */
-    public static void restoreTags(FSTConfiguration fst, byte[] b) 
-      { _tagUse = (SortedMap<String, Integer>) fst.asObject(b); }
-      
-        
     /**
      * Increment the count for the given tag. 
      */
@@ -86,7 +73,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
                 _tagUse.replace(tag, x);
             }
             else 
-                _tagUse.put(tag, new Integer(1));
+                _tagUse.put(tag, 1);
         }
     }
     

@@ -19,7 +19,6 @@ import uk.me.jstott.jcoord.*;
 import java.util.concurrent.*;
 import java.util.regex.*;
 import java.util.stream.*;
-import org.nustaq.serialization.*;
 import no.polaric.aprsd.filter.*;
 
 import com.github.davidmoten.rtree2.*;
@@ -248,7 +247,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
           try {
              _api.log().info("StationDBImp", "Saving data...");
              FileOutputStream fs = new FileOutputStream(_file);
-             FSTObjectOutput ofs = new FSTObjectOutput(fs);
+             ObjectOutputStream ofs = new ObjectOutputStream(fs);
              
              ofs.writeObject(_routes);
              _api.getMsgProcessor().save();
@@ -275,11 +274,11 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
      */
     private synchronized void restore()
     {
-        FSTObjectInput ifs = null; 
+        ObjectInputStream ifs = null; 
         try {
           _api.log().info("StationDBImp", "Restoring point data...");
           FileInputStream fs = new FileInputStream(_file);
-          ifs = new FSTObjectInput(fs);
+          ifs = new ObjectInputStream(fs);
           
           _api.log().debug("StationDBImp", "Restoring routes...");
           _routes = (RouteInfo) ifs.readObject();
