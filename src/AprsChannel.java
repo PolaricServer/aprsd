@@ -1,5 +1,5 @@
- /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+/* 
+ * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ public abstract class AprsChannel extends Channel
      /* Statistics */
      protected long _heardPackets, _duplicates, _sent;        
 
+     protected static boolean canSend;
 
 
      /**
@@ -51,6 +52,10 @@ public abstract class AprsChannel extends Channel
      
      public static void init(ServerAPI api) {
         _logPackets = api.getBoolProperty("channel.logpackets", true);
+        canSend = true;
+        String myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();
+        if ("NOCALL".equals(myCall))
+            canSend = false;
      }
 
      

@@ -54,9 +54,11 @@ public class InetChannel extends TcpChannel
      */ 
     public void sendPacket(AprsPacket p)
     {  
+        if (!canSend)
+            return; 
         if (p.via == null || p.via.equals("")) {
-           p = p.clone(); 
-           p.via = "TCPIP*";
+            p = p.clone(); 
+            p.via = "TCPIP*";
         }
         if (_out != null) {
             _out.println(p.from+">"+p.to + 

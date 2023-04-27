@@ -68,7 +68,9 @@ public class TcpKissChannel extends TcpChannel
   
    
     public synchronized void sendPacket(AprsPacket p)
-    {
+    {        
+        if (!canSend)
+            return; 
         _log.log(" [>" + this.getShortDescr() + "] " + p);
         try {
            if (_kiss!=null) {
