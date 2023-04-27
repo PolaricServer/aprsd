@@ -902,19 +902,18 @@ public class AprsParser implements AprsChannel.Receiver
              int r = (int) Math.round(Math.sqrt(2*ht*Math.sqrt((power/10)*(gain/2))));
              int rKm = (int) Math.round(r*1.609344);
              
-             String dir;
-             switch (comment.charAt(6))
+             String dir = switch (comment.charAt(6))
              {
-                case '1': dir = " NE";
-                case '2': dir = " E";
-                case '3': dir = " SE";
-                case '4': dir = " S";
-                case '5': dir = " SW";
-                case '6': dir = " W";
-                case '7': dir = " NW";
-                case '8': dir = " N";
-                default : dir = "";
-             }
+                case '1' -> " NE";
+                case '2' -> " E";
+                case '3' -> " SE";
+                case '4' -> " S";
+                case '5' -> " SW";
+                case '6' -> " W";
+                case '7' -> " NW";
+                case '8' -> " N";
+                default  -> "";
+             };
              comment = comment.substring(7,comment.length()) + " ("+power+" watt, "+gain+" dB"+dir+
                    (rKm>0 ? " => "+rKm+" km" : "") + ")"; 
            }
@@ -1083,6 +1082,7 @@ public class AprsParser implements AprsChannel.Receiver
                int temp = Integer.parseInt(m.group(4)); 
                tempf = ((temp - 32) * 5) / 9;
             }
+
             String dir = ""; 
             if (direction >= 337 || direction < 22)
                 dir = "N"; 

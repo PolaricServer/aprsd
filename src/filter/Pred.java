@@ -392,8 +392,8 @@ class AND extends Pred
     void optimize() {
         List<Pred> copy = new LinkedList<Pred>();
         for (Pred p : conj) {
-           if (p instanceof AND) {
-              for (Pred q : ((AND)p).conj)
+           if (p instanceof AND pp) {
+              for (Pred q : pp.conj)
                  copy.add(q); 
            }
            else
@@ -445,8 +445,8 @@ class OR extends Pred
    void optimize() {
         List<Pred> copy = new LinkedList<Pred>();
         for (Pred p : disj) {
-           if (p instanceof OR) {
-              for (Pred q : ((OR)p).disj)
+           if (p instanceof OR pp) {
+              for (Pred q : pp.disj)
                  copy.add(q); 
            }
            else
@@ -469,8 +469,8 @@ class NOT extends Pred
             { return !pred.eval(obj, scale); }
             
         static Pred optimize(NOT p) {
-           if (p.pred instanceof NOT) {
-               return ((NOT)p.pred).pred; 
+           if (p.pred instanceof NOT pp) {
+               return pp.pred; 
            }
            else
                return p;

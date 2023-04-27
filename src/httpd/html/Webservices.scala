@@ -72,7 +72,7 @@ package no.polaric.aprsd.http
 
 
        def action(req : Request): NodeSeq =
-          if (!getAuthInfo(req).sar)
+          if (!getAuthInfo(req).sar && !getAuthInfo(req).admin)
               <h3>{"You are not authorized for such operations"}</h3>
 
           else if ("clearobj".equals(cmd)) {

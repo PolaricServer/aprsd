@@ -63,6 +63,9 @@ public class Tnc2Channel extends TncChannel
      
     public synchronized void sendPacket(AprsPacket p)
     {
+       if (!canSend)
+            return; 
+    
        if (_out == null)
           return;
        String unproto = p.to + (p.via != null && p.via.length()>0 ? " VIA "+p.via : "");
