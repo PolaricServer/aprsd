@@ -2,16 +2,16 @@ Source: polaric-aprsd
 Section: hamradio
 Priority: optional
 Maintainer: Øyvind Hanssen <ohanssen@acm.org>
-Build-Depends: debhelper (>= 10), libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, openjdk-17-jdk-headless|openjdk-18-jdk-headless|openjdk-19-jdk-headless|openjdk-20-jdk-headless, scala (>> 2.11.12), byacc-j, jflex, librxtx-java 
+Build-Depends: debhelper (>= 12), libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, openjdk-17-jdk-headless|openjdk-18-jdk-headless|openjdk-19-jdk-headless|openjdk-20-jdk-headless, scala (>> 2.11.12), byacc-j, jflex, librxtx-java 
 Standards-Version: 3.9.8
 Homepage: http://aprs.no/polaricserver
 
 Package: polaric-aprsd
 Architecture: all
-Depends: openjdk-17-jre-headless|openjdk-18-jre-headless|openjdk-19-headless|openjdk-20-headless, libslf4j-java, librxtx-java, scala-library (>> 2.11.12), scala-xml, scala-parser-combinators, gettext-base, libgettext-commons-java, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, adduser, apache2-utils, sudo, lsb-base, ${misc:Depends}
-Conflicts: polaric-database-plugin (<= 2.10), polaric-ais-plugin (<= 2.1.0) 
+Depends: openjdk-17-jre-headless|openjdk-18-jre-headless|openjdk-19-headless|openjdk-20-headless, libslf4j-java, librxtx-java, scala-library (>> 2.11.12), scala-xml, scala-parser-combinators, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, adduser, sudo, lsb-base, ${misc:Depends}
+Conflicts: polaric-database-plugin (<= 2.11), polaric-ais-plugin (<= 2.1.0) 
 Recommends:
-Suggests: polaric-webapp2 (>= 1.10)
+Suggests: polaric-webapp2 (>= 1.11)
 Description: Polaric Server: APRS daemon part. 
  The "Polaric Server" is mainly a web based service to present APRS 
  tracking information on maps and where the information is updated at real-

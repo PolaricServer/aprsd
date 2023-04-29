@@ -1,8 +1,18 @@
-polaric-aprsd (2.11.1+) UNRELEASED; urgency=medium
+polaric-aprsd (2.12) stable; urgency=medium
 
-  * Development 
+  * Update libraries
+  * Allow HTTPS for backend webserver
+  * Scripts work
+  * Config tidying
+  * Performance improvements, especially in overlay generation
+  * Allow user to change group/role for a session, alternative group/role for users
+  * Allow database logging of alias/icon/tag settings
+  * Get rid of FST - incompatible with JDK17
+  * Move to JDK17
+  * Don't send packets if callsign not set 
+  * Various fixes..
 
- -- Oyvind Hanssen <oivindh@la7eca>  Mon, 06 Feb 2023 22:07:58 +0100
+ -- Oyvind Hanssen <ohanssen@acm.org>  Wed, 26 Apr 2023 18:43:07 +0200
 
 polaric-aprsd (2.11.1) stable; urgency=medium
 

@@ -341,6 +341,7 @@ V.2.10
 * Tracker management fix
 * Various fixes..
 
+
 V.2.11
 ------
   * Remove unused i18n stuff and gettext dependency
@@ -352,4 +353,28 @@ V.2.11
   * Check rf-channel when used in igate (security)
   * group config file
   * various fixes 
+
+  
+V.2.12
+------
+ * Update libraries
+ * Allow HTTPS for backend webserver
+ * Scripts work
+ * Config tidying
+ * Performance improvements, especially in overlay generation
+ * Allow user to change group/role for a session, alternative group/role for users
+ * Allow database logging of alias/icon/tag settings
+ * Get rid of FST - incompatible with JDK17
+ * Move to JDK17
+ * Don't send packets if callsign not set 
+ * Various fixes..
+ * Use babel to compile/minify webapp
+ * WFS setup improvements 
+ * Allow multiple telemtry windows
+ * Store and query annotations (tags, alias, icon)
+ * Remove DStationDbImp
+ * Various fixes..
+
+  
+  
 
