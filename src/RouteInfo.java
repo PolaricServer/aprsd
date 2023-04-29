@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2013 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2013-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@ import java.io.Serializable;
 public class RouteInfo implements Serializable
 {
     protected static class Node implements Serializable {
-       public Map<String, Edge> from = new HashMap();   // One of these can be Set<string> instead
-       public Map<String, Edge> to = new HashMap();      
+       public Map<String, Edge> from = new HashMap<String,Edge>();   // One of these can be Set<string> instead
+       public Map<String, Edge> to = new HashMap<String,Edge>();      
        public void addFrom(String id, Edge e) { from.put(id, e); }    
        public void addTo(String id, Edge e) { to.put(id, e); }  
     }
@@ -51,7 +51,7 @@ public class RouteInfo implements Serializable
         
    
      
-    private Map<String, Node> _nodes = new HashMap();        
+    private Map<String, Node> _nodes = new HashMap<String,Node>();        
     private long nEdges;
     
     public long nItems() 
@@ -99,7 +99,7 @@ public class RouteInfo implements Serializable
     private synchronized Set<String> clean(Set<String> s)
     {
        Iterator<String> it = s.iterator();   
-       Set<String> x = new HashSet();
+       Set<String> x = new HashSet<String>();
        for (String key: s)
             if (_nodes.containsKey(key))
               x.add(key);

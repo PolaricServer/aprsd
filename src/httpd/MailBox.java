@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2020-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -152,7 +152,7 @@ public abstract class MailBox {
     /** Proxy for a group of mailboxes */
     
     public static class Group extends MailBox {
-        private List<MailBox> _boxes = new ArrayList(); 
+        private List<MailBox> _boxes = new ArrayList<MailBox>(); 
         
         public Group(ServerAPI api) {
             _api = api;

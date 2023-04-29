@@ -1,6 +1,6 @@
   
 /* 
- * Copyright (C) 2021- by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2021-2023 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import java.io.*;
 
 public class LocalGroups implements GroupDb
 {
-    private Map<String, Group> _map = new HashMap();
+    private Map<String, Group> _map = new HashMap<String,Group>();
 
     public Group get(String gid) { 
         return _map.get(gid);

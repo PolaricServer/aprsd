@@ -22,7 +22,7 @@ import java.io.*;
 
 public class ViewFilter {
     
-  private static Map<String, RuleSet> _map = new LinkedHashMap();
+  private static Map<String, RuleSet> _map = new LinkedHashMap<String,RuleSet>();
   private static RuleSet _default = new RuleSet(); 
   private static TagRuleSet _tagrules; 
   

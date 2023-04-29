@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ public class ThreadNotifier implements Notifier
     private TrackerPoint signalledPt; 
     private static long _mintime  = 1000 * 10;   /* Minimum wait time: 10s */
     private static long _timeout  = 1000 * 120;  /* Maximum wait time: 2min */
-    private Map<Long, Integer> _waiters = new HashMap();
+    private Map<Long, Integer> _waiters = new HashMap<Long,Integer>();
     // 0 = continue waiting, 1 = return XML, 2 = abort and return nothing
     
     /**

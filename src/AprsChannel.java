@@ -30,7 +30,7 @@ public abstract class AprsChannel extends Channel
      private static boolean _logPackets = false; 
      
      protected ServerAPI _api; 
-     protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap();
+     protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap<String, Heard>();
     
      /* Statistics */
      protected long _heardPackets, _duplicates, _sent;        

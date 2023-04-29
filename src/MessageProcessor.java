@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,8 +93,8 @@ public class MessageProcessor implements Runnable, Serializable
    private RecMessages recMessages = new RecMessages();
    private Date recMsg_ts = new Date(); 
        
-   private Map<String,  Subscriber> _subscribers = new HashMap();
-   private Map<String,  OutMessage> _outgoing = new HashMap();
+   private Map<String, Subscriber> _subscribers = new HashMap<String, Subscriber>();
+   private Map<String, OutMessage> _outgoing = new HashMap<String, OutMessage>();
    private static int  _msgno = 0;
    private AprsChannel _inetChan, _rfChan;
    private String      _myCall; /* Move this ? */

@@ -1,5 +1,5 @@
  /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,9 +61,9 @@ public abstract class Channel extends Source implements ManagedObject
      /* FIXME: Consider writing the interface spec */
 
      public static class Manager {
-         private HashMap<String, String>  _classes = new HashMap();
-         private HashMap<String, Channel> _instances = new LinkedHashMap();
-         private Set<String> _backups = new HashSet();
+         private HashMap<String, String>  _classes = new HashMap<String, String>();
+         private HashMap<String, Channel> _instances = new LinkedHashMap<String, Channel>();
+         private Set<String> _backups = new HashSet<String>();
          
          
          /**
@@ -93,6 +93,7 @@ public abstract class Channel extends Source implements ManagedObject
           * @param tname A short name for the type. See addClass method.
           * @param id A short name for the channel instance to allow later lookup.  
           */
+        @SuppressWarnings("unchecked")
          public Channel newInstance(ServerAPI api, String tname, String id)
          {
             try {

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ public abstract class ServerBase
         }
     }
    
-   
+   @SuppressWarnings("unchecked")
     public static Object deserializeJson(String text, Class cls) {
         try {
             return mapper.readValue(text, cls);

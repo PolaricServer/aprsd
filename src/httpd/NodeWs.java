@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2022-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ import java.util.function.*;
 public class NodeWs extends WsNotifier 
 {
     private HmacAuth _hmauth;
-    private NodeWsApi.Handler _handler;
+    private NodeWsApi.Handler<String> _handler;
     
     
     
@@ -88,11 +88,11 @@ public class NodeWs extends WsNotifier
     }
    
    
-    private HashMap<String, Client> _subscribers = new HashMap(); 
+    private HashMap<String, Client> _subscribers = new HashMap<String,Client>(); 
     
             
         
-    public NodeWs(ServerAPI api, NodeWsApi.Handler hdl) { 
+    public NodeWs(ServerAPI api, NodeWsApi.Handler<String> hdl) { 
         super(api, false); 
         _hmauth = new HmacAuth(api, "httpserver.auth.key");
         _handler = hdl;
@@ -106,7 +106,7 @@ public class NodeWs extends WsNotifier
     
     
     
-    public void setHandler(NodeWsApi.Handler h) {
+    public void setHandler(NodeWsApi.Handler<String> h) {
         _handler = h;
     }
     

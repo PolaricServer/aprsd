@@ -5,7 +5,7 @@ import java.util.*;
  
  
 class IndexedSets {
-    private HashMap<String, Set<String>> _map = new HashMap();
+    private HashMap<String, Set<String>> _map = new HashMap<String, Set<String>>();
     
     public void add(String key, String val) {
         Set<String> s = _map.get(key); 
@@ -44,7 +44,7 @@ class IndexedSets {
     
     
     public List<String> getAll() {
-        List<String> res = new ArrayList();
+        List<String> res = new ArrayList<String>();
         for (Set<String> s : _map.values())
             for (String x : s)
                 res.add(x); 

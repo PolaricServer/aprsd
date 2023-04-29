@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2010 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2010-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,10 +28,10 @@ public class DupCheck
      private static final long RT_TIMEOUT = 1000 * 60 * 3; /* 3 minutes */
      
      private LinkedHashMap<String, Date> _realtime  = 
-        new LinkedHashMap(); 
+        new LinkedHashMap<String, Date>(); 
         
      private LinkedHashMap<String, Boolean> _timestamped = 
-        new LinkedHashMap() 
+        new LinkedHashMap<String, Boolean>() 
         {
             protected boolean removeEldestEntry(Map.Entry e)
                 { return size() > 75000; }

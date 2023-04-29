@@ -1,5 +1,5 @@
  /* 
- * Copyright (C) 2017 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,9 +66,9 @@ public class AuthInfo {
     
     private static List<String> _services = new ArrayList<String>();    
     private static Queue<SesMailBox> gcbox = new LinkedList<SesMailBox>();
-    private static Map<String, SesMailBox> mboxlist = new HashMap();
+    private static Map<String, SesMailBox> mboxlist = new HashMap<String,SesMailBox>();
     private static ScheduledExecutorService gc = Executors.newScheduledThreadPool(5);
-    private static Map<String, ScheduledFuture> closingSessions = new HashMap();
+    private static Map<String, ScheduledFuture> closingSessions = new HashMap<String,ScheduledFuture>();
     
     public static void addService(String srv) {
        _services.add(srv);

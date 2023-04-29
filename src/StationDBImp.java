@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2022 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import static com.github.davidmoten.rtree2.Entries.entry;
  */
 public class StationDBImp extends StationDBBase implements StationDB, Runnable
 {
-    private SortedMap<String, TrackerPoint> _map = new ConcurrentSkipListMap();
+    private SortedMap<String, TrackerPoint> _map = new ConcurrentSkipListMap<String,TrackerPoint>();
     private String     _file;
     private String     _stnsave;
     private boolean    _kill = false; 
@@ -136,7 +136,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     public List<TrackerPoint> searchPrefix(String srch)
     {
         if (srch == null)
-           return new LinkedList();
+           return new LinkedList<TrackerPoint>();
         return _map.values().stream().filter( s ->
            ( s.getIdent().toUpperCase().startsWith(srch) )).collect(Collectors.toList());
     }
@@ -155,7 +155,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
      */
     public List<TrackerPoint> search(String srch, String[] tags)
     {
-        LinkedList<TrackerPoint> result = new LinkedList();
+        LinkedList<TrackerPoint> result = new LinkedList<TrackerPoint>();
         srch = srch.toUpperCase();
         if (srch.matches("REG:.*"))
            srch = srch.substring(4);
@@ -192,7 +192,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
         LatLng ul = uleft.toLatLng();
         LatLng lr = lright.toLatLng();
         
-        List res = new ArrayList(2000);
+        List<TrackerPoint> res = new ArrayList<TrackerPoint>(2000);
         Iterable<Entry<TrackerPoint, Point>> entries =
             _geoindex.search(Geometries.rectangleGeographic(ul.getLng(), lr.getLat(), lr.getLng(), ul.getLat()));  
 

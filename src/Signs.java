@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ public class Signs extends Source
     
     private BufferedReader  _rd;
     private StringTokenizer _next;
-    private List<Item> _list = new ArrayList();
+    private List<Item> _list = new ArrayList<Item>();
     private ExtDb _extdb = null;
     private int localId = -1;
     
@@ -116,6 +116,7 @@ public class Signs extends Source
                         !x[2].matches("[0-9]{7}") ||
                         !x[3].matches("[0-9]+"))
                         continue;    
+                        
                     double easting = Long.parseLong(x[1]);
                     double northing = Long.parseLong(x[2]);
                     long scale = Long.parseLong(x[3]);
@@ -146,7 +147,7 @@ public class Signs extends Source
     public static synchronized Iterable<Item>
           search(long scale, Reference uleft, Reference lright)
     {
-         LinkedList<Item> result = new LinkedList();
+         LinkedList<Item> result = new LinkedList<Item>();
          if (_signs == null)
             return result; 
          if (uleft==null || lright==null)

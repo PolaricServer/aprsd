@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017-2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private ServerAPI _api;
    private Logfile   _log;
     
-   private LinkedHashMap<String, LogEntry> _cmds = new LinkedHashMap(); 
+   private LinkedHashMap<String, LogEntry> _cmds = new LinkedHashMap<String, LogEntry>(); 
    private IndexedSets _users = new IndexedSets();
    private Map<String, Child> _children = new HashMap<String, Child>();
    

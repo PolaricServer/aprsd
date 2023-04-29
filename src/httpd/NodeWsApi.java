@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2022-23 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,8 @@ public class NodeWsApi<T> {
     private NodeWs _children;
     private String _nodeid;
     private Class<T> _cls;
-    private Handler _handler, _chandler;
+    private Handler<String> _handler;
+    private Handler<T> _chandler;
     private Map<String, NodeWsClient> _servers;
     
     
@@ -33,17 +34,17 @@ public class NodeWsApi<T> {
 
     
 
-    
+    @SuppressWarnings("unchecked")
     public NodeWsApi(String nodeid, NodeWs srv, Class<T> cls) {
-        _servers = new HashMap();
+        _servers = new HashMap<String,NodeWsClient>();
         _children = srv;
         _nodeid = nodeid;
         _cls = cls;
         
-        _handler = new Handler() {
-            public void recv(String nodeid, Object obj) {
+        _handler = new Handler<String>() {
+            public void recv(String nodeid, String obj) {
                 if (_chandler != null)
-                    _chandler.recv(nodeid, ServerBase.fromJson((String) obj, _cls));
+                    _chandler.recv(nodeid, (T) ServerBase.fromJson(obj, _cls));
             }
         };
         
@@ -54,7 +55,7 @@ public class NodeWsApi<T> {
     
     
     public List<String> getNodes() {
-        List<String> list = new ArrayList();
+        List<String> list = new ArrayList<String>();
         for (String x : _servers.keySet())
             list.add(x);
         for (String x : _children.getSubscribers())

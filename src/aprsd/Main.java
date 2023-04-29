@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2019 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2019-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ import java.util.concurrent.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "2.11.1+";
-   public  static String toaddr  = "APPS2B";
+   public  static String version = "2.12";
+   public  static String toaddr  = "APPS2C";
    
    private static StationDB db = null;
    private static AprsParser parser = null;
@@ -50,7 +50,7 @@ public class Main implements ServerAPI
    private static String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
    private static StatLogger stats; 
    public  static Logfile log;
-   private static List<ServerAPI.SimpleCb> _shutdown = new ArrayList();
+   private static List<ServerAPI.SimpleCb> _shutdown = new ArrayList<ServerAPI.SimpleCb>();
     
     
    /* API interface methods 

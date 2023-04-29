@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2022 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2022-23 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ public class NodeWsClient implements WebSocket.Listener{
     private String _subscribe;
     private boolean _connected = false;
     private HmacAuth _auth; 
-    private NodeWsApi.Handler _handler; 
+    private NodeWsApi.Handler<String> _handler; 
     private boolean _retry = false;
     private long _retr_int = 0;
     private Timer hb = new Timer();
@@ -61,7 +61,7 @@ public class NodeWsClient implements WebSocket.Listener{
     
     
     
-    public void setHandler(NodeWsApi.Handler h) {
+    public void setHandler(NodeWsApi.Handler<String> h) {
         _handler = h;
     }
     

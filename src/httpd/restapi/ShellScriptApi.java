@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 public class ShellScriptApi extends ServerBase {
 
     private ServerAPI _api; 
-    private Map<String, Script> _scripts = new HashMap();
+    private Map<String, Script> _scripts = new HashMap<String, Script>();
     private String _fname;
     private String _sdir;
     private File   _slog;
@@ -236,7 +236,7 @@ public class ShellScriptApi extends ServerBase {
          * Get list of available commands/scripts 
          */
         get("/scripts", "application/json", (req, resp) -> {
-            List<ScriptInfo> res = new ArrayList(); 
+            List<ScriptInfo> res = new ArrayList<ScriptInfo>(); 
             for (Script x: _scripts.values())
                 res.add(x.sinfo);
             return res;
@@ -271,7 +271,7 @@ public class ShellScriptApi extends ServerBase {
                     return ERROR(resp, 400, "Script "+name+": Expected "+script.nargs+" arguments, got "+arg.args.length);
                 
                 String cmd = _sdir+"/"+script.cmd;
-                List<String> cmdarg = new ArrayList(); 
+                List<String> cmdarg = new ArrayList<String>(); 
                 cmdarg.add(cmd);
                 if (script.nargs > 0) 
                     for (String a : arg.args)

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-23 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -378,7 +378,7 @@ public class WebServer implements ServerAPI.Web
     
     
     public List<WebClient> getClients() {
-        List<WebClient> wclist = new LinkedList();
+        List<WebClient> wclist = new LinkedList<WebClient>();
         for (WsNotifier.Client c: _jmapupdate.clients())
             wclist.add((WebClient) c); 
         return wclist;

@@ -29,7 +29,7 @@ import no.polaric.aprsd.*;
 public class SarApi extends ServerBase {
 
     private ServerAPI _api; 
-    private Map<String, Map> _ippMap = new HashMap();
+    private Map<String, Map> _ippMap = new HashMap<String,Map>();
     private long nextId = 1; 
     
     /* 
@@ -50,10 +50,11 @@ public class SarApi extends ServerBase {
     }
     
     
+    @SuppressWarnings("unchecked")
     protected String addIpp(String user, IppInfo ii) {
-        var umap = _ippMap.get(user); 
+        Map<String,IppInfo> umap = _ippMap.get(user); 
         if (umap==null) {
-            umap = new HashMap();
+            umap = new HashMap<String,IppInfo>();
             _ippMap.put(user, umap);
         }
         umap.put(ii.ident, ii);
@@ -61,8 +62,9 @@ public class SarApi extends ServerBase {
     }
     
     
+    @SuppressWarnings("unchecked")
     protected boolean updateIpp(String user, String ident, IppInfo ii) {
-        var umap = _ippMap.get(user); 
+        Map<String,IppInfo>  umap = _ippMap.get(user); 
         if (umap==null) 
             return false;
         umap.replace(ident, ii);
@@ -70,8 +72,9 @@ public class SarApi extends ServerBase {
     }
     
     
+    @SuppressWarnings("unchecked")
     protected Collection<IppInfo> getIppList(String user) {
-        var umap = _ippMap.get(user);
+        Map<String,IppInfo> umap = _ippMap.get(user);
         if (umap==null)
             return null;
         return umap.values();

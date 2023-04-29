@@ -47,7 +47,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
     
     
     public class SubBoard {
-        private SortedMap<String, SenderBulls> _map = new TreeMap();
+        private SortedMap<String, SenderBulls> _map = new TreeMap<String, SenderBulls>();
         private int _size = 10;
         private char _start='0', _end='9'; 
         private String name;
@@ -192,7 +192,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
     private ServerAPI _api; 
     private SubBoard _bulletins = new SubBoard("_B_", true);
     private SubBoard _announcements = new SubBoard("_A_", false); 
-    private SortedMap<String, SubBoard> _groups = new TreeMap(); 
+    private SortedMap<String, SubBoard> _groups = new TreeMap<String, SubBoard>(); 
     private String _grpsel;
     private String _senders;
     private String _myCall;

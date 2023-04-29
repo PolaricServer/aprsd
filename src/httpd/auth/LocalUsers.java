@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2018-22 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018-23 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -118,7 +118,7 @@ public class LocalUsers implements UserDb
      * Get all users as a collection.
      */
     public Collection<no.polaric.aprsd.http.User> getAll() {
-        List<no.polaric.aprsd.http.User> xl = new ArrayList();
+        List<no.polaric.aprsd.http.User> xl = new ArrayList<no.polaric.aprsd.http.User>();
         for (no.polaric.aprsd.http.User x: _users.values())
             xl.add(x);
         return xl;
@@ -293,6 +293,9 @@ public class LocalUsers implements UserDb
                 /* Read a line */
                 String line = rd.readLine();
                 if (!line.startsWith("#") && line.length() > 1) {
+                
+                // userid, lastupd, sar, admin, name, callsign, group [,group2], suspend
+                
                     String[] x = line.split(",");  
                     String userid = x[0].trim();
                     String lu = x[1].trim();

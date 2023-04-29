@@ -56,9 +56,14 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
     /**
      * Restore tags from file. 
      */
+    @SuppressWarnings("unchecked")
     public static void restoreTags(ObjectInput ifs) 
      throws IOException,ClassNotFoundException
-      { _tagUse = (SortedMap<String, Integer>) ifs.readObject(); }
+    { 
+        var obj = ifs.readObject();
+        if (obj instanceof SortedMap)
+            _tagUse = (SortedMap<String,Integer>) obj; 
+    }
       
 
       
