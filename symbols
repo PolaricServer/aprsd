@@ -25,6 +25,7 @@ D&             diamond-D.png    # D-star
 [\\IT2]&       diamond-I.png    # Igate 
 R&             diamond-R.png    # Receive only igate
 E&             diamond-E.png
+L&             diamond-L.png    # LoRa APRS igate
 
 # Cars/vehicles
 /[>hjR\(]|.>   car.png          # Ordinary car /h is actually SUV
