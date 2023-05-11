@@ -84,6 +84,7 @@ public class UserApi extends ServerBase {
         public String group; 
     }
     
+    
     public static class Client {
         public String uid; 
         public String username;
@@ -336,15 +337,19 @@ public class UserApi extends ServerBase {
                 Group g = _groups.get(uu.group);
                 if (g==null)
                     return ERROR(resp, 404, "Unknown group: "+uu.group);
-                u.setGroup(_groups.get(uu.group));
             }    
             if (uu.altgroup != null) {
                 Group g = _groups.get(uu.altgroup);
                 if (g==null)
                     return ERROR(resp, 404, "Unknown alt group: "+uu.altgroup);
-                u.setAltGroup(_groups.get(uu.altgroup));
             } 
+            if (uu.callsign != null && !_api.getMsgProcessor().getMycall().equals(uu.callsign))
+                return ERROR(resp, 400, "Cannot use the same callsign as this server: "+ uu.callsign);
             
+            if (uu.group != null)
+                u.setGroup(_groups.get(uu.group)); 
+            if (uu.altgroup != null)
+                u.setAltGroup(_groups.get(uu.altgroup));   
             if (uu.name != null)
                 u.setName(uu.name);           
             if (uu.callsign != null)

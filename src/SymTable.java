@@ -49,7 +49,7 @@ public class SymTable
                if (!line.startsWith("#")) 
                {               
                    String[] x = line.split("\\s+");  
-                   if (x[0].length() < 2) 
+                   if (x.length < 2) 
                        continue;
                    _rtab.add(new Exp(x[0], x[1]));    
                }

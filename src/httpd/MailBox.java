@@ -203,8 +203,11 @@ public abstract class MailBox {
      * Remove all address-mappings associated with this mailbox. 
      */    
     public void removeAddresses() {
-        for (String addr: _addr) 
+        for (String addr: _addr) {
             _addressMapping.remove(addr);
+            if (addr.matches(".*@(aprs|APRS|Aprs)"))
+               _api.getMsgProcessor().unsubscribe( addr.split("@")[0].toUpperCase() );
+        }
         _addr.clear();
     }
     

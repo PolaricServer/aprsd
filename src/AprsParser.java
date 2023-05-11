@@ -235,7 +235,7 @@ public class AprsParser implements AprsChannel.Receiver
         String msgid = null;
         String msg = p.report;
         
-        String recipient = msg.substring(1,9).trim();
+        String recipient = msg.substring(1,10).trim();
         int i = msg.lastIndexOf('{');
         if (i >= 0) 
            msgid = msg.substring(i+1, msg.length());

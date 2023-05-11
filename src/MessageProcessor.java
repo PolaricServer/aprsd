@@ -136,6 +136,9 @@ public class MessageProcessor implements Runnable, Serializable
    }  
        
            
+   public String getMycall() {
+       return _myCall;
+   }
       
    public void setChannels(AprsChannel rf, AprsChannel inet)
    {
@@ -155,10 +158,12 @@ public class MessageProcessor implements Runnable, Serializable
     public synchronized void incomingMessage
         (Station sender, String recipient, String text, String msgid)
     {
+        _api.log().debug("MessageProc", "Incoming msg: "+sender.getIdent()+">" + recipient + ": " + text + " -- msgid="+msgid);
+        
         /* Is it an ack or rej message? */
         if (_myCall.equals(recipient) && text.matches("(ack|rej).+")) {
             msgid = text.substring(3, text.length());
-         
+
             /* notify recipient about result? */
             OutMessage m = _outgoing.get(msgid);
             if (m != null && m.not != null) {
@@ -224,8 +229,9 @@ public class MessageProcessor implements Runnable, Serializable
     * @param handler The message handler interface of the recipient (used to deliver message)
     * @param verify If true - verify authenticicy of message by using MAC scheme. 
     */
-   public void subscribe(String recipient, MessageHandler handler, boolean verify)
-      { _subscribers.put(recipient, new Subscriber(handler, verify)); }
+   public void subscribe(String recipient, MessageHandler handler, boolean verify) { 
+        _subscribers.put(recipient, new Subscriber(handler, verify)); 
+    }
 
       
 

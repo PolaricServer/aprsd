@@ -25,7 +25,7 @@ import java.text.*;
 public class DupCheck 
 {
      private static final Boolean TRUE = true;
-     private static final long RT_TIMEOUT = 1000 * 60 * 3; /* 3 minutes */
+     private static final long RT_TIMEOUT = 1000 * 30; /* 30 seconds */
      
      private LinkedHashMap<String, Date> _realtime  = 
         new LinkedHashMap<String, Date>(); 
