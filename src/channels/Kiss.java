@@ -24,10 +24,12 @@ import java.util.concurrent.Semaphore;
 public class Kiss
 {
    protected static final byte FTYPE_UI  = (byte) 0x03; 
-   protected static final byte PID_APRS  = (byte) 0xF0;
+   protected static final byte PID_NO_L3 = (byte) 0xF0;
+   
    protected static final byte FLAG_LAST = (byte) 0x01;
    protected static final byte FLAG_DIGI = (byte) 0x80;
    protected static final byte ASCII_SPC = (byte) 0x20;
+   
    protected static final byte FEND  = (byte) 0xC0;
    protected static final byte FESC  = (byte) 0xDB;
    protected static final byte TFEND = (byte) 0xDC;
@@ -94,7 +96,7 @@ public class Kiss
          for (String d : digis)
             encodeAddr(d, ++n >= digis.length); 
          sendByte(FTYPE_UI); 
-         sendByte(PID_APRS);
+         sendByte(PID_NO_L3);
 
          /* Messsage */
          for (byte b : p.report.getBytes())
@@ -139,7 +141,7 @@ public class Kiss
                         p.via += ",";
                 } 
 
-                if (receiveByte() == FTYPE_UI && receiveByte() == PID_APRS)
+                if (receiveByte() == FTYPE_UI && receiveByte() == PID_NO_L3)
                     complete = true;
                 while (true)
                     p.report += (char) receiveByte(); 
@@ -151,7 +153,9 @@ public class Kiss
                         return p;
                 }
             }
-            catch (Exception e) { }
+            catch (Exception e) {
+               return null;
+            }
         }
     }
     

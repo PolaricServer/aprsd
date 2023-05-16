@@ -99,7 +99,7 @@ public class AprsParser implements AprsChannel.Receiver
         {
             case '>':
                /* Status report */
-               parseStatusReport(p, station);
+               parseStatusReport(p, station, false);
                break;
                
             case '!': 
@@ -141,6 +141,13 @@ public class AprsParser implements AprsChannel.Receiver
                break;
                
             default: 
+               /* If the first character is not recognized as a valid APRS frame type, 
+                * The frame may be regarded as a status beacon. 
+                */
+               if ("ID".equals(p.to) || "BEACON".equals(p.to))
+                  parseStatusReport(p, station, true);
+                
+                
         }
         } catch (NumberFormatException e) { 
             _api.log().debug("AprsParser", "Cannot parse number in input. Report string probably malformed"); 
@@ -271,11 +278,12 @@ public class AprsParser implements AprsChannel.Receiver
     /**
      * Parse APRS status report.
      */
-    private void parseStatusReport(AprsPacket p, Station station)
+    private void parseStatusReport(AprsPacket p, Station station, boolean includefirst)
     {
         String msg = p.report; 
         Date d = null;
-        msg = msg.substring(1);
+        if (!includefirst)
+            msg = msg.substring(1);
         if (msg.matches("[0-9]{6}[hz/].*")) {
            d = parseTimestamp(msg, false);
            msg = msg.substring(7);
