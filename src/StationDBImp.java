@@ -313,6 +313,8 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     private synchronized void rebuildIndex() {
         _geoindex = RTree.star().maxChildren(6).create();
         for (TrackerPoint s: _map.values()) { 
+            if (s.getPosition() == null)
+                continue;
             LatLng pos = s.getPosition().toLatLng();
             var point = Geometries.pointGeographic(pos.getLng(), pos.getLat());
             _geoindex = _geoindex.add(s, point);
