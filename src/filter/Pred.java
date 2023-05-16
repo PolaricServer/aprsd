@@ -75,7 +75,10 @@ public abstract class Pred
       { return new OR(p); }
    
    public static Pred NOT(Pred p)
-      { return NOT.optimize(new NOT(p)); }
+      { return NOT.optimize(new NOT(p)); }  
+      
+    public static Pred TrafficTo(Pred p)
+      { return new TrafficTo(p); }
 }
 
 
@@ -359,6 +362,34 @@ class TrailLen extends NumVal
 }
 
 
+ 
+
+class TrafficTo extends Pred 
+{
+    private Pred to;
+    
+    public TrafficTo(Pred p) {
+        to = p; 
+    }
+    
+    public boolean eval(TrackerPoint obj, long scale) {
+        if (obj != null && obj instanceof Station st)  {
+            Set<String> toset = st.getTrafficTo();
+            if (toset==null)
+                return false;
+            for (String id : toset) {
+                var item = TrackerPoint.getApi().getDB().getItem(id, null);
+                if (to.eval(item, scale))
+                    return true;
+            }
+        }
+        return false; 
+    }
+}
+
+
+
+
 /**
  * Conjunction of predicates. 
  *
@@ -457,7 +488,10 @@ class OR extends Pred
 }
 
 
-
+/**
+ * Negation of predicates. 
+ *
+ */
 class NOT extends Pred
 {
         private Pred pred; 

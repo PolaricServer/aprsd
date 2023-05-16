@@ -12,7 +12,7 @@ import no.polaric.aprsd.ServerAPI;
 %token <obj>   NUM
 
 %token <obj>   BOOLEAN VALUE
-%token         AND OR NOT ARROW PROFILE AUTOTAG PUBLIC ALL INCLUDE EXPORT TAG TAGS
+%token         AND OR NOT TRAFFIC ARROW PROFILE AUTOTAG PUBLIC ALL INCLUDE EXPORT TAG TAGS
 %token         ERROR
 
 %type <obj>  action actions expr rule tag_rule public
@@ -114,6 +114,8 @@ groups  : groups ',' IDENT    { ruleset.addGroup($3);}
 expr : '(' expr ')'           {  $$=$2; }
 
      |  NOT expr              {  $$=Pred.NOT((Pred)$2); }          
+     
+     |  TRAFFIC expr          {  $$=Pred.TrafficTo((Pred)$2); }
                               
      |  expr AND expr         {  $$=Pred.AND((Pred)$1, (Pred)$3); }  
                               

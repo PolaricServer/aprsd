@@ -79,6 +79,9 @@ OR|"or"|\|
 NOT|"not"|\!
          { return Parser.NOT; }
          
+TRAFFIC|traffic|TRAFFICTO|trafficto
+         { return Parser.TRAFFIC; }
+         
 =>       
          { return Parser.ARROW; }
            
