@@ -40,16 +40,24 @@ public class SysAdminApi extends ServerBase {
         _api = api;
     }
     
-    public static class SysInfo {
+    public static class SysInfo 
+    {
         public Date runsince; 
         public String version;
         public int items;
         public int ownobj;
         public int clients, loggedin;
         public long usedmem;
-        public String[] plugins;
+        public List<String> plugins;
+        public List<ChannelInfo> channels;
         public String remotectl;
     }
+    
+    
+    public static record ChannelInfo 
+       (String ident, String name, boolean active)
+    {}
+    
     
     
     
@@ -85,11 +93,17 @@ public class SysAdminApi extends ServerBase {
             
             /* Plugins */
             PluginManager.Plugin[] plugins = PluginManager.getPlugins();
-            String[] plist = new String[plugins.length];
-            int i=0;
+            res.plugins = new ArrayList<String>(); 
             for (PluginManager.Plugin x: plugins)
-                plist[i++] = x.getDescr();
-            res.plugins = plist; 
+                res.plugins.add(x.getDescr());
+            
+            /* Channels */
+            Set<String> chans = _api.getChanManager().getKeys();
+            res.channels = new ArrayList<ChannelInfo>();
+            for (String chn:  _api.getChanManager().getKeys()) {
+                Channel ch = _api.getChanManager().get(chn);
+                res.channels.add( new ChannelInfo(ch.getShortDescr(), ch.getIdent(), ch.isActive()));
+            }
             
             /* Connected servers */
             RemoteCtl rctl = _api.getRemoteCtl(); 
@@ -97,6 +111,10 @@ public class SysAdminApi extends ServerBase {
             
             return res;
         }, ServerBase::toJson );
+        
+        
+        
+        
         
         
     }
