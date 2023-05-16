@@ -78,12 +78,15 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
         
      
     @Override protected synchronized void _addRtItem(TrackerPoint s) {
-        if (s == null || s.getPosition() == null)
+        if (s == null)
             return;
         
         if ( s != null && s.getIdent() != null) 
             _map.remove(s.getIdent());
         _map.put(s.getIdent(), s);
+
+        if (s.getPosition() == null)
+            return;
 
         LatLng pos = s.getPosition().toLatLng();
         var point = Geometries.pointGeographic(pos.getLng(), pos.getLat());
@@ -155,7 +158,6 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
      */
     public List<TrackerPoint> search(String srch, String[] tags)
     {
-        LinkedList<TrackerPoint> result = new LinkedList<TrackerPoint>();
         srch = srch.toUpperCase();
         if (srch.matches("REG:.*"))
            srch = srch.substring(4);
@@ -165,7 +167,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
         }
          
         final String _srch = srch;
-        return _map.values().stream().filter( s -> 
+        List<TrackerPoint> result = _map.values().stream().filter( s -> 
             ( s.getIdent().toUpperCase().matches(_srch) ||
                 s.getDisplayId().toUpperCase().matches(_srch) ||
                 s.getDescr().toUpperCase().matches("(.*\\s+)?\\(?("+_srch+")\\)?\\,?(\\s+.*)?") ) &&
@@ -173,6 +175,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
                 (Arrays.stream(tags).map(x -> s.tagIsOn(x))
                                     .reduce((x,y) -> (x && y))).get())
         ).collect(Collectors.toList());
+        return result;
     } 
      
      
@@ -254,6 +257,8 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
              _ownobj.save(ofs);
              PointObject.saveTags(ofs);
              ofs.writeInt(_map.size());
+             
+             /* Save all points that matches regex */
              for (TrackerPoint s: _map.values()) { 
                 if (s.getIdent().matches("("+_stnsave+")|.*\\@("+_stnsave+")"))
                     ofs.writeObject(s); 
