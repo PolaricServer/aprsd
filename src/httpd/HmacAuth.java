@@ -23,7 +23,7 @@ public class HmacAuth {
         _dup = new DuplicateChecker(2000);
     }
     
-    
+
     /* Add headers to http request */
     public final HttpRequest.Builder addAuth(HttpRequest.Builder bld, String body) {
         String k = _api.getProperty(_key, "NOKEY");
@@ -38,6 +38,8 @@ public class HmacAuth {
     public final boolean checkAuth(Request req) {
         String rmac = req.headers("Arctic-Hmac");
         String nonce = req.headers("Arctic-Nonce");
+        if (rmac==null && nonce==null)
+            return false;
         return checkAuth(nonce, rmac, req.body());
     }
     

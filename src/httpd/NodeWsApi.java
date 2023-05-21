@@ -74,6 +74,17 @@ public class NodeWsApi<T> {
     
     
     
+    public void rmNode(String nodeid) {
+        var srv = _servers.get(nodeid);
+        if (srv != null) {
+            srv.unsubscribe();
+            srv.close();
+        }
+        // FIXME: Is everything covered? 
+    }
+    
+    
+    
     public void setHandler(Handler<T> h) {
         _chandler = h;
     }

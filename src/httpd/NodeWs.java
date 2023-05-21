@@ -63,6 +63,7 @@ public class NodeWs extends WsNotifier
                  * arguments: nonce, mac, ident
                  */
                 case "SUBSCRIBE":
+                case "SUB":
                     nodeid = parms[3];
                     _subscribers.put(parms[3], this);
                     break;
@@ -71,6 +72,7 @@ public class NodeWs extends WsNotifier
                  * arguments: nonce, mac, ident
                  */
                 case "UNSUBSCRIBE":
+                case "UNSUB":
                     _subscribers.remove(parms[3]);
                     break;
                     
@@ -78,6 +80,7 @@ public class NodeWs extends WsNotifier
                  * arguments: nonce, mac, JSON-encoded content
                  */
                 case "POST": 
+                case "MSG":
                     if (_handler != null) _handler.recv(nodeid, parms[3]);
                     break;
             

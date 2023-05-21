@@ -30,13 +30,13 @@ public class RestClient {
     private HttpClient _client; 
     private String _url; 
     private boolean _hmacAuth = false;
-    
+    private HmacAuth _auth;
 
     
-    public RestClient(ServerAPI api, String url, boolean hm) {
+    public RestClient(ServerAPI api, String url, HmacAuth hm) {
         _api = api;
         _url=url;
-        _hmacAuth = hm;
+        _auth = hm;
         _client = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .followRedirects(HttpClient.Redirect.NORMAL)
@@ -45,7 +45,7 @@ public class RestClient {
     }
     
     public RestClient(ServerAPI api, String url)
-        { this(api, url, false);}
+        { this(api, url, (HmacAuth) null);}
     
     
     public RestClient(ServerAPI api, String url, Authenticator auth) {
@@ -67,12 +67,8 @@ public class RestClient {
     
     
     private HttpRequest.Builder addAuth(HttpRequest.Builder bld, String body) {
-        if (_hmacAuth) {
-            String key = _api.getProperty("httpserver.auth.key", "NOKEY");
-            String nonce = SecUtils.b64encode( SecUtils.getRandom(8) );
-            bld.header("Arctic-Nonce", nonce );
-            bld.header("Arctic-Hmac", SecUtils.hmacB64(nonce+body, key, 44));
-        }
+        if (_auth != null) 
+            _auth.addAuth(bld, body);
         return bld;
     }
     
@@ -80,80 +76,74 @@ public class RestClient {
     
  
  
-    public HttpResponse GET(String resource, boolean stream) {
-    
-        try {
-            HttpRequest.Builder bld = HttpRequest.newBuilder()
-                .uri(new URI(_url+"/"+resource))
-                .headers("Content-Type", "text/plain;charset=UTF-8");
-            
-            HttpRequest request = addAuth(bld, "")
-                .GET()
-                .build();
-            
-            /* Send the request and get the response */
-            if (stream) { 
-                HttpResponse<InputStream> response = _client
-                    .send(request, HttpResponse.BodyHandlers.ofInputStream());
-                return response;
-            }
-            else {
-                HttpResponse<String> response = _client
-                    .send(request, HttpResponse.BodyHandlers.ofString());
-                return response;
-            }
-            
-            
+    public HttpResponse GET(String resource, boolean stream) 
+        throws URISyntaxException, IOException, InterruptedException
+    {
+        HttpRequest.Builder bld = HttpRequest.newBuilder()
+            .uri(new URI(_url+"/"+resource))
+            .headers("Content-Type", "text/plain;charset=UTF-8");
+        
+        HttpRequest request = _auth.addAuth(bld, "")
+            .GET()
+            .build();
+        
+        /* Send the request and get the response */
+        if (stream) { 
+            HttpResponse<InputStream> response = _client
+                .send(request, HttpResponse.BodyHandlers.ofInputStream());
+            return response;
         }
-        catch (Exception e) { return null; }
+        else {
+            HttpResponse<String> response = _client
+                .send(request, HttpResponse.BodyHandlers.ofString());
+            return response;
+        }
     }
     
     
-    public HttpResponse GET(String resource) 
+    public HttpResponse GET(String resource)     
+        throws URISyntaxException, IOException, InterruptedException
         { return GET(resource, false); }
     
     
     
-    public HttpResponse POST(String resource, String body) {
-    
-        try {
-           HttpRequest.Builder bld = HttpRequest.newBuilder()
-                .uri(new URI(_url+"/"+resource))
-                .headers("Content-Type", "text/plain;charset=UTF-8");
-                
-            HttpRequest request = addAuth(bld, body)   
-                .POST(HttpRequest.BodyPublishers.ofString(body))
-                .build();
+    public HttpResponse POST(String resource, String body)
+        throws URISyntaxException, IOException, InterruptedException 
+    {
+        HttpRequest.Builder bld = HttpRequest.newBuilder()
+            .uri(new URI(_url+"/"+resource))
+            .headers("Content-Type", "text/plain;charset=UTF-8");
             
-            /* Send the request and get the response */
-            HttpResponse<String> response = _client
-                .send(request, HttpResponse.BodyHandlers.ofString());
-            return response;
-        }
-        catch (Exception e) { e.printStackTrace(System.out); return null; }
+        HttpRequest request = addAuth(bld, body)   
+            .POST(HttpRequest.BodyPublishers.ofString(body))
+            .build();
+
+        /* Send the request and get the response */
+        HttpResponse<String> response = _client
+            .send(request, HttpResponse.BodyHandlers.ofString());
+        return response;
     }
     
     
     
     
-    public HttpResponse PUT(String resource, String body) {
-    
-        try {
-            HttpRequest.Builder bld = HttpRequest.newBuilder()
-                .uri(new URI(_url+"/"+resource))
-                .headers("Content-Type", "text/plain;charset=UTF-8");
-                
-           HttpRequest request = addAuth(bld, body)
-                .PUT(HttpRequest.BodyPublishers.ofString(body))
-                .build();
+    public HttpResponse PUT(String resource, String body) 
+        throws URISyntaxException, IOException, InterruptedException 
+    {
+        HttpRequest.Builder bld = HttpRequest.newBuilder()
+            .uri(new URI(_url+"/"+resource))
+            .headers("Content-Type", "text/plain;charset=UTF-8");
             
-            /* Send the request and get the response */
-            HttpResponse<String> response = _client
-                .send(request, HttpResponse.BodyHandlers.ofString());
-            return response;
-        }
-        catch (Exception e) { return null; }
-    }
+        HttpRequest request = addAuth(bld, body)
+            .PUT(HttpRequest.BodyPublishers.ofString(body))
+            .build();
+        
+        /* Send the request and get the response */
+        HttpResponse<String> response = _client
+            .send(request, HttpResponse.BodyHandlers.ofString());
+        return response;
+    }    
+    
 }
 
 

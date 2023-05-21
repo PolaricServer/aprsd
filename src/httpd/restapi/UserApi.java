@@ -343,7 +343,7 @@ public class UserApi extends ServerBase {
                 if (g==null)
                     return ERROR(resp, 404, "Unknown alt group: "+uu.altgroup);
             } 
-            if (uu.callsign != null && !_api.getMsgProcessor().getMycall().equals(uu.callsign))
+            if (uu.callsign != null && !uu.callsign.equals("") && _api.getMsgProcessor().getMycall().equals(uu.callsign))
                 return ERROR(resp, 400, "Cannot use the same callsign as this server: "+ uu.callsign);
             
             if (uu.group != null)
