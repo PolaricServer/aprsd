@@ -145,9 +145,10 @@ public class AprsParser implements AprsChannel.Receiver
                 * The frame may be regarded as a status beacon. 
                 */
                if ("ID".equals(p.to) || "BEACON".equals(p.to))
+               {
+                  station.setTag("BEACON");
                   parseStatusReport(p, station, true);
-                
-                
+               }
         }
         } catch (NumberFormatException e) { 
             _api.log().debug("AprsParser", "Cannot parse number in input. Report string probably malformed"); 
