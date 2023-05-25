@@ -143,7 +143,26 @@ public class RestClient {
             .send(request, HttpResponse.BodyHandlers.ofString());
         return response;
     }    
-    
+       
+       
+       
+       
+    public HttpResponse DELETE(String resource) 
+        throws URISyntaxException, IOException, InterruptedException 
+    {
+        HttpRequest.Builder bld = HttpRequest.newBuilder()
+            .uri(new URI(_url+"/"+resource))
+            .headers("Content-Type", "text/plain;charset=UTF-8");
+            
+        HttpRequest request = addAuth(bld, "")
+            .DELETE()
+            .build();
+        
+        /* Send the request and get the response */
+        HttpResponse<String> response = _client
+            .send(request, HttpResponse.BodyHandlers.ofString());
+        return response;
+    }   
 }
 
 
