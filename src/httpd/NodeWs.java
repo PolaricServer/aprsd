@@ -108,6 +108,10 @@ public class NodeWs extends WsNotifier
     }
     
     
+    public void removeSubscriber(String id) {
+        _subscribers.remove(id);
+    }
+    
     
     public void setHandler(NodeWsApi.Handler<String> h) {
         _handler = h;

@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import java.io.Serializable;
  
 public class Telemetry implements Serializable
 {
-    public static final int MAX_DATA_LENGTH = 200;
+    public static final int MAX_DATA_LENGTH = 256;
     public static final int ANALOG_CHANNELS = 5; 
     public static final int BINARY_CHANNELS = 8;
     public static final int CHANNELS = (ANALOG_CHANNELS+BINARY_CHANNELS);
@@ -204,6 +204,7 @@ public class Telemetry implements Serializable
         var api = TrackerPoint.getApi();
         if (_ident == null)
             return;
+            
         api.getWebserver().getPubSub().createRoom("telemetry:"+_ident, (Class) null);
         api.getWebserver().getPubSub().put("telemetry:"+_ident, null);
     }

@@ -80,7 +80,8 @@ public class NodeWsApi<T> {
             srv.unsubscribe();
             srv.close();
         }
-        // FIXME: Is everything covered? 
+        _servers.remove(nodeid);
+        _children.removeSubscriber(nodeid);
     }
     
     

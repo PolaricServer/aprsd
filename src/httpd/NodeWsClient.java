@@ -76,7 +76,6 @@ public class NodeWsClient implements WebSocket.Listener{
         }
         catch (Exception e) {
             _api.log().warn("NodeWsClient", "Websocket connect exception: "+e.getMessage());
-           // e.printStackTrace(System.out);
             retry();
         }
     }
