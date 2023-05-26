@@ -194,6 +194,12 @@ public class Station extends AprsPoint implements Serializable, Cloneable
         if (t==null)  
            t = new Date(); 
         _status = new Status(t, txt);
+        // If the station description is empty, then use the status
+       if ( ! hasDescr() )
+       {
+         setDescr(txt);
+       }
+
     }
     
     /* Vi kan kanskje legge inn en sjekk om statusrapporten er for gammel */
