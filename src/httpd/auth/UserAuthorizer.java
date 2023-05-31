@@ -27,7 +27,7 @@ public class UserAuthorizer implements Authorizer {
         var aa = context.getRequestAttribute("authinfo"); 
         if (aa.isPresent()) {
             var auth = (AuthInfo) aa.get();
-            return (admin ? auth.admin : auth.sar); 
+            return (admin ? auth.admin : (auth.admin || auth.sar)); 
         }
         else
             return false;

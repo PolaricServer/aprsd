@@ -101,6 +101,15 @@ public class NodeWsApi<T> {
     }
     
     
+    
+    
+    public boolean isConnected(String nodeid) {
+        NodeWsClient s = _servers.get(nodeid);
+        return ( (s != null && s.isConnected())  
+            || _children.getSubscribers().contains(nodeid) );
+    }
+    
+    
 }
 
 

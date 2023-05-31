@@ -158,8 +158,6 @@ public class MessageProcessor implements Runnable, Serializable
     public synchronized void incomingMessage
         (Station sender, String recipient, String text, String msgid)
     {
-        _api.log().debug("MessageProc", "Incoming msg: "+sender.getIdent()+">" + recipient + ": " + text + " -- msgid="+msgid);
-        
         /* Is it an ack or rej message? */
         if (_myCall.equals(recipient) && text.matches("(ack|rej).+")) {
             msgid = text.substring(3, text.length());

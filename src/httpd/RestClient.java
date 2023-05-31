@@ -83,7 +83,7 @@ public class RestClient {
             .uri(new URI(_url+"/"+resource))
             .headers("Content-Type", "text/plain;charset=UTF-8");
         
-        HttpRequest request = _auth.addAuth(bld, "")
+        HttpRequest request = addAuth(bld, "")
             .GET()
             .build();
         
