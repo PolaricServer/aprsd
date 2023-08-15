@@ -4,9 +4,9 @@ jcoord-polaric.jar              Based on v.1.1 (2006). Slightly modified. Source
 jetty-polaric.jar               Jetty Uber All compilation v. 9.4.50.v20221201 
 
 
-pac4j-core-polaric.jar          v.5.5.0
-pac4j-http-polaric.jar          v.5.5.0
-pac4j-javaee-polaric.jar        v.5.5.0
+pac4j-core-polaric.jar          v.5.7.1
+pac4j-http-polaric.jar          v.5.7.1
+pac4j-javaee-polaric.jar        v.5.7.1
 spark-pac4j-polaric.jar         v.5.0.1
 spark-core-polaric.jar          v.2.9.4
 utf8-with-fallback-polaric.jar  Based on v.1.1.0. Slightly modified. Source included. 
@@ -38,9 +38,6 @@ https://github.com/cinnom/nano-cuckoo
 
 lz4 and XxHash:
 https://github.com/lz4/lz4-java
-
-fst:
-https://github.com/RuedigerMoeller/fast-serialization/wiki/Serialization
 
 objenesis:
 http://objenesis.org/
