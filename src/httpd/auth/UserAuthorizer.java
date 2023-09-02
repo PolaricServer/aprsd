@@ -24,13 +24,8 @@ public class UserAuthorizer implements Authorizer {
 
     @Override
     public boolean isAuthorized(final WebContext context, final SessionStore ss, final List<UserProfile> profile) {
-        var aa = context.getRequestAttribute("authinfo"); 
-        if (aa.isPresent()) {
-            var auth = (AuthInfo) aa.get();
-            return (admin ? auth.admin : (auth.admin || auth.sar)); 
-        }
-        else
-            return false;
+        var auth = AuthService.getAuthInfo(context);  
+        return (admin ? auth.admin : (auth.admin || auth.sar)); 
     }
 
  

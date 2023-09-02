@@ -17,6 +17,7 @@ package no.polaric.aprsd.http;
 import spark.Request;
 import spark.Response;
 import org.pac4j.sparkjava.SparkWebContext; 
+import org.pac4j.core.context.WebContext;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.jee.context.session.*;
@@ -183,11 +184,32 @@ public class AuthInfo {
         return sar || admin; 
     }
 
+    
     public static Optional<CommonProfile> getSessionProfile(Request req, Response res) {
-        final SparkWebContext context = new SparkWebContext(req, res);
+        return getSessionProfile(new SparkWebContext(req, res)); 
+    }
+    
+    
+    public static Optional<CommonProfile> getSessionProfile(WebContext context) {
         final ProfileManager manager = new ProfileManager(context, JEESessionStore.INSTANCE); 
         final Optional<CommonProfile> profile = manager.getProfile(CommonProfile.class);
         return profile;
+    }
+    
+    /*
+     * Authorizations. We use a kind a role-based authorization here. 
+     * where some authorizations depends on role/group membership. 
+     */
+    public void authorize(User u, Group grp) {
+        userid = u.getIdent();
+        callsign = u.getCallsign();
+        if (grp == null) 
+            grp = u.getGroup();
+        groupid = grp.getIdent();
+        tagsAuth = grp.getTags();
+            
+        admin = u.isAdmin();
+        sar = grp.isSar(); 
     }
     
        
@@ -195,10 +217,30 @@ public class AuthInfo {
      * Constructor. Gets userid from a user profile on request and sets authorisations. 
      * called from AuthService for each request.
      */
+     
+    public AuthInfo(ServerAPI api, User u, Group g) {
+        _api = api;
+        authorize(u, g);
+        var i = 0;
+        services = new String[_services.size()];
+        for (var x : _services)
+            services[i++] = x;
+    }
     
-    public AuthInfo(ServerAPI api, Request req, Response res) 
+    
+    
+    /**
+     * Constructor. Gets info from web context.
+     */
+     
+    public AuthInfo(ServerAPI api, Request req, Response res) {
+        this(api, new SparkWebContext(req, res));
+    }
+    
+    
+    public AuthInfo(ServerAPI api, WebContext context) 
     {
-        Optional<CommonProfile> profile = getSessionProfile(req, res);
+        Optional<CommonProfile> profile = getSessionProfile(context);
         _api = api;
         var i = 0;
         services = new String[_services.size()];
@@ -230,17 +272,11 @@ public class AuthInfo {
             }
 
             User u = (User) profile.get().getAttribute("userInfo");
-            callsign = u.getCallsign();
-            
             Group grp = (Group) profile.get().getAttribute("role");
-            if (grp == null) 
-                grp = u.getGroup();
-            groupid = grp.getIdent();
-            tagsAuth = grp.getTags();
-            
-            admin = u.isAdmin();
-            sar = grp.isSar();          
+            authorize(u, grp);
         }
+        else
+            api.log().debug("AuthInfo", "User profile not present");
        
         servercall=api.getProperty("default.mycall", "NOCALL");
     }

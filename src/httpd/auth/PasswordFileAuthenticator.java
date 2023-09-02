@@ -139,6 +139,7 @@ public class PasswordFileAuthenticator implements Authenticator {
     
     
     protected void throwsException(final String message) throws CredentialsException {
+        _api.log().info("PasswordFileAuthenticator", "Auth failed: "+message);
         throw new CredentialsException(message);
     }
     

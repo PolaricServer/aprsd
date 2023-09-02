@@ -118,7 +118,6 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                     if (!s.visible() || (_api.getSar() != null && !allowed && _api.getSar().filter(s))) {
                         if (!_keep) 
                             continue;
-                        
                         mu.delete.add(s.getIdent());
                     }
                     else {  
@@ -176,7 +175,8 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             JsPoint x  = new JsPoint();
             
             /* Indicate if user has authorization to change point. */
-            x.sarAuth = getAuthInfo().itemSarAuth(s); 
+            var ai = getAuthInfo();
+            x.sarAuth = (ai != null && getAuthInfo().itemSarAuth(s)); 
             
             x.ident   = s.getIdent();
             x.label   = createLabel(s, action);

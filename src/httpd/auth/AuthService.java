@@ -1,5 +1,5 @@
-/* 
- * Copyright (C) 2017 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+    /* 
+ * Copyright (C) 2017-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,8 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.jee.context.session.*;
+import org.pac4j.sparkjava.SparkWebContext; 
+import org.pac4j.core.context.WebContext;
 import java.util.Optional;
 import javax.servlet.*;
 
@@ -38,13 +40,14 @@ import javax.servlet.*;
  
 public class AuthService {
     
-    private AuthConfig _authConf; 
+    private static AuthConfig _authConf; 
     static ServerAPI _api; // FIXME: This is static. 
     private static Logfile  _log;
    
    
     public AuthService(ServerAPI api) {
-       _authConf = new AuthConfig(api);
+       if (_authConf == null)
+         _authConf = new AuthConfig(api);
        _api = api; 
        _log = new Logfile(api, "auth", "auth.log");
     }
@@ -52,7 +55,7 @@ public class AuthService {
    
    
     /** Return the configuration */
-    public AuthConfig conf() 
+    public static AuthConfig conf() 
        { return _authConf; }
        
        
@@ -61,46 +64,47 @@ public class AuthService {
     public void start() {
       Config conf = _authConf.get();
       
-      before("/formLogin",  new SecurityFilter(conf, "FormClient", "isauth")); 
+      /* 
+       * OPTIONS requests (CORS preflight) are not sent with cookies and should not go 
+       * through the auth check. 
+       * Maybe we do this only for REST APIs and return info more exactly what options
+       * are available? Move it inside the corsEnable method? 
+       */
+      before("*", (req, res) -> {
+            if (req.requestMethod() == "OPTIONS") {
+                corsHeaders(req, res); 
+                halt(200, "");
+            }
+        });
         
+      /* Set CORS headers. */
+      before ("/authStatus", (req,resp) -> { corsHeaders(req, resp); } );
+      before ("/directLogin", (req,resp) -> { corsHeaders(req, resp); } );
+      before ("/hmacTest", (req,resp) -> { corsHeaders(req, resp); } );     
+      before ("/postTest", (req,resp) -> { corsHeaders(req, resp); } );   
+              
+      /* Login with username and password */
+      before("/directLogin", new SecurityFilter(conf, "DirectFormClient")); 
+              
+      /* MD5 Hash of body */
+      before("*", AuthService::genBodyDigest);
+      
+      before("/hmacTest",    new SecurityFilter(conf, "HeaderClient")); 
+      before("/authStatus",  new SecurityFilter(conf, "HeaderClient")); 
+
+
        /* 
-        * Put an AuthInfo object on the request. Here we rely on sessions to remember 
+        * For all routes, put an AuthInfo object on the request. Here we rely on sessions to remember 
         * user-profiles between requests. IF we use direct clients (stateless server) 
         * this will not work for paths without authenticators!! 
-        */ 
-      before("*", AuthService::setAuthInfo);
-      
-       /* Authorization status. */
-      before ("/authStatus", (req,resp) -> { corsHeaders(req, resp); } );
-                
-      before("/logout", (req,resp) -> {
-           _log.log("Logout by user: "+ ((AuthInfo) req.raw().getAttribute("authinfo")).userid);
-        }); 
-        
-      /* Callback route */
-      final CallbackRoute callback = new CallbackRoute(conf, null, true);   
-      callback.setRenewSession(true);
-      get("/callback", callback);
-      post("/callback", callback);
-             
-      /* Logout route */
-      final LogoutRoute localLogout = new LogoutRoute(conf, "/loggedout", ".*");   
-      localLogout.setDestroySession(true);
-      get("/logout", localLogout);
-      get("/loggedout", AuthService::logout);
-      
-      /* Other routes */
-      get("/basicLogin", AuthService::login);
-      get("/formLogin",  AuthService::login);    
-      get("/loginForm",  AuthService::loginForm);
-      get("/authStatus", AuthService::authStatus);
-      
-              
-        options("*", (req, resp) -> {
-            System.out.println("**** OPTIONS ****");
-            return null;
-        });
-      
+        */
+      before("/hmacTest",    AuthService::getAuthInfo);
+      before("/authStatus",  AuthService::getAuthInfo);
+
+      post("/directLogin", AuthService::directLogin);   // Indicate login success
+      get("/hmacTest",     AuthService::directLogin2);  
+      get("/authStatus",   AuthService::authStatus);    // Return authorisation status
+
     }
     
 
@@ -125,6 +129,7 @@ public class AuthService {
      * add it to the Allow-Origin response header. 
      */
     public void corsHeaders(Request req, Response resp) {
+        resp.header("Access-Control-Allow-Headers", "Authorization"); 
         resp.header("Access-Control-Allow-Credentials", "true"); 
         resp.header("Access-Control-Allow-Origin", getAllowOrigin(req)); 
         resp.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
@@ -139,91 +144,59 @@ public class AuthService {
         AuthInfo auth = new AuthInfo(_api, req, res);
         return ServerBase.serializeJson(auth);
     }
+
     
-    
-    
-    /**
-     * Generate a login form in HTML. 
+    /* 
+     * This returns a key, be sure that it is only sent on encrypted channels in production 
+     * enviroments. 
      */
-    public static String loginForm(Request req, Response res) {
-       String err = "";
-       if (req.queryParams("error") != null) {
-          err = "<span class=\"error\">" + "Sorry. Unknown user and/or password!" + "</span>";
-          _log.log("Unsuccessful login attempt from. " +req.ip());
-       }
-       return    
-         "<!doctype html>" +
-         "<meta charset=\"UTF-8\">"+ 
-         "<meta name=\"viewport\" content=\"user-scalable=no, width=device-width, height=device-height\">"+
-       
-         "<html><head><link rel=\"stylesheet\" href=\"style.css\"></head><body id=\"login\">" + 
-         "<div><img src=\"images/PolaricServer.png\"/>" +
-         "<div>|login|</div></div>" +
-         err + 
-         "<form method=\"post\" action=\"callback?client_name=FormClient\">" +
-            "<fieldset>"+
-              "<label class=\"leftlab sleftlab\"><b>" + "Username" + "</b></label>" +
-              "<input type=\"text\" placeholder=\"" + "Enter Username" + "\" name=\"username\" required><br>" +
-              "<label class=\"leftlab sleftlab\"><b>Password</b></label>" +
-              "<input type=\"password\" placeholder=\""+ "Enter Password" + "\" name=\"password\" required><br>" +
-            "</fieldset>" +     
-            "<button type=\"submit\">Login</button>" +
-         "</form></body></html>";
+    public static String directLogin(Request req, Response res) {
+      Optional<CommonProfile> profile = AuthInfo.getSessionProfile(req, res); 
+         
+      String userid = profile.get().getId();
+      String key = SecUtils.b64encode(SecUtils.getRandom(48)); // Gives 64 bytes when encoded 
+      _authConf.getHmacAuth().setUserKey(userid, key);
+             
+      _log.log("Successful DIRECT login from: "+req.ip()+", userid="+ userid);
+      return key;
     }
     
     
-    
-    /**
-     * Returns the client to the URL given as query param 'origin'. 
-     */
-    private static void returnToOrigin(Request req, Response res, String origin) {
-       if (origin != null) 
-          res.header("Refresh", "3;"+origin);
+    public static String directLogin2(Request req, Response res) {
+      Optional<CommonProfile> profile = AuthInfo.getSessionProfile(req, res); 
+      String userid = profile.get().getId();
+      
+      _log.log("Successful DIRECT login (using HMAC) from: "+req.ip()+", userid="+ userid);
+      return "Ok";
     }
+
     
     
-    /**
-     * Indicate the result of a successful login and return to origin URL.
-     */
-    public static String login(Request req, Response res) {
-       final SparkWebContext context = new SparkWebContext(req, res);
-       final ProfileManager manager = new ProfileManager(context, JEESessionStore.INSTANCE);  
-       final Optional<CommonProfile> profile = manager.getProfile(CommonProfile.class);
-       
-       AuthInfo auth = (AuthInfo) req.raw().getAttribute("authinfo");
-       String origin = req.queryParams("origin");
-       _log.log("Successful login from: "+req.ip()+", userid="+ auth.userid+", origin="+origin);
-       returnToOrigin(req, res, origin);
-       
-       return 
-         "<html><head><link rel=\"stylesheet\" href=\"style.css\"></head><body>" + 
-         "<h2>" + "You are now logged in" + "</h2>" +
-         "userid='"+profile.get().getId() +"'" +
-         "</body></html>";
-    }
+   public static void genBodyDigest(Request req, Response res) {
+      String body = req.body();
+      String digest = (body==null || body.length() == 0 ? "" : SecUtils.xDigestB64(body, 44));
+      req.raw().setAttribute("bodyHash", digest);
+   }
     
-    
-    /**
-     * Indicate the result of a successful logout and return to origin URL.
-     */
-    public static String logout(Request req, Response res) {
-       returnToOrigin(req, res, "url"); 
-       return 
-         "<html><head><link rel=\"stylesheet\" href=\"style.css\"></head><body>" + 
-         "<html><body>" + 
-         "<h1>" + "You are now logged out" + "</h1>" +
-         "</body></html>";
-    }
     
     
     /** 
      * Create an AuthInfo object from the user profile and add it as an 
      * attribute on the request. 
-     */    
-    public static void setAuthInfo(Request req, Response res)
-    {
-        AuthInfo auth = new AuthInfo(_api, req, res); 
-        req.raw().setAttribute("authinfo", auth);
-    }
+     */
+   public static AuthInfo getAuthInfo(Request req, Response res) {
+      return getAuthInfo(new SparkWebContext(req, res));
+   }
+    
+   public static AuthInfo getAuthInfo(WebContext context)
+   {
+      Optional<AuthInfo> ainfo = context.getRequestAttribute("authinfo");
+      if (ainfo.isPresent()) 
+         return ainfo.get();
+      
+      AuthInfo auth = new AuthInfo(_api, context); 
+      context.setRequestAttribute("authinfo", auth);
+      return auth;
+   }
     
 }

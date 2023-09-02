@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import org.pac4j.core.credentials.authenticator.Authenticator;
 import org.pac4j.core.authorization.authorizer.*;
 import org.pac4j.sparkjava.SecurityFilter;
 import org.pac4j.http.client.indirect.*;
+import org.pac4j.http.client.direct.*;
 import no.polaric.aprsd.*;
 
 
@@ -31,13 +32,13 @@ import no.polaric.aprsd.*;
  */
 public class AuthConfig {
      private ServerAPI _api;
-     private String _host, _allowOrigin, _passwdFile, _userFile, _groupFile; 
+     private String _host, _allowOrigin, _passwdFile, _userFile, _groupFile, _keyFile; 
      private Config _config;
      private final PasswordFileAuthenticator _passwds;
+     private final HmacAuthenticator _hmac;
      private UserDb _users; 
      private GroupDb _groups;
      private boolean _udbChanged = false; 
-        
      
      public AuthConfig(ServerAPI api) {
         _api = api;
@@ -48,20 +49,26 @@ public class AuthConfig {
          _passwdFile  = api.getProperty("httpserver.passwdfile",  "/etc/polaric-aprsd/passwd");
          _userFile    = api.getProperty("httpserver.userfile",    "/var/lib/polaric/users.dat");
          _groupFile   = api.getProperty("httpserver.groupfile",   "/etc/polaric-aprsd/groups");
-              
-         /* Default user and groups database is local file */
+         _keyFile     = api.getProperty("httpserver.keyfile",     "/etc/polaric-aprsd/keys");
+
+         
+          /* Default user and groups database is local file */
          _groups = new LocalGroups(api, _groupFile);
          _users = new LocalUsers(api, _userFile, _groups);
          _passwds =  new PasswordFileAuthenticator(api, _passwdFile, _users);
+         _hmac = new HmacAuthenticator(api, _keyFile, _users);
      
-         /* Indirect basic auth client */     
-         final IndirectBasicAuthClient basicClient = new IndirectBasicAuthClient(_passwds);
-
          /* Indirect Form client */
          final FormClient formClient = new FormClient(_host+"/loginForm", _passwds);
 
+         /* Direct Form Auth client -- TO BE TESTED */
+         final DirectFormClient dformClient = new DirectFormClient(_passwds);
+         
+         /* Direct HMAC Auth client -- TO BE TESTED */         
+         final HeaderClient hdrClient = new HeaderClient("Authorization", "Arctic-Hmac", _hmac);
+         
          /* Config */      
-         _config = new Config (new Clients(_host+"/callback", basicClient, formClient));
+         _config = new Config (new Clients(_host+"/callback", formClient, dformClient, hdrClient));
          _config.addAuthorizer("isauth", new IsFullyAuthenticatedAuthorizer());
          _config.addAuthorizer("sar", new UserAuthorizer(false));
          _config.addAuthorizer("admin", new UserAuthorizer(true));
@@ -76,6 +83,9 @@ public class AuthConfig {
         _users = udb; 
      }
  
+     public HmacAuthenticator getHmacAuth()
+        { return _hmac; }
+        
      public GroupDb getGroupDb()
         { return _groups; }
         

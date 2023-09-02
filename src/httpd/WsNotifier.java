@@ -74,6 +74,7 @@ public abstract class WsNotifier extends ServerBase
    
    
       public final void setAuthInfo(AuthInfo auth) {
+         _api.log().debug("WsNotifier", "setAuthInfo: "+auth);
          _auth = auth;
       }
       
@@ -182,26 +183,53 @@ public abstract class WsNotifier extends ServerBase
      { return _trusted; }
 
     
+    
+    
+   public AuthInfo authenticate(UpgradeRequest req) {
+      String qstring = req.getQueryString();
+      String[] params = null; 
+      if (qstring != null) {
+         params = qstring.split(";");
+         if (params.length != 3) {
+            _api.log().info("WsNotifier", "Authentication failed, wrong format of query string");
+            return null;
+         }
+      }
+      try { 
+         HmacAuthenticator auth = AuthService.conf().getHmacAuth();
+         User ui = auth.checkAuth(params[0], params[1], params[2], "");
+         Group grp = null;
+         return new AuthInfo(_api, ui, grp); // FIXME: We need the group 
+      }
+      catch (Exception e) {}
+      return null;
+   }
+   
+   
+    
+    
    /** 
     * Websocket Connect handler. Subscribe to the service (join the room). 
-    * Use remote IP + port as user id. FIXME: Is this enough? More than one simultaneous user 
-    * per client endpoint? 
+    * Use remote IP + port as user id. 
     */
    
    @OnWebSocketConnect
    public void onConnect(Session conn) {
       try {
-          UpgradeRequest req = conn.getUpgradeRequest();    
           String uid = _getUid(conn);
+          UpgradeRequest req = conn.getUpgradeRequest(); 
+          String qstring = req.getQueryString();
+          _api.log().debug("WsNotifier", "onConnect - query string: "+qstring);
           
           /* Check origin */
           _origin = req.getOrigin();
           if (_origin == null || _origin.matches(_trustedOrigin))
             // FIXME: Is this secure enough for web-browser clients?
           { 
-              /* Create client and set authorization info */
+          
+              /* Create client, autenticate and set authorization info */
               Client client = newClient(conn);
-              client.setAuthInfo(getAuthInfo(req));
+              client.setAuthInfo(authenticate(req));
                  
               if (subscribe(uid, client)) {
                  _api.log().debug("WsNotifier", "Subscription success. User="+uid);
@@ -217,10 +245,9 @@ public abstract class WsNotifier extends ServerBase
                     _nLoggedIn++;
                     _logins++;
                 }
-                
               }
               else {
-                 _api.log().info("WsNotifier", "Subscription rejected. User="+uid);
+                 _api.log().info("WsNotifier", "Subscription rejected by subclass::subscribe. User="+uid);
                  conn.close();
               }
            }
@@ -339,6 +366,7 @@ public abstract class WsNotifier extends ServerBase
    /**
     * Get username,etc of the authenticated user. 
     * @return username, null if not authenticated. 
+    * FIXME: This uses auth info on session - not used in the new auth scheme - remove 
     */
    protected final AuthInfo getAuthInfo(UpgradeRequest req)
    {

@@ -156,8 +156,15 @@ public class UserApi extends ServerBase {
        
         /************************************************
          * Get list of filter profiles.
+         * /myfilters requires login
          ************************************************/
+         
         get ("/filters", "application/json", (req, resp) -> {
+            return ViewFilter.getFilterList(false, null);
+        }, ServerBase::toJson);
+
+        
+        get ("/myfilters", "application/json", (req, resp) -> {
             AuthInfo auth = getAuthInfo(req);
             return ViewFilter.getFilterList(auth.userid !=null, auth.groupid);
         }, ServerBase::toJson);
@@ -325,7 +332,8 @@ public class UserApi extends ServerBase {
         put("/users/*", (req, resp) -> {
             var ident = req.splat()[0];        
             User u = _users.get(ident);
-
+            
+            System.out.println("BODY LEN: "+req.contentLength());
             if (u==null)
                 return ERROR(resp, 404, "Unknown user: "+ident);
             var uu = (UserUpdate) 

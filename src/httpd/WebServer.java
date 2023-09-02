@@ -173,50 +173,12 @@ public class WebServer implements ServerAPI.Web
         System.out.println("*** WebServer: Starting...");
                      
         _auth.start();
-        
-        /* 
-         * OPTIONS requests (CORS preflight) are not sent with cookies and should not go 
-         * through the auth check. 
-         * Maybe we do this only for REST APIs and return info more exactly what options
-         * are available? Move it inside the corsEnable method? 
-         */
-        before("*", (req, res) -> {
-            if (req.requestMethod() == "OPTIONS") {
-                _auth.corsHeaders(req, res); 
-                halt(200, "");
-            }
-        });
-         
          
         before("*", (req, res) -> {res.status(200);});
         before("/config_menu", _auth.conf().filter("FormClient", "isauth, admin")); 
 
         
-        /* 
-         * Protect other webservices. 
-         */ 
-        before("/addobject",       _auth.conf().filter(null, "isauth, sar"));
-        before("/deleteobject",    _auth.conf().filter(null, "isauth, sar"));
-        before("/resetinfo",       _auth.conf().filter(null, "isauth, sar"));
-        before("/sarmode",         _auth.conf().filter(null, "isauth, sar"));
-        before("/sarurl",          _auth.conf().filter(null, "isauth"));
-        before("/mygroup",         _auth.conf().filter(null, "isauth"));
-        before("/groups",          _auth.conf().filter(null, "isauth"));
-        before("/users",           _auth.conf().filter(null, "isauth, admin"));
-        before("/users/*",         _auth.conf().filter(null, "isauth, admin"));
-        before("/mypasswd",        _auth.conf().filter(null, "isauth"));
-        before("/item/*/alias",    _auth.conf().filter(null, "isauth"));
-        before("/item/*/reset",    _auth.conf().filter(null, "isauth"));
-        before("/item/*/tags",     _auth.conf().filter(null, "isauth"));
-        before("/item/*/chcolor",  _auth.conf().filter(null, "isauth"));
-        before("/aprs/*",          _auth.conf().filter(null, "isauth, sar"));
-        before("/system/sarmode",  _auth.conf().filter(null, "isauth, sar"));
-        before("/sar/ipp/*",       _auth.conf().filter(null, "isauth"));
-        before("/mailbox",         _auth.conf().filter(null, "isauth"));
-        before("/wsclients",       _auth.conf().filter(null, "isauth, admin"));
-        before("/loginusers",      _auth.conf().filter(null, "isauth"));
-        before("/usernames",       _auth.conf().filter(null, "isauth"));
-        before("/scripts",         _auth.conf().filter(null, "isauth, admin"));
+
         
         
         afterAfter((request, response) -> {
@@ -261,7 +223,8 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/users/*"); 
         corsEnable("/mypasswd");
         corsEnable("/filters");
-
+        corsEnable("/myfilters");
+        
         /* Start REST API: SAR */
         SarApi sar = new SarApi(_api); 
         sar.start();
@@ -277,6 +240,39 @@ public class WebServer implements ServerAPI.Web
         mb.start(); 
         corsEnable("/mailbox");
         corsEnable("/mailbox/*");
+        
+        
+        /* 
+         * Protect other webservices. 
+         */ 
+        protectUrl("/addobject",    "sar");
+        protectUrl("/deleteobject", "sar");
+        protectUrl("/resetinfo",    "sar");
+        protectUrl("/sarmode",      "sar");
+        protectUrl("/sarurl");
+        protectUrl("/mygroup");
+        protectUrl("/groups");
+        protectUrl("/myfilters");
+        protectUrl("/users",        "admin");
+        protectUrl("/users/*",      "admin");
+        protectUrl("/mypasswd");
+        protectUrl("/item/*/alias");
+        protectUrl("/item/*/reset");
+        protectUrl("/item/*/tags");
+        protectUrl("/item/*/chcolor");
+        protectUrl("/aprs/*",         "sar");
+        protectUrl("/system/sarmode", "sar");
+        protectUrl("/system/ownpos",  "admin");
+        protectUrl("/sar/ipp/");     
+        protectUrl("/sar/ipp/*");
+        protectUrl("/mailbox");
+        protectUrl("/mailbox/*");
+        protectUrl("/wsclients",      "admin");
+        protectUrl("/loginusers");
+        protectUrl("/usernames");
+        protectUrl("/scripts",        "admin");
+        
+        
         
         /* Rooms for SYSTEM and ADMIN notifications */
         _pubsub.createRoom("notify:SYSTEM", false, false, false, false, ServerAPI.Notification.class);
@@ -298,12 +294,22 @@ public class WebServer implements ServerAPI.Web
     
     public void corsEnable(String uri) {
         if (!corsEnabled.contains(uri)) {
-            after(uri, (req,resp) -> { _auth.corsHeaders(req, resp); } );
+            before(uri, (req,resp) -> { _auth.corsHeaders(req, resp); } );
             corsEnabled.add(uri);
         }
     }
     
-
+    public void protectUrl(String prefix) {
+        protectUrl(prefix, null);
+    }
+    
+    public void protectUrl(String prefix, String level) {  
+        var cli = "HeaderClient"; 
+        String lvl = (level==null ? "" : level);
+        before(prefix, _auth.conf().filter(cli, lvl)); 
+        before(prefix, AuthService::getAuthInfo);
+    }
+    
     
     
     public void stop() throws Exception {
@@ -347,15 +353,6 @@ public class WebServer implements ServerAPI.Web
         
     public WsNotifier getJsonMapUpdater()
         { return _jmapupdate; }
-    
-    public void protectUrl(String prefix) {
-        before(prefix, _auth.conf().filter(null, "isauth")); 
-    }
-    
-    public void protectUrl(String prefix, String level) {
-        String lvl = (level==null ? "" : ", "+level);
-        before(prefix, _auth.conf().filter(null, "isauth"+lvl)); 
-    }
     
     
     public UserDb getUserDb() {
