@@ -144,7 +144,7 @@ public class PubSub extends WsNotifier implements ServerAPI.PubSub
         }
         
         @Override public boolean addClient(Client c) {
-            if (!c.getUsername().equals(userid))
+            if (c.getUsername() == null || !c.getUsername().equals(userid))
                 return false;
             return super.addClient(c);
         }

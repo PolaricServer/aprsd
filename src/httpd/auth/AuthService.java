@@ -79,6 +79,7 @@ public class AuthService {
         
       /* Set CORS headers. */
       before ("/authStatus", (req,resp) -> { corsHeaders(req, resp); } );
+      before ("/authStatus2", (req,resp) -> { corsHeaders(req, resp); } );
       before ("/directLogin", (req,resp) -> { corsHeaders(req, resp); } );
       before ("/hmacTest", (req,resp) -> { corsHeaders(req, resp); } );     
       before ("/postTest", (req,resp) -> { corsHeaders(req, resp); } );   
@@ -89,7 +90,6 @@ public class AuthService {
       /* MD5 Hash of body */
       before("*", AuthService::genBodyDigest);
       
-      before("/hmacTest",    new SecurityFilter(conf, "HeaderClient")); 
       before("/authStatus",  new SecurityFilter(conf, "HeaderClient")); 
 
 
@@ -102,8 +102,8 @@ public class AuthService {
       before("/authStatus",  AuthService::getAuthInfo);
 
       post("/directLogin", AuthService::directLogin);   // Indicate login success
-      get("/hmacTest",     AuthService::directLogin2);  
       get("/authStatus",   AuthService::authStatus);    // Return authorisation status
+      get("/authStatus2",  AuthService::authStatus);    // Return authorisation status without authentication
 
     }
     
@@ -161,14 +161,6 @@ public class AuthService {
       return key;
     }
     
-    
-    public static String directLogin2(Request req, Response res) {
-      Optional<CommonProfile> profile = AuthInfo.getSessionProfile(req, res); 
-      String userid = profile.get().getId();
-      
-      _log.log("Successful DIRECT login (using HMAC) from: "+req.ip()+", userid="+ userid);
-      return "Ok";
-    }
 
     
     

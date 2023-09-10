@@ -58,17 +58,14 @@ public class AuthConfig {
          _passwds =  new PasswordFileAuthenticator(api, _passwdFile, _users);
          _hmac = new HmacAuthenticator(api, _keyFile, _users);
      
-         /* Indirect Form client */
-         final FormClient formClient = new FormClient(_host+"/loginForm", _passwds);
-
-         /* Direct Form Auth client -- TO BE TESTED */
+         /* Direct Form Auth client */
          final DirectFormClient dformClient = new DirectFormClient(_passwds);
          
-         /* Direct HMAC Auth client -- TO BE TESTED */         
+         /* Direct HMAC Auth client */         
          final HeaderClient hdrClient = new HeaderClient("Authorization", "Arctic-Hmac", _hmac);
          
          /* Config */      
-         _config = new Config (new Clients(_host+"/callback", formClient, dformClient, hdrClient));
+         _config = new Config (dformClient, hdrClient);
          _config.addAuthorizer("isauth", new IsFullyAuthenticatedAuthorizer());
          _config.addAuthorizer("sar", new UserAuthorizer(false));
          _config.addAuthorizer("admin", new UserAuthorizer(true));
