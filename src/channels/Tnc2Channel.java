@@ -17,7 +17,8 @@ import java.io.*;
 import java.util.*;
 import gnu.io.*;
 import java.util.concurrent.Semaphore;
-
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonSubTypes.*;
 
 
 /**
@@ -48,7 +49,40 @@ public class Tnc2Channel extends TncChannel
        _pathCmd = _api.getProperty("channel."+getIdent()+".pathcommand", "UNPROTO");  
        _noBreak = _api.getBoolProperty("channel."+getIdent()+".nobreak", false);
     }
- 
+    
+    
+    
+    /* 
+     * Information about config to be exchanged in REST API
+     */
+    @JsonTypeName("TNC2")
+    public static class  JsConfig extends Channel.JsConfig {
+        public long heard, heardpackets, duplicates, sentpackets; 
+        public String host, port; 
+        public int baud, kissport;
+    }
+       
+    
+    public JsConfig getJsConfig() {
+        var cnf = new JsConfig();
+        cnf.heard = nHeard();
+        cnf.heardpackets = nHeardPackets(); 
+        cnf.duplicates = nDuplicates(); 
+        cnf.sentpackets = nSentPackets();
+        
+        cnf.baud = _api.getIntProperty("channel."+getIdent()+".baud", 9600);
+        cnf.port = _api.getProperty("channel."+getIdent()+".port", "/dev/ttyS0");
+        return cnf;
+    }
+    
+    
+    public void setJsConfig(Channel.JsConfig ccnf) {
+        var cnf = (JsConfig) ccnf;
+        var props = _api.getConfig();
+        props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
+        props.setProperty("channel."+getIdent()+".baud", ""+cnf.baud);
+    }
+    
  
     /**
      * Send packet on RF. 
@@ -63,7 +97,7 @@ public class Tnc2Channel extends TncChannel
      
     public synchronized void sendPacket(AprsPacket p)
     {
-       if (!canSend)
+       if (!isReady() || !canSend)
             return; 
     
        if (_out == null)

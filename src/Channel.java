@@ -19,6 +19,10 @@ import java.io.*;
 import se.raek.charset.*;
 import java.text.*;
 import java.lang.reflect.Constructor; 
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonSubTypes.*;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
+
 
 
 /**
@@ -26,6 +30,22 @@ import java.lang.reflect.Constructor;
  */
 public abstract class Channel extends Source implements ManagedObject
 {
+      
+     /* 
+      * Defined in concrete subclasses to generate or receive configurations (JSON encoded). 
+      * We may make this a concrete class here?? 
+      */
+     @JsonTypeInfo (
+         use = JsonTypeInfo.Id.NAME, 
+         include = As.PROPERTY, 
+         property = "type")        
+     public abstract static class JsConfig {
+     }
+     
+     public abstract JsConfig getJsConfig();
+     public abstract void setJsConfig(JsConfig conf);
+ 
+     
  
      /* State. RUNNING if running ok. */
  
@@ -46,12 +66,17 @@ public abstract class Channel extends Source implements ManagedObject
         { return _state; }
         
         
+     public abstract void activate(ServerAPI api);
+     public abstract void deActivate();
+     
    
      /** Return true if service is running */
      public boolean isActive() {
-        return getState() == State.STARTING || _state == State.RUNNING;
+        return getState() == State.STARTING || getState() == State.RUNNING;
      }
- 
+      public boolean isReady() {
+        return getState() == State.RUNNING;
+     }
  
      
      /**
@@ -83,8 +108,25 @@ public abstract class Channel extends Source implements ManagedObject
           
          public Set<String> getTypes() 
          {
-             return _classes.keySet();
+            return _classes.keySet();
          }
+         
+         
+         
+         public Class<Channel> getClass(String tname) {
+            try {
+               String cname = _classes.get(tname);
+               if (cname == null)
+                  return null;
+               return (Class<Channel>) Class.forName(cname);
+            }
+            catch (Exception e) {
+               e.printStackTrace(System.out);
+               return null; 
+            }
+         }
+         
+         
          
          
          /**
@@ -110,6 +152,11 @@ public abstract class Channel extends Source implements ManagedObject
                e.printStackTrace(System.out);
                return null; 
             }
+         }
+         
+         
+         public void removeInstance(String id) {
+            _instances.remove(id);
          }
          
          

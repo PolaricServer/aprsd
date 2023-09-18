@@ -32,13 +32,27 @@ import no.polaric.aprsd.*;
  * Implement REST API for system-admin.  
  */
 public class SysAdminApi extends ServerBase {
-
+    
+    /* Register subtypes for deserialization */
+    static { 
+        ServerBase.addSubtype(InetChannel.JsConfig.class, "APRSIS");
+        ServerBase.addSubtype(KissTncChannel.JsConfig.class, "KISS");
+        ServerBase.addSubtype(TcpKissChannel.JsConfig.class, "TCPKISS");
+        ServerBase.addSubtype(Tnc2Channel.JsConfig.class, "TNC2");
+    }
+    
+    
     private ServerAPI _api; 
     
     public SysAdminApi(ServerAPI api) {
         super(api);
         _api = api;
     }
+    
+    
+    
+    
+    
     
     public static class SysInfo 
     {
@@ -55,9 +69,156 @@ public class SysAdminApi extends ServerBase {
     
     
     public static record ChannelInfo 
-       (String ident, String name, boolean active)
+       (String ident, String name, boolean active, GenChanInfo generic, Channel.JsConfig specific)
     {}
     
+    
+    public static record GenChanInfo 
+        (Channel.State state, String tag, boolean restricted)
+    { 
+        public GenChanInfo(ServerAPI api, Channel ch) {
+            this (
+                ch.getState(),
+                api.getProperty("channel."+ch.getIdent()+".tag", ""),
+                api.getBoolProperty("channel."+ch.getIdent()+".restricted", false)
+            );
+        }
+    }
+    
+    
+    public  void setChannelProps(Channel ch, ChannelInfo cnf) {
+        var props = _api.getConfig();
+        props.setProperty("channel."+ch.getIdent()+".on", ""+cnf.active);
+        props.setProperty("channel."+ch.getIdent()+".tag", cnf.generic.tag);
+        props.setProperty("channel."+ch.getIdent()+".restricted", ""+cnf.generic.restricted);
+        ch.setJsConfig((Channel.JsConfig) cnf.specific);
+        if (cnf.active)
+            ch.activate(_api);
+        else if (ch.isActive())
+            ch.deActivate();
+    }
+    
+    
+    
+    public void removeChannelConfig(Channel ch) {
+        Properties cnf = _api.getConfig();
+        for (Object key: cnf.keySet())
+            if (((String)key).startsWith("channel."+ch.getIdent()))
+                cnf.remove((String) key);
+    }
+    
+    
+    
+    
+    public static record ClientInfo
+       (Date created, String cid, long in, long out, String userid)
+    {}
+    
+    public static record ServerConfig 
+    (
+        String mycall, 
+        boolean igate, boolean rfigate, boolean objigate, 
+        int radius, 
+        String path_igate,
+        String path_messages, 
+        String path_objects, 
+        String always_rf, 
+        boolean remotectl,
+        int remote_radius,
+        String rc_server,
+        String authkey
+    ) 
+    {
+        public ServerConfig(ServerAPI api) {
+            this (
+                api.getProperty("default.mycall", "NOCALL"),
+                api.getBoolProperty("igate.on", false),
+                api.getBoolProperty("igate.rfgate.allow", false),
+                api.getBoolProperty("objects.rfgate.allow", false),
+                api.getIntProperty("objects.rfgate.range", 10),
+                api.getProperty("igate.rfgate.path", ""),
+                api.getProperty("message.rfpath", ""),
+                api.getProperty("objects.rfpath", ""),
+                api.getProperty("message.alwaysRf", ""),
+                api.getBoolProperty("remotectl.on", false),
+                api.getIntProperty("remotectl.radius", 10),
+                api.getProperty("remotectl.connect", ""),
+                api.getProperty("message.auth.key", "")
+            );
+        }
+        
+        public void save(ServerAPI api) {
+            Properties  prop = api.getConfig();
+            prop.setProperty("default.mycall", mycall);
+            prop.setProperty("igate.on", ""+igate);
+            prop.setProperty("igate.rfgate.allow", ""+rfigate);
+            prop.setProperty("objects.rfgate.allow", ""+objigate);
+            prop.setProperty("objects.rfgate.range", ""+radius);
+            prop.setProperty("igate.rfgate.path", path_igate);
+            prop.setProperty("message.rfpath", path_messages);
+            prop.setProperty("objects.rfpath", path_objects);
+            prop.setProperty("message.alwaysRf", ""+always_rf);
+            prop.setProperty("remotectl.on", ""+remotectl);
+            prop.setProperty("remotectl.radius", ""+remote_radius);
+            prop.setProperty("remotectl.connect", rc_server);
+            prop.setProperty("message.auth.key", authkey);
+        }
+        
+    }
+    
+    
+    public static record OwnPos 
+    (
+        boolean txon, boolean allowrf, boolean compress, 
+        String symbol, 
+        String rfpath,
+        String comment,
+        double[] pos,
+        boolean gpson, boolean adjustclock,
+        String gpsport,
+        int baud, 
+        int minpause, int maxpause, int mindist, int maxturn
+    ) 
+    {
+        public OwnPos(ServerAPI api) {
+            this (
+                api.getBoolProperty("ownposition.tx.on", false),
+                api.getBoolProperty("ownposition.tx.allowrf", false),
+                api.getBoolProperty("ownposition.tx.compress", false),
+                api.getProperty("ownposition.symbol", "/c"),
+                api.getProperty("ownposition.tx.rfpath", ""),
+                api.getProperty("ownposition.tx.comment", ""),
+                api.getPosProperty("ownposition.position"), 
+                api.getBoolProperty("ownposition.gps.on", false),
+                api.getBoolProperty("ownposition.gps.adjustclock", false),
+                api.getProperty("ownposition.gps.port", ""),
+                api.getIntProperty("ownposition.gps.baud", 4800),
+                api.getIntProperty("ownposition.tx.minpause", 0),
+                api.getIntProperty("ownposition.tx.maxpause", 0),
+                api.getIntProperty("ownposition.tx.mindist",  0),
+                api.getIntProperty("ownposition.tx.maxturn",  0)
+            );
+        } 
+        
+        public void save(ServerAPI api) {
+            Properties  prop = api.getConfig();
+            prop.setProperty("ownposition.tx.on", ""+txon);
+            prop.setProperty("ownposition.tx.allowrf", ""+allowrf);
+            prop.setProperty("ownposition.tx.compress", ""+compress);
+            prop.setProperty("ownposition.symbol", symbol);
+            prop.setProperty("ownposition.tx.rfpath", rfpath);
+            prop.setProperty("ownposition.tx.comment", comment);
+            prop.setProperty("ownposition.position", pos[0]+","+pos[1]);
+            prop.setProperty("ownposition.gps.on", ""+gpson);
+            prop.setProperty("ownposition.gps.adjustclock", ""+adjustclock);
+            prop.setProperty("ownposition.gps.port", gpsport);
+            prop.setProperty("ownposition.gps.baud", ""+baud);
+            prop.setProperty("ownposition.tx.minpause", ""+minpause);
+            prop.setProperty("ownposition.tx.maxpause", ""+maxpause);
+            prop.setProperty("ownposition.tx.mindist",  ""+mindist);
+            prop.setProperty("ownposition.tx.maxturn",  ""+maxturn);
+        }   
+    }
     
     
     
@@ -77,7 +238,18 @@ public class SysAdminApi extends ServerBase {
      */
     public void start() {     
     
-    
+        /******************************************
+         * Restart server program
+         ******************************************/
+        put("/system/adm/restart", (req, resp) -> {
+            ProcessBuilder pb = new ProcessBuilder("/usr/bin/sudo", "-n", "/usr/bin/polaric-restart");
+            pb.inheritIO();
+            pb.start(); 
+            return "Ok";
+        });     
+             
+             
+             
         /******************************************
          * Get system status info
          ******************************************/
@@ -102,7 +274,7 @@ public class SysAdminApi extends ServerBase {
             res.channels = new ArrayList<ChannelInfo>();
             for (String chn:  _api.getChanManager().getKeys()) {
                 Channel ch = _api.getChanManager().get(chn);
-                res.channels.add( new ChannelInfo(ch.getShortDescr(), ch.getIdent(), ch.isActive()));
+                res.channels.add( new ChannelInfo(ch.getShortDescr(), ch.getIdent(), ch.isActive(), null, null));
             }
             
             /* Connected servers */
@@ -114,11 +286,163 @@ public class SysAdminApi extends ServerBase {
         
         
         
+        /******************************************
+         * Get clients
+         ******************************************/
+        get("/system/adm/clients", (req, resp) -> {
+            WebServer ws = (WebServer) _api.getWebserver();
+            List<ClientInfo> res = new ArrayList<ClientInfo>();
+            
+            for ( WsNotifier.Client x : ws.getJsonMapUpdater().clients())
+                res.add(new ClientInfo(x.created(), x.getUid(), x.nIn(), x.nOut(), x.getUsername()));
+            
+            return res;
+        }, ServerBase::toJson );
         
         
+        
+        
+        /******************************************
+         * Get server config
+         ******************************************/
+        get("/system/adm/server", (req, resp) -> {
+            ServerConfig conf = new ServerConfig(_api);
+            return conf;
+        }, ServerBase::toJson );
+                
+        
+        
+        
+        /******************************************
+         * Update server config
+         ******************************************/
+        put("/system/adm/server", (req, resp) -> {
+            ServerConfig conf = (ServerConfig) ServerBase.fromJson(req.body(), ServerConfig.class);
+            conf.save(_api);
+            // FIXME: Make sure server reboots/reloads settings
+            return "Ok";
+        });
+        
+        
+        /******************************************
+         * Get server config - own position
+         ******************************************/
+        get("/system/adm/ownpos", (req, resp) -> {
+            OwnPos conf = new OwnPos(_api);
+            return conf;
+        }, ServerBase::toJson );
+                
+           
+           
+        /******************************************
+         * Update server config
+         ******************************************/
+        put("/system/adm/ownpos", (req, resp) -> {
+            OwnPos conf = (OwnPos) ServerBase.fromJson(req.body(), OwnPos.class);
+            conf.save(_api);
+            // FIXME: Make sure server reboots/reloads settings
+            return "Ok";
+        });
+        
+        
+        
+        /******************************************
+         * Get server config - get channel names
+         ******************************************/
+        get("/system/adm/channels", (req, resp) -> {
+            Set<String> chans = _api.getChanManager().getKeys();
+            List<ChannelInfo> res = new ArrayList<ChannelInfo>();
+            for (String chn:  _api.getChanManager().getKeys()) {
+                Channel ch = _api.getChanManager().get(chn);
+                res.add( new ChannelInfo(ch.getShortDescr(), ch.getIdent(), ch.isActive(),  
+                   new GenChanInfo(_api, ch), null));
+            }
+            return res;
+        }, ServerBase::toJson );
+        
+        
+        
+        /******************************************
+         * Get server config - get channel
+         ******************************************/
+        get("/system/adm/channels/*", (req, resp) -> {
+            var chname = req.splat()[0];
+            Channel.Manager mgr = _api.getChanManager(); 
+            Channel ch = mgr.get(chname);
+            if (ch==null)
+                return ERROR(resp, 404, "Channel not found: "+chname);
+                
+            return new ChannelInfo(
+                ch.getShortDescr(), 
+                ch.getIdent(), 
+                _api.getBoolProperty("channel."+ch.getIdent()+".on", false), 
+                new GenChanInfo(_api, ch), 
+                ch.getJsConfig()
+            );
+        }, ServerBase::toJson );
+    
+    
+    
+       /******************************************
+        * Update channel
+        ******************************************/
+        put("/system/adm/channels/*", (req, resp) -> {
+            var chname = req.splat()[0];
+            var mgr = _api.getChanManager(); 
+            var ch = mgr.get(chname);
+            if (ch==null)
+                return ERROR(resp, 404, "Channel not found: "+chname);
+
+            ChannelInfo conf = (ChannelInfo) ServerBase.fromJson(req.body(), ChannelInfo.class);
+            if (conf==null)
+                return ERROR(resp, 400, "Couldn't parse input");  
+            setChannelProps(ch, conf);
+            return "Ok";
+        });
+    
+    
+    
+       /******************************************
+        * Add a channel
+        ******************************************/
+        post("/system/adm/channels", (req, resp) -> {
+            ChannelInfo conf = (ChannelInfo) ServerBase.fromJson(req.body(), ChannelInfo.class);
+            if (conf==null)
+                return ERROR(resp, 400, "Couldn't parse input");
+                
+            String tname="";
+            if (conf.specific instanceof InetChannel.JsConfig) tname = "APRSIS"; 
+            else if (conf.specific instanceof KissTncChannel.JsConfig) tname = "KISS";
+            else if (conf.specific instanceof TcpKissChannel.JsConfig) tname = "TCPKISS";
+            else if (conf.specific instanceof Tnc2Channel.JsConfig) tname = "TNC2";
+            // FIXME: Can we get type name from serialization of conf? 
+            
+            var chmgr = _api.getChanManager();
+            var ch = chmgr.newInstance(_api, tname, conf.name);
+            if (ch==null)
+                return ERROR(resp, 400, "Couldn't instantiate channel: "+tname+": "+conf.name);
+            setChannelProps(ch, conf);
+            return "Ok";
+        });  
+        
+        
+            
+       /******************************************
+        * Remove a channel and its config
+        ******************************************/
+        delete("/system/adm/channels/*", (req, resp) -> {
+            var chname = req.splat()[0];
+            var mgr = _api.getChanManager(); 
+            var ch = mgr.get(chname);
+            if (ch==null)
+                return ERROR(resp, 404, "Channel not found: "+chname);
+            ch.deActivate();
+            removeChannelConfig(ch);
+            mgr.removeInstance(chname);
+            return "Ok";
+        });
         
     }
-
 }
 
 

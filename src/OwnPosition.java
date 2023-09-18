@@ -71,8 +71,10 @@ public class OwnPosition extends Station implements Runnable
         if (myCall.length() == 0)
            myCall = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
         String sym = _api.getProperty("ownposition.symbol", "/."); 
-        setSymtab(sym.charAt(0));
-        setSymbol(sym.charAt(1));
+        if (sym.length() >= 2) {
+            setSymtab(sym.charAt(0));
+            setSymbol(sym.charAt(1));
+        }
         _txOn     = _api.getBoolProperty("ownposition.tx.on", false);        
         _allowRf  = _api.getBoolProperty("ownposition.tx.allowrf", false);
         _pathRf   = _api.getProperty("ownposition.tx.rfpath", "WIDE1-1"); 

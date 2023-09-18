@@ -159,6 +159,25 @@ public class Main implements ServerAPI
                  
    public int getIntProperty(String pname, int dvalue)
     {  return Integer.parseInt(_config.getProperty(pname, ""+dvalue).trim()); }
+    
+    
+   public double[] getPosProperty(String pname)
+    {
+        String inp = _config.getProperty(pname, "0,0").trim(); 
+        if (!inp.matches("[0-9]+(\\.([0-9]+))?\\,([0-9]+)(\\.([0-9]+))?")) {
+            log.warn("Main", "Error in parsing position: "+inp);
+            return new double[] {0,0};
+        }
+        String[] scoord = inp.split(",");
+        double[] res = new double[] {0,0};
+        if (scoord.length != 2)
+            return res;
+        res[0] = Double.parseDouble(scoord[0].trim());
+        res[1] = Double.parseDouble(scoord[1].trim());
+        return res;
+    }
+    
+    
            
    public Map<String, Object> properties()
     { return PluginManager.properties(); }

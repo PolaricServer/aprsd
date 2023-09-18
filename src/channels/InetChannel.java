@@ -16,9 +16,8 @@ package no.polaric.aprsd;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-
-
-
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonSubTypes.*;
 
 /**
  * Internet channel. Connect to APRS-IS server. 
@@ -33,20 +32,57 @@ public class InetChannel extends TcpChannel
        { super(api, id); }
        
     
+    @Override public String getShortDescr()
+       { return "is"+_chno; }
+
+       
     @Override public void activate(ServerAPI a) {
        super.activate(_api);
        String id = getIdent();
        _user = _api.getProperty("channel."+id+".user", "").toUpperCase();
        if (_user.length() == 0)
-           _user = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
+       _user = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
        _pass     = _api.getProperty("channel."+id+".pass", "-1");
        _filter   = _api.getProperty("channel."+id+".filter", ""); 
        _rfilter  = _api.getProperty("channel."+id+".rfilter", ""); 
     }
- 
-
-    @Override public String getShortDescr()
-       { return "is"+_chno; }
+    
+    
+    /* 
+     * Information about config to be exchanged in REST API
+     */
+    
+    @JsonTypeName("APRSIS")
+    public static class JsConfig extends Channel.JsConfig {
+        public long heardpackets, heard, duplicates, sentpackets; 
+        public int port, pass; 
+        public String host, filter;
+    }
+       
+       
+    public JsConfig getJsConfig() {
+        var cnf = new JsConfig();
+        cnf.heard = nHeard();
+        cnf.heardpackets = nHeardPackets(); 
+        cnf.duplicates = nDuplicates(); 
+        cnf.sentpackets = nSentPackets();
+        
+        cnf.host  = _api.getProperty("channel."+getIdent()+".host", "localhost");
+        cnf.port  = _api.getIntProperty("channel."+getIdent()+".port", 21);
+        cnf.pass  = _api.getIntProperty("channel."+getIdent()+".pass", 0); 
+        cnf.filter= _api.getProperty("channel."+getIdent()+".filter", "");
+        return cnf;
+    }
+    
+    public void setJsConfig(Channel.JsConfig ccnf) {
+        var cnf = (JsConfig) ccnf;
+        var props = _api.getConfig();
+        props.setProperty("channel."+getIdent()+".host", cnf.host);
+        props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
+        props.setProperty("channel."+getIdent()+".pass", ""+cnf.pass);
+        props.setProperty("channel."+getIdent()+".filter", cnf.filter); 
+    }
+    
        
         
     /**
@@ -54,7 +90,7 @@ public class InetChannel extends TcpChannel
      */ 
     public void sendPacket(AprsPacket p)
     {  
-        if (!canSend)
+        if (!isReady() || !canSend)
             return; 
         if (p.via == null || p.via.equals("")) {
             p = p.clone(); 

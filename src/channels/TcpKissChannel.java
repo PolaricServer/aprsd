@@ -17,6 +17,8 @@ import java.io.*;
 import java.util.*;
 import gnu.io.*;
 import java.util.concurrent.Semaphore;
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonSubTypes.*;
 
 /**
  * KISS over a TCP stream
@@ -43,7 +45,42 @@ public class TcpKissChannel extends TcpChannel
        _log = new Logfile(_api, getIdent(), "rf.log");
     }
     
-   
+    
+           
+    /* 
+     * Information about config to be exchanged in REST API
+     */
+    @JsonTypeName("TCPKISS")
+    public static class  JsConfig extends Channel.JsConfig {
+        public long heard, heardpackets, duplicates, sentpackets; 
+        public String host;  
+        public int port, kissport;
+    }
+       
+       
+    public JsConfig getJsConfig() {
+        var cnf = new JsConfig();
+        cnf.heard = nHeard();
+        cnf.heardpackets = nHeardPackets(); 
+        cnf.duplicates = nDuplicates(); 
+        cnf.sentpackets = nSentPackets();
+        
+        cnf.kissport = _api.getIntProperty("channel."+getIdent()+".kissport", 0);
+        cnf.host=_api.getProperty("channel."+getIdent()+".host", "localhost");
+        cnf.port=_api.getIntProperty("channel."+getIdent()+".port", 21);
+        return cnf; 
+    }
+        
+
+    public void setJsConfig(Channel.JsConfig ccnf) {
+        var cnf = (JsConfig) ccnf;
+        var props = _api.getConfig();
+        props.setProperty("channel."+getIdent()+".host", cnf.host);
+        props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
+        props.setProperty("channel."+getIdent()+".kissport", ""+cnf.kissport);
+    }
+    
+    
    
    /* Return true if this is a RF channel */
     @Override public boolean isRf() {
@@ -69,7 +106,7 @@ public class TcpKissChannel extends TcpChannel
    
     public synchronized void sendPacket(AprsPacket p)
     {        
-        if (!canSend)
+        if (!isReady() || !canSend)
             return; 
         _log.log(" [>" + this.getShortDescr() + "] " + p);
         try {

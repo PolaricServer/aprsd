@@ -91,6 +91,7 @@ public abstract class TcpChannel extends AprsChannel
     /** Stop the service */
     public void deActivate() {
         try {
+            _state = State.OFF;
             _comm.deActivate();
             Thread.sleep(1000);
             _close();

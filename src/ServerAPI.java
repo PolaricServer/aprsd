@@ -196,6 +196,13 @@ public interface ServerAPI
     public int getIntProperty (String pn, int dval);
    
    
+    /**
+     * Get position (lat, long) configuration property.
+     */
+    public double[] getPosProperty(String pname);
+   
+   
+   
     /** Generic dictionary of objects. 
      * Plugins may use this to exchange references to interfaces to their services. 
      */

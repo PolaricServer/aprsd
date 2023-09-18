@@ -17,8 +17,8 @@ import java.io.*;
 import java.util.*;
 import gnu.io.*;
 import java.util.concurrent.Semaphore;
-
-
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.annotation.JsonSubTypes.*;
 
 /**
  * TNC channel. For devices in KISS compatible mode.
@@ -42,14 +42,50 @@ public class KissTncChannel extends TncChannel
        _kissport = api.getIntProperty("channel."+id+".kissport", 0);
     }
     
- 
+    
+        
+    /* 
+     * Information about config to be exchanged in REST API
+     */
+     
+    @JsonTypeName("KISS")
+    public static class  JsConfig extends Channel.JsConfig {      
+        public long heard, heardpackets, duplicates, sentpackets; 
+        public String port; 
+        public int baud;
+        public int kissport;
+    }
+       
+       
+    public JsConfig getJsConfig() {
+        var cnf = new JsConfig();
+        cnf.heard = nHeard();
+        cnf.heardpackets = nHeardPackets(); 
+        cnf.duplicates = nDuplicates(); 
+        cnf.sentpackets = nSentPackets();
+        
+        cnf.kissport = _api.getIntProperty("channel."+getIdent()+".kissport", 0);
+        cnf.baud = _api.getIntProperty("channel."+getIdent()+".baud", 9600);
+        cnf.port = _api.getProperty("channel."+getIdent()+".port", "/dev/ttyS0");
+        return cnf;
+    }
 
+    public void setJsConfig(Channel.JsConfig ccnf) {
+        var cnf = (JsConfig) ccnf;
+        var props = _api.getConfig();
+        props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
+        props.setProperty("channel."+getIdent()+".baud", ""+cnf.baud);
+        props.setProperty("channel."+getIdent()+".kissport", ""+cnf.kissport); 
+    }
+    
+    
+    
     /**
      * Send packet on RF. 
      */ 
     public synchronized void sendPacket(AprsPacket p)
     {      
-        if (!canSend)
+        if (!isReady() || !canSend)
             return; 
         _log.log(" [>" + this.getShortDescr() + "] " + p);
         try {

@@ -29,9 +29,10 @@ import com.mindprod.base64.Base64;
 import java.util.concurrent.locks.*; 
 import spark.*;
 import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.jsontype.NamedType;
 
 
-// FIXME: Move some of this to a ServerConfig object. Move out the XML stuff (remove it later). 
+// FIXME: Move some of this to a ServerConfig object.
 
 public abstract class ServerBase 
 {
@@ -73,6 +74,7 @@ public abstract class ServerBase
             return mapper.writeValueAsString(obj);
         }
         catch (Exception e) {
+            System.out.println(e.getMessage());
             return null;
         }
     }
@@ -83,8 +85,14 @@ public abstract class ServerBase
             return mapper.readValue(text, cls);
         }
         catch (Exception e) {
+            System.out.println(e.getMessage());
             return null;
         }
+    }
+    
+    
+    public static void addSubtype(Class type, String name) {
+        mapper.registerSubtypes(new NamedType(type, name));
     }
     
     
