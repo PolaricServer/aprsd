@@ -170,8 +170,20 @@ public class OwnObjects implements Runnable
        
     public void setChannels(AprsChannel rf, AprsChannel inet)
     {
-        _inetChan = inet;
-        _rfChan = rf; 
+        setRfChan(rf);
+        setInetChan(inet);
+    }
+    
+    public void setRfChan(AprsChannel rf) {
+      if (rf != null && !rf.isRf())
+         _api.log().warn("OwnObjects", "Non-RF channel used as RF channel");
+      _rfChan = rf;
+    }
+    
+    public void setInetChan(AprsChannel inet) {
+      if (inet != null && inet.isRf())
+         _api.log().warn("OwnObjects", "RF channel used as internet channel");
+      _inetChan = inet;
     }
     
     
@@ -229,12 +241,12 @@ public class OwnObjects implements Runnable
        _api.log().debug("OwnObjects", "Send object report: "+ p.from+">"+p.to+":"+p.report);
        
        /* Send object report on aprs-is */
-       if (_inetChan != null) 
+       if (_inetChan != null && !_inetChan.isRf()) 
            _inetChan.sendPacket(p);
             
        /* Send object report on RF, if appropriate */
        p.via = _pathRf;
-       if (_allowRf && _rfChan != null && object_in_range(obj, _rangeRf))
+       if (_allowRf && _rfChan != null && _rfChan.isRf() && object_in_range(obj, _rangeRf))
            _rfChan.sendPacket(p);
     }
     

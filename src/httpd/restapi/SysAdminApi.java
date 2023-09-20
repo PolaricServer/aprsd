@@ -69,7 +69,9 @@ public class SysAdminApi extends ServerBase {
     
     
     public static record ChannelInfo 
-       (String ident, String name, boolean active, GenChanInfo generic, Channel.JsConfig specific)
+       ( String ident, String name, 
+         boolean active, boolean rfchan, boolean inetchan, boolean isrf, boolean isaprs,
+         GenChanInfo generic, Channel.JsConfig specific)
     {}
     
     
@@ -91,6 +93,33 @@ public class SysAdminApi extends ServerBase {
         props.setProperty("channel."+ch.getIdent()+".on", ""+cnf.active);
         props.setProperty("channel."+ch.getIdent()+".tag", cnf.generic.tag);
         props.setProperty("channel."+ch.getIdent()+".restricted", ""+cnf.generic.restricted);
+        try {
+        if (ch instanceof AprsChannel ach) {
+            if (ach.isRf()) {
+                if (_api.getRfChannel() == ach && !cnf.rfchan) {
+                    _api.setRfChannel(null);
+                    props.remove("channel.default.rf");
+                }
+                else if (cnf.rfchan) {
+                    _api.setRfChannel(ach);
+                    props.setProperty("channel.default.rf", ach.getIdent());
+                }
+            }
+            else {
+                if (_api.getInetChannel() == ach && !cnf.inetchan) {
+                    _api.setInetChannel(null);
+                    props.remove("channel.default.inet");
+                }
+                else if (cnf.inetchan) {
+                    _api.setRfChannel(ach);
+                    props.setProperty("channel.default.inet", ach.getIdent());
+                }
+            }
+        }
+        } catch (Exception e) {
+            e.printStackTrace(System.out);
+        }
+        
         ch.setJsConfig((Channel.JsConfig) cnf.specific);
         if (cnf.active)
             ch.activate(_api);
@@ -268,15 +297,7 @@ public class SysAdminApi extends ServerBase {
             res.plugins = new ArrayList<String>(); 
             for (PluginManager.Plugin x: plugins)
                 res.plugins.add(x.getDescr());
-            
-            /* Channels */
-            Set<String> chans = _api.getChanManager().getKeys();
-            res.channels = new ArrayList<ChannelInfo>();
-            for (String chn:  _api.getChanManager().getKeys()) {
-                Channel ch = _api.getChanManager().get(chn);
-                res.channels.add( new ChannelInfo(ch.getShortDescr(), ch.getIdent(), ch.isActive(), null, null));
-            }
-            
+        
             /* Connected servers */
             RemoteCtl rctl = _api.getRemoteCtl(); 
             res.remotectl = (rctl == null ? "" : rctl.toString());
@@ -355,6 +376,8 @@ public class SysAdminApi extends ServerBase {
             for (String chn:  _api.getChanManager().getKeys()) {
                 Channel ch = _api.getChanManager().get(chn);
                 res.add( new ChannelInfo(ch.getShortDescr(), ch.getIdent(), ch.isActive(),  
+                   ch==_api.getRfChannel(), ch==_api.getInetChannel(), ch.isRf(), 
+                   ch instanceof AprsChannel,
                    new GenChanInfo(_api, ch), null));
             }
             return res;
@@ -375,7 +398,9 @@ public class SysAdminApi extends ServerBase {
             return new ChannelInfo(
                 ch.getShortDescr(), 
                 ch.getIdent(), 
-                _api.getBoolProperty("channel."+ch.getIdent()+".on", false), 
+                _api.getBoolProperty("channel."+ch.getIdent()+".on", false),  
+                ch==_api.getRfChannel(), ch==_api.getInetChannel(), ch.isRf(), 
+                ch instanceof AprsChannel, 
                 new GenChanInfo(_api, ch), 
                 ch.getJsConfig()
             );

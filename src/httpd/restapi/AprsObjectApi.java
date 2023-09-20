@@ -127,7 +127,7 @@ public class AprsObjectApi extends ServerBase {
                 ServerBase.fromJson(req.body(), ObjUpdate.class);
             AprsObject obj = _ownObj.get(ident);
             if (obj==null)
-                return ERROR(resp, 400, "Object not found");
+                return ERROR(resp, 404, "Object not found");
                 
             var pos = new LatLng( oi.pos[1], oi.pos[0]);
             var pd  = new ReportHandler.PosData (pos, oi.sym, oi.symtab);

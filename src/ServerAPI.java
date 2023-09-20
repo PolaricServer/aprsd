@@ -131,6 +131,13 @@ public interface ServerAPI
     /** Return current internet channel in igate, etc.. */
     public AprsChannel getInetChannel();
 
+    /** Replace current RF channel in igate, etc.. */   
+    public void setRfChannel(AprsChannel ch);
+      
+      
+    /** Return current RF channel in igate, etc.. */
+    public AprsChannel getRfChannel();
+   
    
    
     /** Add HTTP handlers (webservices).

@@ -104,14 +104,27 @@ public class Main implements ServerAPI
    public void setInetChannel(AprsChannel ch) {
        ch1 = ch; 
        if (igate != null) 
-           igate.setChannels(ch2, ch1);
-       msgProc.setChannels(ch2, ch1);
-       ownpos.setChannels(ch2, ch1);
-       ownobjects.setChannels(ch2, ch1); 
+           igate.setInetChan(ch1);
+       msgProc.setInetChan(ch1);
+       ownpos.setInetChan(ch1);
+       ownobjects.setInetChan(ch1); 
    }
    
    public AprsChannel getInetChannel()
       { return ch1; }
+    
+    
+   public void setRfChannel(AprsChannel ch) {
+       ch2 = ch; 
+       if (igate != null) 
+           igate.setRfChan(ch2);
+       msgProc.setRfChan(ch2);
+       ownpos.setRfChan(ch2);
+       ownobjects.setRfChan(ch2); 
+   }
+   
+   public AprsChannel getRfChannel()
+      { return ch2; }
       
       
    public void addHttpHandler(Object obj, String prefix)
@@ -359,8 +372,6 @@ public class Main implements ServerAPI
             PluginManager.startWebservices();
             
             /* Add main webservices */
-            ws.addHandler(new Webservices(api), null);
-            ws.addHandler(new ConfigService(api), null); 
             TrackerPoint.setNotifier(ws.getNotifier());
             log.info("Main", "HTTP/WS server ready on port " + http_port);
            
@@ -372,12 +383,15 @@ public class Main implements ServerAPI
             instantiate_channels(); 
            
             /* 
-             * Default channels
+             * Default primary channels
              */
-            String ch_inet_name = getProperty("channel.default.inet", "aprsis"); 
-            String ch_rf_name = getProperty("channel.default.rf", "tnc");
-            ch1 = (ch_inet_name.length() > 0 ? (AprsChannel) _chanManager.get(ch_inet_name) : null);
-            ch2 = (ch_rf_name.length() > 0  ? (AprsChannel) _chanManager.get(ch_rf_name) : null);          
+            String ch_inet_name = getProperty("channel.default.inet", null); 
+            String ch_rf_name = getProperty("channel.default.rf", null);
+            ch1 = (ch_inet_name != null && ch_inet_name.length() > 0 
+                ? (AprsChannel) _chanManager.get(ch_inet_name) : null);
+            ch2 = (ch_rf_name != null && ch_rf_name.length() > 0  
+                ? (AprsChannel) _chanManager.get(ch_rf_name) : null);          
+            
             if (ch2 != null && !ch2.isRf()) {
                 log.warn("Main", "Channel " + ch_rf_name + " isn't a proper APRS RF channel - disabling");
                 ch2 = null;
@@ -430,14 +444,8 @@ public class Main implements ServerAPI
         _chanManager.addClass("TNC2", "no.polaric.aprsd.Tnc2Channel");
         _chanManager.addClass("KISS", "no.polaric.aprsd.KissTncChannel");
         _chanManager.addClass("TCPKISS", "no.polaric.aprsd.TcpKissChannel");
-           
-        /* FIXME: IS THIS RIGHT???? */
-        String[] channelns = {"aprsis", "tnc"};
-        if (getProperty("channel.aprsis.type", "").equals(""))
-            _config.setProperty("channel.aprsis.type", "APRSIS"); 
-        if (getProperty("channel.tnc.type", "").equals(""))
-            _config.setProperty("channel.tnc.type", "TNC2");  
-           
+
+        String[] channelns = { };
         String[] c = getProperty("channels", "").split(",(\\s*)");
         if (c.length > 0)
             channelns = c; 
@@ -450,8 +458,8 @@ public class Main implements ServerAPI
             Channel ch = _chanManager.newInstance(api, type, chan);
             if (ch != null) {
                 /* FIXME: add parser in AprsChannel constructor?? */
-                if (ch instanceof AprsChannel) 
-                    ((AprsChannel)ch).addReceiver(parser);
+                if (ch instanceof AprsChannel ach) 
+                    ach.addReceiver(parser);
                  
                 if (getBoolProperty("channel."+chan+".on", false))
                     ch.activate(api);

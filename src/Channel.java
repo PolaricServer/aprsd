@@ -55,7 +55,6 @@ public abstract class Channel extends Source implements ManagedObject
      protected State _state = State.OFF;
 
      
-     
  
      protected String chId() {
         return "["+getShortDescr()+"] "; 
@@ -65,7 +64,11 @@ public abstract class Channel extends Source implements ManagedObject
      public State getState() 
         { return _state; }
         
-        
+     
+     public boolean isRf() 
+        { return false; }
+     
+     
      public abstract void activate(ServerAPI api);
      public abstract void deActivate();
      

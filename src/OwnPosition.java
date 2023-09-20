@@ -110,9 +110,20 @@ public class OwnPosition extends Station implements Runnable
      */
     public synchronized void setChannels(AprsChannel rfc, AprsChannel ic)
     {
-       _inetChan = ic; 
-       _rfChan = rfc;
+        setRfChan(rfc);
+        setInetChan(ic);
     }
+    public void setRfChan(AprsChannel rf) {
+      if (rf != null && !rf.isRf())
+         _api.log().warn("OwnPosition", "Non-RF channel used as RF channel");
+      _rfChan = rf;
+    }
+    public void setInetChan(AprsChannel inet) {
+      if (inet != null && inet.isRf())
+         _api.log().warn("OwnPosition", "RF channel used as internet channel");
+      _inetChan = inet;
+    }
+    
     
     
     @Override 
@@ -228,7 +239,7 @@ public class OwnPosition extends Station implements Runnable
         
         /* Send object report on RF, if appropriate */
         p.via = _pathRf; 
-        if (_allowRf && _rfChan != null) {
+        if (_allowRf && _rfChan != null && _rfChan.isRf()) {
            _rfChan.sendPacket(p);
            sentRf = true;
         }
@@ -241,7 +252,7 @@ public class OwnPosition extends Station implements Runnable
         if (sentRf && ig != null && ig.isActive()) 
             ig.gate_to_inet(p);
         else
-            if (_inetChan != null) 
+            if (_inetChan != null && !_inetChan.isRf()) 
                 _inetChan.sendPacket(p);
             
     }

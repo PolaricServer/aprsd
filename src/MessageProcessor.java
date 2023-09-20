@@ -136,16 +136,27 @@ public class MessageProcessor implements Runnable, Serializable
    }  
        
            
-   public String getMycall() {
+    public String getMycall() {
        return _myCall;
-   }
+    }
       
-   public void setChannels(AprsChannel rf, AprsChannel inet)
-   {
-       _inetChan = inet;
-       _rfChan = rf;
-   }
-
+    public void setChannels(AprsChannel rf, AprsChannel inet)
+    {
+        setRfChan(rf);
+        setInetChan(inet);
+    }
+    public void setRfChan(AprsChannel rf) {
+      if (rf != null && !rf.isRf())
+         _api.log().warn("MessageProcessor", "Non-RF channel used as RF channel");
+      _rfChan = rf;
+    }
+    public void setInetChan(AprsChannel inet) {
+      if (inet != null && inet.isRf())
+         _api.log().warn("MessageProcessor", "RF channel used as internet channel");
+      _inetChan = inet;
+    }
+    
+    
     
    /**
     * Process incoming message.
@@ -341,7 +352,8 @@ public class MessageProcessor implements Runnable, Serializable
              p.via = AprsChannel.getReversePath(path); 
              
           _api.log().debug("MessageProc", "Sending message to "+recipient+" on RF: "+p.via);
-          _rfChan.sendPacket(p);
+          if (_rfChan != null && _rfChan.isRf()) 
+            _rfChan.sendPacket(p);
           sentOnRf = true;
        }
        /*
@@ -354,7 +366,8 @@ public class MessageProcessor implements Runnable, Serializable
            */
           p.via = sentOnRf ? "qAR,"+_myCall : "qAC,"+_myCall;
           _api.log().debug("MessageProc", "Sending message to "+recipient+" on INET: "+p.via);
-          _inetChan.sendPacket(p);
+          if (_inetChan != null && !_inetChan.isRf())
+            _inetChan.sendPacket(p);
        }  
     
        if ((_inetChan == null || !_inetChan.isActive()) && 

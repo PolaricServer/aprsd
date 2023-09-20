@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,8 +99,18 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
      */   
     public synchronized void setChannels(AprsChannel rf, AprsChannel inet)
     {
-        _inetChan = inet;
-        _rfChan = rf; 
+        setRfChan(rf);
+        setInetChan(inet);
+    }
+    public void setRfChan(AprsChannel rf) {
+      if (rf != null && !rf.isRf())
+         _api.log().warn("Igate", "Non-RF channel used as RF channel");
+      _rfChan = rf;
+    }
+    public void setInetChan(AprsChannel inet) {
+      if (inet != null && inet.isRf())
+         _api.log().warn("Igate", "RF channel used as internet channel");
+      _inetChan = inet;
     }
     
     
@@ -123,7 +133,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
        _log.log(" [" + _rfChan.getShortDescr() + ">" + _inetChan.getShortDescr() + "] " + p);       
        
        p.via += (",qAR,"+_myCall);
-       if (_inetChan != null) 
+       if (_inetChan != null && !_inetChan.isRf()) 
            _inetChan.sendPacket(p);
        
     }
@@ -175,7 +185,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
           p.from = _myCall;
           p.to = _api.getToAddr();
           p.thirdparty = false;               
-          if (_rfChan.isRf()) 
+          if (_inetChan != null && _rfChan.isRf()) 
               _rfChan.sendPacket(p);
        } 
     }
