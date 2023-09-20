@@ -36,7 +36,7 @@ INSTALL_SCPLUG = $(INSTALL_CONFIG)/script-conf.d
 ##################################################
     LIBDIR = _lib
  JAVAFLAGS =
- PACKAGES  = core util channels httpd scala aprsd
+ PACKAGES  = core util channels httpd aprsd
  LANGUAGES = no
 
 
@@ -113,20 +113,10 @@ channels:
 	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/channels/*.java 
 		
 	
-#filter: core  src/filter/Parser.java src/filter/Lexer.java
-#	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/filter/*.java
-
-	
 .PHONY : httpd
 httpd: core
 	$(JAVAC) -d $(TDIR) $(JAVAFLAGS) src/httpd/auth/*.java  src/httpd/*.java src/httpd/restapi/*.java
 	
-	
-.PHONY : scala
-scala: core           
-	scalac -d $(TDIR) -classpath $(LIBDIR):$(CLASSPATH) src/httpd/html/*.scala
-	scalac -d $(TDIR) -classpath $(LIBDIR):$(CLASSPATH) src/httpd/webconfig/*.scala
-
 	
 clean:
 	@if [ -e ${LIBDIR} ]; then \
