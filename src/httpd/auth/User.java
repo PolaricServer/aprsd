@@ -41,7 +41,7 @@ public abstract class User {
     
     /* 
      * Group membership and authorisations
-     * These flags are now stored in this class. 
+     * These attrs are now stored in this class. 
      */
     private Group group = Group.DEFAULT;
     private Group altgroup = Group.DEFAULT;
@@ -64,6 +64,10 @@ public abstract class User {
     public final void setSuspended(boolean s)   { suspended = s; }
     public String getAllowedTrackers()          { return trackerAllowed; }
     public void setAllowedTrackers(String expr) { trackerAllowed = expr; }
+    
+    public boolean roleAllowed(Group role) {
+        return (admin || role==group || role == altgroup || role == Group.DEFAULT);
+    }
     
     protected User(String id)
         { userid=id; }

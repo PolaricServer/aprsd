@@ -240,37 +240,6 @@ public class UserApi extends ServerBase {
         
         
         
-        /************************************************
-         * Change role (group) for current user session
-         ************************************************/
-        put("/mygroup", (req, resp) -> {
-            AuthInfo auth = getAuthInfo(req);
-            String uid = auth.userid; 
-            Optional<CommonProfile> profile = AuthInfo.getSessionProfile(req, resp);
-            
-            /* FIXME: Do we need this? */
-            User u = _users.get(uid);
-            if (u==null)
-                return ERROR(resp, 404, "Unknown user: "+uid);
-                
-            var grp = (GroupUpdate) 
-                ServerBase.fromJson(req.body(), GroupUpdate.class);
-            Group g = _groups.get(grp.group);
-            if (g==null)
-                return ERROR(resp, 404, "Unknown group: "+grp.group);
-            if (!groupAllowed(g, u, true))
-                return ERROR(resp, 403, "Group is not allowed: "+grp.group);
-                
-            if (profile.isPresent())
-                profile.get().addAttribute("role", g);
-            _psub.put("auth:"+uid, null);
-                 
-            return "Ok";
-        });
-        
-        
-        
-        
         /******************************************
          * Get a list of users. 
          ******************************************/

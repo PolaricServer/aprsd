@@ -190,16 +190,17 @@ public abstract class WsNotifier extends ServerBase
       String[] params = null; 
       if (qstring != null) {
          params = qstring.split(";");
-         if (params.length != 3) {
+         if (params.length < 3 || params.length > 4) {
             _api.log().info("WsNotifier", "Authentication failed, wrong format of query string");
             return null;
          }
       }
       try { 
          HmacAuthenticator auth = AuthService.conf().getHmacAuth();
+         String rname = (params.length == 4 ? params[3] : null);
          User ui = auth.checkAuth(params[0], params[1], params[2], "");
-         Group grp = null;
-         return new AuthInfo(_api, ui, grp); // FIXME: We need the group 
+         Group grp = auth.getRole(ui, rname);
+         return new AuthInfo(_api, ui, grp); 
       }
       catch (Exception e) {}
       return null;

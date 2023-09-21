@@ -218,7 +218,6 @@ public class WebServer implements ServerAPI.Web
         corsEnable("/loginusers");
         corsEnable("/usernames");
         corsEnable("/groups");
-        corsEnable("/mygroup");
         corsEnable("/users");
         corsEnable("/users/*"); 
         corsEnable("/mypasswd");
@@ -250,7 +249,6 @@ public class WebServer implements ServerAPI.Web
         protectUrl("/resetinfo",    "sar");
         protectUrl("/sarmode",      "sar");
         protectUrl("/sarurl");
-        protectUrl("/mygroup");
         protectUrl("/groups");
         protectUrl("/myfilters");
         protectUrl("/users",        "admin");

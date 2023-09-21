@@ -109,13 +109,18 @@ public class HmacAuthenticator implements Authenticator {
         /* We use a token credentials type - it is just a string that must be parsed further */
         TokenCredentials tcred = (TokenCredentials) cred;
         String[] token = tcred.getToken().split(";");
-        if (token.length != 3)
+        if (token.length < 3 || token.length > 4)
             throwsException("Invalid Authorization header");
         String userid = token[0].trim();
         String nonce = token[1].trim();
         String rmac = token[2].trim();
         if (rmac==null && nonce==null)
             throwsException("Lack of authentication header info");
+            
+        /* The role-name is optional */
+        String role = null;
+        if (token.length == 4)
+            role = token[3].trim();
             
         /* Check hmac auth */
         Optional<String> bodyHash = context.getRequestAttribute("bodyHash");
@@ -132,9 +137,23 @@ public class HmacAuthenticator implements Authenticator {
          * The kay was found in the keyfile. 
          */
         profile.addAttribute("userInfo", ui);
+        
+        profile.addAttribute("role", getRole(ui, role));
         tcred.setUserProfile(profile);
     }
 
+    
+    public Group getRole(User u, String rname) {
+        if (rname==null)
+            return null;
+        Group g = _users.getGroupDb().get(rname);
+        if (g==null || !u.roleAllowed(g)) {
+            _api.log().debug("HmacAuthenticator", "Group/role not known or not allowed: "+rname);
+            return null;
+        }
+        return g;
+    }
+    
         
         
     /* Check authentication fields: nonce, hmac and data) */
