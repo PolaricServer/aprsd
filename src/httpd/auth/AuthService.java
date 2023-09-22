@@ -154,16 +154,22 @@ public class AuthService {
       Optional<CommonProfile> profile = AuthInfo.getSessionProfile(req, res); 
          
       String userid = profile.get().getId();
-      String key = SecUtils.b64encode(SecUtils.getRandom(48)); // Gives 64 bytes when encoded 
+      String key =  _authConf.getHmacAuth().getUserKey(userid);
+      
+      /* If key not found, generate a new one */
+      if (key == null)
+         key = SecUtils.b64encode(SecUtils.getRandom(48)); // Gives 64 bytes when encoded 
+      
       _authConf.getHmacAuth().setUserKey(userid, key);
-             
-      _log.log("Successful DIRECT login from: "+req.ip()+", userid="+ userid);
+      _log.log("Successful login from: "+req.ip()+", userid="+ userid);
       return key;
     }
     
 
     
-    
+   /* 
+    * Generate a SHA256 digest of the request body 
+    */
    public static void genBodyDigest(Request req, Response res) {
       String body = req.body();
       String digest = (body==null || body.length() == 0 ? "" : SecUtils.xDigestB64(body, 44));

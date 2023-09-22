@@ -57,6 +57,10 @@ public class HmacAuthenticator implements Authenticator {
     }
        
        
+    public final String getUserKey(String userid) {
+        return _keymap.get(userid);
+    }
+    
        
     public final void setUserKey(String userid, String key) {
         _keymap.remove(userid);
