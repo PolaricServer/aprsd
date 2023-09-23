@@ -2,7 +2,7 @@ Source: polaric-aprsd
 Section: hamradio
 Priority: optional
 Maintainer: Øyvind Hanssen <ohanssen@acm.org>
-Build-Depends: debhelper (>= 12), libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, openjdk-17-jdk-headless|openjdk-18-jdk-headless|openjdk-19-jdk-headless|openjdk-20-jdk-headless, scala (>> 2.11.12), byacc-j, jflex, librxtx-java 
+Build-Depends: debhelper (>= 12), libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, openjdk-17-jdk-headless|openjdk-18-jdk-headless|openjdk-19-jdk-headless|openjdk-20-jdk-headless, byacc-j, jflex, librxtx-java 
 Standards-Version: 3.9.8
 Homepage: http://aprs.no/polaricserver
 
