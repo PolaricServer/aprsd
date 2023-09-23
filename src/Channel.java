@@ -38,8 +38,9 @@ public abstract class Channel extends Source implements ManagedObject
      @JsonTypeInfo (
          use = JsonTypeInfo.Id.NAME, 
          include = As.PROPERTY, 
-         property = "type")        
+         property = "type", visible=true)        
      public abstract static class JsConfig {
+         public String type; 
      }
      
      public abstract JsConfig getJsConfig();

@@ -435,13 +435,7 @@ public class SysAdminApi extends ServerBase {
             if (conf==null)
                 return ERROR(resp, 400, "Couldn't parse input");
                 
-            String tname="";
-            if (conf.specific instanceof InetChannel.JsConfig) tname = "APRSIS"; 
-            else if (conf.specific instanceof KissTncChannel.JsConfig) tname = "KISS";
-            else if (conf.specific instanceof TcpKissChannel.JsConfig) tname = "TCPKISS";
-            else if (conf.specific instanceof Tnc2Channel.JsConfig) tname = "TNC2";
-            // FIXME: Can we get type name from serialization of conf? 
-            
+            String tname=conf.specific.type;
             var chmgr = _api.getChanManager();
             var ch = chmgr.newInstance(_api, tname, conf.name);
             if (ch==null)

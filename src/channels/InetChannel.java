@@ -66,13 +66,14 @@ public class InetChannel extends TcpChannel
         cnf.heardpackets = nHeardPackets(); 
         cnf.duplicates = nDuplicates(); 
         cnf.sentpackets = nSentPackets();
-        
+        cnf.type  = "APRSIS";
         cnf.host  = _api.getProperty("channel."+getIdent()+".host", "localhost");
         cnf.port  = _api.getIntProperty("channel."+getIdent()+".port", 21);
         cnf.pass  = _api.getIntProperty("channel."+getIdent()+".pass", 0); 
         cnf.filter= _api.getProperty("channel."+getIdent()+".filter", "");
         return cnf;
     }
+    
     
     public void setJsConfig(Channel.JsConfig ccnf) {
         var cnf = (JsConfig) ccnf;

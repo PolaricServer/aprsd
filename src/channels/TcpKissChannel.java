@@ -65,6 +65,7 @@ public class TcpKissChannel extends TcpChannel
         cnf.duplicates = nDuplicates(); 
         cnf.sentpackets = nSentPackets();
         
+        cnf.type = "TCPKISS";
         cnf.kissport = _api.getIntProperty("channel."+getIdent()+".kissport", 0);
         cnf.host=_api.getProperty("channel."+getIdent()+".host", "localhost");
         cnf.port=_api.getIntProperty("channel."+getIdent()+".port", 21);

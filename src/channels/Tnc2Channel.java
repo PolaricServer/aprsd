@@ -70,6 +70,7 @@ public class Tnc2Channel extends TncChannel
         cnf.duplicates = nDuplicates(); 
         cnf.sentpackets = nSentPackets();
         
+        cnf.type = "TNC2";
         cnf.baud = _api.getIntProperty("channel."+getIdent()+".baud", 9600);
         cnf.port = _api.getProperty("channel."+getIdent()+".port", "/dev/ttyS0");
         return cnf;
