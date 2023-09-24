@@ -93,6 +93,40 @@ public class ItemApi extends ServerBase {
     
     
     
+    private Object _itemInfo(Request req, Response resp) {
+        try {
+            var ident = req.splat()[0];
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            if (!authForItem(req, st))
+                return ERROR(resp, 401, "Uauthorized for access to item");
+            return st.getJsInfo();
+        }
+        catch(Exception e) {
+            e.printStackTrace(System.out);
+            return ERROR(resp, 500, "Errror: "+e.getMessage());
+        }
+    }
+    
+    private Object _itemPos(Request req, Response resp) {
+        try {
+            var ident = req.splat()[0];
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            if (!authForItem(req, st))
+                return ERROR(resp, 401, "Uauthorized for access to item");
+            LatLng pos = st.getPosition().toLatLng();
+            return new double[] {pos.getLng(), pos.getLat()};
+        }
+        catch(Exception e) {
+            e.printStackTrace(System.out);
+            return ERROR(resp, 500, "Errror: "+e.getMessage());
+        }
+    }
+    
+    
     /** 
      * Set up the webservices. 
      */
@@ -133,26 +167,32 @@ public class ItemApi extends ServerBase {
         
         
         
-        // FIXME: Should be 'items' instead of 'item'? 
+        /*******************************************
+         * Get Info about a given item
+         * xinfo is for logged-in users
+         *******************************************/
+        get("/item/*/info", "application/json", (req, resp) -> {
+            return _itemInfo(req, resp);
+        }, ServerBase::toJson );
+        
+        get("/item/*/xinfo", "application/json", (req, resp) -> {
+            return _itemInfo(req, resp);
+        }, ServerBase::toJson );
+        
+        
         
         /*******************************************
          * Get Info about a given item
+         * xinfo is for logged-in users
          *******************************************/
-        get("/item/*/info", "application/json", (req, resp) -> {
-            try {
-                var ident = req.splat()[0];
-                var st = _api.getDB().getItem(ident, null);
-                if (st==null)
-                    return ERROR(resp, 404, "Unknown tracker item: "+ident); 
-                if (!authForItem(req, st))
-                    return ERROR(resp, 401, "Uauthorized for access to item");
-                return st.getJsInfo();
-            }
-            catch(Exception e) {
-                e.printStackTrace(System.out);
-                return ERROR(resp, 500, "Errror: "+e.getMessage());
-            }
+        get("/item/*/pos", "application/json", (req, resp) -> {
+            return _itemPos(req, resp);
         }, ServerBase::toJson );
+        
+        get("/item/*/xpos", "application/json", (req, resp) -> {
+            return _itemPos(req, resp);
+        }, ServerBase::toJson );
+        
         
         
         

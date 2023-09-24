@@ -254,6 +254,8 @@ public class WebServer implements ServerAPI.Web
         protectUrl("/users",        "admin");
         protectUrl("/users/*",      "admin");
         protectUrl("/mypasswd");
+        protectUrl("/item/*/xinfo");  
+        protectUrl("/item/*/xpos");
         protectUrl("/item/*/alias");
         protectUrl("/item/*/reset");
         protectUrl("/item/*/tags");
@@ -261,7 +263,7 @@ public class WebServer implements ServerAPI.Web
         protectUrl("/aprs/*",         "sar");
         protectUrl("/system/sarmode", "sar");
         protectUrl("/system/ownpos",  "admin");
-        protectUrl("/sar/ipp/");     
+        protectUrl("/sar/ipp");     
         protectUrl("/sar/ipp/*");
         protectUrl("/mailbox");
         protectUrl("/mailbox/*");

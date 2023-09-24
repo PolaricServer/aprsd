@@ -64,6 +64,7 @@ public class KissTncChannel extends TncChannel
         cnf.duplicates = nDuplicates(); 
         cnf.sentpackets = nSentPackets();
         
+        cnf.type = "KISS";
         cnf.kissport = _api.getIntProperty("channel."+getIdent()+".kissport", 0);
         cnf.baud = _api.getIntProperty("channel."+getIdent()+".baud", 9600);
         cnf.port = _api.getProperty("channel."+getIdent()+".port", "/dev/ttyS0");
