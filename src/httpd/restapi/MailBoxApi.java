@@ -60,7 +60,7 @@ public class MailBoxApi extends ServerBase {
          * Get content of the mailbox - list of messages 
          */
         get("/mailbox", "application/json", (req, resp) -> {
-            var box = getAuthInfo(req).mailbox;
+            var box = getAuthInfo(req).getMailbox();
             if (box==null)
                 return ERROR(resp, 401, "Unauthorized - no mailbox available");
             return box.getMessages();

@@ -85,10 +85,16 @@ public class AuthInfo {
     public static void init(ServerAPI api) {
 
         WebServer ws = (WebServer) api.getWebserver(); 
+        
+        /* Called when websocket connection for map-updates is opened. 
+         * Kind of represents a client session 
+         */
         ws.onOpenSes( (c)-> {
                 AuthInfo a = c.getAuthInfo();
-                if (a==null)
+                if (a==null) 
                     return;
+                
+                a.getMailbox();
                 
                 /* If user has recently closed session and is scheduled for removal, 
                  * cancel this removal. 
@@ -100,32 +106,38 @@ public class AuthInfo {
                     closingSessions.remove(a.userid);
                 }
                 
-                else if (a.mailbox!=null) {
-                    a.mailbox.increment();
-                    
-                    /* As long as one or more sessions are open, we want 
-                     * address mappings for messages. 
+                else { 
+                    /* 
+                     * Inform other PS instances of user login. 
                      */
                     var rctl = api.getRemoteCtl(); 
                     if (rctl != null)
                         rctl.sendRequestAll("USER", a.userid+"@"+api.getRemoteCtl().getMycall(), null);
+                    
+                    /* As long as one or more sessions are open, we want 
+                     * address mappings for messages. 
+                     */
+                    a.mailbox.increment();
                     a.mailbox.addAddress(a.userid);
                     if (!"".equals(a.callsign))
                         a.mailbox.addAddress(a.callsign+"@aprs");
                 }
-            }); 
+            });
             
+        /* Called when websocket connection for map-updates is closed. 
+         * Kind of represents a client session 
+         */
         ws.onCloseSes( (c)-> {
-
                 AuthInfo a = c.getAuthInfo();
                 if (a==null)
                     return;
+                    
+                a.getMailbox();
                 if (a.mailbox!=null) {
                     if (a.mailbox.decrement() == 0) {
-                        
                         /* 
-                         * Schedule for removing the user and expiring the mailbox - in 10 seconds 
-                         * This is cancelled if session is re-opened within 10 seconds
+                         * Schedule for removing the user and expiring the mailbox - in 20 seconds 
+                         * This is cancelled if session is re-opened within 20 seconds
                          */
                         var closing = gc.schedule( () -> {
                             /* If last session is closed, remove address mappings for messages. */
@@ -136,17 +148,18 @@ public class AuthInfo {
                             /* Put mailbox on expire. Expire after 1 week */
                             a.mailbox.expire = (new Date()).getTime() + 1000 * 60 * MAILBOX_EXPIRE; 
                             gcbox.add(a.mailbox);
-                            mboxlist.put(a.mailbox.getUid(), a.mailbox);
+                            // mboxlist.put(a.mailbox.getUid(), a.mailbox);
                             
                             /* Remove the future */
                             closingSessions.remove(a.userid); 
                             
-                        }, 10, TimeUnit.SECONDS);
+                        }, 20, TimeUnit.SECONDS);
                         closingSessions.put(a.userid, closing); 
                     }
                 }
             }); 
             
+
         /* Start a periodic task that expires mailboxes. */
         gc.scheduleAtFixedRate( ()-> {
             while (true) 
@@ -159,6 +172,7 @@ public class AuthInfo {
                 else
                     break;
         }, 60, 60, TimeUnit.SECONDS);
+        
         
         /* At shutdown. Send a message to other nodes */
         api.addShutdownHandler( ()-> {
@@ -196,6 +210,7 @@ public class AuthInfo {
         return profile;
     }
     
+    
     /*
      * Authorizations. We use a kind a role-based authorization here. 
      * where some authorizations depends on role/group membership. 
@@ -211,6 +226,24 @@ public class AuthInfo {
         admin = u.isAdmin();
         sar = grp.isSar(); 
     }
+    
+    
+    public SesMailBox getMailbox() {
+        if (mailbox != null)
+            return mailbox; 
+        MailBox mb = MailBox.get(userid); 
+        if (mb==null)
+            mb = mboxlist.get(userid);
+            
+        if (mb != null && mb instanceof SesMailBox) 
+            mailbox = (SesMailBox) mb;
+        else {
+            mailbox = new SesMailBox(_api, userid); 
+            mboxlist.put(userid, mailbox);
+        }    
+        return mailbox;
+    }
+    
     
        
     /**
@@ -249,28 +282,10 @@ public class AuthInfo {
         
         /* 
          * Copy user-information from the user-profile?
-         * The user profile is created by the authenticator and kept as long as the session is active.
+         * The user profile is created by the authenticator.
          */
         if (profile.isPresent()) {
             userid = profile.get().getId();
-            api.log().debug("AuthInfo", "Found user profile: "+userid);
-            
-            /* check if there is a mailbox on the session. If not, find one that 
-             * matches the user id or create one. 
-             */
-            mailbox = (SesMailBox) profile.get().getAttribute("mailbox");
-            if (mailbox==null) {
-                MailBox mb = MailBox.get(userid); 
-                if (mb==null)
-                    mb = mboxlist.get(userid);
-                if (mb != null && mb instanceof SesMailBox) 
-                    mailbox = (SesMailBox) mb;
-                else 
-                    mailbox = new SesMailBox(api, userid); 
-                    
-                profile.get().addAttribute("mailbox", mailbox); 
-            }
-
             User u = (User) profile.get().getAttribute("userInfo");
             Group grp = (Group) profile.get().getAttribute("role");
             authorize(u, grp);
