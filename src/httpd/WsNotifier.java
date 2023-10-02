@@ -55,6 +55,8 @@ public abstract class WsNotifier extends ServerBase
       protected AuthInfo _auth;
       protected long _nIn, _nOut; 
       protected Date _ctime; 
+      private   boolean _mobile;
+      
       
       protected class _CB implements WriteCallback {
         public void writeFailed(Throwable x) {
@@ -104,6 +106,7 @@ public abstract class WsNotifier extends ServerBase
       public String getUsername()
          { return (_auth == null ? null : _auth.userid); }
            
+      public boolean isMobile() {return _mobile;}
       public Date created() {return _ctime; }
       public long nIn() {return _nIn; }
       public long nOut() {return _nOut; }
@@ -185,8 +188,7 @@ public abstract class WsNotifier extends ServerBase
     
     
     
-   public AuthInfo authenticate(UpgradeRequest req) {
-      String qstring = req.getQueryString();
+   public AuthInfo authenticate(String qstring) {
       String[] params = null; 
       if (qstring != null) {
          params = qstring.split(";");
@@ -227,10 +229,17 @@ public abstract class WsNotifier extends ServerBase
           if (_origin == null || _origin.matches(_trustedOrigin))
             // FIXME: Is this secure enough for web-browser clients?
           { 
-          
               /* Create client, autenticate and set authorization info */
               Client client = newClient(conn);
-              client.setAuthInfo(authenticate(req));
+              String[] qs = null;
+              if (qstring != null) {
+                  qs = qstring.split("&");
+                  if ("_MOBILE_".equals(qs[0]))
+                     client._mobile=true;
+              }       
+              client.setAuthInfo(authenticate(
+                 (qstring == null ? null :  (qs.length == 1 ? qstring : qs[1]))
+              ));
                  
               if (subscribe(uid, client)) {
                  _api.log().debug("WsNotifier", "Subscription success. User="+uid);

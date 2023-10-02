@@ -214,7 +214,6 @@ public class WebServer implements ServerAPI.Web
         /* Start REST API: Users */
         UserApi uu = new UserApi(_api, _auth.conf().getUserDb(), _auth.conf().getGroupDb());
         uu.start();
-        corsEnable("/wsclients");
         corsEnable("/loginusers");
         corsEnable("/usernames");
         corsEnable("/groups");
@@ -267,7 +266,6 @@ public class WebServer implements ServerAPI.Web
         protectUrl("/sar/ipp/*");
         protectUrl("/mailbox");
         protectUrl("/mailbox/*");
-        protectUrl("/wsclients",      "admin");
         protectUrl("/loginusers");
         protectUrl("/usernames");
         protectUrl("/scripts",        "admin");

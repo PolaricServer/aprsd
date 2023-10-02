@@ -14,5 +14,7 @@ public interface WebClient {
     public String getUsername();
     
     public Date created();
+    
+    public boolean isMobile();
 }
 

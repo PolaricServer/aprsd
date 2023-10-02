@@ -140,7 +140,7 @@ public class SysAdminApi extends ServerBase {
     
     
     public static record ClientInfo
-       (Date created, String cid, long in, long out, String userid)
+       (Date created, String cid, long in, long out, String userid, boolean mobile)
     {}
     
     public static record ServerConfig 
@@ -315,7 +315,7 @@ public class SysAdminApi extends ServerBase {
             List<ClientInfo> res = new ArrayList<ClientInfo>();
             
             for ( WsNotifier.Client x : ws.getJsonMapUpdater().clients())
-                res.add(new ClientInfo(x.created(), x.getUid(), x.nIn(), x.nOut(), x.getUsername()));
+                res.add(new ClientInfo(x.created(), x.getUid(), x.nIn(), x.nOut(), x.getUsername(), x.isMobile()));
             
             return res;
         }, ServerBase::toJson );

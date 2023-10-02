@@ -84,16 +84,7 @@ public class UserApi extends ServerBase {
         public String group; 
     }
     
-    
-    public static class Client {
-        public String uid; 
-        public String username;
-        public Date created; 
-        public Client(String id, String uname, Date cr) {
-            uid=id; username=uname; created=cr;
-        }
-    }
-    
+
     
     private UserDb _users; 
     private GroupDb _groups; 
@@ -181,26 +172,13 @@ public class UserApi extends ServerBase {
                 return ERROR(resp, 404, "Unknown user: "+uid);
             var pwd = (PasswdUpdate) 
                 ServerBase.fromJson(req.body(), PasswdUpdate.class);
-
+                
             if (pwd.passwd != null) 
                     u.setPasswd(pwd.passwd);
-                    
             _users.getSyncer().update(uid, new UserUpdate
                 (null, null, null, pwd.passwd, u.isAdmin(), u.isSar(), u.isSuspended())); 
             return "Ok";
         });
-        
-        
-        
-        /************************************************
-         * Get (web socket) clients.
-         ************************************************/
-        get("/wsclients", "application/json", (req, resp) -> {
-            List<Client> cli = new ArrayList<Client>();
-            for (WebClient x: ((WebServer)_api.getWebserver()).getClients())
-                cli.add(new Client(x.getUid(), x.getUsername(), x.created()));
-            return cli;
-        }, ServerBase::toJson );
         
         
         

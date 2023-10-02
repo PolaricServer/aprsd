@@ -162,9 +162,6 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
        try {
          client.sendText( ((Client)client).getOverlayData(true) );  
          
-//         UpgradeRequest req = client.getSession().getUpgradeRequest();  
-//         String origin = req.getHeader("X-Forwarded-For");
-         
          /* Update the time of last access for the logged in user */
          WebServer ws = (WebServer) _api.getWebserver(); 
          if (client.getUsername() != null)
