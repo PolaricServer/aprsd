@@ -206,7 +206,8 @@ public class LocalUsers implements UserDb
     
     
     
-    public synchronized boolean updatePasswd(String username, String passwd) {            
+    public synchronized boolean updatePasswd(String username, String passwd) {  
+    
         var cmd = "/usr/bin/sudo /usr/bin/htpasswd -b /etc/polaric-aprsd/passwd "+username+" "+passwd;
         try {
             var p = Runtime.getRuntime().exec(cmd);
