@@ -282,7 +282,10 @@ public class WebServer implements ServerAPI.Web
         MailBox.init(_api);
         AuthInfo.init(_api);
         init();
-        _zconf.registerMdns("_http._tcp.local.", "Polaric aprsd API", _port, "");
+        
+        var secure = _api.getBoolProperty("httpserver.secure", false);
+        var mycall = _api.getProperty("default.mycall", "NOCALL");
+        _zconf.registerMdns("_polaric_aprsd._tcp.local.", mycall, _port, "secure="+(secure?"yes":"no"));
     }
     
     
