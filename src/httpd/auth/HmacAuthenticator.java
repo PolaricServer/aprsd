@@ -39,7 +39,9 @@ import java.security.MessageDigest;
  */
 public class HmacAuthenticator implements Authenticator {
 
+        /* Keys given to users. username->key mapping */
     private final Map<String, String> _keymap = new HashMap<String, String>();
+        /* Devices (peer PS instances) with a key */
     private final Set<String> _devices = new HashSet<String> ();
     private ServerAPI _api; 
     private final String _file;   
@@ -141,7 +143,6 @@ public class HmacAuthenticator implements Authenticator {
          * The kay was found in the keyfile. 
          */
         profile.addAttribute("userInfo", ui);
-        
         profile.addAttribute("role", getRole(ui, role));
         tcred.setUserProfile(profile);
     }
@@ -175,10 +176,11 @@ public class HmacAuthenticator implements Authenticator {
         String key = _keymap.get(userid);
         if (key==null)
             throwsException("No key for user: "+userid+". Login needed");
-        
+
         /* Compute a mac and check if it is equal to the remote mac */
-        if (SecUtils.hmacB64(nonce + data, key, 44).equals(rmac))
+        if (!SecUtils.hmacB64(nonce + data, key, 44).equals(rmac)) {
             throwsException("HMAC mismatch");
+        }
         _dup.add(nonce);
         return ui;
     }

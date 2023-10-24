@@ -93,7 +93,6 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 RuleSet vfilt = ViewFilter.getFilter(_filter, allowed);      
                 List<TrackerPoint> itemlist =  _api.getDB().search(_uleft, _lright, vfilt);
                 if (itemlist.size() > _max_ovr_size) {
-                    _api.log().info("JsonMapUpdater", "Too many points: "+itemlist.size());
                     mu.overload = true;
                     return;
                 }
