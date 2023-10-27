@@ -304,11 +304,18 @@ public class WebServer implements ServerAPI.Web
         protectUrl(prefix, null);
     }
     
+    
     public void protectUrl(String prefix, String level) {  
         var cli = "HeaderClient"; 
-        String lvl = (level==null ? "" : level);
+        String lvl = (level==null ? "isuser" : level);
         before(prefix, _auth.conf().filter(cli, lvl)); 
         before(prefix, AuthService::getAuthInfo);
+    }
+    
+    
+    public void protectDeviceUrl(String prefix) {  
+        var cli = "HeaderClient"; 
+        before(prefix, _auth.conf().filter(cli, "device")); 
     }
     
     

@@ -12,35 +12,23 @@ import java.util.List;
 
 /**
  */
-public class UserAuthorizer implements Authorizer {
+public class DeviceAuthorizer implements Authorizer {
 
-    private boolean admin = false;
-    private boolean sar = false;
-
-    
-    public UserAuthorizer() { }
-
-    
-    public UserAuthorizer(final int lvl) {
-        admin = (lvl >= 2);
-        sar = (lvl >= 1);
-    }
+    public DeviceAuthorizer() { }
 
     
     @Override
     public boolean isAuthorized(final WebContext context, final SessionStore ss, final List<UserProfile> profile) {
         var auth = AuthService.getAuthInfo(context);  
         if (auth==null)
-            return false;
-        if (admin) return auth.admin; 
-        if (sar) return auth.sar || auth.admin;
-        return true;
+            return true;
+        return false;
     }
 
  
 
     @Override
     public String toString() {
-        return "UserAuthorizer[" + (admin? "admin" : "sar") + "]";
+        return "DeviceAuthorizer";
     }
 }

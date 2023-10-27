@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2022 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2022-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,14 +29,15 @@ public class RestClient {
     private ServerAPI _api;  
     private HttpClient _client; 
     private String _url; 
-    private boolean _hmacAuth = false;
-    private HmacAuth _auth;
+    private HmacAuthenticator _auth;
+    private String _userid;
 
     
-    public RestClient(ServerAPI api, String url, HmacAuth hm) {
+    public RestClient(ServerAPI api, String url, HmacAuthenticator hm, String userid) {
         _api = api;
         _url=url;
         _auth = hm;
+        _userid = userid;
         _client = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .followRedirects(HttpClient.Redirect.NORMAL)
@@ -44,13 +45,14 @@ public class RestClient {
             .build();
     }
     
-    public RestClient(ServerAPI api, String url)
-        { this(api, url, (HmacAuth) null);}
+    public RestClient(ServerAPI api, String url, String userid)
+        { this(api, url, (HmacAuthenticator) null, userid);}
     
     
     public RestClient(ServerAPI api, String url, Authenticator auth) {
         _api=api;
         _url=url;
+        _userid=null;
         _client = HttpClient.newBuilder()
             .version(HttpClient.Version.HTTP_1_1)
             .followRedirects(HttpClient.Redirect.NORMAL)
@@ -65,10 +67,10 @@ public class RestClient {
     
     
     
-    
+    /* Add Authorization header */
     private HttpRequest.Builder addAuth(HttpRequest.Builder bld, String body) {
         if (_auth != null) 
-            _auth.addAuth(bld, body);
+            _auth.addAuth(bld, body, _userid);
         return bld;
     }
     
@@ -99,6 +101,7 @@ public class RestClient {
             return response;
         }
     }
+    
     
     
     public HttpResponse GET(String resource)     

@@ -38,7 +38,7 @@ public class SecUtils
           _rand = SecureRandom.getInstance("SHA1PRNG");
        }
        catch (Exception e) {
-          System.out.println("Login: couldnt create random generator");
+          System.out.println("*** SecUtils: Couldnt create random generator");
        }
     }
 
@@ -73,7 +73,7 @@ public class SecUtils
             return dig.digest();
         }
         catch (Exception e) {
-            System.out.println("*** Cannot generate message digest: "+e);
+            System.out.println("*** SecUtils: Cannot generate message digest: "+e);
             return null;
         }
     }
@@ -100,7 +100,7 @@ public class SecUtils
             return mac.doFinal(data.getBytes("UTF-8"));
         }
         catch (Exception e) {
-            System.out.println("*** Cannot generate HMAC: "+e);
+            System.out.println("*** SecUtils: Cannot generate HMAC: "+e);
             return null;
         }
     }

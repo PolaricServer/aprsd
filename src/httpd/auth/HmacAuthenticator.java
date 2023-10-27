@@ -26,10 +26,10 @@ import org.pac4j.core.credentials.authenticator.Authenticator;
 
 import java.io.*; 
 import java.util.*; 
+import java.net.http.*;
 import no.polaric.aprsd.*;
 import org.apache.commons.codec.digest.*;
 import java.security.MessageDigest;
-
 
 
 
@@ -139,9 +139,11 @@ public class HmacAuthenticator implements Authenticator {
         profile.setId(userid);
    
         /* 
-         * If ui is null here, the userid is not a personal user but a server or a device. 
-         * The kay was found in the keyfile. 
+         * If ui is null here, the userid is not a personal user but a service-id for use with devices or
+         * peer servers. The kay was found in the keyfile. 
          */
+        if (ui==null)
+            profile.addAttribute("service", userid);
         profile.addAttribute("userInfo", ui);
         profile.addAttribute("role", getRole(ui, role));
         tcred.setUserProfile(profile);
@@ -179,17 +181,39 @@ public class HmacAuthenticator implements Authenticator {
 
         /* Compute a mac and check if it is equal to the remote mac */
         if (!SecUtils.hmacB64(nonce + data, key, 44).equals(rmac)) {
-            throwsException("HMAC mismatch");
+            throwsException("HMAC mismatch ("+userid+")");
         }
         _dup.add(nonce);
         return ui;
     }
     
     
+    
+    public final String authString(String body, String userid) {
+        String key = _keymap.get(userid);
+        if (key==null) {
+            _api.log().warn("HmacAuthenticator", "Key not found for user: "+userid);
+            return "";
+        }
+        String nonce = SecUtils.b64encode( SecUtils.getRandom(8) );
+        String data = (body==null || body.length() == 0 ? "" : SecUtils.xDigestB64(body, 44));
+        String hmac = SecUtils.hmacB64(nonce+data, key, 44);
+        return userid + ";" + nonce + ";" + hmac;
+    }
+    
+    
+    
+    /* Add headers to http request */
+    public final HttpRequest.Builder addAuth(HttpRequest.Builder bld, String body, String userid) {
+        /* Generate authorization header */
+        bld.header("Authorization", "Arctic-Hmac "+ authString(body, userid)); 
+        return bld;
+    }
+
 
     
     protected void throwsException(final String message) throws CredentialsException {
-        _api.log().info("HmacAuthenticator", "Auth failed: " + message);
+        _api.log().debug("HmacAuthenticator", "Auth failed: " + message);
          throw new CredentialsException(message);
     }
     

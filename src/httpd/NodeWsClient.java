@@ -35,8 +35,8 @@ public class NodeWsClient implements WebSocket.Listener{
     private HttpClient _ht;
     private String _nodeid;
     private String _subscribe;
+    private String _userid;
     private boolean _connected = false;
-    private HmacAuth _auth; 
     private NodeWsApi.Handler<String> _handler; 
     private boolean _retry = false;
     private long _retr_int = 0;
@@ -47,7 +47,6 @@ public class NodeWsClient implements WebSocket.Listener{
         _api=api;
         _nodeid=nodeid;
         _retry = retry;
-        _auth = new HmacAuth(_api, "httpserver.auth.key");
         try {
             _url=new URI(url);
             _ht = HttpClient.newHttpClient();
@@ -60,6 +59,11 @@ public class NodeWsClient implements WebSocket.Listener{
     
     
     
+    public void setUserid(String id) {
+        _userid = id;
+    }
+    
+    
     
     public void setHandler(NodeWsApi.Handler<String> h) {
         _handler = h;
@@ -69,6 +73,10 @@ public class NodeWsClient implements WebSocket.Listener{
     
     public void open() {
         try {
+            HmacAuthenticator auth = AuthService.conf().getHmacAuth();
+            
+            URI u = new URI(_url.toString() + "?" + auth.authString("", _userid)); 
+            
             _wsClient = _ht.newWebSocketBuilder()
                 .connectTimeout(Duration.ofSeconds(20))
                 .buildAsync(_url, this)
@@ -97,20 +105,20 @@ public class NodeWsClient implements WebSocket.Listener{
     
     public boolean subscribe(String nodeid) {
         _subscribe = nodeid;
-        return putCommand("SUBSCRIBE", nodeid);
+        return putCommand("SUBSCRIBE ", nodeid);
     }
     
     
     
     public void unsubscribe() {
+        putCommand("UNSUBSCRIBE ", _subscribe);
         _subscribe = null;
-        putCommand("UNSUBSCRIBE", "");
     }
     
     
     
     public boolean putText(String msg) {
-        return putCommand("POST", msg);
+        return putCommand("POST ", msg);
     }
     
     
@@ -122,7 +130,7 @@ public class NodeWsClient implements WebSocket.Listener{
             _api.log().warn("NodeWsClient", "Node not connected: "+_url);
             return false;
         }
-        _wsClient.sendText(cmd+" "+_auth.genAuthPrefix(msg)+" "+msg, true);
+        _wsClient.sendText(cmd + msg, true);
         return true;
     }
     
@@ -189,14 +197,11 @@ public class NodeWsClient implements WebSocket.Listener{
     @Override
     public CompletionStage<?> onText​(WebSocket webSocket, CharSequence data, boolean last) {
         if (_handler != null) {
-            String[] parms = data.toString().split(" ", 4);
-            if (parms.length < 4) 
+            String[] parms = data.toString().split(" ", 2);
+            if (parms.length < 2) 
                 _api.log().warn("NodeWsClient", "Format error in message");
             else if (parms[0].equals("POST")) {
-                if (!_auth.checkAuth(parms[1], parms[2], parms[3])) 
-                    _api.log().warn("NodeWsClient", "Authentication failed");
-                else
-                    _handler.recv(_nodeid, parms[3]);
+                _handler.recv(_nodeid, parms[1]);
             }
         }
         webSocket.request(1);

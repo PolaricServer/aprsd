@@ -32,7 +32,6 @@ import java.util.function.*;
 @WebSocket(maxIdleTime=1200000)
 public class NodeWs extends WsNotifier 
 {
-    private HmacAuth _hmauth;
     private NodeWsApi.Handler<String> _handler;
     
     
@@ -47,41 +46,36 @@ public class NodeWs extends WsNotifier
         
        
         @Override synchronized public void onTextFrame(String text) {
-            String[] parms = text.split(" ", 4);
-            if (parms.length < 4) {
+            String[] parms = text.split(" ", 2);
+            if (parms.length < 2) {
                 _api.log().warn("NodeWs", "Format error in message");
-                _conn.close();
-            }
-            else
-            if ( !_hmauth.checkAuth(parms[1], parms[2], parms[3])) {
-                _api.log().warn("NodeWs", "Authentication failed");
                 _conn.close();
             }
             else
             switch (parms[0]) {
                 /* subscribe: 
-                 * arguments: nonce, mac, ident
+                 * arguments: ident
                  */
                 case "SUBSCRIBE":
                 case "SUB":
-                    nodeid = parms[3];
-                    _subscribers.put(parms[3], this);
+                    nodeid = parms[1];
+                    _subscribers.put(parms[1], this);
                     break;
                    
                  /* unsubscribe:
-                 * arguments: nonce, mac, ident
+                 * arguments: ident
                  */
                 case "UNSUBSCRIBE":
                 case "UNSUB":
-                    _subscribers.remove(parms[3]);
+                    _subscribers.remove(parms[1]);
                     break;
                     
                 /* post
-                 * arguments: nonce, mac, JSON-encoded content
+                 * arguments: JSON-encoded content
                  */
                 case "POST": 
                 case "MSG":
-                    if (_handler != null) _handler.recv(nodeid, parms[3]);
+                    if (_handler != null) _handler.recv(nodeid, parms[1]);
                     break;
             
                 default: 
@@ -97,7 +91,6 @@ public class NodeWs extends WsNotifier
         
     public NodeWs(ServerAPI api, NodeWsApi.Handler<String> hdl) { 
         super(api, false); 
-        _hmauth = new HmacAuth(api, "httpserver.auth.key");
         _handler = hdl;
     }  
    
@@ -143,7 +136,7 @@ public class NodeWs extends WsNotifier
             return false;
         }
         try {               
-            client.sendText("POST "+_hmauth.genAuthPrefix(msg) + " " + msg);
+            client.sendText("POST " + msg);
             return true;
                
         } catch (java.nio.channels.ClosedChannelException e) {   
