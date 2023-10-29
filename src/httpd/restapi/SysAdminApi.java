@@ -70,7 +70,7 @@ public class SysAdminApi extends ServerBase {
     
     public static record ChannelInfo 
        ( String ident, String name, 
-         boolean active, boolean rfchan, boolean inetchan, boolean isrf, boolean isaprs,
+         boolean active, boolean rfchan, boolean inetchan, boolean isrf, boolean isaprs, 
          GenChanInfo generic, Channel.JsConfig specific)
     {}
     
@@ -134,6 +134,23 @@ public class SysAdminApi extends ServerBase {
         for (Object key: cnf.keySet())
             if (((String)key).startsWith("channel."+ch.getIdent()))
                 cnf.remove((String) key);
+    }
+    
+    
+    
+    public void updateChanList() {
+        var mgr = _api.getChanManager(); 
+        var i = 0;
+        String chlist = ""; 
+        
+        for (String chn : mgr.getKeys()) {
+            if (i>0)
+                chlist+=",";
+            chlist += chn; 
+            i++;
+        }
+        Properties cnf = _api.getConfig();
+        cnf.setProperty("channels", chlist);
     }
     
     
@@ -441,6 +458,7 @@ public class SysAdminApi extends ServerBase {
             if (ch==null)
                 return ERROR(resp, 400, "Couldn't instantiate channel: "+tname+": "+conf.name);
             setChannelProps(ch, conf);
+            updateChanList();
             return "Ok";
         });  
         
@@ -450,6 +468,7 @@ public class SysAdminApi extends ServerBase {
         * Remove a channel and its config
         ******************************************/
         delete("/system/adm/channels/*", (req, resp) -> {
+            try {
             var chname = req.splat()[0];
             var mgr = _api.getChanManager(); 
             var ch = mgr.get(chname);
@@ -458,6 +477,12 @@ public class SysAdminApi extends ServerBase {
             ch.deActivate();
             removeChannelConfig(ch);
             mgr.removeInstance(chname);
+            updateChanList();
+            
+            } catch (Exception e) {
+                e.printStackTrace(System.out);
+                return ERROR(resp, 500, "ERRRROR");  
+            }
             return "Ok";
         });
         

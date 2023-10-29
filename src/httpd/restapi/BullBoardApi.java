@@ -99,7 +99,7 @@ public class BullBoardApi extends ServerBase {
             AuthInfo user = getAuthInfo(req); 
             String sbid = req.splat()[0];
             if (user.callsign == null)
-                return ERROR(resp,  401, "No callsign registered for user");
+                return ERROR(resp,  403, "No callsign registered for user");
             
             var b = (BullSubmit) 
                 ServerBase.fromJson(req.body(), BullSubmit.class);

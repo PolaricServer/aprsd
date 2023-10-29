@@ -81,8 +81,6 @@ public class AuthService {
       before ("/authStatus", (req,resp) -> { corsHeaders(req, resp); } );
       before ("/authStatus2", (req,resp) -> { corsHeaders(req, resp); } );
       before ("/directLogin", (req,resp) -> { corsHeaders(req, resp); } );
-      before ("/hmacTest", (req,resp) -> { corsHeaders(req, resp); } );     
-      before ("/postTest", (req,resp) -> { corsHeaders(req, resp); } );   
               
       /* Login with username and password */
       before("/directLogin", new SecurityFilter(conf, "DirectFormClient")); 

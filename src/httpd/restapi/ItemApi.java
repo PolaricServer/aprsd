@@ -100,7 +100,7 @@ public class ItemApi extends ServerBase {
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
             if (!authForItem(req, st))
-                return ERROR(resp, 401, "Uauthorized for access to item");
+                return ERROR(resp, 403, "Not authorized for access to item");
             return st.getJsInfo();
         }
         catch(Exception e) {
@@ -116,7 +116,7 @@ public class ItemApi extends ServerBase {
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
             if (!authForItem(req, st))
-                return ERROR(resp, 401, "Uauthorized for access to item");
+                return ERROR(resp, 403, "Not aauthorized for access to item");
             LatLng pos = st.getPosition().toLatLng();
             return new double[] {pos.getLng(), pos.getLat()};
         }
@@ -127,27 +127,40 @@ public class ItemApi extends ServerBase {
     }
     
     
-    /** 
-     * Set up the webservices. 
-     */
-    public void start() {     
-    
-
-        
-        /*******************************************
-         * Search items. Returns list of items. 
-         * Parameters: 
-         *    tags - comma separated list of tags
-         *    srch - free text search
-         *******************************************/
-        get("/items", "application/json", (req, resp) -> {
-            var srch = req.queryParams("srch");
-            var tags = req.queryParams("tags");
-            if (srch == null) 
-                srch  = "__NOCALL__";
-            var tagList = (tags==null || tags.equals("")) ? null : tags.split(",");
+    private Object _itemTrail(Request req, Response resp) {
+        try {
+            var ident = req.splat()[0];
+            var st = _api.getDB().getItem(ident, null);
+            if (st==null)
+                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
+            if (!authForItem(req, st))
+                return ERROR(resp, 403, "Not aauthorized for access to item");
             
-            try {
+            var h = st.getTrail();                     
+            var pp = st.getHItem();
+            var fl = new ArrayList<JsTPoint>(); 
+            for (var x:  h.points()) {
+                var dist = x.getPosition().toLatLng().distance(pp.getPosition().toLatLng());
+                fl.add(new JsTPoint(x.getTS(), x.speed, x.course, (int) Math.round(dist*1000), cleanPath(x.getPath())));
+                pp = x; 
+            }
+            return fl;
+        }
+        catch (Exception e) {
+            e.printStackTrace(System.out);
+            return ERROR(resp, 500, "Errror: "+e.getMessage());
+        }
+    }
+    
+    
+    private List<JsPoint> _searchItems(Request req, Response resp) {
+        var srch = req.queryParams("srch");
+        var tags = req.queryParams("tags");
+        if (srch == null) 
+            srch  = "__NOCALL__";
+        var tagList = (tags==null || tags.equals("")) ? null : tags.split(",");
+            
+        try {
             List<JsPoint> result = 
                 _api.getDB().search(srch, tagList)
                     .stream()
@@ -160,10 +173,32 @@ public class ItemApi extends ServerBase {
                         x.getUpdated(), x.getDescr(), x.getSpeed(), x.getCourse() ) )
                     .collect(Collectors.toList());
             return result;
-            } catch (Exception e)
+        } catch (Exception e)
               {e.printStackTrace(System.out); return null;}
+    }
+    
+    
+    
+    
+    /** 
+     * Set up the webservices. 
+     */
+    public void start() {     
+    
+
+        /*******************************************
+         * Search items. Returns list of items. 
+         * Parameters: 
+         *    tags - comma separated list of tags
+         *    srch - free text search
+         *******************************************/         
+        get("/items", "application/json", (req, resp) -> {
+            return _searchItems(req, resp);
         }, ServerBase::toJson );
         
+        get("/xitems", "application/json", (req, resp) -> {
+            return _searchItems(req, resp);
+        }, ServerBase::toJson );
         
         
         
@@ -181,10 +216,10 @@ public class ItemApi extends ServerBase {
         
         
         
-        /*******************************************
-         * Get Info about a given item
-         * xinfo is for logged-in users
-         *******************************************/
+        /*********************************************
+         * Get Info about the position of a given item
+         * xpos is for logged-in users
+         *********************************************/
         get("/item/*/pos", "application/json", (req, resp) -> {
             return _itemPos(req, resp);
         }, ServerBase::toJson );
@@ -195,6 +230,18 @@ public class ItemApi extends ServerBase {
         
         
         
+        /*******************************************
+         * Trail of items
+         *******************************************/
+        get("/item/*/trail", "application/json", (req, resp) -> {
+            return _itemPos(req, resp);
+        }, ServerBase::toJson );
+        
+        get("/item/*/xtrail", "application/json", (req, resp) -> {
+            return _itemPos(req, resp);
+        }, ServerBase::toJson );
+        
+                
         
         /*******************************************
          * Get alias/icon for a given item
@@ -205,7 +252,7 @@ public class ItemApi extends ServerBase {
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
             if (!authForItem(req, st))
-                return ERROR(resp, 401, "Uauthorized for access to item");
+                return ERROR(resp, 403, "Not authorized for access to item");
             return new ItemInfo.Alias(st.getAlias(), (st.iconIsNull() ? null : st.getIcon())); 
         }, ServerBase::toJson );
         
@@ -221,7 +268,7 @@ public class ItemApi extends ServerBase {
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
             if (!sarAuthForItem(req, st))
-                return ERROR(resp, 401, "Uauthorized for access to item");
+                return ERROR(resp, 403, "Not authorized for access to item");
                 
             if (st.hasTag("MANAGED") || st.hasTag("RMAN"))
                 return ERROR(resp, 401, "Alias can only be set by owner");
@@ -239,33 +286,7 @@ public class ItemApi extends ServerBase {
             return "Ok";
         });
         
-        
-        
-        /*******************************************
-         * Trail items
-         *******************************************/
-        get("/item/*/trail", "application/json", (req, resp) -> {
-            var ident = req.splat()[0];
-            var st = _api.getDB().getItem(ident, null);
-            if (st==null)
-                return ERROR(resp, 404, "Unknown tracker item: "+ident); 
-            try {
-            var h = st.getTrail();                     
-            var pp = st.getHItem();
-            var fl = new ArrayList<JsTPoint>(); 
-            for (var x:  h.points()) {
-                var dist = x.getPosition().toLatLng().distance(pp.getPosition().toLatLng());
-                fl.add(new JsTPoint(x.getTS(), x.speed, x.course, (int) Math.round(dist*1000), cleanPath(x.getPath())));
-                pp = x; 
-            }
-            return fl;
-            }
-            catch (Exception e) {
-                e.printStackTrace(System.out);
-            }
-            return null;
-        }, ServerBase::toJson );
-        
+
         
         /*******************************************
          * Change color of trail
@@ -276,7 +297,7 @@ public class ItemApi extends ServerBase {
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident);  
             if (!sarAuthForItem(req, st))
-                return ERROR(resp, 401, "Uauthorized for access to item");    
+                return ERROR(resp, 403, "Not authorized for access to item");    
             st.nextTrailColor();
             return "Ok";
         });
@@ -291,7 +312,7 @@ public class ItemApi extends ServerBase {
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
             if (!sarAuthForItem(req, st))
-                return ERROR(resp, 401, "Uauthorized for access to item");   
+                return ERROR(resp, 403, "Not authorized for access to item");   
             st.reset();
             return "Ok";
         });
@@ -306,7 +327,9 @@ public class ItemApi extends ServerBase {
             var st = _api.getDB().getItem(ident, null);
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
-            
+            if (!authForItem(req, st))
+                return ERROR(resp, 403, "Not authorized for access to item");
+                
             var tags = st.getTags();
             return tags;
         }, ServerBase::toJson );
@@ -322,7 +345,7 @@ public class ItemApi extends ServerBase {
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
             if (!sarAuthForItem(req, st))
-                return ERROR(resp, 401, "Uauthorized for access to item");
+                return ERROR(resp, 403, "Not authorized for access to item");
                 
             String[] a = (String[]) ServerBase.fromJson(req.body(), String[].class);
             for (String tag: a) {
@@ -346,7 +369,7 @@ public class ItemApi extends ServerBase {
             if (st==null)
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
             if (!sarAuthForItem(req, st))
-                return ERROR(resp, 401, "Uauthorized for access to item");
+                return ERROR(resp, 403, "Not authorized for access to item");
                 
             if (tag.charAt(0) != '+' && tag.charAt(0) != '-' && st.hasTag(tag)) {
                 st.setTag("-" + tag); 
