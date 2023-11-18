@@ -280,7 +280,6 @@ public class UserApi extends ServerBase {
             var ident = req.splat()[0];        
             User u = _users.get(ident);
             
-            System.out.println("BODY LEN: "+req.contentLength());
             if (u==null)
                 return ERROR(resp, 404, "Unknown user: "+ident);
             var uu = (UserUpdate) 

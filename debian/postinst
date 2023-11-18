@@ -13,6 +13,13 @@ case "$1" in
                    polaric
                usermod -G dialout polaric
            fi
+           chown root:polaric /etc/polaric-aprsd/passwd
+           chown root:polaric /etc/polaric-aprsd/keys
+           chown root:polaric /etc/polaric-aprsd/keys/*
+           chmod 640 /etc/polaric-aprsd/passwd
+           chmod 750 /etc/polaric-aprsd/keys
+           chmod 640 /etc/polaric-aprsd/keys/*
+        
            chown polaric:adm /var/log/polaric
            chown polaric:adm /var/lib/polaric
            chmod 755 /var/log/polaric
@@ -29,10 +36,13 @@ case "$1" in
            chown polaric:polaric /var/lib/polaric/users.dat
            chmod 644 /var/lib/polaric/users.dat
         fi
+        if [[ ! -e "/etc/polaric-aprsd/keys/keystore.jks" ]] ; then 
+           polaric-importcert-snakeoil yes
+        fi
         
         echo
         echo "******* Polaric-aprsd *******"
-        echo "To configure server, point your browser to http://localhost:8081/config_menu"
+        echo "Server can be configured via the polaric-webapp2 package"
         echo "If this is the first time installataion, please set your CALLSIGN and restart server!" 
         echo "Use the command 'polaric-restart' to restart server" 
         echo "Use command 'polaric-password' to change password or add new users"

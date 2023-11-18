@@ -45,8 +45,9 @@ public class RestClient {
             .build();
     }
     
-    public RestClient(ServerAPI api, String url, String userid)
-        { this(api, url, (HmacAuthenticator) null, userid);}
+    public RestClient(ServerAPI api, String url, String userid) { 
+        this(api, url, AuthService.conf().getHmacAuth(), userid);
+    }
     
     
     public RestClient(ServerAPI api, String url, Authenticator auth) {

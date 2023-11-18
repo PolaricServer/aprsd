@@ -28,6 +28,7 @@ INSTALL_CONFIG = $(DESTDIR)/etc/polaric-aprsd
 INSTALL_PLUGDIR= $(INSTALL_CONFIG)/config.d
 INSTALL_SCPLUG = $(INSTALL_CONFIG)/script-conf.d
  INSTALL_SCDIR = $(INSTALL_CONFIG)/scripts
+  INSTALL_KEYS = $(INSTALL_CONFIG)/keys
 
 
 ##################################################
@@ -37,7 +38,6 @@ INSTALL_SCPLUG = $(INSTALL_CONFIG)/script-conf.d
     LIBDIR = _lib
  JAVAFLAGS =
  PACKAGES  = core util channels httpd aprsd
- LANGUAGES = no
 
 
 all: aprs
@@ -47,6 +47,7 @@ install: polaric-aprsd.jar
 	install -d $(INSTALL_PLUGDIR)
 	install -d $(INSTALL_SCPLUG)
 	install -d $(INSTALL_SCDIR)
+	install -m 750 -d $(INSTALL_KEYS)
 	install -d $(INSTALL_BIN)
 	install -d $(INSTALL_JAR)
 	install -d $(INSTALL_WEB)/images
@@ -54,7 +55,8 @@ install: polaric-aprsd.jar
 	install -d $(INSTALL_BACKUP)
 	install -d $(INSTALL_SUDO)
 	install -m 755 -d $(INSTALL_LOG)
-	install -m 644 passwd $(INSTALL_CONFIG)
+	install -m 640 peers  $(INSTALL_KEYS)
+	install -m 640 passwd $(INSTALL_CONFIG)
 	install -m 644 groups $(INSTALL_CONFIG)
 	install -m 644 server.ini $(INSTALL_CONFIG)
 	install -m 644 scripts.conf $(INSTALL_CONFIG)

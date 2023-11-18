@@ -234,11 +234,11 @@ public class ItemApi extends ServerBase {
          * Trail of items
          *******************************************/
         get("/item/*/trail", "application/json", (req, resp) -> {
-            return _itemPos(req, resp);
+            return _itemTrail(req, resp);
         }, ServerBase::toJson );
         
         get("/item/*/xtrail", "application/json", (req, resp) -> {
-            return _itemPos(req, resp);
+            return _itemTrail(req, resp);
         }, ServerBase::toJson );
         
                 

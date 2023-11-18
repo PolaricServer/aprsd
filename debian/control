@@ -8,7 +8,7 @@ Homepage: http://aprs.no/polaricserver
 
 Package: polaric-aprsd
 Architecture: all
-Depends: openjdk-17-jre-headless|openjdk-18-jre-headless|openjdk-19-headless|openjdk-20-headless, libslf4j-java, librxtx-java, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, adduser, sudo, lsb-base, ${misc:Depends}
+Depends: openjdk-17-jre-headless|openjdk-18-jre-headless|openjdk-19-headless|openjdk-20-headless, libslf4j-java, librxtx-java, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, adduser, sudo, openssl, ssl-cert, ${misc:Depends}
 Conflicts: polaric-database-plugin (<= 2.11), polaric-ais-plugin (<= 2.1.0) 
 Recommends:
 Suggests: polaric-webapp2 (>= 1.11)

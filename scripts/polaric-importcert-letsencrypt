@@ -7,7 +7,7 @@ if [ $(whoami) != "root" ]; then
 fi
 
 if [ ! $# -lt 1 ]; then
-    echo "This commands needs one parameter"
+    echo "This command needs one parameter"
     echo "    Domain name of certificate"
     exit 1
 fi
@@ -57,9 +57,8 @@ DPASSWD=$(< /dev/urandom tr -dc [:alnum:] | head -c16)
 #
 # If necesssary, add lines to config file
 #
-polaric-insertline $INIFILE 'httpserver\.port' 'httpserver.secure = false'
-polaric-insertline $INIFILE 'httpserver\.secure( )+=' 'httpserver.keystore.pw = password'
-
+polaric-insertline $INIFILE 'httpserver\.port' 'httpserver\.secure.*' 'httpserver.secure = false'
+polaric-insertline $INIFILE 'httpserver\.secure' 'httpserver\.keystore\.pw.*' 'httpserver.keystore.pw = password'
 
 # 
 # Set password in ini file
@@ -81,7 +80,7 @@ keytool -importkeystore -destkeystore __keystore.jks -srckeystore __pkcs.p12 \
      
      
 if [[ -e $KSDIR/keystore.jks ]] ; then 
-    mv KSDIR/keystore.jks KSDIR/keystore.jks.bak
+    mv $KSDIR/keystore.jks $KSDIR/keystore.jks.bak
 fi
 mv __keystore.jks $KSDIR/keystore.jks
 rm __pkcs.p12

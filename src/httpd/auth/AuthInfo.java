@@ -136,8 +136,8 @@ public class AuthInfo {
                 if (a.mailbox!=null) {
                     if (a.mailbox.decrement() == 0) {
                         /* 
-                         * Schedule for removing the user and expiring the mailbox - in 20 seconds 
-                         * This is cancelled if session is re-opened within 20 seconds
+                         * Schedule for removing the user and expiring the mailbox - in 30 seconds 
+                         * This is cancelled if session is re-opened within 30 seconds
                          */
                         var closing = gc.schedule( () -> {
                             /* If last session is closed, remove address mappings for messages. */
@@ -148,12 +148,11 @@ public class AuthInfo {
                             /* Put mailbox on expire. Expire after 1 week */
                             a.mailbox.expire = (new Date()).getTime() + 1000 * 60 * MAILBOX_EXPIRE; 
                             gcbox.add(a.mailbox);
-                            // mboxlist.put(a.mailbox.getUid(), a.mailbox);
                             
                             /* Remove the future */
                             closingSessions.remove(a.userid); 
                             
-                        }, 20, TimeUnit.SECONDS);
+                        }, 30, TimeUnit.SECONDS);
                         closingSessions.put(a.userid, closing); 
                     }
                 }

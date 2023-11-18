@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,7 +108,7 @@ public class HmacAuthenticator implements Authenticator {
            throws CredentialsException 
     {
         if (cred == null) 
-            return; // throwsException("No credential");
+            throwsException("No credential");
         if (! (cred instanceof TokenCredentials))
             throwsException("Credentials is not a token type");
  
@@ -134,7 +134,6 @@ public class HmacAuthenticator implements Authenticator {
         User ui = checkAuth(userid, nonce, rmac, bh);
         
         /* Create a user profile */
-        _api.log().debug("HmacAuthenticator", "Validate: creating user profile");
         final CommonProfile profile = new CommonProfile();
         profile.setId(userid);
    
@@ -142,7 +141,7 @@ public class HmacAuthenticator implements Authenticator {
          * If ui is null here, the userid is not a personal user but a service-id for use with devices or
          * peer servers. The kay was found in the keyfile. 
          */
-        if (ui==null)
+        if (ui==null) 
             profile.addAttribute("service", userid);
         profile.addAttribute("userInfo", ui);
         profile.addAttribute("role", getRole(ui, role));
