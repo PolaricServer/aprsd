@@ -8,20 +8,26 @@ import org.pac4j.core.util.CommonHelper;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.*;
 import java.util.List;
+import java.util.*;
 
 
 /**
  */
 public class DeviceAuthorizer implements Authorizer {
 
-    public DeviceAuthorizer() { }
+    public DeviceAuthorizer() {
+    }
 
-    
-    @Override
+
+    @Override    
     public boolean isAuthorized(final WebContext context, final SessionStore ss, final List<UserProfile> profile) {
-        var auth = AuthService.getAuthInfo(context);  
-        if (auth==null)
-            return true;
+
+        Optional<CommonProfile> prof = AuthInfo.getSessionProfile(context);
+        if (prof.isPresent()) {
+            var svc = prof.get().getAttribute("service") ;
+            if (svc != null)
+                return true;
+        }
         return false;
     }
 
