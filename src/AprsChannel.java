@@ -37,6 +37,8 @@ public abstract class AprsChannel extends Channel
 
      protected static boolean canSend;
 
+     
+
 
      /**
       * Information about APRS packet heard on the channel. 
@@ -100,9 +102,8 @@ public abstract class AprsChannel extends Channel
     protected String _rfilter = null;
 
     public static DupCheck  _dupCheck = new DupCheck();
-    public static final String _rx_encoding = /* "X-UTF-8_with_cp-850_fallback"; */
-                                              "X-UTF-8_with_ISO-8859-1_fallback";
-                          
+    public static final String _rx_encoding = "UTF-8"; 
+                  /* was "X-UTF-8_with_ISO-8859-1_fallback"; */
     public static final String _tx_encoding = "UTF-8";
 
  
