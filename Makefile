@@ -17,7 +17,7 @@
 # Review (and if necessary) change these if you are going to 
 # install by using this makefile
 
-   INSTALL_JAR = $(DESTDIR)/usr/share/java
+   INSTALL_JAR = $(DESTDIR)/usr/share/polaric/java
    INSTALL_BIN = $(DESTDIR)/usr/bin
 INSTALL_CONFIG = $(DESTDIR)/etc/polaric-aprsd
    INSTALL_WEB = $(DESTDIR)/usr/share/polaric
