@@ -13,7 +13,6 @@
  */
  
 package no.polaric.aprsd;
-import uk.me.jstott.jcoord.*; 
 import java.util.*;
 import java.io.Serializable;
   
@@ -39,7 +38,7 @@ public class ThreadNotifier implements Notifier
      * @param id Identity of the waiter thread. Assumed to be a unique number. 
      *           Other waiters with the same id will be aborted.
      */
-    public boolean waitSignal(Reference uleft, Reference lright, long id)
+    public boolean waitSignal(LatLng uleft, LatLng lright, long id)
     {
          long wstart = (new Date()).getTime();
          long elapsed = 0;

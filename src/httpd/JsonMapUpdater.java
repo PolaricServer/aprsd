@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017-2021 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.io.IOException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
-import uk.me.jstott.jcoord.*; 
 import no.polaric.aprsd.filter.*;
 
 
@@ -147,13 +146,13 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
          * Convert sign to JSON Point.
          */
         private JsPoint createSign(Signs.Item s) {
-            LatLng ref = s.getPosition().toLatLng(); 
+            LatLng ref = s.getPosition(); 
             if (ref == null)
                 return null;
             JsPoint x = new JsPoint(); 
             
             x.ident = s.getIdent();
-            x.pos   = new double[] {ref.getLongitude(), ref.getLatitude()};
+            x.pos   = new double[] {ref.getLng(), ref.getLat()};
             x.title = s.getDescr() == null ? "" : fixText(s.getDescr());
             x.href  = s.getUrl() == null ? "" : s.getUrl();
             x.icon  = "/icons/"+ s.getIcon();
@@ -167,7 +166,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
          * Return null if point has no position.  
          */
         private JsPoint createPoint(TrackerPoint s, Action action) {
-            LatLng ref = s.getPosition().toLatLng(); 
+            LatLng ref = s.getPosition(); 
             if (ref == null) 
                 return null;
              
@@ -179,7 +178,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             
             x.ident   = s.getIdent();
             x.label   = createLabel(s, action);
-            x.pos     = new double[] {roundDeg(ref.getLongitude()), roundDeg(ref.getLatitude())};
+            x.pos     = new double[] {roundDeg(ref.getLng()), roundDeg(ref.getLat())};
             x.title   = s.getDescr() == null ? "" : fixText(s.getDescr()); 
             x.redraw  = s.isChanging();
             x.own     = (s instanceof AprsObject) 
@@ -236,9 +235,9 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
         /**
          * Display a message path between nodes. 
          */
-        protected void addLines(JsOverlay ov, Station s, Reference uleft, Reference lright)
+        protected void addLines(JsOverlay ov, Station s, LatLng uleft, LatLng lright)
         {
-            LatLng ity = s.getPosition().toLatLng();
+            LatLng ity = s.getPosition();
             Set<String> from = s.getTrafficTo();
             if (from == null || from.isEmpty()) 
                 return;
@@ -249,7 +248,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 if (p==null || !p.isInside(uleft, lright) || p.expired())
                     continue;
                 
-                LatLng itx = p.getPosition().toLatLng();
+                LatLng itx = p.getPosition();
                 RouteInfo.Edge e = _api.getDB().getRoutes().getEdge(s.getIdent(), p.getIdent());
                 
                 if (itx != null) { 

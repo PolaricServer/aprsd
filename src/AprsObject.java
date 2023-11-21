@@ -13,7 +13,6 @@
  */
  
 package no.polaric.aprsd;
-import uk.me.jstott.jcoord.*; 
 import java.util.*;
 import java.io.Serializable;
   
@@ -137,7 +136,7 @@ public class AprsObject extends AprsPoint implements Serializable
             setChanging();
 
         if (_position != null && _updated != null) {
-            long distance = Math.round(_position.toLatLng().distance(pd.pos.toLatLng()) * 1000);  
+            long distance = Math.round(_position.distance(pd.pos) * 1000);  
             if (distance > 10)
                 setChanging();
         }
@@ -145,7 +144,7 @@ public class AprsObject extends AprsPoint implements Serializable
             setTimeless(true);
             ts = new Date();
         }
-        LatLng prevpos = (getPosition()==null ? null : getPosition().toLatLng());
+        LatLng prevpos = (getPosition()==null ? null : getPosition());
         saveToTrail(ts, pd.pos, 0, 0, "(obj)");
         updatePosition(ts, pd.pos, pd.ambiguity);        
         setDescr(descr); 

@@ -13,7 +13,6 @@
  */ 
 
 package no.polaric.aprsd;
-import uk.me.jstott.jcoord.*; 
 import java.util.*;
 import java.io.Serializable;
   
@@ -29,9 +28,9 @@ public class Point implements Serializable,  Cloneable
     public static final float KNOTS2MPS = (float) 0.5148;
     public static final float FEET2M = (float) 3.2898;
 
-    protected Reference   _position;
+    protected LatLng   _position;
       
-    public Point (Reference p)
+    public Point (LatLng p)
        { _position = p; }
           
     
@@ -44,21 +43,18 @@ public class Point implements Serializable,  Cloneable
      * @param xext Percentage with which to extend the search area in x direction.
      * @param yext Percentage with which to extend the search area in y direction.
      */          
-    public boolean isInside(Reference ul, Reference lr, double xext, double yext)
+    public boolean isInside(LatLng uleft, LatLng lright, double xext, double yext)
     {   
-        LatLng uleft = ul.toLatLng();
-        LatLng lright = lr.toLatLng(); 
-        
         if (uleft == null || lright == null)
            return false; 
         
-        double xoff  = xext * (lright.getLng() - uleft.getLng());
+        double xoff = xext * (lright.getLng() - uleft.getLng());
         double yoff = yext * (uleft.getLat() - lright.getLat());
         
         if (_position == null)
            return false;
         try {
-           LatLng ref = _position.toLatLng();
+           LatLng ref = _position;
            if (lright.getLng() < uleft.getLng()) {
               double xleft = uleft.getLng();
               double xright = 360 + lright.getLng(); 
@@ -82,7 +78,7 @@ public class Point implements Serializable,  Cloneable
      * @param uleft Upper left corner of the area. 
      * @param lright Lower right corner of the area. 
      */
-    public boolean isInside(Reference uleft, Reference lright)
+    public boolean isInside(LatLng uleft, LatLng lright)
        { return isInside(uleft, lright, 0, 0); }
 
        
@@ -96,12 +92,12 @@ public class Point implements Serializable,  Cloneable
      /** 
      * Return distance (in meters) from a reference. 
      */
-    public long distance(Reference p)
-       { return Math.round(_position.toLatLng().distance(p.toLatLng()) * 1000); }
+    public long distance(LatLng p)
+       { return Math.round(_position.distance(p) * 1000); }
     
 
        
-    public Reference getPosition ()   
+    public LatLng getPosition ()   
        { return _position; } 
 
 

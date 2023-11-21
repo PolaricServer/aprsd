@@ -19,8 +19,6 @@ import no.polaric.aprsd.filter.*;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.io.PrintStream;
-
-import uk.me.jstott.jcoord.*;
 import java.util.*;
 import java.util.function.*;
 import java.io.*;
@@ -140,19 +138,6 @@ public abstract class ServerBase
        }
   
 
-
-   /**
-    * Convert reference to UTM projection with our chosen zone.
-    * Return null if it cannot be converted to our zone (too far away).
-    */
-   protected UTMRef toUTM(Reference ref, int utmz)
-   {
-        try { return ref.toLatLng().toUTMRef(utmz); }
-        catch (Exception e)
-           { _api.log().warn("ServerBase", "Cannot convert to UTM"+ utmz+ " : "+ref);
-             return null; }
-   }
-   
    
        
     /*
@@ -285,7 +270,7 @@ public abstract class ServerBase
    
    
    protected String ll2dmString(LatLng llref)
-      { return showDMstring(llref.getLatitude())+"N, "+showDMstring(llref.getLongitude())+"E"; }
+      { return showDMstring(llref.getLat())+"N, "+showDMstring(llref.getLng())+"E"; }
    
    
 

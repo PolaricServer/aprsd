@@ -49,13 +49,13 @@ public class AuthConfig {
          _passwdFile  = api.getProperty("httpserver.passwdfile",  "/etc/polaric-aprsd/passwd");
          _userFile    = api.getProperty("httpserver.userfile",    "/var/lib/polaric/users.dat");
          _groupFile   = api.getProperty("httpserver.groupfile",   "/etc/polaric-aprsd/groups");
-         _dkeyFile     = api.getProperty("httpserver.keyfile",     "/etc/polaric-aprsd/keys/peers");
+         _dkeyFile    = api.getProperty("httpserver.keyfile",     "/etc/polaric-aprsd/keys/peers");
 
          
           /* Default user and groups database is local file */
          _groups = new LocalGroups(api, _groupFile);
          _users = new LocalUsers(api, _userFile, _groups);
-         _passwds =  new PasswordFileAuthenticator(api, _passwdFile, _users);
+         _passwds = new PasswordFileAuthenticator(api, _passwdFile, _users);
          _hmac = new HmacAuthenticator(api, _dkeyFile, _users);
      
          /* Direct Form Auth client */

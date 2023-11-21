@@ -18,7 +18,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.text.*;
-import uk.me.jstott.jcoord.*;
 import java.math.BigInteger;
 
 

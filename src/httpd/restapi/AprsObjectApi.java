@@ -22,7 +22,6 @@ import static spark.Spark.post;
 import static spark.Spark.*;
 import java.util.*; 
 import no.polaric.aprsd.*;
-import uk.me.jstott.jcoord.*; 
 
 
 

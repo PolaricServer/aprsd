@@ -16,7 +16,6 @@
 package no.polaric.aprsd;
 import java.util.*;
 import java.io.*;
-import uk.me.jstott.jcoord.*;
 
 
 
@@ -86,13 +85,10 @@ public class OwnPosition extends Station implements Runnable
            _minPause = _maxPause;
         _description = _comment;
         
-        String[] pp = ownpos.split("[-\\s]+");
-        if (pp.length == 3) {
-        
-           Reference p = new UTMRef(Double.parseDouble(pp[1]), Double.parseDouble(pp[2]), pp[0].charAt(2), 
-                      Integer.parseInt( pp[0].substring(0,2)));
+        String[] pp = ownpos.split(",[\\s]+");
+        if (pp.length == 2) {
+           LatLng p = new LatLng(Double.parseDouble(pp[0]), Double.parseDouble(pp[1])); 
                       
-           p = p.toLatLng();
            /* FIXME: Don't reset pos if GPS is active */
            updatePosition(new Date(), p, 0);
            _api.log().info("OwnPosition", "Position is: "+p);
@@ -190,20 +186,20 @@ public class OwnPosition extends Station implements Runnable
     */
     protected String encodePos()
     {
-        LatLng pos = getPosition().toLatLng();
+        LatLng pos = getPosition();
         
         if (_compress) { 
-            var lat_c = compressLL(pos.getLatitude(), false);
-            var lon_c = compressLL(pos.getLongitude(), true);
+            var lat_c = compressLL(pos.getLat(), false);
+            var lon_c = compressLL(pos.getLng(), true);
             var cst_c = compressCST();
             return getSymtab() + lat_c + lon_c + getSymbol() + cst_c;
         }
         else {
             /* Format latitude and longitude values, etc. */
-            char lat_sn = (pos.getLatitude() < 0 ? 'S' : 'N');
-            char long_we = (pos.getLongitude() < 0 ? 'W' : 'E');
-            float latf = Math.abs((float) pos.getLatitude());
-            float longf = Math.abs((float) pos.getLongitude());
+            char lat_sn = (pos.getLat() < 0 ? 'S' : 'N');
+            char long_we = (pos.getLng() < 0 ? 'W' : 'E');
+            float latf = Math.abs((float) pos.getLat());
+            float longf = Math.abs((float) pos.getLng());
             return showDMstring(latf,2) + lat_sn + getSymtab() + showDMstring(longf, 3)+ long_we + getSymbol();
         }
     }
@@ -231,7 +227,7 @@ public class OwnPosition extends Station implements Runnable
         p.to = _api.getToAddr();
         p.type = '/';
 
-        String xrep = xReports(new Date(), getPosition().toLatLng());
+        String xrep = xReports(new Date(), getPosition());
         p.report = "/" + timeStamp(new Date()) + encodePos() + xrep + _comment;
         
         _api.log().debug("OwnPosition", "Send position report: "+ p.from+">"+p.to+": "+p.report);
@@ -269,7 +265,7 @@ public class OwnPosition extends Station implements Runnable
      * @param symtab APRS symbol table 
      * @param symbol APRS symbol. 
      */
-    public synchronized void updatePosition(Date t, Reference pos, char symtab, char symbol)
+    public synchronized void updatePosition(Date t, LatLng pos, char symtab, char symbol)
     {
           update(new Date(),new ReportHandler.PosData(pos, symbol, symtab), _comment, "");
           _timeSinceReport = 0;

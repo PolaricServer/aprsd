@@ -23,7 +23,6 @@ import static spark.Spark.*;
 import java.util.*; 
 import java.io.*;
 import java.util.stream.*;
-import uk.me.jstott.jcoord.*;
 import no.polaric.aprsd.*;
 
 

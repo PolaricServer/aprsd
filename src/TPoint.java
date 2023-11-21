@@ -14,7 +14,6 @@
  */ 
 
 package no.polaric.aprsd;
-import uk.me.jstott.jcoord.*; 
 import java.util.*;
 import java.util.function.*;
 
@@ -33,10 +32,7 @@ public class TPoint extends Point
        
     public String getPath()
         { return _path; }
-    
-//    public TPoint (Date t, Reference p)
-//        { super(p);  _time = t;}
-        
-    public TPoint (Date t, Reference p, String pt)
+
+    public TPoint (Date t, LatLng p, String pt)
         { super(p);  _time = t; _path=pt;}
 }

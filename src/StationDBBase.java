@@ -15,7 +15,6 @@
 package no.polaric.aprsd;
 import java.util.*;
 import java.io.*;
-import uk.me.jstott.jcoord.*; 
 import java.util.concurrent.*;
 import java.util.regex.*;
 import java.util.stream.*;

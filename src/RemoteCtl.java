@@ -18,7 +18,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
-import uk.me.jstott.jcoord.*; 
 
 
 
@@ -93,7 +92,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    public Child getChild(String id)
        { return _children.get(id); }
        
-   public void addChild(String id, int r, Reference p) 
+   public void addChild(String id, int r, LatLng p) 
        { _children.put(id, new Child(r, p)); }
    
    public void updateChildTS(String id) {
@@ -120,12 +119,12 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    public static class Child {
         Date date;
         int radius; 
-        Reference pos;
+        LatLng pos;
         void updateTS() 
             { date = new Date(); }
         long getTime() 
             {return date.getTime();}
-        Child(int r, Reference p)
+        Child(int r, LatLng p)
             {radius=r; pos=p; date=new Date(); }
    }
    
@@ -300,7 +299,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         if (arg.length < 2 || !arg[0].matches("ALIAS|ICON|TAG|RMTAG"))
             return true;
         Point x = _api.getDB().getItem(arg[1], null);
-        Reference pos = _api.getOwnPos().getPosition();
+        LatLng pos = _api.getOwnPos().getPosition();
         if (_radius <= 0 || pos == null) 
             return true; 
         if (x != null && x.distance(pos) > _radius*1000)
@@ -875,12 +874,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
                
                 /* Now get position and radius if set */
                 String arg = "";
-                Reference pos = _api.getOwnPos().getPosition();
+                LatLng pos = _api.getOwnPos().getPosition();
                 if (_radius > 0 && pos != null) {
-                    LatLng pp = pos.toLatLng(); 
                     arg += " "+_radius+" "+ 
-                        ((float) Math.round(pp.getLatitude()*1000))/1000+" "+ 
-                        ((float) Math.round(pp.getLongitude()*1000))/1000;
+                        ((float) Math.round(pos.getLat()*1000))/1000+" "+ 
+                        ((float) Math.round(pos.getLng()*1000))/1000;
                 }
                 sendRequest(_parent, "CON", arg);
             }

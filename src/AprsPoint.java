@@ -13,7 +13,6 @@
  */ 
 
 package no.polaric.aprsd;
-import uk.me.jstott.jcoord.*; 
 import java.util.*;
 import java.io.Serializable;
   
@@ -52,7 +51,7 @@ public abstract class AprsPoint extends TrackerPoint implements Serializable, Cl
     }
     
     
-    public AprsPoint(Reference p)
+    public AprsPoint(LatLng p)
       { super(p); }
 
     
@@ -100,7 +99,7 @@ public abstract class AprsPoint extends TrackerPoint implements Serializable, Cl
      * @param newpos Position coordinates.
      * @param ambiguity 
      */    
-    public void updatePosition(Date ts, Reference newpos, int ambiguity)
+    public void updatePosition(Date ts, LatLng newpos, int ambiguity)
     {
         updatePosition(ts, newpos);
         _ambiguity = ambiguity;

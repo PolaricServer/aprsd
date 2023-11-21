@@ -16,7 +16,7 @@
 package no.polaric.aprsd;
 import no.polaric.aprsd.*;
 import java.util.*;
-import uk.me.jstott.jcoord.*;
+
 
 /**
  * Handle APRS packets and reports. To be implemented by
@@ -30,7 +30,7 @@ public interface ReportHandler
      * Information typically associated with an APRS position report.
      */
     public static class PosData {
-       public Reference pos;
+       public LatLng pos;
        public int ambiguity  = 0; 
        public int course = -1;
        public int speed = -1;
@@ -38,9 +38,9 @@ public interface ReportHandler
        public long altitude = -1; 
        
        public PosData () {}
-       public PosData (Reference p, char sym, char stab)
+       public PosData (LatLng p, char sym, char stab)
           {pos=p; symbol=sym; symtab=stab; }
-       public PosData (Reference p, int crs, int sp, char sym, char stab)
+       public PosData (LatLng p, int crs, int sp, char sym, char stab)
           {pos=p; course=crs; speed=sp; symbol=sym; symtab=stab; }   
     }
 

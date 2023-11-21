@@ -14,7 +14,6 @@
  */ 
 
 package no.polaric.aprsd;
-import uk.me.jstott.jcoord.*; 
 import java.util.*;
 import java.util.function.*;
 

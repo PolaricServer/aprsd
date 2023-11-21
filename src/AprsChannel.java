@@ -16,7 +16,7 @@ package no.polaric.aprsd;
 import java.util.*;
 import java.util.regex.*;
 import java.io.*;
-import se.raek.charset.*;
+//import se.raek.charset.*;
 import java.text.*;
 import java.lang.reflect.Constructor; 
 

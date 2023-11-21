@@ -13,7 +13,6 @@
  */
  
 package no.polaric.aprsd;
-import uk.me.jstott.jcoord.*; 
 import java.util.*;   
 import java.io.Serializable;  
 import java.util.function.*;
@@ -34,7 +33,7 @@ public class Trail implements Iterable<Trail.Item>, Serializable
     public static class Item extends TPoint {
        public int speed;
        public int course; 
-       public Item(Date t, Reference p, int sp, int crs, String path)
+       public Item(Date t, LatLng p, int sp, int crs, String path)
          { super(t, p, path); speed = sp; course = crs; } 
     }
        
@@ -162,7 +161,7 @@ public class Trail implements Iterable<Trail.Item>, Serializable
     /**
      * Add a position report to history.
      */
-    public synchronized boolean add(Date t, Reference p, int sp, int crs, String path)
+    public synchronized boolean add(Date t, LatLng p, int sp, int crs, String path)
     { 
         Date now = new Date(); 
         boolean added = false;

@@ -14,7 +14,6 @@
  
  
 package no.polaric.aprsd;
-import uk.me.jstott.jcoord.*;
 import java.util.*;
 import java.io.*;
 import java.text.*;
@@ -29,8 +28,8 @@ import java.util.concurrent.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "2.12";
-   public  static String toaddr  = "APPS2C";
+   public  static String version = "3.0";
+   public  static String toaddr  = "APPS30";
    
    private static StationDB db = null;
    private static AprsParser parser = null;
@@ -46,7 +45,6 @@ public class Main implements ServerAPI
    private static Properties _config, _defaultConf; 
    private static WebServer ws; 
    private static Channel.Manager _chanManager = new Channel.Manager();
-   private static SarUrl sarurl;
    private static String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
    private static StatLogger stats; 
    public  static Logfile log;
@@ -200,9 +198,6 @@ public class Main implements ServerAPI
     
    public String getToAddr()
     { return toaddr; }
- 
-   public SarUrl getSarUrl()
-    { return sarurl; }
     
    public SarMode getSar()
     { return sarmode; }
@@ -338,11 +333,6 @@ public class Main implements ServerAPI
             if (getBoolProperty("remotectl.on", false)) {
                log.info("Main", "Activate Remote Control");
                rctl = new RemoteCtl(api, msgProc);
-            }
-            
-            if (getBoolProperty("sarurl.on", false)) {
-               log.info("Main", "Activate Sar URL");
-               sarurl = new SarUrl(api);
             }
   
             /* Igate */

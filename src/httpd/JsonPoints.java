@@ -9,7 +9,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.io.IOException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
-import uk.me.jstott.jcoord.*; 
 import no.polaric.aprsd.filter.*;
 
 
@@ -82,8 +81,8 @@ public interface JsonPoints
             time = t;
         }
         public JsTPoint(TPoint p) {
-            LatLng ref = (LatLng) p.getPosition();
-            pos = new double[] {ref.getLongitude(), ref.getLatitude()}; 
+            LatLng ref = p.getPosition();
+            pos = new double[] {ref.getLng(), ref.getLat()}; 
             time = p.getTS();
             path = ServerBase.cleanPath(p.getPath());
         }

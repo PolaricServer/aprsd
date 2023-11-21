@@ -14,7 +14,6 @@
 
 package no.polaric.aprsd;
 import java.util.List;  
-import uk.me.jstott.jcoord.*;
 import java.util.Date;
 import no.polaric.aprsd.filter.*;
 
@@ -218,7 +217,7 @@ public interface StationDB
      * @param filter May be used in search. Null is allowed. 
      */
     public List<TrackerPoint>
-          search(Reference uleft, Reference lright, RuleSet filter);       
+          search(LatLng uleft, LatLng lright, RuleSet filter);       
         
         
         

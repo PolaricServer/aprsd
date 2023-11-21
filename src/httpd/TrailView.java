@@ -2,7 +2,6 @@
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
 import java.io.*;
-import uk.me.jstott.jcoord.*;
 
  
 public class TrailView
@@ -15,10 +14,10 @@ public class TrailView
     private PrintWriter _out;    
        
 
-    public TrailView(PrintWriter out, String pre, String post, Reference firstpos)
+    public TrailView(PrintWriter out, String pre, String post, LatLng firstpos)
     {
        _pre = pre; _post = post; 
-       _itx = (firstpos == null ? null :  firstpos.toLatLng());
+       _itx = (firstpos == null ? null :  firstpos);
        _out = out; 
     }
     
@@ -43,7 +42,7 @@ public class TrailView
            _out.println(_post);
         }
         else {
-           _itx = p.getPosition().toLatLng();
+           _itx = p.getPosition();
            if (p.getTS() == null) 
               t = "0";
            else

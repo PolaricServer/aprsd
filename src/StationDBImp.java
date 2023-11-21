@@ -15,7 +15,6 @@
 package no.polaric.aprsd;
 import java.util.*;
 import java.io.*;
-import uk.me.jstott.jcoord.*; 
 import java.util.concurrent.*;
 import java.util.regex.*;
 import java.util.stream.*;
@@ -88,7 +87,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
         if (s.getPosition() == null)
             return;
 
-        LatLng pos = s.getPosition().toLatLng();
+        LatLng pos = s.getPosition();
         var point = Geometries.pointGeographic(pos.getLng(), pos.getLat());
         _geoindex = _geoindex.delete(s, point, true)
                              .add(s, point);
@@ -121,7 +120,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     @Override protected synchronized void _removeRtItem(String id) {
         TrackerPoint pt = _getRtItem(id);
         if (pt.getPosition() != null)
-            _removeGItem(pt, pt.getPosition().toLatLng());
+            _removeGItem(pt, pt.getPosition());
         _map.remove(id);
     }    
         
@@ -190,11 +189,8 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
      * @param lright Lower right corner.
      */
     public List<TrackerPoint>
-        search(Reference uleft, Reference lright, RuleSet filter)
+        search(LatLng ul, LatLng lr, RuleSet filter)
     { 
-        LatLng ul = uleft.toLatLng();
-        LatLng lr = lright.toLatLng();
-        
         List<TrackerPoint> res = new ArrayList<TrackerPoint>(2000);
         Iterable<Entry<TrackerPoint, Point>> entries =
             _geoindex.search(Geometries.rectangleGeographic(ul.getLng(), lr.getLat(), lr.getLng(), ul.getLat()));  
@@ -315,7 +311,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
         for (TrackerPoint s: _map.values()) { 
             if (s.getPosition() == null)
                 continue;
-            LatLng pos = s.getPosition().toLatLng();
+            LatLng pos = s.getPosition();
             var point = Geometries.pointGeographic(pos.getLng(), pos.getLat());
             _geoindex = _geoindex.add(s, point);
         }

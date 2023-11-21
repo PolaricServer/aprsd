@@ -23,7 +23,6 @@ import static spark.Spark.*;
 import java.util.*; 
 import java.io.*;
 import java.util.stream.*;
-import uk.me.jstott.jcoord.*;
 import no.polaric.aprsd.*;
 
 
@@ -117,7 +116,7 @@ public class ItemApi extends ServerBase {
                 return ERROR(resp, 404, "Unknown tracker item: "+ident); 
             if (!authForItem(req, st))
                 return ERROR(resp, 403, "Not aauthorized for access to item");
-            LatLng pos = st.getPosition().toLatLng();
+            LatLng pos = st.getPosition();
             return new double[] {pos.getLng(), pos.getLat()};
         }
         catch(Exception e) {
@@ -140,7 +139,7 @@ public class ItemApi extends ServerBase {
             var pp = st.getHItem();
             var fl = new ArrayList<JsTPoint>(); 
             for (var x:  h.points()) {
-                var dist = x.getPosition().toLatLng().distance(pp.getPosition().toLatLng());
+                var dist = x.getPosition().distance(pp.getPosition());
                 fl.add(new JsTPoint(x.getTS(), x.speed, x.course, (int) Math.round(dist*1000), cleanPath(x.getPath())));
                 pp = x; 
             }

@@ -16,7 +16,7 @@ package no.polaric.aprsd;
 import java.net.*;
 import java.util.*;
 import java.io.*;
-import uk.me.jstott.jcoord.*;
+
 
 
 public class Signs extends Source
@@ -39,7 +39,7 @@ public class Signs extends Source
      * Interface for searching in a database external to this class. 
      */
     public interface ExtDb {
-        public Iterable<Item> search(long scale, Reference uleft, Reference lright);
+        public Iterable<Item> search(long scale, LatLng uleft, LatLng lright);
         public void close(); 
     }
     
@@ -70,7 +70,7 @@ public class Signs extends Source
         public String getUrl()
           { return _url; }
         
-        public Item (String i, Reference r, long sc, String ic, String url, String txt)
+        public Item (String i, LatLng r, long sc, String ic, String url, String txt)
           { super(r);  _id = i; _maxScale = sc; _icon = ic; _url = url; _description = txt; 
             if (_url.matches("-|null|none")) 
                  _url = null; }   
@@ -111,18 +111,15 @@ public class Signs extends Source
                     String[] x = line.split(",\\s*");  
                     if (x.length < 7)
                         continue;
-                    if (!x[0].matches("[0-9]{2}[a-zA-Z]") || 
-                        !x[1].matches("[0-9]{6}") || 
-                        !x[2].matches("[0-9]{7}") ||
-                        !x[3].matches("[0-9]+"))
+                    if (!x[0].matches("[0-9\\.]+") || 
+                        !x[1].matches("[0-9\\.]+") ||
+                        !x[2].matches("[0-9]+"))
                         continue;    
                         
-                    double easting = Long.parseLong(x[1]);
-                    double northing = Long.parseLong(x[2]);
+                    double lat = Double.parseDouble(x[0]);
+                    double lng = Double.parseDouble(x[1]);
                     long scale = Long.parseLong(x[3]);
-                    Reference pos = new UTMRef( Integer.parseInt( x[0].substring(0,2)), 
-                                               x[0].charAt(2),
-                                               easting, northing);
+                    LatLng pos = new LatLng(lat, lng);
                     if (x.length > 7)
                        x[6] = x[6] + " "+ x[7];
                      
@@ -145,7 +142,7 @@ public class Signs extends Source
        
     
     public static synchronized Iterable<Item>
-          search(long scale, Reference uleft, Reference lright)
+          search(long scale, LatLng uleft, LatLng lright)
     {
          LinkedList<Item> result = new LinkedList<Item>();
          if (_signs == null)

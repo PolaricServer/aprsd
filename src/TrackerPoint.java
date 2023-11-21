@@ -14,7 +14,6 @@
  */ 
 
 package no.polaric.aprsd;
-import uk.me.jstott.jcoord.*; 
 import java.util.*;
 import java.io.Serializable;
 import no.polaric.aprsd.filter.ViewFilter; 
@@ -111,7 +110,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
 
   
   
-    public TrackerPoint(Reference p)
+    public TrackerPoint(LatLng p)
       { super(p); }
 
     
@@ -134,7 +133,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * @param newpos Position coordinates.
      */    
 
-    public synchronized void updatePosition(Date ts, Reference newpos)
+    public synchronized void updatePosition(Date ts, LatLng newpos)
     { 
          _expired = false;
          if (_position == null)
@@ -158,7 +157,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * @return true to indicate if position is ok and can be saved to realtime point. 
      */
 
-    public synchronized boolean saveToTrail(Date ts, Reference newpos, int speed, int course, String pathinfo) 
+    public synchronized boolean saveToTrail(Date ts, LatLng newpos, int speed, int course, String pathinfo) 
     {         
         /*
          * If timestamp is in the future, do nothing.
@@ -226,7 +225,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * @param uleft upper left corner of area.
      * @param lright lower right corner of area. 
      */
-    @Override public boolean isInside(Reference uleft, Reference lright) 
+    @Override public boolean isInside(LatLng uleft, LatLng lright) 
     {
        if (super.isInside(uleft, lright))
           return true;

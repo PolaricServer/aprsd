@@ -2,7 +2,6 @@
 package no.polaric.aprsd;
 import java.util.*;
 import java.io.*;
-import uk.me.jstott.jcoord.*;
 import gnu.io.*;
 import java.text.*;
 
@@ -22,11 +21,10 @@ public class XReports
             latitude=lat;
             longitude=lon;
         }
-        XRep(Date ts, Reference pos) {
-            LatLng ll = pos.toLatLng();
+        XRep(Date ts, LatLng pos) {
             timestamp=ts.getTime(); 
-            latitude = ll.getLatitude();
-            longitude = ll.getLongitude();
+            latitude = pos.getLat();
+            longitude = pos.getLng();
         }
     }
     

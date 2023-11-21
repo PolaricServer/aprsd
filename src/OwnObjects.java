@@ -18,7 +18,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.text.*;
-import uk.me.jstott.jcoord.*;
 
 
 
@@ -211,13 +210,12 @@ public class OwnObjects implements Runnable
     }
     
     
-    protected String posReport(Date d, Reference pos, char sym, char symtab)
+    protected String posReport(Date d, LatLng pos, char sym, char symtab)
     {
-        LatLng llref = pos.toLatLng();
         _tsformat.setCalendar(_utcTime);
         return (d==null ? "111111" : _tsformat.format(d)) + "z"  
-               + _latformat.format(toGpsNumber(llref.getLatitude())) + symtab 
-               + _lngformat.format(toGpsNumber(llref.getLongitude())) + sym ;  
+               + _latformat.format(toGpsNumber(pos.getLat())) + symtab 
+               + _lngformat.format(toGpsNumber(pos.getLng())) + sym ;  
     }
     
     

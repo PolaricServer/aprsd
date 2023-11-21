@@ -16,7 +16,6 @@
 package no.polaric.aprsd;
 import java.util.*;
 import java.io.*;
-import uk.me.jstott.jcoord.*;
 import gnu.io.*;
 import java.text.*;
 
@@ -119,7 +118,7 @@ public class GpsPosition extends OwnPosition
     transient private   boolean   _gpsOn;
     transient private   boolean   _gpx_fix = false;
     transient private   int       _course = 0, _prev_course = 0, _prev_speed = 0;
-    transient private   Reference _prev_pos = null;
+    transient private   LatLng _prev_pos = null;
     transient private   Date      _prev_timestamp; 
     transient private   XReports  _xreports;
 
@@ -213,7 +212,7 @@ public class GpsPosition extends OwnPosition
             Double lngDeg = Integer.parseInt(arg[5].substring(0,3)) + Double.parseDouble(arg[5].substring(3,8))/60;
             if (arg[6].equals("W"))
                 lngDeg *= -1;
-            Reference pos = new LatLng(latDeg, lngDeg); 
+            LatLng pos = new LatLng(latDeg, lngDeg); 
           
             /* Speed and course */
             int speed = Math.round( Float.parseFloat(arg[7]) * KNOTS2KMH);
@@ -230,7 +229,7 @@ public class GpsPosition extends OwnPosition
 
 
     private int cnt = 0;
-    private void updatePosition(Date t, Reference pos, int crs, int speed)
+    private void updatePosition(Date t, LatLng pos, int crs, int speed)
     {
         /* Update position locally on map */
         if (++cnt >= 5 || speed > 1 && ( course_change(crs, getCourse(), 30) && cnt >= 2)) {
@@ -310,7 +309,7 @@ public class GpsPosition extends OwnPosition
     
     /* Extra reports (in comment field) */
     @Override protected String xReports(Date ts, LatLng pos) {
-        XReports.XRep curr = new XReports.XRep(ts, pos.getLatitude(), pos.getLongitude());
+        XReports.XRep curr = new XReports.XRep(ts, pos.getLat(), pos.getLng());
         String rep = _xreports.encode(curr);
         return rep;
     }

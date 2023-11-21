@@ -8,7 +8,7 @@
    CLASSDIR = classes
       CODEC = /usr/share/java/commons-codec.jar
     JACKSON = /usr/share/java/jackson-core.jar:/usr/share/java/jackson-databind.jar:/usr/share/java/jackson-annotations.jar
-  CLASSPATH = lib/jcoord-polaric.jar:lib/utf8-with-fallback-polaric.jar:/usr/share/java/RXTXcomm.jar:lib/jetty-polaric.jar:/usr/share/java/sl4j-api.jar:/usr/share/java/sl4j-simple.jar:lib/spark-core-polaric.jar:lib/pac4j-core-polaric.jar:lib/pac4j-http-polaric.jar:lib/pac4j-javaee-polaric.jar:lib/spark-pac4j-polaric.jar:lib/jmdns-polaric.jar:lib/nano-cuckoo-polaric.jar:lib/rtree2-polaric.jar:$(JACKSON):$(CODEC)
+  CLASSPATH = /usr/share/java/RXTXcomm.jar:lib/jetty-polaric.jar:/usr/share/java/sl4j-api.jar:/usr/share/java/sl4j-simple.jar:lib/spark-core-polaric.jar:lib/pac4j-core-polaric.jar:lib/pac4j-http-polaric.jar:lib/pac4j-javaee-polaric.jar:lib/spark-pac4j-polaric.jar:lib/jmdns-polaric.jar:lib/nano-cuckoo-polaric.jar:lib/rtree2-polaric.jar:$(JACKSON):$(CODEC)
       JAVAC = javac -source 17 -target 17
        YACC = byaccj
         LEX = jflex

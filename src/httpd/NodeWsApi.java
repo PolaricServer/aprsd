@@ -67,7 +67,6 @@ public class NodeWsApi<T> {
     
     
     public void addServer(String nodeid, NodeWsClient srv) {
-        System.out.println("*** NodeWsApi.AddServer: "+nodeid);
         _servers.put(nodeid, srv);
         srv.subscribe(_nodeid);
         srv.setHandler(_handler);

@@ -13,7 +13,6 @@
  */
  
 package no.polaric.aprsd;
-import uk.me.jstott.jcoord.*; 
 import java.util.*;
 import java.io.Serializable;
   
@@ -223,7 +222,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     public synchronized void update(Date ts, ReportHandler.PosData pd, String descr, String pathinfo)
     { 
         StationDB db = _api.getDB();
-        LatLng prevpos = (getPosition()==null ? null : getPosition().toLatLng());
+        LatLng prevpos = (getPosition()==null ? null : getPosition());
         if (saveToTrail(ts, pd.pos, pd.speed, pd.course, _pathinfo)) {
              updatePosition(ts, pd.pos, pd.ambiguity);
              if (db != null && db.getRoutes() != null)

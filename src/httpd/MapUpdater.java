@@ -24,7 +24,6 @@ import java.io.IOException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
 import java.net.*;
-import uk.me.jstott.jcoord.*; 
 import org.eclipse.jetty.websocket.api.UpgradeRequest;
 
 

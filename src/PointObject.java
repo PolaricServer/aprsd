@@ -13,7 +13,6 @@
  */ 
 
 package no.polaric.aprsd;
-import uk.me.jstott.jcoord.*; 
 import java.util.*;
 import java.io.*;
 import java.util.regex.*;
@@ -121,7 +120,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
             ident = p.getIdent();
             descr = p.getDescr(); 
             source = p.getSourceId(); 
-            LatLng ref = p.getPosition().toLatLng();
+            LatLng ref = p.getPosition();
             pos = new double[] {ref.getLng(), ref.getLat()};
         }
     }
@@ -224,7 +223,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
     protected String      _icon; 
     protected String      _description;    
        
-    public PointObject(Reference p)
+    public PointObject(LatLng p)
        { super(p); }       
   
     

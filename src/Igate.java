@@ -18,7 +18,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.text.*;
-import uk.me.jstott.jcoord.*;
+
 
 /**
  * Igate - Gateway between RF channel and internet channel.
