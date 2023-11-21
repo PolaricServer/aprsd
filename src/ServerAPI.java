@@ -224,9 +224,6 @@ public interface ServerAPI
     public String getToAddr();
    
    
-    /** Get SAR URL handler. */
-    public SarUrl getSarUrl();
-   
    
     /** Get SAR mode info. */
     public SarMode getSar();
