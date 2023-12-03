@@ -91,7 +91,13 @@ public class WebServer implements ServerAPI.Web
        _pubsub     = new PubSub(_api, true); 
        _jmapupdate = new JsonMapUpdater(_api, true);
        _auth = new AuthService(api); 
-      
+            
+            
+            
+        if (api.getBoolProperty("layerstats.on", false)) 
+            _jmapupdate.setStatLogger(new LStatLogger(api, "layerstats", "layerstats.log")); 
+        
+        
         /*  https://blog.codecentric.de/en/2017/07/fine-tuning-embedded-jetty-inside-spark-framework/  */
         EmbeddedServers.add(EmbeddedServers.Identifiers.JETTY, 
          (Routes routeMatcher, StaticFilesConfiguration staticFilesConfiguration, ExceptionMapper ex, boolean hasMultipleHandler) -> 
@@ -288,8 +294,10 @@ public class WebServer implements ServerAPI.Web
         init();
         
         var secure = _api.getBoolProperty("httpserver.secure", false);
+        var proxy  = _api.getBoolProperty("httpserver.proxy", true);
         var mycall = _api.getProperty("default.mycall", "NOCALL");
-        _zconf.registerMdns("_polaric_aprsd._tcp.local.", mycall, _port, "secure="+(secure?"yes":"no"));
+        _zconf.registerMdns("_polaric_aprsd._tcp.local.", mycall, _port,
+             "secure="+(secure?"yes":"no")+", "+"proxy="+(proxy?"yes":"no"));
     }
     
     
@@ -303,6 +311,7 @@ public class WebServer implements ServerAPI.Web
             corsEnabled.add(uri);
         }
     }
+    
     
     public void protectUrl(String prefix) {
         protectUrl(prefix, null);

@@ -118,13 +118,13 @@ public class Signs extends Source
                         
                     double lat = Double.parseDouble(x[0]);
                     double lng = Double.parseDouble(x[1]);
-                    long scale = Long.parseLong(x[3]);
+                    long scale = Long.parseLong(x[2]);
                     LatLng pos = new LatLng(lat, lng);
-                    if (x.length > 7)
-                       x[6] = x[6] + " "+ x[7];
+                    if (x.length > 6)
+                       x[5] = x[5] + " "+ x[6];
                      
                      /* NOTE: signs from local file get suffix @local */
-                    Item it = new Item(""+(localId++), pos, scale, x[4], x[5], x[6]);
+                    Item it = new Item(""+(localId++), pos, scale, x[3], x[4], x[5]);
                     _list.add(it);
                 }
             }     

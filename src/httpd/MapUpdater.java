@@ -15,7 +15,6 @@
 
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
-
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,6 +40,7 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
        private boolean   _subscribe; 
        private long      _lastSent = 0;
        private boolean   _pending = false; 
+       private String    _baseLayer = "none";
        
        protected LatLng  _uleft;     /* Area of interest: upper left */
        protected LatLng  _lright;    /* Area of interest: lower right */
@@ -118,15 +118,20 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
               else
                  _api.log().warn("MapUpdater", "SUBSCRIBE command with too few parameters. uid="+_uid); 
            }
+           else if (parms[0].equals("BASELAYER")) {
+                  _baseLayer = parms[1];
+           }
            else if (!parms[0].equals("****"))
               _api.log().warn("MapUpdater", "Unknown command from client. uid="+_uid);
        }   
    } /* Class client */
      
-    
+     
+   private LStatLogger _stats;
    private MapUpdater _link;  
    private Timer hb = new Timer();
    protected long    _updates = 0;
+   
           
           
     public MapUpdater(ServerAPI api, boolean trust) { 
@@ -139,8 +144,23 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
                           x -> ((Client)x).isInside(null, false) ); 
             } 
         } , 10000, 5000); 
+        
+        /* Periodic task to count usage of map layers */
+        hb.schedule( new TimerTask() { 
+            public void run() { 
+               if (_stats != null) {
+                  for (String x : _clients.keySet())
+                     _stats.count( ((Client)_clients.get(x))._baseLayer); 
+               }
+            } 
+        } , 30000, 60000); 
     }  
     
+          
+          
+    public void setStatLogger(LStatLogger l) {
+       _stats = l;
+    }
           
     /**
      * Websocket close handler.

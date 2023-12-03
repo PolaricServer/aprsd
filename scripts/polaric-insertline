@@ -10,14 +10,13 @@ if [ ! $# -eq 4 ]; then
 fi
 
 if [[ $(sed -n "/$3/=" $1) != "" ]]; then 
-    echo "already there"
 	exit 0
 fi
 
 linenr=$(sed -n "/$2/=" $1 | head -n 1)
 
 if [[ $linenr == "" ]]; then 
-	echo "Insert point not found" 
+	echo "polaric-insertline: Insert point not found" 
 	exit 0
 fi
 
