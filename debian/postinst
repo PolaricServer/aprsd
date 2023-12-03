@@ -41,9 +41,11 @@ case "$1" in
         fi
         
         echo
-        echo "******* Polaric-aprsd *******"
-        echo "Server can be configured via the polaric-webapp2 package"
-        echo "If this is the first time installataion, please set your CALLSIGN and restart server!" 
+        echo "******** Polaric-aprsd ********"
+        echo "It is recommended to install the polaric-webapp2 package. It can also be used to"
+        echo "configure the server. If this is the first time installataion, please set your CALLSIGN and restart!" 
+        echo
+        echo "Use the command 'polaric-setcall' to set the callsign"
         echo "Use the command 'polaric-restart' to restart server" 
         echo "Use command 'polaric-password' to change password or add new users"
         echo 
