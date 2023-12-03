@@ -1,0 +1,18 @@
+#!/bin/bash
+DIR=/etc/polaric-aprsd
+CONFIG=$DIR/server.ini
+
+echo "Please enter your callsign:"
+read callsign
+
+callsign_regex="^[a-zA-Z0-9\-]+$"
+
+if [[ $callsign =~ $callsign_regex ]] && (( ${#input_value} <= 10 )); then
+  callsign=${callsign^^}
+  echo "Ok, setting default callsign to: $callsign"
+  sed -i -E "s/default\.mycall = .+/default\.mycall = $callsign/g" "$CONFIG"
+  
+else
+  echo "Invalid input. Try again with a valid callsign"
+fi
+
