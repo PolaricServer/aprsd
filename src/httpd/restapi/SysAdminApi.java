@@ -110,7 +110,7 @@ public class SysAdminApi extends ServerBase {
                     props.remove("channel.default.inet");
                 }
                 else if (cnf.inetchan) {
-                    _api.setRfChannel(ach);
+                    _api.setInetChannel(ach);
                     props.setProperty("channel.default.inet", ach.getIdent());
                 }
             }
@@ -120,8 +120,10 @@ public class SysAdminApi extends ServerBase {
         }
         
         ch.setJsConfig((Channel.JsConfig) cnf.specific);
-        if (cnf.active)
+        if (cnf.active) {
+            ch.deActivate(); 
             ch.activate(_api);
+        }
         else if (ch.isActive())
             ch.deActivate();
     }
