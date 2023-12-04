@@ -10,22 +10,6 @@ License: GPL-2.0
 (see /usr/share/common-licenses/GPL-2)
 
 
-Files: lib/jcoord-polaric.jar
-Copyright: J. M. Stott 
-License: GPL
-(see http://www.jstott.me.uk/jcoord/)
-Modified by Ø.Hanssen for Polaric aprsd.
-Modified source: jcoord-modified.tar.gz
-
-
-Files: lib/utf8-with-fallback-polaric.jar
-Copyright: Rasmus Svensson 
-License: LGPL
-(see /usr/share/common-licenses/LGPL-3)
-Modified by Ø.Hanssen for Polaric aprsd
-Modified source: utf8-with-fallback-modified.tar.gz
-
-
 Files: lib/jetty-polaric.jar
 Copyright: 2017, Eclipse Jetty Project
 Licence: GPL-2.0 with classpath exception

@@ -42,12 +42,12 @@ case "$1" in
         
         echo
         echo "******** Polaric-aprsd ********"
-        echo "It is recommended to install the polaric-webapp2 package. It can also be used to"
-        echo "configure the server. If this is the first time installataion, please set your CALLSIGN and restart!" 
+        echo "It is recommended to install the polaric-webapp2 package. It can also be used to configure"
+        echo "the server. If this is the first time installataion, please set your CALLSIGN and restart!" 
         echo
         echo "Use the command 'polaric-setcall' to set the callsign"
         echo "Use the command 'polaric-restart' to restart server" 
-        echo "Use command 'polaric-password' to change password or add new users"
+        echo "Use command 'polaric-passwd' to change password or add new users"
         echo 
     ;;
 

@@ -376,5 +376,43 @@ V.2.12
  * Various fixes..
 
   
+V.3.0
+-----
+  (aprsd)
+* Add TRAFFIC keyword to filter scripts
+* Regognize UI packets to ID or BEACON as status reports.
+* Allow items without position 
+* If a station's description is empty, then use the latest Status message (W6ELA)
+* Tag ID and BEACON packets with the "BEACON" tag to help find them (W6ELA)..
+* Pac4j to version 5.7.1
+* Implement new HMAC-based authentication scheme (see doc)
+* Update Server-server authentication and authorisation (see doc)
+* All config through REST API (SysAdminApi)
+* Remove Scala code (Web-interface for config). All is now REST API.
+* Allow conn to websocket to specify if mobile-app. 
+* Update to mDNS announcement
+* Stop using jcoord and utf8-w-fallback
+* Remove SarUrl class
+* Remove unneccesary libs and files
+* Add some helper scripts
+* Many updates and fixes..
   
+  (db-plugin)
+* DbSync work
+* Move to 2021.1.0+ of libpostgis-java
+* stop using jcoord
+* Move pligin jar files to /usr/share/polaric/plugins
+* Various fixes..
+
+  (webapp2)
+* Some minor icon updates
+* Improve support for mobile devices
+* New Authentication scheme (HMAC based)
+* Improvements to websocket clients
+* Client code for server-admin (based on new API)
+* Allow setting alternative servers dynamically
+* OpenLayers to 7.5.2, proj4.js to 2.9.2
+* Use jquery libs from deb packages
+* Move default app-setup out of examples directory
+* Many updates and fixes...
 

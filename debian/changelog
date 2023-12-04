@@ -1,3 +1,25 @@
+polaric-aprsd (3.0) stable; urgency=medium
+
+  * Add TRAFFIC keyword to filter scripts
+  * Regognize UI packets to ID or BEACON as status reports.
+  * Allow items without position 
+  * If a station's description is empty, use the latest Status msg (W6ELA)
+  * Tag ID and BEACON packets with the "BEACON" tag to help find them (W6ELA)..
+  * Pac4j to version 5.7.1
+  * Implement new HMAC-based authentication scheme (see doc)
+  * Update Server-server authentication and authorisation (see doc)
+  * All config through REST API (SysAdminApi)
+  * Remove Scala code (Web-interface for config). All is now REST API.
+  * Allow conn to websocket to specify if mobile-app. 
+  * Update to mDNS announcement
+  * Stop using jcoord and utf8-w-fallback
+  * Remove SarUrl class
+  * Remove unnecessary libs and files
+  * Add some helper scripts
+  * Many updates and fixes..
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Mon, 4 Dec 2023 21:46:00 +0100
+
 polaric-aprsd (2.12) stable; urgency=medium
 
   * Update libraries
