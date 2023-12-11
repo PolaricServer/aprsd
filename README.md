@@ -18,9 +18,7 @@ http://aprs.no/polaricserver or https://polaricserver.readthedocs.io
 ## System requirements
 
 Linux/Java platform (tested with Debian/Ubuntu) with
-* Java Runtime environment version 11 or later. 
-* Scala library version 2.11 or later. You will also need scala-xml
-  and scala-parser-combinators packages.
+* Java Runtime environment version 17 or later. 
 * jsvc.
 * librxtx-java (if using serial port for communication with TNC or GPS).
 * libjackson2 (for JSON processing)
@@ -30,13 +28,10 @@ We support deb installation packages for Linux distros that can use it (Debian, 
 It shouldn't be too hard to port it to e.g. Windows if anyone wants to do the job. 
 
 We also use the following external libraries. jar files are included: 
-* Jcoord, with some small modifications. Compiled jar and source included.
-* utf8-with-fallback with some small modifications. Compiled jar and source included. 
 * Jetty and Spark framework (HTTP server)
 * pac4j framework (authentication/authorization)
 * nano-cuckoo with lz4
 * jMDNS
-* fst with objenesis
 
 
 ## Installation
@@ -47,11 +42,11 @@ see: https://polaricserver.readthedocs.io/en/latest/gettingstarted.html
 Documentation on the project can be found here: 
 http://aprs.no/polaricserver
 
-To configure a standalone server, point your browser to: 
-http://localhost:8081/config_menu
+To configure a server, use the webapp2. Some command-line scripts are also available: 
+polaric-setcall, polaric-password, 
 
-username=admin, password=polaric. Use the command polaric-password
-to change the password and add new users. 
+For first-time login use account: username=admin, password=polaric. Remember to change the password at your fist
+convenience. 
 
 Se also: [Examples of how to use it with Docker](https://github.com/PolaricServer/Dockerfiles).
 
@@ -59,8 +54,7 @@ Se also: [Examples of how to use it with Docker](https://github.com/PolaricServe
 ## Building from source 
 
 Build from the source is done by a plain old makefile. Yes I know :)
-Maybe I move to something else a little later. Setup for generating deb
+Maybe I move to something else (Maven, Gradle) later. Setup for generating deb
 packages is included. You may use the 'debuild' command.
 
-You will need JDK (Oracle or OpenJDK) version 11 or later, the Scala
-programming language version 2.11.12 or later. 
+You will need JDK (Oracle or OpenJDK) version 17 or later. 
