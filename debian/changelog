@@ -1,3 +1,9 @@
+polaric-aprsd (3.0+) UNRELEASED; urgency=medium
+
+  * Hacking...
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Tue, 05 Dec 2023 21:38:49 +0100
+
 polaric-aprsd (3.0) stable; urgency=medium
 
   * Add TRAFFIC keyword to filter scripts

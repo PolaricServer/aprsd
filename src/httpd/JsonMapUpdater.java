@@ -131,7 +131,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 }
                 
                 /* Add signs to list */
-                for (Signs.Item s: Signs.search(_scale, _uleft, _lright)) {
+                for (Signs.Item s: Signs.search(getUsername(), _scale, _uleft, _lright)) {
                     JsPoint p = createSign(s); 
                     if (p!=null)
                        mu.points.add(p);

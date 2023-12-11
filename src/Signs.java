@@ -39,12 +39,12 @@ public class Signs extends Source
      * Interface for searching in a database external to this class. 
      */
     public interface ExtDb {
-        public Iterable<Item> search(long scale, LatLng uleft, LatLng lright);
+        public Iterable<Item> search(String uid, long scale, LatLng uleft, LatLng lright);
         public void close(); 
     }
     
     
-     /**
+    /**
      * Sign item. A pointobject plus scale and url.
      */
     public static class Item extends PointObject {
@@ -59,7 +59,7 @@ public class Signs extends Source
           { return _id; }
           
         public String getIdent()
-          { return _id.matches(".*@local") ? "__loc."+(_id) : "__db."+_id; }
+          { return _id.matches(".*@(local|datex)") ? "__loc."+(_id) : "__db."+_id; }
           
         public Source getSource()
           { return null; }
@@ -72,7 +72,7 @@ public class Signs extends Source
         
         public Item (String i, LatLng r, long sc, String ic, String url, String txt)
           { super(r);  _id = i; _maxScale = sc; _icon = ic; _url = url; _description = txt; 
-            if (_url.matches("-|null|none")) 
+            if (_url==null || _url.matches("-|null|none")) 
                  _url = null; }   
     }
     
@@ -80,6 +80,8 @@ public class Signs extends Source
     private BufferedReader  _rd;
     private StringTokenizer _next;
     private List<Item> _list = new ArrayList<Item>();
+    private Map<String, Item> _list2 = new HashMap<String, Item>();
+    
     private ExtDb _extdb = null;
     private int localId = -1;
     
@@ -94,9 +96,7 @@ public class Signs extends Source
     /**
      * Read signs file.
      * Format of each line: 
-     * UTM-zone, UTM-easting, UTM-northing, max-scale, icon-filename, URL, description.
-     * Example:  
-     *    33W, 123456, 1234567, 30000, symbol.gif, http://mysite.net, This is my site 
+     * lat, long, max-scale, icon-filename, URL, description.
      */  
     protected Signs(ServerAPI api, String file) 
     {
@@ -124,7 +124,7 @@ public class Signs extends Source
                        x[5] = x[5] + " "+ x[6];
                      
                      /* NOTE: signs from local file get suffix @local */
-                    Item it = new Item(""+(localId++), pos, scale, x[3], x[4], x[5]);
+                    Item it = new Item(""+(localId++)+"@local", pos, scale, x[3], x[4], x[5]);
                     _list.add(it);
                 }
             }     
@@ -136,13 +136,23 @@ public class Signs extends Source
     }     
     
     
+    public static void clear() {
+       _signs._list2.clear();
+    }
+    
+    
+    public static void add(Item it) {
+       _signs._list2.put(it.getId(), it);
+    }
+    
+    
     public static void setExtDb(ExtDb x)
        { _signs._extdb = x; }
        
        
     
     public static synchronized Iterable<Item>
-          search(long scale, LatLng uleft, LatLng lright)
+          search(String uid, long scale, LatLng uleft, LatLng lright)
     {
          LinkedList<Item> result = new LinkedList<Item>();
          if (_signs == null)
@@ -153,15 +163,17 @@ public class Signs extends Source
          for (Item s: _signs._list)
             if (s.visible(scale) && s.isInside(uleft, lright, 0.1, 0.1))
                 result.add(s);
-        
+         for (Item s: _signs._list2.values())
+            if (s.visible(scale) && s.isInside(uleft, lright, 0.1, 0.1))
+                result.add(s);
+         
          if (_signs._extdb != null) {
             /* Copy items from database resultset. This may be a little
              * inefficient, so consider to support returning the resultset directly. 
              * However, this allows us to mix it with signs from static file rather easily.
              */
-            for (Item s: _signs._extdb.search(scale, uleft, lright)) 
+            for (Item s: _signs._extdb.search(uid, scale, uleft, lright)) 
                result.add(s);
-            
             _signs._extdb.close();   
          }
          return result;
