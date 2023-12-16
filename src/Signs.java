@@ -51,6 +51,7 @@ public class Signs extends Source
         protected String _id;
         protected long _maxScale;
         protected String _url;
+        protected String _type = "sign";
         
         public boolean visible(long scale)
           { return scale <= _maxScale; }
@@ -69,6 +70,14 @@ public class Signs extends Source
           
         public String getUrl()
           { return _url; }
+        
+        public void setType(String t) {
+          _type = t;
+        }
+        
+        public String getType() {
+          return _type;
+        }
         
         public Item (String i, LatLng r, long sc, String ic, String url, String txt)
           { super(r);  _id = i; _maxScale = sc; _icon = ic; _url = url; _description = txt; 
@@ -125,6 +134,8 @@ public class Signs extends Source
                      
                      /* NOTE: signs from local file get suffix @local */
                     Item it = new Item(""+(localId++)+"@local", pos, scale, x[3], x[4], x[5]);
+                    if (it.getUrl() != null && it.getUrl().charAt(0) == 'P')
+                        it.setType("picture");
                     _list.add(it);
                 }
             }     

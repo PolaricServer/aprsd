@@ -152,6 +152,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             JsPoint x = new JsPoint(); 
             
             x.ident = s.getIdent();
+            x.type  = s.getType();
             x.pos   = new double[] {ref.getLng(), ref.getLat()};
             x.title = s.getDescr() == null ? "" : fixText(s.getDescr());
             x.href  = s.getUrl() == null ? "" : s.getUrl();
