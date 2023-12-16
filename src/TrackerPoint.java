@@ -495,6 +495,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
             setAlias(null);
             setIcon(null);
             removeAllTags();
+            setChanging();
         }
         return _expired;
     }

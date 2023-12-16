@@ -23,6 +23,7 @@ import java.nio.charset.Charset;
 import no.polaric.aprsd.http.*;
 import no.polaric.aprsd.filter.*;
 import java.util.concurrent.*;
+import java.util.logging.*;
 
 
 
@@ -349,14 +350,12 @@ public class Main implements ServerAPI
             ownobjects = db.getOwnObjects(); 
             
             /* 
-             * Plug-ins. These are started after the webserver is instantiated since they may use it or
+             * Plug-ins. The webservice parts are started after the webserver is instantiated since they may use it or
              * start websockets 
              */           
             PluginManager.addList(getProperty("plugins", ""));
             ws.start();
-            
-            
-            
+  
 
             /* Start webservices (REST API) of plugins after Webserver is started */
             PluginManager.startWebservices();
@@ -416,7 +415,7 @@ public class Main implements ServerAPI
         }
         catch( Exception ioe )
         {
-             log.error("Main", "Couldn't start server:\n");
+             log.error("Main", "Error when starting server:\n");
              ioe.printStackTrace(System.err);;
         }
         
