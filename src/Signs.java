@@ -39,7 +39,7 @@ public class Signs extends Source
      * Interface for searching in a database external to this class. 
      */
     public interface ExtDb {
-        public Iterable<Item> search(String uid, long scale, LatLng uleft, LatLng lright);
+        public Iterable<Item> search(String uid, String group, long scale, LatLng uleft, LatLng lright);
         public void close(); 
     }
     
@@ -78,6 +78,11 @@ public class Signs extends Source
         public String getType() {
           return _type;
         }
+        
+        public String getUser() {
+          return null;
+        }
+        
         
         public Item (String i, LatLng r, long sc, String ic, String url, String txt)
           { super(r);  _id = i; _maxScale = sc; _icon = ic; _url = url; _description = txt; 
@@ -163,7 +168,7 @@ public class Signs extends Source
        
     
     public static synchronized Iterable<Item>
-          search(String uid, long scale, LatLng uleft, LatLng lright)
+          search(String uid, String group, long scale, LatLng uleft, LatLng lright)
     {
          LinkedList<Item> result = new LinkedList<Item>();
          if (_signs == null)
@@ -183,7 +188,7 @@ public class Signs extends Source
              * inefficient, so consider to support returning the resultset directly. 
              * However, this allows us to mix it with signs from static file rather easily.
              */
-            for (Item s: _signs._extdb.search(uid, scale, uleft, lright)) 
+            for (Item s: _signs._extdb.search(uid, group, scale, uleft, lright)) 
                result.add(s);
             _signs._extdb.close();   
          }

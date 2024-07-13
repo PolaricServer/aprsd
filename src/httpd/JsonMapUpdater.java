@@ -131,7 +131,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 }
                 
                 /* Add signs to list */
-                for (Signs.Item s: Signs.search(getUsername(), _scale, _uleft, _lright)) {
+                for (Signs.Item s: Signs.search(getUsername(), getGroup(), _scale, _uleft, _lright)) {
                     JsPoint p = createSign(s); 
                     if (p!=null)
                        mu.points.add(p);
@@ -157,6 +157,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             x.title = s.getDescr() == null ? "" : fixText(s.getDescr());
             x.href  = s.getUrl() == null ? "" : s.getUrl();
             x.icon  = "/icons/"+ s.getIcon();
+            x.own   = (getUsername() != null && getUsername().equals(s.getUser()));
             return x;
         }
         
