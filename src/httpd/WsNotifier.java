@@ -105,7 +105,10 @@ public abstract class WsNotifier extends ServerBase
          
       public String getUsername()
          { return (_auth == null ? null : _auth.userid); }
-           
+      
+      public String getGroup()
+         { return (_auth == null ? null : _auth.groupid); }
+         
       public boolean isMobile() {return _mobile;}
       public Date created() {return _ctime; }
       public long nIn() {return _nIn; }
