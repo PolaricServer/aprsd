@@ -85,15 +85,23 @@ public class SysAdminApi extends ServerBase {
             );
         }
     }
+
     
     
-    public  void setChannelProps(Channel ch, ChannelInfo cnf) {
+    public  void setChannelProps(Channel ch, ChannelInfo cnf, String type) {
         var props = _api.getConfig();
         props.setProperty("channel."+ch.getIdent()+".on", ""+cnf.active);
         props.setProperty("channel."+ch.getIdent()+".tag", cnf.generic.tag);
         props.setProperty("channel."+ch.getIdent()+".restricted", ""+cnf.generic.restricted);
+        if (type != null)
+            props.setProperty("channel."+ch.getIdent()+".type", type);
+        
         try {
         if (ch instanceof AprsChannel ach) {
+            
+            ach.addReceiver(_api.getAprsParser());
+        
+        
             if (ach.isRf()) {
                 if (_api.getRfChannel() == ach && !cnf.rfchan) {
                     _api.setRfChannel(null);
@@ -439,7 +447,7 @@ public class SysAdminApi extends ServerBase {
             ChannelInfo conf = (ChannelInfo) ServerBase.fromJson(req.body(), ChannelInfo.class);
             if (conf==null)
                 return ERROR(resp, 400, "Couldn't parse input");  
-            setChannelProps(ch, conf);
+            setChannelProps(ch, conf, null);
             return "Ok";
         });
     
@@ -458,7 +466,7 @@ public class SysAdminApi extends ServerBase {
             var ch = chmgr.newInstance(_api, tname, conf.name);
             if (ch==null)
                 return ERROR(resp, 400, "Couldn't instantiate channel: "+tname+": "+conf.name);
-            setChannelProps(ch, conf);
+            setChannelProps(ch, conf, tname);
             updateChanList();
             return "Ok";
         });  
