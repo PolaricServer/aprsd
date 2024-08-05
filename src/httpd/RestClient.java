@@ -63,6 +63,17 @@ public class RestClient {
     }
     
     
+    public RestClient(ServerAPI api, String url) {
+        _api=api;
+        _url=url;
+        _userid=null;
+        _client = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .connectTimeout(Duration.ofSeconds(20))
+            .build();
+    }
+    
     
     public String getUrl() {return _url;}
     
