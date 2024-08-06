@@ -78,6 +78,7 @@ public abstract class AprsChannel extends Channel
 
     /**
      * Interface for receivers of APRS packets.
+     * Receivers can be AprsParser and Igate. See also Database Plugin
      */
     public interface Receiver {
         /** Receive an APRS packet. 
@@ -329,6 +330,8 @@ public abstract class AprsChannel extends Channel
           regHeard(p);
        else
           _duplicates++;
+          
+       /* Pass the packet to registered receivers: Aprs-parser, igate, etc.. */
        for (Receiver r: _rcv)
            r.receivePacket(p, dup);
        return !dup;

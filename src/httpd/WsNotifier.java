@@ -346,7 +346,7 @@ public abstract class WsNotifier extends ServerBase
     @OnWebSocketMessage
     public void onMessage(Session conn, String message) {
         Client c = _clients.get(_getUid(conn));
-        if (c != null && message.length() > 0) {
+        if (c != null && message != null &&  message.length() > 0) {
            c._nIn++;
            c.onTextFrame(message);
         }
