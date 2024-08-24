@@ -29,8 +29,8 @@ import java.util.logging.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "3.0+";
-   public  static String toaddr  = "APPS30";
+   public  static String version = "3.1";
+   public  static String toaddr  = "APPS31";
    
    private static StationDB db = null;
    private static AprsParser parser = null;
@@ -42,7 +42,6 @@ public class Main implements ServerAPI
    public static  OwnPosition ownpos = null; 
    public static  BullBoard bullboard = null;
    public static  RemoteCtl rctl;
-   public static  SarMode  sarmode = null;
    private static Properties _config, _defaultConf; 
    private static WebServer ws; 
    private static Channel.Manager _chanManager = new Channel.Manager();
@@ -199,16 +198,6 @@ public class Main implements ServerAPI
     
    public String getToAddr()
     { return toaddr; }
-    
-   public SarMode getSar()
-    { return sarmode; }
-    
-   public void setSar(String reason, String src, String filt, boolean hideAlias)
-    { sarmode = new SarMode(reason, src, filt, hideAlias); }
- 
-   public void clearSar()
-    { sarmode = null; }
-    
     
     
    private ServerAPI api;

@@ -63,7 +63,6 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                     return null;
                 }
                 mu.authorization = _auth;
-                mu.sarmode = (_api.getSar() != null);
                 if (!metaonly)
                     addPoints(mu);
                 return serializeJson(mu);
@@ -113,7 +112,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                       continue; 
 
                     /* Add point to delete-list */
-                    if (!s.visible() || (_api.getSar() != null && !allowed && _api.getSar().filter(s))) {
+                    if (!s.visible() || !allowed) {
                         if (!_keep) 
                             continue;
                         mu.delete.add(s.getIdent());
@@ -189,7 +188,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             x.telemetry = s.hasTag("APRS.telemetry");
            
             String icon = action.getIcon(s.getIcon()); 
-            if (s.iconOverride() && _api.getSar()!=null)  
+            if (s.iconOverride())  
                icon = s.getIcon(); 
             x.icon = "/icons/"+ (icon != null ? icon : _icon); 
             x.trail = createTrail(s, action);
@@ -200,8 +199,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
        
         /** Create label or return null if label is to be hidden. */
         private JsLabel createLabel(TrackerPoint s, Action action) {
-            boolean showSarInfo = login() || _api.getSar() == null || 
-                !_api.getSar().isAliasHidden() || !action.hideAlias();
+            boolean showSarInfo = login() || !action.hideAlias();
             
             JsLabel lbl = new JsLabel();
            

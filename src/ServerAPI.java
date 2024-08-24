@@ -224,23 +224,6 @@ public interface ServerAPI
     public String getToAddr();
    
    
-   
-    /** Get SAR mode info. */
-    public SarMode getSar();
-
-
-    /** Set SAR mode. 
-     * @param src Callsign of the user requesting SAR mode. 
-     * @param filt Regular expression for filtering source callsign of pos reports.
-     * @param descr The reason why SAR mode is requested. 
-     */
-    public void setSar(String src, String filt, String descr, boolean h);
-
-
-    /**
-     * Clear SAR mode. 
-     */
-    public void clearSar();
     
     
     /**

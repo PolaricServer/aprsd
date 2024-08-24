@@ -356,8 +356,6 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         /* Remove ALIAS or ICON commands for the item */
         _cmds.values().removeIf( (x)-> x.cmd.matches("(ALIAS|ICON) "+arg1_+" .*") );
   
-     else if (arg[0].matches("SAR"))
-         return;
      
      /* Don't store deletions */
      if (!text.matches(".*(NULL|OFF)") && !text.matches("RM.*")) 
@@ -422,7 +420,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        * CON ack may be lost. 
        */
       if (!_parentCon && sender.getIdent().equals(_parent) && 
-           arg[0].matches("ALIAS|ICON|TAG|USER|RMTAG|SAR|RMUSER|RMNODE|RMITEM")) {
+           arg[0].matches("ALIAS|ICON|TAG|USER|RMTAG|RMUSER|RMNODE|RMITEM")) {
            _parentCon = true; 
            _log.info(null, "Connection to parent: "+_parent+ " assumed (CON ACK may be lost)");
       }
@@ -450,8 +448,6 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           p = doSetTag(sender, args);
       else if (arg[0].equals("RMTAG"))
           p = doRemoveTag(sender, args);          
-      else if (arg[0].equals("SAR"))
-          p = doSetSarMode(sender, args);
       else if (arg[0].equals("USER")) {
           args = decodeUser(args);
           p = doUser(sender, args, true);
@@ -598,53 +594,6 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     }
        
        
-   /**
-    * Set SAR mode. 
-    * @param sender The station that sent the commmand.
-    * @param args The arguments of the SAR command or OFF.
-    * @return true if success.
-    */
-   protected boolean doSetSarMode(Station sender, String args)
-   {
-       if (args == null) {
-          _api.log().warn("RemoteCtl", "Missing arguments to remote SAR command");
-          return false;
-       }
-       if ("OFF".equals(args.trim())) {
-           _api.log().debug("RemoteCtl", "Clear SAR-mode from "+sender.getIdent());
-           _api.clearSar();
-       }
-       else {      
-           String arg1, arg2;
-           String[] arg = args.split("\\s+", 3);
-           if (arg.length < 1) {
-               _api.log().warn("RemoteCtl", "Remote SAR command syntax error");
-               return false;
-           }
-           else if (arg.length < 2) {
-                arg1 = "NONE";
-                arg2 = "";
-           }
-           else if (arg.length < 3) {
-                arg1 = arg[1];
-                arg2 = "";
-           }
-           else {
-                arg1 = arg[1]; arg2=arg[2]; 
-           }
-           
-           boolean nohide = false; 
-           if (arg2.matches("\\[NOHIDE\\].*")) {
-                nohide = true; 
-                arg2 = arg2.substring(8); 
-           }
-           
-           _api.log().debug("RemoteCtl", "Set SAR-mode from "+sender.getIdent());
-           String filter = ("NONE".equals(arg1) ? "" : arg1);
-           _api.setSar(arg2, arg[0]+"@"+sender.getIdent(), filter, !nohide);
-       }
-       return true;
-   }
    
    
    /**
