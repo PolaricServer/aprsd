@@ -252,7 +252,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
     
     public String getSourceId() { 
         Source s = getSource(); 
-        return (s==null ? "(unknown)" : s.getIdent()); 
+        return (s==null ? "(local)" : s.getIdent()); 
     }
     
     public abstract Source getSource(); 
