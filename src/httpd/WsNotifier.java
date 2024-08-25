@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2024 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,12 +60,11 @@ public abstract class WsNotifier extends ServerBase
       
       protected class _CB implements WriteCallback {
         public void writeFailed(Throwable x) {
-            _api.log().warn("WsNotifier", "sendText write failed: "+x.getMessage());
         }
-        public void writeSuccess() {
+        public void writeSuccess() {        
         }
-        
       }
+
       
    
       public Client(Session conn) {
@@ -87,15 +86,20 @@ public abstract class WsNotifier extends ServerBase
       public final boolean login() 
          { return _auth != null && _auth.userid != null; }
    
-      public void sendText(String text) throws IOException {
-          if (_conn == null || _conn.getRemote() == null) {
-              _api.log().warn("WsNotifier", "sendText. Connection is null");
-              return;
-          }
-          if (text == null) text="";
-          _nOut++; 
-          _conn.getRemote().sendString(text, new _CB()); 
-       }
+   
+      public boolean sendText(String text) throws IOException {
+         if (_conn == null || _conn.getRemote() == null) {
+            _api.log().warn("WsNotifier", "sendText. Connection is null");
+            return false;
+         }
+         if (text == null) text="";
+         _nOut++; 
+
+         _conn.getRemote().sendString(text); 
+         return true;
+      }
+   
+
    
       public  String getUid()
          { return _uid; }

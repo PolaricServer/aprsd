@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022-23 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2022-24 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
  
 package no.polaric.aprsd.http;
 import java.util.*;
-
+import no.polaric.aprsd.ServerAPI;
 
 
 public class NodeWsApi<T> {
@@ -26,7 +26,7 @@ public class NodeWsApi<T> {
     private Handler<String> _handler;
     private Handler<T> _chandler;
     private Map<String, NodeWsClient> _servers;
-    
+    private ServerAPI _api;
     
     public interface Handler<T> {
         public void recv(String nodeid, T obj);
@@ -35,14 +35,16 @@ public class NodeWsApi<T> {
     
 
     @SuppressWarnings("unchecked")
-    public NodeWsApi(String nodeid, NodeWs srv, Class<T> cls) {
+    public NodeWsApi(ServerAPI api, String nodeid, NodeWs srv, Class<T> cls) {
         _servers = new HashMap<String,NodeWsClient>();
         _children = srv;
         _nodeid = nodeid;
         _cls = cls;
+        _api = api;
         
         _handler = new Handler<String>() {
             public void recv(String nodeid, String obj) {
+                _api.log().debug("NodeWsApi", "Received message from: "+nodeid);
                 if (_chandler != null)
                     _chandler.recv(nodeid, (T) ServerBase.fromJson(obj, _cls));
             }
@@ -91,12 +93,14 @@ public class NodeWsApi<T> {
     }
     
     
-
+    /** Post a object to the connected node (JSON encoded) */
     public boolean put(String nodeid, T obj) {
         NodeWsClient srv = _servers.get(nodeid);
         if (srv != null && srv.isConnected())
+            /* Send to parent node if it exists */
             return srv.put(obj);
         else
+            /* Send to child node */
             return _children.put(nodeid, obj);
     }
     

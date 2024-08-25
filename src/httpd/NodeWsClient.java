@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2022-23 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2022-24 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import no.polaric.aprsd.ServerAPI;
  * Client side of websocket. 
  */
 
-public class NodeWsClient implements WebSocket.Listener{
+public class NodeWsClient implements WebSocket.Listener {
     
     private ServerAPI _api;
     private WebSocket _wsClient; 
@@ -117,12 +117,6 @@ public class NodeWsClient implements WebSocket.Listener{
     
     
     
-    public boolean putText(String msg) {
-        return putCommand("POST ", msg);
-    }
-    
-    
-    
     public boolean putCommand(String cmd, String msg) {
         _api.log().debug("NodeWsClient", "Post message: "+cmd);
 
@@ -130,8 +124,21 @@ public class NodeWsClient implements WebSocket.Listener{
             _api.log().warn("NodeWsClient", "Node not connected: "+_url);
             return false;
         }
-        _wsClient.sendText(cmd + msg, true);
+        /* Send it on websocket */
+        try {
+            _wsClient.sendText(cmd + msg, true).join();
+        }
+        catch (CompletionException e) {
+            Throwable cause = e.getCause();
+            _api.log().warn("NodeWsClient", "Message delivery failed: "+cause);
+            return false;
+        }
         return true;
+    }
+        
+    
+    public boolean putText(String msg) {
+        return putCommand("POST ", msg);
     }
     
                 
@@ -196,11 +203,15 @@ public class NodeWsClient implements WebSocket.Listener{
     
     @Override
     public CompletionStage<?> onText​(WebSocket webSocket, CharSequence data, boolean last) {
+        _api.log().debug("NodeWsClient", "onText: "+_nodeid+", "+_handler);
         if (_handler != null) {
             String[] parms = data.toString().split(" ", 2);
-            if (parms.length < 2) 
-                _api.log().warn("NodeWsClient", "Format error in message");
+            if (parms.length < 2) { 
+                if (parms.length == 0 || !parms[0].equals("PING"))
+                    _api.log().warn("NodeWsClient", "Format error in message");
+            }
             else if (parms[0].equals("POST")) {
+                _api.log().debug("NodeWsClient", "calling handler: "+_nodeid);
                 _handler.recv(_nodeid, parms[1]);
             }
         }

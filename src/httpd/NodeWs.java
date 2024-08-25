@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2022-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2022-2024 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.io.IOException;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.*;
+import org.eclipse.jetty.websocket.api.WebSocketException;
 import java.net.*;
 import java.util.function.*;
 
@@ -33,7 +34,7 @@ import java.util.function.*;
 public class NodeWs extends WsNotifier 
 {
     private NodeWsApi.Handler<String> _handler;
-    
+    private Timer hb = new Timer();
     
     
     public class Client extends WsNotifier.Client
@@ -43,8 +44,10 @@ public class NodeWs extends WsNotifier
         }
              
         public String nodeid;
-        
-       
+      
+
+      
+      
         @Override synchronized public void onTextFrame(String text) {
             String[] parms = text.split(" ", 2);
             if (parms.length < 2) {
@@ -92,6 +95,13 @@ public class NodeWs extends WsNotifier
     public NodeWs(ServerAPI api, NodeWsApi.Handler<String> hdl) { 
         super(api, false); 
         _handler = hdl;
+        
+        hb.schedule( new TimerTask() { 
+            public void run() {
+                for (Client c : _subscribers.values())
+                    putText(c.nodeid, null); // PING each node every 2 minutes
+            } 
+        }, 120000, 120000); 
     }  
    
    
@@ -136,13 +146,15 @@ public class NodeWs extends WsNotifier
             return false;
         }
         try {               
-            client.sendText("POST " + msg);
-            return true;
+            if (msg == null) 
+                return client.sendText("PING");
+            else    
+                return client.sendText("POST " + msg);
                
-        } catch (java.nio.channels.ClosedChannelException e) {   
+        } catch (java.nio.channels.ClosedChannelException | WebSocketException e) {   
             _clients.remove(client.getUid());
             _subscribers.remove(nodeid);
-            _api.log().debug("NodeWs", "Unsubscribing closed client channel: "+nodeid);
+            _api.log().debug("NodeWs", "Unsubscribing closed client channel: "+nodeid+", "+e.getCause());
             return false;
         } catch (IOException e) {
             e.printStackTrace(System.out);
