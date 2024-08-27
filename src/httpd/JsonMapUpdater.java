@@ -10,8 +10,8 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- */
-
+ */ 
+ 
 
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
@@ -112,7 +112,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                       continue; 
 
                     /* Add point to delete-list */
-                    if (!s.visible() || !allowed) {
+                    if (!s.visible()) {
                         if (!_keep) 
                             continue;
                         mu.delete.add(s.getIdent());

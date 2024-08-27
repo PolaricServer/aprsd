@@ -230,7 +230,7 @@ class Ident extends Pred
     }
     
     public boolean eval(TrackerPoint obj, long scale) {
-        if (obj.getIdent() == null)
+        if (obj == null || obj.getIdent() == null)
             return false;
         return pattern.matcher(obj.getIdent()).matches(); 
     }

@@ -153,6 +153,8 @@ public class NodeWsClient implements WebSocket.Listener {
         _api.log().warn("NodeWsClient", "Error: "+error);
         error.printStackTrace(System.out);
         _connected = false;
+        _retr_int = 60000 * 8; // Retry after 16 minutes
+        retry();
     }
 
     
@@ -215,6 +217,7 @@ public class NodeWsClient implements WebSocket.Listener {
                 _handler.recv(_nodeid, parms[1]);
             }
         }
+        _retr_int = 0;
         webSocket.request(1);
         return null;
     }
