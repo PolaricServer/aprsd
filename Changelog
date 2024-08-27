@@ -416,3 +416,24 @@ V.3.0
 * Move default app-setup out of examples directory
 * Many updates and fixes...
 
+ 
+ 
+V.3.1
+-----
+  (aprsd)
+  * Fix problem with REST API for configuring channels
+  * Remove SAR mode
+  * Update libs: jmdns, lz4-java and objenesis
+  * Some smaller updates and fixes..
+  
+  (db-plugin)
+  * Support for photos as spatiotemporal objects
+  * DbSync fixes
+  
+  (webapp2)
+  * Support photo API (Database plugin)
+  * Configurable persistent storage
+  * Fix issues with jquery js library
+  * Allow CONFIG.get to asynchronous
+  * Rotate north button
+  * Various fixes and updates

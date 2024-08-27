@@ -1,8 +1,11 @@
-polaric-aprsd (3.0+) UNRELEASED; urgency=medium
+polaric-aprsd (3.1) stable; urgency=medium
 
-  * Hacking...
+  * Fix problem with REST API for configuring channels
+  * Remove SAR mode
+  * Update libs: jmdns, lz4-java and objenesis
+  * Some smaller updates and fixes..
 
- -- Oyvind Hanssen <ohanssen@acm.org>  Tue, 05 Dec 2023 21:38:49 +0100
+ -- Oyvind Hanssen <oh@hans.priv.no>  Tue, 06 Aug 2024 22:16:41 +0200
 
 polaric-aprsd (3.0) stable; urgency=medium
 
