@@ -54,6 +54,8 @@ class IndexedSets {
     
     public boolean contains(String key, String val) {
         Set<String> s = _map.get(key);
+        if (s==null)
+            return false;
         return s.contains(val);
     }
     

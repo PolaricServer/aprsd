@@ -395,6 +395,34 @@ public class WebServer implements ServerAPI.Web
     }
     
     
+    public boolean hasLoginUser(String user) {
+        for (WebClient c :_jmapupdate.clients())
+            if (c.getUsername() != null && c.getUsername().equals(user))
+                return true;
+        return false;
+    }
+    
+    
+    /**
+     * Callback for user logins. 
+     * Suitable for lambda function.
+     */
+    public static interface UserLogin {
+        void login(String uname);
+    }
+    private UserLogin _loginCb;
+    
+    public void onLogin(UserLogin login) {
+        _loginCb = login;
+    }
+   
+    /* User login notification. To be called from AuthInfo class */
+    public void notifyLogin(String user) {
+        if (_loginCb != null)
+            _loginCb.login(user);
+    }
+    
+    
     public List<WebClient> getClients() {
         List<WebClient> wclist = new LinkedList<WebClient>();
         for (WsNotifier.Client c: _jmapupdate.clients())

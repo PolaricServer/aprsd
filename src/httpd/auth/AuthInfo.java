@@ -1,5 +1,5 @@
  /* 
- * Copyright (C) 2017-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2024 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,15 +39,17 @@ public class AuthInfo {
     public static final int MAILBOX_EXPIRE = 60 * 24 * 7;
     
     
-    /* Wrapper of Mailbox with counter */
-    public static class SesMailBox extends MailBox.User {
-        long expire = 0;
-        int cnt = 0;
+    /* User Mailbox wrapper with counter */
+    public static class SesMailBox {
+        public long expire = 0;
+        public int cnt = 0;
+        public MailBox.User mbox;
+        
         public int increment() {return ++cnt;}
         public int decrement() {return --cnt;}
         
-        public SesMailBox(ServerAPI api, String userid) {
-            super(api, userid); 
+        public SesMailBox(ServerAPI api, MailBox.User box) {
+            mbox = box; 
         }
     }
     
@@ -86,7 +88,7 @@ public class AuthInfo {
 
         WebServer ws = (WebServer) api.getWebserver(); 
         
-        /* Called when websocket connection for map-updates is opened. 
+        /* Called when a websocket connection for map-updates is opened. 
          * Kind of represents a client session 
          */
         ws.onOpenSes( (c)-> {
@@ -94,7 +96,7 @@ public class AuthInfo {
                 if (a==null) 
                     return;
                 
-                a.getMailbox();
+                a.mailbox = a.getMailbox();
                 
                 /* If user has recently closed session and is scheduled for removal, 
                  * cancel this removal. 
@@ -108,19 +110,24 @@ public class AuthInfo {
                 
                 else { 
                     /* 
-                     * Inform other PS instances of user login. 
+                     * Inform system and other PS instances of user login. 
                      */
-                    var rctl = api.getRemoteCtl(); 
+                    ((WebServer) api.getWebserver()).notifyLogin(a.userid);
+                    RemoteCtl rctl = api.getRemoteCtl(); 
                     if (rctl != null)
                         rctl.sendRequestAll("USER", a.userid+"@"+api.getRemoteCtl().getMycall(), null);
                     
-                    /* As long as one or more sessions are open, we want 
-                     * address mappings for messages. 
+                    /* 
+                     * As long as one or more sessions are open, we want 
+                     * address mappings for messages.
+                     *
+                     * FIXME: Address mappings and receiving maibox should 
+                     * exist also when session is closed. 
                      */
                     a.mailbox.increment();
-                    a.mailbox.addAddress(a.userid);
+                    a.mailbox.mbox.addAddress(a.userid);
                     if (!"".equals(a.callsign))
-                        a.mailbox.addAddress(a.callsign+"@aprs");
+                        a.mailbox.mbox.addAddress(a.callsign+"@aprs");
                 }
             });
             
@@ -132,16 +139,18 @@ public class AuthInfo {
                 if (a==null)
                     return;
                     
-                a.getMailbox();
+                a.mailbox = a.getMailbox();
                 if (a.mailbox!=null) {
                     if (a.mailbox.decrement() == 0) {
                         /* 
-                         * Schedule for removing the user and expiring the mailbox - in 30 seconds 
+                         * If last session (for user) is closed, schedule for removing the user 
+                         * and expiring the mailbox - in 30 seconds. 
                          * This is cancelled if session is re-opened within 30 seconds
                          */
                         var closing = gc.schedule( () -> {
+                        
                             /* If last session is closed, remove address mappings for messages. */
-                            a.mailbox.removeAddresses();
+                            a.mailbox.mbox.removeAddresses();
                             var rctl = api.getRemoteCtl(); 
                             rctl.sendRequestAll("RMUSER", a.userid+"@"+api.getRemoteCtl().getMycall(), null);
                         
@@ -164,9 +173,9 @@ public class AuthInfo {
             while (true) 
                 if (!gcbox.isEmpty() && gcbox.peek().expire < (new Date()).getTime()) {
                     SesMailBox mb = gcbox.remove();
-                    if (mb!=null && mb.cnt == 0 && mboxlist.get(mb.getUid()) != null)
-                        api.log().info("AuthInfo", "MailBox expired. userid="+mb.getUid());
-                    mboxlist.remove(mb.getUid());   
+                    if (mb!=null && mb.cnt == 0 && mboxlist.get(mb.mbox.getUid()) != null)
+                        api.log().info("AuthInfo", "MailBox expired. userid="+mb.mbox.getUid());
+                    mboxlist.remove(mb.mbox.getUid());   
                 }
                 else
                     break;
@@ -210,7 +219,7 @@ public class AuthInfo {
     }
     
     
-    /*
+    /**
      * Authorizations. We use a kind a role-based authorization here. 
      * where some authorizations depends on role/group membership. 
      */
@@ -227,20 +236,32 @@ public class AuthInfo {
     }
     
     
+    /**
+     * Get the user's mailbox (for short messages). Note that there may be multiple sessions
+     * for the same user sharing a mailbox.
+     */
     public SesMailBox getMailbox() {
+    
+        /* If mailbox exists on this session, return it */
         if (mailbox != null)
             return mailbox; 
-        MailBox mb = MailBox.get(userid); 
-        if (mb==null)
-            mb = mboxlist.get(userid);
             
-        if (mb != null && mb instanceof SesMailBox) 
-            mailbox = (SesMailBox) mb;
-        else {
-            mailbox = new SesMailBox(_api, userid); 
-            mboxlist.put(userid, mailbox);
-        }    
-        return mailbox;
+        /* 
+         * Try to get it from session maibox list (in this class). If not found, try 
+         * to find in the MailBox class' address mapping. If not found there, 
+         * create a new one. 
+         */
+        SesMailBox mb = mboxlist.get(userid);
+        
+        if (mb==null) {
+            MailBox m = MailBox.get(userid); 
+            if (m==null || !(m instanceof MailBox.User)) {
+                m = new MailBox.User(_api, userid); 
+                m.addAddress(userid);
+            }
+            mb = new SesMailBox(_api, (MailBox.User) m);
+        }
+        return mb;
     }
     
     

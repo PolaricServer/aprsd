@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2024 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     * Suitable for lambda function.
     */
    public static interface UserCb {
-        void cb(String node, String uname);
+        void login(String node, String uname);
    }
 
    
@@ -70,6 +70,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private MessageProcessor.MessageHandler _pmsg;
    private ServerAPI _api;
    private Logfile   _log;
+   private UserCb    _usercb;
     
    private LinkedHashMap<String, LogEntry> _cmds = new LinkedHashMap<String, LogEntry>(); 
    private IndexedSets _users = new IndexedSets();
@@ -159,15 +160,26 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    }
    
    
+   
+   /* Used by MailBox class with a lambda function */
    public void setMailbox(MessageProcessor.MessageHandler mh) {
         _pmsg = mh;
    }
 
    
+   public void setUserCallback(UserCb cb) {
+        _usercb = cb;
+   }
+   
+   
    public List<String> getUsers() {
         return _users.getAll();
    }
    
+   
+   public boolean hasUser(String node, String user) {
+        return _users.contains(node, user);
+   }
    
    
    private int _try_parent = 0;
@@ -586,8 +598,12 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         }
         
         String u = args.trim();
-        if (add) 
+        if (add) {
+            _api.log().warn("RemoteCtl", "doUser.add: "+u);
             _users.add(sender.getIdent(), u);
+            if (_usercb != null)
+                _usercb.login(sender.getIdent(), u);
+        }
         else 
             _users.remove(sender.getIdent(), u); 
         return true;

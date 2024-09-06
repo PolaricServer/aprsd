@@ -60,7 +60,7 @@ public class MailBoxApi extends ServerBase {
          * Get content of the mailbox - list of messages 
          */
         get("/mailbox", "application/json", (req, resp) -> {
-            var box = getAuthInfo(req).getMailbox();
+            var box = getAuthInfo(req).getMailbox().mbox;
             if (box==null)
                 return ERROR(resp, 401, "Unauthorized - no mailbox available");
             return box.getMessages();
@@ -109,7 +109,7 @@ public class MailBoxApi extends ServerBase {
          */
         delete("/mailbox/*", (req, resp) -> {
             var msgid = req.splat()[0];
-            var box = getAuthInfo(req).mailbox;
+            var box = getAuthInfo(req).mailbox.mbox;
             if (!msgid.matches("[0-9]+"))            
                 return ERROR(resp, 400, "Message id must be number");
             box.remove(Long.parseLong(msgid));

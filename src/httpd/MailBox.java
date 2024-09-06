@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2020-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2020-2024 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ public abstract class MailBox {
     public static class Message {
         public long msgId;
         
-        // -1=failure, 1=success
+        // -1=failure, 0=unknown, 1=success
         public int status = 0; 
         public Date time; 
         public String from, to; 
@@ -76,14 +76,15 @@ public abstract class MailBox {
     }
  
  
-    protected ServerAPI _api;
+    protected static ServerAPI _api;
     private List<String> _addr = new LinkedList<String>();
-    private static Map<String, MailBox> _addressMapping = new HashMap<String,MailBox>();
+    private static Map<String, MailBox> _addressMapping = new HashMap<String, MailBox>();
  
     public abstract void put(Message m); 
         
-        
-        
+    protected void archiveSetReceived(String userid) {}
+    
+    
     /** 
      *  Mailbox for a single user. 
      *  Instances are created and put on the user login session. See AuthInfo.java. 
@@ -140,11 +141,22 @@ public abstract class MailBox {
             _messages.add(m);
             clean();
         }
-        
+    
+    
         public String getUid() {
             return _uid; 
         }
-
+    
+    
+       /**
+        * Check archive of outgoing messages. Set status from waiting to delivered if 
+        * user has logged in on destination server. 
+        */
+        @Override protected void archiveSetReceived(String userid) {
+            for (Message m : getMessages())
+                if (m.to.equals(userid) && m.outgoing)
+                    setStatus(m, 1, "Delivery confirmed: "+userid);
+        }
     }
     
     
@@ -169,6 +181,7 @@ public abstract class MailBox {
         }
     }
     
+
 
     
             
@@ -213,13 +226,29 @@ public abstract class MailBox {
     
     
     
+    /*******************************************************
+     * STATIC METHODS 
+     *******************************************************/
+    
     public static void init(ServerAPI api) {
+        _api = api;
         if (api.getRemoteCtl() == null)
             return;
+            
+        /* Handler for incoming messages */    
         api.getRemoteCtl().setMailbox( (sender, recipient, text) -> {
             String[] tc = text.split(" ", 2); 
             String[] addr = tc[0].split(">", 2);
             return putMessage(new Message(addr[0], addr[1], tc[1]));
+        });
+        
+        api.getRemoteCtl().setUserCallback( (node, user) -> {
+            for (MailBox box: _addressMapping.values())
+                box.archiveSetReceived(user);
+        });  
+        ((WebServer) api.getWebserver()).onLogin( (user) -> {
+            for (MailBox box: _addressMapping.values())
+                box.archiveSetReceived(user);
         });
     }
     
@@ -265,20 +294,32 @@ public abstract class MailBox {
         else if (!putMessage(msg))
             return false;
             
-        archiveSent(_addressMapping.get(msg.from), msg, 1);
+        int status = (((WebServer) api.getWebserver()).hasLoginUser(addr[0]) ? 1 : 2);
+        archiveSent(_addressMapping.get(msg.from), msg, status);
         return true;
     }
+    
     
     
     /** 
      * Put message into a local mailbox. 
      */
     public static boolean putMessage(Message msg) {
-        /* Find recipients mailbox and put it there */
+        /* 
+         * Find recipients mailbox and put the message there.
+         * If not found AND the recipient is a valid user on this node, 
+         * create it
+         */
         MailBox box = _addressMapping.get(msg.to);
+        
+        if (box == null && _api.getWebserver().getUserDb().hasUser(msg.to)) {
+            box = new User(_api, msg.to); 
+            box.addAddress(msg.to);
+        }    
         if (box != null)
             box.put(msg);
-        else return false; 
+        else return false;
+        
         return true;
     }
     
@@ -295,6 +336,11 @@ public abstract class MailBox {
             box.put(m2);
         return m2;
     }
+    
+
+     
+     
+     
     
     
     /**
@@ -321,7 +367,7 @@ public abstract class MailBox {
              * @-part of address is another Polaric Server instance. 
              * Message should be authenticated and acked. 
              */
-            addr[1]=addr[1].toUpperCase(); 
+            addr[1] = addr[1].toUpperCase(); 
             msg.to = addr[0]+"@"+addr[1];
             MailBox.User mb = (MailBox.User) _addressMapping.get(msg.from);
             Message m2 = archiveSent(mb, msg, 0); 
@@ -329,15 +375,18 @@ public abstract class MailBox {
             
             api.getMsgProcessor().sendMessage(addr[1], "MSG "+msg.from+">"+addr[0]+" "+msg.text, 
                 true, true, new MessageProcessor.Notification() {
-                
+                    MailBox.User mb_ = mb;
+                    Message m2_ = m2;
+                    
                     public void reportFailure(String id, String mtext) {
                         api.log().info("MailBox","Delivery failed: msgid="+msg.msgId+", node="+id);
-                        mb.setStatus(m2, -1, "Delivery failed: "+id);
+                        mb_.setStatus(m2_, -1, "Delivery failed: "+id);
                     }
                 
                     public void reportSuccess(String id, String mtext) {
                         api.log().info("MailBox", "Delivery confirmed: msgid="+msg.msgId+", node="+id);
-                        mb.setStatus(m2, 1, "Delivery confirmed: "+id);
+                        int status = (api.getRemoteCtl().hasUser(addr[1], msg.to) ? 1 : 2);
+                        mb_.setStatus(m2_, status, (status == 1 ? "Delivery confirmed: " : "Awaiting user login: ")+id);
                     }
                 });
             return true; 
