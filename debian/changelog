@@ -1,3 +1,9 @@
+polaric-aprsd (3.1+) UNRELEASED; urgency=medium
+
+  * Hacking
+
+ -- Oyvind Hanssen <oh@hans.priv.no>  Wed, 04 Sep 2024 19:21:37 +0200
+
 polaric-aprsd (3.1) stable; urgency=medium
 
   * Fix problem with REST API for configuring channels
