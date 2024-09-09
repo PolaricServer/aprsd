@@ -29,7 +29,10 @@ import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.sparkjava.*; 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
+import org.eclipse.jetty.websocket.server.WebSocketHandler;
 import javax.servlet.SessionCookieConfig;
+import org.eclipse.jetty.websocket.server.WebSocketServerFactory;
+import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 import java.util.*;
 import java.lang.reflect.*;
 import no.polaric.aprsd.*;
@@ -61,6 +64,19 @@ public class WebServer implements ServerAPI.Web
             } else {
                 server = new Server();
             }
+            
+            // Create a WebSocket handler
+            WebSocketHandler wsHandler = new WebSocketHandler() {
+                @Override
+                public void configure(WebSocketServletFactory factory) {
+                    // Set WebSocket policy directly
+                    factory.getPolicy().setMaxTextMessageSize(2 * 1024 * 1024);
+                    factory.getPolicy().setMaxBinaryMessageSize(2 * 1024 * 1024); 
+                }
+            };
+
+            // Set the handler on the server
+            server.setHandler(wsHandler);
             return server;
         }
 
@@ -405,21 +421,21 @@ public class WebServer implements ServerAPI.Web
     
     /**
      * Callback for user logins. 
-     * Suitable for lambda function.
+     * Suitable for lambda function. Multiple subscriptions allowed.
      */
     public static interface UserLogin {
         void login(String uname);
     }
-    private UserLogin _loginCb;
+    private List<UserLogin> _loginCb = new LinkedList<UserLogin>();
     
     public void onLogin(UserLogin login) {
-        _loginCb = login;
+        _loginCb.add(login);
     }
    
     /* User login notification. To be called from AuthInfo class */
     public void notifyLogin(String user) {
-        if (_loginCb != null)
-            _loginCb.login(user);
+        for (UserLogin x: _loginCb)
+            x.login(user);
     }
     
     

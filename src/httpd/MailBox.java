@@ -15,7 +15,7 @@
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
 import java.util.*;
-
+import java.util.concurrent.*;
   
   
  
@@ -30,6 +30,9 @@ public abstract class MailBox {
     private static long _lastMsgId = 0;
     private static long nextMsgId()
         { return _lastMsgId = (_lastMsgId+1) % 2000000000; }
+        
+     private static ScheduledExecutorService gc = Executors.newScheduledThreadPool(5);
+  
   
   
     /* Message content */
@@ -37,6 +40,7 @@ public abstract class MailBox {
         public long msgId;
         
         // -1=failure, 0=unknown, 1=success
+        // For incoming messages 1 means that user is notified. 
         public int status = 0; 
         public Date time; 
         public String from, to; 
@@ -83,6 +87,8 @@ public abstract class MailBox {
     public abstract void put(Message m); 
         
     protected void archiveSetReceived(String userid) {}
+    public void notifyNewMessages() {} 
+    
     
     
     /** 
@@ -105,6 +111,7 @@ public abstract class MailBox {
         }
 
     
+        /** Set status and report it to client */
         private void setStatus(Message m, int st, String info) {
             m.status = st;
             Status stm = new Status(m.msgId, st, info);
@@ -131,17 +138,31 @@ public abstract class MailBox {
             {clean(); return _messages;}
     
     
-        /** Add a message to the mailbox */
+        /** Add a message to the mailbox. Notify user if logged in */
         public void put(Message m) {
-            if (!m.outgoing) { 
-                _api.getWebserver().notifyUser(_uid, 
-                    new ServerAPI.Notification("chat", m.from, m.text, m.time, NOT_EXPIRE));
+            if (((WebServer) _api.getWebserver()).hasLoginUser(_uid)) {
+                if (!m.outgoing) { 
+                    m.status = 1;
+                    _api.getWebserver().notifyUser(_uid, 
+                        new ServerAPI.Notification("chat", m.from, m.text, m.time, NOT_EXPIRE));
+                }
+                _psub.put("messages:"+_uid, m); 
             }
-            _psub.put("messages:"+_uid, m); 
             _messages.add(m);
             clean();
         }
     
+    
+        /* Notify user of any new messages */
+        public void notifyNewMessages() {
+            for (Message m: getMessages())
+                if (!m.outgoing && m.status == 0) {
+                    m.status = 1;
+                    _api.getWebserver().notifyUser(_uid, 
+                        new ServerAPI.Notification("chat", m.from, m.text, m.time, NOT_EXPIRE));
+                }
+        }
+        
     
         public String getUid() {
             return _uid; 
@@ -242,13 +263,23 @@ public abstract class MailBox {
             return putMessage(new Message(addr[0], addr[1], tc[1]));
         });
         
+        /* Handler for user-logins on other nodes */
         api.getRemoteCtl().setUserCallback( (node, user) -> {
             for (MailBox box: _addressMapping.values())
                 box.archiveSetReceived(user);
         });  
+        
+        /* Handler for user-logins */
         ((WebServer) api.getWebserver()).onLogin( (user) -> {
+            /* Notify other user's mailboxes that user has received messages (if any) */
             for (MailBox box: _addressMapping.values())
                 box.archiveSetReceived(user);
+                
+            /* Notify this user about any new incoming messsages */
+            final MailBox mybox = _addressMapping.get(user); 
+            if (mybox != null)
+                gc.schedule( ()->
+                    mybox.notifyNewMessages(), 20, TimeUnit.SECONDS );
         });
     }
     

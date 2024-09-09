@@ -303,7 +303,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    /**
     * Return true if message is with child-node's area of interest. 
     * Only messages regarding points with positions (aliases, icons, tags)
-    * is filtered this way. 
+    * are filtered this way. 
     */
    private boolean isWithinInterest(String node, String msg) {
         /* tbd */
@@ -388,6 +388,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         for (Map.Entry<String, LogEntry> entry: _cmds.entrySet())
             if (!entry.getValue().cmd.matches("USER .*@"+dest_) && isWithinInterest(dest, entry.getValue().cmd) )
                 sendRequest(dest, null, entry.getValue().cmd);
+        _log.info(null, "End of playback ("+dest+")");
    }
    
    
@@ -539,7 +540,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     
     
     /** 
-     * Handler for connect command. 
+     * Handler for incoming connect command. 
      * Commands should perhaps be "plugin" modules or plugin-modules should
      * be allowed to add commands 
      */
@@ -567,7 +568,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
                         rad=Integer.parseInt(args[0]); 
                         lat=Float.parseFloat(args[1]);
                         lng=Float.parseFloat(args[2]);
-                        System.out.println("*** radius="+rad+", lat="+lat+", lng="+lng);
+                        _log.info(null, "radius="+rad+", lat="+lat+", lng="+lng);
                     }
                 }
                 else
@@ -829,8 +830,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */
    public void run()
    {
+      long round = 0;
       while (true) 
       try {
+         /* Wait for 1 minute */
          Thread.sleep(60000);
 
          while (true) {
@@ -846,18 +849,26 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
                         ((float) Math.round(pos.getLng()*1000))/1000;
                 }
                 sendRequest(_parent, "CON", arg);
+                if (round >= 2)
+                    _tryPause = 1;
             }
+            round++;
             if (_tryPause > 0)
                 _tryPause--;
             
+            /* Disconnect chldren not heard from in 40 minutes */
             for (String x : getChildren()) 
                 if (getChild(x).getTime() + 2400000 <= (new Date()).getTime()) {
                    _log.info(null, ""+x+" disconnected (timeout)");
                    disconnectChild(x);
                 }
-            Thread.sleep(1200000);
+                
+            /* Wait for 10 minutes */
+            Thread.sleep(600000);
          }
-      } catch (Exception e) {}
+      } catch (Exception e) {
+            _api.log().warn("RemoteCtl", "Exception: "+e.getMessage());
+        }
    } 
 }
 

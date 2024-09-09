@@ -96,6 +96,14 @@ public class AuthInfo {
                 if (a==null) 
                     return;
                 
+               /* 
+                * Inform system and other PS instances of user login. 
+                */
+                ((WebServer) api.getWebserver()).notifyLogin(a.userid);
+                RemoteCtl rctl = api.getRemoteCtl(); 
+                if (rctl != null)
+                    rctl.sendRequestAll("USER", a.userid+"@"+api.getRemoteCtl().getMycall(), null);
+                    
                 a.mailbox = a.getMailbox();
                 
                 /* If user has recently closed session and is scheduled for removal, 
@@ -110,19 +118,8 @@ public class AuthInfo {
                 
                 else { 
                     /* 
-                     * Inform system and other PS instances of user login. 
-                     */
-                    ((WebServer) api.getWebserver()).notifyLogin(a.userid);
-                    RemoteCtl rctl = api.getRemoteCtl(); 
-                    if (rctl != null)
-                        rctl.sendRequestAll("USER", a.userid+"@"+api.getRemoteCtl().getMycall(), null);
-                    
-                    /* 
                      * As long as one or more sessions are open, we want 
                      * address mappings for messages.
-                     *
-                     * FIXME: Address mappings and receiving maibox should 
-                     * exist also when session is closed. 
                      */
                     a.mailbox.increment();
                     a.mailbox.mbox.addAddress(a.userid);

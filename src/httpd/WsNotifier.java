@@ -155,7 +155,6 @@ public abstract class WsNotifier extends ServerBase
    
    
    
-   
    public WsNotifier(ServerAPI api, boolean trusted) {
        super(api); 
       _trustedOrigin = _api.getProperty("trusted.orgin", ".*");
@@ -224,7 +223,7 @@ public abstract class WsNotifier extends ServerBase
     */
    
    @OnWebSocketConnect
-   public void onConnect(Session conn) {
+   public void onConnect(org.eclipse.jetty.websocket.api.Session conn) {
       try {
           String uid = _getUid(conn);
           UpgradeRequest req = conn.getUpgradeRequest(); 
