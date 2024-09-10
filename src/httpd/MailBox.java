@@ -15,10 +15,24 @@
 package no.polaric.aprsd.http;
 import no.polaric.aprsd.*;
 import java.util.*;
+import java.io.*;
 import java.util.concurrent.*;
+
   
   
- 
+ /**
+  * Mailbox manager and mailboxes for short messages between users.
+  * See subclasses (within this class): 
+  *
+  *   MailBox.User - for individual users. Instances are created and put on the user 
+  *   login session. See AuthInfo.java.
+  *
+  *   Mailbox.Group - Proxy for a group of mailboxes.
+  *
+  * This class provides several static methods for managing mailboxes and addresses, 
+  * and for posting messages to some address.
+  * 
+  */
   
   
 public abstract class MailBox {  
@@ -27,16 +41,17 @@ public abstract class MailBox {
     private static final int MSG_EXPIRE = 60*24*7;
     private static final int NOT_EXPIRE = 60; 
   
+    private static String _file;
     private static long _lastMsgId = 0;
     private static long nextMsgId()
         { return _lastMsgId = (_lastMsgId+1) % 2000000000; }
         
-     private static ScheduledExecutorService gc = Executors.newScheduledThreadPool(5);
+    private static ScheduledExecutorService gc = Executors.newScheduledThreadPool(5);
   
   
   
     /* Message content */
-    public static class Message {
+    public static class Message implements Serializable {
         public long msgId;
         
         // -1=failure, 0=unknown, 1=success
@@ -83,6 +98,7 @@ public abstract class MailBox {
     protected static ServerAPI _api;
     private List<String> _addr = new LinkedList<String>();
     private static Map<String, MailBox> _addressMapping = new HashMap<String, MailBox>();
+    private static int _nuserboxes = 0;
  
     public abstract void put(Message m); 
         
@@ -105,11 +121,16 @@ public abstract class MailBox {
         public User(ServerAPI api, String uid) {
             _api = api;
             _uid = uid;
+            _nuserboxes++;
             _psub = (no.polaric.aprsd.http.PubSub) _api.getWebserver().getPubSub();
             _psub.createRoom("messages:"+uid, Message.class); 
             _psub.createRoom("msgstatus:"+uid, Status.class);
         }
 
+        
+        public int size() { 
+            return _messages.size();
+        }
     
         /** Set status and report it to client */
         private void setStatus(Message m, int st, String info) {
@@ -151,7 +172,7 @@ public abstract class MailBox {
             _messages.add(m);
             clean();
         }
-    
+        
     
         /* Notify user of any new messages */
         public void notifyNewMessages() {
@@ -184,7 +205,7 @@ public abstract class MailBox {
     
     /** Proxy for a group of mailboxes */
     
-    public static class Group extends MailBox {
+    public static class Group extends MailBox implements Serializable {
         private List<MailBox> _boxes = new ArrayList<MailBox>(); 
         
         public Group(ServerAPI api) {
@@ -215,8 +236,9 @@ public abstract class MailBox {
         
         
         /* Aprs message handler. Return if not APRS user */
-        if (!addr.matches(".*@(aprs|APRS|Aprs)"))
+        if (!addr.matches(".*@(aprs|APRS|Aprs)")) {
             return;
+        }
             
         /* 
          * Subscribe to APRS messages addressed to user 
@@ -237,6 +259,7 @@ public abstract class MailBox {
      * Remove all address-mappings associated with this mailbox. 
      */    
     public void removeAddresses() {
+        _nuserboxes--;
         for (String addr: _addr) {
             _addressMapping.remove(addr);
             if (addr.matches(".*@(aprs|APRS|Aprs)"))
@@ -253,6 +276,12 @@ public abstract class MailBox {
     
     public static void init(ServerAPI api) {
         _api = api;
+        
+        _file = api.getProperty("mailbox.file", "mailbox.dat");
+        if (_file.charAt(0) != '/')
+           _file = System.getProperties().getProperty("datadir", ".")+"/"+_file;   
+        restore();
+        
         if (api.getRemoteCtl() == null)
             return;
             
@@ -423,6 +452,72 @@ public abstract class MailBox {
             return true; 
         }    
     }
+    
+    
+    /**
+     * Shutdown. May save state, etc.. 
+     */
+     
+    public static void shutdown()
+       { save(); }
+    
+    
+    
+    private static synchronized void save() {
+        try {
+            FileOutputStream fs = new FileOutputStream(_file); 
+            ObjectOutputStream ofs = new ObjectOutputStream(fs);
+            Set<MailBox> boxes = new HashSet<MailBox>(); 
+            
+            ofs.writeInt(_nuserboxes);
+            for (MailBox mb : _addressMapping.values())
+                if (mb instanceof MailBox.User mbu && !boxes.contains(mb)) {
+                    boxes.add(mb);
+                    ofs.writeObject(mbu.getUid());
+                    ofs.writeInt(mbu.size());
+                    _api.log().info("MailBox", "Saving mailbox: "+mbu.getUid()+", "+mbu.size()+" messages");
+                    for (Message x: mbu.getMessages())
+                        ofs.writeObject(x);
+                }
+            
+            ofs.close();
+        }
+        catch (Exception e) {
+            _api.log().warn("MailBox", "Cannot save data: "+e);
+            e.printStackTrace();
+        } 
+    }
+    
+    
+    
+    private static synchronized void restore() {
+        int i=0;
+        ObjectInputStream ifs = null;
+        try {
+            FileInputStream fs = new FileInputStream(_file);
+            ifs = new ObjectInputStream(fs);
+            int boxes = ifs.readInt();
+            for (i=0; i < boxes; i++) {
+                String uid = (String) ifs.readObject();
+                int nmsgs = ifs.readInt();
+                MailBox.User mb = new MailBox.User(_api, uid);
+                _api.log().info("MailBox", "Restoring mailbox: "+uid+", "+nmsgs+" messages");
+                _addressMapping.put(uid, mb);
+                for (int j=0; j<nmsgs; j++)
+                    mb._messages.add((Message) ifs.readObject());
+            }
+            ifs.close();
+        }
+        catch (EOFException e) {
+            _api.log().warn("MailBox", "Unexpected EOF. _nuserboxes is wrong?");
+            try {ifs.close();} catch (Exception x) {};
+        }
+        catch (Exception e) {
+            _api.log().warn("MailBox", "Cannot restore data: "+e);
+            e.printStackTrace();
+        }
+    }
+    
     
 }
 

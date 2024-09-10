@@ -463,6 +463,8 @@ public class Main implements ServerAPI
             e.printStackTrace(System.out);
          }
 
+         MailBox.shutdown(); 
+         
          System.out.println("*** Polaric APRSD shutdown"); 
          PluginManager.deactivateAll();
          if (db  != null) db.shutdown(); 
