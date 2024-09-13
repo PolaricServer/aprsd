@@ -125,6 +125,7 @@ public abstract class MailBox {
             _psub = (no.polaric.aprsd.http.PubSub) _api.getWebserver().getPubSub();
             _psub.createRoom("messages:"+uid, Message.class); 
             _psub.createRoom("msgstatus:"+uid, Status.class);
+            _psub.createRoom("msgdelete:"+uid, null);
         }
 
         
@@ -150,7 +151,8 @@ public abstract class MailBox {
     
     
         public void remove(long id) {
-            _messages.removeIf( m -> (m.msgId == id));
+            _messages.removeIf( m -> (m.msgId == id)); 
+            _psub.put("msgdelete:"+_uid, null);
         }
     
     

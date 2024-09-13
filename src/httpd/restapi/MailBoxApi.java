@@ -108,12 +108,18 @@ public class MailBoxApi extends ServerBase {
          * Delete a message. Returns "Ok" even if message was not found.
          */
         delete("/mailbox/*", (req, resp) -> {
-            var msgid = req.splat()[0];
-            var box = getAuthInfo(req).mailbox.mbox;
-            if (!msgid.matches("[0-9]+"))            
-                return ERROR(resp, 400, "Message id must be number");
-            box.remove(Long.parseLong(msgid));
-            return "Ok";
+            try {
+                var msgid = req.splat()[0];
+                var box = getAuthInfo(req).getMailbox().mbox;
+                if (!msgid.matches("[0-9]+"))            
+                    return ERROR(resp, 400, "Message id must be number");
+                box.remove(Long.parseLong(msgid));
+                return "Ok";
+            }
+            catch (Exception e) {
+                e.printStackTrace(System.out);
+                return ERROR(resp, 500, "Exception: "+e.getMessage());  
+            }
         });
         
         
