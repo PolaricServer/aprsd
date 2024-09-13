@@ -359,6 +359,7 @@ public class WebServer implements ServerAPI.Web
             
         _api.log().info("WebServer", "Unregistering on mDNS...");
         _zconf.unregisterMdns();
+        getAuthConfig().close();
     }
          
     

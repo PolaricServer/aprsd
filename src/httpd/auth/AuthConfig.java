@@ -32,7 +32,7 @@ import no.polaric.aprsd.*;
  */
 public class AuthConfig {
      private ServerAPI _api;
-     private String _host, _allowOrigin, _passwdFile, _userFile, _groupFile, _dkeyFile; 
+     private String _host, _allowOrigin, _passwdFile, _userFile, _groupFile, _dkeyFile, _ukeyFile; 
      private Config _config;
      private final PasswordFileAuthenticator _passwds;
      private final HmacAuthenticator _hmac;
@@ -50,13 +50,13 @@ public class AuthConfig {
          _userFile    = api.getProperty("httpserver.userfile",    "/var/lib/polaric/users.dat");
          _groupFile   = api.getProperty("httpserver.groupfile",   "/etc/polaric-aprsd/groups");
          _dkeyFile    = api.getProperty("httpserver.keyfile",     "/etc/polaric-aprsd/keys/peers");
-
+         _ukeyFile    = api.getProperty("httpserver.loginkeyfile",     "/var/lib/polaric/logins.dat");
          
           /* Default user and groups database is local file */
          _groups = new LocalGroups(api, _groupFile);
          _users = new LocalUsers(api, _userFile, _groups);
          _passwds = new PasswordFileAuthenticator(api, _passwdFile, _users);
-         _hmac = new HmacAuthenticator(api, _dkeyFile, _users);
+         _hmac = new HmacAuthenticator(api, _dkeyFile, _ukeyFile, _users);
      
          /* Direct Form Auth client */
          final DirectFormClient dformClient = new DirectFormClient(_passwds);
@@ -107,5 +107,11 @@ public class AuthConfig {
      public SecurityFilter filter(String clients, String authorizers) {
         return new SecurityFilter(get(), clients, authorizers); 
      }
+     
+     
+     public void close() {
+         _hmac.saveLogins();
+     }
+     
 }
  

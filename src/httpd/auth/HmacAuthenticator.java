@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2024 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,8 @@ import java.net.http.*;
 import no.polaric.aprsd.*;
 import org.apache.commons.codec.digest.*;
 import java.security.MessageDigest;
+import java.nio.file.*;
+import java.nio.file.attribute.PosixFilePermissions;
 
 
 
@@ -39,23 +41,31 @@ import java.security.MessageDigest;
  */
 public class HmacAuthenticator implements Authenticator {
 
+    private static final long MAX_SESSION_LENGTH = 7 * 24 * 60 *60 * 1000;
+    
         /* Keys given to users. username->key mapping */
     private final Map<String, String> _keymap = new HashMap<String, String>();
         /* Devices (peer PS instances) with a key */
     private final Set<String> _devices = new HashSet<String> ();
+        /* Person users with a timestamp */
+    private final Map<String, Long> _userlogins = new HashMap<String, Long>();
+    
+    
     private ServerAPI _api; 
-    private final String _file;   
+    private final String _ukeyfile, _dkeyfile;   
     private UserDb _users;
     private final DuplicateChecker _dup = new DuplicateChecker(2000);
         // A fixed size of this can be a vulnerability?
     
     
     
-    public HmacAuthenticator(ServerAPI api, String file, UserDb lu) {
+    public HmacAuthenticator(ServerAPI api, String dfile, String ufile, UserDb lu) {
         _api = api; 
-        _file = file;
+        _dkeyfile = dfile;
+        _ukeyfile = ufile;
         _users = lu;
-        load();
+        loadDevices();
+        loadLogins();
     }
        
        
@@ -64,20 +74,84 @@ public class HmacAuthenticator implements Authenticator {
     }
     
        
+    /**
+     * Set session-key for a user. 
+     * This is done when user successfully logs in. A timestamp is also set to be able
+     * to expire the session. 
+     */
     public final void setUserKey(String userid, String key) {
         _keymap.remove(userid);
         _keymap.put(userid, key);
+        _userlogins.remove(userid);
+        _userlogins.put(userid, (new Date()).getTime());
     }
-
+    
+    
+    
+    public final void expireUserKey(String userid) {
+        long now = (new Date()).getTime();
+        Long ts = _userlogins.get(userid);
+        if (ts == null)
+            return;
+        if (ts + MAX_SESSION_LENGTH < now) {
+            _userlogins.remove(userid);
+            _keymap.remove(userid);
+        }
+    }
+    
+    
+    
+    
+    /**
+     * Save keys to file.
+     * Assume that these are personal user-logins. 
+     */
+    public void saveLogins() {
+        try {
+            final PrintWriter wr = new PrintWriter(new FileWriter(_ukeyfile));
+            _keymap.forEach( (k, v) -> {
+                Long ts = _userlogins.get(k);
+                if (ts==null)
+                    ts = (new Date()).getTime();
+                if (!_devices.contains(k))
+                    wr.println(k+":"+v+":"+ts);
+            });
+            wr.close();
+            Path path = Paths.get(_ukeyfile); 
+            Files.setPosixFilePermissions(path, PosixFilePermissions.fromString("rw-------")); 
+        }
+        catch (IOException e) {
+           _api.log().warn("HmacAuthenticator", "Couldn't open key file: "+e.getMessage());
+        } 
+    }
+    
+       
+    /**
+     * Load keys from file.
+     * Assume that these are personal user-logins. 
+     */
+    private void loadLogins() {
+        loadKeys(_ukeyfile, false); 
+    }
+    
     
     /**
      * Load keys from file.
      * Assume that these are not personal users but device/server groups. 
      */
-    private void load() {
+    private void loadDevices() {
+        loadKeys(_dkeyfile, true); 
+    }
+    
+    
+    
+    /**
+     * Load keys from file.
+     */
+    private void loadKeys(String file, boolean dev) {
         try {
             /* Open key file */
-            BufferedReader rd = new BufferedReader(new FileReader(_file));
+            BufferedReader rd = new BufferedReader(new FileReader(file));
             while (rd.ready() )
             {
                 /* Read a line */
@@ -89,15 +163,17 @@ public class HmacAuthenticator implements Authenticator {
                         String userid = x[0].trim();
                         String key = x[1].trim();
                         _keymap.put(userid, key);
-                        _devices.add(userid);
+                        if (dev)
+                            _devices.add(userid);
                     }
                     else
                         _api.log().warn("HmacAuthenticator", "Bad line in key file: "+line);
                 }
             }
+            rd.close();
         }
         catch (IOException e) {
-           _api.log().warn("HmacAuthenticator", "Couldn't open hmackeys file: "+e.getMessage());
+           _api.log().warn("HmacAuthenticator", "Couldn't open key file: "+e.getMessage());
         } 
     }
     
@@ -174,6 +250,7 @@ public class HmacAuthenticator implements Authenticator {
             throwsException("Unknown userid: "+userid);
 
         /* Get key from keymap.get(userid) */
+        expireUserKey(userid);
         String key = _keymap.get(userid);
         if (key==null)
             throwsException("No key for user: "+userid+". Login needed");
