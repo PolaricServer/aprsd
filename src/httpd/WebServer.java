@@ -294,7 +294,7 @@ public class WebServer implements ServerAPI.Web
         protectUrl("/bullboard/*");
         protectUrl("/loginusers");
         protectUrl("/usernames");
-        protectUrl("/scripts",        "admin");
+        protectUrl("/scripts/*",      "admin");
         protectUrl("/system/adm/*",   "admin");
         
         

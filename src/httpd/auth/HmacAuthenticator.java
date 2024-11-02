@@ -157,7 +157,7 @@ public class HmacAuthenticator implements Authenticator {
                 /* Read a line */
                 String line = rd.readLine();
                 if (!line.startsWith("#") && line.length() > 1) {
-                    if (line.matches(".*:.*"))
+                    if (line.matches(".*:.*(:.*)?"))
                     {                 
                         String[] x = line.split(":");  
                         String userid = x[0].trim();
@@ -165,6 +165,12 @@ public class HmacAuthenticator implements Authenticator {
                         _keymap.put(userid, key);
                         if (dev)
                             _devices.add(userid);
+                        else {
+                            long ts = (new Date()).getTime();
+                            if (x.length >= 3 && x[2].matches("[0-9]+"))
+                                ts = Long.parseLong(x[2].trim());
+                            _userlogins.put(userid, ts);
+                        }
                     }
                     else
                         _api.log().warn("HmacAuthenticator", "Bad line in key file: "+line);

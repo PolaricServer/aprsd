@@ -250,10 +250,10 @@ public class ShellScriptApi extends ServerBase {
          */
         post("/scripts/*", (req, resp) -> {
             var name = req.splat()[0];
-            var script = _scripts.get(name);
-            var uid = getAuthInfo(req).userid;
-            
+
             try {
+                var script = _scripts.get(name);
+                var uid = getAuthInfo(req).userid;     
                 ScriptArg arg = null;
                 if (req.body().length() > 0) {
                     arg = (ScriptArg) 
