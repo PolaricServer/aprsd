@@ -92,7 +92,7 @@ public class AprsParser implements AprsChannel.Receiver
         station.setSource(p.source);
         station.setTag("APRS");
         station.setTag(p.source.getTag());
-        
+         
         if (!duplicate) try {    
         switch(p.type)
         {
@@ -782,6 +782,7 @@ public class AprsParser implements AprsChannel.Receiver
             if (data.substring(1).matches("[0-9]{6}h.*")) 
                 time = parseTimestamp(data.substring(1), false);   
             data = data.substring(8);
+            
             /* A duplicate check on timestamp itself */
             if (AprsChannel._dupCheck.checkTS(station.getIdent(), time)) 
                 return; 
@@ -845,7 +846,7 @@ public class AprsParser implements AprsChannel.Receiver
           }
           
           
-          else if (data.matches("[\\\\/][\\x21-\\x7f]{12}.*"))
+          else if (data.matches("[\\\\/0-9A-Z][\\x20-\\x7f]{12}.*"))
            /* Parse compressed position report */
           {
               pd = parseCompressedPos(data);
