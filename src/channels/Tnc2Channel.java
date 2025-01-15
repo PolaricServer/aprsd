@@ -117,7 +117,7 @@ public class Tnc2Channel extends TncChannel
           }
           catch (Exception e) {}
         
-       _log.log(" [>" + this.getShortDescr() + "] " + p);
+       _log.log(" [>" + this.getIdent() + "] " + p);
        
        if (p.from != null && !p.from.equals(_myCall)) {
            _log.add("*** Force third party format. TX path = '"+unproto+"'"); 

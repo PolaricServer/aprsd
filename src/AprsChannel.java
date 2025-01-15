@@ -109,7 +109,7 @@ public abstract class AprsChannel extends Channel
 
  
     protected String chId() {
-       return "["+getShortDescr()+"] "; 
+       return "["+getIdent()+"] "; 
     }
 
     

@@ -68,7 +68,7 @@ public class SysAdminApi extends ServerBase {
     
     
     public static record ChannelInfo 
-       ( String ident, String name, 
+       ( String name, 
          boolean active, boolean rfchan, boolean inetchan, boolean isrf, boolean isaprs, 
          GenChanInfo generic, Channel.JsConfig specific)
     {}
@@ -401,10 +401,12 @@ public class SysAdminApi extends ServerBase {
             List<ChannelInfo> res = new ArrayList<ChannelInfo>();
             for (String chn:  _api.getChanManager().getKeys()) {
                 Channel ch = _api.getChanManager().get(chn);
-                res.add( new ChannelInfo(ch.getShortDescr(), ch.getIdent(), ch.isActive(),  
+                
+                res.add( new ChannelInfo(ch.getIdent(), ch.isActive(),  
                    ch==_api.getRfChannel(), ch==_api.getInetChannel(), ch.isRf(), 
                    ch instanceof AprsChannel,
-                   new GenChanInfo(_api, ch), null));
+                   new GenChanInfo(_api, ch), 
+                   ch.getJsConfig()));
             }
             return res;
         }, ServerBase::toJson );
@@ -422,7 +424,6 @@ public class SysAdminApi extends ServerBase {
                 return ERROR(resp, 404, "Channel not found: "+chname);
                 
             return new ChannelInfo(
-                ch.getShortDescr(), 
                 ch.getIdent(), 
                 _api.getBoolProperty("channel."+ch.getIdent()+".on", false),  
                 ch==_api.getRfChannel(), ch==_api.getInetChannel(), ch.isRf(), 

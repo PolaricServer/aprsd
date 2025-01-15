@@ -27,10 +27,7 @@ public abstract class TcpChannel extends AprsChannel
 {
     protected boolean  _close = false;
     protected String   _backup; 
-    protected int      _chno;
     protected TcpComm  _comm;
-        
-    private static int _next_chno = 0;
     
 
     
@@ -38,8 +35,6 @@ public abstract class TcpChannel extends AprsChannel
     {
         _init(api, "channel", id);
         _api = api;
-        _chno = _next_chno;
-        _next_chno++;
         _state = State.OFF;
     }
  

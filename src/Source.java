@@ -77,13 +77,7 @@ public abstract class Source implements Serializable
      public boolean isRestricted()
         { return _restrict; }
         
-        
-    /** 
-     * Return a short (3 character) descriptor for channel. 
-     * The first two should normally indicate the type of the channel (e.g. RF), the last character 
-     * should typically be a number.
-     */
-    public abstract String getShortDescr(); 
+
     
 }
 

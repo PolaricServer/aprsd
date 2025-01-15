@@ -130,7 +130,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
             
        _msgcnt++;
        _api.log().debug("Igate", "Gated to internet");
-       _log.log(" [" + _rfChan.getShortDescr() + ">" + _inetChan.getShortDescr() + "] " + p);       
+       _log.log(" [" + _rfChan.getIdent() + ">" + _inetChan.getIdent() + "] " + p);       
        
        p.via += (",qAR,"+_myCall);
        if (_inetChan != null && !_inetChan.isRf()) 
@@ -162,7 +162,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
        )    
        {        
           _api.log().debug("Igate", "Gated to RF");
-          _log.log(" [" + _inetChan.getShortDescr() + ">" + _rfChan.getShortDescr() + "] " 
+          _log.log(" [" + _inetChan.getIdent() + ">" + _rfChan.getIdent() + "] " 
                + p + (p.thirdparty ? " (was thirdparty)" : ""));
                
           /* Now, get a proper path for the packet. 

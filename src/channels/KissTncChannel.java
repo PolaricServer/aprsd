@@ -88,7 +88,7 @@ public class KissTncChannel extends TncChannel
     {      
         if (!isReady() || !canSend)
             return; 
-        _log.log(" [>" + this.getShortDescr() + "] " + p);
+        _log.log(" [>" + this.getIdent() + "] " + p);
         try {
            _kiss.sendPacket(p);
            _sent++;

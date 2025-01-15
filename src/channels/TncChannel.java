@@ -28,10 +28,7 @@ public abstract class TncChannel extends AprsChannel
     protected String      _myCall; /* Move this ? */
     private   Semaphore   _sem = new Semaphore(1, true);
     protected Logfile     _log; 
-    private   int         _chno;
     protected SerialComm  _serial;
-    
-    private static int _next_chno = 0;
     
    
     
@@ -47,8 +44,6 @@ public abstract class TncChannel extends AprsChannel
     {
         _init(api, "channel", id);
         _api = api;
-        _chno = _next_chno;
-        _next_chno++;
         _state = State.OFF;
     }
   
@@ -107,10 +102,6 @@ public abstract class TncChannel extends AprsChannel
          * more than one path instance */
     }
  
-    
-    @Override public String getShortDescr()
-       { return "rf"+_chno; }
-
 
 }
 

@@ -31,10 +31,7 @@ public class InetChannel extends TcpChannel
     public InetChannel(ServerAPI api, String id) 
        { super(api, id); }
        
-    
-    @Override public String getShortDescr()
-       { return "is"+_chno; }
-
+       
        
     @Override public void activate(ServerAPI a) {
        super.activate(_api);

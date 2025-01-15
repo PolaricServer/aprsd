@@ -109,7 +109,7 @@ public class TcpKissChannel extends TcpChannel
     {        
         if (!isReady() || !canSend)
             return; 
-        _log.log(" [>" + this.getShortDescr() + "] " + p);
+        _log.log(" [>" + this.getIdent() + "] " + p);
         try {
            if (_kiss!=null) {
               _kiss.sendPacket(p);
@@ -147,8 +147,5 @@ public class TcpKissChannel extends TcpChannel
          * more than one path instance */
     }
  
-    
-    @Override public String getShortDescr()
-       { return "rf"+_chno; }
        
 }

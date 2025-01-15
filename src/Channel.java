@@ -57,7 +57,7 @@ public abstract class Channel extends Source implements ManagedObject
      
  
      protected String chId() {
-        return "["+getShortDescr()+"] "; 
+        return "["+getIdent()+"] "; 
      }
     
     
