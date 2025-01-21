@@ -132,7 +132,12 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
        _api.log().debug("Igate", "Gated to internet");
        _log.log(" [" + _rfChan.getIdent() + ">" + _inetChan.getIdent() + "] " + p);       
        
-       p.via += (",qAR,"+_myCall);
+       /* qAR means that packet is gated from RF and igate is bidirectional */
+       if (_allowRf)
+         p.via += (",qAR,"+_myCall);
+       else 
+         p.via += (",qAO,"+_myCall);
+         
        if (_inetChan != null && !_inetChan.isRf()) 
            _inetChan.sendPacket(p);
        
