@@ -54,8 +54,23 @@ public class AprsUtil
     
     
     
+   /* Consider Moving this to AprsdPacket */ 
+   public static String[] getQcode(AprsPacket p) {
+      String[] vias = p.via.split(",(\\s)*");
+      for (int i=0; i<vias.length; i++) 
+         if (vias[i].charAt(0) == 'q') {
+            String[] ret = new String[2];
+            ret[0] = vias[i]; 
+            if (i+1 < vias.length)
+               ret[1] = vias[i+1];
+            return ret; 
+         }
+      return null;
+   }
     
     
+    
+   /* Consider moving this to AprsPacket */
    public static Point getPos(AprsPacket p) 
    {
       ReportHandler.PosData pd = 
@@ -64,6 +79,8 @@ public class AprsUtil
             case '\'', '`' ->  parseMicEPos(p, null);
             default -> null;
          };
+      if (pd==null)
+         return null;
       return new Point(pd.pos);
    }
    

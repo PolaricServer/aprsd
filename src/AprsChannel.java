@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,9 +98,10 @@ public abstract class AprsChannel extends Channel
      * Perhaps we should use a list of receivers in a later version, but for now
      * two is sufficient: A parser and an igate.
      */
-    transient private List<Receiver> _rcv = new LinkedList<Receiver>(); 
+    transient protected List<Receiver> _rcv = new LinkedList<Receiver>(); 
     transient protected PrintWriter  _out = null; 
     protected String _rfilter = null;
+    private boolean _inRouter = false; 
 
     public static DupCheck  _dupCheck = new DupCheck();
     public static final String _rx_encoding = "UTF-8"; 
@@ -118,6 +119,15 @@ public abstract class AprsChannel extends Channel
         return false; 
     }
    
+    public void setInRouter(boolean ir) {
+      _inRouter = ir;
+    }
+    
+    public boolean isInRouter() {
+      return _inRouter;
+    }
+    
+    
     
     /**
       * Returns true if callsign is heard on the channel.

@@ -35,9 +35,11 @@ public class SysAdminApi extends ServerBase {
     /* Register subtypes for deserialization */
     static { 
         ServerBase.addSubtype(InetChannel.JsConfig.class, "APRSIS");
+        ServerBase.addSubtype(InetSrvChannel.JsConfig.class, "APRSIS-SRV");
         ServerBase.addSubtype(KissTncChannel.JsConfig.class, "KISS");
         ServerBase.addSubtype(TcpKissChannel.JsConfig.class, "TCPKISS");
         ServerBase.addSubtype(Tnc2Channel.JsConfig.class, "TNC2");
+        ServerBase.addSubtype(Router.JsConfig.class, "ROUTER");
     }
     
     
@@ -88,6 +90,9 @@ public class SysAdminApi extends ServerBase {
 
     
     
+    /*
+     * (re-) configure a channel f rom a channelinfo object. 
+     */
     public  void setChannelProps(Channel ch, ChannelInfo cnf, String type) {
         var props = _api.getConfig();
         props.setProperty("channel."+ch.getIdent()+".on", ""+cnf.active);
@@ -98,10 +103,6 @@ public class SysAdminApi extends ServerBase {
         
         try {
         if (ch instanceof AprsChannel ach) {
-            
-            ach.addReceiver(_api.getAprsParser());
-        
-        
             if (ach.isRf()) {
                 if (_api.getRfChannel() == ach && !cnf.rfchan) {
                     _api.setRfChannel(null);
@@ -134,6 +135,7 @@ public class SysAdminApi extends ServerBase {
         }
         else if (ch.isActive())
             ch.deActivate();
+        
     }
     
     
@@ -146,7 +148,10 @@ public class SysAdminApi extends ServerBase {
     }
     
     
-    
+    /* 
+     * Re-create the channel list which is a comma-separated 
+     * text-string
+     */
     public void updateChanList() {
         var mgr = _api.getChanManager(); 
         var i = 0;
@@ -168,6 +173,8 @@ public class SysAdminApi extends ServerBase {
     public static record ClientInfo
        (Date created, String cid, long in, long out, String userid, boolean mobile)
     {}
+    
+    
     
     public static record ServerConfig 
     (
@@ -468,6 +475,8 @@ public class SysAdminApi extends ServerBase {
             if (ch==null)
                 return ERROR(resp, 400, "Couldn't instantiate channel: "+tname+": "+conf.name);
             setChannelProps(ch, conf, tname);
+            if (ch instanceof AprsChannel ach)
+                ach.addReceiver(_api.getAprsParser());
             updateChanList();
             return "Ok";
         });  

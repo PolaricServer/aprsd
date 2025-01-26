@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ public class AprsPacket implements Cloneable {
      * info about source packet is in from_orig and to_orig.
      */
     public Date time; 
-    public Channel source;
+    public AprsChannel source;
     public char type;
     public String from, to, msgto, via, report; 
     public String from_orig, to_orig, via_orig; 
@@ -79,6 +79,31 @@ public class AprsPacket implements Cloneable {
         return null;
     }
 
+    
+    /**
+     * Get Q-code from via part 
+     */
+    public String[] getQcode() {
+        return AprsUtil.getQcode(this);
+    }
+    
+    
+    /**
+     * Set q-code in via part. 
+     * if one exists, replace it. 
+     */
+    public void setQcode(String q, String call) {
+        via = via.replaceAll("qA[CXUoOSrRZI](,(\\s)*.+)?", "");
+        via += ((via.equals("") ? "" : ",") + q + ","+call);
+    }
+    
+    
+    /**
+     * Get position as point. 
+     */
+    public Point getPos() {
+        return AprsUtil.getPos(this); 
+    }
     
     
     public String toString() {  

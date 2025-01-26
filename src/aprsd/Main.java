@@ -314,7 +314,8 @@ public class Main implements ServerAPI
             parser = new AprsParser(api, msgProc);
             bullboard = new BullBoard(api, msgProc);
                      
-           
+            AprsFilter.init(this);
+            
             /* Initialize signs early since plugins may use it (see below) */
             Signs.init(api);
             TrackerPoint.setApi(api);
@@ -419,31 +420,35 @@ public class Main implements ServerAPI
          */
         AprsChannel.init(api);
         _chanManager.addClass("APRSIS", "no.polaric.aprsd.InetChannel");
+        _chanManager.addClass("APRSIS-SRV", "no.polaric.aprsd.InetSrvChannel");
         _chanManager.addClass("TNC2", "no.polaric.aprsd.Tnc2Channel");
         _chanManager.addClass("KISS", "no.polaric.aprsd.KissTncChannel");
         _chanManager.addClass("TCPKISS", "no.polaric.aprsd.TcpKissChannel");
+        _chanManager.addClass("ROUTER", "no.polaric.aprsd.Router");
 
         String[] channelns = { };
         String[] c = getProperty("channels", "").split(",(\\s*)");
         if (c.length > 0)
             channelns = c; 
-           
+        List<Channel> chlist = new ArrayList<Channel>();
            
         /* Try to instantiate channels in channel list */
         for (String chan: channelns) {
             /* Define and activate channel */
             String type = getProperty("channel."+chan+".type", "");
             Channel ch = _chanManager.newInstance(api, type, chan);
-            if (ch != null) {
-                /* FIXME: add parser in AprsChannel constructor?? */
-                if (ch instanceof AprsChannel ach) 
-                    ach.addReceiver(parser);
-                 
-                if (getBoolProperty("channel."+chan+".on", false))
-                    ch.activate(api);
-            }
+            if (ch != null)
+                chlist.add(ch);
             else
                 log.error("Main", "ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
+                
+            if (getBoolProperty("channel."+ch.getIdent()+".on", false))
+                ch.activate(api);
+        }
+        
+        for (Channel ch : chlist) {
+            if (ch instanceof AprsChannel ach && !ach.isInRouter()) 
+                ach.addReceiver(parser);
         }
     }
   
