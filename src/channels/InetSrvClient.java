@@ -117,7 +117,7 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
             _userid = x[1].toUpperCase();
         if (x.length > 3 && x[2].matches("pass|PASS"))
             verify(_userid, x[3]);
-        _writer.println("# Login ok user="+_userid+(_verified? ", " : ", not ")+"verfied");
+        _writer.println("# Login ok user="+_userid+(_verified? ", " : ", not ")+"verified");
         _writer.flush();
         _api.log().info("InetSrvChannel", "User "+_userid+" verification "+(_verified ? "Ok": "Failed"));
         _api.log().info("InetSrvChannel", "Filter: "+_filter);
@@ -200,11 +200,13 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
     /**
      * Send packet to connected client.
      */
-    public void sendPacket(AprsPacket p) {
+    public boolean sendPacket(AprsPacket p) {
         if (_login && _filter != null && _filter.test((p))) {
             _writer.println(p.toString());
             _writer.flush();
+            return true;
         }
+        return false; 
     }
     
     

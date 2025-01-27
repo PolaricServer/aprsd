@@ -77,13 +77,14 @@ public class SysAdminApi extends ServerBase {
     
     
     public static record GenChanInfo 
-        (Channel.State state, String tag, boolean restricted)
+        (Channel.State state, String tag, boolean restricted, boolean inRouter)
     { 
         public GenChanInfo(ServerAPI api, Channel ch) {
             this (
                 ch.getState(),
                 api.getProperty("channel."+ch.getIdent()+".tag", ""),
-                api.getBoolProperty("channel."+ch.getIdent()+".restricted", false)
+                api.getBoolProperty("channel."+ch.getIdent()+".restricted", false),
+                (ch instanceof AprsChannel ach ? ach.isInRouter() : false)
             );
         }
     }
@@ -410,7 +411,7 @@ public class SysAdminApi extends ServerBase {
                 Channel ch = _api.getChanManager().get(chn);
                 
                 res.add( new ChannelInfo(ch.getIdent(), ch.isActive(),  
-                   ch==_api.getRfChannel(), ch==_api.getInetChannel(), ch.isRf(), 
+                   ch==_api.getRfChannel(), ch==_api.getInetChannel(), ch.isRf(),
                    ch instanceof AprsChannel,
                    new GenChanInfo(_api, ch), 
                    ch.getJsConfig()));

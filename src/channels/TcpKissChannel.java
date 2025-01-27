@@ -105,19 +105,21 @@ public class TcpKissChannel extends TcpChannel
   
   
    
-    public synchronized void sendPacket(AprsPacket p)
+    public synchronized boolean sendPacket(AprsPacket p)
     {        
         if (!isReady() || !canSend)
-            return; 
+            return false; 
         _log.log(" [>" + this.getIdent() + "] " + p);
         try {
            if (_kiss!=null) {
               _kiss.sendPacket(p);
               _sent++;
+              return true; 
            }
         }
         catch (IOException e)
            {  _api.log().error("TcpKissChannel", chId()+"KissTncChannel.sendPacket: "+e); }
+        return false; 
     }
   
   

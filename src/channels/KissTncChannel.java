@@ -84,17 +84,19 @@ public class KissTncChannel extends TncChannel
     /**
      * Send packet on RF. 
      */ 
-    public synchronized void sendPacket(AprsPacket p)
+    public synchronized boolean sendPacket(AprsPacket p)
     {      
         if (!isReady() || !canSend)
-            return; 
+            return false; 
         _log.log(" [>" + this.getIdent() + "] " + p);
         try {
            _kiss.sendPacket(p);
            _sent++;
+           return true;
         }
         catch (IOException e)
            { _api.log().error("KissTncChannel", chId()+"sendPacket: "+e); }
+        return false; 
     }
    
    

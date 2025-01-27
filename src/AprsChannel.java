@@ -224,7 +224,7 @@ public abstract class AprsChannel extends Channel
        { return _out; }
 
     
-    public abstract void sendPacket(AprsPacket p);
+    public abstract boolean sendPacket(AprsPacket p);
     
     
     /**

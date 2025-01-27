@@ -12,6 +12,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+ 
+ 
 package no.polaric.aprsd;
 import java.io.*;
 import java.net.*;
@@ -86,10 +88,10 @@ public class InetChannel extends TcpChannel
     /**
      * Send a packet to APRS-IS.
      */ 
-    public void sendPacket(AprsPacket p)
+    public boolean sendPacket(AprsPacket p)
     {  
         if (!isReady() || !canSend)
-            return; 
+            return false; 
         if (p.via == null || p.via.equals("")) {
             p = p.clone(); 
             p.via = "TCPIP*";
@@ -101,7 +103,9 @@ public class InetChannel extends TcpChannel
                 /* Should type char be part of report? */
             _out.flush();
             _sent++;
-        }      
+            return true;
+        } 
+        return false; 
     }
     
     

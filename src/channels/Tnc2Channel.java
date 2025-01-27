@@ -96,13 +96,13 @@ public class Tnc2Channel extends TncChannel
      * Break out of converse mode and try to send command to TNC.
      */ 
      
-    public synchronized void sendPacket(AprsPacket p)
+    public synchronized boolean sendPacket(AprsPacket p)
     {
        if (!isReady() || !canSend)
-            return; 
+            return false; 
     
        if (_out == null)
-          return;
+          return false;
        String unproto = p.to + (p.via != null && p.via.length()>0 ? " VIA "+p.via : "");
        if (!_unproto.equals(unproto))
           try {
@@ -127,6 +127,7 @@ public class Tnc2Channel extends TncChannel
            _out.print(p.report+"\r");
        _out.flush();    
        _sent++;
+       return true;
     }
    
     

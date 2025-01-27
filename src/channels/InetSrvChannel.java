@@ -126,16 +126,19 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
     /**
      * Outgoing packet. Distribute to connected clients.
      */
-    public void sendPacket(AprsPacket p, InetSrvClient except)
+    public boolean sendPacket(AprsPacket p, InetSrvClient except)
     {     
-       _sent++;
+        boolean sent = false; 
         for (Client x : _clients)
             if (x instanceof InetSrvClient c && c != except)
-                c.sendPacket(p);
+                if (c.sendPacket(p)) sent = true;
+        if (sent)
+            _sent++;
+        return sent;
     }
     
-    public void sendPacket(AprsPacket p) {
-        sendPacket(p, null);
+    public boolean sendPacket(AprsPacket p) {
+        return sendPacket(p, null);
     }
     
     

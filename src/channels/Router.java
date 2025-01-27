@@ -125,16 +125,21 @@ public class Router extends AprsChannel
     }
     
     
+    
     /** 
      * Send packet to contained channels, except the one it came from 
      */
-    public void sendPacket(AprsPacket p) {
-        _sent++;
+    public boolean sendPacket(AprsPacket p) {
+        boolean sent = false; 
         if (_state == State.RUNNING)
             for (AprsChannel ch : _channels) {
-                if (ch != null && !ch.getIdent().equals(p.source))
-                    ch.sendPacket(p);
-        }
+                if (ch != null && !ch.getIdent().equals(p.source.getIdent()))
+                    if (ch.sendPacket(p)) 
+                        sent = true;;
+            }
+        if (sent)
+            _sent++;
+        return sent;
     }
         
         
@@ -157,7 +162,6 @@ public class Router extends AprsChannel
        if (_rfilter != null && !_rfilter.equals("") && !p.toString().matches(_rfilter))
           return false; 
           
-       p.source = this;
        _heardPackets++;
           
        /* Pass the packet to registered receivers: Aprs-parser, igate, etc.. */
