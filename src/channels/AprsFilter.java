@@ -30,11 +30,30 @@ import java.util.*;
  *  t - type
  *  p - prefix
  *  b - budlist (with wildcards)
+ *  e - entry (with wildcards)
+ *
+ * Filters separated by just a space is a disjunction. For example 'a b c' means 'a OR b OR c'.
+ * If the filter starts with '-' it is an exception. If any such filters is true, it means the whole filter is false. 
+ * If the filter starts with '&' it is a conjunction with the filter it immediately follows. 
+ *    For example 'a &b &c' means '(a AND b AND c)'. 'a &b c' means '(a AND b) OR c'.  
+ * Conjunctions can also be used with exceptions. 
+ *    For example -t/x &p/a means NOT(t/x AND p/a)
  */
 
+ 
 public abstract class AprsFilter {
 
     protected static ServerAPI _api; 
+    
+    
+    public static class All extends AprsFilter {
+        @Override public boolean test(AprsPacket p) {
+            return true;
+        }
+        public String toString() {return "All";}
+    }
+    
+    
     
     /**
      * Range filter.
@@ -155,55 +174,147 @@ public abstract class AprsFilter {
         public String toString() {return "Budlist";}
     }
     
-    
+        
+    /**
+     * e - entry calls with wildcards
+     */
+    public static class Entry extends AprsFilter {
+        private String[] patterns;
+        
+        public Entry(String[] parms) {
+            patterns = parms; 
+            /* Convert to regex */
+            for (int i = 1; i< patterns.length; i++)
+                patterns[i] = patterns[i].replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+        }
+        
+        @Override public boolean test(AprsPacket p) {
+            String[] qc = p.getQcode();
+            if (qc==null || qc[1] == null)
+                return false; 
+            for (String x : patterns)
+                if (qc[1].matches(x))
+                    return true;
+            return false;
+        }
+        
+        public String toString() {return "Entry";}
+    }
     
     
     /**
      * Combined filter. List of filters. 
      */
     public static class Combined extends AprsFilter {
-        List<AprsFilter> _flist; 
+        List<AprsFilter[]> _flist, _xlist;
         String _client; // Callsign of the logged in client
         
         public Combined(String cl) {
             _client = cl; 
-            _flist = new LinkedList<AprsFilter>();
+            _flist = new LinkedList<AprsFilter[]>();
+            _xlist = new LinkedList<AprsFilter[]>();
             parse(cl);
         }
-        
-        private void add(AprsFilter f) {
-            if (f != null) 
-                _flist.add(f);
-        }
+
         
         private void parse(String fspec) {
+            int findex = 0;
             String[] fspecs = fspec.split(" ");
+            AprsFilter[] f = new AprsFilter[10]; 
+             
             for (String fstr : fspecs) {
                 String[] ff = fstr.split("/");
-                AprsFilter f = switch (ff[0]) {
+                String cmd = ff[0];
+                boolean exception = false;
+                
+                if (cmd.charAt(0) == '-')  {
+                    exception = true;
+                    cmd = cmd.substring(1);
+                }
+                if (cmd.charAt(0) == '&') {
+                    cmd = cmd.substring(1);
+                    findex++;
+                }
+                else {
+                    f = new AprsFilter[10];        
+                    findex = 0;
+                }
+                
+                f[findex] = switch (cmd) {
+                    case "*" -> new All();
                     case "p" -> new Prefix(ff);
                     case "b" -> new Budlist(ff);
                     case "t" -> new Type(ff);
                     case "r" -> new ERange(ff);
                     case "m" -> new ItemRange(_client, ff);
                     case "f" -> new ItemRange(ff[1], ff, 2);
+                    case "e" -> new Entry(ff);
                     default -> null;
                 }; 
-                add(f);
+                if (findex > 0)
+                    continue;
+                if (exception)
+                    _xlist.add(f);
+                else
+                    _flist.add(f);
             }
         }
         
+        
+        /* 
+         * Go through rules and test.
+         * Negative results of exception rules will override any other rule regardless of order 
+         */
         public boolean test(AprsPacket p) {
-            for (AprsFilter f: _flist)
-                if (f.test(p)) return true;
-            return false;
+            boolean res = false; 
+            for (AprsFilter[] f: _flist)
+                if (ctest(f, p)) res = true;
+            for (AprsFilter[] f: _xlist)
+                if (ctest(f, p)) return false; 
+            return res; 
         }
+        
+        
+        /* 
+         * Conjunction. Return true only if all parts are true 
+         */
+        private boolean ctest(AprsFilter[] conj, AprsPacket p) {
+            for (AprsFilter f : conj) {
+                if (f==null)
+                    break;
+                if (!f.test(p)) return false;
+            }
+            return true;
+        }
+        
+        
         
         public String toString() {
             String res = "[ ";
-            for (AprsFilter x: _flist)
-                res += x + " ";
-            return res+"]";
+            res += _toString(_flist);
+            if (_xlist.size() > 0)
+                res += "EXCEPT " + _toString(_xlist);
+            return res + "]";
+        }
+        
+        
+        private String _toString(List<AprsFilter[]> list) {
+            String res = "";
+            for (AprsFilter[] x: list) {
+                if (x[1] != null) {
+                    res+= "(";
+                    for (int i=0; i<x.length-1; i++) {
+                        if (x[i] == null)
+                            break;
+                        res+=x[i] + (x[i+1]==null ? "" : " & ");
+                    }
+                    res+= ")";
+                }
+                else
+                    res += x[0];
+                res += " ";
+            }
+            return res;
         }
     }
 
@@ -237,6 +348,8 @@ public abstract class AprsFilter {
     public static AprsFilter createFilter(String fspec) {
         return new Combined(fspec);
     }
+    
+
     
 }
 
