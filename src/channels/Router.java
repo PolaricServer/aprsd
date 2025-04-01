@@ -32,6 +32,7 @@ public class Router extends AprsChannel
 {
     private String[] _chnames;
     private AprsChannel[] _channels;
+    private AprsFilter[] _filters;
     private Receiver _recv;
     
     
@@ -48,10 +49,13 @@ public class Router extends AprsChannel
     @JsonTypeName("ROUTER")
     public static class JsConfig extends Channel.JsConfig {
         public long heardpackets, heard, duplicates, sentpackets; 
-        public String channels;
+        public List<SubChan> channels;
     }
+    
        
-       
+    public static record SubChan (String name, String filter) {}
+    
+    
        
     public JsConfig getJsConfig() {
         var cnf = new JsConfig();
@@ -59,7 +63,16 @@ public class Router extends AprsChannel
         cnf.heardpackets = nHeardPackets(); 
         cnf.duplicates = nDuplicates(); 
         cnf.sentpackets = nSentPackets();
-        cnf.channels  =  _api.getProperty("channel."+getIdent()+".channels", "");
+        cnf.channels = new ArrayList<SubChan>();
+        
+        String chans  =  _api.getProperty("channel."+getIdent()+".channels", "");
+        if (chans.length() > 0) {
+            String[] chnames = chans.split(",(\\s)*");
+            for (String ch : chnames) {
+                String filt =  _api.getProperty("channel."+getIdent()+".filter."+ch, "*");
+                cnf.channels.add(new SubChan(ch, filt));
+            }
+        }
         cnf.type  = "ROUTER";
         return cnf;
     }
@@ -69,7 +82,15 @@ public class Router extends AprsChannel
     public void setJsConfig(Channel.JsConfig ccnf) {
         var cnf = (JsConfig) ccnf;
         var props = _api.getConfig();  
-        props.setProperty("channel."+getIdent()+".channels", ""+cnf.channels);
+        var chanlist = ""; 
+        
+        for (SubChan ch: cnf.channels) {
+            chanlist += ch.name + ",";
+            props.setProperty("channel."+getIdent()+".filter."+ch.name, ch.filter);
+        }
+        if (chanlist.length() > 0)
+            chanlist = chanlist.substring(0, chanlist.length()-1);
+        props.setProperty("channel."+getIdent()+".channels", ""+chanlist);
     }
     
     
@@ -85,11 +106,15 @@ public class Router extends AprsChannel
        String chn = _api.getProperty("channel."+getIdent()+".channels", "");
         _chnames = chn.split(",(\\s)*");
         _channels = new AprsChannel[_chnames.length];
+        _filters = new AprsFilter[_chnames.length];
+        
         for (int i=0; i<_chnames.length; i++) {
             Channel ch = _api.getChanManager().get(_chnames[i]);
             if (ch != null && ch instanceof AprsChannel ach) {
                 ach.setInRouter(true);
                 _channels[i] = ach;
+                String filt = _api.getProperty("channel."+getIdent()+".filter."+_chnames[i], "*");
+                _filters[i] = AprsFilter.createFilter( filt );
             }
             else
                 _channels[i] = null;
@@ -118,9 +143,12 @@ public class Router extends AprsChannel
     @Override public void deActivate() {
         _state = State.OFF;
               
-        for (AprsChannel ch: _channels)
-            if (ch != null)
-                ch.removeReceiver(_recv);
+        if (_channels != null)
+            for (AprsChannel ch: _channels)
+                if (ch != null) {
+                    ch.removeReceiver(_recv);
+                    ch.setInRouter(false);
+                }
         _recv = null;
     }
     
@@ -131,10 +159,13 @@ public class Router extends AprsChannel
      */
     public boolean sendPacket(AprsPacket p) {
         boolean sent = false; 
+        int i=0;
+        
         if (_state == State.RUNNING)
             for (AprsChannel ch : _channels) {
-                if (ch != null && !ch.getIdent().equals(p.source.getIdent()))
-                    if (ch.sendPacket(p)) 
+                AprsFilter filt = _filters[i++];
+                if (ch != null && p.source != null && !ch.getIdent().equals(p.source.getIdent()))
+                    if ( (filt==null || filt.test(p)) && ch.sendPacket(p)) 
                         sent = true;;
             }
         if (sent)

@@ -112,7 +112,7 @@ public class InetChannel extends TcpChannel
     @Override protected void _close()
     {
        try { 
-          if (_rder != null) _rder.close(); 
+          Thread.sleep(200);
           if (_out != null)  _out.close();
           if (_comm != null) _comm.deActivate(); 
           Thread.sleep(500);
@@ -135,21 +135,27 @@ public class InetChannel extends TcpChannel
     {    
          _rder = new BufferedReader(new InputStreamReader(_comm.getInputStream(), _rx_encoding));
          _out = new PrintWriter(new OutputStreamWriter(_comm.getOutputStream(), _tx_encoding));         
-         _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+_api.getVersion()+"\r\n");
+         _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+_api.getVersion());
          
          if (_filter.length() > 0)
-             _out.print("# filter "+_filter+ "\r\n"); 
+             _out.print(" filter "+_filter);
+         _out.print("\r\n");
          _out.flush();
          
          while (_comm.running()) 
          {
-             String inp = _rder.readLine(); 
-             if (inp != null) 
-                receivePacket(inp, false);
-             else {   
-                _api.log().info("InetChannel", chId()+"Disconnected from APRS server '"+getHost()+"'");
-                break; 
-             }              
+            try { 
+                String inp = _rder.readLine(); 
+                if (inp != null) 
+                    receivePacket(inp, false);
+                else {   
+                    _api.log().info("InetChannel", chId()+"Disconnected from APRS server '"+getHost()+"'");
+                    break; 
+                }
+            }
+            catch (java.net.SocketException e) {
+                _api.log().info("InetChannel", chId()+"Socket closed");
+            }
          }
     }
     

@@ -24,20 +24,25 @@ import java.util.*;
  * See https://www.aprs-is.net/javAPRSFilter.aspx. 
  *
  * A subset of these filters are supported (more can be added if needed):
- *  r - range
+ *  a - area
+ *  r - range 
  *  m - my range
  *  f - friend range
  *  t - type
- *  p - prefix
- *  b - budlist (with wildcards)
+ *  p - prefix 
+ *  d - digipeater (with wildcards)
+ *  b - budlist (with wildcards) 
+ *  u - unproto (with wildcards) 
  *  e - entry (with wildcards)
  *
- * Filters separated by just a space is a disjunction. For example 'a b c' means 'a OR b OR c'.
+ * Todo: o-object, os-strict object, s-symbol, g-group, q-qconstruct, 
+ *
+ * Filters separated by just a space is a disjunction. For example 'a b' means 'a OR b'.
  * If the filter starts with '-' it is an exception. If any such filters is true, it means the whole filter is false. 
  * If the filter starts with '&' it is a conjunction with the filter it immediately follows. 
  *    For example 'a &b &c' means '(a AND b AND c)'. 'a &b c' means '(a AND b) OR c'.  
  * Conjunctions can also be used with exceptions. 
- *    For example -t/x &p/a means NOT(t/x AND p/a)
+ *    For example -t/x &p/a means NOT(t/x AND p/a)  FIXME: Check if this is correct!!!
  */
 
  
@@ -51,6 +56,32 @@ public abstract class AprsFilter {
             return true;
         }
         public String toString() {return "All";}
+    }
+    
+        
+    
+    /**
+     * Area filter.  a/latN/lonW/latS/lonE 
+     */
+    public static class Area extends AprsFilter {
+        protected LatLng uleft, lright;
+        
+        public Area(String[] parms) {
+            double latN = Double.parseDouble(parms[1]);
+            double lonW = Double.parseDouble(parms[2]);
+            double latS = Double.parseDouble(parms[3]);
+            double lonE = Double.parseDouble(parms[4]);
+            
+            uleft = new LatLng(latN, lonW); 
+            lright = new LatLng(latS, lonE);
+        }
+        
+        @Override public boolean test(AprsPacket p) {
+            Point pktpos = AprsUtil.getPos(p); 
+            if (uleft == null || lright == null || pktpos == null)
+                return false;
+            return pktpos.isInside(uleft, lright);
+        }
     }
     
     
@@ -69,6 +100,8 @@ public abstract class AprsFilter {
             return (pos.distance(pktpos) <= dist*1000);
         }
     }
+    
+    
     
     
     /**
@@ -136,6 +169,8 @@ public abstract class AprsFilter {
                 
         public Prefix(String[] parms) {
             _prefixes = Arrays.copyOfRange(parms, 1, parms.length);
+            for (int i=0; i<_prefixes.length; i++)
+                _prefixes[i] = _prefixes[i].toUpperCase();
         }
         
         @Override public boolean test(AprsPacket p) {
@@ -161,7 +196,7 @@ public abstract class AprsFilter {
             patterns = parms; 
             /* Convert to regex */
             for (int i = 1; i< patterns.length; i++)
-                patterns[i] = patterns[i].replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
         }
         
         @Override public boolean test(AprsPacket p) {
@@ -174,6 +209,69 @@ public abstract class AprsFilter {
         public String toString() {return "Budlist";}
     }
     
+    
+    
+        
+    /**
+     * u - unproto with wildcards
+     */
+    public static class Unproto extends AprsFilter {
+        private String[] patterns;
+        
+        public Unproto(String[] parms) {
+            patterns = parms; 
+            /* Convert to regex */
+            for (int i = 1; i< patterns.length; i++)
+                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+        }
+        
+        @Override public boolean test(AprsPacket p) {
+            for (String x : patterns)
+                if (p.to.matches(x))
+                    return true;
+            return false;
+        }
+        
+        public String toString() {return "Unproto";}
+    }
+    
+    
+    
+    
+    /**
+     * d - digipeater with wildcards
+     */
+    public static class Digi extends AprsFilter {
+        private String[] patterns;
+        
+        public Digi(String[] parms) {
+            patterns = parms; 
+            /* Convert to regex */
+            for (int i = 1; i< patterns.length; i++)
+                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".")+"(\\*)?";
+        }
+         
+        @Override public boolean test(AprsPacket p) {
+            if (p.via == null || p.via == null)
+                return false; 
+            String[] digis = p.via.split(",");
+            int i;
+            for (i=digis.length; i>0; i--)
+                if (digis[i-1].matches(".+\\*"))
+                    break;
+
+            for (int j=0; j<i; j++)
+                for (String x : patterns)
+                    if (digis[i].matches(x))
+                        return true;
+            return false;
+        }
+        
+        public String toString() {return "Digi";}
+    }
+    
+    
+    
         
     /**
      * e - entry calls with wildcards
@@ -185,7 +283,7 @@ public abstract class AprsFilter {
             patterns = parms; 
             /* Convert to regex */
             for (int i = 1; i< patterns.length; i++)
-                patterns[i] = patterns[i].replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
         }
         
         @Override public boolean test(AprsPacket p) {
@@ -218,11 +316,15 @@ public abstract class AprsFilter {
 
         
         private void parse(String fspec) {
+            if (fspec.length() == 0)
+                return;
             int findex = 0;
             String[] fspecs = fspec.split(" ");
             AprsFilter[] f = new AprsFilter[10]; 
              
             for (String fstr : fspecs) {
+                if (fstr.length() == 0)
+                    continue;
                 String[] ff = fstr.split("/");
                 String cmd = ff[0];
                 boolean exception = false;
@@ -242,8 +344,11 @@ public abstract class AprsFilter {
                 
                 f[findex] = switch (cmd) {
                     case "*" -> new All();
+                    case "a" -> new Area(ff);
                     case "p" -> new Prefix(ff);
                     case "b" -> new Budlist(ff);
+                    case "u" -> new Unproto(ff);
+                    case "d" -> new Digi(ff);
                     case "t" -> new Type(ff);
                     case "r" -> new ERange(ff);
                     case "m" -> new ItemRange(_client, ff);

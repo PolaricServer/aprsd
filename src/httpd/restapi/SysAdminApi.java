@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2018-2021 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018-2025 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,8 +53,6 @@ public class SysAdminApi extends ServerBase {
     
     
     
-    
-    
     public static class SysInfo 
     {
         public Date runsince; 
@@ -88,6 +86,7 @@ public class SysAdminApi extends ServerBase {
             );
         }
     }
+
 
     
     
@@ -136,7 +135,6 @@ public class SysAdminApi extends ServerBase {
         }
         else if (ch.isActive())
             ch.deActivate();
-        
     }
     
     
@@ -419,6 +417,27 @@ public class SysAdminApi extends ServerBase {
             return res;
         }, ServerBase::toJson );
         
+            
+       /******************************************
+        * Return list of connected clients
+        ******************************************/
+        get("/system/adm/channels/*/clients", (req, resp) -> {
+            var chname = req.splat()[0];
+            Channel.Manager mgr = _api.getChanManager(); 
+            Channel ch = mgr.get(chname);
+            if (ch==null)
+                return ERROR(resp, 404, "Channel not found: "+chname);
+            
+            List<InetSrvClient.Info> res = new ArrayList<InetSrvClient.Info>();
+            if (ch instanceof InetSrvChannel ich) {
+                for (InetSrvClient x: ich.getClients())
+                    res.add(x.getInfo());
+                return res;
+            }
+            else
+                return ERROR(resp, 400, "Invalid channel type: "+chname);
+        }, ServerBase::toJson );
+        
         
         
         /******************************************
@@ -441,12 +460,14 @@ public class SysAdminApi extends ServerBase {
             );
         }, ServerBase::toJson );
     
-    
-    
+        
+
+        
        /******************************************
         * Update channel
         ******************************************/
         put("/system/adm/channels/*", (req, resp) -> {
+        try {
             var chname = req.splat()[0];
             var mgr = _api.getChanManager(); 
             var ch = mgr.get(chname);
@@ -456,8 +477,15 @@ public class SysAdminApi extends ServerBase {
             ChannelInfo conf = (ChannelInfo) ServerBase.fromJson(req.body(), ChannelInfo.class);
             if (conf==null)
                 return ERROR(resp, 400, "Couldn't parse input");  
+                
             setChannelProps(ch, conf, null);
             return "Ok";
+            
+        } catch (Exception e ) {
+             e.printStackTrace(System.out);
+             return ERROR(resp, 500, "ERRROR: "+e.getMessage());  
+        }
+        
         });
     
     
@@ -466,6 +494,7 @@ public class SysAdminApi extends ServerBase {
         * Add a channel
         ******************************************/
         post("/system/adm/channels", (req, resp) -> {
+        try {
             ChannelInfo conf = (ChannelInfo) ServerBase.fromJson(req.body(), ChannelInfo.class);
             if (conf==null)
                 return ERROR(resp, 400, "Couldn't parse input");
@@ -480,6 +509,12 @@ public class SysAdminApi extends ServerBase {
                 ach.addReceiver(_api.getAprsParser());
             updateChanList();
             return "Ok";
+            
+        } catch (Exception e ) {
+             e.printStackTrace(System.out);
+             return ERROR(resp, 500, "ERRROR: "+e.getMessage());  
+        }    
+            
         });  
         
         

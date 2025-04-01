@@ -28,17 +28,18 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.*;
 /**
  * Channel that can act as a simple APRS-IS server.
  * It is primary aimed at igates to let them connect directly to a Polaric Server instance. 
- * A limited set of filters are supported. It listens to a port. To listen to multiple ports, 
- * start multiple instances of this. To connect it to the APRS-IS network use it with a Router-channel
+ * A set of filters are supported. It listens to a port. To listen to multiple ports, start 
+ * multiple instances of this. To connect it to the APRS-IS network use it with a Router-channel
  * and an APRS-IS channel. 
  */
  
 public class InetSrvChannel extends AprsChannel implements Runnable {
         
-    private List<Client> _clients = new LinkedList<Client>();
+    private List<InetSrvClient> _clients = new LinkedList<InetSrvClient>();
     private int _nclients = 0;
     private int _portnr;
-    private Thread _serverthread = new Thread(this);
+    private AprsFilter _filter;
+    private Thread _serverthread;
 
     public static class Client {
     }
@@ -57,17 +58,24 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         String id = getIdent();            
         _state = State.STARTING;
         _portnr = _api.getIntProperty("channel."+id+".port", 14580);
+        String filt =  _api.getProperty("channel."+id+".infilter", "*");
+        _filter = AprsFilter.createFilter( filt );
+        _serverthread = new Thread(this);
         _serverthread.start(); 
     }
     
         
     /** Stop the service */
     @Override public void deActivate() {
+        if (_state == State.OFF)
+            return;
         _state = State.OFF;
         try {
             _serverthread.join();
         }
-        catch (Exception e) {}
+        catch (Exception e) {
+            e.printStackTrace(System.out);
+        }
     }
     
     
@@ -80,6 +88,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
     public static class JsConfig extends Channel.JsConfig {
         public long nclients, heardpackets, heard, duplicates, sentpackets; 
         public int port; 
+        public String filter;
     }
        
        
@@ -92,6 +101,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         cnf.sentpackets = nSentPackets();
         cnf.type  = "APRSIS-SRV";
         cnf.port  = _api.getIntProperty("channel."+getIdent()+".port", 14580);
+        cnf.filter = _api.getProperty("channel."+getIdent()+".infilter", "*");
         return cnf;
     }
     
@@ -100,11 +110,12 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         var cnf = (JsConfig) ccnf;
         var props = _api.getConfig();
         props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
+        props.setProperty("channel."+getIdent()+".infilter", ""+cnf.filter);
     }
     
     
     
-    public List<Client> getClients() {
+    public List<InetSrvClient> getClients() {
         return _clients;
     }
     
@@ -147,7 +158,8 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
      * Handle incoming packet. To be called from clients. 
      */
     public void handlePacket(AprsPacket p) {
-        boolean accepted = receivePacket(p, false);
+        if (_filter.test(p))
+            receivePacket(p, false);
     }
     
     
@@ -166,12 +178,13 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
                 try {
                     Socket conn = server.accept(); 
                     synchronized(this) {
-                        Client worker = new InetSrvClient(_api, conn, this);
+                        InetSrvClient worker = new InetSrvClient(_api, conn, this);
                         _clients.add(worker);
                         _nclients++;
                     }
                 }
-                catch (SocketTimeoutException e) {}
+                catch (SocketTimeoutException e) {
+                }
             }
         }
         catch (Exception ex) {

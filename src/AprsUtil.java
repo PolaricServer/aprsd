@@ -75,7 +75,8 @@ public class AprsUtil
    {
       ReportHandler.PosData pd = 
          switch(p.type) {
-            case '!', '=', '@', '/' -> _parseStd(p);
+            case '!', '=' -> _parseStd(p, false);
+            case '@', '/' -> _parseStd(p, true);
             case '\'', '`' ->  parseMicEPos(p, null);
             default -> null;
          };
@@ -86,12 +87,18 @@ public class AprsUtil
    
    
    
-   private static ReportHandler.PosData _parseStd(AprsPacket p) 
+   private static ReportHandler.PosData _parseStd(AprsPacket p, boolean ts) 
    {
-      if (p.report.matches("[\\\\/0-9A-Z][\\x20-\\x7f]{12}.*"))
-         return parseCompressedPos(p.report);
+      String data = p.report;
+      if (ts) 
+         data = data.substring(8);
       else
-         return parseStdPos(p.report, null); 
+         data = data.substring(1);
+         
+      if (data.matches("[\\\\/0-9A-Z][\\x20-\\x7f]{12}.*"))
+         return parseCompressedPos(data);
+      else
+         return parseStdPos(data, null); 
    }
    
    
