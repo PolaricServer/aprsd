@@ -34,6 +34,7 @@ import java.util.*;
  *  b - budlist (with wildcards) 
  *  u - unproto (with wildcards) 
  *  e - entry (with wildcards)
+ *  C - input channel (internal only)
  *
  * Todo: o-object, os-strict object, s-symbol, g-group, q-qconstruct, 
  *
@@ -42,7 +43,7 @@ import java.util.*;
  * If the filter starts with '&' it is a conjunction with the filter it immediately follows. 
  *    For example 'a &b &c' means '(a AND b AND c)'. 'a &b c' means '(a AND b) OR c'.  
  * Conjunctions can also be used with exceptions. 
- *    For example -t/x &p/a means NOT(t/x AND p/a)  FIXME: Check if this is correct!!!
+ *    For example -t/x &p/a means NOT(t/x AND p/a) 
  */
 
  
@@ -300,6 +301,33 @@ public abstract class AprsFilter {
     }
     
     
+    
+    /**
+     * C - Input channel
+     */
+     public static class Chan extends AprsFilter {
+        private String[] chan;
+    
+        public Chan(String c[]) { 
+            chan = new String[c.length-1];
+            for (int i = 1; i< c.length; i++)
+                chan[i-1] = c[i];
+        }
+    
+        @Override public boolean test(AprsPacket p) {
+            for (int i=0; i<chan.length; i++) {
+                if (chan[i].equals(p.source.getIdent())) 
+                    return true;
+            }
+                
+            return false;
+        }
+        
+        public String toString() {return "Channel";}
+    }
+    
+    
+    
     /**
      * Combined filter. List of filters. 
      */
@@ -354,6 +382,7 @@ public abstract class AprsFilter {
                     case "m" -> new ItemRange(_client, ff);
                     case "f" -> new ItemRange(ff[1], ff, 2);
                     case "e" -> new Entry(ff);
+                    case "C" -> new Chan(ff);
                     default -> null;
                 }; 
                 if (findex > 0)
@@ -374,6 +403,8 @@ public abstract class AprsFilter {
             boolean res = false; 
             for (AprsFilter[] f: _flist)
                 if (ctest(f, p)) res = true;
+                
+            /* Exceptions */
             for (AprsFilter[] f: _xlist)
                 if (ctest(f, p)) return false; 
             return res; 

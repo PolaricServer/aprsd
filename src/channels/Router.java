@@ -69,8 +69,14 @@ public class Router extends AprsChannel
         if (chans.length() > 0) {
             String[] chnames = chans.split(",(\\s)*");
             for (String ch : chnames) {
-                String filt =  _api.getProperty("channel."+getIdent()+".filter."+ch, "*");
-                cnf.channels.add(new SubChan(ch, filt));
+                /* Add subchannel if a corresponding channel exists in config */
+                if (_api.getProperty("channel."+ch+".type",null) != null) {
+                    String filt =  _api.getProperty("channel."+getIdent()+".filter."+ch, "*");
+                    cnf.channels.add(new SubChan(ch, filt));
+                }
+                else
+                    /* Clean up */
+                    _api.getConfig().remove("channel."+getIdent()+".filter."+ch); 
             }
         }
         cnf.type  = "ROUTER";
@@ -85,8 +91,11 @@ public class Router extends AprsChannel
         var chanlist = ""; 
         
         for (SubChan ch: cnf.channels) {
-            chanlist += ch.name + ",";
-            props.setProperty("channel."+getIdent()+".filter."+ch.name, ch.filter);
+            /* Insert subchannel if a corresponding channel exists in config */
+            if (props.getProperty("channel."+ch.name+".type", null) != null) {
+                chanlist += ch.name + ",";
+                props.setProperty("channel."+getIdent()+".filter."+ch.name, ch.filter);
+            }
         }
         if (chanlist.length() > 0)
             chanlist = chanlist.substring(0, chanlist.length()-1);
@@ -111,7 +120,7 @@ public class Router extends AprsChannel
         for (int i=0; i<_chnames.length; i++) {
             Channel ch = _api.getChanManager().get(_chnames[i]);
             if (ch != null && ch instanceof AprsChannel ach) {
-                ach.setInRouter(true);
+                ach.setInRouter(this);
                 _channels[i] = ach;
                 String filt = _api.getProperty("channel."+getIdent()+".filter."+_chnames[i], "*");
                 _filters[i] = AprsFilter.createFilter( filt );
@@ -147,7 +156,7 @@ public class Router extends AprsChannel
             for (AprsChannel ch: _channels)
                 if (ch != null) {
                     ch.removeReceiver(_recv);
-                    ch.setInRouter(false);
+                    ch.setInRouter(null);
                 }
         _recv = null;
     }

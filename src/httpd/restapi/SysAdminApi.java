@@ -94,6 +94,8 @@ public class SysAdminApi extends ServerBase {
      * (re-) configure a channel f rom a channelinfo object. 
      */
     public  void setChannelProps(Channel ch, ChannelInfo cnf, String type) {
+        if (ch.getIdent().equals(""))
+            return;
         var props = _api.getConfig();
         props.setProperty("channel."+ch.getIdent()+".on", ""+cnf.active);
         props.setProperty("channel."+ch.getIdent()+".tag", cnf.generic.tag);

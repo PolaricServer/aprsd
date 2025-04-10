@@ -104,7 +104,7 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
     /**
      * User login with passcode and filter command. 
      */
-    protected void getLogin(InputStream istr) throws IOException {
+    protected void getLogin() throws IOException {
        /*
         * Format:  user mycall[-ss] pass passcode[ vers softwarename softwarevers[ UDP udpport][ servercommand]] 
         * See http://www.aprs-is.net/connecting.aspx
@@ -112,35 +112,44 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
         String line = "";
         String[] fline;
         String[] x;
-        while (true) {
-            line = _reader.readLine();
-            if (line==null)
-                return;
-            if (line.startsWith("#") || line.length() < 1) 
-                continue;
-            
-            /* Get filter command if it exists */
-            fline = getFiltCmd(line);
-            x = fline[0].split("\\s+");
-            if (x.length < 2) {
-                _writer.println("# Invalid login string, too few arguments");
-                _writer.flush();
-                continue;
-            }
-            break;
-        }
-        if (x[0].matches("user|USER"))
-            _userid = x[1].toUpperCase();
-        if (x.length > 3 && x[2].matches("pass|PASS"))
-            verify(_userid, x[3]);
-        if (x.length > 6 && x[4].matches("vers|VERS"))
-            _software = x[5]+" "+x[6];
         
-        _writer.println("# Login ok user="+_userid+(_verified? ", " : ", not ")+"verified");
-        _writer.flush();
-        _api.log().info("InetSrvChannel", "User "+_userid+" verification "+(_verified ? "Ok": "Failed"));
-        _api.log().info("InetSrvChannel", "Filter: "+_filter);
-        _login = true; 
+        try {
+            while (true) {
+                _writer.println("# Polaric-Aprsd");
+                _writer.flush(); 
+                
+                line = _reader.readLine();
+                if (line==null)
+                    return;
+                if (line.startsWith("#") || line.length() < 1) 
+                    continue;
+            
+                /* Get filter command if it exists */
+                fline = getFiltCmd(line);
+                x = fline[0].split("\\s+");
+                if (x.length < 2) {
+                    _writer.println("# Invalid login string, too few arguments");
+                    _writer.flush();
+                    continue;
+                }
+                break;
+            }
+            if (x[0].matches("user|USER"))
+                _userid = x[1].toUpperCase();
+            if (x.length > 3 && x[2].matches("pass|PASS"))
+                verify(_userid, x[3]);
+            if (x.length > 6 && x[4].matches("vers|VERS"))
+                _software = x[5]+" "+x[6];
+        
+            _writer.println("# Login ok user="+_userid+(_verified? ", " : ", not ")+"verified");
+            _writer.flush();
+            _api.log().info("InetSrvChannel", "User "+_userid+" verification "+(_verified ? "Ok": "Failed"));
+            _login = true;
+        }
+        catch (SocketTimeoutException e) {
+            _writer.println("# Timeout - login failed");
+            _writer.flush();
+        }
     }
     
     
@@ -174,36 +183,25 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
      * nodes are clients (igates or UI-devices). 
      *
      * See https://www.aprs-is.net/q.aspx (this is how I interpret it in this 
-     * context. It is not easy to understand. Should we support I-construct?? 
-     * Suggestions are appreciated. 
+     * context. Have I understood it right?
      */
-    protected void qProcess(AprsPacket p) {
+    protected boolean qProcess(AprsPacket p) {
         String[] qq = p.getQcode();
         String mycall = _api.getProperty("default.mycall", "NOCALL");
         
-        /* FROM != id of connected gate */
-        if (!p.from.equals(_userid)) {
-            if (qq != null) {
-                if (qq[0].matches("qA[rR]"))
-                    p.setQcode("qAo", qq[1]);
-                else if (qq[0].matches("qAS"))
-                    p.setQcode("qAO", qq[1]);
-                else if (qq[0].matches("qAC") && !qq[1].equals(_userid) 
-                   && !qq[1].equals(mycall))
-                    p.setQcode("qAO", qq[1]);
-            }
-            else
-                p.setQcode("qAO", _userid);
-        }
-        
-        /* FROM == id of connected gate */
-        else {
+        if (qq != null && qq[0].matches("qAZ"))
+            return false;
+            
+        if (qq != null)
+            return true; 
+        if (p.from.equals(_userid)) {
             p.via = "TCPIP*";
-            if (qq != null)
-                p.setQcode("qAC", mycall); 
-            else
-                p.setQcode("qAS", _userid);
+            p.setQcode("qAC", mycall); 
         }
+        else
+            p.setQcode("qAS", _userid); 
+        
+        return true;
     }
     
     
@@ -223,7 +221,8 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
         if (p==null)
             return;
         /* q-code processing */
-        qProcess(p);
+        if (!qProcess(p))
+            return; 
         
         _rxpackets++;
         
@@ -257,16 +256,25 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
             _ostream = _conn.getOutputStream();
             _writer = new PrintWriter(_ostream);
             _reader = new BufferedReader(new InputStreamReader(_istream));
-
+            _conn.setSoTimeout(60000);
             _conn.setKeepAlive(true);
-            getLogin(_istream);
+            
+            getLogin();
+            if (_login == false)
+                return;
             while (!_conn.isClosed() ) {
-                String inp = _reader.readLine();
-                if (inp == null)
-                    break;
-                processPacket(inp);
+                try {
+                    String inp = _reader.readLine();
+                    if (inp == null)
+                        break;
+                    processPacket(inp);
+                }
+                catch (SocketTimeoutException e) {
+                    _writer.println("# Polaric-Aprsd");
+                    _writer.flush();
+                }
             }
-            login = false; 
+            _login = false; 
             _api.log().info("InetSrvChannel", "Connection closed: "+_ipaddr);
         }
         catch (Exception ex) {

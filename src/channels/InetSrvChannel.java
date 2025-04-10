@@ -36,6 +36,8 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.*;
 public class InetSrvChannel extends AprsChannel implements Runnable {
         
     private List<InetSrvClient> _clients = new LinkedList<InetSrvClient>();
+    private Set<String> _logins = new HashSet<String>();
+    
     private int _nclients = 0;
     private int _portnr;
     private AprsFilter _filter;
@@ -107,6 +109,8 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
     
     
     public void setJsConfig(Channel.JsConfig ccnf) {
+        if (getIdent().equals(""))
+            return;
         var cnf = (JsConfig) ccnf;
         var props = _api.getConfig();
         props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
@@ -122,6 +126,18 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
     public void removeClient(InetSrvClient c) {
         _clients.remove(c);
         _nclients--;
+    }
+    
+    public void addLogin(String login) {
+        _logins.add(login);
+    }
+    
+    public void removeLogin(String login) {
+        _logins.remove(login);
+    }
+    
+    public boolean hasLogin(String login) {
+        return _logins.contains(login);
     }
     
     

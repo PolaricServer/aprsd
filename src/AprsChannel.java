@@ -39,7 +39,6 @@ public abstract class AprsChannel extends Channel
 
      
 
-
      /**
       * Information about APRS packet heard on the channel. 
       */ 
@@ -101,13 +100,18 @@ public abstract class AprsChannel extends Channel
     transient protected List<Receiver> _rcv = new LinkedList<Receiver>(); 
     transient protected PrintWriter  _out = null; 
     protected String _rfilter = null;
-    private boolean _inRouter = false; 
+    private AprsChannel _inRouter = null; 
 
     public static DupCheck  _dupCheck = new DupCheck();
     public static final String _rx_encoding = "UTF-8"; 
                   /* was "X-UTF-8_with_ISO-8859-1_fallback"; */
     public static final String _tx_encoding = "UTF-8";
 
+ 
+ 
+    public DupCheck getDupCheck() {
+      return _dupCheck;
+    }
  
     protected String chId() {
        return "["+getIdent()+"] "; 
@@ -119,12 +123,17 @@ public abstract class AprsChannel extends Channel
         return false; 
     }
    
-    public void setInRouter(boolean ir) {
+    public void setInRouter(AprsChannel ir) {
       _inRouter = ir;
+      /* If in router, we use the router's duplicate checker */
+      if (ir != null)
+         _dupCheck = ir.getDupCheck();
+      else
+         _dupCheck = new DupCheck();
     }
     
     public boolean isInRouter() {
-      return _inRouter;
+      return _inRouter != null;
     }
     
     

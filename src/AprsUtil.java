@@ -59,10 +59,10 @@ public class AprsUtil
       String[] vias = p.via.split(",(\\s)*");
       for (int i=0; i<vias.length; i++) 
          if (vias[i].charAt(0) == 'q') {
-            String[] ret = new String[2];
-            ret[0] = vias[i]; 
-            if (i+1 < vias.length)
-               ret[1] = vias[i+1];
+            String[] ret = new String[vias.length];
+            int k=0;
+            for (int j=i; j<vias.length; j++)
+               ret[k++] = vias[j];
             return ret; 
          }
       return null;
