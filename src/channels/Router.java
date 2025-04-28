@@ -119,7 +119,14 @@ public class Router extends AprsChannel
         
         for (int i=0; i<_chnames.length; i++) {
             Channel ch = _api.getChanManager().get(_chnames[i]);
-            if (ch != null && ch instanceof AprsChannel ach) {
+            if (ch == null) {
+                String type = _api.getProperty("channel."+_chnames[i]+".type", "");
+                ch = _api.getChanManager().newInstance(_api, type, _chnames[i]); 
+                if (_api.getBoolProperty("channel."+_chnames[i]+".on", false))
+                    ch.activate(_api);
+                // See also Main.java
+            }    
+            if (ch instanceof AprsChannel ach) {
                 ach.setInRouter(this);
                 _channels[i] = ach;
                 String filt = _api.getProperty("channel."+getIdent()+".filter."+_chnames[i], "*");

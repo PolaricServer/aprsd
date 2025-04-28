@@ -435,8 +435,11 @@ public class Main implements ServerAPI
         /* Try to instantiate channels in channel list */
         for (String chan: channelns) {
             /* Define and activate channel */
+            if (_chanManager.get(chan) != null)
+                continue;
             String type = getProperty("channel."+chan+".type", "");
             Channel ch = _chanManager.newInstance(api, type, chan);
+            
             if (ch != null)
                 chlist.add(ch);
             else
