@@ -75,9 +75,11 @@ public class AprsUtil
    {
       ReportHandler.PosData pd = 
          switch(p.type) {
-            case '!', '=' -> _parseStd(p, false);
-            case '@', '/' -> _parseStd(p, true);
+            case '!', '='  -> _parseStd(p.report, false);
+            case '@', '/'  -> _parseStd(p.report, true);
             case '\'', '`' ->  parseMicEPos(p, null);
+            case ';'       ->  parseObjPos(p);
+            case ')'       ->  parseItemPos(p);   
             default -> null;
          };
       if (pd==null)
@@ -87,18 +89,39 @@ public class AprsUtil
    
    
    
-   private static ReportHandler.PosData _parseStd(AprsPacket p, boolean ts) 
+   
+   private static ReportHandler.PosData parseObjPos(AprsPacket p) {
+      String msg = p.report; 
+      char op = msg.charAt(10);
+      return _parseStd(p.report.substring(10), true);
+   }
+   
+   
+   
+   private static ReportHandler.PosData parseItemPos(AprsPacket p) {
+      String msg = p.report; 
+      int i = msg.indexOf('!');
+      if (i == -1 || i > 11)
+         i = msg.indexOf('_');  
+      if (i==-1) return null;
+      return _parseStd(p.report.substring(i), false);
+   }
+   
+   
+   
+   private static ReportHandler.PosData _parseStd(String data, boolean ts) 
    {
-      String data = p.report;
       if (ts) 
          data = data.substring(8);
       else
          data = data.substring(1);
          
-      if (data.matches("[\\\\/0-9A-Z][\\x20-\\x7f]{12}.*"))
+      Matcher m = _stdPat.matcher(data);
+      if (m.matches()) 
+         return parseStdPos(data, m); 
+      else if (data.matches("[\\\\/0-9A-Z][\\x20-\\x7f]{12}.*"))
          return parseCompressedPos(data);
-      else
-         return parseStdPos(data, null); 
+      return null;
    }
    
    

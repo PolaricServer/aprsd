@@ -150,7 +150,17 @@ public abstract class AprsFilter {
         @Override public boolean test(AprsPacket p) {
         
             char t = toFType(p);
+
             if (types.indexOf(t) != -1) {
+            
+                /* Telemetry. Drop if item position is not known */
+                if (t=='m' && p.from.equals(p.msgto)) {
+                    Point x = _api.getDB().getItem(p.from, null);
+                    if (x==null || x.getPosition() == null) 
+                        return false;
+                 }
+                        
+                /* Range check */
                 if (range != null)
                     return range.test(p);
                 return true;
@@ -402,7 +412,7 @@ public abstract class AprsFilter {
         public boolean test(AprsPacket p) {
             boolean res = false; 
             for (AprsFilter[] f: _flist)
-                if (ctest(f, p)) res = true;
+                if (ctest(f, p)) { res = true; break; }
                 
             /* Exceptions */
             for (AprsFilter[] f: _xlist)

@@ -288,7 +288,9 @@ public abstract class AprsChannel extends Channel
               * Special treatment for message type or object
               * Extract recipient/object id
               */
-             p.msgto = p.report.substring(1,10).trim();
+            p.msgto = p.report.substring(1,10).trim();
+            if (p.msgto.length() > 0 && p.msgto.charAt(p.msgto.length()-1)==':')
+               p.msgto = p.msgto.substring(0, p.msgto.length()-1);
           }
          return p;
     }
