@@ -125,7 +125,8 @@ public class HmacAuthenticator implements Authenticator {
         } 
     }
     
-       
+    
+    
     /**
      * Load keys from file.
      * Assume that these are personal user-logins. 
@@ -133,6 +134,7 @@ public class HmacAuthenticator implements Authenticator {
     private void loadLogins() {
         loadKeys(_ukeyfile, false); 
     }
+    
     
     
     /**

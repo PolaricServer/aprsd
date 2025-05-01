@@ -106,6 +106,7 @@ public abstract class MailBox {
     public void notifyNewMessages() {} 
     
     
+
     
     /** 
      *  Mailbox for a single user. 
@@ -119,7 +120,6 @@ public abstract class MailBox {
         private PubSub _psub; 
     
         public User(ServerAPI api, String uid) {
-            _api = api;
             _uid = uid;
             _nuserboxes++;
             _psub = (no.polaric.aprsd.http.PubSub) _api.getWebserver().getPubSub();
@@ -128,7 +128,7 @@ public abstract class MailBox {
             _psub.createRoom("msgdelete:"+uid, null);
         }
 
-        
+
         public int size() { 
             return _messages.size();
         }
@@ -485,8 +485,8 @@ public abstract class MailBox {
             ofs.close();
         }
         catch (Exception e) {
-            _api.log().warn("MailBox", "Cannot save data: "+e);
             e.printStackTrace();
+            _api.log().warn("MailBox", "Cannot save data: "+e);
         } 
     }
     

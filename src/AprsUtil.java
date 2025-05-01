@@ -89,7 +89,7 @@ public class AprsUtil
    
    
    
-   
+   /* Get position from object report */
    private static ReportHandler.PosData parseObjPos(AprsPacket p) {
       String msg = p.report; 
       char op = msg.charAt(10);
@@ -97,7 +97,7 @@ public class AprsUtil
    }
    
    
-   
+   /* Get position from item report */
    private static ReportHandler.PosData parseItemPos(AprsPacket p) {
       String msg = p.report; 
       int i = msg.indexOf('!');
@@ -108,7 +108,7 @@ public class AprsUtil
    }
    
    
-   
+   /* Get position from relevant part of standard report */
    private static ReportHandler.PosData _parseStd(String data, boolean ts) 
    {
       if (ts) 

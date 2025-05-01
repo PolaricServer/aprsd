@@ -80,7 +80,7 @@ public interface ServerAPI
         /** Create a room */
         public void createRoom(String name, Class cl);
     }
-  
+
     public interface UserDb {
         public boolean hasUser(String id); 
     }
