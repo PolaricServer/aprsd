@@ -325,6 +325,8 @@ public abstract class AprsFilter {
         }
     
         @Override public boolean test(AprsPacket p) {
+            if (p.source==null)
+                return true;
             for (int i=0; i<chan.length; i++) {
                 if (chan[i].equals(p.source.getIdent())) 
                     return true;
