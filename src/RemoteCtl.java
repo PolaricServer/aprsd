@@ -296,7 +296,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     
         if (n>0)
             _log.info(null, "Send > ALL("+n+"): " + cmd+ " "+text + (origin==null||n==0 ? "" : " -- (not to "+origin+")" ));
-        storeRequest(cmd+" "+text, origin);                
+        // storeRequest(cmd+" "+text, origin);                
     }
 
 
@@ -327,6 +327,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */
    private void storeRequest(String text, String origin)
    {
+
      /* 
       * Log last update to each item. 
       * Assume those updates are idempotent 
@@ -385,9 +386,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             return; 
         _log.info(null, "Playback command log: "+dest);
         final var dest_ = SecUtils.escape4regex(dest);
-        for (Map.Entry<String, LogEntry> entry: _cmds.entrySet())
+        for (Map.Entry<String, LogEntry> entry: _cmds.entrySet()) {
             if (!entry.getValue().cmd.matches("USER .*@"+dest_) && isWithinInterest(dest, entry.getValue().cmd) )
                 sendRequest(dest, null, entry.getValue().cmd);
+        }
+                
         _log.info(null, "End of playback ("+dest+")");
    }
    
@@ -598,15 +601,17 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             return false;
         }
         
-        String u = args.trim();
+        String u = args.trim();     
+        String[] uu = u.split("@");
         if (add) {
-            _api.log().warn("RemoteCtl", "doUser.add: "+u);
-            _users.add(sender.getIdent(), u);
+            _api.log().debug("RemoteCtl", "doUser.add: "+u);
+            _users.add(uu[1], u);
+            
             if (_usercb != null)
-                _usercb.login(sender.getIdent(), u);
+                _usercb.login(uu[1], u);
         }
         else 
-            _users.remove(sender.getIdent(), u); 
+            _users.remove(uu[1], u); 
         return true;
     }
        

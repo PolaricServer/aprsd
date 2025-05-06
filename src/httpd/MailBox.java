@@ -446,8 +446,8 @@ public abstract class MailBox {
                     }
                 
                     public void reportSuccess(String id, String mtext) {
-                        api.log().info("MailBox", "Delivery confirmed: msgid="+msg.msgId+", node="+id);
                         int status = (api.getRemoteCtl().hasUser(addr[1], msg.to) ? 1 : 2);
+                        api.log().info("MailBox", "Delivery confirmed: msgid="+msg.msgId+", to="+msg.to+", status="+status);
                         mb_.setStatus(m2_, status, (status == 1 ? "Delivery confirmed: " : "Awaiting user login: ")+id);
                     }
                 });
