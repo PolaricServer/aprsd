@@ -69,6 +69,7 @@ public abstract class TncChannel extends AprsChannel
     * Load/reload configuration parameters. Called each time channel is activated. 
     */
     public void activate(ServerAPI a) {
+        resetCounters();
         String id = getIdent();
         _myCall = _api.getProperty("channel."+id+".mycall", "").toUpperCase();
         if (_myCall.length() == 0)

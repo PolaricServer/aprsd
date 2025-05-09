@@ -53,6 +53,7 @@ public abstract class TcpChannel extends AprsChannel
  
     /** Start the service */
     public void activate(ServerAPI a) {
+        resetCounters();
         String id = getIdent();
         String host = _api.getProperty("channel."+id+".host", "localhost");
         int port = _api.getIntProperty("channel."+id+".port", 21);

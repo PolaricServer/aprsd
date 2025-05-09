@@ -109,8 +109,8 @@ public class Router extends AprsChannel
      */
     @Override public void activate(ServerAPI a) {        
        _state = State.RUNNING;
-       _sent=0;
-       
+        resetCounters();
+               
        /* Configure, Get contained channels */
        String chn = _api.getProperty("channel."+getIdent()+".channels", "");
         _chnames = chn.split(",(\\s)*");

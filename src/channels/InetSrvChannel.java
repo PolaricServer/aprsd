@@ -57,6 +57,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
        
     /** Stop the service */
     @Override public void activate(ServerAPI a) {
+        resetCounters();
         String id = getIdent();            
         _state = State.STARTING;
         _portnr = _api.getIntProperty("channel."+id+".port", 14580);

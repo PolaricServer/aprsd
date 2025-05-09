@@ -60,6 +60,10 @@ public abstract class AprsChannel extends Channel
      }
 
      
+     public void resetCounters() {
+       _heardPackets = _duplicates = _sent = 0;
+     }
+     
      private void removeOldHeardEntries()
      {
           Iterator<Heard> it = _heard.values().iterator();
