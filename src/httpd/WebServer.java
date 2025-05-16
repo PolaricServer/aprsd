@@ -277,6 +277,7 @@ public class WebServer implements ServerAPI.Web
         protectUrl("/mypasswd");
         protectUrl("/xitems");  
         protectUrl("/xtrail"); 
+        protectUrl("/item",         "admin");
         protectUrl("/item/*/xinfo");  
         protectUrl("/item/*/xpos");
         protectUrl("/item/*/alias");

@@ -385,6 +385,16 @@ public class ItemApi extends ServerBase {
         
         
         
+        /******************************************
+         * Remove all items
+         ******************************************/
+        delete("/item", (req, resp) -> {
+            _api.getDB().clearItems();
+            return "Ok"; 
+        });
+        
+        
+        
         /*********************************************
          * Get telemetry description for a given item
          *********************************************/

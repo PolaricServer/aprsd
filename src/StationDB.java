@@ -48,6 +48,7 @@ public interface StationDB
         public void removeManagedItem(String id); 
         
         
+        
         /**
          * Get item at a particular point in time. 
          * @param id identifier (typically a callsign) of item.
@@ -179,7 +180,15 @@ public interface StationDB
     public void removeItem(String id);
     
 
+                
         
+    /**
+     * Clear database. 
+     */
+    public void clearItems();
+    
+    
+    
     
     /****************************
      * Item search methods

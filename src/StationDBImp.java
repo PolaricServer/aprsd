@@ -37,7 +37,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     private String     _file;
     private String     _stnsave;
     private boolean    _kill = false; 
-    RTree<TrackerPoint, Point> _geoindex = RTree.star().maxChildren(6).create();
+    private RTree<TrackerPoint, Point> _geoindex = RTree.star().maxChildren(6).create();
     
     
     public StationDBImp(ServerAPI api)
@@ -125,7 +125,14 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     }    
         
         
-        
+    
+    public synchronized void clearItems() {
+        _map.clear();
+        _geoindex = RTree.star().maxChildren(6).create();
+    }
+    
+    
+    
         
     /****************************
      * Item search methods
@@ -379,6 +386,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
             if (s.isChanging(true))
                 _hasChanged = true;
     }
+    
     
     
     /**
