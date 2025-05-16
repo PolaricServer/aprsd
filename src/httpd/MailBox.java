@@ -440,11 +440,16 @@ public abstract class MailBox {
                     MailBox.User mb_ = mb;
                     Message m2_ = m2;
                     
+                    /* Handler to be called if failure (a REJ is received) */
                     public void reportFailure(String id, String mtext) {
                         api.log().info("MailBox","Delivery failed: msgid="+msg.msgId+", node="+id);
                         mb_.setStatus(m2_, -1, "Delivery failed: "+id);
                     }
                 
+                    /* 
+                     * Handler to be called if success (an ACK is received). If recipient is 
+                     * logged in we assume that the message is deliered to him/her 
+                     */
                     public void reportSuccess(String id, String mtext) {
                         int status = (api.getRemoteCtl().hasUser(addr[1], msg.to) ? 1 : 2);
                         api.log().info("MailBox", "Delivery confirmed: msgid="+msg.msgId+", to="+msg.to+", status="+status);

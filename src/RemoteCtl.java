@@ -299,6 +299,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         // storeRequest(cmd+" "+text, origin);                
     }
 
+    
 
    /**
     * Return true if message is with child-node's area of interest. 
@@ -350,15 +351,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
          
          /* Remove earlier updates for the same item */
          _cmds.remove(prefix);
-         
      }
-     
-     /* This is currently not used and it may not be a good idea to store this 
-     else if (arg[0].matches("RMITEM") && _cmds != null)
-        _cmds.values().removeIf( (x)-> {
-            return x != null && x.cmd != null && x.cmd.matches("(ALIAS|ICON|TAG) "+arg1_+" .*");
-        });
-     */
 
      
      else if (arg[0].matches("RMNODE"))
@@ -376,6 +369,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
      
    }
    
+   
 
    /** 
     * Play back log entries when new node connect. 
@@ -390,14 +384,13 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             if (!entry.getValue().cmd.matches("USER .*@"+dest_) && isWithinInterest(dest, entry.getValue().cmd) )
                 sendRequest(dest, null, entry.getValue().cmd);
         }
-                
         _log.info(null, "End of playback ("+dest+")");
    }
    
    
    /**
     * To be called from (StationDBImp) when an item expires. 
-    * Remove ALIAs, ICON, TAG entries for the given item from log. 
+    * Remove ALIAS, ICON, TAG entries for the given item from the log. 
     */
    public void removeExpired(String id) {
         final var id_ = SecUtils.escape4regex(id);

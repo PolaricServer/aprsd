@@ -28,6 +28,19 @@ case "$1" in
         if [ -e "/var/lib/polaric/messages.dat" ]; then
             rm /var/lib/polaric/messages.dat
         fi
+        if [ -e "/var/lib/polaric/mailbox.dat" ]; then
+            rm /var/lib/polaric/mailbox.dat
+        fi
+        if [ -e "/var/lib/polaric/logins.dat" ]; then
+            rm /var/lib/polaric/logins.dat
+        fi
+        if [ -d "/var/lib/polaric/backup" ]; then
+            rm -R /var/lib/polaric/backup
+        fi
+        if [ -d "/etc/polaric-aprsd/keys" ]; then
+            rm -R /etc/polaric-aprsd/keys
+        fi
+        
     ;;
 
     upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)

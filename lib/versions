@@ -17,6 +17,9 @@ guava-mini-polaric.jar          v.0.1.4
 
 Spark: 
 https://repo1.maven.org/maven2/com/sparkjava/spark-core/
+ It is ababdonware and should be replaced by javalin or jooby.
+ https://github.com/javalin/javalin
+ https://github.com/jooby-project/jooby
 
 Jetty: 
 https://www.eclipse.org/jetty/download.php

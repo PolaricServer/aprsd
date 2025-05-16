@@ -169,7 +169,7 @@ public class MessageProcessor implements Runnable, Serializable
     public synchronized void incomingMessage
         (Station sender, String recipient, String text, String msgid)
     {
-        /* Is it an ack or rej message? */
+        /* Is it an ACK or REJ message? */
         if (_myCall.equals(recipient) && text.matches("(ack|rej).+")) {
             msgid = text.substring(3, text.length());
 
@@ -190,6 +190,7 @@ public class MessageProcessor implements Runnable, Serializable
         if (subs == null && recipient.matches("BLN.*")) 
             subs = _subscribers.get("BLN");
 
+            
         /* If there is a subscriber to the messasge */ 
         if (subs != null) {
             /* Clear seen-before map if last entry is older than 20 minutes */
@@ -222,13 +223,15 @@ public class MessageProcessor implements Runnable, Serializable
             else
                 _api.log().debug("MessageProc", "Duplicate message from "+sender.getIdent()+" msgid="+msgid);
                 
+                
             /* 
-             * Send ack or rej. Assume that message is in recMessages if accepted. 
+             * Send ACK or REJ. Assume that message is in recMessages if accepted. 
              */
             if (msgid != null && (!recipient.matches("BLN.*") ) )
                 sendAck(sender.getIdent(), msgid, recMessages.get(sender.getIdent()+"#"+msgid));
         } /* if subs */     
     }
+   
    
 
 
@@ -325,6 +328,7 @@ public class MessageProcessor implements Runnable, Serializable
        AprsPacket p = new AprsPacket();
        p.from = from;
        p.to = "APRS";
+       
        p.msgto = recipient;
        /* Need to set p.via, and differently for the two channels */
        p.type = ':';

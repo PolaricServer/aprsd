@@ -140,8 +140,9 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
                 verify(_userid, x[3]);
             if (x.length > 6 && x[4].matches("vers|VERS"))
                 _software = x[5]+" "+x[6];
-        
-            _writer.println("# Login ok user="+_userid+(_verified? ", " : ", not ")+"verified");
+                
+            String mycall = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
+            _writer.println("# logresp "+_userid+ (_verified ? " verified" : " unverified" ) + ", server " + mycall);
             _writer.flush();
             _api.log().info("InetSrvChannel", "User "+_userid+" verification "+(_verified ? "Ok": "Failed"));
             _login = true;
