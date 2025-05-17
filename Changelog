@@ -437,3 +437,30 @@ V.3.1
   * Allow CONFIG.get to asynchronous
   * Rotate north button
   * Various fixes and updates
+  
+  
+  
+  
+V.3.2
+-----
+  (aprsd)
+  * Mailbox work - save mailbox to file (between restarts), fixes..
+  * Add router and APRS-IS server channels
+  * Implement APRS server-filters with additions
+  * Small fixes to channel management
+  * Save logins (between restarts)
+  * Various smaller fixes and updates
+  
+  (db-plugins)
+  * DbSync work
+  * Get Tracklog up to date and compatible with Arctic Tracker
+  
+  (webapp2)
+  * Bullboard and mailbox fixes
+  * Allow showing telemetry history for last day or week
+  * Layer management fixes: WMS layer improvements..
+  * Channel management fixes: new types...
+  * Allow manual removal of child dbsync nodes (see also db-plugin)
+  * Openlayers to 10.5.0, Mithril to 2.2.15
+  * Various fixes..
+

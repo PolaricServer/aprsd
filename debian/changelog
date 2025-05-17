@@ -1,8 +1,13 @@
-polaric-aprsd (3.1+) UNRELEASED; urgency=medium
+polaric-aprsd (3.2) stable; urgency=medium
 
-  * Hacking
+  * Mailbox work - save mailbox to file (between restarts), fixes..
+  * Add router and APRS-IS server channels
+  * Implement APRS server-filters with additions
+  * Small fixes to channel management
+  * Save logins (between restarts)
+  * Various smaller fixes and updates
 
- -- Oyvind Hanssen <oh@hans.priv.no>  Wed, 04 Sep 2024 19:21:37 +0200
+ -- Oyvind Hanssen <ohanssen@acm.org>  Fri, 16 May 2025 18:38:05 +0200
 
 polaric-aprsd (3.1) stable; urgency=medium
 
