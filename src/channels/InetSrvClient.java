@@ -193,8 +193,9 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
         if (qq != null && qq[0].matches("qAZ"))
             return false;
             
-        if (qq != null)
+        if (qq != null && !p.from.equals(_userid))
             return true; 
+            
         if (p.from.equals(_userid)) {
             p.via = "TCPIP*";
             p.setQcode("qAC", mycall); 

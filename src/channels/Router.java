@@ -139,6 +139,8 @@ public class Router extends AprsChannel
        /* Set up a receiver and use it to subscribe to the contained channels */
        _recv = new Receiver() {
             @Override public void receivePacket(AprsPacket p, boolean dup) {
+                if (dup)
+                    return;
                 sendPacket(p);
                 Router.this.receivePacket(p, dup);
             }
