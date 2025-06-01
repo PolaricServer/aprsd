@@ -251,7 +251,7 @@ public class SysAdminApi extends ServerBase {
                 api.getProperty("ownposition.symbol", "/c"),
                 api.getProperty("ownposition.tx.rfpath", ""),
                 api.getProperty("ownposition.tx.comment", ""),
-                api.getPosProperty("ownposition.position"), 
+                api.getPosProperty("ownposition.pos"), 
                 api.getBoolProperty("ownposition.gps.on", false),
                 api.getBoolProperty("ownposition.gps.adjustclock", false),
                 api.getProperty("ownposition.gps.port", ""),
@@ -271,7 +271,7 @@ public class SysAdminApi extends ServerBase {
             prop.setProperty("ownposition.symbol", symbol);
             prop.setProperty("ownposition.tx.rfpath", rfpath);
             prop.setProperty("ownposition.tx.comment", comment);
-            prop.setProperty("ownposition.position", pos[0]+","+pos[1]);
+            prop.setProperty("ownposition.pos", pos[0]+","+pos[1]);
             prop.setProperty("ownposition.gps.on", ""+gpson);
             prop.setProperty("ownposition.gps.adjustclock", ""+adjustclock);
             prop.setProperty("ownposition.gps.port", gpsport);

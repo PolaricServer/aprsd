@@ -386,8 +386,12 @@ public class Main implements ServerAPI
          
          
             /* Own position */
-            System.out.println("GPS ON = "+getBoolProperty("ownposition.gps.on", false));
-            ownpos = new GpsPosition(api);
+            boolean gpson = api.getBoolProperty("ownposition.gps.on", false);
+            System.out.println("GPS ON = "+gpson);
+            if (gpson) 
+                ownpos = new GpsPosition(api);
+            else
+                ownpos = new OwnPosition(api);
             db.addItem(ownpos); 
 
                      

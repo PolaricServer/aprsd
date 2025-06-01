@@ -85,9 +85,10 @@ public class OwnPosition extends Station implements Runnable
            _minPause = _maxPause;
         _description = _comment;
         
-        String[] pp = ownpos.split(",[\\s]+");
+        System.out.println("*** pos = "+ownpos);
+        String[] pp = ownpos.split(",[\\s]*");
         if (pp.length == 2) {
-           LatLng p = new LatLng(Double.parseDouble(pp[0]), Double.parseDouble(pp[1])); 
+           LatLng p = new LatLng(Double.parseDouble(pp[1]), Double.parseDouble(pp[0])); 
                       
            /* FIXME: Don't reset pos if GPS is active */
            updatePosition(new Date(), p, 0);
@@ -187,6 +188,8 @@ public class OwnPosition extends Station implements Runnable
     protected String encodePos()
     {
         LatLng pos = getPosition();
+        if (pos==null)
+            pos = new LatLng(0,0);
         
         if (_compress) { 
             var lat_c = compressLL(pos.getLat(), false);
@@ -211,6 +214,8 @@ public class OwnPosition extends Station implements Runnable
         return "";
     }
     
+    
+
     
     
     
@@ -249,7 +254,7 @@ public class OwnPosition extends Station implements Runnable
             ig.gate_to_inet(p);
         else
             if (_inetChan != null && !_inetChan.isRf()) 
-                _inetChan.sendPacket(p);
+                _api.log().debug("OwnPosition", "Send packet: "+p.toString());
             
     }
 
@@ -280,8 +285,7 @@ public class OwnPosition extends Station implements Runnable
      */
     protected boolean should_update () 
     {       
-       int t = Math.min(_maxPause, 120); 
-       t = Math.max(_minPause, t); 
+       int t = 60;
        return (isChanging() && _timeSinceReport >= t); 
     }
 
@@ -293,9 +297,11 @@ public class OwnPosition extends Station implements Runnable
         * Simple periodic reporting of position if it exists. Note that this 
         * could easily be extended to do real tracking, possibly with smart
         * beaconing.
-        */
+       */
+       try {Thread.sleep(20* 1000); } catch (Exception e) {}
+       sendPosReport();
        while (true) {
-         try {  
+         try { 
             Thread.sleep(_trackTime * 1000);
             synchronized (this) {
               _timeSinceReport += _trackTime;
