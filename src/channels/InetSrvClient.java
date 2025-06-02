@@ -39,10 +39,10 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
     private   PrintWriter    _writer;
     private   BufferedReader _reader;
  
-    private   String _userid = "NOCALL";
-    private   String _software = "";
+    private   String  _userid = "NOCALL";
+    private   String  _software = "";
     private   boolean _verified = false;
-    private   String _filt;
+    private   String  _filt;
     private   AprsFilter _filter;
     private   boolean _login;
     private   long _txpackets, _rxpackets;
@@ -141,6 +141,9 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
             if (x.length > 6 && x[4].matches("vers|VERS"))
                 _software = x[5]+" "+x[6];
                 
+            if (_software.matches("Polaric\\-APRSD ([12].+)"))
+                _writer.println("# Please upgrade to a newer version of Polaric-Server");
+                
             String mycall = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
             _writer.println("# logresp "+_userid+ (_verified ? " verified" : " unverified" ) + ", server " + mycall);
             _writer.flush();
@@ -158,10 +161,14 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
     protected String[] getFiltCmd(String line) {
         /* Get filter command if it exists */
         String[] fline = line.split("(filter|FILTER)(\\s+)");
-        if (fline.length > 1 && fline[1] != null) {
+        if (fline.length > 1 && fline[1] != null) 
             _filt = fline[1];
-            _filter = AprsFilter.createFilter(fline[1]);
-        }
+        else
+            _filt = _chan.defaultfilt(); 
+            
+        if (_filt != null && !_filt.equals(""))
+            _filter = AprsFilter.createFilter(_filt);
+        
         return fline;
     }
     

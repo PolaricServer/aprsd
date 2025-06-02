@@ -41,6 +41,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
     private int _nclients = 0;
     private int _portnr;
     private AprsFilter _filter;
+    private String _defaultfilt;
     private Thread _serverthread;
 
     public static class Client {
@@ -63,6 +64,8 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         _portnr = _api.getIntProperty("channel."+id+".port", 14580);
         String filt =  _api.getProperty("channel."+id+".infilter", "*");
         _filter = AprsFilter.createFilter( filt );
+        _defaultfilt = _api.getProperty("channel."+id+".defaultfilt", "");
+        
         _serverthread = new Thread(this);
         _serverthread.start(); 
     }
@@ -74,6 +77,9 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
             return;
         _state = State.OFF;
         try {
+            /* Close all clients */
+            for (InetSrvClient x: _clients)
+                x.close();
             _serverthread.join();
         }
         catch (Exception e) {
@@ -92,6 +98,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         public long nclients, heardpackets, heard, duplicates, sentpackets; 
         public int port; 
         public String filter;
+        public String defaultfilt;
     }
        
        
@@ -105,6 +112,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         cnf.type  = "APRSIS-SRV";
         cnf.port  = _api.getIntProperty("channel."+getIdent()+".port", 14580);
         cnf.filter = _api.getProperty("channel."+getIdent()+".infilter", "*");
+        cnf.defaultfilt = _api.getProperty("channel."+getIdent()+".defaultfilt", "");
         return cnf;
     }
     
@@ -116,9 +124,13 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         var props = _api.getConfig();
         props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
         props.setProperty("channel."+getIdent()+".infilter", ""+cnf.filter);
+        props.setProperty("channel."+getIdent()+".defaultfilt", ""+cnf.defaultfilt);
     }
     
     
+    public String defaultfilt() {
+        return _defaultfilt;
+    }
     
     public List<InetSrvClient> getClients() {
         return _clients;
