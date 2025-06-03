@@ -126,7 +126,6 @@ public abstract class AprsFilter {
         protected String item;
         
         public ItemRange(String it, String[] parms, int index) {
-            System.out.println("ItemRange: "+it);
             item = it;
             dist = Integer.parseInt(parms[index]);
         }
