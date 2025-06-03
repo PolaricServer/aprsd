@@ -39,6 +39,10 @@ public class AprsUtil
    protected static Pattern _telPat = Pattern.compile
        (".*\\|([\\x21-\\x7f]{4,14})\\|.*");
     
+   protected static Pattern _latPat = Pattern.compile
+       ("[0-9\\s]{4}.[0-9\\s]{2}");
+    protected static Pattern _lngPat = Pattern.compile
+       ("[0-9\\s]{5}.[0-9\\s]{2}");
     
    protected static DateFormat _dtgFormat = new SimpleDateFormat("ddhhmm");
    protected static DateFormat _hmsFormat = new SimpleDateFormat("hhmmss");
@@ -54,9 +58,10 @@ public class AprsUtil
     
     
     
-   /* Consider Moving this to AprsdPacket */ 
+   /* Consider Moving this to AprsPacket */ 
    public static String[] getQcode(AprsPacket p) {
       String[] vias = p.via.split(",(\\s)*");
+      
       for (int i=0; i<vias.length; i++) 
          if (vias[i].charAt(0) == 'q') {
             String[] ret = new String[vias.length];
@@ -118,7 +123,7 @@ public class AprsUtil
          
       Matcher m = _stdPat.matcher(data);
       if (m.matches()) 
-         return parseStdPos(data, m); 
+         return parseStdPos(data, m, null); 
       else if (data.matches("[\\\\/0-9A-Z][\\x20-\\x7f]{12}.*"))
          return parseCompressedPos(data);
       return null;
@@ -351,7 +356,7 @@ public class AprsUtil
  
      
     
-    protected static ReportHandler.PosData parseStdPos(String data, Matcher m)
+    protected static ReportHandler.PosData parseStdPos(String data, Matcher m, AprsPacket p)
     {
       if (m==null) {   
          m = _stdPat.matcher(data);
@@ -369,9 +374,12 @@ public class AprsUtil
       pd.symbol  = m.group(10).charAt(0);
       String comment = m.group(11);   // FIXME: Move out
       
+      if (lng.matches("[0-9\\s]{4}.[0-9\\s]{2}"))
+         lng = "0"+lng;
       if (!lat.matches("[0-9\\s]{4}.[0-9\\s]{2}") || !lng.matches("[0-9\\s]{5}.[0-9\\s]{2}")) {
          /* ERROR: couldn't understand Lat/Long field */
-         _api.log().debug("AprsParser", "Could not parse lat/long field: "+lat+" "+lng);
+         if (p!=null)
+            _api.log().debug("AprsParser", "Could not parse lat/long field: "+lat+" "+lng);
           return null; 
       }
       

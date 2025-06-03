@@ -549,7 +549,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
          Matcher m = _stdPat.matcher(data);
          if (m.matches())
          {
-            pd = parseStdPos(data, m); 
+            pd = parseStdPos(data, m, p); 
             comment = m.group(11);
          }
          else if (data.matches("[\\\\/0-9A-Z][\\x20-\\x7f]{12}.*"))
