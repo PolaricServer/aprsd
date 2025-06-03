@@ -141,6 +141,9 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
             if (x.length > 6 && x[4].matches("vers|VERS"))
                 _software = x[5]+" "+x[6];
                 
+            if (_filt != null && !_filt.equals(""))
+                _filter = AprsFilter.createFilter(_filt, _userid);
+            
             if (_software.matches("Polaric\\-APRSD ([12].+)"))
                 _writer.println("# Please upgrade to a newer version of Polaric-Server");
                 
@@ -165,9 +168,6 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
             _filt = fline[1];
         else
             _filt = _chan.defaultfilt(); 
-            
-        if (_filt != null && !_filt.equals(""))
-            _filter = AprsFilter.createFilter(_filt);
         
         return fline;
     }

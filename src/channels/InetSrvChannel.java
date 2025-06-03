@@ -63,7 +63,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         _state = State.STARTING;
         _portnr = _api.getIntProperty("channel."+id+".port", 14580);
         String filt =  _api.getProperty("channel."+id+".infilter", "*");
-        _filter = AprsFilter.createFilter( filt );
+        _filter = AprsFilter.createFilter( filt, null);
         _defaultfilt = _api.getProperty("channel."+id+".defaultfilt", "");
         
         _serverthread = new Thread(this);

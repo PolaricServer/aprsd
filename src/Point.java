@@ -34,6 +34,10 @@ public class Point implements Serializable,  Cloneable
        { _position = p; }
           
     
+    public boolean isNull() {
+      return _position == null;
+    }
+    
     /**
      * Test if position is inside of a rectangular area. The area is defined by uleft (upper left corner)
      * and lright (lower right corner). 

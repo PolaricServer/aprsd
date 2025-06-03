@@ -98,7 +98,7 @@ public abstract class AprsFilter {
             Point pktpos = AprsUtil.getPos(p); 
             if (pos==null || pktpos==null)
                 return false;
-            return (pos.distance(pktpos) <= dist*1000);
+            return (!pos.isNull() && pos.distance(pktpos) <= dist*1000);
         }
     }
     
@@ -118,18 +118,29 @@ public abstract class AprsFilter {
     }
     
     
+    
     /**
      * m - my range - dist.
      */
     public static class ItemRange extends Range {
-        public ItemRange(String item, String[] parms, int index) {
-            pos = _api.getDB().getItem(item, null);
+        protected String item;
+        
+        public ItemRange(String it, String[] parms, int index) {
+            System.out.println("ItemRange: "+it);
+            item = it;
             dist = Integer.parseInt(parms[index]);
         }
-        public ItemRange(String item, String[] parms) {
-            this(item, parms, 1);
+        
+        public ItemRange(String it, String[] parms) {
+            this(it, parms, 1);
         }
+        
         public String toString() {return "ItemRange";}
+        
+        @Override public boolean test(AprsPacket p) {
+            pos = _api.getDB().getItem(item, null);
+            return super.test(p);
+        }
     }
     
     
@@ -347,8 +358,8 @@ public abstract class AprsFilter {
         List<AprsFilter[]> _flist, _xlist;
         String _client; // Callsign of the logged in client
         
-        public Combined(String cl) {
-            _client = cl; 
+        public Combined(String cl, String userid) {
+            _client = userid; 
             _flist = new LinkedList<AprsFilter[]>();
             _xlist = new LinkedList<AprsFilter[]>();
             parse(cl);
@@ -493,8 +504,8 @@ public abstract class AprsFilter {
     }
     
     
-    public static AprsFilter createFilter(String fspec) {
-        return new Combined(fspec);
+    public static AprsFilter createFilter(String fspec, String userid) {
+        return new Combined(fspec, userid);
     }
     
 

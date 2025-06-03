@@ -130,7 +130,7 @@ public class Router extends AprsChannel
                 ach.setInRouter(this);
                 _channels[i] = ach;
                 String filt = _api.getProperty("channel."+getIdent()+".filter."+_chnames[i], "*");
-                _filters[i] = AprsFilter.createFilter( filt );
+                _filters[i] = AprsFilter.createFilter( filt, null );
             }
             else
                 _channels[i] = null;

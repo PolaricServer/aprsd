@@ -236,7 +236,6 @@ public class OwnPosition extends Station implements Runnable
         p.report = "/" + timeStamp(new Date()) + encodePos() + xrep + _comment;
         
         _api.log().debug("OwnPosition", "Send position report: "+ p.from+">"+p.to+": "+p.report);
-        _api.log().debug("OwnPosition", "XREP: "+ xrep);
         
         /* Send object report on RF, if appropriate */
         p.via = _pathRf; 
@@ -253,11 +252,14 @@ public class OwnPosition extends Station implements Runnable
         if (sentRf && ig != null && ig.isActive()) 
             ig.gate_to_inet(p);
         else
-            if (_inetChan != null && !_inetChan.isRf()) 
+            if (_inetChan != null && !_inetChan.isRf()) {
                 _api.log().debug("OwnPosition", "Send packet: "+p.toString());
+                _inetChan.sendPacket(p);
+            }
             
     }
 
+    
     
     protected int _timeSinceReport = 0;
     
@@ -285,8 +287,7 @@ public class OwnPosition extends Station implements Runnable
      */
     protected boolean should_update () 
     {       
-       int t = 60;
-       return (isChanging() && _timeSinceReport >= t); 
+       return ((isChanging() && _timeSinceReport >= 240) || _timeSinceReport >= 1200); 
     }
 
 
@@ -298,7 +299,7 @@ public class OwnPosition extends Station implements Runnable
         * could easily be extended to do real tracking, possibly with smart
         * beaconing.
        */
-       try {Thread.sleep(20* 1000); } catch (Exception e) {}
+       try {Thread.sleep(20 * 1000); } catch (Exception e) {}
        sendPosReport();
        while (true) {
          try { 
