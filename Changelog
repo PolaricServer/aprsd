@@ -464,3 +464,25 @@ V.3.2
   * Openlayers to 10.5.0, Mithril to 2.2.15
   * Various fixes..
 
+  
+V.3.2.1
+-------
+  (aprsd)
+  * Fix issues with registering and reporting own position
+  
+  (webapp2)
+  * Fix bugs in own position management
+  
+  
+V.3.2.2
+-------
+  (aprsd)
+  * Allow default filter for aprs-is channels
+  * Fix issues with own position and distance filters
+  
+  (webapp2)
+  * Add default filter to aprsis-srv channel config
+  * Use projectiopn 3857 instead of 900913 - fixes a problem
+  
+  
+  

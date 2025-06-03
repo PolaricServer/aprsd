@@ -29,7 +29,7 @@ import java.util.logging.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "3.2.1";
+   public  static String version = "3.2.2";
    public  static String toaddr  = "APPS32";
    
    private static StationDB db = null;

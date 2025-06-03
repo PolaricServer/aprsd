@@ -1,3 +1,10 @@
+polaric-aprsd (3.2.2) stable; urgency=medium
+
+  * Allow default filter for aprs-is channels
+  * Fix issues with own position and distance filters
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Tue, 03 Jun 2025 22:04:18 +0200
+
 polaric-aprsd (3.2.1) stable; urgency=medium
 
   * Fix issues with registering and reporting own position

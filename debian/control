@@ -9,9 +9,9 @@ Homepage: http://aprs.no/polaricserver
 Package: polaric-aprsd
 Architecture: all
 Depends: openjdk-17-jre-headless|openjdk-21-jre-headless|openjdk-22-jre-headless|openjdk-17-headless|openjdk-21-headless|openjdk-22-headless, libslf4j-java, librxtx-java, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, adduser, sudo, openssl, ssl-cert, ${misc:Depends}
-Conflicts: polaric-database-plugin (<< 3.1), polaric-ais-plugin (<< 3.0) 
+Conflicts: polaric-database-plugin (<< 3.2), polaric-ais-plugin (<< 3.0) 
 Recommends:
-Suggests: polaric-webapp2 (>= 3.0)
+Suggests: polaric-webapp2 (>= 3.2.2)
 Description: Polaric Server: APRS daemon part. 
  The "Polaric Server" is mainly a web based service to present APRS 
  tracking information on maps and where the information is updated at real-
