@@ -19,6 +19,8 @@ import java.net.*;
 import java.util.*;
 import java.text.*;
 import java.math.BigInteger;
+import java.util.function.*;
+
 
 
 /**
@@ -26,6 +28,29 @@ import java.math.BigInteger;
  */
 public class AprsParser extends AprsUtil implements AprsChannel.Receiver
 { 
+
+    protected static Predicate<String> _viaPat = Pattern.compile
+       ("(WIDE|TRACE|NOR|SAR).*").asPredicate();
+    
+    protected static Predicate<String> _comprPos = Pattern.compile
+       ("[\\\\/0-9A-Z][\\x20-\\x7f]{12}.*").asPredicate();
+       
+    protected static Predicate<String> _csPat = Pattern.compile
+       ("[0-9]{3}/[0-9]{3}").asPredicate();
+       
+    protected static Predicate<String> _dotdotdotPat = Pattern.compile
+       ("/(\\.\\.\\./\\.\\.\\.)").asPredicate();
+       
+    protected static Predicate<String> _phgPat = Pattern.compile
+       ("PHG[0-9]{4}").asPredicate();
+       
+    protected static Predicate<String> _rngPat = Pattern.compile
+       ("RNG[0-9]{4}").asPredicate();
+       
+    protected static Predicate<String> _altitudePat = Pattern.compile  
+       ("/A=[0-9]{6}").asPredicate();
+       
+       
     private MessageProcessor _msg;
     private List<ReportHandler> _subscribers = new LinkedList<ReportHandler>();
 
@@ -174,7 +199,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
                    to.setWideDigi(true); /* Digi is WIDE */
                 from = to;
             }
-            else if (!pp[i].matches("(WIDE|TRACE|NOR|SAR).*"))
+            else if (!_viaPat.test(pp[i]))  // (WIDE|TRACE|NOR|SAR).*
                skip = true;
         }
         
@@ -194,7 +219,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
            }
            else {
                Station last = null;
-               if (pp[tindex].matches("(WIDE|TRACE|NOR|SAR).*") && tindex > 0)
+               if (_viaPat.test(pp[tindex]) && tindex > 0) // (WIDE|TRACE|NOR|SAR).*
                   last = _api.getDB().getStation(pp[tindex-1], null);
                Station x = _api.getDB().getStation(pp[plen-1], null);
                if (last != null && x != null) {
@@ -552,7 +577,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
             pd = parseStdPos(data, m, p); 
             comment = m.group(11);
          }
-         else if (data.matches("[\\\\/0-9A-Z][\\x20-\\x7f]{12}.*"))
+         else if (_comprPos.test(data))  
            /* Parse compressed position report */
          {
             pd = parseCompressedPos(data);
@@ -589,25 +614,25 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
            return null;
         while( true ) {
            /* Course and speed: nnn/nnn */
-           if (comment.length() >= 7 && comment.substring(0,7).matches("[0-9]{3}/[0-9]{3}")) {
+           if (comment.length() >= 7 && _csPat.test(comment.substring(0,7))) {
               pd.course = Integer.parseInt(comment.substring(0,3));
               pd.speed  = (int) Math.round( Integer.parseInt(comment.substring(4,7))* 1.852);
               comment = comment.substring(7);
               
               /* Ignore additional Bearing/NRQ fields */
-              if (comment.length() >= 8 && comment.substring(0,8).matches("/[0-9]{3}/[0-9]{3}"))
+              if (comment.length() >= 8 && _csPat.test(comment.substring(0,8)))
                  comment = comment.substring(8);
-              else if (comment.length() >= 8 && comment.substring(0,8).matches("/(\\.\\.\\./\\.\\.\\.)"))
+              else if (comment.length() >= 8 && _dotdotdotPat.test(comment.substring(0,8)))
                  /* Ignore */ ;
            } 
            
            /* .../... */
-           else if (comment.length() >= 7 && comment.substring(0,7).matches("/(\\.\\.\\./\\.\\.\\.)"))
+           else if (comment.length() >= 7 && _dotdotdotPat.test(comment.substring(0,7)))
               /* Ignore */
               ;
            
            /* PHGnnnn */
-           else if (comment.length() >= 7 && comment.substring(0,7).matches("PHG[0-9]{4}")) {
+           else if (comment.length() >= 7 && _phgPat.test(comment.substring(0,7))) {
              int power = (comment.charAt(3)-'0');
              power = power * power; 
              int gain = (comment.charAt(5)-'0');
@@ -632,14 +657,14 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
            }
            
            /* RNGnnnn */
-           else if (comment.length() >= 7 && comment.substring(0,7).matches("RNG[0-9]{4}")) {
+           else if (comment.length() >= 7 && _rngPat.test(comment.substring(0,7))) {
              int r = Integer.parseInt(comment.substring(3,7));
              int rKm = (int) Math.round(r*1.609344);
              comment = comment.substring(7, comment.length()) + " ("+rKm+" km omni)";
            }
           
            /* Altitude /A=nnnn */
-           else if (comment.length() >= 9 && comment.substring(0,9).matches("/A=[0-9]{6}")) {
+           else if (comment.length() >= 9 && _altitudePat.test(comment.substring(0,9))) {
               pd.altitude = Long.parseLong(comment.substring(3,9));
               pd.altitude *= 0.3048;
               comment = comment.substring(9, comment.length());

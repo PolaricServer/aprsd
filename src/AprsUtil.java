@@ -19,6 +19,7 @@ import java.net.*;
 import java.util.*;
 import java.text.*;
 import java.math.BigInteger;
+import java.util.function.*;
 
 
 /**
@@ -39,10 +40,15 @@ public class AprsUtil
    protected static Pattern _telPat = Pattern.compile
        (".*\\|([\\x21-\\x7f]{4,14})\\|.*");
     
-   protected static Pattern _latPat = Pattern.compile
-       ("[0-9\\s]{4}.[0-9\\s]{2}");
-    protected static Pattern _lngPat = Pattern.compile
-       ("[0-9\\s]{5}.[0-9\\s]{2}");
+   protected static Predicate<String> _latPat = Pattern.compile
+       ("[0-9\\s]{4}.[0-9\\s]{2}").asPredicate();
+       
+   protected static Predicate<String> _lngPat = Pattern.compile
+       ("[0-9\\s]{5}.[0-9\\s]{2}").asPredicate();
+       
+   protected static Predicate<String> _comprPos = Pattern.compile
+       ("[\\\\/0-9A-Z][\\x20-\\x7f]{12}.*").asPredicate();
+       
     
    protected static DateFormat _dtgFormat = new SimpleDateFormat("ddhhmm");
    protected static DateFormat _hmsFormat = new SimpleDateFormat("hhmmss");
@@ -124,7 +130,7 @@ public class AprsUtil
       Matcher m = _stdPat.matcher(data);
       if (m.matches()) 
          return parseStdPos(data, m, null); 
-      else if (data.matches("[\\\\/0-9A-Z][\\x20-\\x7f]{12}.*"))
+      else if (_comprPos.test(data))  
          return parseCompressedPos(data);
       return null;
    }
@@ -374,9 +380,9 @@ public class AprsUtil
       pd.symbol  = m.group(10).charAt(0);
       String comment = m.group(11);   // FIXME: Move out
       
-      if (lng.matches("[0-9\\s]{4}.[0-9\\s]{2}"))
+      if (_lngPat.test(lat)) 
          lng = "0"+lng;
-      if (!lat.matches("[0-9\\s]{4}.[0-9\\s]{2}") || !lng.matches("[0-9\\s]{5}.[0-9\\s]{2}")) {
+      if (!_latPat.test(lat) || !_lngPat.test(lng)) {
          /* ERROR: couldn't understand Lat/Long field */
          if (p!=null)
             _api.log().debug("AprsParser", "Could not parse lat/long field: "+lat+" "+lng);
