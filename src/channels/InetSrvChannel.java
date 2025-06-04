@@ -72,7 +72,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
     
         
     /** Stop the service */
-    @Override public void deActivate() {
+    @Override public synchronized void deActivate() {
         if (_state == State.OFF)
             return;
         _state = State.OFF;
@@ -136,7 +136,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         return _clients;
     }
     
-    public void removeClient(InetSrvClient c) {
+    public synchronized void removeClient(InetSrvClient c) {
         _clients.remove(c);
         _nclients--;
     }
