@@ -146,8 +146,14 @@ public class InetChannel extends TcpChannel
          {
             try { 
                 String inp = _rder.readLine(); 
-                if (inp != null) 
+                if (inp != null) {
                     receivePacket(inp, false);
+                    if (inp.charAt(0) == '#') {
+                        if (inp.length() > 7 && inp.matches("# Note:.*"))
+                            _api.log().info("InetChannel", inp.substring(2));
+                        continue;
+                    }
+                }
                 else {   
                     _api.log().info("InetChannel", chId()+"Disconnected from APRS server '"+getHost()+"'");
                     break; 

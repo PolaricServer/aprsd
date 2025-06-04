@@ -145,7 +145,7 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
                 _filter = AprsFilter.createFilter(_filt, _userid);
             
             if (_software.matches("Polaric\\-APRSD ([12].+)"))
-                _writer.println("# Please upgrade to a newer version of Polaric-Server");
+                _writer.println("# Note: Upgrade to a newer version of Polaric-Server is recommended");
                 
             String mycall = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
             _writer.println("# logresp "+_userid+ (_verified ? " verified" : " unverified" ) + ", server " + mycall);
