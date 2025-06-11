@@ -56,7 +56,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
     }
     
        
-    /** Stop the service */
+    /** Start the service */
     @Override public void activate(ServerAPI a) {
         resetCounters();
         String id = getIdent();            

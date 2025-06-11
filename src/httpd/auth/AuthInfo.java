@@ -258,6 +258,7 @@ public class AuthInfo {
             }
             mb = new SesMailBox(_api, (MailBox.User) m);
         }
+        mboxlist.put(userid, mb);
         return mb;
     }
     

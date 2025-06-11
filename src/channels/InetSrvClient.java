@@ -134,8 +134,15 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
                 }
                 break;
             }
-            if (x[0].matches("user|USER"))
+            if (x[0].matches("user|USER")) {
                 _userid = x[1].toUpperCase();
+                if (_chan.hasLogin(_userid)) {
+                    _writer.println("# Userid '"+_userid+"' already logged in");
+                    _writer.flush();
+                    return;
+                }
+            }
+            
             if (x.length > 3 && x[2].matches("pass|PASS"))
                 verify(_userid, x[3]);
             if (x.length > 6 && x[4].matches("vers|VERS"))
@@ -285,6 +292,9 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
             }
             _login = false; 
             _api.log().info("InetSrvChannel", "Connection closed: "+_ipaddr);
+        }
+        catch (SocketException ex) {
+            _api.log().warn("InetSrvChannel", "Connection ("+_ipaddr+"): "+ex.getMessage());
         }
         catch (Exception ex) {
              _api.log().warn("InetSrvChannel", "Connection ("+_ipaddr+"): "+ex.getMessage());
