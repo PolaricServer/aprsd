@@ -112,7 +112,7 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
         String line = "";
         String[] fline;
         String[] x;
-        
+        _login = false; 
         try {
             while (true) {
                 _writer.println("# Polaric-Aprsd");
@@ -134,14 +134,17 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
                 }
                 break;
             }
+
             if (x[0].matches("user|USER")) {
                 _userid = x[1].toUpperCase();
-                if (_chan.hasLogin(_userid)) {
+                if (_userid != null && !_userid.matches("NOCALL") && _chan.hasLogin(_userid)) {
                     _writer.println("# Userid '"+_userid+"' already logged in");
                     _writer.flush();
                     return;
                 }
             }
+            if (_userid != null && !_userid.matches("NOCALL"))
+                _chan.addLogin(_userid);
             
             if (x.length > 3 && x[2].matches("pass|PASS"))
                 verify(_userid, x[3]);
@@ -303,6 +306,8 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
         finally {
             /* Close the connection */
             close();
+            if (_userid != null && !_userid.equals("NOCALL"))
+                _chan.removeLogin(_userid);
             _chan.removeClient(this);
         }
     }
