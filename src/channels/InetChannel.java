@@ -160,7 +160,8 @@ public class InetChannel extends TcpChannel
                 }
             }
             catch (java.net.SocketException e) {
-                _api.log().info("InetChannel", chId()+"Socket closed");
+                _api.log().info("InetChannel", chId()+"Socket closed: "+e.getMessage());
+                break;
             }
          }
     }
