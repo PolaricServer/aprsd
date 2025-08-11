@@ -455,7 +455,7 @@ public class MessageProcessor implements Runnable, Serializable
             }); 
            
             synchronized(this) {
-                _outgoing.values().removeIf((m) -> {return m.deleted;}); 
+                _outgoing.values().removeIf((m) -> {return m != null && m.deleted;}); 
             }
 
          } catch (Exception e) 
