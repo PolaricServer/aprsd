@@ -61,6 +61,7 @@ public class AuthInfo {
     public String servercall;
     public boolean admin = false, sar = false;
     public String tagsAuth;
+    public int nclients = -1;
     public String[] services = null;
     private ServerAPI _api; 
     
@@ -271,6 +272,7 @@ public class AuthInfo {
      
     public AuthInfo(ServerAPI api, User u, Group g) {
         _api = api;
+        nclients = _api.getWebserver().nClients();
         authorize(u, g);
         var i = 0;
         services = new String[_services.size()];
@@ -293,6 +295,7 @@ public class AuthInfo {
     {
         Optional<CommonProfile> profile = getSessionProfile(context);
         _api = api;
+        nclients = _api.getWebserver().nClients();
         var i = 0;
         services = new String[_services.size()];
         for (var x : _services)

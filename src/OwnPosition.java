@@ -84,15 +84,13 @@ public class OwnPosition extends Station implements Runnable
         if (_minPause == 0)
            _minPause = _maxPause;
         _description = _comment;
-        
-        System.out.println("*** pos = "+ownpos);
+
         String[] pp = ownpos.split(",[\\s]*");
         if (pp.length == 2) {
            LatLng p = new LatLng(Double.parseDouble(pp[1]), Double.parseDouble(pp[0])); 
                       
            /* FIXME: Don't reset pos if GPS is active */
            updatePosition(new Date(), p, 0);
-           _api.log().info("OwnPosition", "Position is: "+p);
         }
         setId(myCall);
         setAltitude(-1);

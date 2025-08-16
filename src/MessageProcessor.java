@@ -420,10 +420,14 @@ public class MessageProcessor implements Runnable, Serializable
      */
     public void run()
     {       
-       int n = 0;
-       while (true) {
-         try {
-            Thread.sleep(5000);
+        try {
+            Thread.sleep(30000);
+        }
+        catch (Exception e) {}
+        int n = 0;
+        while (true) {
+        try {
+            Thread.sleep(6000);
             
             /* Every 4 hours, send a message to tell APRS-IS that we are here. 
              */
@@ -433,8 +437,8 @@ public class MessageProcessor implements Runnable, Serializable
             }
             n++;
             
-        
             Iterator<OutMessage> iter = _outgoing.values().iterator(); 
+            
             iter.forEachRemaining(m -> {
                 Date t = new Date();
                 long tdiff = t.getTime() - m.time.getTime();
@@ -453,15 +457,15 @@ public class MessageProcessor implements Runnable, Serializable
                     } 
                 }
             }); 
-           
             synchronized(this) {
                 _outgoing.values().removeIf((m) -> {return m != null && m.deleted;}); 
             }
 
-         } catch (Exception e) 
+        } catch (Exception e) 
              { _api.log().warn("MessageProc", ""+e);
-               e.printStackTrace(System.out);}
-       }
+               e.printStackTrace(System.out);
+             }
+        }
     }
 
    

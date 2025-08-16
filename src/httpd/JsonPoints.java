@@ -21,7 +21,7 @@ public interface JsonPoints
         /* FIXME: Consider adding some session info here */
       
         public AuthInfo       authorization;
-        public boolean        sarmode; 
+        public int            nclients;
         public boolean        overload;
         public List<JsPoint>  points;
         public List<String>   delete;

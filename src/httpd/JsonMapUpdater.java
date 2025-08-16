@@ -63,6 +63,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                     return null;
                 }
                 mu.authorization = _auth;
+                mu.nclients = _api.getWebserver().nClients();
                 if (!metaonly)
                     addPoints(mu);
                 return serializeJson(mu);

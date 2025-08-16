@@ -139,6 +139,7 @@ public class AuthService {
      * Return authorization status (as JSON)
      */
     public static String authStatus(Request req, Response res) {
+        res.header("Expires", "0"); 
         AuthInfo auth = new AuthInfo(_api, req, res);
         return ServerBase.serializeJson(auth);
     }
