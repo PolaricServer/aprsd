@@ -19,7 +19,6 @@ http://aprs.no/polaricserver or https://polaricserver.readthedocs.io
 
 Linux/Java platform (tested with Debian/Ubuntu) with
 * Java Runtime environment version 17 or later. 
-* jsvc.
 * librxtx-java (if using serial port for communication with TNC or GPS).
 * libjackson2 (for JSON processing)
 * libcommons-codec
@@ -32,6 +31,7 @@ We also use the following external libraries. jar files are included:
 * pac4j framework (authentication/authorization)
 * nano-cuckoo with lz4
 * jMDNS
+* and more...
 
 
 ## Installation
@@ -53,8 +53,9 @@ Se also: [Examples of how to use it with Docker](https://github.com/PolaricServe
 
 ## Building from source 
 
-Build from the source is done by a plain old makefile. Yes I know :)
-Maybe I move to something else (Maven, Gradle) later. Setup for generating deb
+Build from the source is done by a plain old makefile (a version 4.0 will use maven). Setup for generating deb
 packages is included. You may use the 'debuild' command.
 
 You will need JDK (Oracle or OpenJDK) version 17 or later. 
+From version 4.0 we move to Javalin for the webserver-part and a webserver-framework is factored out as a separate software component: [arctic-core](https://github.com/PolaricServer/ArcticCore). 
+
