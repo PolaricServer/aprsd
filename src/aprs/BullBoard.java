@@ -1,4 +1,8 @@
+
 package no.polaric.aprsd;
+import no.arctic.core.*;
+import no.polaric.aprsd.point.*;
+import no.polaric.aprsd.channel.*;
 import java.util.*;
 import java.time.*;
 import java.util.concurrent.*;
@@ -76,7 +80,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
                 mybulls.remove(index);
                 if (mybulls.nbulls == 0)
                     _map.remove(sender);
-                _api.getWebserver().getPubSub().put("bullboard", null);
+                _api.getWebserver().pubSub().put("bullboard", null);
                 return;
             }
             
@@ -123,7 +127,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
             
             /* If there is a change, replace and notify */
             _map.get(b.sender).update(b.bullid - _start, b); 
-            _api.getWebserver().getPubSub().put("bullboard", null);
+            _api.getWebserver().pubSub().put("bullboard", null);
                         
             /* FIXME: allow users to subscribe to notifications? */
             if (false)
@@ -158,7 +162,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
                     _map.remove(s);
             }
             if (remove)
-                _api.getWebserver().getPubSub().put("bullboard", null);
+                _api.getWebserver().pubSub().put("bullboard", null);
         }
         
         
@@ -189,7 +193,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
     }
     
     
-    private ServerAPI _api; 
+    private AprsServerAPI _api; 
     private SubBoard _bulletins = new SubBoard("_B_", true);
     private SubBoard _announcements = new SubBoard("_A_", false); 
     private SortedMap<String, SubBoard> _groups = new TreeMap<String, SubBoard>(); 
@@ -210,7 +214,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
   
   
   
-    public BullBoard(ServerAPI api, MessageProcessor p) {
+    public BullBoard(AprsServerAPI api, MessageProcessor p) {
         _api = api;
         _grpsel = _api.getProperty("bulletin.groups", ".*");
         _senders = _api.getProperty("bulletin.senders", ".*");

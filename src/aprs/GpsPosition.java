@@ -14,6 +14,7 @@
  */
 
 package no.polaric.aprsd;
+import no.polaric.aprsd.point.*;
 import java.util.*;
 import java.io.*;
 import gnu.io.*;
@@ -123,7 +124,7 @@ public class GpsPosition extends OwnPosition
     transient private   XReports  _xreports;
 
 
-    public GpsPosition(ServerAPI api) 
+    public GpsPosition(AprsServerAPI api) 
     {
         super(api);    
     }

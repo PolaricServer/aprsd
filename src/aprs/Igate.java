@@ -1,18 +1,21 @@
 /* 
- * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  */
  
 package no.polaric.aprsd;
+import no.arctic.core.*;
+import no.polaric.aprsd.point.*;
+import no.polaric.aprsd.channel.*;
 import java.util.regex.*;
 import java.io.*;
 import java.net.*;
@@ -33,10 +36,10 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
     private String   _defaultPath, _pathObj, _alwaysRf;
     private int      _rangeObj;
     private Logfile  _log;
-    private ServerAPI   _api;
+    private AprsServerAPI   _api;
     
     
-    public Igate(ServerAPI api) 
+    public Igate(AprsServerAPI api) 
     {
         _api = api;
         init();
@@ -62,7 +65,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
      * Start the service.    
      * @param a The server interface. 
      */
-    public synchronized void activate(ServerAPI a) {
+    public synchronized void activate(AprsServerAPI a) {
          /* Activating means subscribing to traffic from the two channels */
          if (_inetChan != null && _rfChan != null) {
             _inetChan.addReceiver(this); 

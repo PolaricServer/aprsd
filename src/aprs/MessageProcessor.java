@@ -1,18 +1,21 @@
 /* 
  * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  */
  
 package no.polaric.aprsd;
+import no.arctic.core.util.*;
+import no.polaric.aprsd.point.*;
+import no.polaric.aprsd.channel.*;
 import java.util.regex.*;
 import java.io.*;
 import java.net.*;
@@ -95,16 +98,16 @@ public class MessageProcessor implements Runnable, Serializable
        
    private Map<String, Subscriber> _subscribers = new HashMap<String, Subscriber>();
    private Map<String, OutMessage> _outgoing = new HashMap<String, OutMessage>();
-   private static int  _msgno = 0;
-   private AprsChannel _inetChan, _rfChan;
-   private String      _myCall; /* Move this ? */
-   private Thread      _thread;
-   private String      _key;
-   private String      _defaultPath;
-   private String      _alwaysRf;
-   private int         _threadid;
-   private String      _file;
-   private ServerAPI   _api; 
+   private static int     _msgno = 0;
+   private AprsChannel    _inetChan, _rfChan;
+   private String         _myCall; /* Move this ? */
+   private Thread         _thread;
+   private String         _key;
+   private String         _defaultPath;
+   private String         _alwaysRf;
+   private int            _threadid;
+   private String         _file;
+   private AprsServerAPI  _api; 
     
     
    private static String getNextId()
@@ -117,7 +120,7 @@ public class MessageProcessor implements Runnable, Serializable
    
    
    private int threadid=0;
-   public MessageProcessor(ServerAPI api)
+   public MessageProcessor(AprsServerAPI api)
    {
        _file = api.getProperty("message.file", "messages.dat");
        if (_file.charAt(0) != '/')
@@ -420,14 +423,10 @@ public class MessageProcessor implements Runnable, Serializable
      */
     public void run()
     {       
-        try {
-            Thread.sleep(30000);
-        }
-        catch (Exception e) {}
-        int n = 0;
-        while (true) {
-        try {
-            Thread.sleep(6000);
+       int n = 0;
+       while (true) {
+         try {
+            Thread.sleep(5000);
             
             /* Every 4 hours, send a message to tell APRS-IS that we are here. 
              */
@@ -437,8 +436,8 @@ public class MessageProcessor implements Runnable, Serializable
             }
             n++;
             
+        
             Iterator<OutMessage> iter = _outgoing.values().iterator(); 
-            
             iter.forEachRemaining(m -> {
                 Date t = new Date();
                 long tdiff = t.getTime() - m.time.getTime();
@@ -457,15 +456,15 @@ public class MessageProcessor implements Runnable, Serializable
                     } 
                 }
             }); 
+           
             synchronized(this) {
-                _outgoing.values().removeIf((m) -> {return m != null && m.deleted;}); 
+                _outgoing.values().removeIf((m) -> {return m !=null && m.deleted;}); 
             }
 
-        } catch (Exception e) 
+         } catch (Exception e) 
              { _api.log().warn("MessageProc", ""+e);
-               e.printStackTrace(System.out);
-             }
-        }
+               e.printStackTrace(System.out);}
+       }
     }
 
    

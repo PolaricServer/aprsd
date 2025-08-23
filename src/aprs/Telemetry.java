@@ -1,20 +1,20 @@
- 
 /* 
  * Copyright (C) 2015-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  */
  
  
 package no.polaric.aprsd;
+import no.polaric.aprsd.point.*;
 import java.util.*;
 import java.io.Serializable;
 
@@ -92,9 +92,9 @@ public class Telemetry implements Serializable
     
     
     
-    public Telemetry(ServerAPI api, String id) {
+    public Telemetry(AprsServerAPI api, String id) {
         _ident = id;
-        api.getWebserver().getPubSub().createRoom("telemetry:"+id, (Class) null);
+        api.getWebserver().pubSub().createRoom("telemetry:"+id, (Class) null);
 
         for (int i=0; i < ANALOG_CHANNELS; i++) 
            _chanMeta[i] = new NumChannelMeta(); 
@@ -205,8 +205,8 @@ public class Telemetry implements Serializable
         if (_ident == null)
             return;
             
-        api.getWebserver().getPubSub().createRoom("telemetry:"+_ident, (Class) null);
-        api.getWebserver().getPubSub().put("telemetry:"+_ident, null);
+        api.getWebserver().pubSub().createRoom("telemetry:"+_ident, (Class) null);
+        api.getWebserver().pubSub().put("telemetry:"+_ident, null);
     }
     
     

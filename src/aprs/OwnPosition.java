@@ -1,19 +1,20 @@
- 
 /* 
- * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  */
 
 package no.polaric.aprsd;
+import no.polaric.aprsd.point.*;
+import no.polaric.aprsd.channel.*;
 import java.util.*;
 import java.io.*;
 
@@ -26,7 +27,7 @@ public class OwnPosition extends Station implements Runnable
 {
     transient private  AprsChannel _inetChan, _rfChan;
     transient private  Thread      _thread;
-    transient protected  ServerAPI _api;
+    transient protected  AprsServerAPI _api;
     transient private  int         _tid;
     transient private  boolean     _txOn, _allowRf, _compress;
     transient protected String     _pathRf, _comment;
@@ -39,7 +40,7 @@ public class OwnPosition extends Station implements Runnable
     
     private class LocalSource extends Source
      {
-         public LocalSource(ServerAPI api, String prefix, String id)
+         public LocalSource(AprsServerAPI api, String prefix, String id)
             { _tag="own"; _init(api, prefix, "ownposition"); }
          public String getShortDescr() 
             { return "OWN"; }
@@ -48,7 +49,7 @@ public class OwnPosition extends Station implements Runnable
     
     
     
-    public OwnPosition(ServerAPI api) 
+    public OwnPosition(AprsServerAPI api) 
     {
         super(null);     
         _api = api;
@@ -84,13 +85,15 @@ public class OwnPosition extends Station implements Runnable
         if (_minPause == 0)
            _minPause = _maxPause;
         _description = _comment;
-
+        
+        System.out.println("*** pos = "+ownpos);
         String[] pp = ownpos.split(",[\\s]*");
         if (pp.length == 2) {
            LatLng p = new LatLng(Double.parseDouble(pp[1]), Double.parseDouble(pp[0])); 
                       
            /* FIXME: Don't reset pos if GPS is active */
            updatePosition(new Date(), p, 0);
+           _api.log().info("OwnPosition", "Position is: "+p);
         }
         setId(myCall);
         setAltitude(-1);

@@ -13,6 +13,9 @@
  */
  
 package no.polaric.aprsd;
+import no.arctic.core.*;
+import no.arctic.core.util.*;
+import no.polaric.aprsd.point.*;
 import java.util.regex.*;
 import java.io.*;
 import java.net.*;
@@ -68,12 +71,12 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        
    private MessageProcessor _msg;
    private MessageProcessor.MessageHandler _pmsg;
-   private ServerAPI _api;
+   private AprsServerAPI _api;
    private Logfile   _log;
    private UserCb    _usercb;
     
    private LinkedHashMap<String, LogEntry> _cmds = new LinkedHashMap<String, LogEntry>(); 
-   private IndexedSets _users = new IndexedSets();
+   private KeyedSet _users = new KeyedSet();
    private Map<String, Child> _children = new HashMap<String, Child>();
    
    private Encryption _crypt; 
@@ -133,7 +136,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    
    
    private int threadid=0;    
-   public RemoteCtl(ServerAPI api, MessageProcessor mp)
+   public RemoteCtl(AprsServerAPI api, MessageProcessor mp)
    {
        _myCall = api.getProperty("remotectl.mycall", "").toUpperCase();
        if (_myCall.length() == 0)

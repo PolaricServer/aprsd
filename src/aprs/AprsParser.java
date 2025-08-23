@@ -13,6 +13,8 @@
  */
  
 package no.polaric.aprsd;
+import no.polaric.aprsd.channel.*;
+import no.polaric.aprsd.point.*;
 import java.util.regex.*;
 import java.io.*;
 import java.net.*;
@@ -55,7 +57,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
     private List<ReportHandler> _subscribers = new LinkedList<ReportHandler>();
 
     
-    public AprsParser(ServerAPI a, MessageProcessor msg) 
+    public AprsParser(AprsServerAPI a, MessageProcessor msg) 
     {
         _api = a;
         _msg = msg;

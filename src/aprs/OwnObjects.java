@@ -1,18 +1,20 @@
 /* 
- * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  */
  
 package no.polaric.aprsd;
+import no.polaric.aprsd.point.*;
+import no.polaric.aprsd.channel.*;
 import java.util.regex.*;
 import java.io.*;
 import java.net.*;
@@ -34,7 +36,7 @@ public class OwnObjects implements Runnable
     private int             _rangeRf;
     private int             _txPeriod;
     private String          _file;
-    private ServerAPI       _api;
+    private AprsServerAPI   _api;
     private BufferedReader  _rd;
     private StringTokenizer _next;
     private Set<String>     _ownObjects = new LinkedHashSet<String>();
@@ -43,7 +45,7 @@ public class OwnObjects implements Runnable
     private int              _tid;
     
     
-    public OwnObjects(ServerAPI api) 
+    public OwnObjects(AprsServerAPI api) 
     {
         _api = api;
         _allowRf     = api.getBoolProperty("objects.rfgate.allow", false);
@@ -146,12 +148,6 @@ public class OwnObjects implements Runnable
         return true;
     }
 
-
-
-
-    protected void finalize() throws Throwable {
-       // deleteAll(); 
-    }
 
 
     public synchronized boolean hasObject(String id)
