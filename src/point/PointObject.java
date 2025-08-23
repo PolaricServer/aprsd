@@ -1,18 +1,20 @@
 /* 
- * Copyright (C) 2014-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2014-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- */ 
-
-package no.polaric.aprsd;
+ * GNU Affero General Public License for more details.
+ */
+ 
+package no.polaric.aprsd.point;
+import no.arctic.core.*;
+import no.polaric.aprsd.*;
 import java.util.*;
 import java.io.*;
 import java.util.regex.*;
@@ -35,7 +37,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
      */
     protected Set<String> _tags = new HashSet<String>();
     protected static SortedMap<String, Integer> _tagUse = new TreeMap<String, Integer>();
-    protected static ServerAPI   _api = null;
+    protected static AprsServerAPI   _api = null;
         
     protected boolean  _nodb = false;
             

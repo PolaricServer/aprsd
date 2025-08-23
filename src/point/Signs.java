@@ -13,6 +13,7 @@
  */
 
 package no.polaric.aprsd;
+import no.polaric.aprsd.point.*;
 import java.net.*;
 import java.util.*;
 import java.io.*;
@@ -27,7 +28,7 @@ public class Signs extends Source
      */
     private static Signs _signs;
     
-    public static void init(ServerAPI api) 
+    public static void init(AprsServerAPI api) 
     { 
        _signs = 
           new Signs(api, System.getProperties().getProperty("confdir", ".")+"/signs");  
@@ -112,7 +113,7 @@ public class Signs extends Source
      * Format of each line: 
      * lat, long, max-scale, icon-filename, URL, description.
      */  
-    protected Signs(ServerAPI api, String file) 
+    protected Signs(AprsServerAPI api, String file) 
     {
         _init (api, "Signs", false, null);
         try {
