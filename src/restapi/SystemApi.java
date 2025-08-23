@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2018-2023 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018-2025 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,17 +13,16 @@
  */
  
 
-package no.polaric.aprsd.http;
-import spark.Request;
-import spark.Response;
-import spark.route.Routes;
-import static spark.Spark.get;
-import static spark.Spark.put;
-import static spark.Spark.*;
+package no.polaric.aprsd;
+import no.polaric.aprsd.point.*;
+import no.arctic.core.*;
+import no.arctic.core.httpd.*;
+import no.arctic.core.auth.*;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
 import java.util.*; 
 import java.io.*;
 import java.util.stream.*;
-import no.polaric.aprsd.*;
 
 
 
@@ -32,9 +31,9 @@ import no.polaric.aprsd.*;
  */
 public class SystemApi extends ServerBase {
 
-    private ServerAPI _api; 
+    private AprsServerAPI _api; 
     
-    public SystemApi(ServerAPI api) {
+    public SystemApi(AprsServerAPI api) {
         super(api);
         _api = api;
     }
@@ -64,8 +63,8 @@ public class SystemApi extends ServerBase {
      * Return an error status message to client. 
      * FIXME: Move to superclass. 
      */
-    public String ERROR(Response resp, int status, String msg)
-      { resp.status(status); return msg; }
+    public void ERROR(Context ctx, int status, String msg)
+      { ctx.status(status); ctx.result(msg); }
       
     
     
@@ -74,38 +73,42 @@ public class SystemApi extends ServerBase {
      */
     public void start() {     
     
+        protect("/system/sarmode", "operator");
+        protect("/system/ownpos",  "admin");
     
         /******************************************
          * Get all tags
          ******************************************/
-        get("/system/tags", "application/json", (req, resp) -> {
+        a.get("/system/tags", (ctx) -> {
             var tags = PointObject.getUsedTags();
-            return tags;
-        }, ServerBase::toJson );
+            ctx.json(tags);
+        });
         
         
         /******************************************
          * Get own position. 
          ******************************************/
-        get("/system/ownpos", "application/json", (req, resp) -> {
+        a.get("/system/ownpos", (ctx) -> {
             var p = _api.getOwnPos();
             LatLng pos = (LatLng) p.getPosition();
             double[] cpos = null;
             if (pos!=null) 
                 cpos = new double[] {pos.getLng(), pos.getLat()};
-            return new OwnPos(cpos, ""+p.getSymtab(), ""+p.getSymbol());
-        }, ServerBase::toJson );
+            ctx.json(new OwnPos(cpos, ""+p.getSymtab(), ""+p.getSymbol()));
+        });
     
     
         /******************************************
          * Set own position
          ******************************************/
-        put("/system/ownpos", (req, resp) -> {
-            var uid = getAuthInfo(req).userid;
+        a.put("/system/ownpos", (ctx) -> {
+            var uid = getAuthInfo(ctx).userid;
             var op = (OwnPos) 
-                ServerBase.fromJson(req.body(), OwnPos.class);
-            if (op==null || op.pos==null)
-                return ERROR(resp, 400, "Couldn't parse input");   
+                ServerBase.fromJson(ctx.body(), OwnPos.class);
+            if (op==null || op.pos==null) {
+                ERROR(ctx, 400, "Couldn't parse input");   
+                return; 
+            }
             var p = _api.getOwnPos();
             p.updatePosition(new Date(), 
                       new LatLng( op.pos[1], op.pos[0]), 
@@ -113,7 +116,7 @@ public class SystemApi extends ServerBase {
                       (op.sym==null ? 'c' : op.sym.charAt(0)));
             _api.log().info("RestApi", "Own position changed by '"+uid+"'");
             systemNotification("ADMIN", "Own position changed by '"+uid+"'", 120);
-            return "Ok";
+            ctx.result("Ok");
         });
     
     
@@ -121,37 +124,39 @@ public class SystemApi extends ServerBase {
         /******************************************
          * Get a list of icons (file paths). 
          ******************************************/
-         get("/system/icons/*", "application/json", (req, resp) -> {
+         a.get("/system/icons/{subdir}", (ctx) -> {
             try {
-                var subdir = req.splat()[0];
+                var subdir = ctx.pathParam("subdir");
                 if (subdir==null || subdir.equals("default"))
                     subdir = "";
                 var webdir = System.getProperties().getProperty("webdir", ".");
                 FilenameFilter flt = (dir, f) -> 
-                    { return f.matches(".*\\.(png|gif|jpg)"); } ;
+                    { return f.matches(".*\\.(png|gif|jpg)"); };
+    
+                
                 Comparator<File> cmp = (f1, f2) -> 
                     f1.getName().compareTo(f2.getName());       
             
                 var icondir = new File(webdir+"/icons/"+subdir);
                 var files = icondir.listFiles(flt);
-                if (files==null) 
-                    return ERROR(resp, 500, "Invalid file subdirectory for icons");
-                
+                if (files==null) {
+                    ERROR(ctx, 500, "Invalid file subdirectory for icons");
+                    return;
+                }
+                    
                 Arrays.sort(files, cmp);
                 if (!subdir.equals("")) subdir += "/";
             
                 List<String> fl = new ArrayList<String>();
                 for (File x: files)
-                fl.add("/icons/"+subdir+x.getName());
+                    fl.add("/icons/"+subdir+x.getName());
             
-                return fl;
+                ctx.json(fl);
             }
             catch (Exception e) {
                 e.printStackTrace(System.out);
-                return null;
             }
-            
-        }, ServerBase::toJson );
+        });
         
     }
 }

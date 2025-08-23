@@ -1,6 +1,6 @@
  
 /* 
- * Copyright (C) 2020-2023 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2020-2025 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,14 +13,14 @@
  * GNU General Public License for more details.
  */
  
-
-package no.polaric.aprsd.http;
-import spark.Request;
-import spark.Response;
-import spark.route.Routes;
-import static spark.Spark.get;
-import static spark.Spark.put;
-import static spark.Spark.*;
+package no.polaric.aprsd;
+import no.polaric.aprsd.point.*;
+import no.polaric.aprsd.filter.*;
+import no.arctic.core.*;
+import no.arctic.core.httpd.*;
+import no.arctic.core.auth.*;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
 import java.util.*; 
 import java.io.*;
 import no.polaric.aprsd.*;
@@ -178,12 +178,15 @@ public class ShellScriptApi extends ServerBase {
     
     
     /** 
-     * Return an error status message to client 
+     * Return an error status message to client. 
+     * FIXME: Move to superclass. 
      */
-    public String ERROR(Response resp, int status, String msg)
-      { resp.status(status); return msg; }
-      
-      
+     
+    public void ERROR(Context ctx, int status, String msg)
+      { ctx.status(status); ctx.result(msg); }
+     
+     
+     
     /*
      * config file consists of lines of the format: 
      *   name command number-of-args description
@@ -230,17 +233,18 @@ public class ShellScriptApi extends ServerBase {
      */
     public void start() {     
        
+       protect("/scripts");
         
         /* 
          * GET /scripts 
          * Get list of available commands/scripts 
          */
-        get("/scripts", "application/json", (req, resp) -> {
+        a.get("/scripts", (ctx) -> {
             List<ScriptInfo> res = new ArrayList<ScriptInfo>(); 
             for (Script x: _scripts.values())
                 res.add(x.sinfo);
-            return res;
-        }, ServerBase::toJson );
+            ctx.json(res); 
+        });
         
 
         
@@ -248,27 +252,33 @@ public class ShellScriptApi extends ServerBase {
          * POST /scripts/<ident> 
          * Execute a script/command. Arguments given as JSON data
          */
-        post("/scripts/*", (req, resp) -> {
-            var name = req.splat()[0];
-
+        a.post("/scripts/{name}", (ctx) -> {
+            var name = ctx.pathParam("name"); 
             try {
                 var script = _scripts.get(name);
-                var uid = getAuthInfo(req).userid;     
+                var uid = getAuthInfo(ctx).userid;     
                 ScriptArg arg = null;
-                if (req.body().length() > 0) {
+                if (ctx.body().length() > 0) {
                     arg = (ScriptArg) 
-                        ServerBase.fromJson(req.body(), ScriptArg.class);
-                    if (arg==null)
-                        return ERROR(resp, 400, "Couldn't parse input");   
+                        ServerBase.fromJson(ctx.body(), ScriptArg.class);
+                    if (arg==null) {
+                        ERROR(ctx, 400, "Couldn't parse input");   
+                        return;
+                    }
                 }
-                if (script == null)
-                    return ERROR(resp, 404, "Script "+name+" not found");   
-                    
-                if ((arg==null || arg.args==null) && script.nargs > 0)
-                    return ERROR(resp, 400, "Script "+name+": Missing arguments");
+                if (script == null) {
+                    ERROR(ctx, 404, "Script "+name+" not found");   
+                    return;
+                }
+                if ((arg==null || arg.args==null) && script.nargs > 0) {
+                    ERROR(ctx, 400, "Script "+name+": Missing arguments");
+                    return; 
+                }
+                if (arg != null && arg.args != null && script.nargs != arg.args.length) {
+                    ERROR(ctx, 400, "Script "+name+": Expected "+script.nargs+" arguments, got "+arg.args.length);
+                    return;
+                }
                 
-                if (arg != null && arg.args != null && script.nargs != arg.args.length)
-                    return ERROR(resp, 400, "Script "+name+": Expected "+script.nargs+" arguments, got "+arg.args.length);
                 
                 String cmd = _sdir+"/"+script.cmd;
                 List<String> cmdarg = new ArrayList<String>(); 
@@ -291,20 +301,20 @@ public class ShellScriptApi extends ServerBase {
                     ProcessRunner runner = new ProcessRunner(_api, uid, pb, script);
                     if (script.longrun) {
                         runner.startDetached();
-                        return "Script launched ok"; 
+                        ctx.result("Script launched ok"); 
                     }
                     else {
                         int res = runner.runAndWait(10);
                         if (res == -1) 
-                            return ERROR(resp, 500, "Script "+name+": exceeded max time. Killed!");
+                            ERROR(ctx, 500, "Script "+name+": exceeded max time. Killed!");
                         else
-                            return res+": "+runner.getText();
+                            ctx.result(res+": "+runner.getText());
                     }
                 }
                 
             } catch (Exception e1) { 
                 e1.printStackTrace(System.out);
-                return ERROR(resp, 500, "Script "+name+": "+e1.getMessage()); 
+                ERROR(ctx, 500, "Script "+name+": "+e1.getMessage()); 
             }
         });
         

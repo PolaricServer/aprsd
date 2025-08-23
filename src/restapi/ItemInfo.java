@@ -1,6 +1,6 @@
 
 
-package no.polaric.aprsd.http;
+package no.polaric.aprsd;
  
 public interface ItemInfo {
 

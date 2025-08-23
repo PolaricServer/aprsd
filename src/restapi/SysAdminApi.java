@@ -12,14 +12,14 @@
  * GNU General Public License for more details.
  */
  
-
-package no.polaric.aprsd.http;
-import spark.Request;
-import spark.Response;
-import spark.route.Routes;
-import static spark.Spark.get;
-import static spark.Spark.put;
-import static spark.Spark.*;
+package no.polaric.aprsd;
+import no.polaric.aprsd.point.*;
+import no.polaric.aprsd.channel.*;
+import no.arctic.core.*;
+import no.arctic.core.httpd.*;
+import no.arctic.core.auth.*;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
 import java.util.*; 
 import java.io.*;
 import java.util.stream.*;
@@ -43,9 +43,9 @@ public class SysAdminApi extends ServerBase {
     }
     
     
-    private ServerAPI _api; 
+    private AprsServerAPI _api; 
     
-    public SysAdminApi(ServerAPI api) {
+    public SysAdminApi(AprsServerAPI api) {
         super(api);
         _api = api;
     }
@@ -192,7 +192,7 @@ public class SysAdminApi extends ServerBase {
         String authkey
     ) 
     {
-        public ServerConfig(ServerAPI api) {
+        public ServerConfig(AprsServerAPI api) {
             this (
                 api.getProperty("default.mycall", "NOCALL"),
                 api.getBoolProperty("igate.on", false),
@@ -210,7 +210,7 @@ public class SysAdminApi extends ServerBase {
             );
         }
         
-        public void save(ServerAPI api) {
+        public void save(AprsServerAPI api) {
             Properties  prop = api.getConfig();
             prop.setProperty("default.mycall", mycall);
             prop.setProperty("igate.on", ""+igate);
@@ -243,7 +243,7 @@ public class SysAdminApi extends ServerBase {
         int minpause, int maxpause, int mindist, int maxturn
     ) 
     {
-        public OwnPos(ServerAPI api) {
+        public OwnPos(AprsServerAPI api) {
             this (
                 api.getBoolProperty("ownposition.tx.on", false),
                 api.getBoolProperty("ownposition.tx.allowrf", false),
@@ -263,7 +263,7 @@ public class SysAdminApi extends ServerBase {
             );
         } 
         
-        public void save(ServerAPI api) {
+        public void save(AprsServerAPI api) {
             Properties  prop = api.getConfig();
             prop.setProperty("ownposition.tx.on", ""+txon);
             prop.setProperty("ownposition.tx.allowrf", ""+allowrf);
@@ -289,9 +289,11 @@ public class SysAdminApi extends ServerBase {
      * Return an error status message to client. 
      * FIXME: Move to superclass. 
      */
-    public String ERROR(Response resp, int status, String msg)
-      { resp.status(status); return msg; }
+    public Object ERROR(Context ctx, int status, String msg)
+      { ctx.status(status); ctx.result(msg); return null;}
       
+ 
+ 
       
     private Date _time = new Date();
     
@@ -300,15 +302,17 @@ public class SysAdminApi extends ServerBase {
      * Set up the webservices. 
      */
     public void start() {     
-    
+            
+        protect("/system/adm/*", "admin");
+            
         /******************************************
          * Restart server program
          ******************************************/
-        put("/system/adm/restart", (req, resp) -> {
+        a.put("/system/adm/restart", (ctx) -> {
             ProcessBuilder pb = new ProcessBuilder("/usr/bin/sudo", "-n", "/usr/bin/polaric-restart");
             pb.inheritIO();
             pb.start(); 
-            return "Ok";
+            ctx.result("Ok");
         });     
              
              
@@ -316,7 +320,7 @@ public class SysAdminApi extends ServerBase {
         /******************************************
          * Get system status info
          ******************************************/
-        get("/system/adm/status", "application/json", (req, resp) -> {
+        a.get("/system/adm/status", (ctx) -> {
             SysInfo res = new SysInfo();
             res.runsince = _time;
             res.version = _api.getVersion();
@@ -336,23 +340,22 @@ public class SysAdminApi extends ServerBase {
             RemoteCtl rctl = _api.getRemoteCtl(); 
             res.remotectl = (rctl == null ? "" : rctl.toString());
             
-            return res;
-        }, ServerBase::toJson );
+            ctx.json(res);
+        });
         
         
         
         /******************************************
          * Get clients
          ******************************************/
-        get("/system/adm/clients", (req, resp) -> {
-            WebServer ws = (WebServer) _api.getWebserver();
+        a.get("/system/adm/clients", (ctx) -> {
+            MyWebServer ws = (MyWebServer) _api.getWebserver();
             List<ClientInfo> res = new ArrayList<ClientInfo>();
             
             for ( WsNotifier.Client x : ws.getJsonMapUpdater().clients())
-                res.add(new ClientInfo(x.created(), x.getUid(), x.nIn(), x.nOut(), x.getUsername(), x.isMobile()));
-            
-            return res;
-        }, ServerBase::toJson );
+                res.add(new ClientInfo(x.created(), x.uid(), x.nIn(), x.nOut(), x.userName(), x.isMobile()));
+            ctx.json(res);
+        });
         
         
         
@@ -360,10 +363,10 @@ public class SysAdminApi extends ServerBase {
         /******************************************
          * Get server config
          ******************************************/
-        get("/system/adm/server", (req, resp) -> {
+        a.get("/system/adm/server", (ctx) -> {
             ServerConfig conf = new ServerConfig(_api);
-            return conf;
-        }, ServerBase::toJson );
+            ctx.json(conf);
+        });
                 
         
         
@@ -371,32 +374,32 @@ public class SysAdminApi extends ServerBase {
         /******************************************
          * Update server config
          ******************************************/
-        put("/system/adm/server", (req, resp) -> {
-            ServerConfig conf = (ServerConfig) ServerBase.fromJson(req.body(), ServerConfig.class);
+        a.put("/system/adm/server", (ctx) -> {
+            ServerConfig conf = (ServerConfig) ServerBase.fromJson(ctx.body(), ServerConfig.class);
             conf.save(_api);
             // FIXME: Make sure server reboots/reloads settings
-            return "Ok";
+            ctx.result("Ok");
         });
         
         
         /******************************************
          * Get server config - own position
          ******************************************/
-        get("/system/adm/ownpos", (req, resp) -> {
+        a.get("/system/adm/ownpos", (ctx) -> {
             OwnPos conf = new OwnPos(_api);
-            return conf;
-        }, ServerBase::toJson );
+            ctx.json(conf);
+        });
                 
            
            
         /******************************************
          * Update server config
          ******************************************/
-        put("/system/adm/ownpos", (req, resp) -> {
-            OwnPos conf = (OwnPos) ServerBase.fromJson(req.body(), OwnPos.class);
+        a.put("/system/adm/ownpos", (ctx) -> {
+            OwnPos conf = (OwnPos) ServerBase.fromJson(ctx.body(), OwnPos.class);
             conf.save(_api);
             // FIXME: Make sure server reboots/reloads settings
-            return "Ok";
+            ctx.result("Ok");
         });
         
         
@@ -404,7 +407,7 @@ public class SysAdminApi extends ServerBase {
         /******************************************
          * Get server config - get channel names
          ******************************************/
-        get("/system/adm/channels", (req, resp) -> {
+        a.get("/system/adm/channels", (ctx) -> {
             Set<String> chans = _api.getChanManager().getKeys();
             List<ChannelInfo> res = new ArrayList<ChannelInfo>();
             for (String chn:  _api.getChanManager().getKeys()) {
@@ -416,51 +419,53 @@ public class SysAdminApi extends ServerBase {
                    new GenChanInfo(_api, ch), 
                    ch.getJsConfig()));
             }
-            return res;
-        }, ServerBase::toJson );
+            ctx.json(res);
+        });
         
             
        /******************************************
         * Return list of connected clients
         ******************************************/
-        get("/system/adm/channels/*/clients", (req, resp) -> {
-            var chname = req.splat()[0];
+        a.get("/system/adm/channels/{ch}/clients", (ctx) -> {
+            var chname = ctx.pathParam("ch");
             Channel.Manager mgr = _api.getChanManager(); 
             Channel ch = mgr.get(chname);
-            if (ch==null)
-                return ERROR(resp, 404, "Channel not found: "+chname);
-            
+            if (ch==null) {
+                ERROR(ctx, 404, "Channel not found: "+chname);
+                return;
+            }
             List<InetSrvClient.Info> res = new ArrayList<InetSrvClient.Info>();
             if (ch instanceof InetSrvChannel ich) {
                 for (InetSrvClient x: ich.getClients())
                     res.add(x.getInfo());
-                return res;
+                ctx.json(res);
             }
             else
-                return ERROR(resp, 400, "Invalid channel type: "+chname);
-        }, ServerBase::toJson );
+                ERROR(ctx, 400, "Invalid channel type: "+chname);
+        });
         
         
         
         /******************************************
          * Get server config - get channel
          ******************************************/
-        get("/system/adm/channels/*", (req, resp) -> {
-            var chname = req.splat()[0];
+        a.get("/system/adm/channels/{ch}", (ctx) -> {
+            var chname = ctx.pathParam("ch");
             Channel.Manager mgr = _api.getChanManager(); 
             Channel ch = mgr.get(chname);
             if (ch==null)
-                return ERROR(resp, 404, "Channel not found: "+chname);
-                
-            return new ChannelInfo(
-                ch.getIdent(), 
-                _api.getBoolProperty("channel."+ch.getIdent()+".on", false),  
-                ch==_api.getRfChannel(), ch==_api.getInetChannel(), ch.isRf(), 
-                ch instanceof AprsChannel, 
-                new GenChanInfo(_api, ch), 
-                ch.getJsConfig()
-            );
-        }, ServerBase::toJson );
+                ERROR(ctx, 404, "Channel not found: "+chname);
+            else    
+                ctx.json(
+                    new ChannelInfo(
+                        ch.getIdent(), 
+                        _api.getBoolProperty("channel."+ch.getIdent()+".on", false),  
+                        ch==_api.getRfChannel(), ch==_api.getInetChannel(), ch.isRf(), 
+                        ch instanceof AprsChannel, 
+                        new GenChanInfo(_api, ch), 
+                        ch.getJsConfig()
+                    ));
+        });
     
         
 
@@ -468,26 +473,27 @@ public class SysAdminApi extends ServerBase {
        /******************************************
         * Update channel
         ******************************************/
-        put("/system/adm/channels/*", (req, resp) -> {
+        a.put("/system/adm/channels/{ch}", (ctx) -> {
         try {
-            var chname = req.splat()[0];
+            var chname = ctx.pathParam("ch");
             var mgr = _api.getChanManager(); 
             var ch = mgr.get(chname);
-            if (ch==null)
-                return ERROR(resp, 404, "Channel not found: "+chname);
-
-            ChannelInfo conf = (ChannelInfo) ServerBase.fromJson(req.body(), ChannelInfo.class);
+            if (ch==null) {
+                ERROR(ctx, 404, "Channel not found: "+chname);
+                return; 
+            }
+            ChannelInfo conf = (ChannelInfo) ServerBase.fromJson(ctx.body(), ChannelInfo.class);
             if (conf==null)
-                return ERROR(resp, 400, "Couldn't parse input");  
-                
-            setChannelProps(ch, conf, null);
-            return "Ok";
+                ERROR(ctx, 400, "Couldn't parse input");  
+            else {     
+                setChannelProps(ch, conf, null);
+                ctx.result("Ok");
+            }
             
         } catch (Exception e ) {
              e.printStackTrace(System.out);
-             return ERROR(resp, 500, "ERRROR: "+e.getMessage());  
+             ERROR(ctx, 500, "ERRROR: "+e.getMessage());  
         }
-        
         });
     
     
@@ -495,26 +501,30 @@ public class SysAdminApi extends ServerBase {
        /******************************************
         * Add a channel
         ******************************************/
-        post("/system/adm/channels", (req, resp) -> {
+        a.post("/system/adm/channels", (ctx) -> {
         try {
-            ChannelInfo conf = (ChannelInfo) ServerBase.fromJson(req.body(), ChannelInfo.class);
-            if (conf==null)
-                return ERROR(resp, 400, "Couldn't parse input");
-                
+            ChannelInfo conf = (ChannelInfo) ServerBase.fromJson(ctx.body(), ChannelInfo.class);
+            if (conf==null) {
+                ERROR(ctx, 400, "Couldn't parse input");
+                return;
+            }
+            
             String tname=conf.specific.type;
             var chmgr = _api.getChanManager();
             var ch = chmgr.newInstance(_api, tname, conf.name);
             if (ch==null)
-                return ERROR(resp, 400, "Couldn't instantiate channel: "+tname+": "+conf.name);
-            setChannelProps(ch, conf, tname);
-            if (ch instanceof AprsChannel ach)
-                ach.addReceiver(_api.getAprsParser());
-            updateChanList();
-            return "Ok";
+                ERROR(ctx, 400, "Couldn't instantiate channel: "+tname+": "+conf.name);
+            else {
+                setChannelProps(ch, conf, tname);
+                if (ch instanceof AprsChannel ach)
+                    ach.addReceiver(_api.getAprsParser());
+                updateChanList();
+                ctx.result("Ok");
+            }
             
         } catch (Exception e ) {
              e.printStackTrace(System.out);
-             return ERROR(resp, 500, "ERRROR: "+e.getMessage());  
+             ERROR(ctx, 500, "ERROR: "+e.getMessage());  
         }    
             
         });  
@@ -524,23 +534,26 @@ public class SysAdminApi extends ServerBase {
        /******************************************
         * Remove a channel and its config
         ******************************************/
-        delete("/system/adm/channels/*", (req, resp) -> {
+        a.delete("/system/adm/channels/{ch}", (ctx) -> {
             try {
-            var chname = req.splat()[0];
-            var mgr = _api.getChanManager(); 
-            var ch = mgr.get(chname);
-            if (ch==null)
-                return ERROR(resp, 404, "Channel not found: "+chname);
-            ch.deActivate();
-            removeChannelConfig(ch);
-            mgr.removeInstance(chname);
-            updateChanList();
+                var chname = ctx.pathParam("ch");
+                var mgr = _api.getChanManager(); 
+                var ch = mgr.get(chname);
+                if (ch==null) {
+                    ERROR(ctx, 404, "Channel not found: "+chname);
+                    return;
+                }
+                ch.deActivate();
+                removeChannelConfig(ch);
+                mgr.removeInstance(chname);
+                updateChanList();
             
             } catch (Exception e) {
                 e.printStackTrace(System.out);
-                return ERROR(resp, 500, "ERRRROR");  
+                ERROR(ctx, 500, "ERROR");  
+                return;
             }
-            return "Ok";
+            ctx.result("Ok");
         });
         
     }

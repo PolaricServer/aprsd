@@ -13,17 +13,17 @@
  */
 
 
-package no.polaric.aprsd.http;
-import spark.Request;
-import spark.Response;
-import spark.route.Routes;
-import static spark.Spark.get;
-import static spark.Spark.put;
-import static spark.Spark.*;
-import java.util.*; 
-import no.polaric.aprsd.*;
+package no.polaric.aprsd;
+import no.polaric.aprsd.point.*;
 import no.polaric.aprsd.filter.*;
-import org.pac4j.core.profile.CommonProfile;
+import no.arctic.core.*;
+import no.arctic.core.httpd.*;
+import no.arctic.core.auth.*;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
+import java.util.*; 
+import java.io.*;
+
 
 
 /**
@@ -31,7 +31,7 @@ import org.pac4j.core.profile.CommonProfile;
  */
 public class UserApi extends ServerBase {
 
-    private ServerAPI _api; 
+    private AprsServerAPI _api; 
     
     
     public static class GroupInfo {
@@ -53,15 +53,15 @@ public class UserApi extends ServerBase {
         public String name, callsign;
         public String group="DEFAULT";
         public String altgroup="DEFAULT";
-        public boolean sar, admin, suspend; 
+        public boolean operator, admin, suspend; 
         public String passwd;
         public UserInfo() {}
         public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a, boolean u)
-           { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; suspend=u; }
+           { ident = id; lastused = lu; name=n; callsign=c; operator=s; admin=a; suspend=u; }
         public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a, boolean u, String tr)
-           { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; suspend=u; group=tr;}   
+           { ident = id; lastused = lu; name=n; callsign=c; operator=s; admin=a; suspend=u; group=tr;}   
         public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a, boolean u, String tr, String tr2)
-           { ident = id; lastused = lu; name=n; callsign=c; sar=s; admin=a; suspend=u; group=tr; altgroup=tr2;}   
+           { ident = id; lastused = lu; name=n; callsign=c; operator=s; admin=a; suspend=u; group=tr; altgroup=tr2;}   
     }
 
     
@@ -70,10 +70,10 @@ public class UserApi extends ServerBase {
         public String group;
         public String altgroup;
         public String passwd;
-        public boolean sar, admin, suspend;
+        public boolean operator, admin, suspend;
         public UserUpdate() {}
         public UserUpdate(String n, String c, String g, String p, boolean s, boolean a, boolean u) 
-            { name=n; callsign=c; group=g; passwd=p; sar=s; admin=a; suspend=u; }
+            { name=n; callsign=c; group=g; passwd=p; operator=s; admin=a; suspend=u; }
     }
     
     
@@ -93,12 +93,12 @@ public class UserApi extends ServerBase {
     
     
     
-    public UserApi(ServerAPI api,  UserDb u, GroupDb g) {
+    public UserApi(AprsServerAPI api,  UserDb u, GroupDb g) {
         super(api);
         _api = api;
         _users = u;
         _groups = g; 
-        _psub = (no.polaric.aprsd.http.PubSub) _api.getWebserver().getPubSub();
+        _psub = (PubSub) api.getWebserver().pubSub();
     }
     
     
@@ -107,9 +107,8 @@ public class UserApi extends ServerBase {
      * Return an error status message to client. 
      * FIXME: Move to superclass. 
      */
-    public String ERROR(Response resp, int status, String msg)
-      { resp.status(status); return msg; }
-      
+    public void ERROR(Context ctx, int status, String msg)
+      { ctx.status(status); ctx.result(msg); }
       
     /** 
      * Get user info for serialising as JSON 
@@ -119,23 +118,9 @@ public class UserApi extends ServerBase {
             return null;
         String name = "";           
         return new UserInfo(u.getIdent(), u.getLastUsed(), u.getName(), 
-            u.getCallsign(), u.isSar(), u.isAdmin(), u.isSuspended(), u.getGroup().getIdent(), u.getAltGroup().getIdent() );    
+            u.getCallsign(), u.isOperator(), u.isAdmin(), u.isSuspended(), u.getGroup().getIdent(), u.getAltGroup().getIdent() );    
     }
     
-
-    
-    protected boolean groupAllowed(Group g, User u, boolean includedef) {
-        if (u==null)
-            return false;
-        String group =  u.getGroup().getIdent();
-        String altgroup =  u.getAltGroup().getIdent();
-        boolean usealt = (!includedef && altgroup.equals("DEFAULT"));
-        
-        return  u.isAdmin() 
-                    || g.getIdent().equals(group) 
-                    || usealt && g.getIdent().equals(altgroup) 
-                    || (includedef && g.getIdent().equals("DEFAULT"));
-    }
     
     
     
@@ -145,39 +130,48 @@ public class UserApi extends ServerBase {
      */
     public void start() {     
        
+        protect("/myfilters");
+        protect("/mypasswd");
+        protect("/loginusers");
+        protect("/usernames");
+        protect("/users",  "admin");
+        protect("/users/*","admin");
+        
         /************************************************
          * Get list of filter profiles.
          * /myfilters requires login
          ************************************************/
          
-        get ("/filters", "application/json", (req, resp) -> {
-            return ViewFilter.getFilterList(false, null);
-        }, ServerBase::toJson);
+        a.get ("/filters", (ctx) -> {
+            ctx.json(ViewFilter.getFilterList(false, null));
+        });
 
         
-        get ("/myfilters", "application/json", (req, resp) -> {
-            AuthInfo auth = getAuthInfo(req);
-            return ViewFilter.getFilterList(auth.userid !=null, auth.groupid);
-        }, ServerBase::toJson);
+        a.get ("/myfilters", (ctx) -> {
+            AuthInfo auth = getAuthInfo(ctx);
+            ctx.json(ViewFilter.getFilterList(auth.userid !=null, auth.groupid));
+        });
        
        
        
         /************************************************
          * Update user's password.
          ************************************************/
-        put("/mypasswd", (req, resp) -> {
-            var uid = getAuthInfo(req).userid; 
+        a.put("/mypasswd", (ctx) -> {
+            var uid = getAuthInfo(ctx).userid; 
             User u = _users.get(uid);
-            if (u==null)
-                return ERROR(resp, 404, "Unknown user: "+uid);
+            if (u==null) {
+                ERROR(ctx, 404, "Unknown user: "+uid);
+                return;
+            }
             var pwd = (PasswdUpdate) 
-                ServerBase.fromJson(req.body(), PasswdUpdate.class);
+                ServerBase.fromJson(ctx.body(), PasswdUpdate.class);
                 
             if (pwd.passwd != null) 
                     u.setPasswd(pwd.passwd);
             _users.getSyncer().update(uid, new UserUpdate
-                (null, null, null, pwd.passwd, u.isAdmin(), u.isSar(), u.isSuspended())); 
-            return "Ok";
+                (null, null, null, pwd.passwd, u.isAdmin(), u.isOperator(), u.isSuspended())); 
+            ctx.result("Ok");
         });
         
         
@@ -185,76 +179,55 @@ public class UserApi extends ServerBase {
         /************************************************
          * Get logged in users (list of usernames).
          ************************************************/
-        get("/loginusers", "application/json", (req, resp) -> {
+        a.get("/loginusers", (ctx) -> {
             List<String> us = new ArrayList<String>(); 
-            for (String name : ((WebServer)_api.getWebserver()).getLoginUsers())
+            for (String name : ((WebServer)_api.getWebserver()).loginUsers())
                 us.add(name);
-            if (_api.getRemoteCtl() == null)
-                return us; 
-            for (String name: _api.getRemoteCtl().getUsers())
-                us.add(name);
-                
-            return us;
-        }, ServerBase::toJson );
-        
-        
-        
-        /******************************************
-         * Get a list of groups. 
-         ******************************************/
-        get("/groups", "application/json", (req, resp) -> {
-            List<GroupInfo> gl = new ArrayList<GroupInfo>();
-            
-            var uid = getAuthInfo(req).userid; 
-            User u = _users.get(uid);
-     
-            for (Group g: _groups.getAll())  
-                gl.add(new GroupInfo(g.getIdent(), g.getName(), 
-                  groupAllowed(g, u,false) ));
-   
-            _psub.createRoom("auth:"+uid, null);
-            return gl;
-        }, ServerBase::toJson );
+            if (((AprsServerAPI)_api).getRemoteCtl() != null) 
+                for (String name: ((AprsServerAPI)_api).getRemoteCtl().getUsers())
+                    us.add(name);
+            ctx.json(us);
+        });
         
         
         
         /******************************************
          * Get a list of users. 
          ******************************************/
-        get("/usernames", "application/json", (req, resp) -> {
+        a.get("/usernames", (ctx) -> {
             List<String> ul = new ArrayList<String>();
             for (User u: _users.getAll())  
                ul.add(u.getIdent());
-    
-            return ul;
-        }, ServerBase::toJson );
+            ctx.json(ul);
+        });
         
         
         
         /******************************************
          * Get a list of users. 
          ******************************************/
-        get("/users", "application/json", (req, resp) -> {
+        a.get("/users", (ctx) -> {
             List<UserInfo> ul = new ArrayList<UserInfo>();
             for (User u: _users.getAll())  
                ul.add(getUser(u));
-    
-            return ul;
-        }, ServerBase::toJson );
+            ctx.json(ul);
+        });
         
         
         
         /*******************************************
          * Add user
          *******************************************/
-        post("/users", (req, resp) -> {
+        a.post("/users", (ctx) -> {
             var u = (UserInfo) 
-                ServerBase.fromJson(req.body(), UserInfo.class);
+                ServerBase.fromJson(ctx.body(), UserInfo.class);
 
-            if (_users.add(u.ident, u.name, u.sar, u.admin, u.suspend, u.passwd, u.group, u.altgroup)==null) 
-                return ERROR(resp, 400, "Probable cause: User exists");
+            if (_users.add(u.ident, u.name, u.admin, u.suspend, u.passwd, u.group, u.altgroup)==null) {
+                ERROR(ctx, 400, "Probable cause: User exists");
+                return;
+            }
             _users.getSyncer().add(u.ident, u);
-            return "Ok";
+            ctx.result("Ok");
         });
         
                 
@@ -263,43 +236,52 @@ public class UserApi extends ServerBase {
         /*******************************************
          * Get info about a given user.
          *******************************************/
-        get("/users/*", "application/json", (req, resp) -> {
-            var ident = req.splat()[0];
+        a.get("/users/{id}", (ctx) -> {
+            var ident = ctx.pathParam("id");
             User u = _users.get(ident);
-            if (u==null)
-                return ERROR(resp, 404, "Unknown user: "+ident);
-            return getUser(u);
-        }, ServerBase::toJson );
+            if (u==null) 
+                ERROR(ctx, 404, "Unknown user: "+ident);
+            else
+                ctx.json(getUser(u));
+        });
         
         
     
         /*******************************************
          * Update user
          *******************************************/
-        put("/users/*", (req, resp) -> {
-            var ident = req.splat()[0];        
+        a.put("/users/{id}", (ctx) -> {
+            var ident = ctx.pathParam("id");  
             User u = _users.get(ident);
             
-            if (u==null)
-                return ERROR(resp, 404, "Unknown user: "+ident);
+            if (u==null) {
+                ERROR(ctx, 404, "Unknown user: "+ident);
+                return;
+            }
             var uu = (UserUpdate) 
-                ServerBase.fromJson(req.body(), UserUpdate.class);
-            if (uu==null)
-                return ERROR(resp, 400, "Cannot parse input");
-                
+                ServerBase.fromJson(ctx.body(), UserUpdate.class);
+            if (uu==null) {
+                ERROR(ctx, 400, "Cannot parse input");
+                return;
+            }    
             if (uu.group != null) {
                 Group g = _groups.get(uu.group);
-                if (g==null)
-                    return ERROR(resp, 404, "Unknown group: "+uu.group);
+                if (g==null) {
+                    ERROR(ctx, 404, "Unknown group: "+uu.group);
+                    return;
+                }
             }    
             if (uu.altgroup != null) {
                 Group g = _groups.get(uu.altgroup);
-                if (g==null)
-                    return ERROR(resp, 404, "Unknown alt group: "+uu.altgroup);
+                if (g==null) {
+                    ERROR(ctx, 404, "Unknown alt group: "+uu.altgroup);
+                    return;
+                }
             } 
-            if (uu.callsign != null && !uu.callsign.equals("") && _api.getMsgProcessor().getMycall().equals(uu.callsign))
-                return ERROR(resp, 400, "Cannot use the same callsign as this server: "+ uu.callsign);
-            
+            if (uu.callsign != null && !uu.callsign.equals("") && ((AprsServerAPI)_api).getMsgProcessor().getMycall().equals(uu.callsign)) {
+                ERROR(ctx, 400, "Cannot use the same callsign as this server: "+ uu.callsign);
+                return;
+            }
             if (uu.group != null)
                 u.setGroup(_groups.get(uu.group)); 
             if (uu.altgroup != null)
@@ -310,11 +292,11 @@ public class UserApi extends ServerBase {
                 u.setCallsign(uu.callsign);
             if (uu.passwd != null) 
                 u.setPasswd(uu.passwd);    
-            u.setSar(uu.sar);
+ //           u.setOperator(uu.operator);
             u.setAdmin(uu.admin);
             u.setSuspended(uu.suspend);
             _users.getSyncer().update(ident, uu);
-            return "Ok";
+            ctx.result("Ok");
         });
         
 
@@ -322,11 +304,11 @@ public class UserApi extends ServerBase {
         /*******************************************
          * Delete user
          *******************************************/
-        delete("/users/*", (req, resp) -> {
-            var ident = req.splat()[0];  
+        a.delete("/users/{id}", (ctx) -> {
+            var ident = ctx.pathParam("id"); 
             _users.remove(ident);
             _users.getSyncer().remove(ident);
-            return "Ok";
+            ctx.result("Ok");
         });
         
         

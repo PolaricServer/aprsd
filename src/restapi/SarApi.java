@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2020-2023 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2020-2025 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,16 +12,18 @@
  * GNU General Public License for more details.
  */
 
-
-package no.polaric.aprsd.http;
-import spark.Request;
-import spark.Response;
-import spark.route.Routes;
-import static spark.Spark.get;
-import static spark.Spark.put;
-import static spark.Spark.*;
+package no.polaric.aprsd;
+import no.polaric.aprsd.point.*;
+import no.polaric.aprsd.filter.*;
+import no.arctic.core.*;
+import no.arctic.core.httpd.*;
+import no.arctic.core.auth.*;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
 import java.util.*; 
-import no.polaric.aprsd.*;
+import java.io.*;
+
+
 
 /**
  * Implement REST API for user-related info. 
@@ -97,49 +99,58 @@ public class SarApi extends ServerBase {
     }
     
     
-    
     /** 
      * Return an error status message to client. 
      * FIXME: Move to superclass. 
      */
-    public String ERROR(Response resp, int status, String msg)
-      { resp.status(status); return msg; }
-      
-
+    public void ERROR(Context ctx, int status, String msg)
+      { ctx.status(status); ctx.result(msg); }
+    
+    
+    
     
     /** 
      * Set up the webservices. 
      */
     public void start() {     
         
+        protect("sar/ipp");
+        
         /******************************************
          * Get a list of IPPs for a user 
          ******************************************/
-        get("/sar/ipp", "application/json", (req, resp) -> {
-            var auth = getAuthInfo(req); 
-            if (auth == null)
-                return ERROR(resp, 500, "No authorization info found");
+        a.get("/sar/ipp", (ctx) -> {
+            var auth = getAuthInfo(ctx); 
+            if (auth == null) {
+                ERROR(ctx, 500, "No authorization info found");
+                return;
+            }
             var list = getIppList(auth.userid); 
             if (list==null)
-                return ERROR(resp, 404, "Not found");
-            return list;
-        }, ServerBase::toJson );
+                ERROR(ctx, 404, "Not found");
+            else
+                ctx.json(list);
+        });
         
                 
         
         /*******************************************
          * Add a IPP 
          *******************************************/
-        post("/sar/ipp", (req, resp) -> {
-            var auth = getAuthInfo(req); 
-            if (auth == null)
-                return ERROR(resp, 500, "No authorization info found");
+        a.post("/sar/ipp", (ctx) -> {
+            var auth = getAuthInfo(ctx); 
+            if (auth == null) {
+                ERROR(ctx, 500, "No authorization info found");
+                return;
+            }
             var ipp = (IppInfo) 
-                ServerBase.fromJson(req.body(), IppInfo.class);       
-            if (ipp==null)
-                return ERROR(resp, 400, "Cannot parse input");   
+                ServerBase.fromJson(ctx.body(), IppInfo.class);       
+            if (ipp==null) {
+                ERROR(ctx, 400, "Cannot parse input");   
+                return;
+            }
             var ident = addIpp(auth.userid, ipp);
-            return ident;
+            ctx.result(ident);
         });
         
         
@@ -147,34 +158,40 @@ public class SarApi extends ServerBase {
         /*******************************************
          * Get a specific IPP
          *******************************************/
-        get("/sar/ipp/*", "application/json", (req, resp) -> {
-            var ident = req.splat()[0];
-            var auth = getAuthInfo(req); 
-            if (auth == null)
-                return ERROR(resp, 500, "No authorization info found");
+        a.get("/sar/ipp/{id}", (ctx) -> {
+            var ident = ctx.pathParam("id");
+            var auth = getAuthInfo(ctx); 
+            if (auth == null) {
+                ERROR(ctx, 500, "No authorization info found");
+                return;
+            }
             var ipp = getIpp(auth.userid, ident);
             if (ipp==null)
-                return ERROR(resp, 404, "Not found");
-            return ipp;
-        }, ServerBase::toJson );
+                ERROR(ctx, 404, "Not found");
+            else 
+                ctx.json(ipp);
+        });
         
         
         
         /*******************************************
          * Update a IPP 
          *******************************************/
-        put("/sar/ipp/*", (req, resp) -> { 
-            var ident = req.splat()[0];
-            var auth = getAuthInfo(req); 
-            if (auth == null)
-                return ERROR(resp, 500, "No authorization info found");
+        a.put("/sar/ipp/{id}", (ctx) -> { 
+            var ident = ctx.pathParam("id");
+            var auth = getAuthInfo(ctx); 
+            if (auth == null) {
+                ERROR(ctx, 500, "No authorization info found");
+                return;
+            }
             var ipp = (IppInfo) 
-                ServerBase.fromJson(req.body(), IppInfo.class);
+                ServerBase.fromJson(ctx.body(), IppInfo.class);
             if (ipp==null)
-                return ERROR(resp, 400, "Cannot parse input");   
-            if (!updateIpp(auth.userid, ident, ipp))
-                return ERROR(resp, 404, "Not found");
-            return "Ok";
+                ERROR(ctx, 400, "Cannot parse input");   
+            else if (!updateIpp(auth.userid, ident, ipp))
+                ERROR(ctx, 404, "Not found");
+            else
+                ctx.result("Ok");
         });
         
         
@@ -182,13 +199,15 @@ public class SarApi extends ServerBase {
         /*******************************************
          * Delete a IPP
          *******************************************/
-        delete("/sar/ipp/*", (req, resp) -> {
-            var ident = req.splat()[0];
-            var auth = getAuthInfo(req); 
-            if (auth == null)
-                return ERROR(resp, 500, "No authorization info found");
+        a.delete("/sar/ipp/{id}", (ctx) -> {
+            var ident = ctx.pathParam("id");
+            var auth = getAuthInfo(ctx); 
+            if (auth == null) {
+                ERROR(ctx, 500, "No authorization info found");
+                return;
+            }
             deleteIpp(auth.userid, ident);
-            return "Ok";
+            ctx.result("Ok");
         });
                 
     }

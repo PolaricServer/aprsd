@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2025 by Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,14 +12,13 @@
  * GNU General Public License for more details.
  */
  
-
-package no.polaric.aprsd.http;
-import spark.Request;
-import spark.Response;
-import spark.route.Routes;
-import static spark.Spark.get;
-import static spark.Spark.put;
-import static spark.Spark.*;
+package no.polaric.aprsd;
+import no.polaric.aprsd.point.*;
+import no.arctic.core.*;
+import no.arctic.core.httpd.*;
+import no.arctic.core.auth.*;
+import io.javalin.Javalin;
+import io.javalin.http.Context;
 import java.util.*; 
 import no.polaric.aprsd.*;
 
@@ -28,7 +27,7 @@ import no.polaric.aprsd.*;
  */
 public class BullBoardApi extends ServerBase {
 
-    private ServerAPI _api; 
+    private AprsServerAPI _api; 
     private BullBoard _board;
     
     
@@ -38,7 +37,7 @@ public class BullBoardApi extends ServerBase {
         public String text; 
     }
     
-    public BullBoardApi(ServerAPI api) {
+    public BullBoardApi(AprsServerAPI api) {
         super(api);
         _api = api;
         _board = _api.getBullBoard();
@@ -46,11 +45,14 @@ public class BullBoardApi extends ServerBase {
     
     
     
+    
     /** 
-     * Return an error status message to client 
+     * Return an error status message to client. 
+     * FIXME: Move to superclass. 
      */
-    public String ERROR(Response resp, int status, String msg)
-      { resp.status(status); return msg; }
+    public void ERROR(Context ctx, int status, String msg)
+      { ctx.status(status); ctx.result(msg); }
+      
       
       
     
@@ -59,59 +61,65 @@ public class BullBoardApi extends ServerBase {
      */
     public void start() {     
        
+       protect("/bullboard");
+       
         /* Get names of groups */
-        get("/bullboard/groups", "application/json", (req, resp) -> {
+        a.get("/bullboard/groups", (ctx) -> {
            Set<String> groups = _board.getGroupNames();
-           return groups;
-        }, ServerBase::toJson );
+           ctx.json(groups);
+        });
 
         
         /* 
          * GET /bullboard/<group>/senders 
          * Get callsigns of senders to a group 
          */
-        get("/bullboard/*/senders", "application/json", (req, resp) -> {
-            String sbid = req.splat()[0];
+        a.get("/bullboard/{sbid}/senders", (ctx) -> {
+            String sbid = ctx.pathParam("sbid");
             BullBoard.SubBoard sb = _board.getBulletinGroup(sbid); 
             if (sb==null)
-                return ERROR(resp, 404, "Group '"+sbid+"' not found");
-            return sb.getSenders();
-        }, ServerBase::toJson );
+                ERROR(ctx, 404, "Group '"+sbid+"' not found");
+            else 
+                ctx.json(sb.getSenders());
+        });
         
                 
         /* 
          * GET /bullboard/<group>/messages
          * Get all messages in a group. Note that this returns a list of lists.  
          */
-        get("/bullboard/*/messages", "application/json", (req, resp) -> {
-            String sbid = req.splat()[0];
+        a.get("/bullboard/{sbid}/messages", (ctx) -> {
+            String sbid = ctx.pathParam("sbid");
             BullBoard.SubBoard sb = _board.getBulletinGroup(sbid); 
             if (sb==null)
-                return ERROR(resp, 404, "Group '"+sbid+"' not found");
-            return sb.getAll();
-        }, ServerBase::toJson );
+                ERROR(ctx, 404, "Group '"+sbid+"' not found");
+            else
+                ctx.json(sb.getAll());
+        });
         
         
         /*
          * Submit bulletin.
          */
-        post("/bullboard/*/messages", (req, resp) -> {
-            AuthInfo user = getAuthInfo(req); 
-            String sbid = req.splat()[0];
-            if (user.callsign == null)
-                return ERROR(resp,  403, "No callsign registered for user");
-            
+        a.post("/bullboard/{sbid}/messages", (ctx) -> {
+            AuthInfo user = getAuthInfo(ctx); 
+            String sbid = ctx.pathParam("sbid");
+            if (user.callsign == null) {
+                ERROR(ctx,  403, "No callsign registered for user");
+                return;
+            }
             var b = (BullSubmit) 
-                ServerBase.fromJson(req.body(), BullSubmit.class);
-            if (b==null)
-                return ERROR(resp, 400, "Cannot parse input");
-            
+                ServerBase.fromJson(ctx.body(), BullSubmit.class);
+            if (b==null) {
+                ERROR(ctx, 400, "Cannot parse input");
+                return; 
+            }
             var grp = _board.getBulletinGroup(b.groupid);
             if (grp == null)
                 grp = _board.createBulletinGroup(b.groupid);
                 
             grp.post(user.callsign, b.bullid.charAt(0), b.text);
-            return "Ok"; 
+            ctx.result("Ok"); 
         });
         
 
@@ -119,14 +127,15 @@ public class BullBoardApi extends ServerBase {
          * GET /bullboard/<group>/messages/<sender>
          * Get messages in a group from a given sender 
          */
-        get("/bullboard/*/messages/*", "application/json", (req, resp) -> {
-            String sbid = req.splat()[0];
-            String sender = req.splat()[1]; 
+        a.get("/bullboard/{sbid}/messages/{sender}", (ctx) -> {
+            String sbid = ctx.pathParam("sbid");
+            String sender = ctx.pathParam("sender");
             BullBoard.SubBoard sb = _board.getBulletinGroup(sbid); 
             if (sb==null)
-                return ERROR(resp, 404, "Group '"+sbid+"' not found");
-            return sb.get(sender);
-        }, ServerBase::toJson );
+                ERROR(ctx, 404, "Group '"+sbid+"' not found");
+            else
+                ctx.json(sb.get(sender));
+        });
     }
 
 
