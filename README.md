@@ -57,5 +57,5 @@ Build from the source is done by a plain old makefile (a version 4.0 will use ma
 packages is included. You may use the 'debuild' command.
 
 You will need JDK (Oracle or OpenJDK) version 17 or later. 
-From version 4.0 we move to Javalin for the webserver-part and a webserver-framework is factored out as a separate software component: [arctic-core](https://github.com/PolaricServer/ArcticCore). 
+From version 4.0 we move to Javalin for the webserver-part and a webserver-framework is factored out in a separate software-component: [arctic-core](https://github.com/PolaricServer/Arctic-Core). 
 
