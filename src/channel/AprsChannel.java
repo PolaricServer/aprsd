@@ -1,22 +1,22 @@
 /* 
  * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  */
  
-package no.polaric.aprsd;
+package no.polaric.aprsd.channel;
+import no.polaric.aprsd.*;
 import java.util.*;
 import java.util.regex.*;
 import java.io.*;
-//import se.raek.charset.*;
 import java.text.*;
 import java.lang.reflect.Constructor; 
 
@@ -29,7 +29,7 @@ public abstract class AprsChannel extends Channel
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      private static boolean _logPackets = false; 
      
-     protected ServerAPI _api; 
+     protected AprsServerAPI _api; 
      protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap<String, Heard>();
     
      /* Statistics */
@@ -51,7 +51,7 @@ public abstract class AprsChannel extends Channel
      
      
      
-     public static void init(ServerAPI api) {
+     public static void init(AprsServerAPI api) {
         _logPackets = api.getBoolProperty("channel.logpackets", true);
         canSend = true;
         String myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();

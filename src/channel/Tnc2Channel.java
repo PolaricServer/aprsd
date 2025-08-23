@@ -1,18 +1,19 @@
 /* 
  * Copyright (C) 2020 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  */
  
-package no.polaric.aprsd;
+package no.polaric.aprsd.channel;
+import no.polaric.aprsd.*;
 import java.io.*;
 import java.util.*;
 import gnu.io.*;
@@ -38,12 +39,12 @@ public class Tnc2Channel extends TncChannel
     
 
  
-    public Tnc2Channel(ServerAPI api, String id) 
+    public Tnc2Channel(AprsServerAPI api, String id) 
        { super(api, id); }
        
        
  
-    @Override public void activate(ServerAPI a) {
+    @Override public void activate(AprsServerAPI a) {
        super.activate(a);
        _unproto = _api.getToAddr();  
        _pathCmd = _api.getProperty("channel."+getIdent()+".pathcommand", "UNPROTO");  
