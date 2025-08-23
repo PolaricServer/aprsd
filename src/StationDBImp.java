@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2024 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,6 +13,7 @@
  */
 
 package no.polaric.aprsd;
+import no.polaric.aprsd.point.*;
 import java.util.*;
 import java.io.*;
 import java.util.concurrent.*;
@@ -40,7 +41,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     private RTree<TrackerPoint, Point> _geoindex = RTree.star().maxChildren(6).create();
     
     
-    public StationDBImp(ServerAPI api)
+    public StationDBImp(AprsServerAPI api)
     {
         super(api);
         _file = api.getProperty("stations.file", "stations.dat");

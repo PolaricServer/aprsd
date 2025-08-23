@@ -12,8 +12,9 @@
  * GNU General Public License for more details.
  */
 
-package no.polaric.aprsd.http;
-import no.polaric.aprsd.*;
+package no.polaric.aprsd;
+import no.arctic.core.*;
+import no.arctic.core.httpd.*;
 import java.util.*;
 import java.io.*;
 import java.util.concurrent.*;
@@ -95,7 +96,7 @@ public abstract class MailBox {
     }
  
  
-    protected static ServerAPI _api;
+    protected static AprsServerAPI _api;
     private List<String> _addr = new LinkedList<String>();
     private static Map<String, MailBox> _addressMapping = new HashMap<String, MailBox>();
     private static int _nuserboxes = 0;
@@ -122,7 +123,7 @@ public abstract class MailBox {
         public User(ServerAPI api, String uid) {
             _uid = uid;
             _nuserboxes++;
-            _psub = (no.polaric.aprsd.http.PubSub) _api.getWebserver().getPubSub();
+            _psub = (PubSub) _api.getWebserver().pubSub();
             _psub.createRoom("messages:"+uid, Message.class); 
             _psub.createRoom("msgstatus:"+uid, Status.class);
             _psub.createRoom("msgdelete:"+uid, null);
@@ -210,7 +211,7 @@ public abstract class MailBox {
     public static class Group extends MailBox implements Serializable {
         private List<MailBox> _boxes = new ArrayList<MailBox>(); 
         
-        public Group(ServerAPI api) {
+        public Group(AprsServerAPI api) {
             _api = api;
         }
         
@@ -276,7 +277,7 @@ public abstract class MailBox {
      * STATIC METHODS 
      *******************************************************/
     
-    public static void init(ServerAPI api) {
+    public static void init(AprsServerAPI api) {
         _api = api;
         
         _file = api.getProperty("mailbox.file", "mailbox.dat");
@@ -328,7 +329,7 @@ public abstract class MailBox {
     /**
      * Send a message. 
      */
-    public static boolean postMessage(ServerAPI api, String from, String to, String txt) {
+    public static boolean postMessage(AprsServerAPI api, String from, String to, String txt) {
         return postMessage(api, new Message(from, to, txt));
     }
 
@@ -338,7 +339,7 @@ public abstract class MailBox {
      * Send a message. 
      * Return false if message could not be delivered (unknown to-address). 
      */
-    public static boolean postMessage(ServerAPI api, Message msg) {
+    public static boolean postMessage(AprsServerAPI api, Message msg) {
         if (msg.time==null)
             msg.time = new Date();
             
@@ -374,7 +375,7 @@ public abstract class MailBox {
          */
         MailBox box = _addressMapping.get(msg.to);
         
-        if (box == null && _api.getWebserver().getUserDb().hasUser(msg.to)) {
+        if (box == null && _api.getWebserver().userDb().hasUser(msg.to)) {
             box = new User(_api, msg.to); 
             box.addAddress(msg.to);
         }    
@@ -408,7 +409,7 @@ public abstract class MailBox {
     /**
      * Send message to another server or elsewhere depending on the @-field. 
      */
-    private static boolean postRemoteMessage(ServerAPI api, String[] addr, Message msg) {
+    private static boolean postRemoteMessage(AprsServerAPI api, String[] addr, Message msg) {
     
         if (addr[1].matches("APRS|aprs|Aprs")) {
             /* 

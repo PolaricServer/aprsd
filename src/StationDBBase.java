@@ -13,6 +13,7 @@
  */
 
 package no.polaric.aprsd;
+import no.polaric.aprsd.point.*;
 import java.util.*;
 import java.io.*;
 import java.util.concurrent.*;
@@ -29,10 +30,10 @@ public abstract class StationDBBase
     protected RouteInfo  _routes;
     protected OwnObjects _ownobj; 
     protected StationDB.Hist _histData = null;
-    protected ServerAPI  _api; 
+    protected AprsServerAPI  _api; 
     
     
-    public StationDBBase(ServerAPI api)
+    public StationDBBase(AprsServerAPI api)
     {
         _api = api;
         _routes = new RouteInfo();

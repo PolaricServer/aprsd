@@ -1,6 +1,9 @@
 
-package no.polaric.aprsd.http;
+package no.polaric.aprsd;
+import no.arctic.core.auth.*;
+import no.arctic.core.httpd.*;
 import no.polaric.aprsd.*;
+import no.polaric.aprsd.point.*;
 
 import java.io.*;
 import java.util.*;

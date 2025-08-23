@@ -1,21 +1,24 @@
 /* 
- * Copyright (C) 2017 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  */
 
 
-package no.polaric.aprsd.http;
-import no.polaric.aprsd.*;
-import java.io.*;
+package no.polaric.aprsd;
+import no.arctic.core.*;
+import no.arctic.core.httpd.*;
+import no.polaric.aprsd.point.*;
+import io.javalin.*;
+import io.javalin.websocket.*; 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -30,8 +33,7 @@ import org.eclipse.jetty.websocket.api.UpgradeRequest;
 /**
  * Map overlay updater using Websockets.  
  */
-@WebSocket(maxIdleTime=600000)
-public abstract class MapUpdater extends WsNotifier implements Notifier
+public abstract class MapUpdater extends WsNotifier
 {
 
    
@@ -49,8 +51,9 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
        protected boolean _keep = false;
        protected long    _scale = 0;
               
-       public Client(Session conn) 
-          { super(conn); }
+              
+       public Client(WsContext ctx) 
+          { super(ctx); }
        
        
        /**
@@ -67,7 +70,7 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
        }
        
        
-       /** Returns the overlay. XML format. */
+       /** Returns the overlay. */
        public abstract String getOverlayData(boolean metaonly);
 
        
@@ -76,10 +79,9 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
        
        
        /** Receive text frame from client. */
-       @Override public void onTextFrame(String text) 
+       @Override synchronized public void handleTextFrame(String text) 
        {
-           // FIXME: Use JSON encoding! 
-           _api.log().debug("MapUpdater", "Client "+_uid+": " + text);
+           _api.log().debug("MapUpdater", "Client "+sesId(_ctx)+", userid="+userName()+" : " + text);
            String[] parms = text.split(",");
            /* SUBSCRIBE filter,x1,x2,x3,x4,scale,tag
             * tag is optional
@@ -111,31 +113,32 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
                  _subscribe = true;
                  subscribe(); 
                  
-                 try { sendText(getOverlayData(false) ); }
-                 catch (IOException e) 
-                  {  _api.log().error("MapUpdater", "Couldn't sendtext to client "+_uid+": "+e); }
+                 send(getOverlayData(false) ); 
+               
               }
               else
-                 _api.log().warn("MapUpdater", "SUBSCRIBE command with too few parameters. uid="+_uid); 
+                 _api.log().warn("MapUpdater", "SUBSCRIBE command with too few parameters. uid="+sesId(_ctx)); 
            }
            else if (parms[0].equals("BASELAYER")) {
                   _baseLayer = parms[1];
            }
            else if (!parms[0].equals("****"))
-              _api.log().warn("MapUpdater", "Unknown command from client. uid="+_uid);
+              _api.log().warn("MapUpdater", "Unknown command from client. uid="+sesId(_ctx));
        }   
-   } /* Class client */
+   } 
      
-     
-   private LStatLogger _stats;
+   
+   
+   
+//   private LStatLogger _stats;
    private MapUpdater _link;  
    private Timer hb = new Timer();
    protected long    _updates = 0;
    
           
           
-    public MapUpdater(ServerAPI api, boolean trust) { 
-        super(api, trust); 
+   public MapUpdater(ServerAPI api) { 
+        super(api); 
       
         /* Periodic task to send updates to clients */
         hb.schedule( new TimerTask() 
@@ -148,52 +151,49 @@ public abstract class MapUpdater extends WsNotifier implements Notifier
         /* Periodic task to count usage of map layers */
         hb.schedule( new TimerTask() { 
             public void run() { 
-               if (_stats != null) {
-                  for (String x : _clients.keySet())
-                     _stats.count( ((Client)_clients.get(x))._baseLayer); 
-               }
+         //      if (_stats != null) {
+         //         for (String x : _clients.keySet())
+         //            _stats.count( ((Client)_clients.get(x))._baseLayer); 
+         //      }
             } 
         } , 30000, 60000); 
-    }  
+   }  
     
           
-          
+/*          
     public void setStatLogger(LStatLogger l) {
        _stats = l;
     }
-          
+*/
+
     /**
      * Websocket close handler.
-     */
+     * FIXME can this be removed?
     @OnWebSocketClose
     public void onClose(Session conn, int statusCode, String reason) {
        String user = _getUid(conn);
        _api.log().info("MapUpdater", "Connection closed"+(reason==null ? "" : ": "+reason)+". Unsubscribing user: "+user);
        closeSes(conn);
     }
-
+     */
    
    /** 
      * When opening the websocket, send client an overlay with only metainfo. 
      */
-   @Override public boolean subscribe(String uid, WsNotifier.Client client) 
+   @Override protected boolean subscribe(WsContext ctx, WsNotifier.Client client) 
    {
-       try {
-         client.sendText( ((Client)client).getOverlayData(true) );  
+      client.send( ((Client)client).getOverlayData(true) );  
          
-         /* Update the time of last access for the logged in user */
-         WebServer ws = (WebServer) _api.getWebserver(); 
-         if (client.getUsername() != null)
-             ws.getAuthConfig().getUserDb().get(client.getUsername()).updateTime();
+      /* Update the time of last access for the logged in user. 
+       * FIXME: Move this to PubSub class ? ? 
+       */
+      WebServer ws = (WebServer) _api.getWebserver(); 
+      if (client.userName() != null)
+         ws.userDb().get(client.userName()).updateTime();
          
-         _api.log().info("MapUpdater", "Client added: "+uid+
-                  (client.getUsername() == null ? "" : ", " + client.getUsername()));
-         return true;
-      }
-      catch (IOException e) {
-         _api.log().error("MapUpdater", "Couldn't send text to client "+uid+": "+e);
-         return false;
-      }
+      _api.log().info("MapUpdater", "Client added: "+sesId(ctx)+
+            (client.userName() == null ? "" : ", " + client.userName()));
+      return true;
    }
 
    

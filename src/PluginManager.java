@@ -29,7 +29,7 @@ public class PluginManager
        public String getDescr();
        
        /** Start webservices (REST APIs) */
-       public default void startWebservice(ServerAPI a) {} 
+       public default void startWebservice(AprsServerAPI a) {} 
    }
    
   
@@ -40,7 +40,7 @@ public class PluginManager
     /* Name-Object map (objects posted by plugin to be used by core or other plugins) */
    private static Map<String, Object> _properties = new HashMap<String, Object>();
    
-   private static ServerAPI api;
+   private static AprsServerAPI api;
 
    /* FIXME: Shorter path to get/put methods */
    public static Map<String, Object> properties() 
@@ -67,7 +67,7 @@ public class PluginManager
     * set the api. Must be done at startup of server. 
     * @param a the server interface. 
     */    
-   public static void setServerApi(ServerAPI a)
+   public static void setServerApi(AprsServerAPI a)
      { api = a; }  
      
 

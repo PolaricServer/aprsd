@@ -1,6 +1,22 @@
-
-/* Plugin (in version 1.1+ could inherit this */
+/* 
+ * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ */
+ 
+ 
 package no.polaric.aprsd;
+
+
+
 
 /**
  * Service that can be activated or deactivated. 
@@ -8,7 +24,7 @@ package no.polaric.aprsd;
 public interface ManagedObject
 {
     /** Start the service */
-   public void activate(ServerAPI a);
+   public void activate(AprsServerAPI a);
    
     /** stop the service */
    public void deActivate();

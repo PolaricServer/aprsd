@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,9 +13,11 @@
  */ 
  
 
-package no.polaric.aprsd.http;
-import no.polaric.aprsd.*;
-
+package no.polaric.aprsd;
+import no.arctic.core.httpd.*;
+import no.arctic.core.auth.*;
+import no.polaric.aprsd.point.*;
+import io.javalin.websocket.*; 
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,19 +31,17 @@ import no.polaric.aprsd.filter.*;
 /**
  * Map overlay updater using Websockets.  
  */
-
-@WebSocket(maxIdleTime=600000)
 public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
 {
     int _max_ovr_size = 20000;
-    
+    StationDB _db; 
     
     public class Client extends MapUpdater.Client 
     {
         private Set<String> items = new HashSet<String>(1000);
        
-        public Client(Session conn) 
-            {  super(conn); }
+        public Client(WsContext ctx) 
+            {  super(ctx); }
    
           
         public void subscribe() {
@@ -81,16 +81,16 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
         private void addPoints(JsOverlay mu) 
         {
             /* Output APRS objects */
-            if (_api.getDB() == null)
+            if (_db == null)
                 _api.log().error("JsonMapUpdater", "_api.getDB() returns null");
             else 
             {
                 mu.points = new LinkedList<JsPoint>();
                 mu.delete = new LinkedList<String>();
                 mu.lines = new LinkedList<JsLine>();
-                boolean allowed = (login() && trusted()); 
+                boolean allowed = login(); 
                 RuleSet vfilt = ViewFilter.getFilter(_filter, allowed);      
-                List<TrackerPoint> itemlist =  _api.getDB().search(_uleft, _lright, vfilt);
+                List<TrackerPoint> itemlist =  _db.search(_uleft, _lright, vfilt);
                 if (itemlist.size() > _max_ovr_size) {
                     mu.overload = true;
                     return;
@@ -131,7 +131,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 }
                 
                 /* Add signs to list */
-                for (Signs.Item s: Signs.search(getUsername(), getGroup(), _scale, _uleft, _lright)) {
+                for (Signs.Item s: Signs.search(userName(), group(), _scale, _uleft, _lright)) {
                     JsPoint p = createSign(s); 
                     if (p!=null)
                        mu.points.add(p);
@@ -157,13 +157,19 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             x.title = s.getDescr() == null ? "" : fixText(s.getDescr());
             x.href  = s.getUrl() == null ? "" : s.getUrl();
             x.icon  = "/icons/"+ s.getIcon();
-            x.own   = (getUsername() != null && getUsername().equals(s.getUser()));
+            x.own   = (userName() != null && userName().equals(s.getUser()));
             return x;
         }
         
         
 
-       
+        /* Authorize to do changes on point (item) */
+        public static boolean itemSarAuth(AuthInfo a, PointObject x) {
+            return x.hasTag(a.tagsAuth) || a.admin; 
+        }
+        
+        
+        
         /** Convert Tracker point to JSON point. 
          * Return null if point has no position.  
          */
@@ -175,8 +181,8 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             JsPoint x  = new JsPoint();
             
             /* Indicate if user has authorization to change point. */
-            var ai = getAuthInfo();
-            x.sarAuth = (ai != null && getAuthInfo().itemSarAuth(s)); 
+            var ai = authInfo();
+            x.sarAuth = (ai != null && itemSarAuth(authInfo(), s)); 
             
             x.ident   = s.getIdent();
             x.label   = createLabel(s, action);
@@ -184,7 +190,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             x.title   = s.getDescr() == null ? "" : fixText(s.getDescr()); 
             x.redraw  = s.isChanging();
             x.own     = (s instanceof AprsObject) 
-                        && _api.getDB().getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""));
+                        && _db.getOwnObjects().hasObject(s.getIdent().replaceFirst("@.*",""));
             x.aprs    = (s instanceof AprsPoint); 
             x.telemetry = s.hasTag("APRS.telemetry");
            
@@ -245,12 +251,12 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
            
             for (String f: from)
             {
-                Station p = (Station)_api.getDB().getItem(f, null);
+                Station p = (Station) _db.getItem(f, null);
                 if (p==null || !p.isInside(uleft, lright) || p.expired())
                     continue;
                 
                 LatLng itx = p.getPosition();
-                RouteInfo.Edge e = _api.getDB().getRoutes().getEdge(s.getIdent(), p.getIdent());
+                RouteInfo.Edge e = _db.getRoutes().getEdge(s.getIdent(), p.getIdent());
                 
                 if (itx != null) { 
                     JsLine line = new JsLine(
@@ -269,11 +275,12 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
     
     
    /* Factory method. */
-   @Override public WsNotifier.Client newClient(Session ses) 
-      { return new Client(ses); }
+   @Override public WsNotifier.Client newClient(WsContext ctx) 
+      { return new Client(ctx); }
     
     
-   public JsonMapUpdater(ServerAPI api, boolean trust) { 
-      super(api, trust); 
+   public JsonMapUpdater(AprsServerAPI api) { 
+      super(api); 
+      _db = api.getDB();
    }
 }
