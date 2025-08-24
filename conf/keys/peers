@@ -1,0 +1,5 @@
+#
+# service-name : key
+# All servers that are to share a service need to have the same key
+#
+
