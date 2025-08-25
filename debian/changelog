@@ -1,3 +1,12 @@
+polaric-aprsd (4.0~pre1) UNRELEASED; urgency=medium
+
+  * Initial work on a 4.0 branch
+  * Split out webserver stuff to arctic-core
+  * Some reorganising of source code
+  * Use maven to build
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Mon, 25 Aug 2025 20:50:54 +0200
+
 polaric-aprsd (3.2.2) stable; urgency=medium
 
   * Allow default filter for aprs-is channels

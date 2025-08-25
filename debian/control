@@ -1,14 +1,16 @@
 Source: polaric-aprsd
-Section: hamradio
+Section: java
 Priority: optional
-Maintainer: Øyvind Hanssen <ohanssen@acm.org>
-Build-Depends: debhelper (>= 12), libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, openjdk-17-jdk-headless|openjdk-21-jdk-headless|openjdk-22-jdk-headless, byacc-j, jflex, librxtx-java 
-Standards-Version: 3.9.8
+Maintainer: Øyvind Hanssen <oh@hans.priv.no>
+Uploaders: Øyvind Hanssen <oh@hans.priv.no>
+Build-Depends: debhelper-compat (= 13), default-jdk (>= 1.17), maven-debian-helper (>= 2.6)
+Standards-Version: 4.5.1
 Homepage: http://aprs.no/polaricserver
 
 Package: polaric-aprsd
 Architecture: all
-Depends: openjdk-17-jre-headless|openjdk-21-jre-headless|openjdk-22-jre-headless|openjdk-17-headless|openjdk-21-headless|openjdk-22-headless, libslf4j-java, librxtx-java, libcommons-codec-java, libjackson2-core-java, libjackson2-databind-java, adduser, sudo, openssl, ssl-cert, ${misc:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${misc:Depends}, ${maven:Depends}, adduser
 Conflicts: polaric-database-plugin (<< 3.2), polaric-ais-plugin (<< 3.0) 
 Recommends:
 Suggests: polaric-webapp2 (>= 3.2.2)
@@ -23,3 +25,4 @@ Description: Polaric Server: APRS daemon part.
  present and manipulate the information through a simple HTTP service. 
  The daemon can also be set up as an igate (internet gateway) and can
  be installed independently of the web app. 
+

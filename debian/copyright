@@ -1,37 +1,10 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: polaric-aprsd
+Source: https://github.com/PolaricServer/aprsd
 
+ 
 Files: *
-Copyright: 2014 Øyvind hanssen <ohanssen@acm.org>
-License: GPL-2.0
-(see /usr/share/common-licenses/GPL-2)
-
-Files: debian/*
-Copyright: 2014 Øyvind hanssen <ohanssen@acm.org>
-License: GPL-2.0
-(see /usr/share/common-licenses/GPL-2)
-
-
-Files: lib/jetty-polaric.jar
-Copyright: 2017, Eclipse Jetty Project
-Licence: GPL-2.0 with classpath exception
-Jetty Uber All compilation
-(see /usr/share/common-licenses/GPL-2 and
- https://www.gnu.org/software/classpath/license.html)
-
-
-Files: lib/pac4j-* 
-Copyright: 2012-2017 pac4j organization
-License: Apache-2.0 
-(See http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-
-Files: lib/spark-pac4j* 
-Copyright: 2012-2017 pac4j organization
-License: Apache-2.0 
-(See http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-
-Files: lib/spark-core-*
-Copyright: Per Wendel and others
-Licence: Apache-2.0
-(See http://www.apache.org/licenses/LICENSE-2.0.txt)
+Copyright: 2025, Øyvind hanssen <ohanssen@acm.org>
+License: AGPL-3+
+(see https://www.gnu.org/licenses/agpl-3.0.html#license-text)
 

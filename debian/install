@@ -1,0 +1,4 @@
+lib/*.jar usr/share/polaric/java
+conf/* etc/polaric-aprsd
+conf/keys/* etc/polaric-aprsd/keys
+scripts/* usr/bin

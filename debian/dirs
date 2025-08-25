@@ -1,0 +1,13 @@
+etc/polaric-aprsd
+etc/polaric-aprsd/keys 
+etc/polaric-aprsd/config.d
+etc/polaric-aprsd/plugins
+etc/polaric-aprsd/script-conf.d
+etc/polaric-aprsd/scripts
+var/lib/polaric
+var/lib/polaric/backup
+var/log/polaric
+usr/share/polaric
+usr/share/polaric/java
+usr/share/polaric/plugins
+usr/share/java

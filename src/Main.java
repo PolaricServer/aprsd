@@ -29,7 +29,7 @@ import java.io.*;
 
 public class Main implements AprsServerAPI {
 
-    public  static String version = "4.0test";
+    public  static String version = "4.0~pre1";
     public  static String toaddr  = "APPS40";
     
     private static StationDB db = null;

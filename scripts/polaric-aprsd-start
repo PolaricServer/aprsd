@@ -1,15 +1,14 @@
 #!/bin/bash
 
-
      JLIB=/usr/share/java
      PLIB=/usr/share/polaric/java
   PLUGINS=/usr/share/polaric/plugins
 
-CLASSPATH=$JLIB/commons-daemon.jar:$JLIB/slf4j-api.jar:$JLIB/slf4j-nop.jar:$PLIB/objenesis-polaric.jar:$PLIB/jetty-polaric.jar:$PLIB/spark-core-polaric.jar:$PLIB/polaric-aprsd.jar:$JLIB/RXTXcomm.jar:$PLIB/pac4j-core-polaric.jar:$PLIB/pac4j-http-polaric.jar:$PLIB/pac4j-javaee-polaric.jar:$PLIB/spark-pac4j-polaric.jar:$JLIB/jackson-core.jar:$JLIB/jackson-databind.jar:$JLIB/commons-codec.jar:$PLIB/jmdns-polaric.jar:$PLIB/nano-cuckoo-polaric.jar:$PLIB/lz4-polaric.jar:$PLIB/rtree2-polaric.jar:$PLIB/guava-mini-polaric.jar:$PLUGINS/*
+CLASSPATH="$JLIB/polaric-aprsd.jar:$PLIB/*:$PLUGINS/*"
 
-SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB0:/dev/ttyUSB1:/dev/ttyACM0:/dev/ttyACM1:/dev/rfcomm0:/dev/rfcomm1
+SERIALPORTS="-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB0:/dev/ttyUSB1:/dev/ttyACM0:/dev/ttyACM1:/dev/rfcomm0:/dev/rfcomm1"
 
-      FLAGS=-XX:+AggressiveHeap -Djava.net.preferIPv4Stack=true      
+      FLAGS=-XX:+AggressiveHeap      
      LOGDIR=/var/log/polaric
     CONFDIR=/etc/polaric-aprsd
      WEBDIR=/usr/share/polaric
@@ -21,6 +20,4 @@ SERIALPORTS=-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUSB
   JAVA_ARGS="$FLAGS $SERIALPORTS -Dconfdir=$CONFDIR -Ddatadir=$DATADIR -Dwebdir=$WEBDIR -Dlogdir=$LOGDIR" 
  
  
- exec $JAVA $JAVA_ARGS -cp "$CLASSPATH" no.polaric.aprsd.Main $INIFILE >> $LOGFILE 2>&1 
- 
- 
+exec $JAVA $JAVA_ARGS -classpath $CLASSPATH no.polaric.aprsd.Main $INIFILE >> $LOGFILE 2>&1 
