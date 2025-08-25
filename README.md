@@ -1,4 +1,4 @@
-# Polaric APRSD
+# Polaric APRSD 4
 
 The "Polaric Server" is mainly a web based service to present APRS tracking information on maps and where 
 the information is updated in real-time. It is originally targeted for use by radio amateurs in voluntary 
@@ -18,10 +18,12 @@ http://aprs.no/polaricserver or https://polaricserver.readthedocs.io
 ## Towards version 4
 Work is in progress towards a version 4 with major changes to how it is built and to the structure of the source code. it is my hope that the codebase now will be easier to maintain and develop further. 
 * We use maven for building
-* A part of the codebase, i.e. is factored out to a separate codebase called arctic-core. It contains the webserver and some common stuff. It is the hope that this can be useful in building also other web-server-applications.
-* The webserver part also moves to from spark-java to javalin. 
-* The codebase is also somewhat reorganised. Some sources are moved to subpackages and subdirectories.
+* A part of the codebase, has been factored out to a separate codebase: Arctic-Core. It is a server-framework (mainly contains the webserver stuff). It is the hope that this can be useful in creating also other server-applications.
+* The webserver part (now Arcic-Core) has moved from spark-java to *javalin*. 
+* The codebase is also somewhat reorganised. More source-files are moved to subpackages and subdirectories.
 
-The functionality of this branch is currently rather similar to the main branch. Now we need to do testing and debugging and make sure that everything works. Then, when it is considered stable enough, it will become the main-branch. There may be one more release from the current main-branch (bugfixes, etc)
+The functionality of this branch is currently similar to the *main*-branch. Now we need to do testing and debugging and make sure that everything works. Then, when it is considered stable enough, it will become the new *main*-branch (merge). There may be one more release from the current *main*-branch (bugfixes, etc)
+
+Interested? Stay tuned.
 
 
