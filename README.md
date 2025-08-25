@@ -15,47 +15,13 @@ with a polaric-webapp2 on another location.
 http://aprs.no runs a recent version of this software. More documentation on the project can be found here: 
 http://aprs.no/polaricserver or https://polaricserver.readthedocs.io
 
-## System requirements
+## Towards version 4
+Work is in progress towards a version 4 with major changes to how it is built and to the structure of the source code. it is my hope that the codebase now will be easier to maintain and develop further. 
+* We use maven for building
+* A part of the codebase, i.e. is factored out to a separate codebase called arctic-core. It contains the webserver and some common stuff. It is the hope that this can be useful in building also other web-server-applications.
+* The webserver part also moves to from spark-java to javalin. 
+* The codebase is also somewhat reorganised. Some sources are moved to subpackages and subdirectories.
 
-Linux/Java platform (tested with Debian/Ubuntu) with
-* Java Runtime environment version 17 or later. 
-* librxtx-java (if using serial port for communication with TNC or GPS).
-* libjackson2 (for JSON processing)
-* libcommons-codec
+The functionality of this branch is currently rather similar to the main branch. Now we need to do testing and debugging and make sure that everything works. Then, when it is considered stable enough, it will become the main-branch. There may be one more release from the current main-branch (bugfixes, etc)
 
-We support deb installation packages for Linux distros that can use it (Debian, Ubuntu, ..) 
-It shouldn't be too hard to port it to e.g. Windows if anyone wants to do the job. 
-
-We also use the following external libraries. jar files are included: 
-* Jetty and Spark framework (HTTP server)
-* pac4j framework (authentication/authorization)
-* nano-cuckoo with lz4
-* jMDNS
-* and more...
-
-
-## Installation
-
-We provide deb (Debian/Ubuntu..) packages. For information on getting started on a Debian based platform please 
-see: https://polaricserver.readthedocs.io/en/latest/gettingstarted.html
-
-Documentation on the project can be found here: 
-http://aprs.no/polaricserver
-
-To configure a server, use the webapp2. Some command-line scripts are also available: 
-polaric-setcall, polaric-password, 
-
-For first-time login use account: username=admin, password=polaric. Remember to change the password at your fist
-convenience. 
-
-Se also: [Examples of how to use it with Docker](https://github.com/PolaricServer/Dockerfiles).
-
-
-## Building from source 
-
-Build from the source is done by a plain old makefile (a version 4.0 will use maven). Setup for generating deb
-packages is included. You may use the 'debuild' command.
-
-You will need JDK (Oracle or OpenJDK) version 17 or later. 
-From version 4.0 we move to Javalin for the webserver-part and a webserver-framework is factored out in a separate software-component: [arctic-core](https://github.com/PolaricServer/Arctic-Core). 
 
