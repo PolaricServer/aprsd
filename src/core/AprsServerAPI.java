@@ -94,6 +94,10 @@ public interface AprsServerAPI extends ServerAPI
     public AprsParser getAprsParser();
     
     
+    /** Save config. Note that this is destructive and should only be called
+     * at shutdown. 
+     */
+    public void saveConfig();
     
 
 }

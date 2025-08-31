@@ -15,6 +15,7 @@
 package no.polaric.aprsd; 
 import no.arctic.core.*;
 import no.arctic.core.util.*;
+import no.arctic.core.auth.*;
 import no.arctic.core.httpd.*;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
@@ -113,10 +114,20 @@ public class MyWebServer extends WebServer {
          
         _zconf.registerMdns("_polaric_aprsd._tcp.local.", mycall, _port,
              "secure="+(secure?"yes":"no")+", "+"proxy="+(proxy?"yes":"no"));
-             
+            
+            
         /* At shutdown. Send a message to other nodes */
         _api.addShutdownHandler( ()-> {
             System.out.println("**** SHUTDOWN ****");
+            ((AprsServerAPI)_api).saveConfig();
+            
+            var u = authService().userDb(); 
+            if (u instanceof LocalUsers) 
+                ((LocalUsers) u).save();
+            
+            _api.log().info("WebServer", "Unregistering on mDNS...");
+            _zconf.unregisterMdns();
+            authService().hmacAuth().saveLogins();
         });
     }
     

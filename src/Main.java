@@ -52,7 +52,6 @@ public class Main implements AprsServerAPI {
     
     
         
-       
     public String getVersion()
         { return version; }
     
@@ -61,7 +60,18 @@ public class Main implements AprsServerAPI {
         { return _config; }
     
     
-     public String getProperty(String pname, String dvalue)
+    public void saveConfig() 
+    { 
+       try {
+            _defaultConf.clear();
+            FileOutputStream cfout = new FileOutputStream(_xconf);
+            _config.storeToXML(cfout, "Configuration for Polaric APRSD");
+       }
+       catch (java.io.IOException e) {log.warn("Main", "Cannot write file "+e);}
+    }
+   
+   
+    public String getProperty(String pname, String dvalue)
         { String x = _config.getProperty(pname, dvalue); 
           return (x == null ? x : x.trim()); }
         
@@ -343,6 +353,14 @@ public class Main implements AprsServerAPI {
         Signs.init(api);
         TrackerPoint.setApi(this);
         Station.init(api); 
+            
+        if (getBoolProperty("remotectl.on", false)) {
+               log.info("Main", "Activate Remote Control");
+               rctl = new RemoteCtl(api, msgProc);
+            }
+            
+        /* Igate */
+        igate = new Igate(api);
             
         db = new StationDBImp(this);
         ownobjects = db.getOwnObjects(); 
