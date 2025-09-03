@@ -78,19 +78,42 @@ public class MessageProcessor implements Runnable, Serializable
    private static final int _MSG_INTERVAL = 30;
    private static final int _MSG_MAX_RETRY = 4; 
    private static final int _MAX_MSGID = 10000;
-   private static final int _MSGID_STORE_SIZE = 256;
+   private static final int _MSGID_STORE_SIZE = 1024;
+   private static final int _MSGID_TX_STORE_SIZE =  256;
    
-   
-   
+
+      
    /**
     * The last nn received messages by sender-callsign + # + msgid 
     */
-   private static class RecMessages extends LinkedHashMap<String, Boolean> {
-       protected boolean removeEldestEntry(Map.Entry e)
-            { return size() > _MSGID_STORE_SIZE; }
+   private static class MsgRec implements Serializable {
+        public boolean accepted; 
+        public Date time;
+        public MsgRec(boolean a) 
+            {accepted=a; time = new Date();}
    }
    
+   private static class RecMessages extends LinkedHashMap<String, MsgRec> {
+       protected boolean removeEldestEntry(Map.Entry e)
+            { return  new Date().getTime() > ((MsgRec)e.getValue()).time.getTime() + 1000*60*60 
+              || size() > _MSGID_STORE_SIZE; }
+   }
+   
+   
+      
+   /**
+    * The last nn sent messages by # + msgid 
+    */
+   private static class TxMessages extends LinkedHashMap<Integer, Boolean> {
+       protected boolean removeEldestEntry(Map.Entry e)
+            { return size() > _MSGID_TX_STORE_SIZE; }
+   }
+   
+   
+   
    private RecMessages recMessages = new RecMessages();
+   private static TxMessages  txMessages = new TxMessages(); 
+   
    private Date recMsg_ts = new Date(); 
        
    private Map<String, Subscriber> _subscribers = new HashMap<String, Subscriber>();
@@ -106,10 +129,14 @@ public class MessageProcessor implements Runnable, Serializable
    private String      _file;
    private ServerAPI   _api; 
     
+
     
    private static String getNextId()
    {
-      _msgno = (_msgno + 1) % _MAX_MSGID;
+      do {
+        _msgno = (_msgno + 1) % _MAX_MSGID;
+      } while (txMessages.containsKey(_msgno));
+      txMessages.put(_msgno, true);
       return ""+_msgno;
    }
 
@@ -158,6 +185,7 @@ public class MessageProcessor implements Runnable, Serializable
     
     
     
+    
    /**
     * Process incoming message.
     * Called by APRS Parser
@@ -168,7 +196,7 @@ public class MessageProcessor implements Runnable, Serializable
     */
     public synchronized void incomingMessage
         (Station sender, String recipient, String text, String msgid)
-    {
+    {  
         /* Is it an ACK or REJ message? */
         if (_myCall.equals(recipient) && text.matches("(ack|rej).+")) {
             msgid = text.substring(3, text.length());
@@ -176,9 +204,10 @@ public class MessageProcessor implements Runnable, Serializable
             /* notify recipient about result? */
             OutMessage m = _outgoing.get(msgid);
             if (m != null && m.not != null) {
-                if (text.matches("(rej).+"))
+                if (text.matches("(rej).+")) 
                     m.not.reportFailure(m.recipient, m.msgtext);
-                else
+
+                else 
                     m.not.reportSuccess(m.recipient, m.msgtext);
             }
             _outgoing.remove(msgid);   
@@ -193,10 +222,7 @@ public class MessageProcessor implements Runnable, Serializable
             
         /* If there is a subscriber to the messasge */ 
         if (subs != null) {
-            /* Clear seen-before map if last entry is older than 20 minutes */
-            if ((new Date()).getTime() > recMsg_ts.getTime() + 1000 * 60 * 60 * 20)
-                recMessages.clear();
-        
+
             /* Have we seen this message-id before? */
             if (!recMessages.containsKey(sender.getIdent()+"#"+msgid)) { 
                 boolean result = !subs.verify;
@@ -215,20 +241,23 @@ public class MessageProcessor implements Runnable, Serializable
                 result = result && subs.recipient.handleMessage(sender, recipient, text);
                 if (!result && msgid != null) 
                     _api.log().info("MessageProc", "Message authentication or processing failed. msgid="+msgid);
+                    
                 if (msgid != null) {
-                    recMessages.put(sender.getIdent()+"#"+msgid, result);
+                    recMessages.put( sender.getIdent()+"#"+msgid, new MsgRec(result));
                     recMsg_ts = new Date();
                 }
             }
-            else
+            else {
                 _api.log().debug("MessageProc", "Duplicate message from "+sender.getIdent()+" msgid="+msgid);
-                
+                msgid=null;
+                // If duplicate, just ignore message (don't ack it)
+            }    
                 
             /* 
              * Send ACK or REJ. Assume that message is in recMessages if accepted. 
              */
             if (msgid != null && (!recipient.matches("BLN.*") ) )
-                sendAck(sender.getIdent(), msgid, recMessages.get(sender.getIdent()+"#"+msgid));
+                sendAck(sender.getIdent(), msgid, recMessages.get(sender.getIdent()+"#"+msgid).accepted);
         } /* if subs */     
     }
    
@@ -320,65 +349,65 @@ public class MessageProcessor implements Runnable, Serializable
    /**
     * Encode and send an APRS message packet.
     */
-   public void sendPacket(String message, String recipient)
+    public void sendPacket(String message, String recipient)
       { sendPacketFrom(_myCall, message, recipient); }
       
-   public void sendPacketFrom(String from, String message, String recipient)
-   {
-       AprsPacket p = new AprsPacket();
-       p.from = from;
-       p.to = "APRS";
+    
+    public void sendPacketFrom(String from, String message, String recipient)
+    {
+        AprsPacket p = new AprsPacket();
+        p.from = from;
+        p.to = "APRS";
        
-       p.msgto = recipient;
-       /* Need to set p.via, and differently for the two channels */
-       p.type = ':';
-       p.report = ":"+message;
+        p.msgto = recipient;
+        /* Need to set p.via, and differently for the two channels */
+        p.type = ':';
+        p.report = ":"+message;
        
-       /* 
-        * Send on RF
-        */
-       boolean sentOnRf = false;
-       if ( _rfChan != null && _rfChan.isActive() && (
+        /* 
+         * Send on RF
+         */
+        boolean sentOnRf = false;
+        if ( _rfChan != null && _rfChan.isActive() && (
            /* if recipient is heard on RF and NOT on the internet */
            ((_rfChan.heard(recipient)   &&
             !_inetChan.heard(recipient))) || 
             recipient.matches(_alwaysRf) || 
             _inetChan == null || !_inetChan.isActive() ||
             recipient.equals("TEST") ) )
-       {
-          /* Now, get a proper path for the packet. 
-           * If possible, a reverse of the path last heard from the recipient.
-           */
-          String path = _rfChan.heardPath(recipient); 
-          if (path == null)
-             p.via = _defaultPath;
-          else
-             p.via = AprsChannel.getReversePath(path); 
+        {
+           /* Now, get a proper path for the packet. 
+            * If possible, a reverse of the path last heard from the recipient.
+            */
+            String path = _rfChan.heardPath(recipient); 
+            if (path == null)
+                p.via = _defaultPath;
+            else
+                p.via = AprsChannel.getReversePath(path); 
              
-          _api.log().debug("MessageProc", "Sending message to "+recipient+" on RF: "+p.via);
-          if (_rfChan != null && _rfChan.isRf()) 
-            _rfChan.sendPacket(p);
-          sentOnRf = true;
-       }
+            _api.log().debug("MessageProc", "Sending message to "+recipient+" on RF: "+p.via);
+            if (_rfChan != null && _rfChan.isRf()) 
+                _rfChan.sendPacket(p);
+            sentOnRf = true;
+        }
        /*
         * Send on internet (aprs/is)
         */
-       if (_inetChan != null && _inetChan.isActive()) {
-          /* 
-           * If already sent on rf, emulate a igate.
-           * Otherwise, use qAC
-           */
-          p.via = sentOnRf ? "qAR,"+_myCall : "qAC,"+_myCall;
-          _api.log().debug("MessageProc", "Sending message to "+recipient+" on INET: "+p.via);
-          if (_inetChan != null && !_inetChan.isRf())
-            _inetChan.sendPacket(p);
-       }  
+        if (_inetChan != null && _inetChan.isActive()) {
+            /* 
+            * If already sent on rf, emulate a igate.
+            * Otherwise, use qAC
+            */
+            p.via = sentOnRf ? "qAR,"+_myCall : "qAC,"+_myCall;
+            _api.log().debug("MessageProc", "Sending message to "+recipient+" on INET: "+p.via);
+            if (_inetChan != null && !_inetChan.isRf())
+                _inetChan.sendPacket(p);
+        }  
     
-       if ((_inetChan == null || !_inetChan.isActive()) && 
-           (_rfChan == null || !_rfChan.isActive()))
-          _api.log().warn("MessageProc", "Cannot send message. No channel.");
-   }
-
+        if ((_inetChan == null || !_inetChan.isActive()) && 
+            (_rfChan == null || !_rfChan.isActive()))
+            _api.log().warn("MessageProc", "Cannot send message. No channel.");
+    }
    
    
 
@@ -391,6 +420,7 @@ public class MessageProcessor implements Runnable, Serializable
        
            ofs.writeObject(_msgno);
            ofs.writeObject(recMessages); 
+           ofs.writeObject(txMessages);
        } catch (Exception e) {
            _api.log().warn("MessageProc", "Cannot save: "+e);
        } 
@@ -406,6 +436,7 @@ public class MessageProcessor implements Runnable, Serializable
           
              _msgno = (Integer) ifs.readObject(); 
              recMessages = (RecMessages) ifs.readObject(); 
+             txMessages = (TxMessages) ifs.readObject();
          } catch (Exception e) {
              _api.log().warn("MessageProc", "Cannot restore: "+e);
          } 
