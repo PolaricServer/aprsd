@@ -28,6 +28,8 @@ public class MyWebServer extends WebServer {
     
     private JsonMapUpdater _jmapupd;
     private ZeroConf _zconf = new ZeroConf();
+    private RemoteCtl _rctl; 
+    
     
     /*
      * Attributes to user-session can be put here .
@@ -41,6 +43,7 @@ public class MyWebServer extends WebServer {
     
     public MyWebServer(AprsServerAPI api, int port) {
         super(api, port, "notify", "/files", "/home/oivindh/src" );
+        _rctl = api.getRemoteCtl(); 
     }
     
     public JsonMapUpdater getJsonMapUpdater() {
@@ -58,12 +61,18 @@ public class MyWebServer extends WebServer {
         /* Called at login when user-session is created */
         onLogin( u-> {
             System.out.println("**** LOGIN:"+u+" ****");
+            if (_rctl != null)
+                _rctl.sendRequestAll("USER", u+"@"+_rctl.getMycall(), null);
         });
+        
         
         /* Called when logout and no other active user-sessions */
         onLogout( u-> {
             System.out.println("**** LOGOUT:"+u+" ****");
+            if (_rctl != null)
+                _rctl.sendRequestAll("RMUSER", u+"@"+_rctl.getMycall(), null);
         });
+        
         
         /* Called to create and close a session-object for user-login. Close is called a week after session-close */
         createUserSes( u-> {
