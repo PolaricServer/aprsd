@@ -160,15 +160,16 @@ public abstract class AprsFilter {
         @Override public boolean test(AprsPacket p) {
         
             char t = toFType(p);
+            boolean telemetry = (t=='m' && p.from.equals(p.msgto));
 
-            if (types.indexOf(t) != -1) {
+            if (types.indexOf(t) != -1 || (telemetry && types.indexOf('M') != -1)) {
             
                 /* Telemetry. Drop if item position is not known */
-                if (t=='m' && p.from.equals(p.msgto)) {
+                if (telemetry) {
                     Point x = _api.getDB().getItem(p.from, null);
-                    if (x==null || x.getPosition() == null) 
+                    if (x==null || x.getPosition() == null)
                         return false;
-                 }
+                }
                         
                 /* Range check */
                 if (range != null)
@@ -179,7 +180,6 @@ public abstract class AprsFilter {
         }
         public String toString() {return "Type";}
     }
-    
     
     
     /**
