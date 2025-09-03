@@ -80,20 +80,39 @@ public class MessageProcessor implements Runnable, Serializable
 
    private static final int _MSG_INTERVAL = 30;
    private static final int _MSG_MAX_RETRY = 4; 
-   private static final int _MAX_MSGID = 10000;
-   private static final int _MSGID_STORE_SIZE = 256;
-   
+   private static final int _MAX_MSGID = 10000; 
+   private static final int _MSGID_STORE_SIZE = 1024;
+   private static final int _MSGID_TX_STORE_SIZE =  256;
    
    
    /**
     * The last nn received messages by sender-callsign + # + msgid 
     */
-   private static class RecMessages extends LinkedHashMap<String, Boolean> {
-       protected boolean removeEldestEntry(Map.Entry e)
-            { return size() > _MSGID_STORE_SIZE; }
+   private static class MsgRec implements Serializable {
+        public boolean accepted; 
+        public Date time;
+        public MsgRec(boolean a) 
+            {accepted=a; time = new Date();}
    }
    
-   private RecMessages recMessages = new RecMessages();
+   private static class RecMessages extends LinkedHashMap<String, MsgRec> {
+       protected boolean removeEldestEntry(Map.Entry e)
+            { return  (new Date()).getTime() > ((MsgRec)e.getValue()).time.getTime() + 1000*60*60 
+              || size() > _MSGID_STORE_SIZE; }
+   }
+   
+   /**
+    * The last nn sent messages by # + msgid 
+    */
+   private static class TxMessages extends LinkedHashMap<Integer, Boolean> {
+       protected boolean removeEldestEntry(Map.Entry e)
+            { return size() > _MSGID_TX_STORE_SIZE; }
+   }
+   
+   
+   private static RecMessages recMessages = new RecMessages();
+   private static TxMessages  txMessages = new TxMessages(); 
+   
    private Date recMsg_ts = new Date(); 
        
    private Map<String, Subscriber> _subscribers = new HashMap<String, Subscriber>();
@@ -112,7 +131,10 @@ public class MessageProcessor implements Runnable, Serializable
     
    private static String getNextId()
    {
-      _msgno = (_msgno + 1) % _MAX_MSGID;
+      do {
+        _msgno = (_msgno + 1) % _MAX_MSGID;
+      } while (txMessages.containsKey(_msgno));
+      txMessages.put(_msgno, true);
       return ""+_msgno;
    }
 
@@ -172,16 +194,17 @@ public class MessageProcessor implements Runnable, Serializable
     public synchronized void incomingMessage
         (Station sender, String recipient, String text, String msgid)
     {
-        /* Is it an ACK or REJ message? */
+       /* Is it an ACK or REJ message? */
         if (_myCall.equals(recipient) && text.matches("(ack|rej).+")) {
             msgid = text.substring(3, text.length());
 
             /* notify recipient about result? */
             OutMessage m = _outgoing.get(msgid);
             if (m != null && m.not != null) {
-                if (text.matches("(rej).+"))
+                if (text.matches("(rej).+")) 
                     m.not.reportFailure(m.recipient, m.msgtext);
-                else
+
+                else 
                     m.not.reportSuccess(m.recipient, m.msgtext);
             }
             _outgoing.remove(msgid);   
@@ -196,9 +219,6 @@ public class MessageProcessor implements Runnable, Serializable
             
         /* If there is a subscriber to the messasge */ 
         if (subs != null) {
-            /* Clear seen-before map if last entry is older than 20 minutes */
-            if ((new Date()).getTime() > recMsg_ts.getTime() + 1000 * 60 * 60 * 20)
-                recMessages.clear();
         
             /* Have we seen this message-id before? */
             if (!recMessages.containsKey(sender.getIdent()+"#"+msgid)) { 
@@ -218,20 +238,24 @@ public class MessageProcessor implements Runnable, Serializable
                 result = result && subs.recipient.handleMessage(sender, recipient, text);
                 if (!result && msgid != null) 
                     _api.log().info("MessageProc", "Message authentication or processing failed. msgid="+msgid);
+                    
                 if (msgid != null) {
-                    recMessages.put(sender.getIdent()+"#"+msgid, result);
+                    recMessages.put( sender.getIdent()+"#"+msgid, new MsgRec(result));
                     recMsg_ts = new Date();
                 }
             }
-            else
+            else {
                 _api.log().debug("MessageProc", "Duplicate message from "+sender.getIdent()+" msgid="+msgid);
-                
-                
+                msgid=null;
+                // If duplicate, just ignore message (don't ack it)
+            }
+            
+            
             /* 
              * Send ACK or REJ. Assume that message is in recMessages if accepted. 
              */
             if (msgid != null && (!recipient.matches("BLN.*") ) )
-                sendAck(sender.getIdent(), msgid, recMessages.get(sender.getIdent()+"#"+msgid));
+                sendAck(sender.getIdent(), msgid, recMessages.get(sender.getIdent()+"#"+msgid).accepted);
         } /* if subs */     
     }
    
@@ -292,6 +316,7 @@ public class MessageProcessor implements Runnable, Serializable
          _outgoing.put(msgid, new OutMessage(msgid, recipient, text, message, not));                      
       sendPacket(message, recipient);       
    }
+   
    
    
    public void sendMessage(String recipient, String text,
@@ -363,6 +388,7 @@ public class MessageProcessor implements Runnable, Serializable
             _rfChan.sendPacket(p);
           sentOnRf = true;
        }
+   
        /*
         * Send on internet (aprs/is)
         */
@@ -391,9 +417,10 @@ public class MessageProcessor implements Runnable, Serializable
            _api.log().debug("MessageProc", "Saving message data...");
            FileOutputStream fs = new FileOutputStream(_file);
            ObjectOutput ofs = new ObjectOutputStream(fs);
-       
+             
            ofs.writeObject(_msgno);
            ofs.writeObject(recMessages); 
+           ofs.writeObject(txMessages);
        } catch (Exception e) {
            _api.log().warn("MessageProc", "Cannot save: "+e);
        } 
@@ -409,6 +436,7 @@ public class MessageProcessor implements Runnable, Serializable
           
              _msgno = (Integer) ifs.readObject(); 
              recMessages = (RecMessages) ifs.readObject(); 
+             txMessages = (TxMessages) ifs.readObject();
          } catch (Exception e) {
              _api.log().warn("MessageProc", "Cannot restore: "+e);
          } 
