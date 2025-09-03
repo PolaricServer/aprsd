@@ -64,6 +64,8 @@ public class MailBoxApi extends ServerBase {
     public void start() {     
        
         protect("/mailbox");
+        protect("/mailbox/*");
+        
         
         /* 
          * GET /mailbox 
@@ -130,6 +132,8 @@ public class MailBoxApi extends ServerBase {
                 var box = getMbox(ctx);
                 if (!msgid.matches("[0-9]+"))            
                     ERROR(ctx, 400, "Message id must be number");
+                else if (box==null)
+                    ERROR(ctx, 401, "Unauthorized - no mailbox available");
                 else {
                     box.remove(Long.parseLong(msgid));
                     ctx.result("Ok");

@@ -520,6 +520,9 @@ public abstract class MailBox {
             _api.log().warn("MailBox", "Unexpected EOF. _nuserboxes is wrong?");
             try {ifs.close();} catch (Exception x) {};
         }
+        catch (FileNotFoundException e) {
+            _api.log().debug("MailBox", "File not found: "+_file);
+        }
         catch (Exception e) {
             _api.log().warn("MailBox", "Cannot restore data: "+e);
             e.printStackTrace();

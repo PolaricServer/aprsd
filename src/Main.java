@@ -43,10 +43,10 @@ public class Main implements AprsServerAPI {
     public  static  OwnPosition ownpos = null; 
     public static   BullBoard bullboard = null;
     public  static  Igate igate  = null;
-    private static Channel.Manager _chanManager = new Channel.Manager();
+    private static  Channel.Manager _chanManager = new Channel.Manager();
     public  static  RemoteCtl rctl;
     public  static  MessageProcessor msgProc = null; 
-    private static String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
+    private static  String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
     private AprsServerAPI api;
     private static AprsParser parser = null;
     
@@ -414,6 +414,7 @@ public class Main implements AprsServerAPI {
     public void stop() {
          for (ServerAPI.SimpleCb f: _shutdown)
             f.cb(); 
+         msgProc.save();
     }
 
     
