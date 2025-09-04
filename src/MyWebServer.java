@@ -58,6 +58,14 @@ public class MyWebServer extends WebServer {
         pubSub().createRoom("notify:ADMIN", false, false, false, true, ServerAPI.Notification.class);
         
         
+        /* Called when connected to Remote Ctl parent or child */
+        if (_rctl != null)
+            _rctl.onConnect( node-> {
+                for (String u : loginUsers())
+                    _rctl.sendRequest(node, "USER", u+"@"+_rctl.getMycall());
+            });
+        
+        
         /* Called at login when user-session is created */
         onLogin( u-> {
             System.out.println("**** LOGIN:"+u+" ****");
