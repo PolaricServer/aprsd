@@ -351,10 +351,6 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
                 
                  /* If not managed, remove it. */
                  if (!st.hasTag("MANAGED")) {
-                    /* Remove expired items from remotectl log */
-                    if (_api.getRemoteCtl() != null)
-                        _api.getRemoteCtl().removeExpired(st.getIdent());
-            
                     st.removeAllTags();
                     removeItem(st.getIdent());
                     _routes.removeNode(st.getIdent());
