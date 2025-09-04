@@ -50,7 +50,13 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    public static interface UserCb {
         void login(String node, String uname);
    }
-
+   
+   /**
+    * Callback for parent/child connections
+    */
+   public static interface ConnectCb {
+        void connect(String node);
+   }
    
 
    /*
@@ -74,6 +80,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private AprsServerAPI _api;
    private Logfile   _log;
    private UserCb    _usercb;
+   private ConnectCb _connectcb;
     
    private LinkedHashMap<String, LogEntry> _cmds = new LinkedHashMap<String, LogEntry>(); 
    private KeyedSet _users = new KeyedSet();
@@ -174,6 +181,10 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         _usercb = cb;
    }
    
+   public void onConnect(ConnectCb cb) {
+        _connectcb = cb;
+   }
+   
    
    public List<String> getUsers() {
         return _users.getAll();
@@ -226,6 +237,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             if (!_parentCon) {
                 _log.info(null, "Connection to parent: "+id+ " established");
                 _parentCon = true;
+                _connectcb.connect(_parent);
             }
             _try_parent = 0;
         }
@@ -298,8 +310,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             }
     
         if (n>0)
-            _log.info(null, "Send > ALL("+n+"): " + cmd+ " "+text + (origin==null||n==0 ? "" : " -- (not to "+origin+")" ));
-        // storeRequest(cmd+" "+text, origin);                
+            _log.info(null, "Send > ALL("+n+"): " + cmd+ " "+text + (origin==null||n==0 ? "" : " -- (not to "+origin+")" ));              
     }
 
     
@@ -323,87 +334,6 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         return true;
    }
    
-   
-   
-
-   /**
-    * Store request in log for later playback when new nodes connect. 
-    */
-   private void storeRequest(String text, String origin)
-   {
-
-     /* 
-      * Log last update to each item. 
-      * Assume those updates are idempotent 
-      */
-     String[] arg = text.split("\\s+", 3);
-     String prefix = arg[0];
-     final var arg1_ = SecUtils.escape4regex(arg[1]);
-    
-     /* FIXME: This shouldn't happen? */
-     _cmds.values().removeIf((x)-> x==null || x.cmd==null);
-     
-     if (arg[0].matches("ALIAS|ICON|TAG|RMTAG|USER|RMUSER|RMAN|RMRMAN")) {
-         if (arg[0].matches("RMTAG"))
-            prefix = "TAG";
-         if (arg[0].matches("RMUSER"))
-            prefix = "USER";
-        if (arg[0].matches("RMRMAN"))
-            prefix = "RMAN";
-         prefix = prefix + " " + arg[1];
-         
-         /* Remove earlier updates for the same item */
-         _cmds.remove(prefix);
-     }
-
-     
-     else if (arg[0].matches("RMNODE"))
-         /* Remove all USER entries with that particular node */
-         _cmds.values().removeIf( (x)-> x.cmd.matches("USER .*@"+arg[1]));
-         
-     else if (arg[0].matches("RMAN"))
-        /* Remove ALIAS or ICON commands for the item */
-        _cmds.values().removeIf( (x)-> x.cmd.matches("(ALIAS|ICON) "+arg1_+" .*") );
-  
-     
-     /* Don't store deletions */
-     if (!text.matches(".*(NULL|OFF)") && !text.matches("RM.*")) 
-        _cmds.put(prefix, new LogEntry(text, origin));
-     
-   }
-   
-   
-
-   /** 
-    * Play back log entries when new node connect. 
-    */
-   private void playbackLog(String dest)
-   {
-        if (_cmds.isEmpty())
-            return; 
-        _log.info(null, "Playback command log: "+dest);
-        final var dest_ = SecUtils.escape4regex(dest);
-        for (Map.Entry<String, LogEntry> entry: _cmds.entrySet()) {
-            if (!entry.getValue().cmd.matches("USER .*@"+dest_) && isWithinInterest(dest, entry.getValue().cmd) )
-                sendRequest(dest, null, entry.getValue().cmd);
-        }
-        _log.info(null, "End of playback ("+dest+")");
-   }
-   
-   
-   /**
-    * To be called from (StationDBImp) when an item expires. 
-    * Remove ALIAS, ICON, TAG entries for the given item from the log. 
-    */
-   public void removeExpired(String id) {
-        final var id_ = SecUtils.escape4regex(id);
-                    
-        if (_cmds !=null && !_cmds.isEmpty())
-            _cmds.values().removeIf( (x)-> { 
-                return x != null && x.cmd != null && x.cmd.matches("(ALIAS|ICON|TAG) "+id_+" .*");
-            }
-        );
-   }
    
    
    
@@ -575,12 +505,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             }
             addChild(sender.getIdent(), rad, new LatLng(lat,lng));
             
-            /* 
-             * Play back log, but wait until this function has 
-             * returned and reply is sent 
-             */
-            gc.schedule( ()->
-                playbackLog(sender.getIdent()), 5, TimeUnit.SECONDS);
+            /* Notify app */
+            _connectcb.connect(sender.getIdent());
         }
         else
             updateChildTS(sender.getIdent()); 
@@ -824,7 +750,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    }
    
 
-
+   
+ 
    /* 
     * Thread to refresh connection to "parent" every 20 minutes. 
     * Parent removes a child if its timestamp is older than 40 minutes.
@@ -856,6 +783,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             round++;
             if (_tryPause > 0)
                 _tryPause--;
+                
             
             /* Disconnect chldren not heard from in 40 minutes */
             for (String x : getChildren()) 
