@@ -310,6 +310,15 @@ public class WebServer implements ServerAPI.Web
         AuthInfo.init(_api);
         init();
         
+        /* Handler for when remotectl connects to parent or child */
+        RemoteCtl rctl = _api.getRemoteCtl(); 
+        if (rctl != null)
+            rctl.onConnect( node-> {
+                for (String name : getLoginUsers())
+                    rctl.sendRequest(node, "USER", name+"@"+rctl.getMycall());
+            });
+        
+        
         var secure = _api.getBoolProperty("httpserver.secure", false);
         var proxy  = _api.getBoolProperty("httpserver.proxy", true);
         var mycall = _api.getProperty("default.mycall", "NOCALL");
@@ -447,7 +456,6 @@ public class WebServer implements ServerAPI.Web
             wclist.add((WebClient) c); 
         return wclist;
     }
-    
     
     
         
