@@ -19,7 +19,7 @@ http://aprs.no/polaricserver or https://polaricserver.readthedocs.io
 
 Linux/Java platform (tested with Debian/Ubuntu) with
 * Java Runtime environment version 17 or later. 
-* librxtx-java (if using serial port for communication with TNC or GPS).
+* librxtx-java (if using serial port for communication with TNC or GPS). Note that there are some issues with the native library of this on some platforms. librxtx is legacy code that may be replaced soon.
 * libjackson2 (for JSON processing)
 * libcommons-codec
 
