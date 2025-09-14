@@ -1,3 +1,9 @@
+polaric-aprsd (3.3) stable; urgency=medium
+
+  * Bugfixes, adjustments
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Sat, 14 Sep 2025 20:50:00 +0200
+
 polaric-aprsd (3.2.2) stable; urgency=medium
 
   * Allow default filter for aprs-is channels

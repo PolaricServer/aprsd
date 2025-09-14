@@ -29,8 +29,8 @@ import java.util.logging.*;
 
 public class Main implements ServerAPI
 {
-   public  static String version = "3.2.2";
-   public  static String toaddr  = "APPS32";
+   public  static String version = "3.3";
+   public  static String toaddr  = "APPS33";
    
    private static StationDB db = null;
    private static AprsParser parser = null;
@@ -159,6 +159,7 @@ public class Main implements ServerAPI
        }
        catch (java.io.IOException e) {log.warn("Main", "Cannot write file "+e);}
    }
+          
           
    public String getProperty(String pname, String dvalue)
     { String x = _config.getProperty(pname, dvalue); 
@@ -476,6 +477,7 @@ public class Main implements ServerAPI
          }
 
          MailBox.shutdown(); 
+         msgProc.save();
          
          System.out.println("*** Polaric APRSD shutdown"); 
          PluginManager.deactivateAll();
