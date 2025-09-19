@@ -35,13 +35,13 @@ import java.util.concurrent.TimeUnit;
  
 public class ShellScriptApi extends ServerBase {
 
-    private ServerAPI _api; 
+    private ServerConfig _api; 
     private Map<String, Script> _scripts = new HashMap<String, Script>();
     private String _fname;
     private String _sdir;
     private File   _slog;
     
-    public ShellScriptApi(ServerAPI api) {
+    public ShellScriptApi(ServerConfig api) {
         super(api);
         _api = api;
         /* Set up config */
@@ -109,11 +109,11 @@ public class ShellScriptApi extends ServerBase {
         private Script _script;
         private String _rtext; 
         private String _uid; 
-        private ServerAPI _api;   
+        private ServerConfig _api;   
         private static final int NOT_EXPIRE = 60; 
         
         
-        public ProcessRunner(ServerAPI api, String uid, ProcessBuilder p, Script scr) {
+        public ProcessRunner(ServerConfig api, String uid, ProcessBuilder p, Script scr) {
             _pb = p;
             _script = scr;
             _api = api; 
@@ -152,17 +152,17 @@ public class ShellScriptApi extends ServerBase {
                     int res = runAndWait(14400); 
                     if (res == 0) {
                         _api.getWebserver().notifyUser(_uid, 
-                            new ServerAPI.Notification("system", "system", 
+                            new ServerConfig.Notification("system", "system", 
                                 _script.sinfo.name +": "+ (getText()!=null ? getText() : "success"), new Date(), NOT_EXPIRE));
                     }    
                     else if (res == -1) {
                         _api.getWebserver().notifyUser(_uid, 
-                            new ServerAPI.Notification("error", "system", 
+                            new ServerConfig.Notification("error", "system", 
                                 _script.sinfo.name +": killed (timeout): ", new Date(), NOT_EXPIRE));
                     }   
                     else {
                         _api.getWebserver().notifyUser(_uid, 
-                            new ServerAPI.Notification("error", "system", 
+                            new ServerConfig.Notification("error", "system", 
                                 _script.sinfo.name + ": "+(getText()!=null ? "("+res+") "+getText() : "Error ("+res+")"), 
                                 new Date(), NOT_EXPIRE));
                     }

@@ -37,9 +37,9 @@ public class SerialComm extends CommDevice implements Runnable
 
     
  
-    public SerialComm(AprsServerAPI api, String id, String pname, int bd, int retr, long rtime) 
+    public SerialComm(AprsServerConfig conf, String id, String pname, int bd, int retr, long rtime) 
     {
-        super(api, id);
+        super(conf, id);
         _portName = pname;
         _baud = bd;
         _max_retry = retr;
@@ -67,7 +67,7 @@ public class SerialComm extends CommDevice implements Runnable
     {
         CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(_portName);
         if ( portIdentifier.isCurrentlyOwned() )
-            _api.log().error("SerialComm", "Port "+ _portName + " is currently in use");
+            _conf.log().error("SerialComm", "Port "+ _portName + " is currently in use");
         else
         {
             CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);       
@@ -77,11 +77,11 @@ public class SerialComm extends CommDevice implements Runnable
                 serialPort.setSerialPortParams(_baud, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
                 serialPort.enableReceiveTimeout(1000);
                 if (!serialPort.isReceiveTimeoutEnabled())
-                   _api.log().warn("SerialComm", "Timeout not enabled on serial port");
+                   _conf.log().warn("SerialComm", "Timeout not enabled on serial port");
                 return (SerialPort) commPort;
             }
             else
-                _api.log().error("SerialComm", "Port " + _portName + " is not a serial port.");
+                _conf.log().error("SerialComm", "Port " + _portName + " is not a serial port.");
         }    
         return null; 
     }
@@ -92,7 +92,7 @@ public class SerialComm extends CommDevice implements Runnable
     public void run()
     {
         int retry = 0;       
-        _api.log().debug("SerialComm", "Activating...");      
+        _conf.log().debug("SerialComm", "Activating...");      
         try { Thread.sleep(500); } catch (Exception e) {}
         while (true) 
         {
@@ -108,7 +108,7 @@ public class SerialComm extends CommDevice implements Runnable
             else break;
         
             try {
-                _api.log().debug("SerialComm", "Initialize on "+_portName);
+                _conf.log().debug("SerialComm", "Initialize on "+_portName);
                 _serialPort = connect();
                 if (_serialPort == null)
                     continue; 
@@ -117,7 +117,7 @@ public class SerialComm extends CommDevice implements Runnable
                     _worker.worker();
             }
             catch(NoSuchPortException e) {
-                _api.log().error("SerialComm", "Serial port " + _portName + " not found");
+                _conf.log().error("SerialComm", "Serial port " + _portName + " not found");
                 e.printStackTrace(System.out);
             }
             catch(Exception e) {   
@@ -127,13 +127,13 @@ public class SerialComm extends CommDevice implements Runnable
                    
             if (!running()) {
                 _state = Channel.State.OFF;
-                _api.log().debug("SerialComm", "Channel closed");
+                _conf.log().debug("SerialComm", "Channel closed");
                 return;
             }
            
             retry++;      
         }
-        _api.log().warn("SerialComm", "Couldn't connect device on'"+_portName+"' - giving up");
+        _conf.log().warn("SerialComm", "Couldn't connect device on'"+_portName+"' - giving up");
         _state = Channel.State.FAILED;
      }
 

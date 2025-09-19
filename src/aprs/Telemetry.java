@@ -92,7 +92,7 @@ public class Telemetry implements Serializable
     
     
     
-    public Telemetry(AprsServerAPI api, String id) {
+    public Telemetry(AprsServerConfig api, String id) {
         _ident = id;
         api.getWebserver().pubSub().createRoom("telemetry:"+id, (Class) null);
 

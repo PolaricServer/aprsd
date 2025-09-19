@@ -62,7 +62,7 @@ public class AprsUtil
        
    // FIXME: Handle ambiguity in latitude ?
      
-   protected static AprsServerAPI _api   = null;
+   protected static AprsServerConfig _conf   = null;
     
     
     
@@ -387,7 +387,7 @@ public class AprsUtil
       if (!_latPat.test(lat) || !_lngPat.test(lng)) {
          /* ERROR: couldn't understand Lat/Long field */
          if (p!=null)
-            _api.log().debug("AprsParser", "Could not parse lat/long field: "+lat+" "+lng);
+            _conf.log().debug("AprsParser", "Could not parse lat/long field: "+lat+" "+lng);
           return null; 
       }
       

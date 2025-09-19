@@ -36,12 +36,12 @@ public class TcpKissChannel extends TcpChannel
     
     
     
-    public TcpKissChannel(AprsServerAPI api, String id) 
+    public TcpKissChannel(AprsServerConfig api, String id) 
        { super(api, id); }
         
         
     
-    @Override public void activate(AprsServerAPI a) {
+    @Override public void activate(AprsServerConfig a) {
        super.activate(_api);
        _kissport = _api.getIntProperty("channel."+getIdent()+".kissport", 0);
        _log = new Logfile(_api, getIdent(), "rf.log");

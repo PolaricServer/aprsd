@@ -30,7 +30,7 @@ import java.io.*;
  */
 public class SarApi extends ServerBase {
 
-    private ServerAPI _api; 
+    private ServerConfig _api; 
     private Map<String, Map> _ippMap = new HashMap<String,Map>();
     private long nextId = 1; 
     
@@ -46,7 +46,7 @@ public class SarApi extends ServerBase {
     
     
     
-    public SarApi(ServerAPI api) {
+    public SarApi(ServerConfig api) {
         super(api);
         _api = api;
     }

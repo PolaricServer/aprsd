@@ -85,7 +85,7 @@ public class ViewFilter {
   
   
   /* Action(hideid, hidetrail, hideall, showpath, style) */
-  public static void init(AprsServerAPI api) 
+  public static void init(AprsServerConfig api) 
   {
       String filename = System.getProperties().getProperty("confdir", ".") + "/view.profiles";
       try {

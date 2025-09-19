@@ -21,7 +21,7 @@
  
  public abstract class CommDevice implements Runnable {
      
-    protected AprsServerAPI     _api; 
+    protected AprsServerConfig     _conf; 
     private   String        _ident;
     protected Channel.State _state = Channel.State.OFF;
     
@@ -41,8 +41,8 @@
     
     
        
-    public CommDevice(AprsServerAPI api, String id) {
-        _api= api; 
+    public CommDevice(AprsServerConfig conf, String id) {
+        _conf= conf; 
         _ident = id;
     }
     

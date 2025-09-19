@@ -77,7 +77,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        
    private MessageProcessor _msg;
    private MessageProcessor.MessageHandler _pmsg;
-   private AprsServerAPI _api;
+   private AprsServerConfig _api;
    private Logfile   _log;
    private UserCb    _usercb;
    private ConnectCb _connectcb;
@@ -143,7 +143,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    
    
    private int threadid=0;    
-   public RemoteCtl(AprsServerAPI api, MessageProcessor mp)
+   public RemoteCtl(AprsServerConfig api, MessageProcessor mp)
    {
        _myCall = api.getProperty("remotectl.mycall", "").toUpperCase();
        if (_myCall.length() == 0)

@@ -36,13 +36,13 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     public static void setNotifier(Notifier n)
         { _change = n; }
     
-    public static void setApi(AprsServerAPI api) { 
+    public static void setApi(AprsServerConfig api) { 
        _api = api; 
        _colTab = new ColourTable (api, System.getProperties().getProperty("confdir", ".")+"/trailcolours");
        AprsPoint.setApi(api);
     }
        
-    public static AprsServerAPI getApi() 
+    public static AprsServerConfig getApi() 
         { return _api; }
         
         

@@ -32,9 +32,9 @@ import no.polaric.aprsd.*;
  */
 public class ItemApi extends ServerBase {
 
-    private AprsServerAPI _api; 
+    private AprsServerConfig _api; 
     
-    public ItemApi(AprsServerAPI api) {
+    public ItemApi(AprsServerConfig api) {
         super(api);
         _api = api;
     }
@@ -194,7 +194,7 @@ public class ItemApi extends ServerBase {
             _api.getRemoteCtl().sendRequestAll("ALIAS", ident+" "+alias, null);
         _api.log().info("SystemApi", 
             "ALIAS: '"+alias+"' for '"+ident+"' by user '"+uid+"'");    
-        _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
+        _api.getWebserver().notifyUser(uid, new ServerConfig.Notification
             ("system", "system", "Alias: '"+alias+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
     }
     
@@ -212,7 +212,7 @@ public class ItemApi extends ServerBase {
             _api.getRemoteCtl().sendRequestAll("ICON", ident+" "+icon, null);
         _api.log().info("SystemApi", 
             "ICON: '"+icon+"' for '"+ident+"' by user '"+uid+"'");    
-        _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
+        _api.getWebserver().notifyUser(uid, new ServerConfig.Notification
             ("system", "system", "Icon: '"+icon+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
     } 
     
@@ -230,7 +230,7 @@ public class ItemApi extends ServerBase {
         _api.log().info("SystemApi", 
             "TAG: '"+tag+"' for '"+ident+"' by user '"+uid+"'");    
         if (!"RMANAGED".equals(tag))
-            _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
+            _api.getWebserver().notifyUser(uid, new ServerConfig.Notification
                 ("system", "system", "Tag: '"+tag+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
     }
     
@@ -245,7 +245,7 @@ public class ItemApi extends ServerBase {
         _api.log().info("SystemApi", 
             "RMTAG: '"+tag+"' for '"+ident+"' by user '"+uid+"'");    
         if (!"RMANAGED".equals(tag))
-            _api.getWebserver().notifyUser(uid, new ServerAPI.Notification
+            _api.getWebserver().notifyUser(uid, new ServerConfig.Notification
                 ("system", "system", "Tag: '"+tag+ "' for '"+ident+"' removed by user '"+uid+"'", new Date(), 10) );     
     }
     

@@ -27,7 +27,7 @@ public class OwnPosition extends Station implements Runnable
 {
     transient private  AprsChannel _inetChan, _rfChan;
     transient private  Thread      _thread;
-    transient protected  AprsServerAPI _api;
+    transient protected  AprsServerConfig _api;
     transient private  int         _tid;
     transient private  boolean     _txOn, _allowRf, _compress;
     transient protected String     _pathRf, _comment;
@@ -40,7 +40,7 @@ public class OwnPosition extends Station implements Runnable
     
     private class LocalSource extends Source
      {
-         public LocalSource(AprsServerAPI api, String prefix, String id)
+         public LocalSource(AprsServerConfig api, String prefix, String id)
             { _tag="own"; _init(api, prefix, "ownposition"); }
          public String getShortDescr() 
             { return "OWN"; }
@@ -49,7 +49,7 @@ public class OwnPosition extends Station implements Runnable
     
     
     
-    public OwnPosition(AprsServerAPI api) 
+    public OwnPosition(AprsServerConfig api) 
     {
         super(null);     
         _api = api;

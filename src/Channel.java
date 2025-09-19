@@ -70,7 +70,7 @@ public abstract class Channel extends Source implements ManagedObject
         { return false; }
      
      
-     public abstract void activate(AprsServerAPI api);
+     public abstract void activate(AprsServerConfig conf);
      public abstract void deActivate();
      
    
@@ -82,6 +82,8 @@ public abstract class Channel extends Source implements ManagedObject
         return getState() == State.RUNNING;
      }
  
+     
+     
      
      /**
       * Abstract factory for Channel objects. 
@@ -135,12 +137,12 @@ public abstract class Channel extends Source implements ManagedObject
          
          /**
           * Instantiate a channel.
-          * @param api
+          * @param conf
           * @param tname A short name for the type. See addClass method.
           * @param id A short name for the channel instance to allow later lookup.  
           */
         @SuppressWarnings("unchecked")
-         public Channel newInstance(AprsServerAPI api, String tname, String id)
+         public Channel newInstance(AprsServerConfig conf, String tname, String id)
          {
             try {
                String cname = _classes.get(tname); 
@@ -148,7 +150,7 @@ public abstract class Channel extends Source implements ManagedObject
                   return null; // Or throw exception??
                Class<Channel> cls = (Class<Channel>) Class.forName(cname);
                Constructor<Channel> constr = (Constructor<Channel>) cls.getConstructors()[0];
-               Channel  c = constr.newInstance(api, id);
+               Channel  c = constr.newInstance(conf, id);
                _instances.put(id, c);
                return c;
             }

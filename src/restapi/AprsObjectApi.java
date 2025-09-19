@@ -52,7 +52,7 @@ public class AprsObjectApi extends ServerBase {
     }
     
     
-    public AprsObjectApi(AprsServerAPI api) {
+    public AprsObjectApi(AprsServerConfig api) {
         super(api);
         _ownObj = api.getOwnObjects();
     }
@@ -111,7 +111,7 @@ public class AprsObjectApi extends ServerBase {
             var pd  = new ReportHandler.PosData (pos, obj.sym, obj.symtab);
             
             if (_ownObj.add(obj.ident, pd, obj.comment, obj.perm)) {
-                _api.log().info("RestApi", "POST OBJECT: '"+obj.ident+"' by user '"+getAuthInfo(ctx).userid+"'");
+                _conf.log().info("RestApi", "POST OBJECT: '"+obj.ident+"' by user '"+getAuthInfo(ctx).userid+"'");
                 systemNotification("ADMIN", "Object '"+obj.ident+"' posted by user '"+getAuthInfo(ctx).userid+"'", 120);
                 ctx.result("OK");
             }
@@ -145,7 +145,7 @@ public class AprsObjectApi extends ServerBase {
         a.delete("/aprs/objects/{id}", (ctx) -> {
             String ident = ctx.pathParam("id");
             if (_ownObj.delete(ident)) {
-                _api.log().info("RestApi", "DELETE OBJECT: '"+ident+"' by user '"+getAuthInfo(ctx).userid+"'");
+                _conf.log().info("RestApi", "DELETE OBJECT: '"+ident+"' by user '"+getAuthInfo(ctx).userid+"'");
                 systemNotification("ADMIN", "Object '"+ident+"' deleted by user '"+getAuthInfo(ctx).userid+"'", 120);
                 ctx.result("OK");
             }

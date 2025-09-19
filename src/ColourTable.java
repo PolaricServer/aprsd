@@ -29,7 +29,7 @@ public class ColourTable
     Iterator<String> it = null;
     
     
-    public ColourTable(ServerAPI api, String file) 
+    public ColourTable(ServerConfig api, String file) 
     {
         try {
            _rd = new BufferedReader(new FileReader(file));

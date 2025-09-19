@@ -31,7 +31,7 @@ import java.io.*;
  */
 public class UserApi extends ServerBase {
 
-    private AprsServerAPI _api; 
+    private AprsServerConfig _api; 
     
     
     public static class GroupInfo {
@@ -93,7 +93,7 @@ public class UserApi extends ServerBase {
     
     
     
-    public UserApi(AprsServerAPI api,  UserDb u, GroupDb g) {
+    public UserApi(AprsServerConfig api,  UserDb u, GroupDb g) {
         super(api);
         _api = api;
         _users = u;
@@ -183,8 +183,8 @@ public class UserApi extends ServerBase {
             List<String> us = new ArrayList<String>(); 
             for (String name : ((WebServer)_api.getWebserver()).loginUsers())
                 us.add(name);
-            if (((AprsServerAPI)_api).getRemoteCtl() != null) 
-                for (String name: ((AprsServerAPI)_api).getRemoteCtl().getUsers())
+            if (((AprsServerConfig)_api).getRemoteCtl() != null) 
+                for (String name: ((AprsServerConfig)_api).getRemoteCtl().getUsers())
                     us.add(name);
             ctx.json(us);
         });
@@ -278,7 +278,7 @@ public class UserApi extends ServerBase {
                     return;
                 }
             } 
-            if (uu.callsign != null && !uu.callsign.equals("") && ((AprsServerAPI)_api).getMsgProcessor().getMycall().equals(uu.callsign)) {
+            if (uu.callsign != null && !uu.callsign.equals("") && ((AprsServerConfig)_api).getMsgProcessor().getMycall().equals(uu.callsign)) {
                 ERROR(ctx, 400, "Cannot use the same callsign as this server: "+ uu.callsign);
                 return;
             }

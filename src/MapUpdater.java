@@ -81,7 +81,7 @@ public abstract class MapUpdater extends WsNotifier
        /** Receive text frame from client. */
        @Override synchronized public void handleTextFrame(String text) 
        {
-           _api.log().debug("MapUpdater", "Client "+sesId(_ctx)+", userid="+userName()+" : " + text);
+           _conf.log().debug("MapUpdater", "Client "+sesId(_ctx)+", userid="+userName()+" : " + text);
            String[] parms = text.split(",");
            /* SUBSCRIBE filter,x1,x2,x3,x4,scale,tag
             * tag is optional
@@ -117,13 +117,13 @@ public abstract class MapUpdater extends WsNotifier
                
               }
               else
-                 _api.log().warn("MapUpdater", "SUBSCRIBE command with too few parameters. uid="+sesId(_ctx)); 
+                 _conf.log().warn("MapUpdater", "SUBSCRIBE command with too few parameters. uid="+sesId(_ctx)); 
            }
            else if (parms[0].equals("BASELAYER")) {
                   _baseLayer = parms[1];
            }
            else if (!parms[0].equals("****"))
-              _api.log().warn("MapUpdater", "Unknown command from client. uid="+sesId(_ctx));
+              _conf.log().warn("MapUpdater", "Unknown command from client. uid="+sesId(_ctx));
        }   
    } 
      
@@ -137,8 +137,8 @@ public abstract class MapUpdater extends WsNotifier
    
           
           
-   public MapUpdater(ServerAPI api) { 
-        super(api); 
+   public MapUpdater(ServerConfig conf) { 
+        super(conf); 
       
         /* Periodic task to send updates to clients */
         hb.schedule( new TimerTask() 
@@ -172,7 +172,7 @@ public abstract class MapUpdater extends WsNotifier
     @OnWebSocketClose
     public void onClose(Session conn, int statusCode, String reason) {
        String user = _getUid(conn);
-       _api.log().info("MapUpdater", "Connection closed"+(reason==null ? "" : ": "+reason)+". Unsubscribing user: "+user);
+       _conf.log().info("MapUpdater", "Connection closed"+(reason==null ? "" : ": "+reason)+". Unsubscribing user: "+user);
        closeSes(conn);
     }
      */
@@ -187,11 +187,11 @@ public abstract class MapUpdater extends WsNotifier
       /* Update the time of last access for the logged in user. 
        * FIXME: Move this to PubSub class ? ? 
        */
-      WebServer ws = (WebServer) _api.getWebserver(); 
+      WebServer ws = (WebServer) _conf.getWebserver(); 
       if (client.userName() != null)
          ws.userDb().get(client.userName()).updateTime();
          
-      _api.log().info("MapUpdater", "Client added: "+sesId(ctx)+
+      _conf.log().info("MapUpdater", "Client added: "+sesId(ctx)+
             (client.userName() == null ? "" : ", " + client.userName()));
       return true;
    }

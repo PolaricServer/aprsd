@@ -43,11 +43,11 @@ public class SysAdminApi extends ServerBase {
     }
     
     
-    private AprsServerAPI _api; 
+    private AprsServerConfig _conf; 
     
-    public SysAdminApi(AprsServerAPI api) {
-        super(api);
-        _api = api;
+    public SysAdminApi(AprsServerConfig conf) {
+        super(conf);
+        _conf = conf;
     }
     
     
@@ -77,11 +77,11 @@ public class SysAdminApi extends ServerBase {
     public static record GenChanInfo 
         (Channel.State state, String tag, boolean restricted, boolean inRouter)
     { 
-        public GenChanInfo(ServerAPI api, Channel ch) {
+        public GenChanInfo(ServerConfig conf, Channel ch) {
             this (
                 ch.getState(),
-                api.getProperty("channel."+ch.getIdent()+".tag", ""),
-                api.getBoolProperty("channel."+ch.getIdent()+".restricted", false),
+                conf.getProperty("channel."+ch.getIdent()+".tag", ""),
+                conf.getBoolProperty("channel."+ch.getIdent()+".restricted", false),
                 (ch instanceof AprsChannel ach ? ach.isInRouter() : false)
             );
         }
@@ -96,7 +96,7 @@ public class SysAdminApi extends ServerBase {
     public  void setChannelProps(Channel ch, ChannelInfo cnf, String type) {
         if (ch.getIdent().equals(""))
             return;
-        var props = _api.getConfig();
+        var props = _conf.getConfig();
         props.setProperty("channel."+ch.getIdent()+".on", ""+cnf.active);
         props.setProperty("channel."+ch.getIdent()+".tag", cnf.generic.tag);
         props.setProperty("channel."+ch.getIdent()+".restricted", ""+cnf.generic.restricted);
@@ -106,22 +106,22 @@ public class SysAdminApi extends ServerBase {
         try {
         if (ch instanceof AprsChannel ach) {
             if (ach.isRf()) {
-                if (_api.getRfChannel() == ach && !cnf.rfchan) {
-                    _api.setRfChannel(null);
+                if (_conf.getRfChannel() == ach && !cnf.rfchan) {
+                    _conf.setRfChannel(null);
                     props.remove("channel.default.rf");
                 }
                 else if (cnf.rfchan) {
-                    _api.setRfChannel(ach);
+                    _conf.setRfChannel(ach);
                     props.setProperty("channel.default.rf", ach.getIdent());
                 }
             }
             else {
-                if (_api.getInetChannel() == ach && !cnf.inetchan) {
-                    _api.setInetChannel(null);
+                if (_conf.getInetChannel() == ach && !cnf.inetchan) {
+                    _conf.setInetChannel(null);
                     props.remove("channel.default.inet");
                 }
                 else if (cnf.inetchan) {
-                    _api.setInetChannel(ach);
+                    _conf.setInetChannel(ach);
                     props.setProperty("channel.default.inet", ach.getIdent());
                 }
             }
@@ -133,7 +133,7 @@ public class SysAdminApi extends ServerBase {
         ch.setJsConfig((Channel.JsConfig) cnf.specific);
         if (cnf.active) {
             ch.deActivate(); 
-            ch.activate(_api);
+            ch.activate(_conf);
         }
         else if (ch.isActive())
             ch.deActivate();
@@ -142,7 +142,7 @@ public class SysAdminApi extends ServerBase {
     
     
     public void removeChannelConfig(Channel ch) {
-        Properties cnf = _api.getConfig();
+        Properties cnf = _conf.getConfig();
         for (Object key: cnf.keySet())
             if (((String)key).startsWith("channel."+ch.getIdent()))
                 cnf.remove((String) key);
@@ -154,7 +154,7 @@ public class SysAdminApi extends ServerBase {
      * text-string
      */
     public void updateChanList() {
-        var mgr = _api.getChanManager(); 
+        var mgr = _conf.getChanManager(); 
         var i = 0;
         String chlist = ""; 
         
@@ -164,7 +164,7 @@ public class SysAdminApi extends ServerBase {
             chlist += chn; 
             i++;
         }
-        Properties cnf = _api.getConfig();
+        Properties cnf = _conf.getConfig();
         cnf.setProperty("channels", chlist);
     }
     
@@ -177,7 +177,7 @@ public class SysAdminApi extends ServerBase {
     
     
     
-    public static record ServerConfig 
+    public static record ServerConfigData 
     (
         String mycall, 
         boolean igate, boolean rfigate, boolean objigate, 
@@ -192,26 +192,26 @@ public class SysAdminApi extends ServerBase {
         String authkey
     ) 
     {
-        public ServerConfig(AprsServerAPI api) {
+        public ServerConfigData(AprsServerConfig conf) {
             this (
-                api.getProperty("default.mycall", "NOCALL"),
-                api.getBoolProperty("igate.on", false),
-                api.getBoolProperty("igate.rfgate.allow", false),
-                api.getBoolProperty("objects.rfgate.allow", false),
-                api.getIntProperty("objects.rfgate.range", 10),
-                api.getProperty("igate.rfgate.path", ""),
-                api.getProperty("message.rfpath", ""),
-                api.getProperty("objects.rfpath", ""),
-                api.getProperty("message.alwaysRf", ""),
-                api.getBoolProperty("remotectl.on", false),
-                api.getIntProperty("remotectl.radius", 10),
-                api.getProperty("remotectl.connect", ""),
-                api.getProperty("message.auth.key", "")
+                conf.getProperty("default.mycall", "NOCALL"),
+                conf.getBoolProperty("igate.on", false),
+                conf.getBoolProperty("igate.rfgate.allow", false),
+                conf.getBoolProperty("objects.rfgate.allow", false),
+                conf.getIntProperty("objects.rfgate.range", 10),
+                conf.getProperty("igate.rfgate.path", ""),
+                conf.getProperty("message.rfpath", ""),
+                conf.getProperty("objects.rfpath", ""),
+                conf.getProperty("message.alwaysRf", ""),
+                conf.getBoolProperty("remotectl.on", false),
+                conf.getIntProperty("remotectl.radius", 10),
+                conf.getProperty("remotectl.connect", ""),
+                conf.getProperty("message.auth.key", "")
             );
         }
         
-        public void save(AprsServerAPI api) {
-            Properties  prop = api.getConfig();
+        public void save(AprsServerConfig conf) {
+            Properties  prop = conf.getConfig();
             prop.setProperty("default.mycall", mycall);
             prop.setProperty("igate.on", ""+igate);
             prop.setProperty("igate.rfgate.allow", ""+rfigate);
@@ -243,28 +243,28 @@ public class SysAdminApi extends ServerBase {
         int minpause, int maxpause, int mindist, int maxturn
     ) 
     {
-        public OwnPos(AprsServerAPI api) {
+        public OwnPos(AprsServerConfig conf) {
             this (
-                api.getBoolProperty("ownposition.tx.on", false),
-                api.getBoolProperty("ownposition.tx.allowrf", false),
-                api.getBoolProperty("ownposition.tx.compress", false),
-                api.getProperty("ownposition.symbol", "/c"),
-                api.getProperty("ownposition.tx.rfpath", ""),
-                api.getProperty("ownposition.tx.comment", ""),
-                api.getPosProperty("ownposition.pos"), 
-                api.getBoolProperty("ownposition.gps.on", false),
-                api.getBoolProperty("ownposition.gps.adjustclock", false),
-                api.getProperty("ownposition.gps.port", ""),
-                api.getIntProperty("ownposition.gps.baud", 4800),
-                api.getIntProperty("ownposition.tx.minpause", 0),
-                api.getIntProperty("ownposition.tx.maxpause", 0),
-                api.getIntProperty("ownposition.tx.mindist",  0),
-                api.getIntProperty("ownposition.tx.maxturn",  0)
+                conf.getBoolProperty("ownposition.tx.on", false),
+                conf.getBoolProperty("ownposition.tx.allowrf", false),
+                conf.getBoolProperty("ownposition.tx.compress", false),
+                conf.getProperty("ownposition.symbol", "/c"),
+                conf.getProperty("ownposition.tx.rfpath", ""),
+                conf.getProperty("ownposition.tx.comment", ""),
+                conf.getPosProperty("ownposition.pos"), 
+                conf.getBoolProperty("ownposition.gps.on", false),
+                conf.getBoolProperty("ownposition.gps.adjustclock", false),
+                conf.getProperty("ownposition.gps.port", ""),
+                conf.getIntProperty("ownposition.gps.baud", 4800),
+                conf.getIntProperty("ownposition.tx.minpause", 0),
+                conf.getIntProperty("ownposition.tx.maxpause", 0),
+                conf.getIntProperty("ownposition.tx.mindist",  0),
+                conf.getIntProperty("ownposition.tx.maxturn",  0)
             );
         } 
         
-        public void save(AprsServerAPI api) {
-            Properties  prop = api.getConfig();
+        public void save(AprsServerConfig conf) {
+            Properties  prop = conf.getConfig();
             prop.setProperty("ownposition.tx.on", ""+txon);
             prop.setProperty("ownposition.tx.allowrf", ""+allowrf);
             prop.setProperty("ownposition.tx.compress", ""+compress);
@@ -323,11 +323,11 @@ public class SysAdminApi extends ServerBase {
         a.get("/system/adm/status", (ctx) -> {
             SysInfo res = new SysInfo();
             res.runsince = _time;
-            res.version = _api.getVersion();
-            res.items = _api.getDB().nItems();
-            res.ownobj = _api.getDB().getOwnObjects().nItems();
-            res.clients = _api.getWebserver().nClients();
-            res.loggedin = _api.getWebserver().nLoggedin();
+            res.version = _conf.getVersion();
+            res.items = _conf.getDB().nItems();
+            res.ownobj = _conf.getDB().getOwnObjects().nItems();
+            res.clients = _conf.getWebserver().nClients();
+            res.loggedin = _conf.getWebserver().nLoggedin();
             res.usedmem = StationDBBase.usedMemory();
             
             /* Plugins */
@@ -337,7 +337,7 @@ public class SysAdminApi extends ServerBase {
                 res.plugins.add(x.getDescr());
         
             /* Connected servers */
-            RemoteCtl rctl = _api.getRemoteCtl(); 
+            RemoteCtl rctl = _conf.getRemoteCtl(); 
             res.remotectl = (rctl == null ? "" : rctl.toString());
             
             ctx.json(res);
@@ -349,7 +349,7 @@ public class SysAdminApi extends ServerBase {
          * Get clients
          ******************************************/
         a.get("/system/adm/clients", (ctx) -> {
-            MyWebServer ws = (MyWebServer) _api.getWebserver();
+            MyWebServer ws = (MyWebServer) _conf.getWebserver();
             List<ClientInfo> res = new ArrayList<ClientInfo>();
             
             for ( WsNotifier.Client x : ws.getJsonMapUpdater().clients())
@@ -364,8 +364,8 @@ public class SysAdminApi extends ServerBase {
          * Get server config
          ******************************************/
         a.get("/system/adm/server", (ctx) -> {
-            ServerConfig conf = new ServerConfig(_api);
-            ctx.json(conf);
+            ServerConfigData confdata = new ServerConfigData(_conf);
+            ctx.json(confdata);
         });
                 
         
@@ -375,8 +375,8 @@ public class SysAdminApi extends ServerBase {
          * Update server config
          ******************************************/
         a.put("/system/adm/server", (ctx) -> {
-            ServerConfig conf = (ServerConfig) ServerBase.fromJson(ctx.body(), ServerConfig.class);
-            conf.save(_api);
+            ServerConfigData confdata = (ServerConfigData) ServerBase.fromJson(ctx.body(), ServerConfigData.class);
+            confdata.save(_conf);
             // FIXME: Make sure server reboots/reloads settings
             ctx.result("Ok");
         });
@@ -386,8 +386,8 @@ public class SysAdminApi extends ServerBase {
          * Get server config - own position
          ******************************************/
         a.get("/system/adm/ownpos", (ctx) -> {
-            OwnPos conf = new OwnPos(_api);
-            ctx.json(conf);
+            OwnPos opos = new OwnPos(_conf);
+            ctx.json(opos);
         });
                 
            
@@ -396,8 +396,8 @@ public class SysAdminApi extends ServerBase {
          * Update server config
          ******************************************/
         a.put("/system/adm/ownpos", (ctx) -> {
-            OwnPos conf = (OwnPos) ServerBase.fromJson(ctx.body(), OwnPos.class);
-            conf.save(_api);
+            OwnPos opos = (OwnPos) ServerBase.fromJson(ctx.body(), OwnPos.class);
+            opos.save(_conf);
             // FIXME: Make sure server reboots/reloads settings
             ctx.result("Ok");
         });
@@ -408,15 +408,15 @@ public class SysAdminApi extends ServerBase {
          * Get server config - get channel names
          ******************************************/
         a.get("/system/adm/channels", (ctx) -> {
-            Set<String> chans = _api.getChanManager().getKeys();
+            Set<String> chans = _conf.getChanManager().getKeys();
             List<ChannelInfo> res = new ArrayList<ChannelInfo>();
-            for (String chn:  _api.getChanManager().getKeys()) {
-                Channel ch = _api.getChanManager().get(chn);
+            for (String chn:  _conf.getChanManager().getKeys()) {
+                Channel ch = _conf.getChanManager().get(chn);
                 
                 res.add( new ChannelInfo(ch.getIdent(), ch.isActive(),  
-                   ch==_api.getRfChannel(), ch==_api.getInetChannel(), ch.isRf(),
+                   ch==_conf.getRfChannel(), ch==_conf.getInetChannel(), ch.isRf(),
                    ch instanceof AprsChannel,
-                   new GenChanInfo(_api, ch), 
+                   new GenChanInfo(_conf, ch), 
                    ch.getJsConfig()));
             }
             ctx.json(res);
@@ -428,7 +428,7 @@ public class SysAdminApi extends ServerBase {
         ******************************************/
         a.get("/system/adm/channels/{ch}/clients", (ctx) -> {
             var chname = ctx.pathParam("ch");
-            Channel.Manager mgr = _api.getChanManager(); 
+            Channel.Manager mgr = _conf.getChanManager(); 
             Channel ch = mgr.get(chname);
             if (ch==null) {
                 ERROR(ctx, 404, "Channel not found: "+chname);
@@ -451,7 +451,7 @@ public class SysAdminApi extends ServerBase {
          ******************************************/
         a.get("/system/adm/channels/{ch}", (ctx) -> {
             var chname = ctx.pathParam("ch");
-            Channel.Manager mgr = _api.getChanManager(); 
+            Channel.Manager mgr = _conf.getChanManager(); 
             Channel ch = mgr.get(chname);
             if (ch==null)
                 ERROR(ctx, 404, "Channel not found: "+chname);
@@ -459,10 +459,10 @@ public class SysAdminApi extends ServerBase {
                 ctx.json(
                     new ChannelInfo(
                         ch.getIdent(), 
-                        _api.getBoolProperty("channel."+ch.getIdent()+".on", false),  
-                        ch==_api.getRfChannel(), ch==_api.getInetChannel(), ch.isRf(), 
+                        _conf.getBoolProperty("channel."+ch.getIdent()+".on", false),  
+                        ch==_conf.getRfChannel(), ch==_conf.getInetChannel(), ch.isRf(), 
                         ch instanceof AprsChannel, 
-                        new GenChanInfo(_api, ch), 
+                        new GenChanInfo(_conf, ch), 
                         ch.getJsConfig()
                     ));
         });
@@ -476,7 +476,7 @@ public class SysAdminApi extends ServerBase {
         a.put("/system/adm/channels/{ch}", (ctx) -> {
         try {
             var chname = ctx.pathParam("ch");
-            var mgr = _api.getChanManager(); 
+            var mgr = _conf.getChanManager(); 
             var ch = mgr.get(chname);
             if (ch==null) {
                 ERROR(ctx, 404, "Channel not found: "+chname);
@@ -510,14 +510,14 @@ public class SysAdminApi extends ServerBase {
             }
             
             String tname=conf.specific.type;
-            var chmgr = _api.getChanManager();
-            var ch = chmgr.newInstance(_api, tname, conf.name);
+            var chmgr = _conf.getChanManager();
+            var ch = chmgr.newInstance(_conf, tname, conf.name);
             if (ch==null)
                 ERROR(ctx, 400, "Couldn't instantiate channel: "+tname+": "+conf.name);
             else {
                 setChannelProps(ch, conf, tname);
                 if (ch instanceof AprsChannel ach)
-                    ach.addReceiver(_api.getAprsParser());
+                    ach.addReceiver(_conf.getAprsParser());
                 updateChanList();
                 ctx.result("Ok");
             }
@@ -537,7 +537,7 @@ public class SysAdminApi extends ServerBase {
         a.delete("/system/adm/channels/{ch}", (ctx) -> {
             try {
                 var chname = ctx.pathParam("ch");
-                var mgr = _api.getChanManager(); 
+                var mgr = _conf.getChanManager(); 
                 var ch = mgr.get(chname);
                 if (ch==null) {
                     ERROR(ctx, 404, "Channel not found: "+chname);

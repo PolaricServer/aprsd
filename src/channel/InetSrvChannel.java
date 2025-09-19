@@ -47,7 +47,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
     }
     
     
-    public InetSrvChannel(AprsServerAPI api, String id) 
+    public InetSrvChannel(AprsServerConfig api, String id) 
     {
         _init(api, "channel", id);
         _api = api;
@@ -56,7 +56,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
     
        
     /** Start the service */
-    @Override public void activate(AprsServerAPI a) {
+    @Override public void activate(AprsServerConfig a) {
         resetCounters();
         String id = getIdent();            
         _state = State.STARTING;

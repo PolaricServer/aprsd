@@ -57,9 +57,9 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
     private List<ReportHandler> _subscribers = new LinkedList<ReportHandler>();
 
     
-    public AprsParser(AprsServerAPI a, MessageProcessor msg) 
+    public AprsParser(AprsServerConfig a, MessageProcessor msg) 
     {
-        _api = a;
+        _conf = a;
         _msg = msg;
         _hmsFormat.setTimeZone(TimeZone.getTimeZone("GMT")); 
     }  
@@ -80,15 +80,15 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
      */
     public void receivePacket(AprsPacket p, boolean duplicate)
     {
-        if (_api.getDB() == null)
+        if (_conf.getDB() == null)
            return; 
                 
         if (p.report == null || p.report.length() < 1)
             return;
           
-        Station station = _api.getDB().getStation(p.from, null);
+        Station station = _conf.getDB().getStation(p.from, null);
         if (station == null)
-            station = _api.getDB().newStation(p.from); 
+            station = _conf.getDB().newStation(p.from); 
         if (station == null)
             return;
         station.setSource(p.source);
@@ -152,11 +152,11 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
                }
         }
         } catch (NumberFormatException e) { 
-            _api.log().debug("AprsParser", "Cannot parse number in input. Report string probably malformed"); 
-            _api.log().debug("AprsParser", p.toString());
+            _conf.log().debug("AprsParser", "Cannot parse number in input. Report string probably malformed"); 
+            _conf.log().debug("AprsParser", p.toString());
           }
           catch (IllegalArgumentException e) {
-            _api.log().warn("AprsParser", "Illegal Argument: "+e.getMessage());
+            _conf.log().warn("AprsParser", "Illegal Argument: "+e.getMessage());
           }
           
           
@@ -190,12 +190,12 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
         boolean skip = false;
         int n = 0;
         for (i=0; i<=tindex; i++) {
-            Station to = _api.getDB().getStation(pp[i], null);
+            Station to = _conf.getDB().getStation(pp[i], null);
             if ( to != null) {
                 n++; 
                 if (!skip) { 
                    skip=false;
-                   _api.getDB().getRoutes().addEdge(from.getIdent(), to.getIdent(), !duplicate); 
+                   _conf.getDB().getRoutes().addEdge(from.getIdent(), to.getIdent(), !duplicate); 
                 }
                 if (n>1 && i<=tindex) 
                    to.setWideDigi(true); /* Digi is WIDE */
@@ -211,10 +211,10 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
         if ((plen >= 2) && pp[plen-2].matches("qA.")) 
         {
            if (tindex == -1) {
-               Station to = _api.getDB().getStation(pp[plen-1], null);
+               Station to = _conf.getDB().getStation(pp[plen-1], null);
                if (to != null) {
-                    if (_api.getDB().getRoutes() !=null)
-                        _api.getDB().getRoutes().addEdge(s.getIdent(), to.getIdent(), !duplicate);  
+                    if (_conf.getDB().getRoutes() !=null)
+                        _conf.getDB().getRoutes().addEdge(s.getIdent(), to.getIdent(), !duplicate);  
                     to.setIgate(true);         
                     /* Igate direct (has not been digipeated) */
                }  
@@ -222,11 +222,11 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
            else {
                Station last = null;
                if (_viaPat.test(pp[tindex]) && tindex > 0) // (WIDE|TRACE|NOR|SAR).*
-                  last = _api.getDB().getStation(pp[tindex-1], null);
-               Station x = _api.getDB().getStation(pp[plen-1], null);
+                  last = _conf.getDB().getStation(pp[tindex-1], null);
+               Station x = _conf.getDB().getStation(pp[plen-1], null);
                if (last != null && x != null) {
-                  if (_api.getDB().getRoutes() != null)
-                    _api.getDB().getRoutes().addEdge(last.getIdent(), x.getIdent(), !duplicate);
+                  if (_conf.getDB().getRoutes() != null)
+                    _conf.getDB().getRoutes().addEdge(last.getIdent(), x.getIdent(), !duplicate);
                   x.setIgate(true);
                   /* Path from last digi to igate */
                }
@@ -250,7 +250,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
            msgid = msg.substring(i+1, msg.length());
         
         if (i>msg.length() || (i>0 && i<11)) {
-            _api.log().debug("AprsParser", "Message format problem: '"+msg+"'");
+            _conf.log().debug("AprsParser", "Message format problem: '"+msg+"'");
             return;
         }
         String content = msg.substring(11, (i>=0 ? i : msg.length()));
@@ -258,7 +258,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
         if (msg.charAt(10) != ':') {
             int pos = msg.indexOf(':',3);
             if (pos > 11 || pos < 0) {
-                _api.log().debug("AprsParser", "Message without dest: '"+msg+"'");
+                _conf.log().debug("AprsParser", "Message without dest: '"+msg+"'");
                 return; 
             }
             recipient = msg.substring(1,pos).trim();
@@ -308,10 +308,10 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
         char op = msg.charAt(10);
         
         station.setPathInfo(p.via); 
-        TrackerPoint x = _api.getDB().getItem(ident+'@'+station.getIdent(), null);      
+        TrackerPoint x = _conf.getDB().getItem(ident+'@'+station.getIdent(), null);      
         AprsObject obj;
         if (x == null) {
-            obj = _api.getDB().newObject(station, ident);
+            obj = _conf.getDB().newObject(station, ident);
             obj.setTag("APRS");
             obj.setTag(p.source.getTag());
             obj.autoTag();
@@ -319,13 +319,13 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
         else if (x instanceof AprsObject)
             obj = (AprsObject) x;
         else {
-           _api.log().warn("AprsParser", "Object "+x+" is not an APRS object");
+           _conf.log().warn("AprsParser", "Object "+x+" is not an APRS object");
            return;
         }
              
         if (op=='*') {
            parseStdAprs(p, msg.substring(10), obj, true, "");
-           _api.getDB().deactivateSimilarObjects(ident, station);
+           _conf.getDB().deactivateSimilarObjects(ident, station);
         }
         else 
            obj.kill();
@@ -349,20 +349,20 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
         char op = msg.charAt(i);
         
         station.setPathInfo(p.via); 
-        TrackerPoint x = _api.getDB().getItem(ident+'@'+station.getIdent(), null);      
+        TrackerPoint x = _conf.getDB().getItem(ident+'@'+station.getIdent(), null);      
         AprsObject obj;
         if (x == null)
-            obj = _api.getDB().newObject(station, ident);
+            obj = _conf.getDB().newObject(station, ident);
         else if (x instanceof AprsObject)
             obj = (AprsObject) x;
         else{
-           _api.log().warn("AprsParser", "Object "+x+" is not an APRS item");
+           _conf.log().warn("AprsParser", "Object "+x+" is not an APRS item");
            return;
         }
              
         if (op=='!') {
            parseStdAprs(p, msg.substring(i), obj, false, "");
-           _api.getDB().deactivateSimilarObjects(ident, station);
+           _conf.getDB().deactivateSimilarObjects(ident, station);
         }
         else 
            obj.kill();
@@ -448,7 +448,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
          }
          /* Sanity check */
          if (day<1||day>31||hour>24||min>59||sec>59) { 
-            _api.log().debug("AprsParser", "Invalid timestamp: "+dstr+tst+" - using current time");
+            _conf.log().debug("AprsParser", "Invalid timestamp: "+dstr+tst+" - using current time");
             return new Date();
          }
 
@@ -499,7 +499,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
        if (AprsChannel._dupCheck.checkTS(station.getIdent(), time))
             return;
             
-       _api.log().debug("AprsParser", "Extra report accepted: "+time);
+       _conf.log().debug("AprsParser", "Extra report accepted: "+time);
        station.update(time, pd, "", "(EXT)" );        
        for (ReportHandler h:_subscribers)
            h.handlePosReport(src, station.getIdent(), time, pd, "", "(EXT)" );
@@ -527,11 +527,11 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
             
             Date time = new Date(tsx);
             if (AprsChannel._dupCheck.checkTS(station.getIdent(), time)) {
-                _api.log().debug("AprsParser", "Extra report type 2 DUPLICATE: "+time);
+                _conf.log().debug("AprsParser", "Extra report type 2 DUPLICATE: "+time);
                 continue;
             }
             
-            _api.log().debug("AprsParser", "Extra report type 2 accepted: "+time);
+            _conf.log().debug("AprsParser", "Extra report type 2 accepted: "+time);
             ReportHandler.PosData pdx = new ReportHandler.PosData(); 
             pdx.pos = new LatLng(lat, lng);
             pdx.symbol = pd.symbol; 
@@ -760,7 +760,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
     {
         Telemetry t = st.getTelemetry();
         if (data.length() < 5) {
-           _api.log().debug("AprsParser", "Metadata format not recognized: "+data); 
+           _conf.log().debug("AprsParser", "Metadata format not recognized: "+data); 
            return;
         }
         String d = data.substring(5);
@@ -793,7 +793,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
               t.setDescr(bb[1]);
         }
         else
-          _api.log().debug("AprsParser", "Metadata format not recognized: "+data);
+          _conf.log().debug("AprsParser", "Metadata format not recognized: "+data);
     }
     
     

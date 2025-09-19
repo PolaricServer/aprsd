@@ -29,7 +29,7 @@ import java.io.*;
  
 public class InetSrvClient extends InetSrvChannel.Client implements Runnable 
 {
-    private   AprsServerAPI _api;
+    private   AprsServerConfig _api;
     private   InetSrvChannel _chan;
     private   Socket _conn;
     private   String _ipaddr;
@@ -53,7 +53,7 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
     {}
     
     
-    public InetSrvClient(AprsServerAPI api, Socket conn, InetSrvChannel chan) 
+    public InetSrvClient(AprsServerConfig api, Socket conn, InetSrvChannel chan) 
     {
         _api = api;
         _conn = conn;

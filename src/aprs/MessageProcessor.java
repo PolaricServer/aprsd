@@ -126,7 +126,7 @@ public class MessageProcessor implements Runnable, Serializable
    private String         _alwaysRf;
    private int            _threadid;
    private String         _file;
-   private AprsServerAPI  _api; 
+   private AprsServerConfig  _api; 
     
     
    private static String getNextId()
@@ -142,7 +142,7 @@ public class MessageProcessor implements Runnable, Serializable
    
    
    private int threadid=0;
-   public MessageProcessor(AprsServerAPI api)
+   public MessageProcessor(AprsServerConfig api)
    {
        _file = api.getProperty("message.file", "messages.dat");
        if (_file.charAt(0) != '/')

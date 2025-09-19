@@ -59,17 +59,17 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 _updates++;
                 JsOverlay mu = new JsOverlay(_filter);
                 if (mu==null) {
-                    _api.log().error("JsonMapUpdater", "Cannot allocate JsOverlay object.");
+                    _conf.log().error("JsonMapUpdater", "Cannot allocate JsOverlay object.");
                     return null;
                 }
                 mu.authorization = _auth;
-                mu.nclients = _api.getWebserver().nClients();
+                mu.nclients = _conf.getWebserver().nClients();
                 if (!metaonly)
                     addPoints(mu);
                 return serializeJson(mu);
             }
             catch (Exception e) {
-                _api.log().error("JsonMapUpdater", "Exception in generating overlay.");
+                _conf.log().error("JsonMapUpdater", "Exception in generating overlay.");
                 e.printStackTrace(System.out);
                 return null;
             }
@@ -82,7 +82,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
         {
             /* Output APRS objects */
             if (_db == null)
-                _api.log().error("JsonMapUpdater", "_api.getDB() returns null");
+                _conf.log().error("JsonMapUpdater", "_conf.getDB() returns null");
             else 
             {
                 mu.points = new LinkedList<JsPoint>();
@@ -279,8 +279,8 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
       { return new Client(ctx); }
     
     
-   public JsonMapUpdater(AprsServerAPI api) { 
-      super(api); 
-      _db = api.getDB();
+   public JsonMapUpdater(AprsServerConfig conf) { 
+      super(conf); 
+      _db = conf.getDB();
    }
 }

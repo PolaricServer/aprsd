@@ -31,7 +31,7 @@ public abstract class AprsPoint extends TrackerPoint implements Serializable, Cl
     protected int         _ambiguity = 0;
     
     
-    public static void setApi(AprsServerAPI api) {
+    public static void setApi(AprsServerConfig api) {
         _symTab = new SymTable (api, System.getProperties().getProperty("confdir", ".")+"/symbols");
     }
     

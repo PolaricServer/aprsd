@@ -39,7 +39,7 @@ public class SymTable
     }
     
     
-    public SymTable(ServerAPI api, String file) 
+    public SymTable(ServerConfig conf, String file) 
     {
         try {
            _rd = new BufferedReader(new FileReader(file));
@@ -56,9 +56,9 @@ public class SymTable
             }     
         }
         catch (FileNotFoundException  e) 
-            { api.log().error("SymTable", "No symbols file present."); }
+            { conf.log().error("SymTable", "No symbols file present."); }
         catch (Exception  e) 
-            { api.log().error("SymTable", ""+e); }        
+            { conf.log().error("SymTable", ""+e); }        
     } 
 
 

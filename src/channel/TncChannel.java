@@ -43,7 +43,7 @@ public abstract class TncChannel extends AprsChannel
     
     
  
-    public TncChannel(AprsServerAPI api, String id) 
+    public TncChannel(AprsServerConfig api, String id) 
     {
         _init(api, "channel", id);
         _api = api;
@@ -71,7 +71,7 @@ public abstract class TncChannel extends AprsChannel
     * Start the service. 
     * Load/reload configuration parameters. Called each time channel is activated. 
     */
-    public void activate(AprsServerAPI a) {
+    public void activate(AprsServerConfig a) {
         resetCounters();
         String id = getIdent();
         _myCall = _api.getProperty("channel."+id+".mycall", "").toUpperCase();

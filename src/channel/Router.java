@@ -36,7 +36,7 @@ public class Router extends AprsChannel
     private Receiver _recv;
     
     
-    public Router(AprsServerAPI api, String id) {  
+    public Router(AprsServerConfig api, String id) {  
         _init(api, "channel", id);
         _api = api;
     }
@@ -107,7 +107,7 @@ public class Router extends AprsChannel
     /** 
      * Start the service 
      */
-    @Override public void activate(AprsServerAPI a) {        
+    @Override public void activate(AprsServerConfig a) {        
        _state = State.RUNNING;
         resetCounters();
                

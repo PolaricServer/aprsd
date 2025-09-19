@@ -29,12 +29,12 @@ public class InetChannel extends TcpChannel
     private  BufferedReader _rder = null;
 
     
-    public InetChannel(AprsServerAPI api, String id) 
+    public InetChannel(AprsServerConfig api, String id) 
        { super(api, id); }
        
        
        
-    @Override public void activate(AprsServerAPI a) {
+    @Override public void activate(AprsServerConfig a) {
        super.activate(_api);
        String id = getIdent();
        _user = _api.getProperty("channel."+id+".user", "").toUpperCase();

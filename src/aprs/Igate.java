@@ -36,28 +36,28 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
     private String   _defaultPath, _pathObj, _alwaysRf;
     private int      _rangeObj;
     private Logfile  _log;
-    private AprsServerAPI   _api;
+    private AprsServerConfig _conf;
     
     
-    public Igate(AprsServerAPI api) 
+    public Igate(AprsServerConfig conf) 
     {
-        _api = api;
+        _conf = conf;
         init();
     }  
        
        
     public void init() 
     {
-        _allowRf     = _api.getBoolProperty("igate.rfgate.allow", true);
-        _gateObj     = _api.getBoolProperty("igate.rfgate.objects", false);
-        _pathObj     = _api.getProperty("objects.rfgate.path", ""); 
-        _rangeObj    = _api.getIntProperty("objects.rfgate.range", 0);
-        _myCall      = _api.getProperty("igate.mycall", "").trim().toUpperCase();
-        _defaultPath = _api.getProperty("message.rfpath", "WIDE1-1");
-        _alwaysRf    = _api.getProperty("message.alwaysRf", "");       
+        _allowRf     = _conf.getBoolProperty("igate.rfgate.allow", true);
+        _gateObj     = _conf.getBoolProperty("igate.rfgate.objects", false);
+        _pathObj     = _conf.getProperty("objects.rfgate.path", ""); 
+        _rangeObj    = _conf.getIntProperty("objects.rfgate.range", 0);
+        _myCall      = _conf.getProperty("igate.mycall", "").trim().toUpperCase();
+        _defaultPath = _conf.getProperty("message.rfpath", "WIDE1-1");
+        _alwaysRf    = _conf.getProperty("message.alwaysRf", "");       
         if (_myCall.length() == 0)
-           _myCall   = _api.getProperty("default.mycall", "NOCALL").toUpperCase();      
-        _log         = new Logfile(_api, "igate", "igate.log");  
+           _myCall   = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();      
+        _log         = new Logfile(_conf, "igate", "igate.log");  
     }
     
        
@@ -65,7 +65,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
      * Start the service.    
      * @param a The server interface. 
      */
-    public synchronized void activate(AprsServerAPI a) {
+    public synchronized void activate(AprsServerConfig a) {
          /* Activating means subscribing to traffic from the two channels */
          if (_inetChan != null && _rfChan != null) {
             _inetChan.addReceiver(this); 
@@ -74,7 +74,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
          }
          else
             /* FIXME: Should perhaps throw exception here? */
-            _api.log().warn("Igate", "Cannot activate igate, channel(s) not set");
+            _conf.log().warn("Igate", "Cannot activate igate, channel(s) not set");
     }
    
    
@@ -107,12 +107,12 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
     }
     public void setRfChan(AprsChannel rf) {
       if (rf != null && !rf.isRf())
-         _api.log().warn("Igate", "Non-RF channel used as RF channel");
+         _conf.log().warn("Igate", "Non-RF channel used as RF channel");
       _rfChan = rf;
     }
     public void setInetChan(AprsChannel inet) {
       if (inet != null && inet.isRf())
-         _api.log().warn("Igate", "RF channel used as internet channel");
+         _conf.log().warn("Igate", "RF channel used as internet channel");
       _inetChan = inet;
     }
     
@@ -132,7 +132,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
            return;
             
        _msgcnt++;
-       _api.log().debug("Igate", "Gated to internet");
+       _conf.log().debug("Igate", "Gated to internet");
        _log.log(" [" + _rfChan.getIdent() + ">" + _inetChan.getIdent() + "] " + p);       
        
        /* qAR means that packet is gated from RF and igate is bidirectional */
@@ -169,7 +169,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
                ! p.via.matches(".*((TCPXX)|NOGATE|RFONLY|NO_TX).*") 
        )    
        {        
-          _api.log().debug("Igate", "Gated to RF");
+          _conf.log().debug("Igate", "Gated to RF");
           _log.log(" [" + _inetChan.getIdent() + ">" + _rfChan.getIdent() + "] " 
                + p + (p.thirdparty ? " (was thirdparty)" : ""));
                
@@ -191,7 +191,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
           /* Send as third party report */
           p.report = AprsChannel.thirdPartyReport(p, "TCPIP,"+_myCall+"*");
           p.from = _myCall;
-          p.to = _api.getToAddr();
+          p.to = _conf.getToAddr();
           p.thirdparty = false;               
           if (_inetChan != null && _rfChan.isRf()) 
               _rfChan.sendPacket(p);
@@ -203,12 +203,12 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
     private boolean object_in_range(AprsPacket p, int range)
     {
        /* We assume that object's position is already parsed and in database. */
-       if (_api.getOwnPos() == null || _api.getOwnPos().getPosition() == null)
+       if (_conf.getOwnPos() == null || _conf.getOwnPos().getPosition() == null)
             return false;
-       AprsPoint obj = (AprsPoint) _api.getDB().getItem(p.msgto, null);
+       AprsPoint obj = (AprsPoint) _conf.getDB().getItem(p.msgto, null);
        if (obj == null)
             return false;
-       return (obj.distance(_api.getOwnPos()) < range*1000);
+       return (obj.distance(_conf.getOwnPos()) < range*1000);
     }
          
 
@@ -234,7 +234,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
     public synchronized void receivePacket(AprsPacket p, boolean dup)
     {
         if (dup || p==null || 
-            (_api.getOwnPos().getIdent() != null && _api.getOwnPos().getIdent().equals(p.msgto)))
+            (_conf.getOwnPos().getIdent() != null && _conf.getOwnPos().getIdent().equals(p.msgto)))
            return;
         if (p.source == _rfChan) {
             if (p.report.matches("\\?IGATE\\?.*"))

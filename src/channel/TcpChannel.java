@@ -32,7 +32,7 @@ public abstract class TcpChannel extends AprsChannel
     
 
     
-    public TcpChannel(AprsServerAPI api, String id) 
+    public TcpChannel(AprsServerConfig api, String id) 
     {
         _init(api, "channel", id);
         _api = api;
@@ -53,7 +53,7 @@ public abstract class TcpChannel extends AprsChannel
 
  
     /** Start the service */
-    public void activate(AprsServerAPI a) {
+    public void activate(AprsServerConfig a) {
         resetCounters();
         String id = getIdent();
         String host = _api.getProperty("channel."+id+".host", "localhost");

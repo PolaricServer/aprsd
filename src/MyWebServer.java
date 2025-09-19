@@ -41,9 +41,9 @@ public class MyWebServer extends WebServer {
     }
      
     
-    public MyWebServer(AprsServerAPI api, int port) {
-        super(api, port, "notify", "/files", "/home/oivindh/src" );
-        _rctl = api.getRemoteCtl(); 
+    public MyWebServer(AprsServerConfig conf, int port) {
+        super(conf, port, "notify", "/files", "/home/oivindh/src" );
+        _rctl = conf.getRemoteCtl(); 
     }
     
     public JsonMapUpdater getJsonMapUpdater() {
@@ -59,8 +59,8 @@ public class MyWebServer extends WebServer {
     public void start() {
         super.start(); 
         
-        pubSub().createRoom("notify:SYSTEM", false, false, false, true, ServerAPI.Notification.class);
-        pubSub().createRoom("notify:ADMIN", false, false, false, true, ServerAPI.Notification.class);
+        pubSub().createRoom("notify:SYSTEM", false, false, false, true, ServerConfig.Notification.class);
+        pubSub().createRoom("notify:ADMIN", false, false, false, true, ServerConfig.Notification.class);
         
         
         /* Called when connected to RemoteCtl parent or child */
@@ -92,7 +92,7 @@ public class MyWebServer extends WebServer {
             System.out.println("**** Create User session:"+u+" ****");
             MailBox.User mb = (MailBox.User) MailBox.get(u);
             if (mb == null) {
-                mb = new MailBox.User(_api, u);
+                mb = new MailBox.User(_conf, u);
                 mb.addAddress(u);
             }
             return new UserSessionInfo(u, mb);
@@ -105,49 +105,49 @@ public class MyWebServer extends WebServer {
         });
         
         
-        MailBox.init((AprsServerAPI) _api);
+        MailBox.init((AprsServerConfig) _conf);
         
-        _jmapupd = new JsonMapUpdater((AprsServerAPI) _api);
+        _jmapupd = new JsonMapUpdater((AprsServerConfig) _conf);
         _jmapupd.start("jmapdata");
         
         /* Start REST APIs */
-        UserApi ua = new UserApi((AprsServerAPI) _api, userDb(), groupDb());
+        UserApi ua = new UserApi((AprsServerConfig) _conf, userDb(), groupDb());
         ua.start();
-        ItemApi ia = new ItemApi((AprsServerAPI) _api);
+        ItemApi ia = new ItemApi((AprsServerConfig) _conf);
         ia.start();
-        AprsObjectApi aoa = new AprsObjectApi((AprsServerAPI) _api);
+        AprsObjectApi aoa = new AprsObjectApi((AprsServerConfig) _conf);
         aoa.start();
-        SystemApi sa = new SystemApi((AprsServerAPI) _api);
+        SystemApi sa = new SystemApi((AprsServerConfig) _conf);
         sa.start();
-        SysAdminApi saa = new SysAdminApi((AprsServerAPI) _api);
+        SysAdminApi saa = new SysAdminApi((AprsServerConfig) _conf);
         saa.start();
-        BullBoardApi bba = new BullBoardApi((AprsServerAPI) _api);
+        BullBoardApi bba = new BullBoardApi((AprsServerConfig) _conf);
         bba.start();
-        MailBoxApi mba = new MailBoxApi((AprsServerAPI) _api);
+        MailBoxApi mba = new MailBoxApi((AprsServerConfig) _conf);
         mba.start();
-        SarApi sar = new SarApi((AprsServerAPI) _api);
+        SarApi sar = new SarApi((AprsServerConfig) _conf);
         sar.start();
-        ShellScriptApi ssa = new ShellScriptApi((AprsServerAPI) _api);
+        ShellScriptApi ssa = new ShellScriptApi((AprsServerConfig) _conf);
         ssa.start();
         
-         var mycall = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
-         var secure = _api.getBoolProperty("httpserver.secure", false);
-         var proxy  = _api.getBoolProperty("httpserver.proxy", true);
+         var mycall = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
+         var secure = _conf.getBoolProperty("httpserver.secure", false);
+         var proxy  = _conf.getBoolProperty("httpserver.proxy", true);
          
         _zconf.registerMdns("_polaric_aprsd._tcp.local.", mycall, _port,
              "secure="+(secure?"yes":"no")+", "+"proxy="+(proxy?"yes":"no"));
             
             
         /* At shutdown. Send a message to other nodes */
-        _api.addShutdownHandler( ()-> {
+        _conf.addShutdownHandler( ()-> {
             System.out.println("**** SHUTDOWN ****");
-            ((AprsServerAPI)_api).saveConfig();
+            ((AprsServerConfig)_conf).saveConfig();
             
             var u = authService().userDb(); 
             if (u instanceof LocalUsers) 
                 ((LocalUsers) u).save();
             
-            _api.log().info("WebServer", "Unregistering on mDNS...");
+            _conf.log().info("WebServer", "Unregistering on mDNS...");
             _zconf.unregisterMdns();
             authService().hmacAuth().saveLogins();
         });

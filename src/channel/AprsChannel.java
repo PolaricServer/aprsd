@@ -29,7 +29,7 @@ public abstract class AprsChannel extends Channel
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      private static boolean _logPackets = false; 
      
-     protected AprsServerAPI _api; 
+     protected AprsServerConfig _api; 
      protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap<String, Heard>();
     
      /* Statistics */
@@ -51,7 +51,7 @@ public abstract class AprsChannel extends Channel
      
      
      
-     public static void init(AprsServerAPI api) {
+     public static void init(AprsServerConfig api) {
         _logPackets = api.getBoolProperty("channel.logpackets", true);
         canSend = true;
         String myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();

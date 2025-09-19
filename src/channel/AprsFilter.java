@@ -49,7 +49,7 @@ import java.util.*;
  
 public abstract class AprsFilter {
 
-    protected static AprsServerAPI _api; 
+    protected static AprsServerConfig _api; 
     
     
     public static class All extends AprsFilter {
@@ -498,7 +498,7 @@ public abstract class AprsFilter {
     }
     
     
-    public static void init(AprsServerAPI api) {
+    public static void init(AprsServerConfig api) {
         _api = api;
     }
     

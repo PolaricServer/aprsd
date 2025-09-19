@@ -31,9 +31,9 @@ import java.util.stream.*;
  */
 public class SystemApi extends ServerBase {
 
-    private AprsServerAPI _api; 
+    private AprsServerConfig _api; 
     
-    public SystemApi(AprsServerAPI api) {
+    public SystemApi(AprsServerConfig api) {
         super(api);
         _api = api;
     }

@@ -124,7 +124,7 @@ public class GpsPosition extends OwnPosition
     transient private   XReports  _xreports;
 
 
-    public GpsPosition(AprsServerAPI api) 
+    public GpsPosition(AprsServerConfig api) 
     {
         super(api);    
     }

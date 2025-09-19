@@ -96,7 +96,7 @@ public abstract class MailBox {
     }
  
  
-    protected static AprsServerAPI _api;
+    protected static AprsServerConfig _api;
     private List<String> _addr = new LinkedList<String>();
     private static Map<String, MailBox> _addressMapping = new HashMap<String, MailBox>();
     private static int _nuserboxes = 0;
@@ -120,7 +120,7 @@ public abstract class MailBox {
         private String _uid;
         private PubSub _psub; 
     
-        public User(ServerAPI api, String uid) {
+        public User(ServerConfig api, String uid) {
             _uid = uid;
             _nuserboxes++;
             _psub = (PubSub) _api.getWebserver().pubSub();
@@ -168,7 +168,7 @@ public abstract class MailBox {
                 if (!m.outgoing) { 
                     m.status = 1;
                     _api.getWebserver().notifyUser(_uid, 
-                        new ServerAPI.Notification("chat", m.from, m.text, m.time, NOT_EXPIRE));
+                        new ServerConfig.Notification("chat", m.from, m.text, m.time, NOT_EXPIRE));
                 }
                 _psub.put("messages:"+_uid, m); 
             }
@@ -183,7 +183,7 @@ public abstract class MailBox {
                 if (!m.outgoing && m.status == 0) {
                     m.status = 1;
                     _api.getWebserver().notifyUser(_uid, 
-                        new ServerAPI.Notification("chat", m.from, m.text, m.time, NOT_EXPIRE));
+                        new ServerConfig.Notification("chat", m.from, m.text, m.time, NOT_EXPIRE));
                 }
         }
         
@@ -211,7 +211,7 @@ public abstract class MailBox {
     public static class Group extends MailBox implements Serializable {
         private List<MailBox> _boxes = new ArrayList<MailBox>(); 
         
-        public Group(AprsServerAPI api) {
+        public Group(AprsServerConfig api) {
             _api = api;
         }
         
@@ -277,7 +277,7 @@ public abstract class MailBox {
      * STATIC METHODS 
      *******************************************************/
     
-    public static void init(AprsServerAPI api) {
+    public static void init(AprsServerConfig api) {
         _api = api;
         
         _file = api.getProperty("mailbox.file", "mailbox.dat");
@@ -329,7 +329,7 @@ public abstract class MailBox {
     /**
      * Send a message. 
      */
-    public static boolean postMessage(AprsServerAPI api, String from, String to, String txt) {
+    public static boolean postMessage(AprsServerConfig api, String from, String to, String txt) {
         return postMessage(api, new Message(from, to, txt));
     }
 
@@ -339,7 +339,7 @@ public abstract class MailBox {
      * Send a message. 
      * Return false if message could not be delivered (unknown to-address). 
      */
-    public static boolean postMessage(AprsServerAPI api, Message msg) {
+    public static boolean postMessage(AprsServerConfig api, Message msg) {
         if (msg.time==null)
             msg.time = new Date();
             
@@ -409,7 +409,7 @@ public abstract class MailBox {
     /**
      * Send message to another server or elsewhere depending on the @-field. 
      */
-    private static boolean postRemoteMessage(AprsServerAPI api, String[] addr, Message msg) {
+    private static boolean postRemoteMessage(AprsServerConfig api, String[] addr, Message msg) {
     
         if (addr[1].matches("APRS|aprs|Aprs")) {
             /* 

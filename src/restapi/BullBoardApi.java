@@ -27,7 +27,7 @@ import no.polaric.aprsd.*;
  */
 public class BullBoardApi extends ServerBase {
 
-    private AprsServerAPI _api; 
+    private AprsServerConfig _api; 
     private BullBoard _board;
     
     
@@ -37,7 +37,7 @@ public class BullBoardApi extends ServerBase {
         public String text; 
     }
     
-    public BullBoardApi(AprsServerAPI api) {
+    public BullBoardApi(AprsServerConfig api) {
         super(api);
         _api = api;
         _board = _api.getBullBoard();

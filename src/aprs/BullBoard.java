@@ -132,7 +132,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
             /* FIXME: allow users to subscribe to notifications? */
             if (false)
                 _api.getWebserver().notifyUser
-                    ("SYSTEM", new ServerAPI.Notification
+                    ("SYSTEM", new ServerConfig.Notification
                         ("chat", ((b.bullid >= '0' && b.bullid <= '9') ? "Bulletin" : "Announcement"),
                         b.sender+" > "+name+"["+b.bullid+"]: "+b.text, new Date(), 60*1));
         }
@@ -193,7 +193,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
     }
     
     
-    private AprsServerAPI _api; 
+    private AprsServerConfig _api; 
     private SubBoard _bulletins = new SubBoard("_B_", true);
     private SubBoard _announcements = new SubBoard("_A_", false); 
     private SortedMap<String, SubBoard> _groups = new TreeMap<String, SubBoard>(); 
@@ -208,13 +208,13 @@ public class BullBoard implements MessageProcessor.MessageHandler {
     public static Calendar utcTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
        
     
-    // FIXME: Move this to ServerAPI
+    // FIXME: Move this to ServerConfig
     private final ScheduledExecutorService scheduler =
        Executors.newScheduledThreadPool(1);
   
   
   
-    public BullBoard(AprsServerAPI api, MessageProcessor p) {
+    public BullBoard(AprsServerConfig api, MessageProcessor p) {
         _api = api;
         _grpsel = _api.getProperty("bulletin.groups", ".*");
         _senders = _api.getProperty("bulletin.senders", ".*");

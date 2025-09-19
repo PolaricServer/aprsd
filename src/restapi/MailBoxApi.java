@@ -28,11 +28,11 @@ import java.util.*;
  
 public class MailBoxApi extends ServerBase {
 
-    private AprsServerAPI _api; 
+    private AprsServerConfig _api; 
     
     
     
-    public MailBoxApi(AprsServerAPI api) {
+    public MailBoxApi(AprsServerConfig api) {
         super(api);
         _api = api;
     }

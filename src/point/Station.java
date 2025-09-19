@@ -33,7 +33,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
    }
 
  
-    public static void init(AprsServerAPI api)
+    public static void init(AprsServerConfig api)
       { int exptime = api.getIntProperty("aprs.expiretime", 60);
         setExpiretime(exptime * 60 * 1000);
       }

@@ -24,7 +24,7 @@ package no.polaric.aprsd;
 public interface ManagedObject
 {
     /** Start the service */
-   public void activate(AprsServerAPI a);
+   public void activate(AprsServerConfig a);
    
     /** stop the service */
    public void deActivate();

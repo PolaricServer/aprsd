@@ -36,7 +36,7 @@ public class OwnObjects implements Runnable
     private int             _rangeRf;
     private int             _txPeriod;
     private String          _file;
-    private AprsServerAPI   _api;
+    private AprsServerConfig   _api;
     private BufferedReader  _rd;
     private StringTokenizer _next;
     private Set<String>     _ownObjects = new LinkedHashSet<String>();
@@ -45,7 +45,7 @@ public class OwnObjects implements Runnable
     private int              _tid;
     
     
-    public OwnObjects(AprsServerAPI api) 
+    public OwnObjects(AprsServerConfig api) 
     {
         _api = api;
         _allowRf     = api.getBoolProperty("objects.rfgate.allow", false);

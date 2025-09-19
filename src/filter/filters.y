@@ -2,7 +2,7 @@
 %{
 import java.io.*;
 import java.util.*;
-import no.arctic.core.ServerAPI;
+import no.arctic.core.ServerConfig;
 %}
 
 /* YACC Declarations */
@@ -49,7 +49,7 @@ profile : public PROFILE IDENT '{' rules '}'
                              { if ((boolean)$1) 
                                   ruleset.setPublic(); 
                                profiles.put($3, ruleset); 
-                               _api.log().debug("ViewFilter", "View profile '"+$3+"' ok");
+                               _conf.log().debug("ViewFilter", "View profile '"+$3+"' ok");
                                ruleset=null; }
         | error 
                             
@@ -241,7 +241,7 @@ tag_actions : tag_actions ',' TAG IDENT
   private Map<String, RuleSet> profiles = new HashMap<String,RuleSet>(); 
   private Map<String, Pred> predicates = new HashMap<String,Pred>(); 
   
-  private ServerAPI _api; 
+  private ServerConfig _conf; 
   private String _filename;
   
   /* a reference to the lexer object */
@@ -254,14 +254,14 @@ tag_actions : tag_actions ',' TAG IDENT
       yyl_return = lexer.yylex();
     }
     catch (IOException e) {
-      _api.log().error("ViewFilter", "IO error :"+e);
+      _conf.log().error("ViewFilter", "IO error :"+e);
     }
     return yyl_return;
   }
   
   /* error reporting */
   public void yyerror (String error) {
-     _api.log().error(null, "In config file '"+_filename+"', line "+lexer.line()+": " + error);
+     _conf.log().error(null, "In config file '"+_filename+"', line "+lexer.line()+": " + error);
   }
 
   public Map<String, RuleSet> getProfiles() 
@@ -274,9 +274,9 @@ tag_actions : tag_actions ',' TAG IDENT
       { yyparse(); }
       
   /* lexer is created in the constructor */
-  public Parser(ServerAPI api, Reader r, String fname) {
+  public Parser(ServerConfig conf, Reader r, String fname) {
     lexer = new Lexer(r, this);
-    _api = api;
+    _conf = conf;
     _filename = fname; 
     
     /* Install predefined predicates */

@@ -39,12 +39,12 @@ public class Tnc2Channel extends TncChannel
     
 
  
-    public Tnc2Channel(AprsServerAPI api, String id) 
+    public Tnc2Channel(AprsServerConfig api, String id) 
        { super(api, id); }
        
        
  
-    @Override public void activate(AprsServerAPI a) {
+    @Override public void activate(AprsServerConfig a) {
        super.activate(a);
        _unproto = _api.getToAddr();  
        _pathCmd = _api.getProperty("channel."+getIdent()+".pathcommand", "UNPROTO");  

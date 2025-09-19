@@ -41,7 +41,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     private RTree<TrackerPoint, Point> _geoindex = RTree.star().maxChildren(6).create();
     
     
-    public StationDBImp(AprsServerAPI api)
+    public StationDBImp(AprsServerConfig api)
     {
         super(api);
         _file = api.getProperty("stations.file", "stations.dat");

@@ -30,10 +30,10 @@ public abstract class StationDBBase
     protected RouteInfo  _routes;
     protected OwnObjects _ownobj; 
     protected StationDB.Hist _histData = null;
-    protected AprsServerAPI  _api; 
+    protected AprsServerConfig  _api; 
     
     
-    public StationDBBase(AprsServerAPI api)
+    public StationDBBase(AprsServerConfig api)
     {
         _api = api;
         _routes = new RouteInfo();

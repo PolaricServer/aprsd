@@ -27,7 +27,7 @@ import java.io.*;
 
 
 
-public class Main implements AprsServerAPI {
+public class Main implements AprsServerConfig {
 
     public  static String version = "4.0~pre1";
     public  static String toaddr  = "APPS40";
@@ -35,7 +35,7 @@ public class Main implements AprsServerAPI {
     private static StationDB db = null;
     public  WebServer webserver;
     public  Logfile log;
-    private List<ServerAPI.SimpleCb> _shutdown = new ArrayList<ServerAPI.SimpleCb>();
+    private List<ServerConfig.SimpleCb> _shutdown = new ArrayList<ServerConfig.SimpleCb>();
     public  static  AprsChannel ch1 = null;
     public  static  AprsChannel ch2 = null;
     private static  Properties _config, _defaultConf; 
@@ -47,7 +47,7 @@ public class Main implements AprsServerAPI {
     public  static  RemoteCtl rctl;
     public  static  MessageProcessor msgProc = null; 
     private static  String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
-    private AprsServerAPI api;
+    private AprsServerConfig api;
     private static AprsParser parser = null;
     
     
@@ -365,10 +365,17 @@ public class Main implements AprsServerAPI {
         db = new StationDBImp(this);
         ownobjects = db.getOwnObjects(); 
         
-        webserver = new MyWebServer(this, 8081);
+        int http_port = getIntProperty("httpserver.port", 8081);
+        webserver = new MyWebServer(this, http_port);
+        
+        PluginManager.addList(getProperty("plugins", ""));
         webserver.start();    
 
-        
+          
+        /* Start webservices (REST API) of plugins after Webserver is started */
+        PluginManager.startWebservices();
+            
+            
         /* 
          * Channel setup. This should be done after plugins are installed since plugins may
          * add channel types. 
@@ -412,7 +419,7 @@ public class Main implements AprsServerAPI {
     
     
     public void stop() {
-         for (ServerAPI.SimpleCb f: _shutdown)
+         for (ServerConfig.SimpleCb f: _shutdown)
             f.cb(); 
          msgProc.save();
     }

@@ -39,7 +39,7 @@ public class KissTncChannel extends TncChannel
 
     
     
-    public KissTncChannel(AprsServerAPI api, String id) 
+    public KissTncChannel(AprsServerConfig api, String id) 
     {
        super(api, id);
        Properties config = api.getConfig();

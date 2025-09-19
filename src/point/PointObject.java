@@ -37,7 +37,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
      */
     protected Set<String> _tags = new HashSet<String>();
     protected static SortedMap<String, Integer> _tagUse = new TreeMap<String, Integer>();
-    protected static AprsServerAPI   _api = null;
+    protected static AprsServerConfig   _api = null;
         
     protected boolean  _nodb = false;
             

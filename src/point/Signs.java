@@ -28,7 +28,7 @@ public class Signs extends Source
      */
     private static Signs _signs;
     
-    public static void init(AprsServerAPI api) 
+    public static void init(AprsServerConfig api) 
     { 
        _signs = 
           new Signs(api, System.getProperties().getProperty("confdir", ".")+"/signs");  
@@ -113,7 +113,7 @@ public class Signs extends Source
      * Format of each line: 
      * lat, long, max-scale, icon-filename, URL, description.
      */  
-    protected Signs(AprsServerAPI api, String file) 
+    protected Signs(AprsServerConfig api, String file) 
     {
         _init (api, "Signs", false, null);
         try {
