@@ -51,6 +51,11 @@ public class MyWebServer extends WebServer {
     }
     
     
+    public long nMapUpdates() {
+        return _jmapupd.nUpdates();
+    }
+    
+    
     public void start() {
         super.start(); 
         
@@ -58,7 +63,7 @@ public class MyWebServer extends WebServer {
         pubSub().createRoom("notify:ADMIN", false, false, false, true, ServerAPI.Notification.class);
         
         
-        /* Called when connected to Remote Ctl parent or child */
+        /* Called when connected to RemoteCtl parent or child */
         if (_rctl != null)
             _rctl.onConnect( node-> {
                 for (String u : loginUsers())
