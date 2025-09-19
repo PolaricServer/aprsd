@@ -4,9 +4,9 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>no.polaric.aprsd</groupId>
+  <groupId>no.polaric</groupId>
   <artifactId>polaric-aprsd</artifactId>
-  <version>4.0-pre1</version>
+  <version>4.0~pre1</version>
 
   <name>Polaric Aprsd</name>
   
@@ -31,49 +31,7 @@
             <artifactId>arctic-core</artifactId>
             <version>1.0a</version>
         </dependency>
-    
-        <dependency>
-            <groupId>io.javalin</groupId>
-            <artifactId>javalin</artifactId>
-            <version>6.6.0</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
-            <version>2.0.16</version>
-        </dependency>
-    
-        <dependency>
-            <groupId>org.pac4j</groupId>
-            <artifactId>javalin-pac4j</artifactId>
-            <version>7.0.0</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.pac4j</groupId>
-            <artifactId>pac4j-core</artifactId>
-            <version>6.1.1</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.pac4j</groupId>
-            <artifactId>pac4j-http</artifactId>
-            <version>6.1.1</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>org.pac4j</groupId>
-            <artifactId>pac4j-oauth</artifactId>
-            <version>6.1.1</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>net.cinnom</groupId>
-            <artifactId>nano-cuckoo</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-        
+
         <dependency>
             <groupId>javax.jmdns</groupId>
             <artifactId>jmdns</artifactId>
