@@ -26,19 +26,16 @@ import java.io.*;
 
 
 
-
-public class Main implements AprsServerConfig {
+public class Main extends ConfigBase implements AprsServerConfig {
 
     public  static String version = "4.0~pre1";
     public  static String toaddr  = "APPS40";
     
     private static StationDB db = null;
     public  WebServer webserver;
-    public  Logfile log;
     private List<ServerConfig.SimpleCb> _shutdown = new ArrayList<ServerConfig.SimpleCb>();
     public  static  AprsChannel ch1 = null;
     public  static  AprsChannel ch2 = null;
-    private static  Properties _config, _defaultConf; 
     public  static  OwnObjects ownobjects;   
     public  static  OwnPosition ownpos = null; 
     public static   BullBoard bullboard = null;
@@ -46,20 +43,20 @@ public class Main implements AprsServerConfig {
     private static  Channel.Manager _chanManager = new Channel.Manager();
     public  static  RemoteCtl rctl;
     public  static  MessageProcessor msgProc = null; 
-    private static  String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml";
-    private AprsServerConfig api;
-    private static AprsParser parser = null;
+    private static  AprsParser parser = null;
+    
+    private AprsServerConfig conf = this;
+    private static  Properties _defaultConf; 
+    private static  String _xconf = System.getProperties().getProperty("datadir", ".")+"/"+"config.xml"; 
     
     
-        
     public String getVersion()
         { return version; }
     
     
-    public Properties getConfig()
-        { return _config; }
-    
-    
+    /*
+     * Save config to XML file
+     */
     public void saveConfig() 
     { 
        try {
@@ -67,42 +64,10 @@ public class Main implements AprsServerConfig {
             FileOutputStream cfout = new FileOutputStream(_xconf);
             _config.storeToXML(cfout, "Configuration for Polaric APRSD");
        }
-       catch (java.io.IOException e) {log.warn("Main", "Cannot write file "+e);}
+       catch (java.io.IOException e) {_log.warn("Main", "Cannot write file "+e);}
     }
    
-   
-    public String getProperty(String pname, String dvalue)
-        { String x = _config.getProperty(pname, dvalue); 
-          return (x == null ? x : x.trim()); }
-        
-    public boolean getBoolProperty(String pname, boolean dvalue)
-        { return _config.getProperty(pname, (dvalue  ? "true" : "false"))
-                 .trim().matches("TRUE|true|YES|yes"); } 
-                 
-    public int getIntProperty(String pname, int dvalue)
-        {  return Integer.parseInt(_config.getProperty(pname, ""+dvalue).trim()); }
-                 
-        
-    public double[] getPosProperty(String pname)
-    {
-        String inp = _config.getProperty(pname, "0,0").trim(); 
-        if (!inp.matches("[0-9]+(\\.([0-9]+))?\\,([0-9]+)(\\.([0-9]+))?")) {
-            log.warn("Main", "Error in parsing position: "+inp);
-            return new double[] {0,0};
-        }
-        String[] scoord = inp.split(",");
-        double[] res = new double[] {0,0};
-        if (scoord.length != 2)
-            return res;
-        res[0] = Double.parseDouble(scoord[0].trim());
-        res[1] = Double.parseDouble(scoord[1].trim());
-        return res;
-    }
     
-    
-    public Logfile log() 
-        { return log; }
-
         
     public WebServer getWebserver()
         { return webserver; }
@@ -273,12 +238,12 @@ public class Main implements AprsServerConfig {
            catch (java.io.FileNotFoundException e) {}
            
            
-           /* API */
-           api = this; // new Main();
-           PluginManager.setServerApi(api);
-           log = new Logfile(this);
+           /* Config */
+           conf = this;
+           PluginManager.setServerApi(conf);
+           _log = new Logfile(this, "aprsd");
            
-           ViewFilter.init(api);
+           ViewFilter.init(conf);
            AuthInfo.addService("basic");
         }
         catch( Exception ioe )
@@ -295,7 +260,7 @@ public class Main implements AprsServerConfig {
         /*
          * default channel setup: one named aprsis type APRSIS and one named tnc type TNC2
          */
-        AprsChannel.init(api);
+        AprsChannel.init(conf);
         _chanManager.addClass("APRSIS", "no.polaric.aprsd.channel.InetChannel");
         _chanManager.addClass("APRSIS-SRV", "no.polaric.aprsd.channel.InetSrvChannel");
         _chanManager.addClass("TNC2", "no.polaric.aprsd.channel.Tnc2Channel");
@@ -315,15 +280,15 @@ public class Main implements AprsServerConfig {
             if (_chanManager.get(chan) != null)
                 continue;
             String type = getProperty("channel."+chan+".type", "");
-            Channel ch = _chanManager.newInstance(api, type, chan);
+            Channel ch = _chanManager.newInstance(conf, type, chan);
             
             if (ch != null) {
                 chlist.add(ch);
                 if (getBoolProperty("channel."+ch.getIdent()+".on", false))
-                    ch.activate(api);
+                    ch.activate(conf);
             }
             else
-                log.error("Main", "ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
+                _log.error("Main", "ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
         }
         
         for (Channel ch : chlist) {
@@ -347,20 +312,20 @@ public class Main implements AprsServerConfig {
         
         properties().put("API", this);
         msgProc = new MessageProcessor(this);
-        parser = new AprsParser(api, msgProc);
-        bullboard = new BullBoard(api, msgProc);
+        parser = new AprsParser(conf, msgProc);
+        bullboard = new BullBoard(conf, msgProc);
                         
-        Signs.init(api);
+        Signs.init(conf);
         TrackerPoint.setApi(this);
-        Station.init(api); 
+        Station.init(conf); 
             
         if (getBoolProperty("remotectl.on", false)) {
-               log.info("Main", "Activate Remote Control");
-               rctl = new RemoteCtl(api, msgProc);
+               _log.info("Main", "Activate Remote Control");
+               rctl = new RemoteCtl(conf, msgProc);
             }
             
         /* Igate */
-        igate = new Igate(api);
+        igate = new Igate(conf);
             
         db = new StationDBImp(this);
         ownobjects = db.getOwnObjects(); 
@@ -394,18 +359,18 @@ public class Main implements AprsServerConfig {
             ? (AprsChannel) _chanManager.get(ch_rf_name) : null);          
             
         if (ch2 != null && !ch2.isRf()) {
-            log.warn("Main", "Channel " + ch_rf_name + " isn't a proper APRS RF channel - disabling");
+            _log.warn("Main", "Channel " + ch_rf_name + " isn't a proper APRS RF channel - disabling");
             ch2 = null;
         }
         
                  
         /* Own position */
-        boolean gpson = api.getBoolProperty("ownposition.gps.on", false);
+        boolean gpson = conf.getBoolProperty("ownposition.gps.on", false);
         System.out.println("GPS ON = "+gpson);
         if (gpson) 
-            ownpos = new GpsPosition(api);
+            ownpos = new GpsPosition(conf);
         else
-            ownpos = new OwnPosition(api);
+            ownpos = new OwnPosition(conf);
         db.addItem(ownpos); 
 
                      

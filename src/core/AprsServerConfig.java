@@ -29,11 +29,6 @@ public interface AprsServerConfig extends ServerConfig
     public String getVersion();
    
    
-   
-    /** Get configuration properties. */
-    public Properties getConfig();
-   
-   
     /** Get data interface. */
     public StationDB getDB();
 
