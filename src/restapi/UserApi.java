@@ -23,7 +23,7 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.util.*; 
 import java.io.*;
-
+import com.fasterxml.jackson.annotation.*;
 
 
 /**
@@ -53,9 +53,16 @@ public class UserApi extends ServerBase {
         public String name, callsign;
         public String group="DEFAULT";
         public String altgroup="DEFAULT";
-        public boolean operator, admin, suspend; 
+        
+        @JsonAlias({"sar"})
+        public boolean operator; 
+        
+        public boolean admin, suspend; 
+        
         public String passwd;
+        
         public UserInfo() {}
+        
         public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a, boolean u)
            { ident = id; lastused = lu; name=n; callsign=c; operator=s; admin=a; suspend=u; }
         public UserInfo(String id, Date lu, String n, String c, boolean s, boolean a, boolean u, String tr)
@@ -70,7 +77,10 @@ public class UserApi extends ServerBase {
         public String group;
         public String altgroup;
         public String passwd;
-        public boolean operator, admin, suspend;
+        
+        @JsonAlias({"sar"})
+        public boolean operator; 
+        public boolean admin, suspend;
         public UserUpdate() {}
         public UserUpdate(String n, String c, String g, String p, boolean s, boolean a, boolean u) 
             { name=n; callsign=c; group=g; passwd=p; operator=s; admin=a; suspend=u; }
