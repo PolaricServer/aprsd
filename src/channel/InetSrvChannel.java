@@ -47,10 +47,10 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
     }
     
     
-    public InetSrvChannel(AprsServerConfig api, String id) 
+    public InetSrvChannel(AprsServerConfig conf, String id) 
     {
-        _init(api, "channel", id);
-        _api = api;
+        _init(conf, "channel", id);
+        _conf = conf;
         _state = State.OFF;
     }
     
@@ -60,10 +60,10 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         resetCounters();
         String id = getIdent();            
         _state = State.STARTING;
-        _portnr = _api.getIntProperty("channel."+id+".port", 14580);
-        String filt =  _api.getProperty("channel."+id+".infilter", "*");
+        _portnr = _conf.getIntProperty("channel."+id+".port", 14580);
+        String filt =  _conf.getProperty("channel."+id+".infilter", "*");
         _filter = AprsFilter.createFilter( filt, null);
-        _defaultfilt = _api.getProperty("channel."+id+".defaultfilt", "");
+        _defaultfilt = _conf.getProperty("channel."+id+".defaultfilt", "");
         
         _serverthread = new Thread(this);
         _serverthread.start(); 
@@ -109,9 +109,9 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         cnf.duplicates = nDuplicates(); 
         cnf.sentpackets = nSentPackets();
         cnf.type  = "APRSIS-SRV";
-        cnf.port  = _api.getIntProperty("channel."+getIdent()+".port", 14580);
-        cnf.filter = _api.getProperty("channel."+getIdent()+".infilter", "*");
-        cnf.defaultfilt = _api.getProperty("channel."+getIdent()+".defaultfilt", "");
+        cnf.port  = _conf.getIntProperty("channel."+getIdent()+".port", 14580);
+        cnf.filter = _conf.getProperty("channel."+getIdent()+".infilter", "*");
+        cnf.defaultfilt = _conf.getProperty("channel."+getIdent()+".defaultfilt", "");
         return cnf;
     }
     
@@ -120,7 +120,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         if (getIdent().equals(""))
             return;
         var cnf = (JsConfig) ccnf;
-        var props = _api.getConfig();
+        var props = _conf.config();
         props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
         props.setProperty("channel."+getIdent()+".infilter", ""+cnf.filter);
         props.setProperty("channel."+getIdent()+".defaultfilt", ""+cnf.defaultfilt);
@@ -198,7 +198,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         try {
             server = new ServerSocket(_portnr);
             server.setSoTimeout(10000);
-            _api.log().info("InetSrvChannel", "Listening on port "+_portnr);
+            _conf.log().info("InetSrvChannel", "Listening on port "+_portnr);
             _state = State.RUNNING;
             
             while (_state == State.RUNNING) {
@@ -206,7 +206,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
                 try {
                     Socket conn = server.accept(); 
                     synchronized(this) {
-                        InetSrvClient worker = new InetSrvClient(_api, conn, this);
+                        InetSrvClient worker = new InetSrvClient(_conf, conn, this);
                         _clients.add(worker);
                         _nclients++;
                     }
@@ -216,11 +216,11 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
             }
         }
         catch (Exception ex) {
-            _api.log().warn("InetSrvChannel", "ERROR: "+ex.getMessage());
+            _conf.log().warn("InetSrvChannel", "ERROR: "+ex.getMessage());
         }
         finally {
             try {
-                _api.log().info("InetSrvChannel","CLOSING");
+                _conf.log().info("InetSrvChannel","CLOSING");
                 if (server!=null) 
                     server.close();
             } catch (Exception e) {}

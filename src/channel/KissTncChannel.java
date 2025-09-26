@@ -39,11 +39,11 @@ public class KissTncChannel extends TncChannel
 
     
     
-    public KissTncChannel(AprsServerConfig api, String id) 
+    public KissTncChannel(AprsServerConfig conf, String id) 
     {
-       super(api, id);
-       Properties config = api.getConfig();
-       _kissport = api.getIntProperty("channel."+id+".kissport", 0);
+       super(conf, id);
+       Properties config = conf.config();
+       _kissport = conf.getIntProperty("channel."+id+".kissport", 0);
     }
     
     
@@ -69,15 +69,15 @@ public class KissTncChannel extends TncChannel
         cnf.sentpackets = nSentPackets();
         
         cnf.type = "KISS";
-        cnf.kissport = _api.getIntProperty("channel."+getIdent()+".kissport", 0);
-        cnf.baud = _api.getIntProperty("channel."+getIdent()+".baud", 9600);
-        cnf.port = _api.getProperty("channel."+getIdent()+".port", "/dev/ttyS0");
+        cnf.kissport = _conf.getIntProperty("channel."+getIdent()+".kissport", 0);
+        cnf.baud = _conf.getIntProperty("channel."+getIdent()+".baud", 9600);
+        cnf.port = _conf.getProperty("channel."+getIdent()+".port", "/dev/ttyS0");
         return cnf;
     }
 
     public void setJsConfig(Channel.JsConfig ccnf) {
         var cnf = (JsConfig) ccnf;
-        var props = _api.getConfig();
+        var props = _conf.config();
         props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
         props.setProperty("channel."+getIdent()+".baud", ""+cnf.baud);
         props.setProperty("channel."+getIdent()+".kissport", ""+cnf.kissport); 
@@ -99,7 +99,7 @@ public class KissTncChannel extends TncChannel
            return true;
         }
         catch (IOException e)
-           { _api.log().error("KissTncChannel", chId()+"sendPacket: "+e); }
+           { _conf.log().error("KissTncChannel", chId()+"sendPacket: "+e); }
         return false; 
     }
    
@@ -110,7 +110,7 @@ public class KissTncChannel extends TncChannel
      */
     @Override public void close() 
     { 
-        _api.log().info("KissTncChannel", chId()+"Closing channel");
+        _conf.log().info("KissTncChannel", chId()+"Closing channel");
        try {  
          _serial.deActivate(); 
          Thread.sleep(3000);

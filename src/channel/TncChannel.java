@@ -43,10 +43,10 @@ public abstract class TncChannel extends AprsChannel
     
     
  
-    public TncChannel(AprsServerConfig api, String id) 
+    public TncChannel(AprsServerConfig conf, String id) 
     {
-        _init(api, "channel", id);
-        _api = api;
+        _init(conf, "channel", id);
+        _conf = conf;
         _state = State.OFF;
     }
   
@@ -74,16 +74,16 @@ public abstract class TncChannel extends AprsChannel
     public void activate(AprsServerConfig a) {
         resetCounters();
         String id = getIdent();
-        _myCall = _api.getProperty("channel."+id+".mycall", "").toUpperCase();
+        _myCall = _conf.getProperty("channel."+id+".mycall", "").toUpperCase();
         if (_myCall.length() == 0)
-           _myCall = _api.getProperty("default.mycall", "NOCALL").toUpperCase(); 
-        _log = new Logfile(_api, id, "rf.log");   
+           _myCall = _conf.getProperty("default.mycall", "NOCALL").toUpperCase(); 
+        _log = new Logfile(_conf, id, "rf.log");   
         
-        String port = _api.getProperty("channel."+id+".port", "/dev/ttyS0");
-        int baud = _api.getIntProperty("channel."+id+".baud", 9600);
-        int retr = _api.getIntProperty("channel."+id+".retry", 0);
-        long rtime = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
-        _serial = new SerialComm(_api, id, port, baud, retr, rtime);
+        String port = _conf.getProperty("channel."+id+".port", "/dev/ttyS0");
+        int baud = _conf.getIntProperty("channel."+id+".baud", 9600);
+        int retr = _conf.getIntProperty("channel."+id+".retry", 0);
+        long rtime = Long.parseLong(_conf.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
+        _serial = new SerialComm(_conf, id, port, baud, retr, rtime);
         _serial.activate( ()-> receiveLoop(), ()->{} );
     }
 

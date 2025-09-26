@@ -96,7 +96,7 @@ public class SysAdminApi extends ServerBase {
     public  void setChannelProps(Channel ch, ChannelInfo cnf, String type) {
         if (ch.getIdent().equals(""))
             return;
-        var props = _conf.getConfig();
+        var props = _conf.config();
         props.setProperty("channel."+ch.getIdent()+".on", ""+cnf.active);
         props.setProperty("channel."+ch.getIdent()+".tag", cnf.generic.tag);
         props.setProperty("channel."+ch.getIdent()+".restricted", ""+cnf.generic.restricted);
@@ -142,7 +142,7 @@ public class SysAdminApi extends ServerBase {
     
     
     public void removeChannelConfig(Channel ch) {
-        Properties cnf = _conf.getConfig();
+        Properties cnf = _conf.config();
         for (Object key: cnf.keySet())
             if (((String)key).startsWith("channel."+ch.getIdent()))
                 cnf.remove((String) key);
@@ -164,7 +164,7 @@ public class SysAdminApi extends ServerBase {
             chlist += chn; 
             i++;
         }
-        Properties cnf = _conf.getConfig();
+        Properties cnf = _conf.config();
         cnf.setProperty("channels", chlist);
     }
     
@@ -211,7 +211,7 @@ public class SysAdminApi extends ServerBase {
         }
         
         public void save(AprsServerConfig conf) {
-            Properties  prop = conf.getConfig();
+            Properties  prop = conf.config();
             prop.setProperty("default.mycall", mycall);
             prop.setProperty("igate.on", ""+igate);
             prop.setProperty("igate.rfgate.allow", ""+rfigate);
@@ -264,7 +264,7 @@ public class SysAdminApi extends ServerBase {
         } 
         
         public void save(AprsServerConfig conf) {
-            Properties  prop = conf.getConfig();
+            Properties  prop = conf.config();
             prop.setProperty("ownposition.tx.on", ""+txon);
             prop.setProperty("ownposition.tx.allowrf", ""+allowrf);
             prop.setProperty("ownposition.tx.compress", ""+compress);

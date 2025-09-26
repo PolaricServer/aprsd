@@ -39,16 +39,16 @@ public class Tnc2Channel extends TncChannel
     
 
  
-    public Tnc2Channel(AprsServerConfig api, String id) 
-       { super(api, id); }
+    public Tnc2Channel(AprsServerConfig conf, String id) 
+       { super(conf, id); }
        
        
  
     @Override public void activate(AprsServerConfig a) {
        super.activate(a);
-       _unproto = _api.getToAddr();  
-       _pathCmd = _api.getProperty("channel."+getIdent()+".pathcommand", "UNPROTO");  
-       _noBreak = _api.getBoolProperty("channel."+getIdent()+".nobreak", false);
+       _unproto = _conf.getToAddr();  
+       _pathCmd = _conf.getProperty("channel."+getIdent()+".pathcommand", "UNPROTO");  
+       _noBreak = _conf.getBoolProperty("channel."+getIdent()+".nobreak", false);
     }
     
     
@@ -72,15 +72,15 @@ public class Tnc2Channel extends TncChannel
         cnf.sentpackets = nSentPackets();
         
         cnf.type = "TNC2";
-        cnf.baud = _api.getIntProperty("channel."+getIdent()+".baud", 9600);
-        cnf.port = _api.getProperty("channel."+getIdent()+".port", "/dev/ttyS0");
+        cnf.baud = _conf.getIntProperty("channel."+getIdent()+".baud", 9600);
+        cnf.port = _conf.getProperty("channel."+getIdent()+".port", "/dev/ttyS0");
         return cnf;
     }
     
     
     public void setJsConfig(Channel.JsConfig ccnf) {
         var cnf = (JsConfig) ccnf;
-        var props = _api.getConfig();
+        var props = _conf.config();
         props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
         props.setProperty("channel."+getIdent()+".baud", ""+cnf.baud);
     }
@@ -164,14 +164,14 @@ public class Tnc2Channel extends TncChannel
             line += (char) _in.read();
       
          if (line.contains("cmd:"))
-             _api.log().debug("TncChannel", chId()+"TNC in command mode");
+             _conf.log().debug("TncChannel", chId()+"TNC in command mode");
          else 
             if (reset_retry) {
-                 _api.log().error("TncChannel", chId()+"Cannot get command prompt from TNC. Giving up"); 
+                 _conf.log().error("TncChannel", chId()+"Cannot get command prompt from TNC. Giving up"); 
                 reset_retry = false;
             }
             else {
-                 _api.log().warn("TncChannel", chId()+"Cannot get command prompt from TNC. Trying a RESET"); 
+                 _conf.log().warn("TncChannel", chId()+"Cannot get command prompt from TNC. Trying a RESET"); 
                 reset_retry = true; 
                 continue; 
             }
@@ -214,7 +214,7 @@ public class Tnc2Channel extends TncChannel
           Thread.sleep(200);
         }
         catch (Exception e) 
-           {  _api.log().error("TncChannel", chId()+"initTnc: "+e); }
+           {  _conf.log().error("TncChannel", chId()+"initTnc: "+e); }
     }
     
   
@@ -238,7 +238,7 @@ public class Tnc2Channel extends TncChannel
      */
     @Override public void close() 
     { 
-       _api.log().info("Tnc2Channel", chId()+"Closing channel..");
+       _conf.log().info("Tnc2Channel", chId()+"Closing channel..");
        try {  
          _serial.deActivate(); 
          Thread.sleep(3000);

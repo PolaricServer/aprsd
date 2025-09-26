@@ -36,15 +36,15 @@ public class TcpKissChannel extends TcpChannel
     
     
     
-    public TcpKissChannel(AprsServerConfig api, String id) 
-       { super(api, id); }
+    public TcpKissChannel(AprsServerConfig conf, String id) 
+       { super(conf, id); }
         
         
     
     @Override public void activate(AprsServerConfig a) {
-       super.activate(_api);
-       _kissport = _api.getIntProperty("channel."+getIdent()+".kissport", 0);
-       _log = new Logfile(_api, getIdent(), "rf.log");
+       super.activate(_conf);
+       _kissport = _conf.getIntProperty("channel."+getIdent()+".kissport", 0);
+       _log = new Logfile(_conf, getIdent(), "rf.log");
     }
     
     
@@ -68,16 +68,16 @@ public class TcpKissChannel extends TcpChannel
         cnf.sentpackets = nSentPackets();
         
         cnf.type = "TCPKISS";
-        cnf.kissport = _api.getIntProperty("channel."+getIdent()+".kissport", 0);
-        cnf.host=_api.getProperty("channel."+getIdent()+".host", "localhost");
-        cnf.port=_api.getIntProperty("channel."+getIdent()+".port", 21);
+        cnf.kissport = _conf.getIntProperty("channel."+getIdent()+".kissport", 0);
+        cnf.host=_conf.getProperty("channel."+getIdent()+".host", "localhost");
+        cnf.port=_conf.getIntProperty("channel."+getIdent()+".port", 21);
         return cnf; 
     }
         
 
     public void setJsConfig(Channel.JsConfig ccnf) {
         var cnf = (JsConfig) ccnf;
-        var props = _api.getConfig();
+        var props = _conf.config();
         props.setProperty("channel."+getIdent()+".host", cnf.host);
         props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
         props.setProperty("channel."+getIdent()+".kissport", ""+cnf.kissport);
@@ -120,7 +120,7 @@ public class TcpKissChannel extends TcpChannel
            }
         }
         catch (IOException e)
-           {  _api.log().error("TcpKissChannel", chId()+"KissTncChannel.sendPacket: "+e); }
+           {  _conf.log().error("TcpKissChannel", chId()+"KissTncChannel.sendPacket: "+e); }
         return false; 
     }
   

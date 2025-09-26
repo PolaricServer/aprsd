@@ -32,10 +32,10 @@ public abstract class TcpChannel extends AprsChannel
     
 
     
-    public TcpChannel(AprsServerConfig api, String id) 
+    public TcpChannel(AprsServerConfig conf, String id) 
     {
-        _init(api, "channel", id);
-        _api = api;
+        _init(conf, "channel", id);
+        _conf = conf;
         _state = State.OFF;
     }
  
@@ -56,27 +56,27 @@ public abstract class TcpChannel extends AprsChannel
     public void activate(AprsServerConfig a) {
         resetCounters();
         String id = getIdent();
-        String host = _api.getProperty("channel."+id+".host", "localhost");
-        int port = _api.getIntProperty("channel."+id+".port", 21);
-        int retr  = _api.getIntProperty("channel."+id+".retry", 4);
+        String host = _conf.getProperty("channel."+id+".host", "localhost");
+        int port = _conf.getIntProperty("channel."+id+".port", 21);
+        int retr  = _conf.getIntProperty("channel."+id+".retry", 4);
         long rtime = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "10")) * 60 * 1000;
         
         /* Set up backup channel */
-        _backup = _api.getProperty("channel."+id+".backup", "");
-        if (!_api.getChanManager().isBackup(_backup))
-            _api.getChanManager().addBackup(_backup); 
+        _backup = _conf.getProperty("channel."+id+".backup", "");
+        if (!_conf.getChanManager().isBackup(_backup))
+            _conf.getChanManager().addBackup(_backup); 
         
         /* If backup channel is running, stop it */
-        Channel back = _api.getChanManager().get(_backup);
+        Channel back = _conf.getChanManager().get(_backup);
         if (back !=null && back.isActive())
             back.deActivate();
         
         /* Set up comm device */
-        _comm = new TcpComm(_api, id, host, port, retr, rtime);
+        _comm = new TcpComm(_conf, id, host, port, retr, rtime);
         _comm.activate( 
             ()-> receiveLoop(),
             ()-> {
-                    var bu = _api.getChanManager().get(_backup);
+                    var bu = _conf.getChanManager().get(_backup);
                     if (bu != null) 
                         bu.activate(a);
                }

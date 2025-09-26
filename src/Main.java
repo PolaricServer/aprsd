@@ -62,9 +62,9 @@ public class Main extends ConfigBase implements AprsServerConfig {
        try {
             _defaultConf.clear();
             FileOutputStream cfout = new FileOutputStream(_xconf);
-            _config.storeToXML(cfout, "Configuration for Polaric APRSD");
+            config().storeToXML(cfout, "Configuration for Polaric APRSD");
        }
-       catch (java.io.IOException e) {_log.warn("Main", "Cannot write file "+e);}
+       catch (java.io.IOException e) {log().warn("Main", "Cannot write file "+e);}
     }
    
     
@@ -230,10 +230,10 @@ public class Main extends ConfigBase implements AprsServerConfig {
             * file when it terminates. If such a plugin is not installed, this file 
             * is not used. 
             */
-           _config = new Properties(_defaultConf); 
+           setConfig(new Properties(_defaultConf)); 
            try { 
                FileInputStream cfin = new FileInputStream(_xconf); 
-               _config.loadFromXML(cfin);
+               config().loadFromXML(cfin);
            }
            catch (java.io.FileNotFoundException e) {}
            
@@ -241,7 +241,7 @@ public class Main extends ConfigBase implements AprsServerConfig {
            /* Config */
            conf = this;
            PluginManager.setServerApi(conf);
-           _log = new Logfile(this, "aprsd");
+           setLogger( new Logfile(this, "aprsd") );
            
            ViewFilter.init(conf);
            AuthInfo.addService("basic");
@@ -288,7 +288,7 @@ public class Main extends ConfigBase implements AprsServerConfig {
                     ch.activate(conf);
             }
             else
-                _log.error("Main", "ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
+                log().error("Main", "ERROR: Couldn't instantiate channel '"+chan+"' for type: '"+type+"'");
         }
         
         for (Channel ch : chlist) {
@@ -320,7 +320,7 @@ public class Main extends ConfigBase implements AprsServerConfig {
         Station.init(conf); 
             
         if (getBoolProperty("remotectl.on", false)) {
-               _log.info("Main", "Activate Remote Control");
+               log().info("Main", "Activate Remote Control");
                rctl = new RemoteCtl(conf, msgProc);
             }
             
@@ -359,7 +359,7 @@ public class Main extends ConfigBase implements AprsServerConfig {
             ? (AprsChannel) _chanManager.get(ch_rf_name) : null);          
             
         if (ch2 != null && !ch2.isRf()) {
-            _log.warn("Main", "Channel " + ch_rf_name + " isn't a proper APRS RF channel - disabling");
+            log().warn("Main", "Channel " + ch_rf_name + " isn't a proper APRS RF channel - disabling");
             ch2 = null;
         }
         

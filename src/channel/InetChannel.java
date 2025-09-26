@@ -29,20 +29,20 @@ public class InetChannel extends TcpChannel
     private  BufferedReader _rder = null;
 
     
-    public InetChannel(AprsServerConfig api, String id) 
-       { super(api, id); }
+    public InetChannel(AprsServerConfig conf, String id) 
+       { super(conf, id); }
        
        
        
     @Override public void activate(AprsServerConfig a) {
-       super.activate(_api);
+       super.activate(_conf);
        String id = getIdent();
-       _user = _api.getProperty("channel."+id+".user", "").toUpperCase();
+       _user = _conf.getProperty("channel."+id+".user", "").toUpperCase();
        if (_user.length() == 0)
-       _user = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
-       _pass     = _api.getProperty("channel."+id+".pass", "-1");
-       _filter   = _api.getProperty("channel."+id+".filter", ""); 
-       _rfilter  = _api.getProperty("channel."+id+".rfilter", ""); 
+       _user = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
+       _pass     = _conf.getProperty("channel."+id+".pass", "-1");
+       _filter   = _conf.getProperty("channel."+id+".filter", ""); 
+       _rfilter  = _conf.getProperty("channel."+id+".rfilter", ""); 
     }
     
     
@@ -65,17 +65,17 @@ public class InetChannel extends TcpChannel
         cnf.duplicates = nDuplicates(); 
         cnf.sentpackets = nSentPackets();
         cnf.type  = "APRSIS";
-        cnf.host  = _api.getProperty("channel."+getIdent()+".host", "localhost");
-        cnf.port  = _api.getIntProperty("channel."+getIdent()+".port", 21);
-        cnf.pass  = _api.getIntProperty("channel."+getIdent()+".pass", 0); 
-        cnf.filter= _api.getProperty("channel."+getIdent()+".filter", "");
+        cnf.host  = _conf.getProperty("channel."+getIdent()+".host", "localhost");
+        cnf.port  = _conf.getIntProperty("channel."+getIdent()+".port", 21);
+        cnf.pass  = _conf.getIntProperty("channel."+getIdent()+".pass", 0); 
+        cnf.filter= _conf.getProperty("channel."+getIdent()+".filter", "");
         return cnf;
     }
     
     
     public void setJsConfig(Channel.JsConfig ccnf) {
         var cnf = (JsConfig) ccnf;
-        var props = _api.getConfig();
+        var props = _conf.config();
         props.setProperty("channel."+getIdent()+".host", cnf.host);
         props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
         props.setProperty("channel."+getIdent()+".pass", ""+cnf.pass);
@@ -134,7 +134,7 @@ public class InetChannel extends TcpChannel
     {    
          _rder = new BufferedReader(new InputStreamReader(_comm.getInputStream(), _rx_encoding));
          _out = new PrintWriter(new OutputStreamWriter(_comm.getOutputStream(), _tx_encoding));         
-         _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+_api.getVersion());
+         _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+_conf.getVersion());
          
          if (_filter.length() > 0)
              _out.print(" filter "+_filter);
@@ -149,17 +149,17 @@ public class InetChannel extends TcpChannel
                     receivePacket(inp, false);
                     if (inp.charAt(0) == '#') {
                         if (inp.length() > 7 && inp.matches("# Note:.*"))
-                            _api.log().info("InetChannel", inp.substring(2));
+                            _conf.log().info("InetChannel", inp.substring(2));
                         continue;
                     }
                 }
                 else {   
-                    _api.log().info("InetChannel", chId()+"Disconnected from APRS server '"+getHost()+"'");
+                    _conf.log().info("InetChannel", chId()+"Disconnected from APRS server '"+getHost()+"'");
                     break; 
                 }
             }
             catch (java.net.SocketException e) {
-                _api.log().info("InetChannel", chId()+"Socket closed"+e.getMessage());
+                _conf.log().info("InetChannel", chId()+"Socket closed"+e.getMessage());
                 break;
             }
          }

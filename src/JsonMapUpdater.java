@@ -197,7 +197,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             String icon = action.getIcon(s.getIcon()); 
             if (s.iconOverride())  
                icon = s.getIcon(); 
-            x.icon = "/icons/"+ (icon != null ? icon : _icon); 
+            x.icon = "/icons/"+ (icon != null ? icon : icon()); 
             x.trail = createTrail(s, action);
             return x;
         }

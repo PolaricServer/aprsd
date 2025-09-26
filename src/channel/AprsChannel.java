@@ -29,7 +29,7 @@ public abstract class AprsChannel extends Channel
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
      private static boolean _logPackets = false; 
      
-     protected AprsServerConfig _api; 
+     protected AprsServerConfig _conf; 
      protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap<String, Heard>();
     
      /* Statistics */
@@ -347,7 +347,7 @@ public abstract class AprsChannel extends Channel
           
        p.source = this;
        if (_logPackets)
-          _api.log().log(null, chId()+p);
+          _conf.log().log(null, chId()+p);
        _heardPackets++;
        dup = _dupCheck.checkPacket(p.from, p.to, p.report);
        if (!dup) 

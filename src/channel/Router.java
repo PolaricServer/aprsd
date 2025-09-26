@@ -36,9 +36,9 @@ public class Router extends AprsChannel
     private Receiver _recv;
     
     
-    public Router(AprsServerConfig api, String id) {  
-        _init(api, "channel", id);
-        _api = api;
+    public Router(AprsServerConfig conf, String id) {  
+        _init(conf, "channel", id);
+        _conf = conf;
     }
        
     
@@ -65,18 +65,18 @@ public class Router extends AprsChannel
         cnf.sentpackets = nSentPackets();
         cnf.channels = new ArrayList<SubChan>();
         
-        String chans  =  _api.getProperty("channel."+getIdent()+".channels", "");
+        String chans  =  _conf.getProperty("channel."+getIdent()+".channels", "");
         if (chans.length() > 0) {
             String[] chnames = chans.split(",(\\s)*");
             for (String ch : chnames) {
                 /* Add subchannel if a corresponding channel exists in config */
-                if (_api.getProperty("channel."+ch+".type",null) != null) {
-                    String filt =  _api.getProperty("channel."+getIdent()+".filter."+ch, "*");
+                if (_conf.getProperty("channel."+ch+".type",null) != null) {
+                    String filt =  _conf.getProperty("channel."+getIdent()+".filter."+ch, "*");
                     cnf.channels.add(new SubChan(ch, filt));
                 }
                 else
                     /* Clean up */
-                    _api.getConfig().remove("channel."+getIdent()+".filter."+ch); 
+                    _conf.config().remove("channel."+getIdent()+".filter."+ch); 
             }
         }
         cnf.type  = "ROUTER";
@@ -87,7 +87,7 @@ public class Router extends AprsChannel
     
     public void setJsConfig(Channel.JsConfig ccnf) {
         var cnf = (JsConfig) ccnf;
-        var props = _api.getConfig();  
+        var props = _conf.config();  
         var chanlist = ""; 
         
         for (SubChan ch: cnf.channels) {
@@ -112,24 +112,24 @@ public class Router extends AprsChannel
         resetCounters();
                
        /* Configure, Get contained channels */
-       String chn = _api.getProperty("channel."+getIdent()+".channels", "");
+       String chn = _conf.getProperty("channel."+getIdent()+".channels", "");
         _chnames = chn.split(",(\\s)*");
         _channels = new AprsChannel[_chnames.length];
         _filters = new AprsFilter[_chnames.length];
         
         for (int i=0; i<_chnames.length; i++) {
-            Channel ch = _api.getChanManager().get(_chnames[i]);
+            Channel ch = _conf.getChanManager().get(_chnames[i]);
             if (ch == null) {
-                String type = _api.getProperty("channel."+_chnames[i]+".type", "");
-                ch = _api.getChanManager().newInstance(_api, type, _chnames[i]); 
-                if (_api.getBoolProperty("channel."+_chnames[i]+".on", false))
-                    ch.activate(_api);
+                String type = _conf.getProperty("channel."+_chnames[i]+".type", "");
+                ch = _conf.getChanManager().newInstance(_conf, type, _chnames[i]); 
+                if (_conf.getBoolProperty("channel."+_chnames[i]+".on", false))
+                    ch.activate(_conf);
                 // See also Main.java
             }    
             if (ch instanceof AprsChannel ach) {
                 ach.setInRouter(this);
                 _channels[i] = ach;
-                String filt = _api.getProperty("channel."+getIdent()+".filter."+_chnames[i], "*");
+                String filt = _conf.getProperty("channel."+getIdent()+".filter."+_chnames[i], "*");
                 _filters[i] = AprsFilter.createFilter( filt, null );
             }
             else
@@ -148,7 +148,7 @@ public class Router extends AprsChannel
        
        for (AprsChannel ch: _channels)
             if (ch != null) {
-                ch.removeReceiver(_api.getAprsParser()  );
+                ch.removeReceiver(_conf.getAprsParser()  );
                 ch.addReceiver(_recv);
             }
     }
@@ -186,7 +186,7 @@ public class Router extends AprsChannel
                    (ch != null && p.source != null && !ch.getIdent().equals(p.source.getIdent())))
                 {
                     if (ch == null) 
-                        _api.log().warn("Router", "Channel is null");
+                        _conf.log().warn("Router", "Channel is null");
                     
                     else if ( (filt==null || filt.test(p)) && ch.sendPacket(p)) 
                         sent = true;

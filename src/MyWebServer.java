@@ -52,17 +52,13 @@ public class MyWebServer extends WebServer {
     
     
     public long nMapUpdates() {
-        return _jmapupd.nUpdates();
+        return (_jmapupd==null ? 0 : _jmapupd.nUpdates());
     }
     
     
     public void start() {
         super.start(); 
-        
-        pubSub().createRoom("notify:SYSTEM", false, false, false, true, ServerConfig.Notification.class);
-        pubSub().createRoom("notify:ADMIN", false, false, false, true, ServerConfig.Notification.class);
-        
-        
+             
         /* Called when connected to RemoteCtl parent or child */
         if (_rctl != null)
             _rctl.onConnect( node-> {
