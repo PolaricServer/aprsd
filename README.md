@@ -1,16 +1,15 @@
 # Polaric APRSD
 
-The "Polaric Server" is mainly a web based service to present APRS tracking information on maps and where 
+The "*Polaric Server*" is mainly a web based service to present APRS tracking information on maps and where 
 the information is updated in real-time. It is originally targeted for use by radio amateurs in voluntary 
 search and rescue service in Norway. It consists of a web application and a server program (APRS daemon). 
  
-The APRS daemon gets data from a TNC or APRS-IS or a combination. It can present 
-and manipulate the information through a simple HTTP service (REST API). The daemon can 
-also be set up as an igate (internet gateway) and can be installed and run independently 
+The APRS daemon gets data from a TNC or APRS-IS or a combination. Users can present 
+and manipulate the information through a HTTP service (REST API) and updates is streamed through a Websocket. 
+The daemon can also be set up as an igate (internet gateway) and can be installed and run independently 
 of the web app. It has its own webserver. 
 
-It is recommended to combine it with polaric-webapp2. It supports CORS to allow it to be used 
-with a polaric-webapp2 on another location.
+*Polaric-aprsd* is meant to be used as a backend-server for *polaric-webapp2*.
 
 http://aprs.no runs a recent version of this software. More documentation on the project can be found here: 
 http://aprs.no/polaricserver or https://polaricserver.readthedocs.io
