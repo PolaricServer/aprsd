@@ -331,7 +331,9 @@ public class Main extends ConfigBase implements AprsServerConfig {
         ownobjects = db.getOwnObjects(); 
         
         int http_port = getIntProperty("httpserver.port", 8081);
-        webserver = new MyWebServer(this, http_port);
+        String filepath = getProperty("httpserver.filepath", "/");
+        String filedir = getProperty("httpserver.filedir", "/usr/share/polaric");
+        webserver = new MyWebServer(this, http_port, filepath, filedir);
         
         PluginManager.addList(getProperty("plugins", ""));
         webserver.start();    

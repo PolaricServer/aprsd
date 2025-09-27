@@ -41,8 +41,8 @@ public class MyWebServer extends WebServer {
     }
      
     
-    public MyWebServer(AprsServerConfig conf, int port) {
-        super(conf, port, "notify", "/files", "/home/oivindh/src" );
+    public MyWebServer(AprsServerConfig conf, int port, String filepath, String filedir) {
+        super(conf, port, "notify", filepath, filedir );
         _rctl = conf.getRemoteCtl(); 
     }
     
