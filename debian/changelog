@@ -7,6 +7,12 @@ polaric-aprsd (4.0~pre1) UNRELEASED; urgency=medium
 
  -- Oyvind Hanssen <ohanssen@acm.org>  Mon, 25 Aug 2025 20:50:54 +0200
 
+polaric-aprsd (3.3) stable; urgency=medium
+
+  * Bugfixes, adjustments
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Sat, 14 Sep 2025 20:50:00 +0200
+
 polaric-aprsd (3.2.2) stable; urgency=medium
 
   * Allow default filter for aprs-is channels
