@@ -48,4 +48,11 @@ import java.io.Serializable;
     public LatLng(double lat, double lng) {
         _lat=lat; _lng=lng; 
     }
+    
+    
+    
+    public String toString() {
+        return "("+ String.format("%.2f", _lat) + ", " + String.format("%.2f", _lat) + ")";
+    }
+    
  }
