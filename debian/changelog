@@ -1,11 +1,12 @@
-polaric-aprsd (4.0~pre1) UNRELEASED; urgency=medium
+polaric-aprsd (4.0~pre2) UNRELEASED; urgency=medium
 
   * Initial work on a 4.0 branch
   * Split out webserver stuff to arctic-core
   * Some reorganising of source code
   * Use maven to build
+  * Various fixes..
 
- -- Oyvind Hanssen <ohanssen@acm.org>  Mon, 25 Aug 2025 20:50:54 +0200
+ -- Oyvind Hanssen <ohanssen@acm.org>  Sun, 28 Sep 2025 14:00:00 +0200
 
 polaric-aprsd (3.3) stable; urgency=medium
 

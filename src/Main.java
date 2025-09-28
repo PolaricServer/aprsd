@@ -28,7 +28,7 @@ import java.io.*;
 
 public class Main extends ConfigBase implements AprsServerConfig {
 
-    public  static String version = "4.0~pre1";
+    public  static String version = "4.0~pre2";
     public  static String toaddr  = "APPS40";
     
     private static StationDB db = null;
