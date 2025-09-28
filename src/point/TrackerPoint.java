@@ -15,6 +15,7 @@
 package no.polaric.aprsd.point;
 import no.arctic.core.*;
 import no.polaric.aprsd.*;
+import no.polaric.aprsd.util.*;
 import java.util.*;
 import java.io.Serializable;
 import no.polaric.aprsd.filter.ViewFilter; 

@@ -12,7 +12,7 @@
  * GNU Affero General Public License for more details.
  */
  
-package no.polaric.aprsd;
+package no.polaric.aprsd.util;
 import no.polaric.aprsd.point.*;
 
  

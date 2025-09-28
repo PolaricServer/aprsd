@@ -1,5 +1,5 @@
     
-package no.polaric.aprsd; 
+package no.polaric.aprsd.util; 
 import no.arctic.core.util.*;
 import java.util.*;
 import java.security.*;

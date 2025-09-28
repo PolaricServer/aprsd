@@ -1,5 +1,5 @@
  
-package no.polaric.aprsd; 
+package no.polaric.aprsd.util; 
 import java.io.*;
 import java.util.*;
  
@@ -8,7 +8,7 @@ import java.util.*;
  * Keyed set. For each key (in the map) we have a set of strings. 
  */
  
-class KeyedSet {
+public class KeyedSet {
     private HashMap<String, Set<String>> _map = new HashMap<String, Set<String>>();
     
     /**

@@ -13,7 +13,7 @@
  */
  
 package no.polaric.aprsd.point;
-import no.polaric.aprsd.Seq;
+import no.polaric.aprsd.util.*;
 import java.util.*;   
 import java.io.Serializable;  
 import java.util.function.*;
