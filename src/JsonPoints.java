@@ -16,6 +16,9 @@ import no.polaric.aprsd.filter.*;
 
 
 
+/**
+ * Define JSON representation of points for use in overlay. 
+ */
 public interface JsonPoints 
 {
 

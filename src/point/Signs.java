@@ -19,7 +19,9 @@ import java.util.*;
 import java.io.*;
 
 
-
+/**
+ * Signs - simple and static geographical points. 
+ */
 public class Signs extends Source
 {
     /*

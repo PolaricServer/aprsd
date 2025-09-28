@@ -2,6 +2,11 @@
 
 package no.polaric.aprsd;
  
+
+/**
+ * JSON objects for item API.
+ */
+ 
 public interface ItemInfo {
 
     public static class Alias {

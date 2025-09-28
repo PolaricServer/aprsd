@@ -20,6 +20,9 @@ import java.util.*;
 
 
 
+/**
+ * Server config interface for polaric-aprsd. Extends the ServerConfig interface. 
+ */
 
 public interface AprsServerConfig extends ServerConfig
 {

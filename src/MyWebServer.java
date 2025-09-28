@@ -24,6 +24,9 @@ import org.pac4j.javalin.*;
 import java.util.*;
 
 
+/**
+ * Web server implementation. 
+ */
 public class MyWebServer extends WebServer {
     
     private JsonMapUpdater _jmapupd;

@@ -10,6 +10,10 @@ import java.security.spec.*;
 import java.time.LocalDate;
 
  
+/**
+ * Implement symmetric encryption. Based on AES cipher. Works for short strings and 
+ * can generate key from passwords/passphrase like secrets. 
+ */
 public class Encryption {
     
     private SecretKey _key;
@@ -17,12 +21,17 @@ public class Encryption {
     private Cipher _cipher;
 
     
+    /**
+     * Sets up an encryption channel with a key. Key is generated from the given secret and a 
+     * default salt 
+     * @param k Secret (typically a password or passphrase)
+     */
     public Encryption(String k) 
     {
         try {
             _cipher = Cipher.getInstance(_algorithm);
 
-            /* Generate AES key from shared secret and a salt:q. */
+            /* Generate AES key from shared secret and a salt. */
             _key = getKeyFromPassword(k, "PoLaR1c"); 
             
         } catch(Exception e) {

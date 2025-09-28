@@ -19,8 +19,9 @@ package no.polaric.aprsd.point;
 import java.io.Serializable;
 
 
- /* Simple class for lat long coordinates */
- 
+ /**
+  * Simple class for lat long coordinates 
+  */
  public class LatLng implements Serializable {
     private double _lat, _lng;
     public double getLat() {return _lat;}

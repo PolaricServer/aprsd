@@ -23,7 +23,7 @@ import java.time.format.DateTimeFormatter;
 
 
 /**
- * Geographical point. Movable, with label, etc..
+ * Moving geographical point. Movable, with label, etc..
  */
 public abstract class TrackerPoint extends PointObject implements Serializable, Cloneable
 {

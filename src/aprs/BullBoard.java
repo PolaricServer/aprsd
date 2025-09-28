@@ -9,6 +9,10 @@ import java.util.concurrent.*;
 import static java.util.concurrent.TimeUnit.*;
 
 
+/**
+ * APRS bulletins implementation. 
+ */
+ 
 public class BullBoard implements MessageProcessor.MessageHandler {
      
     public class Update {}

@@ -22,7 +22,7 @@ import java.util.function.*;
 
   
 /**
- * Movement history of APRS stations. A history has a certain maximum length with
+ * Movement history of trackers. A history has a certain maximum length with
  * respect to time span. 
  */  
 public class Trail implements Iterable<Trail.Item>, Serializable

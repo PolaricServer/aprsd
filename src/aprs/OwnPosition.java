@@ -21,7 +21,7 @@ import java.io.*;
 
 
 /**
- * Tracking of our own position
+ * Tracking of our own position.
  */
 public class OwnPosition extends Station implements Runnable
 {

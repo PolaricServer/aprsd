@@ -25,6 +25,9 @@ import java.util.*;
 import java.io.*;
 
 
+/** 
+ * Main class. Setup and start application.
+ */
 
 public class Main extends ConfigBase implements AprsServerConfig {
 

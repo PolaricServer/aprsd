@@ -9,6 +9,9 @@ import java.text.*;
 
 
 
+/**
+ * Extra reports to be added to APRS pos reports. 
+ */
  
 public class XReports 
 {
