@@ -68,7 +68,7 @@ public interface StationDB
         
         /**
          * Log setting of alias
-         * @param src identifier
+         * @param tp Tracker point object
          * @param alias Alias is set now. null to delete it. 
          */
         public void setAlias(TrackerPoint tp, String alias); 
@@ -76,8 +76,8 @@ public interface StationDB
         
         /**
          * Log setting of icon
-         * @param src identifier
-         * @param alias Icon filename is set now. null to delete it. 
+         * @param tp Tracker point object
+         * @param icon Icon filename to be used. null to delete it. 
          */
         public void setIcon(TrackerPoint tp, String icon); 
          
@@ -85,7 +85,7 @@ public interface StationDB
         
         /**
          * Log setting of tag
-         * @param src identifier
+         * @param tp Point object
          * @param tag Icon 
          * @param delete false if tag is to be added, true if it is to be removed
          */
@@ -197,7 +197,7 @@ public interface StationDB
     
     /**
      * Return a list of trackerpoints where the ident has the given prefix. 
-     * @Param srch Prefix 
+     * @param arg Prefix 
      */
     public List<TrackerPoint> searchPrefix(String arg);
     
@@ -239,7 +239,7 @@ public interface StationDB
     /**
      * Get trail point for an item at a particular time.
      * @param id identifier (typically a callsign) of item.
-     * @param d time of capture
+     * @param t time of capture
      */
     public Trail.Item getTrailPoint(String id, java.util.Date t);
     

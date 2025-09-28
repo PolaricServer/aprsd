@@ -28,6 +28,7 @@ public class Action
 {
     /**
      * Null Action. No changes. 
+     * @return Empty action
      */
     public static Action NULL()
           { return new Action(false, false, false, false, false, false, "", null, -1, -1); }
@@ -48,9 +49,11 @@ public class Action
      * @param hideall Hide geo object completely (default is to show it).
      * @param hidealias Hide alias and/or special icon. 
      * @param showpath Show path of signals (default is to NOT show it).
+     * @param pub Publicly available
      * @param style CSS class (used in addition to other classes). 
+     * @param icon icon path
      * @param trailtime Timeout for trails in minutes (overrides, -1 means no change).
-     * @param trailtime Trail length in minutes (overrides, -1 means no change).
+     * @param traillen Trail length in minutes (overrides, -1 means no change).
      */
     public Action(boolean hideid, boolean hidetrail, boolean hideall, boolean hidealias, boolean showpath, 
                   boolean pub, String style, String icon, long trailtime, long traillen) 

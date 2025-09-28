@@ -141,7 +141,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
      
     /**
      * Return a list of trackerpoints where the ident has the given prefix. 
-     * @Param srch Prefix 
+     * @param srch Prefix 
      */
     public List<TrackerPoint> searchPrefix(String srch)
     {
@@ -193,8 +193,8 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
      * Geographical search in the database of trackerpoints. 
      * Return list of stations within the rectangle defined by uleft (upper left 
      * corner) and lright (lower right corner).
-     * @param uleft Upper left corner.
-     * @param lright Lower right corner.
+     * @param ul Upper left corner.
+     * @param lr Lower right corner.
      */
     public List<TrackerPoint>
         search(LatLng ul, LatLng lr, RuleSet filter)

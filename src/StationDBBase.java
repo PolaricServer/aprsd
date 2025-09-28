@@ -68,7 +68,7 @@ public abstract class StationDBBase
     /**
      * Get an item.  At a specific time or if d is null, get realtime item. 
      * @param id identifier (typically a callsign) of item.
-     * @param d time of capture, null if realtime.
+     * @param t time of capture, null if realtime.
      */
     public TrackerPoint getItem(String id, Date t)
        { return getItem(id, t, false); }
@@ -200,8 +200,8 @@ public abstract class StationDBBase
 
     /**
      * Get trail point for an item at a particular time.
-     * @param id identifier (typically a callsign) of item.
-     * @param d time of capture
+     * @param src identifier (typically a callsign) of item.
+     * @param t time of capture
      */
     public Trail.Item getTrailPoint(String src, java.util.Date t)
     {
