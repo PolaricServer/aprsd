@@ -69,7 +69,7 @@ public class MyWebServer extends WebServer {
         
         /* Called at login when user-session is created */
         onLogin( u-> {
-            System.out.println("**** LOGIN:"+u+" ****");
+            _conf.log().debug("MyWebServer", "Login: "+u);
             if (_rctl != null)
                 _rctl.sendRequestAll("USER", u+"@"+_rctl.getMycall(), null);
         });
@@ -77,7 +77,7 @@ public class MyWebServer extends WebServer {
         
         /* Called when logout and no other active user-sessions */
         onLogout( u-> {
-            System.out.println("**** LOGOUT:"+u+" ****");
+            _conf.log().debug("MyWebServer", "Logout: "+u);
             if (_rctl != null)
                 _rctl.sendRequestAll("RMUSER", u+"@"+_rctl.getMycall(), null);
         });
@@ -85,7 +85,6 @@ public class MyWebServer extends WebServer {
         
         /* Called to create and close a session-object for user-login. Close is called a week after session-close */
         createUserSes( u-> {
-            System.out.println("**** Create User session:"+u+" ****");
             MailBox.User mb = (MailBox.User) MailBox.get(u);
             if (mb == null) {
                 mb = new MailBox.User(_conf, u);
@@ -95,7 +94,6 @@ public class MyWebServer extends WebServer {
         });
         
         closeUserSes( ses-> {
-            System.out.println("**** Close User session:"+ses+" ****");
             MailBox mb = ((MyWebServer.UserSessionInfo) ses).mailbox;
             mb.removeAddresses(); 
         });

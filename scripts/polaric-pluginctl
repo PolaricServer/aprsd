@@ -1,6 +1,4 @@
- 
-#!/usr/bin/bash
-
+#!/usr/bin/env bash
 # -------------------------------------------------
 # Usage: ./toggle_plugins.sh <path-to-file> <action>
 #        <action> must be either "activate" or "deactivate"

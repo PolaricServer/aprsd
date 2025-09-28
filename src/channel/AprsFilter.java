@@ -49,7 +49,7 @@ import java.util.*;
  
 public abstract class AprsFilter {
 
-    protected static AprsServerConfig _api; 
+    protected static AprsServerConfig _conf; 
     
     
     public static class All extends AprsFilter {
@@ -137,7 +137,7 @@ public abstract class AprsFilter {
         public String toString() {return "ItemRange";}
         
         @Override public boolean test(AprsPacket p) {
-            pos = _api.getDB().getItem(item, null);
+            pos = _conf.getDB().getItem(item, null);
             return super.test(p);
         }
     }
@@ -166,7 +166,7 @@ public abstract class AprsFilter {
             
                 /* Telemetry. Drop if item position is not known */
                 if (telemetry) {
-                    Point x = _api.getDB().getItem(p.from, null);
+                    Point x = _conf.getDB().getItem(p.from, null);
                     if (x==null || x.getPosition() == null)
                         return false;
                 }
@@ -498,8 +498,8 @@ public abstract class AprsFilter {
     }
     
     
-    public static void init(AprsServerConfig api) {
-        _api = api;
+    public static void init(AprsServerConfig conf) {
+        _conf = conf;
     }
     
     

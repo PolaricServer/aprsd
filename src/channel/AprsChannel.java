@@ -51,10 +51,11 @@ public abstract class AprsChannel extends Channel
      
      
      
-     public static void init(AprsServerConfig api) {
-        _logPackets = api.getBoolProperty("channel.logpackets", true);
+     public static void init(AprsServerConfig conf) {
+        AprsFilter.init(conf); 
+        _logPackets = conf.getBoolProperty("channel.logpackets", true);
         canSend = true;
-        String myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();
+        String myCall = conf.getProperty("default.mycall", "NOCALL").toUpperCase();
         if ("NOCALL".equals(myCall))
             canSend = false;
      }
