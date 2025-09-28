@@ -1,0 +1,58 @@
+ 
+#!/usr/bin/bash
+
+# -------------------------------------------------
+# Usage: ./toggle_plugins.sh <path-to-file> <action>
+#        <action> must be either "activate" or "deactivate"
+# -------------------------------------------------
+
+
+set -euo pipefail   # safer execution
+
+# ---------- Helper: print usage ----------
+usage() {
+    echo "Usage: $0 <path-to-file> <activate|deactivate>"
+    exit 1
+}
+
+# ---------- Argument handling ----------
+FILE="${1:-}"
+ACTION="${2:-}"
+
+[[ -z "$FILE" || -z "$ACTION" ]] && usage
+[[ ! -f "$FILE" ]] && { echo "Error: '$FILE' does not exist."; exit 1; }
+[[ "$ACTION" != "activate" && "$ACTION" != "deactivate" ]] && { echo "Error: action must be activate or deactivate."; usage; }
+
+
+# ---------- Detect which sed flavour we have ----------
+# BSD/macOS sed needs an empty string after -i, GNU/Linux sed can take an optional suffix.
+if sed --version >/dev/null 2>&1; then
+    # GNU sed (Linux)
+    SED_INPLACE=(-i)
+else
+    # BSD sed (macOS)
+    SED_INPLACE=(-i '')
+fi
+
+# ---------- Core logic ----------
+if [[ "$ACTION" == "deactivate" ]]; then
+    # Comment out lines that start (ignoring leading whitespace) with "plugins ="
+    #   Capture leading whitespace so we keep the original indentation.
+    sed "${SED_INPLACE[@]}" -E \
+        's/^([[:space:]]*)plugins[[:space:]]*=/\1# plugins =/' \
+        "$FILE"
+    echo "Deactivated plugins in '$FILE'."
+else
+    # Activate: remove a leading "#" (and any surrounding spaces) from those lines.
+    sed "${SED_INPLACE[@]}" -E \
+        's/^([[:space:]]*)#?[[:space:]]*plugins[[:space:]]*=/\1plugins =/' \
+        "$FILE"
+    echo "Activated plugins in '$FILE'."
+fi
+
+
+
+
+
+
+
