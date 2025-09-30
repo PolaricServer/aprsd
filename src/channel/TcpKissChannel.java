@@ -13,7 +13,7 @@
  */
  
 package no.polaric.aprsd.channel;
-import no.arctic.core.*;
+import no.polaric.core.*;
 import no.polaric.aprsd.*;
 import java.io.*;
 import java.util.*;

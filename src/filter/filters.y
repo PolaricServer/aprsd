@@ -2,7 +2,7 @@
 %{
 import java.io.*;
 import java.util.*;
-import no.arctic.core.ServerConfig;
+import no.polaric.core.ServerConfig;
 %}
 
 /* YACC Declarations */

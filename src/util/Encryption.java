@@ -1,6 +1,6 @@
     
 package no.polaric.aprsd.util; 
-import no.arctic.core.util.*;
+import no.polaric.core.util.*;
 import java.util.*;
 import java.security.*;
 import javax.crypto.*;

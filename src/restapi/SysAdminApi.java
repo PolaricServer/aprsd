@@ -15,9 +15,9 @@
 package no.polaric.aprsd;
 import no.polaric.aprsd.point.*;
 import no.polaric.aprsd.channel.*;
-import no.arctic.core.*;
-import no.arctic.core.httpd.*;
-import no.arctic.core.auth.*;
+import no.polaric.core.*;
+import no.polaric.core.httpd.*;
+import no.polaric.core.auth.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.util.*; 
@@ -352,8 +352,9 @@ public class SysAdminApi extends ServerBase {
             MyWebServer ws = (MyWebServer) _conf.getWebserver();
             List<ClientInfo> res = new ArrayList<ClientInfo>();
             
-            for ( WsNotifier.Client x : ws.getJsonMapUpdater().clients())
+            for ( WsNotifier.Client x : ws.getJsonMapUpdater().clients()) {
                 res.add(new ClientInfo(x.created(), x.uid(), x.nIn(), x.nOut(), x.userName(), x.isMobile()));
+            }
             ctx.json(res);
         });
         

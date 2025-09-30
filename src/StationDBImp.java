@@ -20,7 +20,6 @@ import java.util.concurrent.*;
 import java.util.regex.*;
 import java.util.stream.*;
 import no.polaric.aprsd.filter.*;
-
 import com.github.davidmoten.rtree2.*;
 import static com.github.davidmoten.rtree2.geometry.Geometries.point;
 import com.github.davidmoten.rtree2.geometry.Point;

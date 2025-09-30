@@ -13,10 +13,10 @@
  */
  
 package no.polaric.aprsd; 
-import no.arctic.core.*;
-import no.arctic.core.util.*;
-import no.arctic.core.auth.*;
-import no.arctic.core.httpd.*;
+import no.polaric.core.*;
+import no.polaric.core.util.*;
+import no.polaric.core.auth.*;
+import no.polaric.core.httpd.*;
 import io.javalin.Javalin;
 import io.javalin.http.staticfiles.Location;
 import org.pac4j.core.config.Config;

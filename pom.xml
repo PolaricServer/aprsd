@@ -27,7 +27,7 @@
 
   <dependencies>
         <dependency>
-            <groupId>no.arctic.core</groupId>
+            <groupId>no.polaric</groupId>
             <artifactId>arctic-core</artifactId>
             <version>1.0a</version>
         </dependency>

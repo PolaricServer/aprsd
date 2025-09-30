@@ -14,8 +14,8 @@
 
 
 package no.polaric.aprsd;
-import no.arctic.core.*;
-import no.arctic.core.httpd.*;
+import no.polaric.core.*;
+import no.polaric.core.httpd.*;
 import no.polaric.aprsd.point.*;
 import io.javalin.*;
 import io.javalin.websocket.*; 
@@ -81,7 +81,6 @@ public abstract class MapUpdater extends WsNotifier
        /** Receive text frame from client. */
        @Override synchronized public void handleTextFrame(String text) 
        {
-           _conf.log().debug("MapUpdater", "Client "+sesId(_ctx)+", userid="+userName()+" : " + text);
            String[] parms = text.split(",");
            /* SUBSCRIBE filter,x1,x2,x3,x4,scale,tag
             * tag is optional

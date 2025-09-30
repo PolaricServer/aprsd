@@ -1,10 +1,9 @@
 
 package no.polaric.aprsd;
-import no.arctic.core.auth.*;
-import no.arctic.core.httpd.*;
+import no.polaric.core.auth.*;
+import no.polaric.core.httpd.*;
 import no.polaric.aprsd.*;
 import no.polaric.aprsd.point.*;
-
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

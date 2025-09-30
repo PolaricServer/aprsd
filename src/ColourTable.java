@@ -13,7 +13,7 @@
  */
 
 package no.polaric.aprsd;
-import no.arctic.core.*;
+import no.polaric.core.*;
 import java.net.*;
 import java.util.*;
 import java.io.*;
