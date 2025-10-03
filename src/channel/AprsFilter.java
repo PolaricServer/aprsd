@@ -273,7 +273,7 @@ public abstract class AprsFilter {
         }
          
         @Override public boolean test(AprsPacket p) {
-            if (p.via == null || p.via == null)
+            if (p.via == null)
                 return false; 
             String[] digis = p.via.split(",");
             int i;
@@ -283,7 +283,7 @@ public abstract class AprsFilter {
 
             for (int j=0; j<i; j++)
                 for (String x : patterns)
-                    if (digis[i].matches(x))
+                    if (digis[j].matches(x))
                         return true;
             return false;
         }

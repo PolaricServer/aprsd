@@ -201,7 +201,7 @@ public class ShellScriptApi extends ServerBase {
                 String line = rd.readLine();
                 if (!line.startsWith("#") && !(line.length() == 0) && !line.matches("\\s+")) {               
                     String[] x = line.split("\\s+", 6);  
-                    if (x.length < 5 ||  
+                    if (x.length < 6 ||  
                         !x[0].matches("[a-zA-Z0-9\\-\\_]+") || 
                         !x[1].matches("[a-zA-Z0-9\\.\\-\\_]+") || !x[2].matches("[0-9]+") ||
                         !x[3].toUpperCase().matches("TRUE|FALSE") ||
