@@ -7,7 +7,7 @@ read callsign
 
 callsign_regex="^[a-zA-Z0-9\-]+$"
 
-if [[ $callsign =~ $callsign_regex ]] && (( ${#input_value} <= 10 )); then
+if [[ $callsign =~ $callsign_regex ]] && (( ${#callsign} <= 10 )); then
   callsign=${callsign^^}
   echo "Ok, setting default callsign to: $callsign"
   sed -i -E "s/default\.mycall = .+/default\.mycall = $callsign/g" "$CONFIG"
