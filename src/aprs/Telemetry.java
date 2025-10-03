@@ -14,6 +14,7 @@
  
  
 package no.polaric.aprsd.aprs;
+import no.polaric.aprsd.*;
 import no.polaric.aprsd.point.*;
 import java.util.*;
 import java.io.Serializable;

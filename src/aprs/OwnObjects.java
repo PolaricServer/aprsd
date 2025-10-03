@@ -257,7 +257,7 @@ public class OwnObjects implements Runnable
     
     
     
-    void save(ObjectOutput ofs)
+    public void save(ObjectOutput ofs)
     { 
        try { 
           ofs.writeObject(_ownObjects.size());
@@ -268,7 +268,7 @@ public class OwnObjects implements Runnable
     }
 
 
-    void restore(ObjectInput ifs)
+    public void restore(ObjectInput ifs)
      {
         try { 
             int n = (Integer) ifs.readObject(); 

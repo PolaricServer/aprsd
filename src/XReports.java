@@ -20,12 +20,12 @@ public class XReports
         double latitude;
         double longitude;
         
-        XRep(Date ts, double lat, double lon) {
+        public XRep(Date ts, double lat, double lon) {
             timestamp=ts.getTime();
             latitude=lat;
             longitude=lon;
         }
-        XRep(Date ts, LatLng pos) {
+        public XRep(Date ts, LatLng pos) {
             timestamp=ts.getTime(); 
             latitude = pos.getLat();
             longitude = pos.getLng();

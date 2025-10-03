@@ -412,7 +412,7 @@ public class MessageProcessor implements Runnable, Serializable
    
    
 
-    void save()
+    public void save()
     { 
        try { 
            _api.log().debug("MessageProc", "Saving message data...");
@@ -428,7 +428,7 @@ public class MessageProcessor implements Runnable, Serializable
     }
 
 
-    void restore()
+    public void restore()
      {        
          try {     
              _api.log().debug("MessageProc", "Restoring message data...");
