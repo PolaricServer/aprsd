@@ -1,6 +1,6 @@
 
 
-package no.polaric.aprsd;
+package no.polaric.aprsd.api;
  
 
 /**

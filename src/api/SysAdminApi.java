@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  */
  
-package no.polaric.aprsd;
+package no.polaric.aprsd.api;
 import no.polaric.aprsd.point.*;
 import no.polaric.aprsd.channel.*;
 import no.polaric.core.*;

@@ -13,7 +13,7 @@
  */
 
 
-package no.polaric.aprsd;
+package no.polaric.aprsd.api;
 import no.polaric.aprsd.aprs.*;
 import no.polaric.aprsd.point.*;
 import no.polaric.aprsd.filter.*;
