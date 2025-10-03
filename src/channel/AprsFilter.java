@@ -35,9 +35,14 @@ import java.util.*;
  *  b - budlist (with wildcards) 
  *  u - unproto (with wildcards) 
  *  e - entry (with wildcards)
+ *  o - object/item (with wildcards)
+ *  os - strict object (with wildcards)
+ *  s - symbol
+ *  g - group message (with wildcards)
+ *  q - Q construct (with wildcards)
  *  C - input channel (internal only)
  *
- * Todo: o-object, os-strict object, s-symbol, g-group, q-qconstruct, 
+ * Implemented filters: a, r, m, f, t, p, d, b, u, e, C, o, os, s, g, q 
  *
  * Filters separated by just a space is a disjunction. For example 'a b' means 'a OR b'.
  * If the filter starts with '-' it is an exception. If any such filters is true, it means the whole filter is false. 
@@ -324,6 +329,179 @@ public abstract class AprsFilter {
     
     
     /**
+     * o - object with wildcards
+     */
+    public static class Object extends AprsFilter {
+        private String[] patterns;
+        
+        public Object(String[] parms) {
+            patterns = parms; 
+            /* Convert to regex */
+            for (int i = 1; i< patterns.length; i++)
+                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+        }
+        
+        @Override public boolean test(AprsPacket p) {
+            if (p.type != ';' && p.type != ')')
+                return false;
+            if (p.report == null || p.report.length() < 3)
+                return false;
+            
+            String objname;
+            if (p.type == ';') {
+                /* Object report: fixed 9-character name at position 1-9 */
+                if (p.report.length() < 10)
+                    return false;
+                objname = p.report.substring(1, 10).trim();
+            } else {
+                /* Item report: variable length name, terminated by ! or _ */
+                String msg = p.report.substring(1);
+                int i = msg.indexOf('!');
+                if (i == -1 || i > 10)
+                    i = msg.indexOf('_');
+                if (i == -1)
+                    return false;
+                objname = msg.substring(0, i).trim();
+            }
+            
+            for (int i = 1; i < patterns.length; i++)
+                if (objname.matches(patterns[i]))
+                    return true;
+            return false;
+        }
+        
+        public String toString() {return "Object";}
+    }
+    
+    
+    
+    /**
+     * os - strict object (not items) with wildcards
+     */
+    public static class StrictObject extends AprsFilter {
+        private String[] patterns;
+        
+        public StrictObject(String[] parms) {
+            patterns = parms; 
+            /* Convert to regex */
+            for (int i = 1; i< patterns.length; i++)
+                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+        }
+        
+        @Override public boolean test(AprsPacket p) {
+            if (p.type != ';')
+                return false;
+            if (p.report == null || p.report.length() < 10)
+                return false;
+            String objname = p.report.substring(1, 10).trim();
+            for (int i = 1; i < patterns.length; i++)
+                if (objname.matches(patterns[i]))
+                    return true;
+            return false;
+        }
+        
+        public String toString() {return "StrictObject";}
+    }
+    
+    
+    
+    /**
+     * s - symbol filter - pri/alt/overlay
+     */
+    public static class Symbol extends AprsFilter {
+        private String primary = null;
+        private String alternate = null; 
+        private String overlay = null;
+        
+        public Symbol(String[] parms) {
+            if (parms.length >= 2 && parms[1] != null && !parms[1].isEmpty())
+                primary = parms[1];
+            if (parms.length >= 3 && parms[2] != null && !parms[2].isEmpty())
+                alternate = parms[2];
+            if (parms.length >= 4 && parms[3] != null && !parms[3].isEmpty())
+                overlay = parms[3];
+        }
+        
+        @Override public boolean test(AprsPacket p) {
+            ReportHandler.PosData pd = AprsUtil.getPos(p);
+            if (pd == null)
+                return false;
+                
+            if (primary != null && primary.indexOf(pd.symbol) == -1)
+                return false;
+            if (alternate != null && alternate.indexOf(pd.symtab) == -1)
+                return false;
+            if (overlay != null) {
+                /* Overlay is when symtab is numerical (0-9) or A-Z */
+                if (overlay.indexOf(pd.symtab) == -1)
+                    return false;
+            }
+            return true;
+        }
+        
+        public String toString() {return "Symbol";}
+    }
+    
+    
+    
+    /**
+     * g - group message filter with wildcards
+     */
+    public static class GroupMsg extends AprsFilter {
+        private String[] patterns;
+        
+        public GroupMsg(String[] parms) {
+            patterns = parms; 
+            /* Convert to regex */
+            for (int i = 1; i< patterns.length; i++)
+                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+        }
+        
+        @Override public boolean test(AprsPacket p) {
+            if (p.type != ':')
+                return false;
+            if (p.msgto == null)
+                return false;
+            for (int i = 1; i < patterns.length; i++)
+                if (p.msgto.matches(patterns[i]))
+                    return true;
+            return false;
+        }
+        
+        public String toString() {return "GroupMsg";}
+    }
+    
+    
+    
+    /**
+     * q - Q construct filter with wildcards
+     */
+    public static class QConstruct extends AprsFilter {
+        private String[] patterns;
+        
+        public QConstruct(String[] parms) {
+            patterns = parms; 
+            /* Convert to regex */
+            for (int i = 1; i< patterns.length; i++)
+                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+        }
+        
+        @Override public boolean test(AprsPacket p) {
+            String[] qc = p.getQcode();
+            if (qc == null || qc[0] == null)
+                return false;
+            for (int i = 1; i < patterns.length; i++)
+                if (qc[0].matches(patterns[i]))
+                    return true;
+            return false;
+        }
+        
+        public String toString() {return "QConstruct";}
+    }
+    
+    
+    
+    /**
      * C - Input channel
      */
      public static class Chan extends AprsFilter {
@@ -405,6 +583,11 @@ public abstract class AprsFilter {
                     case "m" -> new ItemRange(_client, ff);
                     case "f" -> new ItemRange(ff[1], ff, 2);
                     case "e" -> new Entry(ff);
+                    case "o" -> new Object(ff);
+                    case "os" -> new StrictObject(ff);
+                    case "s" -> new Symbol(ff);
+                    case "g" -> new GroupMsg(ff);
+                    case "q" -> new QConstruct(ff);
                     case "C" -> new Chan(ff);
                     default -> null;
                 }; 
