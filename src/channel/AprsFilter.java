@@ -430,7 +430,7 @@ public abstract class AprsFilter {
         }
         
         @Override public boolean test(AprsPacket p) {
-            ReportHandler.PosData pd = AprsUtil.getPos(p);
+            ReportHandler.PosData pd = AprsUtil.getPosData(p);
             if (pd == null)
                 return false;
                 

@@ -87,6 +87,20 @@ public class AprsUtil
    /* Consider moving this to AprsPacket */
    public static Point getPos(AprsPacket p) 
    {
+      ReportHandler.PosData pd = getPosData(p);
+      if (pd==null)
+         return null;
+      return new Point(pd.pos);
+   }
+   
+   
+   
+   /**
+    * Get position data including symbol information from APRS packet.
+    * Returns full PosData with position, symbol, symtab, speed, course, etc.
+    */
+   public static ReportHandler.PosData getPosData(AprsPacket p)
+   {
       ReportHandler.PosData pd = 
          switch(p.type) {
             case '!', '='  -> _parseStd(p.report, false);
@@ -96,9 +110,7 @@ public class AprsUtil
             case ')'       ->  parseItemPos(p);   
             default -> null;
          };
-      if (pd==null)
-         return null;
-      return new Point(pd.pos);
+      return pd;
    }
    
    
