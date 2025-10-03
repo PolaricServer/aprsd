@@ -13,6 +13,7 @@
  */
  
 package no.polaric.aprsd; 
+import no.polaric.aprsd.aprs.*;
 import no.polaric.core.*;
 import no.polaric.core.util.*;
 import no.polaric.core.auth.*;

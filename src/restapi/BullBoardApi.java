@@ -21,6 +21,7 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.util.*; 
 import no.polaric.aprsd.*;
+import no.polaric.aprsd.aprs.*;
 
 /**
  * Implement REST API for user-related info. Users, areas. 

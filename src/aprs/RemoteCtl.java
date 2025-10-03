@@ -12,7 +12,8 @@
  * GNU General Public License for more details.
  */
  
-package no.polaric.aprsd;
+package no.polaric.aprsd.aprs;
+import no.polaric.aprsd.*;
 import no.polaric.core.*;
 import no.polaric.core.util.*;
 import no.polaric.aprsd.point.*;

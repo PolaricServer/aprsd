@@ -16,6 +16,7 @@
 package no.polaric.aprsd.filter;
 import java.util.*;
 import no.polaric.aprsd.*;
+import no.polaric.aprsd.aprs.*;
 import no.polaric.aprsd.point.*;
 import java.util.regex.*;
 

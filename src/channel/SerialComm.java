@@ -15,6 +15,7 @@
  
 package no.polaric.aprsd.channel;
 import no.polaric.aprsd.*;
+import no.polaric.aprsd.aprs.*;
 import java.io.*;
 import java.util.*;
 import gnu.io.*;
