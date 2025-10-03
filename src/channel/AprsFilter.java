@@ -35,6 +35,11 @@ import java.util.*;
  *  b - budlist (with wildcards) 
  *  u - unproto (with wildcards) 
  *  e - entry (with wildcards)
+ *  o - object/item (with wildcards)
+ *  os - strict object (with wildcards)
+ *  s - symbol
+ *  g - group message (with wildcards)
+ *  q - Q construct (with wildcards)
  *  C - input channel (internal only)
  *
  * Implemented filters: a, r, m, f, t, p, d, b, u, e, C, o, os, s, g, q 
