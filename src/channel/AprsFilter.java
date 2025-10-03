@@ -20,11 +20,11 @@ import no.polaric.aprsd.point.*;
 import java.util.*;
 
 
-/*
- * APRS-IS filters
+/**
+ * APRS-IS filters.
  * See https://www.aprs-is.net/javAPRSFilter.aspx. 
  *
- * A subset of these filters are supported (more can be added if needed):
+ * These filters are supported. C and * are specific for Polaric Aprsd. 
  *  a - area
  *  r - range 
  *  m - my range
@@ -41,8 +41,8 @@ import java.util.*;
  *  g - group message (with wildcards)
  *  q - Q construct (with wildcards)
  *  C - input channel (internal only)
+ *  * - matches all   (internal only)
  *
- * Implemented filters: a, r, m, f, t, p, d, b, u, e, C, o, os, s, g, q 
  *
  * Filters separated by just a space is a disjunction. For example 'a b' means 'a OR b'.
  * If the filter starts with '-' it is an exception. If any such filters is true, it means the whole filter is false. 
