@@ -617,14 +617,15 @@ public abstract class AprsFilter {
          * Negative results of exception rules will override any other rule regardless of order 
          */
         public boolean test(AprsPacket p) {
-            boolean res = false; 
-            for (AprsFilter[] f: _flist)
-                if (ctest(f, p)) { res = true; break; }
-                
-            /* Exceptions */
+            /* Check exceptions first - if any match, result is false */
             for (AprsFilter[] f: _xlist)
-                if (ctest(f, p)) return false; 
-            return res; 
+                if (ctest(f, p)) return false;
+                
+            /* Check positive filters - if any match, result is true */
+            for (AprsFilter[] f: _flist)
+                if (ctest(f, p)) return true;
+                
+            return false; 
         }
         
         
