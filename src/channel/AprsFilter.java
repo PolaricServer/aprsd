@@ -217,18 +217,19 @@ public abstract class AprsFilter {
      * b - budlist with wildcards
      */
     public static class Budlist extends AprsFilter {
-        private String[] patterns;
+        private java.util.regex.Pattern[] patterns;
         
         public Budlist(String[] parms) {
-            patterns = parms; 
-            /* Convert to regex */
-            for (int i = 1; i< patterns.length; i++)
-                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+            patterns = new java.util.regex.Pattern[parms.length - 1]; 
+            /* Convert to regex and pre-compile patterns */
+            for (int i = 1; i< parms.length; i++)
+                patterns[i-1] = java.util.regex.Pattern.compile(
+                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
         }
         
         @Override public boolean test(AprsPacket p) {
-            for (String x : patterns)
-                if (p.from.matches(x))
+            for (java.util.regex.Pattern x : patterns)
+                if (x.matcher(p.from).matches())
                     return true;
             return false;
         }
@@ -243,18 +244,19 @@ public abstract class AprsFilter {
      * u - unproto with wildcards
      */
     public static class Unproto extends AprsFilter {
-        private String[] patterns;
+        private java.util.regex.Pattern[] patterns;
         
         public Unproto(String[] parms) {
-            patterns = parms; 
-            /* Convert to regex */
-            for (int i = 1; i< patterns.length; i++)
-                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+            patterns = new java.util.regex.Pattern[parms.length - 1]; 
+            /* Convert to regex and pre-compile patterns */
+            for (int i = 1; i< parms.length; i++)
+                patterns[i-1] = java.util.regex.Pattern.compile(
+                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
         }
         
         @Override public boolean test(AprsPacket p) {
-            for (String x : patterns)
-                if (p.to.matches(x))
+            for (java.util.regex.Pattern x : patterns)
+                if (x.matcher(p.to).matches())
                     return true;
             return false;
         }
@@ -269,13 +271,15 @@ public abstract class AprsFilter {
      * d - digipeater with wildcards
      */
     public static class Digi extends AprsFilter {
-        private String[] patterns;
+        private java.util.regex.Pattern[] patterns;
+        private static final java.util.regex.Pattern DIGI_USED = java.util.regex.Pattern.compile(".+\\*");
         
         public Digi(String[] parms) {
-            patterns = parms; 
-            /* Convert to regex */
-            for (int i = 1; i< patterns.length; i++)
-                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".")+"(\\*)?";
+            patterns = new java.util.regex.Pattern[parms.length - 1]; 
+            /* Convert to regex and pre-compile patterns */
+            for (int i = 1; i< parms.length; i++)
+                patterns[i-1] = java.util.regex.Pattern.compile(
+                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".")+"(\\*)?");
         }
          
         @Override public boolean test(AprsPacket p) {
@@ -284,12 +288,12 @@ public abstract class AprsFilter {
             String[] digis = p.via.split(",");
             int i;
             for (i=digis.length; i>0; i--)
-                if (digis[i-1].matches(".+\\*"))
+                if (DIGI_USED.matcher(digis[i-1]).matches())
                     break;
 
             for (int j=0; j<i; j++)
-                for (String x : patterns)
-                    if (digis[j].matches(x))
+                for (java.util.regex.Pattern x : patterns)
+                    if (x.matcher(digis[j]).matches())
                         return true;
             return false;
         }
@@ -304,21 +308,22 @@ public abstract class AprsFilter {
      * e - entry calls with wildcards
      */
     public static class Entry extends AprsFilter {
-        private String[] patterns;
+        private java.util.regex.Pattern[] patterns;
         
         public Entry(String[] parms) {
-            patterns = parms; 
-            /* Convert to regex */
-            for (int i = 1; i< patterns.length; i++)
-                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+            patterns = new java.util.regex.Pattern[parms.length - 1]; 
+            /* Convert to regex and pre-compile patterns */
+            for (int i = 1; i< parms.length; i++)
+                patterns[i-1] = java.util.regex.Pattern.compile(
+                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
         }
         
         @Override public boolean test(AprsPacket p) {
             String[] qc = p.getQcode();
             if (qc==null || qc[1] == null)
                 return false; 
-            for (String x : patterns)
-                if (qc[1].matches(x))
+            for (java.util.regex.Pattern x : patterns)
+                if (x.matcher(qc[1]).matches())
                     return true;
             return false;
         }
@@ -332,13 +337,14 @@ public abstract class AprsFilter {
      * o - object with wildcards
      */
     public static class Object extends AprsFilter {
-        private String[] patterns;
+        private java.util.regex.Pattern[] patterns;
         
         public Object(String[] parms) {
-            patterns = parms; 
-            /* Convert to regex */
-            for (int i = 1; i< patterns.length; i++)
-                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+            patterns = new java.util.regex.Pattern[parms.length - 1]; 
+            /* Convert to regex and pre-compile patterns */
+            for (int i = 1; i< parms.length; i++)
+                patterns[i-1] = java.util.regex.Pattern.compile(
+                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
         }
         
         @Override public boolean test(AprsPacket p) {
@@ -364,8 +370,8 @@ public abstract class AprsFilter {
                 objname = msg.substring(0, i).trim();
             }
             
-            for (int i = 1; i < patterns.length; i++)
-                if (objname.matches(patterns[i]))
+            for (java.util.regex.Pattern pattern : patterns)
+                if (pattern.matcher(objname).matches())
                     return true;
             return false;
         }
@@ -379,13 +385,14 @@ public abstract class AprsFilter {
      * os - strict object (not items) with wildcards
      */
     public static class StrictObject extends AprsFilter {
-        private String[] patterns;
+        private java.util.regex.Pattern[] patterns;
         
         public StrictObject(String[] parms) {
-            patterns = parms; 
-            /* Convert to regex */
-            for (int i = 1; i< patterns.length; i++)
-                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+            patterns = new java.util.regex.Pattern[parms.length - 1]; 
+            /* Convert to regex and pre-compile patterns */
+            for (int i = 1; i< parms.length; i++)
+                patterns[i-1] = java.util.regex.Pattern.compile(
+                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
         }
         
         @Override public boolean test(AprsPacket p) {
@@ -394,8 +401,8 @@ public abstract class AprsFilter {
             if (p.report == null || p.report.length() < 10)
                 return false;
             String objname = p.report.substring(1, 10).trim();
-            for (int i = 1; i < patterns.length; i++)
-                if (objname.matches(patterns[i]))
+            for (java.util.regex.Pattern pattern : patterns)
+                if (pattern.matcher(objname).matches())
                     return true;
             return false;
         }
@@ -448,13 +455,14 @@ public abstract class AprsFilter {
      * g - group message filter with wildcards
      */
     public static class GroupMsg extends AprsFilter {
-        private String[] patterns;
+        private java.util.regex.Pattern[] patterns;
         
         public GroupMsg(String[] parms) {
-            patterns = parms; 
-            /* Convert to regex */
-            for (int i = 1; i< patterns.length; i++)
-                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+            patterns = new java.util.regex.Pattern[parms.length - 1]; 
+            /* Convert to regex and pre-compile patterns */
+            for (int i = 1; i< parms.length; i++)
+                patterns[i-1] = java.util.regex.Pattern.compile(
+                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
         }
         
         @Override public boolean test(AprsPacket p) {
@@ -462,8 +470,8 @@ public abstract class AprsFilter {
                 return false;
             if (p.msgto == null)
                 return false;
-            for (int i = 1; i < patterns.length; i++)
-                if (p.msgto.matches(patterns[i]))
+            for (java.util.regex.Pattern pattern : patterns)
+                if (pattern.matcher(p.msgto).matches())
                     return true;
             return false;
         }
@@ -477,21 +485,22 @@ public abstract class AprsFilter {
      * q - Q construct filter with wildcards
      */
     public static class QConstruct extends AprsFilter {
-        private String[] patterns;
+        private java.util.regex.Pattern[] patterns;
         
         public QConstruct(String[] parms) {
-            patterns = parms; 
-            /* Convert to regex */
-            for (int i = 1; i< patterns.length; i++)
-                patterns[i] = patterns[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+            patterns = new java.util.regex.Pattern[parms.length - 1]; 
+            /* Convert to regex and pre-compile patterns */
+            for (int i = 1; i< parms.length; i++)
+                patterns[i-1] = java.util.regex.Pattern.compile(
+                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
         }
         
         @Override public boolean test(AprsPacket p) {
             String[] qc = p.getQcode();
             if (qc == null || qc[0] == null)
                 return false;
-            for (int i = 1; i < patterns.length; i++)
-                if (qc[0].matches(patterns[i]))
+            for (java.util.regex.Pattern pattern : patterns)
+                if (pattern.matcher(qc[0]).matches())
                     return true;
             return false;
         }
@@ -538,8 +547,8 @@ public abstract class AprsFilter {
         
         public Combined(String cl, String userid) {
             _client = userid; 
-            _flist = new LinkedList<AprsFilter[]>();
-            _xlist = new LinkedList<AprsFilter[]>();
+            _flist = new ArrayList<AprsFilter[]>();
+            _xlist = new ArrayList<AprsFilter[]>();
             parse(cl);
         }
 
@@ -558,11 +567,13 @@ public abstract class AprsFilter {
                 String cmd = ff[0];
                 boolean exception = false;
                 
-                if (cmd.charAt(0) == '-')  {
+                char firstChar = cmd.charAt(0);
+                if (firstChar == '-')  {
                     exception = true;
                     cmd = cmd.substring(1);
+                    firstChar = cmd.charAt(0);
                 }
-                if (cmd.charAt(0) == '&') {
+                if (firstChar == '&') {
                     cmd = cmd.substring(1);
                     findex++;
                 }
