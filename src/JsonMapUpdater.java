@@ -14,6 +14,7 @@
  
 
 package no.polaric.aprsd;
+import no.polaric.aprsd.aprs.*;
 import no.polaric.core.httpd.*;
 import no.polaric.core.auth.*;
 import no.polaric.aprsd.point.*;

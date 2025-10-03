@@ -15,6 +15,7 @@
  
 package no.polaric.aprsd.filter;
 import no.polaric.aprsd.*;
+import no.polaric.aprsd.aprs.*;
 
 
 /**

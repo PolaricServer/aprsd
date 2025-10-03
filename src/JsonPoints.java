@@ -3,6 +3,7 @@ package no.polaric.aprsd;
 import no.polaric.core.auth.*;
 import no.polaric.core.httpd.*;
 import no.polaric.aprsd.*;
+import no.polaric.aprsd.aprs.*;
 import no.polaric.aprsd.point.*;
 import java.io.*;
 import java.util.*;

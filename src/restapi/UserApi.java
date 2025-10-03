@@ -14,6 +14,7 @@
 
 
 package no.polaric.aprsd;
+import no.polaric.aprsd.aprs.*;
 import no.polaric.aprsd.point.*;
 import no.polaric.aprsd.filter.*;
 import no.polaric.core.*;

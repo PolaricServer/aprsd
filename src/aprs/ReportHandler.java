@@ -13,7 +13,7 @@
  */
  
  
-package no.polaric.aprsd;
+package no.polaric.aprsd.aprs;
 import no.polaric.aprsd.point.*;
 import java.util.*;
 
