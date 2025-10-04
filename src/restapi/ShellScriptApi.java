@@ -23,7 +23,6 @@ import io.javalin.Javalin;
 import io.javalin.http.Context;
 import java.util.*; 
 import java.io.*;
-import no.polaric.aprsd.*;
 import no.polaric.aprsd.aprs.*;
 import java.lang.ProcessBuilder.Redirect;
 import java.util.concurrent.TimeUnit; 
@@ -106,7 +105,6 @@ public class ShellScriptApi extends ServerBase {
     public static class ProcessRunner {
         
         private ProcessBuilder _pb; 
-        private Thread _thread;
         private Script _script;
         private String _rtext; 
         private String _uid; 

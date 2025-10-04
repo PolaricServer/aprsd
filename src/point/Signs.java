@@ -95,7 +95,6 @@ public class Signs extends Source
     
     
     private BufferedReader  _rd;
-    private StringTokenizer _next;
     private List<Item> _list = new ArrayList<Item>();
     private Map<String, Item> _list2 = new HashMap<String, Item>();
     

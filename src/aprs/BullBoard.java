@@ -135,11 +135,6 @@ public class BullBoard implements MessageProcessor.MessageHandler {
             _api.getWebserver().pubSub().put("bullboard", null);
                         
             /* FIXME: allow users to subscribe to notifications? */
-            if (false)
-                _api.getWebserver().notifyUser
-                    ("SYSTEM", new ServerConfig.Notification
-                        ("chat", ((b.bullid >= '0' && b.bullid <= '9') ? "Bulletin" : "Announcement"),
-                        b.sender+" > "+name+"["+b.bullid+"]: "+b.text, new Date(), 60*1));
         }
         
         

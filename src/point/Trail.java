@@ -92,10 +92,8 @@ public class Trail implements Iterable<Trail.Item>, Serializable
         
     
     private LinkedList<Item> _items = new LinkedList<Item>();
-    private boolean _extended;
     private boolean _itemsExpired; 
-    private long _expire, _length; 
-    private int  _maxSpeed;    
+    private long _expire, _length;    
     
     public static void setMaxAge(long a)
        { _maxAge = a; }

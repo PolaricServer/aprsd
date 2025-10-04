@@ -129,7 +129,6 @@ public abstract class MapUpdater extends WsNotifier
    
    
    
-//   private LStatLogger _stats;
    private MapUpdater _link;  
    private Timer hb = new Timer();
    protected long    _updates = 0;
@@ -146,37 +145,11 @@ public abstract class MapUpdater extends WsNotifier
                           x -> ((Client)x).isInside(null, false) ); 
             } 
         } , 10000, 5000); 
-        
-        /* Periodic task to count usage of map layers */
-        hb.schedule( new TimerTask() { 
-            public void run() { 
-         //      if (_stats != null) {
-         //         for (String x : _clients.keySet())
-         //            _stats.count( ((Client)_clients.get(x))._baseLayer); 
-         //      }
-            } 
-        } , 30000, 60000); 
    }  
     
           
-/*          
-    public void setStatLogger(LStatLogger l) {
-       _stats = l;
-    }
-*/
 
-    /**
-     * Websocket close handler.
-     * FIXME can this be removed?
-    @OnWebSocketClose
-    public void onClose(Session conn, int statusCode, String reason) {
-       String user = _getUid(conn);
-       _conf.log().info("MapUpdater", "Connection closed"+(reason==null ? "" : ": "+reason)+". Unsubscribing user: "+user);
-       closeSes(conn);
-    }
-     */
-   
-   /** 
+    /** 
      * When opening the websocket, send client an overlay with only metainfo. 
      */
    @Override protected boolean subscribe(WsContext ctx, WsNotifier.Client client) 

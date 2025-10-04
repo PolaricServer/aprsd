@@ -36,10 +36,7 @@ public class OwnObjects implements Runnable
     private String          _pathRf;
     private int             _rangeRf;
     private int             _txPeriod;
-    private String          _file;
     private AprsServerConfig   _api;
-    private BufferedReader  _rd;
-    private StringTokenizer _next;
     private Set<String>     _ownObjects = new LinkedHashSet<String>();
     private Thread          _thread;
     private boolean         _forceUpdate;

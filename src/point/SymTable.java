@@ -25,7 +25,6 @@ import java.io.*;
 public class SymTable 
 {
     private BufferedReader  _rd;
-    private StringTokenizer _next;
     private Map<String, String> _stab = new HashMap<String,String>(); 
     private ArrayList<Exp> _rtab = new ArrayList<Exp>();
     
