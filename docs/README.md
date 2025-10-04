@@ -4,6 +4,7 @@ This directory contains documentation files for Polaric APRSD in reStructuredTex
 
 ## Contents
 
+- `aprsis-config.rst` - Complete guide to configuring and using the APRS-IS service
 - `aprs-filters.rst` - Comprehensive guide to APRS-IS filters implemented in Polaric APRSD
 
 ## Format
