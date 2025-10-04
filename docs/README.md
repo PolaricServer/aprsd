@@ -1,6 +1,6 @@
 # Polaric APRSD Documentation
 
-This directory contains documentation files for Polaric APRSD in reStructuredText (RST) format, suitable for use with ReadTheDocs.
+This directory contains documentation files for Polaric APRSD in reStructuredText (RST) format, suitable for use with ReadTheDocs. Files may be moved to the docs repository and be visible on the documentation on readthedocs. 
 
 ## Contents
 
