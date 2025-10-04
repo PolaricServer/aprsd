@@ -125,7 +125,6 @@ public class MessageProcessor implements Runnable, Serializable
    private String         _key;
    private String         _defaultPath;
    private String         _alwaysRf;
-   private int            _threadid;
    private String         _file;
    private AprsServerConfig  _api; 
     
