@@ -43,7 +43,7 @@ public class InetChannel extends TcpChannel
        _user = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
        _pass     = _conf.getProperty("channel."+id+".pass", "-1");
        _filter   = _conf.getProperty("channel."+id+".filter", ""); 
-       _rfilter  = _conf.getProperty("channel."+id+".rfilter", ""); 
+       setReceiveFilter(_conf.getProperty("channel."+id+".rfilter", "")); 
     }
     
     

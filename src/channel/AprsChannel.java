@@ -106,6 +106,7 @@ public abstract class AprsChannel extends Channel
     transient protected List<Receiver> _rcv = new LinkedList<Receiver>(); 
     transient protected PrintWriter  _out = null; 
     protected String _rfilter = null;
+    protected Pattern _rfilterPattern = null;
     private AprsChannel _inRouter = null; 
 
     public static DupCheck  _dupCheck = new DupCheck();
@@ -142,6 +143,23 @@ public abstract class AprsChannel extends Channel
       return _inRouter != null;
     }
     
+    
+    /**
+     * Set receive filter with regex pattern. The pattern is compiled once for performance.
+     */
+    protected void setReceiveFilter(String filter) {
+        _rfilter = filter;
+        if (filter != null && !filter.isEmpty()) {
+            try {
+                _rfilterPattern = Pattern.compile(filter);
+            } catch (PatternSyntaxException e) {
+                _conf.log().warn("AprsChannel", "Invalid regex pattern in rfilter: " + filter);
+                _rfilterPattern = null;
+            }
+        } else {
+            _rfilterPattern = null;
+        }
+    }
     
     
     /**
@@ -344,7 +362,7 @@ public abstract class AprsChannel extends Channel
        if (p==null)
           return false;
        
-       if (_rfilter != null && !_rfilter.equals("") && !p.toString().matches(_rfilter))
+       if (_rfilterPattern != null && !_rfilterPattern.matcher(p.toString()).matches())
           return false; 
           
        p.source = this;

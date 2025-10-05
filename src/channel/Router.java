@@ -215,7 +215,7 @@ public class Router extends AprsChannel
        if (p==null)
           return false;
        
-       if (_rfilter != null && !_rfilter.equals("") && !p.toString().matches(_rfilter))
+       if (_rfilterPattern != null && !_rfilterPattern.matcher(p.toString()).matches())
           return false; 
           
        _heardPackets++;
