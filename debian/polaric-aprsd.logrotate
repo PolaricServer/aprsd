@@ -4,7 +4,7 @@
         missingok
         rotate 52
         postrotate
-                /etc/init.d/polaric-aprsd restart > /dev/null
+                systemctl restart polaric-aprsd.service > /dev/null
         endscript
         compress
 }
