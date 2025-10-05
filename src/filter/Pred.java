@@ -113,7 +113,7 @@ class Tag extends Pred
 
     public Tag(String t) { 
         if (t.charAt(0)=='+')
-            t = t.substring(1, t.length());
+            t = t.substring(1);
         plustag = Pattern.compile("\\+?(" + t + ")");
         minustag = Pattern.compile("\\-"+t);
     }
@@ -167,8 +167,9 @@ class AprsSym extends Pred
     }
     
     public boolean eval(TrackerPoint p, long scale) { 
-        if (p instanceof AprsPoint) {
-            return pattern.matcher(""+((AprsPoint)p).getSymtab()+((AprsPoint)p).getSymbol()).matches();
+        if (p instanceof AprsPoint ap) {
+            String symString = new String(new char[]{ap.getSymtab(), ap.getSymbol()});
+            return pattern.matcher(symString).matches();
         }
         else return false;
     }
@@ -278,7 +279,6 @@ class Path extends Pred
 abstract class NumVal extends Pred
 {
     private long val; 
-    private String op;
     private byte _op;
     
     private byte opVal(String op) {
@@ -398,7 +398,7 @@ class TrafficTo extends Pred
  */
 class AND extends Pred
 {
-    private List<Pred> conj = new LinkedList<Pred>(); 
+    private List<Pred> conj = new ArrayList<Pred>(); 
     
     
     public AND() {};
@@ -423,7 +423,7 @@ class AND extends Pred
     }
     
     void optimize() {
-        List<Pred> copy = new LinkedList<Pred>();
+        List<Pred> copy = new ArrayList<Pred>();
         for (Pred p : conj) {
            if (p instanceof AND pp) {
               for (Pred q : pp.conj)
@@ -446,7 +446,7 @@ class AND extends Pred
  */
 class OR extends Pred
 {
-   private List<Pred> disj = new LinkedList<Pred>(); 
+   private List<Pred> disj = new ArrayList<Pred>(); 
    
    
    public OR() {};
@@ -476,7 +476,7 @@ class OR extends Pred
     * than this, since they may be referenced from elsewhere. 
     */
    void optimize() {
-        List<Pred> copy = new LinkedList<Pred>();
+        List<Pred> copy = new ArrayList<Pred>();
         for (Pred p : disj) {
            if (p instanceof OR pp) {
               for (Pred q : pp.disj)
