@@ -29,7 +29,7 @@
         <dependency>
             <groupId>no.polaric</groupId>
             <artifactId>arctic-core</artifactId>
-            <version>1.0a</version>
+            <version>1.0</version>
         </dependency>
 
         <dependency>
