@@ -52,13 +52,14 @@ public class ViewFilter {
             
      List<String[]> res = new ArrayList<String[]>();
      list.forEach( (Map.Entry<String, RuleSet> e) -> {
-        if ( e.getValue().isPublic() 
-                || (loggedIn && e.getValue().isAll())
-                || (loggedIn && group != null && e.getValue().isGroup(group))
-                || (!loggedIn && e.getValue().isGroup("NOLOGIN"))
+        RuleSet rs = e.getValue();
+        if ( rs.isPublic() 
+                || (loggedIn && rs.isAll())
+                || (loggedIn && group != null && rs.isGroup(group))
+                || (!loggedIn && rs.isGroup("NOLOGIN"))
         )
         {
-            String[] x = {e.getKey(), e.getValue().getDescr()}; 
+            String[] x = {e.getKey(), rs.getDescr()}; 
             res.add( x );
         }
      });
