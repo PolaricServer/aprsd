@@ -4,6 +4,7 @@ Documentation=man:polaric-aprsd(8)
 
 [Timer]
 OnCalendar=daily
+AccuracySec=1h
 Persistent=true
 
 [Install]
