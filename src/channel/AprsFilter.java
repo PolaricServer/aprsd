@@ -57,6 +57,14 @@ public abstract class AprsFilter {
 
     protected static AprsServerConfig _conf; 
     
+    /**
+     * Convert wildcard pattern (* and ?) to regex pattern.
+     * Used during filter initialization only, not during packet processing.
+     */
+    protected static String wildcardToRegex(String wildcard) {
+        return wildcard.replaceAll("\\*", "(.*)").replaceAll("\\?", ".");
+    }
+    
     
     public static class All extends AprsFilter {
         @Override public boolean test(AprsPacket p) {
@@ -224,7 +232,7 @@ public abstract class AprsFilter {
             /* Convert to regex and pre-compile patterns */
             for (int i = 1; i< parms.length; i++)
                 patterns[i-1] = java.util.regex.Pattern.compile(
-                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
+                    wildcardToRegex(parms[i].toUpperCase()));
         }
         
         @Override public boolean test(AprsPacket p) {
@@ -251,7 +259,7 @@ public abstract class AprsFilter {
             /* Convert to regex and pre-compile patterns */
             for (int i = 1; i< parms.length; i++)
                 patterns[i-1] = java.util.regex.Pattern.compile(
-                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
+                    wildcardToRegex(parms[i].toUpperCase()));
         }
         
         @Override public boolean test(AprsPacket p) {
@@ -279,7 +287,7 @@ public abstract class AprsFilter {
             /* Convert to regex and pre-compile patterns */
             for (int i = 1; i< parms.length; i++)
                 patterns[i-1] = java.util.regex.Pattern.compile(
-                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", ".")+"(\\*)?");
+                    wildcardToRegex(parms[i].toUpperCase()) + "(\\*)?");
         }
          
         @Override public boolean test(AprsPacket p) {
@@ -315,7 +323,7 @@ public abstract class AprsFilter {
             /* Convert to regex and pre-compile patterns */
             for (int i = 1; i< parms.length; i++)
                 patterns[i-1] = java.util.regex.Pattern.compile(
-                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
+                    wildcardToRegex(parms[i].toUpperCase()));
         }
         
         @Override public boolean test(AprsPacket p) {
@@ -344,7 +352,7 @@ public abstract class AprsFilter {
             /* Convert to regex and pre-compile patterns */
             for (int i = 1; i< parms.length; i++)
                 patterns[i-1] = java.util.regex.Pattern.compile(
-                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
+                    wildcardToRegex(parms[i].toUpperCase()));
         }
         
         @Override public boolean test(AprsPacket p) {
@@ -392,7 +400,7 @@ public abstract class AprsFilter {
             /* Convert to regex and pre-compile patterns */
             for (int i = 1; i< parms.length; i++)
                 patterns[i-1] = java.util.regex.Pattern.compile(
-                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
+                    wildcardToRegex(parms[i].toUpperCase()));
         }
         
         @Override public boolean test(AprsPacket p) {
@@ -462,7 +470,7 @@ public abstract class AprsFilter {
             /* Convert to regex and pre-compile patterns */
             for (int i = 1; i< parms.length; i++)
                 patterns[i-1] = java.util.regex.Pattern.compile(
-                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
+                    wildcardToRegex(parms[i].toUpperCase()));
         }
         
         @Override public boolean test(AprsPacket p) {
@@ -492,7 +500,7 @@ public abstract class AprsFilter {
             /* Convert to regex and pre-compile patterns */
             for (int i = 1; i< parms.length; i++)
                 patterns[i-1] = java.util.regex.Pattern.compile(
-                    parms[i].toUpperCase().replaceAll("\\*", "(.*)").replaceAll("\\?", "."));
+                    wildcardToRegex(parms[i].toUpperCase()));
         }
         
         @Override public boolean test(AprsPacket p) {
