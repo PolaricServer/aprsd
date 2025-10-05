@@ -26,7 +26,7 @@ import no.polaric.aprsd.aprs.*;
 
 public class RuleSet implements Rule
 {
-    private List<Rule> rlist = new LinkedList<Rule>(); 
+    private List<Rule> rlist = new ArrayList<Rule>(); 
     private Set<String> _groups = new HashSet<String>();
     private List<String> _tags   = new ArrayList<String>(); 
     private boolean _public = false; 

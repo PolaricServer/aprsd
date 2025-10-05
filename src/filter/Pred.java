@@ -398,7 +398,7 @@ class TrafficTo extends Pred
  */
 class AND extends Pred
 {
-    private List<Pred> conj = new LinkedList<Pred>(); 
+    private List<Pred> conj = new ArrayList<Pred>(); 
     
     
     public AND() {};
@@ -423,7 +423,7 @@ class AND extends Pred
     }
     
     void optimize() {
-        List<Pred> copy = new LinkedList<Pred>();
+        List<Pred> copy = new ArrayList<Pred>();
         for (Pred p : conj) {
            if (p instanceof AND pp) {
               for (Pred q : pp.conj)
@@ -446,7 +446,7 @@ class AND extends Pred
  */
 class OR extends Pred
 {
-   private List<Pred> disj = new LinkedList<Pred>(); 
+   private List<Pred> disj = new ArrayList<Pred>(); 
    
    
    public OR() {};
@@ -476,7 +476,7 @@ class OR extends Pred
     * than this, since they may be referenced from elsewhere. 
     */
    void optimize() {
-        List<Pred> copy = new LinkedList<Pred>();
+        List<Pred> copy = new ArrayList<Pred>();
         for (Pred p : disj) {
            if (p instanceof OR pp) {
               for (Pred q : pp.disj)

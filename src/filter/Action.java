@@ -82,8 +82,8 @@ public class Action
         if (x._icon != null) 
            _icon = x._icon;
         
-        if (!_style.contains(x._style))
-           _style = _style + (_style.equals("") ? "": " ") + x._style; 
+        if (!x._style.isEmpty() && !_style.contains(x._style))
+           _style = _style.isEmpty() ? x._style : _style + " " + x._style; 
            
         /* Trail time just overrides */
         if (x._trailTime > -1)
