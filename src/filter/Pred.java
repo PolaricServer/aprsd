@@ -167,8 +167,9 @@ class AprsSym extends Pred
     }
     
     public boolean eval(TrackerPoint p, long scale) { 
-        if (p instanceof AprsPoint) {
-            return pattern.matcher(""+((AprsPoint)p).getSymtab()+((AprsPoint)p).getSymbol()).matches();
+        if (p instanceof AprsPoint ap) {
+            String symString = new String(new char[]{ap.getSymtab(), ap.getSymbol()});
+            return pattern.matcher(symString).matches();
         }
         else return false;
     }
@@ -278,7 +279,6 @@ class Path extends Pred
 abstract class NumVal extends Pred
 {
     private long val; 
-    private String op;
     private byte _op;
     
     private byte opVal(String op) {
