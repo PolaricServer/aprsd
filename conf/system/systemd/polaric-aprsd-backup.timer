@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily backup timer for Polaric APRSD
+Documentation=man:polaric-aprsd(8)
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target
