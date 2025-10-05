@@ -3,7 +3,6 @@ package no.polaric.aprsd;
 import no.polaric.aprsd.point.*;
 import java.util.*;
 import java.io.*;
-import gnu.io.*;
 import java.text.*;
 
 

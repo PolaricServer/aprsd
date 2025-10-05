@@ -17,7 +17,6 @@ import no.polaric.aprsd.*;
 import no.polaric.aprsd.aprs.*;
 import java.io.*;
 import java.util.*;
-import gnu.io.*;
 import java.util.concurrent.Semaphore;
 import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.annotation.JsonSubTypes.*;
