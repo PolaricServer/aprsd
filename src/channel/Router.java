@@ -183,13 +183,11 @@ public class Router extends AprsChannel
         if (_state == State.RUNNING)
             for (AprsChannel ch : _channels) {
                 AprsFilter filt = _filters[i++];  
-                if (p.source == null || 
-                   (ch != null && p.source != null && !ch.getIdent().equals(p.source.getIdent())))
+                if (ch == null) 
+                    _conf.log().warn("Router", "Channel is null");
+                else if (p.source == null || !ch.getIdent().equals(p.source.getIdent()))
                 {
-                    if (ch == null) 
-                        _conf.log().warn("Router", "Channel is null");
-                    
-                    else if ( (filt==null || filt.test(p)) && ch.sendPacket(p)) 
+                    if ( (filt==null || filt.test(p)) && ch.sendPacket(p)) 
                         sent = true;
                 }
             }
@@ -215,7 +213,7 @@ public class Router extends AprsChannel
        if (p==null)
           return false;
        
-       if (_rfilter != null && !_rfilter.equals("") && !p.toString().matches(_rfilter))
+       if (_rfilterPattern != null && !_rfilterPattern.matcher(p.toString()).matches())
           return false; 
           
        _heardPackets++;
