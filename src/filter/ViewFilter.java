@@ -48,19 +48,7 @@ public class ViewFilter {
      List<Map.Entry<String, RuleSet> > list
             = new ArrayList<Map.Entry<String, RuleSet> >(
                 _map.entrySet());
-     Collections.sort(
-            list,
-            new Comparator<Map.Entry<String, RuleSet> >() {
-                // Comparing two entries by value
-                public int compare(
-                    Map.Entry<String, RuleSet> entry1,
-                    Map.Entry<String, RuleSet> entry2)
-                {
-                    // Substracting the entries
-                    return entry1.getValue().getLine()
-                        - entry2.getValue().getLine();
-                }
-            });
+     Collections.sort(list, Comparator.comparingInt(e -> e.getValue().getLine()));
             
      List<String[]> res = new ArrayList<String[]>();
      list.forEach( (Map.Entry<String, RuleSet> e) -> {

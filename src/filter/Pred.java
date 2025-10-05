@@ -113,7 +113,7 @@ class Tag extends Pred
 
     public Tag(String t) { 
         if (t.charAt(0)=='+')
-            t = t.substring(1, t.length());
+            t = t.substring(1);
         plustag = Pattern.compile("\\+?(" + t + ")");
         minustag = Pattern.compile("\\-"+t);
     }
