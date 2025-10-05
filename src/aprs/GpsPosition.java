@@ -18,7 +18,7 @@ import no.polaric.aprsd.*;
 import no.polaric.aprsd.point.*;
 import java.util.*;
 import java.io.*;
-import gnu.io.*;
+import com.fazecast.jSerialComm.*;
 import java.text.*;
 
 
@@ -91,17 +91,13 @@ public class GpsPosition extends OwnPosition
                         }
                         /* Close port */
                         _in.close();
-                        _serialPort.close();
+                        _serialPort.closePort();
                     }
-                }
-                catch(NoSuchPortException e)
-                {
-                    _api.log().warn("GpsPosition", "serial port " + _portName + " not found");
                 }
                 catch(Exception e)
                 {   
                     e.printStackTrace(System.out); 
-                    _serialPort.close();
+                    _serialPort.closePort();
                 }
                 retry++;
             }
@@ -341,25 +337,24 @@ public class GpsPosition extends OwnPosition
      */
     private SerialPort connect () throws Exception
     {
-        CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(_portName);
-        if ( portIdentifier.isCurrentlyOwned() )
-            _api.log().error("GpsPosition", "Port "+ _portName + " is currently in use");
-        else
-        {
-            CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);       
-            if ( commPort instanceof SerialPort )
-            {
-                SerialPort serialPort = (SerialPort) commPort;
-                serialPort.setSerialPortParams(_baud, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-                serialPort.enableReceiveTimeout(3000);
-                if (!serialPort.isReceiveTimeoutEnabled())
-                   _api.log().warn("GpsPosition", "Timeout not enabled on serial port");
-                return (SerialPort) commPort;
-            }
-            else
-                _api.log().error("GpsPosition", "Port " + _portName + " is not a serial port.");
-        }    
-        return null; 
+        SerialPort serialPort = com.fazecast.jSerialComm.SerialPort.getCommPort(_portName);
+        if (serialPort == null) {
+            _api.log().error("GpsPosition", "Port " + _portName + " not found");
+            return null;
+        }
+        
+        serialPort.setBaudRate(_baud);
+        serialPort.setNumDataBits(8);
+        serialPort.setNumStopBits(com.fazecast.jSerialComm.SerialPort.ONE_STOP_BIT);
+        serialPort.setParity(com.fazecast.jSerialComm.SerialPort.NO_PARITY);
+        serialPort.setComPortTimeouts(com.fazecast.jSerialComm.SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 3000, 0);
+        
+        if (!serialPort.openPort()) {
+            _api.log().error("GpsPosition", "Port "+ _portName + " could not be opened (may be in use)");
+            return null;
+        }
+        
+        return serialPort;
     }
    
 

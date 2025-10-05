@@ -18,7 +18,7 @@ import no.polaric.aprsd.*;
 import no.polaric.aprsd.aprs.*;
 import java.io.*;
 import java.util.*;
-import gnu.io.*;
+import com.fazecast.jSerialComm.*;
 import java.util.concurrent.Semaphore;
 
 
@@ -57,7 +57,7 @@ public class SerialComm extends CommDevice implements Runnable
     
 
     public void sendBreak(int n)
-        { _serialPort.sendBreak(n); }
+        { _serialPort.setBreak(); try { Thread.sleep(n); } catch (Exception e) {} _serialPort.clearBreak(); }
         
         
         
@@ -66,25 +66,24 @@ public class SerialComm extends CommDevice implements Runnable
      */
     private SerialPort connect () throws Exception
     {
-        CommPortIdentifier portIdentifier = CommPortIdentifier.getPortIdentifier(_portName);
-        if ( portIdentifier.isCurrentlyOwned() )
-            _conf.log().error("SerialComm", "Port "+ _portName + " is currently in use");
-        else
-        {
-            CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);       
-            if ( commPort instanceof SerialPort )
-            {
-                SerialPort serialPort = (SerialPort) commPort;
-                serialPort.setSerialPortParams(_baud, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-                serialPort.enableReceiveTimeout(1000);
-                if (!serialPort.isReceiveTimeoutEnabled())
-                   _conf.log().warn("SerialComm", "Timeout not enabled on serial port");
-                return (SerialPort) commPort;
-            }
-            else
-                _conf.log().error("SerialComm", "Port " + _portName + " is not a serial port.");
-        }    
-        return null; 
+        SerialPort serialPort = com.fazecast.jSerialComm.SerialPort.getCommPort(_portName);
+        if (serialPort == null) {
+            _conf.log().error("SerialComm", "Port " + _portName + " not found");
+            return null;
+        }
+        
+        serialPort.setBaudRate(_baud);
+        serialPort.setNumDataBits(8);
+        serialPort.setNumStopBits(com.fazecast.jSerialComm.SerialPort.ONE_STOP_BIT);
+        serialPort.setParity(com.fazecast.jSerialComm.SerialPort.NO_PARITY);
+        serialPort.setComPortTimeouts(com.fazecast.jSerialComm.SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 1000, 0);
+        
+        if (!serialPort.openPort()) {
+            _conf.log().error("SerialComm", "Port "+ _portName + " could not be opened (may be in use)");
+            return null;
+        }
+        
+        return serialPort;
     }
    
    
@@ -116,10 +115,6 @@ public class SerialComm extends CommDevice implements Runnable
                 _state = Channel.State.RUNNING;
                 if (_worker != null) 
                     _worker.worker();
-            }
-            catch(NoSuchPortException e) {
-                _conf.log().error("SerialComm", "Serial port " + _portName + " not found");
-                e.printStackTrace(System.out);
             }
             catch(Exception e) {   
                 e.printStackTrace(System.out); 
