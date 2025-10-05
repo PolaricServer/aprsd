@@ -14,10 +14,9 @@ RestartSec=10
 # Security hardening options
 NoNewPrivileges=true
 PrivateTmp=true
-ProtectSystem=strict
+ProtectSystem=full
 ProtectHome=true
-ReadWritePaths=/var/log/polaric /var/lib/polaric /etc/polaric-aprsd/keys
-ReadOnlyPaths=/etc/polaric-aprsd
+ReadWritePaths=/var/log/polaric /var/lib/polaric /etc/polaric-aprsd
 
 # Resource limits
 LimitNOFILE=65536
