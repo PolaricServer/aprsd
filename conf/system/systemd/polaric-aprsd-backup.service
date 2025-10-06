@@ -1,0 +1,7 @@
+[Unit]
+Description=Polaric APRSD daily backup
+Documentation=man:polaric-aprsd(8)
+
+[Service]
+Type=oneshot
+ExecStart=/etc/cron.daily/polaric-aprsd

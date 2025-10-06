@@ -3,3 +3,5 @@ conf/* etc/polaric-aprsd
 conf/keys/* etc/polaric-aprsd/keys
 scripts/* usr/bin
 conf/system/sudoers.d/polaric-aprsd etc/sudoers.d
+conf/system/systemd/polaric-aprsd-backup.service usr/lib/systemd/system
+conf/system/systemd/polaric-aprsd-backup.timer usr/lib/systemd/system
