@@ -1,0 +1,25 @@
+[Unit]
+Description=Polaric APRSD - APRS daemon for web-based tracking
+Documentation=http://aprs.no/polaricserver https://polaricserver.readthedocs.io
+After=network.target
+
+[Service]
+Type=simple
+User=polaric
+Group=polaric
+ExecStart=/usr/bin/polaric-aprsd-start
+Restart=on-failure
+RestartSec=10
+
+# Security hardening options
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/log/polaric /var/lib/polaric /etc/polaric-aprsd
+
+# Resource limits
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
