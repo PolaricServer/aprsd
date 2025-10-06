@@ -263,7 +263,8 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
              
              /* Save all points that matches regex */
              for (TrackerPoint s: _map.values()) { 
-                if (s.getIdent().matches("("+_stnsave+")|.*\\@("+_stnsave+")"))
+                if (!s instanceof OwnPosition
+                       && s.getIdent().matches("("+_stnsave+")|.*\\@("+_stnsave+")"))
                     ofs.writeObject(s); 
              }
              
