@@ -28,8 +28,11 @@ public class InetChannel extends TcpChannel
 {
     private  String   _user, _pass, _filter;
     private  BufferedReader _rder = null;
-
+    private AprsFilter _xfilter;
+    private long _blocked = 0;
     
+
+
     public InetChannel(AprsServerConfig conf, String id) 
        { super(conf, id); }
        
@@ -41,8 +44,10 @@ public class InetChannel extends TcpChannel
        _user = _conf.getProperty("channel."+id+".user", "").toUpperCase();
        if (_user.length() == 0)
        _user = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
-       _pass     = _conf.getProperty("channel."+id+".pass", "-1");
-       _filter   = _conf.getProperty("channel."+id+".filter", ""); 
+       _pass  = _conf.getProperty("channel."+id+".pass", "-1");
+       _filter = _conf.getProperty("channel."+id+".filter", "");
+       String xfilt = _conf.getProperty("channel."+id+".xfilter", "*");
+       _xfilter = AprsFilter.createFilter( xfilt, null);
        setReceiveFilter(_conf.getProperty("channel."+id+".rfilter", "")); 
     }
     
@@ -53,9 +58,9 @@ public class InetChannel extends TcpChannel
     
     @JsonTypeName("APRSIS")
     public static class JsConfig extends Channel.JsConfig {
-        public long heardpackets, heard, duplicates, sentpackets; 
+        public long heardpackets, heard, duplicates, sentpackets, blocked;
         public int port, pass; 
-        public String host, filter;
+        public String host, filter, xfilter;
     }
        
        
@@ -65,11 +70,13 @@ public class InetChannel extends TcpChannel
         cnf.heardpackets = nHeardPackets(); 
         cnf.duplicates = nDuplicates(); 
         cnf.sentpackets = nSentPackets();
+        cnf.blocked = _blocked;
         cnf.type  = "APRSIS";
         cnf.host  = _conf.getProperty("channel."+getIdent()+".host", "localhost");
         cnf.port  = _conf.getIntProperty("channel."+getIdent()+".port", 21);
         cnf.pass  = _conf.getIntProperty("channel."+getIdent()+".pass", 0); 
-        cnf.filter= _conf.getProperty("channel."+getIdent()+".filter", "");
+        cnf.filter = _conf.getProperty("channel."+getIdent()+".filter", "");
+        cnf.xfilter = _conf.getProperty("channel."+getIdent()+".xfilter", "*");
         return cnf;
     }
     
@@ -81,6 +88,7 @@ public class InetChannel extends TcpChannel
         props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
         props.setProperty("channel."+getIdent()+".pass", ""+cnf.pass);
         props.setProperty("channel."+getIdent()+".filter", cnf.filter); 
+        props.setProperty("channel."+getIdent()+".xfilter", cnf.xfilter);
     }
     
        
@@ -109,6 +117,7 @@ public class InetChannel extends TcpChannel
     }
     
     
+
     @Override protected void _close()
     {
        try { 
@@ -147,12 +156,16 @@ public class InetChannel extends TcpChannel
             try { 
                 String inp = _rder.readLine(); 
                 if (inp != null) {
-                    receivePacket(inp, false);
                     if (inp.charAt(0) == '#') {
                         if (inp.length() > 7 && inp.matches("# Note:.*"))
                             _conf.log().info("InetChannel", inp.substring(2));
                         continue;
                     }
+                    AprsPacket p = AprsPacket.fromString(inp);
+                    if (_xfilter == null || _xfilter.test(p))
+                        receivePacket(p, false);
+                    else
+                        _blocked++;
                 }
                 else {   
                     _conf.log().info("InetChannel", chId()+"Disconnected from APRS server '"+getHost()+"'");
