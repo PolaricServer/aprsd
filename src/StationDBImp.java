@@ -14,6 +14,7 @@
 
 package no.polaric.aprsd;
 import no.polaric.aprsd.point.*;
+import no.polaric.aprsd.aprs.*;
 import java.util.*;
 import java.io.*;
 import java.util.concurrent.*;
@@ -263,7 +264,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
              
              /* Save all points that matches regex */
              for (TrackerPoint s: _map.values()) { 
-                if (!s instanceof OwnPosition
+                if (!(s instanceof OwnPosition)
                        && s.getIdent().matches("("+_stnsave+")|.*\\@("+_stnsave+")"))
                     ofs.writeObject(s); 
              }
