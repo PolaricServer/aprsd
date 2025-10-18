@@ -79,6 +79,44 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
        
        
        
+       
+        /**
+         * Check if an item should be restricted based on its source.
+         * Handles the case where item is recovered from file but source is not yet 
+         * initialized from APRS input stream.
+         */
+        private boolean shouldRestrictItem(TrackerPoint s) {
+            Source src = s.getSource();
+            
+            /* If source is available, check if it's restricted */
+            if (src != null)
+                return src.isRestricted();
+            
+            /* If source is null, check if item has a source identifier stored.
+             * This handles items recovered from file where source is not yet initialized.
+             */
+            String srcId = null;
+            if (s instanceof Station) {
+                srcId = ((Station)s).getSourceId();
+            }
+            else if (s instanceof AprsObject) {
+                Station owner = ((AprsObject)s).getOwner();
+                if (owner != null)
+                    srcId = owner.getSourceId();
+            }
+            else {
+                srcId = s.getSourceId();
+            }
+            
+            /* If source ID exists but source not available, treat as restricted to be safe */
+            if (srcId != null && !srcId.equals("(local)"))
+                return true;
+            
+            /* No source restriction */
+            return false;
+        }
+       
+       
         /** Add trackerpoints to overlay */
         private void addPoints(JsOverlay mu) 
         {
@@ -108,7 +146,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                     /* Apply filter. */ 
                     Action action = vfilt.apply(s, _scale); 
                     if ( s.getPosition() == null ||
-                         ( s.getSource() != null && s.getSource().isRestricted() && !action.isPublic() && !allowed) ||
+                         ( shouldRestrictItem(s) && !action.isPublic() && !allowed) ||
                            action.hideAll() ||
                            (_tag != null && !s.hasTag(_tag))
                         )
