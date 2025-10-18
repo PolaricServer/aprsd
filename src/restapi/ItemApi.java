@@ -77,10 +77,40 @@ public class ItemApi extends ServerBase {
     protected boolean authForItem(Context ctx, PointObject x) {
         if (x==null)
             return false; 
-        if (x.getSource() == null) 
-            return true; /* FIXME */ 
+        
+        Source src = x.getSource();
+        
+        /* If source is null, check if item has a source identifier stored.
+         * This handles the case where item is recovered from file but source
+         * is not yet initialized from APRS input stream. In this case, deny
+         * access to be safe, since we cannot verify if source is restricted.
+         */
+        if (src == null) {
+            String srcId = null;
+            
+            /* For Station objects, getSourceId() returns the stored _source field */
+            if (x instanceof Station) {
+                srcId = ((Station)x).getSourceId();
+            }
+            /* For AprsObject, check the owner station's source ID */
+            else if (x instanceof AprsObject) {
+                Station owner = ((AprsObject)x).getOwner();
+                if (owner != null)
+                    srcId = owner.getSourceId();
+            }
+            /* For other types, use getSourceId() which may call getSource() */
+            else {
+                srcId = x.getSourceId();
+            }
+            
+            /* If source ID is "(local)" or null, item has no source restriction */
+            if (srcId == null || srcId.equals("(local)"))
+                return true;
+            /* Source ID exists but source not available - deny access to be safe */
+            return false;
+        }
     
-        return (!x.getSource().isRestricted() 
+        return (!src.isRestricted() 
            || x.tagIsOn("OPEN") 
            || (getAuthInfo(ctx) != null && getAuthInfo(ctx).login()));
     }
