@@ -88,10 +88,17 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
         if (s.getPosition() == null)
             return;
 
-        LatLng pos = s.getPosition();
-        var point = Geometries.pointGeographic(pos.getLng(), pos.getLat());
-        _geoindex = _geoindex.delete(s, point, true)
-                             .add(s, point);
+        try {
+            LatLng pos = s.getPosition();
+            var point = Geometries.pointGeographic(pos.getLng(), pos.getLat());
+            _geoindex = _geoindex.delete(s, point, true)
+                                 .add(s, point);
+        } catch (Exception e) {
+            /* If adding to geoindex fails, remove from map to maintain consistency */
+            _map.remove(s.getIdent());
+            _api.log().warn("StationDBImp", "Failed to add item "+s.getIdent()+" to geoindex: "+e);
+            throw e;
+        }
     }
     
     
@@ -300,11 +307,20 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
           PointObject.restoreTags(ifs);
           _api.log().debug("StationDBImp", "Restoring points...");
           int size = ifs.readInt();
+          int restored = 0;
+          int failed = 0;
           for (int i=0; i<size; i++)
           { 
-              TrackerPoint st = (TrackerPoint) ifs.readObject(); 
-             _addRtItem(st);
+              try {
+                  TrackerPoint st = (TrackerPoint) ifs.readObject(); 
+                  _addRtItem(st);
+                  restored++;
+              } catch (Exception ex) {
+                  failed++;
+                  _api.log().warn("StationDBImp", "Failed to restore point "+(i+1)+"/"+size+": "+ex);
+              }
           }
+          _api.log().info("StationDBImp", "Restored "+restored+" points, failed: "+failed);
           ifs.close();
         }
         catch (Exception e) {
