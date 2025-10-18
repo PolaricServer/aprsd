@@ -126,7 +126,6 @@ public class ItemApi extends ServerBase {
     
     private Object _itemInfo(Context ctx) {
         try {
-           // var ident = req.splat()[0];
             var ident = ctx.pathParam("ident");
             var st = _api.getDB().getItem(ident, null);
             if (st==null)
@@ -149,7 +148,7 @@ public class ItemApi extends ServerBase {
             if (st==null)
                 return ERROR(ctx, 404, "Unknown tracker item: "+ident); 
             if (!authForItem(ctx, st))
-                return ERROR(ctx, 403, "Not aauthorized for access to item");
+                return ERROR(ctx, 403, "Not authorized for access to item");
             LatLng pos = st.getPosition();
             return new double[] {pos.getLng(), pos.getLat()};
         }
@@ -319,11 +318,15 @@ public class ItemApi extends ServerBase {
          * xinfo is for logged-in users
          *******************************************/
         a.get("/item/{ident}/info", (ctx) -> {
-            ctx.json(_itemInfo(ctx));
+            var res = _itemInfo(ctx);
+            if (res != null)
+                ctx.json(_itemInfo(ctx));
         });
         
         a.get("/item/{ident}/xinfo", (ctx) -> {
-            ctx.json(_itemInfo(ctx));
+            var res = _itemInfo(ctx);
+            if (res != null)
+                ctx.json(_itemInfo(ctx));
         });
         
         
@@ -333,11 +336,15 @@ public class ItemApi extends ServerBase {
          * xpos is for logged-in users
          *********************************************/
         a.get("/item/{ident}/pos", (ctx) -> {
-            ctx.json(_itemPos(ctx));
+            var res = _itemPos(ctx);
+            if (res != null)
+                ctx.json(res);
         });
         
         a.get("/item/{ident}/xpos", (ctx) -> {
-            ctx.json(_itemPos(ctx));
+            var res = _itemPos(ctx);
+            if (res != null)
+                ctx.json(res);
         });
         
         
@@ -346,11 +353,15 @@ public class ItemApi extends ServerBase {
          * Trail of items
          *******************************************/
         a.get("/item/{ident}/trail", (ctx) -> {
-            ctx.json(_itemTrail(ctx));
+            var res = _itemTrail(ctx);
+            if (res != null)
+                ctx.json(res);
         });
         
         a.get("/item/{ident}/xtrail", (ctx) -> {
-            ctx.json(_itemTrail(ctx));
+            var res = _itemTrail(ctx);
+            if (res != null)
+                ctx.json(res);
         });
         
                 
