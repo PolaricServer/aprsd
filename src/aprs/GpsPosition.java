@@ -94,10 +94,17 @@ public class GpsPosition extends OwnPosition
                         _serialPort.closePort();
                     }
                 }
+                catch(SerialPortInvalidPortException e)
+                {
+                    _api.log().warn("GpsPosition", "Invalid serial port " + _portName);
+                    break;
+                }
                 catch(Exception e)
                 {   
                     e.printStackTrace(System.out); 
-                    _serialPort.closePort();
+                    if (_serialPort != null)
+                        _serialPort.closePort();
+                    break;
                 }
                 retry++;
             }
@@ -168,11 +175,13 @@ public class GpsPosition extends OwnPosition
             return;
         if ((p.length() - i) > 3)
             return;
+            
         if (p.charAt(i) == '*') {
             int c_checksum = Integer.parseInt(p.substring(i+1, p.length()), 16);
             if (c_checksum != checksum) 
                 return;
         } 
+
         String[] tok = p.split(",");
         if ( "$GPRMC".equals(tok[0])) 
             do_RMC(tok);

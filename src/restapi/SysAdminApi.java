@@ -352,7 +352,7 @@ public class SysAdminApi extends ServerBase {
             MyWebServer ws = (MyWebServer) _conf.getWebserver();
             List<ClientInfo> res = new ArrayList<ClientInfo>();
             
-            for ( WsNotifier.Client x : ws.getJsonMapUpdater().clients()) {
+            for ( WsNotifier.Client x : ws.pubSub().clients()) {
                 res.add(new ClientInfo(x.created(), x.uid(), x.nIn(), x.nOut(), x.userName(), x.isMobile()));
             }
             ctx.json(res);
