@@ -124,7 +124,10 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
             descr = p.getDescr(); 
             source = p.getSourceId(); 
             LatLng ref = p.getPosition();
-            pos = new double[] {ref.getLng(), ref.getLat()};
+            if (ref != null)
+                pos = new double[] {ref.getLng(), ref.getLat()};
+            else
+                pos = null;
         }
     }
     

@@ -34,7 +34,8 @@ public class AprsObject extends AprsPoint implements Serializable
         public JsInfo(AprsObject p) {
             super(p);
             type = "AprsObject";
-            owner = p.getOwner().getIdent();
+            Station ownerStation = p.getOwner();
+            owner = (ownerStation != null) ? ownerStation.getIdent() : null;
         }
     }
     

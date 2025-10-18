@@ -80,34 +80,14 @@ public class ItemApi extends ServerBase {
         
         Source src = x.getSource();
         
-        /* If source is null, check if item has a source identifier stored.
-         * This handles the case where item is recovered from file but source
-         * is not yet initialized from APRS input stream. In this case, deny
-         * access to be safe, since we cannot verify if source is restricted.
+        /* If source is null, this handles the case where item is recovered 
+         * from file but source is not yet initialized from APRS input stream.
+         * Allow access to the item since it exists in the database. Once the
+         * source is initialized from incoming APRS packets, normal source
+         * restrictions will apply.
          */
         if (src == null) {
-            String srcId = null;
-            
-            /* For Station objects, getSourceId() returns the stored _source field */
-            if (x instanceof Station) {
-                srcId = ((Station)x).getSourceId();
-            }
-            /* For AprsObject, check the owner station's source ID */
-            else if (x instanceof AprsObject) {
-                Station owner = ((AprsObject)x).getOwner();
-                if (owner != null)
-                    srcId = owner.getSourceId();
-            }
-            /* For other types, use getSourceId() which may call getSource() */
-            else {
-                srcId = x.getSourceId();
-            }
-            
-            /* If source ID is "(local)" or null, item has no source restriction */
-            if (srcId == null || srcId.equals("(local)"))
-                return true;
-            /* Source ID exists but source not available - deny access to be safe */
-            return false;
+            return true;
         }
     
         return (!src.isRestricted() 
