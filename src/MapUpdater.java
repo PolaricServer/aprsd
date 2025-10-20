@@ -175,8 +175,10 @@ public abstract class MapUpdater extends WsNotifier
        * postText will not generate and send text here. 
        * This is postponed to a periodic task to avoid 
        * deadlock problems and to avoid sending too often. 
+       * We use a lambda that returns null to ensure the filter is executed
+       * to mark clients as pending without actually sending data yet.
        */
-      postText( "", x -> ((Client)x).isInside(st, true) );
+      postText( x -> null, x -> ((Client)x).isInside(st, true) );
       if (_link != null) 
          _link.signal(st);
    }
