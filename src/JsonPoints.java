@@ -74,7 +74,7 @@ public interface JsonPoints
         
         public List<JsTPoint> linestring;  
         public JsTrail(String[] s) 
-            { style=s; linestring = new LinkedList<JsTPoint>(); }
+            { style=s; linestring = new ArrayList<JsTPoint>(); }
     }
 
    

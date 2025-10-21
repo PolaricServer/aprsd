@@ -125,9 +125,9 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 _conf.log().error("JsonMapUpdater", "_conf.getDB() returns null");
             else 
             {
-                mu.points = new LinkedList<JsPoint>();
-                mu.delete = new LinkedList<String>();
-                mu.lines = new LinkedList<JsLine>();
+                mu.points = new ArrayList<JsPoint>();
+                mu.delete = new ArrayList<String>();
+                mu.lines = new ArrayList<JsLine>();
                 boolean allowed = login(); 
                 AuthInfo ai = authInfo();
                 RuleSet vfilt = ViewFilter.getFilter(_filter, allowed);      
@@ -162,12 +162,13 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                     else {  
                         /* Add item to overlay */
                         JsPoint p = createPoint(s, action, allowed, ai);
-                        if (p!=null) 
+                        if (p!=null) {
                             mu.points.add(p);
-                                
-                        /* Add lines (that connect points) to list */
-                        if (action.showPath() && s instanceof Station && ((AprsPoint)s).isInfra())
-                           addLines(mu, (Station) s, _uleft, _lright); 
+                            
+                            /* Add lines (that connect points) to list */
+                            if (action.showPath() && s instanceof Station && ((AprsPoint)s).isInfra())
+                               addLines(mu, (Station) s, s.getPosition(), _uleft, _lright); 
+                        }
                     }
                 }
                 
@@ -198,7 +199,8 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             x.title = s.getDescr() == null ? "" : fixText(s.getDescr());
             x.href  = s.getUrl() == null ? "" : s.getUrl();
             x.icon  = "/icons/"+ s.getIcon();
-            x.own   = (userName() != null && userName().equals(s.getUser()));
+            String uname = userName();
+            x.own   = (uname != null && uname.equals(s.getUser()));
             return x;
         }
         
@@ -285,9 +287,8 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
         /**
          * Display a message path between nodes. 
          */
-        protected void addLines(JsOverlay ov, Station s, LatLng uleft, LatLng lright)
+        protected void addLines(JsOverlay ov, Station s, LatLng spos, LatLng uleft, LatLng lright)
         {
-            LatLng ity = s.getPosition();
             Set<String> from = s.getTrafficTo();
             if (from == null || from.isEmpty()) 
                 return;
@@ -305,7 +306,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                     JsLine line = new JsLine(
                        f+"."+s.getIdent(),
                        new double[] {roundDeg(itx.getLng()), roundDeg(itx.getLat())}, 
-                       new double[] {roundDeg(ity.getLng()), roundDeg(ity.getLat())}, 
+                       new double[] {roundDeg(spos.getLng()), roundDeg(spos.getLat())}, 
                        (e.primary ? "prim" : "sec") 
                     );
                     ov.lines.add(line);
