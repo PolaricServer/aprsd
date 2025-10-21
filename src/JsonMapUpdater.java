@@ -229,7 +229,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             x.ident   = s.getIdent();
             
             /* Cache trail to avoid calling getTrail() multiple times */
-            Seq<TPoint> trail = s.getTrail();
+            Trail trail = s.getTrail();
             x.label   = createLabel(s, action, allowed, trail);
             x.pos     = new double[] {roundDeg(ref.getLng()), roundDeg(ref.getLat())};
             x.title   = s.getDescr() == null ? "" : fixText(s.getDescr()); 
@@ -250,7 +250,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
        
        
         /** Create label or return null if label is to be hidden. */
-        private JsLabel createLabel(TrackerPoint s, Action action, boolean allowed, Seq<TPoint> trail) {
+        private JsLabel createLabel(TrackerPoint s, Action action, boolean allowed, Trail trail) {
             boolean showSarInfo = allowed || !action.hideAlias();
             
             JsLabel lbl = new JsLabel();
@@ -266,7 +266,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
        
        
        
-        private JsTrail createTrail(Seq<TPoint> trail, TrackerPoint s, Action action) {
+        private JsTrail createTrail(Trail trail, TrackerPoint s, Action action) {
             Seq<TPoint> h = trail
                .subTrail(action.getTrailTime(), action.getTrailLen(), 
                   tp -> tp.isInside(_uleft, _lright, 0.7, 0.7) );     
