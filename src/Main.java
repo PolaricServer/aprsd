@@ -36,7 +36,7 @@ public class Main extends ConfigBase implements AprsServerConfig {
     public  static String toaddr  = "APPS40";
     
     private static StationDB db = null;
-    public  WebServer webserver;
+    public  MyWebServer webserver;
     private List<ServerConfig.SimpleCb> _shutdown = new ArrayList<ServerConfig.SimpleCb>();
     public  static  AprsChannel ch1 = null;
     public  static  AprsChannel ch2 = null;
@@ -341,7 +341,7 @@ public class Main extends ConfigBase implements AprsServerConfig {
         
         PluginManager.addList(getProperty("plugins", ""));
         webserver.start();    
-
+        TrackerPoint.setNotifier(webserver.getJsonMapUpdater());
           
         /* Start webservices (REST API) of plugins after Webserver is started */
         PluginManager.startWebservices();

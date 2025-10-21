@@ -117,7 +117,8 @@ public class Router extends AprsChannel
         _chnames = chn.split(",(\\s)*");
         _channels = new AprsChannel[_chnames.length];
         _filters = new AprsFilter[_chnames.length];
-        
+        _conf.log().info("Router", "Initializing "+_chnames.length+" channels");
+
         for (int i=0; i<_chnames.length; i++) {
             Channel ch = _conf.getChanManager().get(_chnames[i]);
             if (ch == null) {
@@ -125,16 +126,20 @@ public class Router extends AprsChannel
                 ch = _conf.getChanManager().newInstance(_conf, type, _chnames[i]); 
                 if (_conf.getBoolProperty("channel."+_chnames[i]+".on", false))
                     ch.activate(_conf);
-                // See also Main.java
             }    
+
             if (ch instanceof AprsChannel ach) {
                 ach.setInRouter(this);
                 _channels[i] = ach;
                 String filt = _conf.getProperty("channel."+getIdent()+".filter."+_chnames[i], "*");
                 _filters[i] = AprsFilter.createFilter( filt, null );
             }
-            else
+            else {
+                _conf.log().warn("Router", "Channel '"+_chnames[i]+"' isn't an AprsChannel");
                 _channels[i] = null;
+            }
+            if (_channels[i] == null)
+                _conf.log().warn("Router", "Channel '"+_chnames[i]+"' is set to null");
         }
        
        /* Set up a receiver and use it to subscribe to the contained channels */
@@ -184,7 +189,7 @@ public class Router extends AprsChannel
             for (AprsChannel ch : _channels) {
                 AprsFilter filt = _filters[i++];  
                 if (ch == null) 
-                    _conf.log().warn("Router", "Channel is null");
+                    continue;
                 else if (p.source == null || !ch.getIdent().equals(p.source.getIdent()))
                 {
                     if ( (filt==null || filt.test(p)) && ch.sendPacket(p)) 
