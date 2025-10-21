@@ -129,6 +129,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                 mu.delete = new LinkedList<String>();
                 mu.lines = new LinkedList<JsLine>();
                 boolean allowed = login(); 
+                AuthInfo ai = authInfo();
                 RuleSet vfilt = ViewFilter.getFilter(_filter, allowed);      
                 List<TrackerPoint> itemlist =  _db.search(_uleft, _lright, vfilt);
                 if (itemlist.size() > _max_ovr_size) {
@@ -160,7 +161,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                     }
                     else {  
                         /* Add item to overlay */
-                        JsPoint p = createPoint(s, action);
+                        JsPoint p = createPoint(s, action, allowed, ai);
                         if (p!=null) 
                             mu.points.add(p);
                                 
@@ -213,7 +214,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
         /** Convert Tracker point to JSON point. 
          * Return null if point has no position.  
          */
-        private JsPoint createPoint(TrackerPoint s, Action action) {
+        private JsPoint createPoint(TrackerPoint s, Action action, boolean allowed, AuthInfo ai) {
             LatLng ref = s.getPosition(); 
             if (ref == null) 
                 return null;
@@ -221,11 +222,13 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             JsPoint x  = new JsPoint();
             
             /* Indicate if user has authorization to change point. */
-            var ai = authInfo();
-            x.sarAuth = (ai != null && itemSarAuth(authInfo(), s)); 
+            x.sarAuth = (ai != null && itemSarAuth(ai, s)); 
             
             x.ident   = s.getIdent();
-            x.label   = createLabel(s, action);
+            
+            /* Cache trail to avoid calling getTrail() multiple times */
+            Seq<TPoint> trail = s.getTrail();
+            x.label   = createLabel(s, action, allowed, trail);
             x.pos     = new double[] {roundDeg(ref.getLng()), roundDeg(ref.getLat())};
             x.title   = s.getDescr() == null ? "" : fixText(s.getDescr()); 
             x.redraw  = s.isChanging();
@@ -238,22 +241,22 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             if (s.iconOverride())  
                icon = s.getIcon(); 
             x.icon = "/icons/"+ (icon != null ? icon : icon()); 
-            x.trail = createTrail(s, action);
+            x.trail = createTrail(trail, s, action);
             return x;
         }
        
        
        
         /** Create label or return null if label is to be hidden. */
-        private JsLabel createLabel(TrackerPoint s, Action action) {
-            boolean showSarInfo = login() || !action.hideAlias();
+        private JsLabel createLabel(TrackerPoint s, Action action, boolean allowed, Seq<TPoint> trail) {
+            boolean showSarInfo = allowed || !action.hideAlias();
             
             JsLabel lbl = new JsLabel();
            
-            lbl.style = (!(s.getTrail().isEmpty()) ? "lmoving" : "lstill");
+            lbl.style = (!(trail.isEmpty()) ? "lmoving" : "lstill");
             if (s instanceof AprsObject)
                 lbl.style = "lobject"; 
-            lbl.style += " "+ action.getStyle();
+            lbl.style = lbl.style + " " + action.getStyle();
             lbl.id = s.getDisplayId(showSarInfo);
             lbl.hidden = (action.hideIdent() || s.isLabelHidden() );
             return lbl;
@@ -261,8 +264,8 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
        
        
        
-        private JsTrail createTrail(TrackerPoint s, Action action) {
-            Seq<TPoint> h = s.getTrail()
+        private JsTrail createTrail(Seq<TPoint> trail, TrackerPoint s, Action action) {
+            Seq<TPoint> h = trail
                .subTrail(action.getTrailTime(), action.getTrailLen(), 
                   tp -> tp.isInside(_uleft, _lright, 0.7, 0.7) );     
           
