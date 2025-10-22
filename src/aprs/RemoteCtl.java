@@ -527,6 +527,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         
         String u = args.trim();     
         String[] uu = u.split("@");
+        if (uu.length < 2) {
+            _api.log().warn("RemoteCtl", "Invalid user format (expected user@node): "+u);
+            return false;
+        }
+        
         if (add) {
             _api.log().debug("RemoteCtl", "doUser.add: "+u);
             _users.add(uu[1], u);
