@@ -239,7 +239,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             if (!_parentCon) {
                 _log.info(null, "Connection to parent: "+id+ " established");
                 _parentCon = true;
-                _connectcb.connect(_parent);
+                if (_connectcb != null)
+                    _connectcb.connect(_parent);
             }
             _try_parent = 0;
         }
@@ -508,7 +509,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             addChild(sender.getIdent(), rad, new LatLng(lat,lng));
             
             /* Notify app */
-            _connectcb.connect(sender.getIdent());
+            if (_connectcb != null)
+                _connectcb.connect(sender.getIdent());
         }
         else
             updateChildTS(sender.getIdent()); 
