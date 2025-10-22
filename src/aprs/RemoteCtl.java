@@ -527,6 +527,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         
         String u = args.trim();     
         String[] uu = u.split("@");
+        if (uu.length < 2) {
+            _api.log().warn("RemoteCtl", "Invalid user format (expected user@node): "+u);
+            return false;
+        }
+        
         if (add) {
             _api.log().debug("RemoteCtl", "doUser.add: "+u);
             _users.add(uu[1], u);
@@ -558,6 +563,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       _api.log().debug("RemoteCtl", "Set TAG from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
+      if (arg.length < 2) {
+          _api.log().warn("RemoteCtl", "Missing arguments to remote TAG command");
+          return false;
+      }
+      
       PointObject item = _api.getDB().getItem(arg[0].trim(), null);
       arg[1] = arg[1].trim();
       
@@ -577,12 +587,17 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doRemoveTag(Station sender, String args)
    {
       if (args == null) {
-          _api.log().warn("RemoteCtl", "Missing arguments to remote TAG command");
+          _api.log().warn("RemoteCtl", "Missing arguments to remote RMTAG command");
           return false;
       }
       
       _api.log().debug("RemoteCtl", "Remove TAG from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
+      
+      if (arg.length < 2) {
+          _api.log().warn("RemoteCtl", "Missing arguments to remote RMTAG command");
+          return false;
+      }
       
       PointObject item = _api.getDB().getItem(arg[0].trim(), null);
       arg[1] = arg[1].trim();
@@ -609,6 +624,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       
         _api.log().debug("RemoteCtl", "Set ALIAS from "+sender.getIdent());
         String[] arg = args.split("\\s+", 2);
+      
+        if (arg.length < 2) {
+            _api.log().warn("RemoteCtl", "Missing arguments to remote ALIAS command");
+            return false;
+        }
       
         TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
         if (item==null || item.expired())
@@ -637,6 +657,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       _api.log().debug("RemoteCtl", "Set ICON from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
+      if (arg.length < 2) {
+          _api.log().warn("RemoteCtl", "Missing arguments to remote ICON command");
+          return false;
+      }
+      
       TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
       if (item==null || item.expired())
         return false; 
@@ -663,6 +688,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       
         _api.log().debug("RemoteCtl", "Set alias/icon (RMAN) from "+sender.getIdent());
         String[] arg = args.split("\\s+", 3);
+      
+        if (arg.length < 3) {
+            _api.log().warn("RemoteCtl", "Missing arguments to remote RMAN command");
+            return false;
+        }
       
         TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
         if (item==null || item.expired())
