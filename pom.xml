@@ -52,6 +52,30 @@
         
   </dependencies>
     
+  <repositories>
+    <repository>
+      <id>local-maven-repo</id>
+      <name>Local Maven Repository</name>
+      <url>file://${user.home}/.m2/repository</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>central</id>
+      <name>Maven Central</name>
+      <url>https://repo.maven.apache.org/maven2</url>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
   
   <build>
     <sourceDirectory>src</sourceDirectory>
