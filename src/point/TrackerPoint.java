@@ -15,7 +15,7 @@
 package no.polaric.aprsd.point;
 import no.polaric.core.*;
 import no.polaric.aprsd.*;
-import no.polaric.aprsd.aprs.*;
+import no.polaric.aprsd.aprs.*; 
 import no.polaric.aprsd.util.*;
 import java.util.*;
 import java.io.Serializable;
@@ -146,9 +146,6 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     }
 
 
-
-    private boolean _fastmove = false;
-
     /**
      * Save position to trail if there is a significant change. 
      * If we want a trail, this should be done before updatePosition
@@ -174,21 +171,10 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
         /* Time distance in seconds */
         long tdistance = (ts.getTime() - _updated.getTime()) / 1000;          
            
-        /* Downsample. Time resolution is 10 seconds or more */
+        /* Downsample */
         if (tdistance < 5 && tdistance > -5)
              return false; 
-        
-        /* If moving incredibly fast (i.e. over 500 km/h) ignore, but only 
-         * first time. Second time, clear trail. 
-         */
-        if ( tdistance > 0 && distance(newpos)/tdistance > (500 * 0.27778)) {
-            if (!_fastmove) {
-               _fastmove = true; 
-               return false; 
-            }
-            _trail.clear(); 
-        }
-        _fastmove = false;     
+          
     
         /* If report is older than the previous one, just save it in the 
          * history 
@@ -342,8 +328,6 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
      * Return true and signal a change if position etc. is updated recently.
      * This must be called periodically to ensure that asyncronous waiters
      * are updated when a station has stopped updating. 
-     *
-     * FIXME: Maybe this signalling is not necessary? We can wait a couple of minutes. 
      */ 
     public synchronized boolean isChanging(boolean signal) 
     {
