@@ -1,0 +1,31 @@
+# Maven build artifacts
+target/
+lib/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Package files
+*.jar
+*.war
+*.ear
+
+# Generated parser files
+src/filter/Parser.java
+src/filter/ParserVal.java
+src/filter/Yylex.java

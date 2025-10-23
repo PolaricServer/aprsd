@@ -37,7 +37,16 @@ You can always compile the sources to a jar file using the 'build.sh' script, on
    
 You will need JDK (OpenJDK) version 17 or later. Maven is used for the build process.
 
-From version 4.0 we use *Javalin* for the webserver-part and a webserver-framework is factored out in a separate software-component: [polaric-core](https://github.com/PolaricServer/Polaric-Core). This is built separately but is just a *'mvn install'*. 
+From version 4.0 we use *Javalin* for the webserver-part and a webserver-framework is factored out in a separate software-component: [polaric-core](https://github.com/PolaricServer/Polaric-Core). 
+
+**Important:** Before building aprsd, you must first build and install polaric-core to your local Maven repository:
+```bash
+git clone https://github.com/PolaricServer/Polaric-Core.git
+cd Polaric-Core
+mvn install
+```
+
+This will install polaric-core to your local `.m2` repository, where Maven will find it when building aprsd. The build system is configured to check both your local Maven repository (`~/.m2/repository`) and Maven Central for dependencies. 
 
 
 
