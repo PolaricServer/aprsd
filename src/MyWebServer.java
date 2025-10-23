@@ -66,6 +66,7 @@ public class MyWebServer extends WebServer {
         /* Called when connected to RemoteCtl parent or child */
         if (_rctl != null)
             _rctl.onConnect( node-> {
+                _conf.log().debug("MyWebServer", "RemoteCtl connect from: "+node);
                 for (String u : loginUsers())
                     _rctl.sendRequest(node, "USER", u+"@"+_rctl.getMycall());
             });
@@ -136,9 +137,11 @@ public class MyWebServer extends WebServer {
              "secure="+(secure?"yes":"no")+", "+"proxy="+(proxy?"yes":"no"));
             
             
+            
         /* At shutdown. Send a message to other nodes */
         _conf.addShutdownHandler( ()-> {
             System.out.println("**** SHUTDOWN ****");
+            _rctl.sendRequestAll("RMNODE", _rctl.getMycall(), null);
             ((AprsServerConfig)_conf).saveConfig();
             
             var u = authService().userDb(); 

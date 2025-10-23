@@ -78,11 +78,10 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
         
      
     @Override protected synchronized void _addRtItem(TrackerPoint s) {
-        if (s == null)
+        if (s == null || s.getIdent() == null)
             return;
         
-        if ( s != null && s.getIdent() != null) 
-            _map.remove(s.getIdent());
+        _map.remove(s.getIdent());
         _map.put(s.getIdent(), s);
 
         if (s.getPosition() == null)
