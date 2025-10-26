@@ -19,7 +19,7 @@ http://aprs.no/polaricserver or https://polaricserver.readthedocs.io
 We provide deb (Debian/Ubuntu..) packages. For information on getting started on a Debian based platform please 
 see: https://polaricserver.readthedocs.io/en/latest/gettingstarted.html
 
-**Note:** From version 4.0, Polaric APRSD uses systemd for service management. See [docs/systemd-migration.md](docs/systemd-migration.md) for migration details and usage instructions.
+From version 4.0, Polaric APRSD uses systemd for service management. See [docs/systemd-migration.md](docs/systemd-migration.md) for migration details and usage instructions.
 
 Documentation on the project can be found here: 
 http://aprs.no/polaricserver
@@ -37,7 +37,7 @@ You can always compile the sources to a jar file using the 'build.sh' script, on
    
 You will need JDK (OpenJDK) version 17 or later. Maven is used for the build process.
 
-From version 4.0 we use *Javalin* for the webserver-part and a webserver-framework is factored out in a separate software-component: [polaric-core](https://github.com/PolaricServer/Polaric-Core). This is built separately but is just a *'mvn install'*. 
+From version 4.0 we use *Javalin* for the webserver-part and a webserver-framework is factored out in a separate software-component: [polaric-core](https://github.com/PolaricServer/Polaric-Core). This is built separately but is just a *'mvn install'*. The polaric-core is also available from Maven Central.
 
 
 
