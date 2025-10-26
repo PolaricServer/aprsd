@@ -19,5 +19,10 @@ SERIALPORTS="-Dgnu.io.rxtx.SerialPorts=/dev/TNC:/dev/ttyS0:/dev/ttyS1:/dev/ttyUS
        JAVA=/usr/bin/java
   JAVA_ARGS="$FLAGS $SERIALPORTS -Dconfdir=$CONFDIR -Ddatadir=$DATADIR -Dwebdir=$WEBDIR -Dlogdir=$LOGDIR" 
  
- 
-exec $JAVA $JAVA_ARGS -classpath $CLASSPATH no.polaric.aprsd.Main $INIFILE >> $LOGFILE 2>&1 
+# Ensure log directory exists
+mkdir -p "$LOGDIR"
+
+# Ensure log file exists and is writable
+touch "$LOGFILE" 2>/dev/null || true
+
+exec $JAVA $JAVA_ARGS -classpath $CLASSPATH no.polaric.aprsd.Main $INIFILE >> $LOGFILE 2>&1

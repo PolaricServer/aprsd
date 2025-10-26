@@ -3,8 +3,8 @@
         weekly
         missingok
         rotate 52
-        postrotate
-                systemctl restart polaric-aprsd.service > /dev/null
-        endscript
+        copytruncate
         compress
+        delaycompress
+        notifempty
 }
