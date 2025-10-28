@@ -87,7 +87,6 @@ public class OwnPosition extends Station implements Runnable
            _minPause = _maxPause;
         _description = _comment;
         
-        System.out.println("*** pos = "+ownpos);
         String[] pp = ownpos.split(",[\\s]*");
         if (pp.length == 2) {
            LatLng p = new LatLng(Double.parseDouble(pp[1]), Double.parseDouble(pp[0])); 

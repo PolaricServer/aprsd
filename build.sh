@@ -1,5 +1,6 @@
 #!/bin/bash
 
+rm lib/*
 cd src/filter
 jflex filters.lex
 byaccj -Jpackage=no.polaric.aprsd.filter filters.y
