@@ -104,9 +104,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
 
    public Child getChild(String id)
        { return _children.get(id); }
-       
-   public void addChild(String id, int r, LatLng p) 
-       { _children.put(id, new Child(r, p)); }
+   
+   
+   public void addChild(String id, int r, LatLng p) { 
+        _children.put(id, new Child(r, p)); 
+   }
    
    public void updateChildTS(String id) {
         Child c = getChild(id);
@@ -233,14 +235,19 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     * Report success. 
     * Implements: Interface MessageProcessor.Notification 
     */
+    private boolean _con_resend = false; 
     public void reportSuccess(String id, String msg)
     {
+        _log.debug(null, "reportSuccess: "+id+"->"+msg);
         if (id.equals(_parent)) {
-            if (!_parentCon) {
-                _log.info(null, "Connection to parent: "+id+ " established");
+            if (!_parentCon || _con_resend) {
+                _log.info(null, "Connection to parent: "+id+ " established"+(_con_resend? " (refresh)" : "") );
                 _parentCon = true;
+                _con_resend = false; 
                 _connectcb.connect(_parent);
             }
+            else
+                _con_resend = true;
             _try_parent = 0;
         }
     }
@@ -711,6 +718,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         item.setIcon(trimArg(arg[2]));
         return true;
    }
+   
    
    protected boolean doRmRman(Station sender, String args)
    {
