@@ -200,14 +200,18 @@ public class MessageProcessor implements Runnable, Serializable
 
             /* notify recipient about result? */
             OutMessage m = _outgoing.get(msgid);
-            if (m != null && m.not != null) {
-                if (text.matches("(rej).+")) 
-                    m.not.reportFailure(m.recipient, m.msgtext);
-
-                else 
-                    m.not.reportSuccess(m.recipient, m.msgtext);
+            if (m != null) {
+                if (m.not != null) {
+                    if (text.matches("(rej).+")) 
+                        m.not.reportFailure(m.recipient, m.msgtext);
+                    else 
+                        m.not.reportSuccess(m.recipient, m.msgtext);
+                }
+                _outgoing.remove(msgid);
             }
-            _outgoing.remove(msgid);   
+            else {
+                _api.log().debug("MessageProc", "Received ACK/REJ for unknown message: msgid="+msgid);
+            }
             return;
         } 
       
