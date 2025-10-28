@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2017-2024 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -235,19 +235,18 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     * Report success. 
     * Implements: Interface MessageProcessor.Notification 
     */
-    private boolean _con_resend = false; 
+    private int _con_resend = 0; 
     public void reportSuccess(String id, String msg)
     {
-        _log.debug(null, "reportSuccess: "+id+"->"+msg);
         if (id.equals(_parent)) {
-            if (!_parentCon || _con_resend) {
-                _log.info(null, "Connection to parent: "+id+ " established"+(_con_resend? " (refresh)" : "") );
+            if ((!_parentCon) || _con_resend>2) {
+                _log.info(null, "Connection to parent: "+id+ " established"+(_con_resend>2 ? " (refresh)" : "") );
                 _parentCon = true;
-                _con_resend = false; 
+                _con_resend = 0; 
                 _connectcb.connect(_parent);
             }
             else
-                _con_resend = true;
+                _con_resend++;
             _try_parent = 0;
         }
     }
@@ -514,8 +513,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             }
             addChild(sender.getIdent(), rad, new LatLng(lat,lng));
             
-            /* Notify app */
-            _connectcb.connect(sender.getIdent());
+            /* Notify app but schedule it to later to allow ack to be sent first */
+            ScheduledExecutorService hdlr = Executors.newSingleThreadScheduledExecutor();
+            hdlr.schedule(
+              () -> _connectcb.connect(sender.getIdent()
+            ), 1, TimeUnit.SECONDS);
         }
         else
             updateChildTS(sender.getIdent()); 
