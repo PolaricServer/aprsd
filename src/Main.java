@@ -32,7 +32,7 @@ import java.io.*;
 
 public class Main extends ConfigBase implements AprsServerConfig {
 
-    public  static String version = "4.0~pre2";
+    public  static String version = "4.0";
     public  static String toaddr  = "APPS40";
     
     private static StationDB db = null;
@@ -372,7 +372,6 @@ public class Main extends ConfigBase implements AprsServerConfig {
                  
         /* Own position */
         boolean gpson = conf.getBoolProperty("ownposition.gps.on", false);
-        System.out.println("GPS ON = "+gpson);
         if (gpson) 
             ownpos = new GpsPosition(conf);
         else

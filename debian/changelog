@@ -1,12 +1,16 @@
-polaric-aprsd (4.0~pre2) UNRELEASED; urgency=medium
+polaric-aprsd (4.0) stable; urgency=medium
 
-  * Initial work on a 4.0 branch
-  * Split out webserver stuff to arctic-core
-  * Some reorganising of source code
+  * Split out webserver stuff to separate codebase: arctic-core
+  * Some reorganising of source code and package structure, etc.. 
   * Use maven to build
-  * Various fixes..
+  * Javadoc updates..
+  * APRS-IS filters. Complete implementation. Performance improvements. Doc.
+  * Add internal filter to InetChannel
+  * Migrate from librxtx to JSerialComm for serial communications
+  * Migrate from init.d to systemd
+  * Various fixes, etc.. 
 
- -- Oyvind Hanssen <ohanssen@acm.org>  Sun, 28 Sep 2025 14:00:00 +0200
+ -- Oyvind Hanssen <ohanssen@acm.org>  Sun, 26 Oct 2025 16:00:00 +0100
 
 polaric-aprsd (3.3) stable; urgency=medium
 

@@ -491,5 +491,41 @@ V.3.3
   * Bugfixes, adjustments
 
 
+V.4.0
+-----
+  Changes to codebase and how it is built and maintained
+  Use modern tools like maven, webpack, copilot, etc.. 
+  
+  (aprsd)
+  * Split out webserver stuff to separate codebase: arctic-core, Use Javalin..
+  * Some reorganising of source code and package structure, Rename ServerAPI to ServerConfig, etc.. 
+  * Use maven to build
+  * Javadoc updates..
+  * APRS-IS filters. Complete implementation. Performance improvements. Documentation
+  * Add internal filter to InetChannel
+  * Migrate from librxtx to JSerialComm for serial communications
+  * Migrate from init.d to systemd
+  * Various fixes, including potential vulnerabilities, performance improvements, etc.. 
 
+  (db-plugin)
+  * Move to 4.0 platform and maven, source code structure
+  * Optimize snapshot search and hrdvia queries
+  * Postrm to deactivate plugin
+  * Varius fixes, 
+  
+  (ais-plugin)
+  * Move to 4.0 platform and maven, source code structure, dependencies updates
+  * Put jar in /usr/lib/polaric/plugins
+  * Postrm to deactivate plugin
+  * Performance optimizations
+  * Refactor and add SerialAisChannel (allow use of serial comms)
+  * Various fixes.. 
+  
+  (webapp2)
+  * Migrate to webpack for building/bundling - requires many adjustments.. 
+  * Migrate from pikaday to flatpickr, remove moment.js
+  * Bump OL version to 10.6.1
+  * Support extra filter in APRS-IS channel, add AIS-SERIAL choices
+  * Various fixes and adjustments
+  
   

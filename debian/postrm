@@ -4,7 +4,6 @@ set -e
 
 case "$1" in
     remove)
-       # Nothing to do here
     ;;
 
     purge)

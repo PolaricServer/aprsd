@@ -11,18 +11,19 @@ Package: polaric-aprsd
 Architecture: all
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${misc:Depends}, ${maven:Depends}, adduser, default-jre-headless (>= 1.17) | default-jdk (>= 1.17), libslf4j-java, libjackson2-core-java, libjackson2-databind-java, adduser, sudo, openssl, ssl-cert,
-Conflicts: polaric-database-plugin (<< 3.2), polaric-ais-plugin (<< 3.0) 
+Conflicts: polaric-database-plugin (<< 4.0), polaric-ais-plugin (<< 4.0) 
 Recommends:
-Suggests: polaric-webapp2 (>= 3.2.2)
+Suggests: polaric-webapp2 (>= 4.0)
 Description: Polaric Server: APRS daemon part. 
- The "Polaric Server" is mainly a web based service to present APRS 
- tracking information on maps and where the information is updated at real-
+ The "Polaric Server" is mainly a web based service to present tracking 
+ information (mainly APRS) on maps and where the information is updated at real-
  time. It is originally targeted for use by radio amateurs in voluntary search
  and rescue service in Norway. It consists of a web application and a server 
- program (APRS daemon). 
+ program (APRS daemon). It can function as an offline service if required. 
  .
  The APRS daemon gets data from a TNC or APRS-IS or a combination. It can 
- present and manipulate the information through a simple HTTP service. 
- The daemon can also be set up as an igate (internet gateway) and can
- be installed independently of the web app. 
+ present and manipulate the information through a simple HTTP service
+ (REST API and Websockets). The daemon can also be set up as an igate 
+ (internet gateway) or APRS-IS server and can be installed independently 
+ of the web app. 
 
