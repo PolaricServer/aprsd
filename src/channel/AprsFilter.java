@@ -46,10 +46,10 @@ import java.util.*;
  *
  * Filters separated by just a space is a disjunction. For example 'a b' means 'a OR b'.
  * If the filter starts with '-' it is an exception. If any such filters is true, it means the whole filter is false. 
- * If the filter starts with '&' it is a conjunction with the filter it immediately follows. 
- *    For example 'a &b &c' means '(a AND b AND c)'. 'a &b c' means '(a AND b) OR c'.  
+ * If the filter starts with '&amp;' it is a conjunction with the filter it immediately follows.
+ *    For example 'a &amp;b &amp;c' means '(a AND b AND c)'. 'a &amp;b c' means '(a AND b) OR c'.
  * Conjunctions can also be used with exceptions. 
- *    For example -t/x &p/a means NOT(t/x AND p/a) 
+ *    For example -t/x &amp;p/a means NOT(t/x AND p/a)
  */
 
  
