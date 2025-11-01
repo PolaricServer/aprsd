@@ -1,3 +1,8 @@
+polaric-aprsd (4.0.1) stable; urgency=medium
+  * Fix permission-problem with passwd file. 
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Sat, 01 Nov 2025 21:27:44 +0100
+
 polaric-aprsd (4.0) stable; urgency=medium
 
   * Split out webserver stuff to separate codebase: arctic-core
