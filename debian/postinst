@@ -16,7 +16,7 @@ case "$1" in
            chown root:polaric /etc/polaric-aprsd/passwd
            chown root:polaric /etc/polaric-aprsd/keys
            chown root:polaric /etc/polaric-aprsd/keys/*
-           chmod 640 /etc/polaric-aprsd/passwd
+           chmod 660 /etc/polaric-aprsd/passwd
            chmod 750 /etc/polaric-aprsd/keys
            chmod 640 /etc/polaric-aprsd/keys/*
         
@@ -26,12 +26,6 @@ case "$1" in
            chmod 755 /var/lib/polaric
            chmod 440 /etc/sudoers.d/polaric-aprsd
         fi  
-        if [ -e "/etc/polaric-webapp/users" ] ; then
-           echo
-           echo "Found password file in polaric-webapp directory"
-           echo "Making a copy in /etc/polaric-aprsd/passwd.webapp.old"
-           cp /etc/polaric-webapp/users /etc/polaric-aprsd/passwd.webapp.old
-        fi
         if [[ ! -e "/var/lib/polaric/users.dat" ]] ; then 
            echo "admin,null,false,true,Admin User,,DEFAULT,false" > /var/lib/polaric/users.dat
            chown polaric:polaric /var/lib/polaric/users.dat
