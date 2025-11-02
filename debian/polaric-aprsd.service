@@ -9,6 +9,9 @@ User=polaric
 Group=polaric
 ExecStart=/usr/bin/polaric-aprsd-start
 Restart=on-failure
+# Give aprsd more time to stop cleanly before systemd kills it.
+TimeoutStopSec=60
+# Optional: make systemd wait a little before attempting restarts started by its own
 RestartSec=10
 
 # Security hardening options

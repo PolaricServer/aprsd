@@ -6,7 +6,8 @@
         copytruncate
         compress
         delaycompress
+        sharedscripts
         postrotate
-                systemctl restart polaric-aprsd.service > /dev/null
+                /bin/systemctl reload-or-restart aprsd.service >/dev/null 2>&1 || true
         endscript
 }
