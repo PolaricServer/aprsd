@@ -64,11 +64,13 @@ public class OfflineDetector {
         if (!host2.isEmpty()) _hosts.add(host2);
         if (!host3.isEmpty()) _hosts.add(host3);
         
-        // Default check interval: 60 seconds
-        _checkInterval = config.getIntProperty("offlinedetector.interval", 60);
+        // Default check interval: 60 seconds, minimum 5 seconds to prevent excessive CPU usage
+        int interval = config.getIntProperty("offlinedetector.interval", 60);
+        _checkInterval = Math.max(interval, 5);
         
-        // Default timeout for host check: 5 seconds
-        _timeout = config.getIntProperty("offlinedetector.timeout", 5000);
+        // Default timeout for host check: 5 seconds, must be positive and reasonable
+        int timeout = config.getIntProperty("offlinedetector.timeout", 5000);
+        _timeout = Math.max(Math.min(timeout, 60000), 1000);  // Between 1 and 60 seconds
         
         _scheduler = Executors.newScheduledThreadPool(1, r -> {
             Thread t = new Thread(r, "OfflineDetector");
@@ -147,6 +149,8 @@ public class OfflineDetector {
     
     /**
      * Check if a single host is reachable.
+     * Uses InetAddress.isReachable() which may have platform-specific limitations.
+     * Note: This method may not work reliably through firewalls or in some network configurations.
      * @param host The hostname or IP address
      * @return true if reachable, false otherwise
      */
