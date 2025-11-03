@@ -150,7 +150,12 @@ public class OfflineDetector {
     /**
      * Check if a single host is reachable.
      * Uses InetAddress.isReachable() which may have platform-specific limitations.
-     * Note: This method may not work reliably through firewalls or in some network configurations.
+     * 
+     * Note: On Linux, this method requires CAP_NET_RAW capability to send ICMP packets.
+     * The Debian package installation automatically grants this capability to the Java binary
+     * using setcap. Without this capability, the method will fall back to TCP-based checks
+     * which may not work reliably through firewalls or in some network configurations.
+     * 
      * @param host The hostname or IP address
      * @return true if reachable, false otherwise
      */

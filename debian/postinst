@@ -35,6 +35,16 @@ case "$1" in
            polaric-importcert-snakeoil yes
         fi
         
+        # Grant CAP_NET_RAW capability to Java for ICMP ping (OfflineDetector)
+        # This allows the Java process to send/receive ICMP packets without running as root
+        JAVA_BIN=$(readlink -f /usr/bin/java 2>/dev/null)
+        if [ -n "$JAVA_BIN" ] && [ -f "$JAVA_BIN" ] && command -v setcap >/dev/null 2>&1; then
+            echo "Granting CAP_NET_RAW capability to Java binary for ICMP support..."
+            setcap cap_net_raw+ep "$JAVA_BIN" || echo "Warning: Failed to set capabilities on Java binary. OfflineDetector ICMP checks may not work."
+        else
+            echo "Warning: setcap not available or Java binary not found. OfflineDetector ICMP checks may not work."
+        fi
+        
         echo
         echo "******** Polaric-aprsd ********"
         echo "It is recommended to install the polaric-webapp2 package. It can also be used to configure"

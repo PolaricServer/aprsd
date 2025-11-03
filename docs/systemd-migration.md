@@ -92,6 +92,28 @@ The systemd service includes security hardening options:
 
 These options improve the security posture of the service without affecting normal operation.
 
+### ICMP Packet Capabilities
+
+Starting with version 4.0.1, the package installation automatically grants the Java binary the `CAP_NET_RAW` capability to allow sending and receiving ICMP packets (used by the OfflineDetector feature). This is done using the `setcap` command during installation:
+
+```bash
+setcap cap_net_raw+ep /path/to/java
+```
+
+This allows the OfflineDetector to check if configured hosts are reachable without requiring the entire service to run as root. The capability is applied only to the Java binary itself, maintaining the principle of least privilege.
+
+If you need to manually verify or reapply this capability:
+
+```bash
+# Check current capabilities
+getcap /usr/bin/java
+
+# Manually set capability (requires root)
+sudo setcap cap_net_raw+ep $(readlink -f /usr/bin/java)
+```
+
+Note: If the `setcap` utility is not available during installation, a warning will be displayed, and the OfflineDetector ICMP checks may not function correctly.
+
 ## Troubleshooting
 
 If the service fails to start:
