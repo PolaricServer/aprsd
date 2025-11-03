@@ -76,6 +76,14 @@ public class SystemApi extends ServerBase {
         protect("/system/sarmode", "operator");
         protect("/system/ownpos",  "admin");
     
+    
+        /******************************************
+         * A simple ping service. Just return OK. 
+         ******************************************/
+        a.get("/system/ping", (ctx) -> {
+            ctx.result("Ok");
+        }
+    
         /******************************************
          * Get all tags
          ******************************************/

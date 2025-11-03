@@ -98,6 +98,10 @@ public interface AprsServerConfig extends ServerConfig
      */
     public void saveConfig();
     
+    /**
+     * Return true if server is offline (not connected to the internet)
+     */
+     public boolean isOffline();
 
 }
 

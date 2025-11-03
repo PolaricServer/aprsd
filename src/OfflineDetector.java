@@ -65,8 +65,8 @@ public class OfflineDetector {
         if (!host3.isEmpty()) _hosts.add(host3);
         
         // Default check interval: 60 seconds, minimum 5 seconds to prevent excessive CPU usage
-        int interval = config.getIntProperty("offlinedetector.interval", 60);
-        _checkInterval = Math.max(interval, 5);
+        int interval = config.getIntProperty("offlinedetector.interval", 120);
+        _checkInterval = Math.max(interval, 10);
         
         // Default timeout for host check: 5 seconds, must be positive and reasonable
         int timeout = config.getIntProperty("offlinedetector.timeout", 5000);
@@ -94,7 +94,7 @@ public class OfflineDetector {
         
         _checkTask = _scheduler.scheduleAtFixedRate(
             this::checkHosts,
-            0,  // Initial delay
+            10,  // Initial delay
             _checkInterval,
             TimeUnit.SECONDS
         );

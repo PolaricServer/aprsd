@@ -166,7 +166,11 @@ public class Main extends ConfigBase implements AprsServerConfig {
         { return PluginManager.properties(); }
     
     
-           
+    public boolean isOffline() {
+        if (offlineDetector == null)
+            return true; 
+        return offlineDetector.isOffline();
+    }
  
     
     
@@ -386,9 +390,11 @@ public class Main extends ConfigBase implements AprsServerConfig {
         ownobjects.setChannels(ch2, ch1);  
         
         /* Start offline detector */
-        offlineDetector = new OfflineDetector(conf);
-        offlineDetector.start();
-        
+        boolean offlinedet = conf.getBoolProperty("offlinedetector.on", false);
+        if (offlinedet) {
+            offlineDetector = new OfflineDetector(conf);
+            offlineDetector.start();
+        }
     }
     
     
