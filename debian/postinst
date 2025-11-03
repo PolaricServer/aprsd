@@ -37,12 +37,21 @@ case "$1" in
         
         # Grant CAP_NET_RAW capability to Java for ICMP ping (OfflineDetector)
         # This allows the Java process to send/receive ICMP packets without running as root
-        JAVA_BIN=$(readlink -f /usr/bin/java 2>/dev/null)
-        if [ -n "$JAVA_BIN" ] && [ -f "$JAVA_BIN" ] && command -v setcap >/dev/null 2>&1; then
-            echo "Granting CAP_NET_RAW capability to Java binary for ICMP support..."
-            setcap cap_net_raw+ep "$JAVA_BIN" || echo "Warning: Failed to set capabilities on Java binary. OfflineDetector ICMP checks may not work."
+        # Note: This capability is set on the Java binary itself, which means all Java
+        # processes on this system will have CAP_NET_RAW. This is a standard approach
+        # for system-wide Java applications requiring ICMP functionality.
+        if [ ! -e "/usr/bin/java" ]; then
+            echo "Warning: Java binary not found at /usr/bin/java. OfflineDetector ICMP checks may not work."
+        elif ! command -v setcap >/dev/null 2>&1; then
+            echo "Warning: setcap command not available. OfflineDetector ICMP checks may not work."
         else
-            echo "Warning: setcap not available or Java binary not found. OfflineDetector ICMP checks may not work."
+            JAVA_BIN=$(readlink -f /usr/bin/java 2>/dev/null)
+            if [ -n "$JAVA_BIN" ] && [ -f "$JAVA_BIN" ]; then
+                echo "Granting CAP_NET_RAW capability to Java binary for ICMP support..."
+                setcap cap_net_raw+ep "$JAVA_BIN" || echo "Warning: Failed to set capabilities on Java binary. OfflineDetector ICMP checks may not work."
+            else
+                echo "Warning: Could not resolve Java binary path. OfflineDetector ICMP checks may not work."
+            fi
         fi
         
         echo

@@ -102,6 +102,11 @@ setcap cap_net_raw+ep /path/to/java
 
 This allows the OfflineDetector to check if configured hosts are reachable without requiring the entire service to run as root. The capability is applied only to the Java binary itself, maintaining the principle of least privilege.
 
+**Security Note:** The capability is set on the system's Java binary, which means all Java applications running on the system will have the ability to send raw network packets. This is a standard approach for system-wide Java services that require ICMP functionality. If you have security concerns about this, you can:
+1. Remove the capability after installation: `sudo setcap -r $(readlink -f /usr/bin/java)`
+2. Use alternative network monitoring methods that don't require ICMP
+3. Disable the OfflineDetector feature in the configuration
+
 If you need to manually verify or reapply this capability:
 
 ```bash
@@ -110,6 +115,9 @@ getcap /usr/bin/java
 
 # Manually set capability (requires root)
 sudo setcap cap_net_raw+ep $(readlink -f /usr/bin/java)
+
+# Remove capability (requires root)
+sudo setcap -r $(readlink -f /usr/bin/java)
 ```
 
 Note: If the `setcap` utility is not available during installation, a warning will be displayed, and the OfflineDetector ICMP checks may not function correctly.
