@@ -40,7 +40,7 @@ case "$1" in
         # Note: This capability is set on the Java binary itself, which means all Java
         # processes on this system will have CAP_NET_RAW. This is a standard approach
         # for system-wide Java applications requiring ICMP functionality.
-        if [ ! -e "/usr/bin/java" ]; then
+        if [ ! -f "/usr/bin/java" ]; then
             echo "Warning: Java binary not found at /usr/bin/java. OfflineDetector ICMP checks may not work."
         elif ! command -v setcap >/dev/null 2>&1; then
             echo "Warning: setcap command not available. OfflineDetector ICMP checks may not work."
