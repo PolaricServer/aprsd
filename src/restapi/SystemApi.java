@@ -82,7 +82,7 @@ public class SystemApi extends ServerBase {
          ******************************************/
         a.get("/system/ping", (ctx) -> {
             ctx.result("Ok");
-        }
+        });
     
         /******************************************
          * Get all tags
