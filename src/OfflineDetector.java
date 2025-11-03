@@ -16,19 +16,24 @@ package no.polaric.aprsd;
 
 import no.polaric.core.*;
 import java.io.IOException;
-import java.net.InetAddress;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * Periodically checks if up to 3 hosts are reachable.
- * If all configured hosts are unreachable, the status is set to offline.
+ * Periodically checks if up to 3 Polaric APRSD instances are reachable via HTTP(s).
+ * Uses the /system/ping endpoint which returns "Ok".
+ * If all configured instances are unreachable, the status is set to offline.
  * Provides callbacks for when the offline status changes.
  */
 public class OfflineDetector {
     
     private final ServerConfig _config;
-    private final List<String> _hosts;
+    private final List<String> _baseUrls;
     private final long _checkInterval;
     private final int _timeout;
     private boolean _isOffline;
@@ -36,6 +41,7 @@ public class OfflineDetector {
     private final ScheduledExecutorService _scheduler;
     private ScheduledFuture<?> _checkTask;
     private final Object _statusLock = new Object();
+    private final HttpClient _httpClient;
     
     /**
      * Callback interface for offline status changes.
@@ -51,18 +57,18 @@ public class OfflineDetector {
      */
     public OfflineDetector(ServerConfig config) {
         _config = config;
-        _hosts = new ArrayList<>();
+        _baseUrls = new ArrayList<>();
         _callbacks = new CopyOnWriteArrayList<>();
         _isOffline = false;
         
-        // Read configuration
-        String host1 = config.getProperty("offlinedetector.host1", "").trim();
-        String host2 = config.getProperty("offlinedetector.host2", "").trim();
-        String host3 = config.getProperty("offlinedetector.host3", "").trim();
+        // Read configuration - now expecting base URLs instead of hostnames
+        String baseUrl1 = config.getProperty("offlinedetector.host1", "").trim();
+        String baseUrl2 = config.getProperty("offlinedetector.host2", "").trim();
+        String baseUrl3 = config.getProperty("offlinedetector.host3", "").trim();
         
-        if (!host1.isEmpty()) _hosts.add(host1);
-        if (!host2.isEmpty()) _hosts.add(host2);
-        if (!host3.isEmpty()) _hosts.add(host3);
+        if (!baseUrl1.isEmpty()) _baseUrls.add(baseUrl1);
+        if (!baseUrl2.isEmpty()) _baseUrls.add(baseUrl2);
+        if (!baseUrl3.isEmpty()) _baseUrls.add(baseUrl3);
         
         // Default check interval: 60 seconds, minimum 5 seconds to prevent excessive CPU usage
         int interval = config.getIntProperty("offlinedetector.interval", 120);
@@ -71,6 +77,11 @@ public class OfflineDetector {
         // Default timeout for host check: 5 seconds, must be positive and reasonable
         int timeout = config.getIntProperty("offlinedetector.timeout", 5000);
         _timeout = Math.max(Math.min(timeout, 60000), 1000);  // Between 1 and 60 seconds
+        
+        // Create HTTP client with timeout configuration
+        _httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofMillis(_timeout))
+            .build();
         
         _scheduler = Executors.newScheduledThreadPool(1, r -> {
             Thread t = new Thread(r, "OfflineDetector");
@@ -83,13 +94,13 @@ public class OfflineDetector {
      * Start the periodic checking.
      */
     public void start() {
-        if (_hosts.isEmpty()) {
-            _config.log().warn("OfflineDetector", "No hosts configured, detector will not start");
+        if (_baseUrls.isEmpty()) {
+            _config.log().warn("OfflineDetector", "No base URLs configured, detector will not start");
             return;
         }
         
         _config.log().info("OfflineDetector", 
-            "Starting with hosts: " + String.join(", ", _hosts) + 
+            "Starting with base URLs: " + String.join(", ", _baseUrls) + 
             ", interval: " + _checkInterval + "s");
         
         _checkTask = _scheduler.scheduleAtFixedRate(
@@ -119,14 +130,14 @@ public class OfflineDetector {
     }
     
     /**
-     * Check if all configured hosts are reachable.
+     * Check if all configured Polaric APRSD instances are reachable.
      */
     private void checkHosts() {
         try {
             boolean allUnreachable = true;
             
-            for (String host : _hosts) {
-                if (isHostReachable(host)) {
+            for (String baseUrl : _baseUrls) {
+                if (isInstanceReachable(baseUrl)) {
                     allUnreachable = false;
                     break;
                 }
@@ -143,29 +154,48 @@ public class OfflineDetector {
                 }
             }
         } catch (Exception e) {
-            _config.log().error("OfflineDetector", "Error during host check: " + e.getMessage());
+            _config.log().error("OfflineDetector", "Error during instance check: " + e.getMessage());
         }
     }
     
     /**
-     * Check if a single host is reachable.
-     * Uses InetAddress.isReachable() which may have platform-specific limitations.
-     * Note: This method may not work reliably through firewalls or in some network configurations.
-     * @param host The hostname or IP address
-     * @return true if reachable, false otherwise
+     * Check if a single Polaric APRSD instance is reachable via HTTP(s).
+     * Makes a GET request to the /system/ping endpoint.
+     * @param baseUrl The base URL of the Polaric APRSD instance (e.g., "http://example.com:8081")
+     * @return true if reachable and returns "Ok", false otherwise
      */
-    private boolean isHostReachable(String host) {
+    private boolean isInstanceReachable(String baseUrl) {
         try {
-            InetAddress address = InetAddress.getByName(host);
-            boolean reachable = address.isReachable(_timeout);
+            // Use URI.resolve() to properly join base URL with endpoint path
+            URI base = URI.create(baseUrl.endsWith("/") ? baseUrl : baseUrl + "/");
+            URI fullUri = base.resolve("system/ping");
+            
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(fullUri)
+                .timeout(Duration.ofMillis(_timeout))
+                .GET()
+                .build();
+            
+            HttpResponse<String> response = _httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            boolean reachable = (response.statusCode() == 200 && "Ok".equals(response.body().trim()));
             
             _config.log().debug("OfflineDetector", 
-                "Host " + host + " is " + (reachable ? "reachable" : "unreachable"));
+                "Instance " + baseUrl + " is " + (reachable ? "reachable" : "unreachable") +
+                " (status: " + response.statusCode() + ")");
             
             return reachable;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            _config.log().debug("OfflineDetector", 
+                "Failed to check instance " + baseUrl + ": " + e.getMessage());
+            return false;
         } catch (IOException e) {
             _config.log().debug("OfflineDetector", 
-                "Failed to check host " + host + ": " + e.getMessage());
+                "Failed to check instance " + baseUrl + ": " + e.getMessage());
+            return false;
+        } catch (IllegalArgumentException e) {
+            _config.log().warn("OfflineDetector", 
+                "Invalid base URL " + baseUrl + ": " + e.getMessage());
             return false;
         }
     }
