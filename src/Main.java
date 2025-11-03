@@ -48,6 +48,7 @@ public class Main extends ConfigBase implements AprsServerConfig {
     public  static  RemoteCtl rctl;
     public  static  MessageProcessor msgProc = null; 
     private static  AprsParser parser = null;
+    public  static  OfflineDetector offlineDetector = null;
     
     private AprsServerConfig conf = this;
     private static  Properties _defaultConf; 
@@ -384,6 +385,9 @@ public class Main extends ConfigBase implements AprsServerConfig {
         ownpos.setChannels(ch2, ch1);
         ownobjects.setChannels(ch2, ch1);  
         
+        /* Start offline detector */
+        offlineDetector = new OfflineDetector(conf);
+        offlineDetector.start();
         
     }
     
@@ -392,6 +396,8 @@ public class Main extends ConfigBase implements AprsServerConfig {
          for (ServerConfig.SimpleCb f: _shutdown)
             f.cb(); 
          msgProc.save();
+         if (offlineDetector != null)
+            offlineDetector.stop();
     }
 
     
