@@ -3,3 +3,10 @@ target/
 .classpath
 .project
 .settings/
+debian/.debhelper
+debian/polaric-aprsd
+debian/files
+debian/debhelper-build-stamp
+src/filter/Lexer.java
+src/filter/Parser.java
+lib
