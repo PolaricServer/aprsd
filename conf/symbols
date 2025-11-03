@@ -34,7 +34,7 @@ L&             diamond-L.png    # LoRa APRS igate
 
 /P             car-police.png
 /f             car-fire.png
-/a             ambul.png    
+/a             ambu1.png    
 
 [\\GTCH]u|/k   car-truck.png    # #u is trucks. Hu is hazardous   
 /U             bus.png
