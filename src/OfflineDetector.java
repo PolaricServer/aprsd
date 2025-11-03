@@ -166,12 +166,12 @@ public class OfflineDetector {
      */
     private boolean isInstanceReachable(String baseUrl) {
         try {
-            // Ensure base URL doesn't end with a slash
-            String url = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
-            url = url + "/system/ping";
+            // Use URI.resolve() to properly join base URL with endpoint path
+            URI base = URI.create(baseUrl.endsWith("/") ? baseUrl : baseUrl + "/");
+            URI fullUri = base.resolve("system/ping");
             
             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(url))
+                .uri(fullUri)
                 .timeout(Duration.ofMillis(_timeout))
                 .GET()
                 .build();
@@ -184,7 +184,12 @@ public class OfflineDetector {
                 " (status: " + response.statusCode() + ")");
             
             return reachable;
-        } catch (IOException | InterruptedException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            _config.log().debug("OfflineDetector", 
+                "Failed to check instance " + baseUrl + ": " + e.getMessage());
+            return false;
+        } catch (IOException e) {
             _config.log().debug("OfflineDetector", 
                 "Failed to check instance " + baseUrl + ": " + e.getMessage());
             return false;
