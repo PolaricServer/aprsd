@@ -168,7 +168,7 @@ public class Main extends ConfigBase implements AprsServerConfig {
     
     public boolean isOffline() {
         if (offlineDetector == null)
-            return true; 
+            return false; 
         return offlineDetector.isOffline();
     }
  

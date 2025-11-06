@@ -65,6 +65,7 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
                     return null;
                 }
                 mu.authorization = _auth;
+                mu.offline = ((AprsServerConfig)_conf).isOffline();
                 mu.nclients = _conf.getWebserver().nClients();
                 if (!metaonly)
                     addPoints(mu);
@@ -115,6 +116,8 @@ public class JsonMapUpdater extends MapUpdater implements Notifier, JsonPoints
             /* No source restriction */
             return false;
         }
+       
+       
        
        
         /** Add trackerpoints to overlay */

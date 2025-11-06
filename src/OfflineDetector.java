@@ -177,7 +177,7 @@ public class OfflineDetector {
                 .build();
             
             HttpResponse<String> response = _httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            boolean reachable = (response.statusCode() == 200 && "Ok".equals(response.body().trim()));
+            boolean reachable = (response.statusCode() == 200);
             
             _config.log().debug("OfflineDetector", 
                 "Instance " + baseUrl + " is " + (reachable ? "reachable" : "unreachable") +

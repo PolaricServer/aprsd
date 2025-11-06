@@ -29,6 +29,7 @@ public interface JsonPoints
         public AuthInfo       authorization;
         public int            nclients;
         public boolean        overload;
+        public boolean        offline;
         public List<JsPoint>  points;
         public List<String>   delete;
         public List<JsLine>   lines;
@@ -37,6 +38,7 @@ public interface JsonPoints
         public JsOverlay(String v) {
             view = v;
             overload = false;
+            offline = false;
         }
     }
 
