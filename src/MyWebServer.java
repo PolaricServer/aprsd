@@ -141,7 +141,8 @@ public class MyWebServer extends WebServer {
         /* At shutdown. Send a message to other nodes */
         _conf.addShutdownHandler( ()-> {
             System.out.println("**** SHUTDOWN ****");
-            _rctl.sendRequestAll("RMNODE", _rctl.getMycall(), null);
+            if (_rctl != null)
+                _rctl.sendRequestAll("RMNODE", _rctl.getMycall(), null);
             ((AprsServerConfig)_conf).saveConfig();
             
             var u = authService().userDb(); 
