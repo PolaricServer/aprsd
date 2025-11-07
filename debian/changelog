@@ -1,3 +1,10 @@
+polaric-aprsd (4.0.3) stable; urgency=medium
+
+  * Fix problem with saving config (if remotectl off)
+  * Work on offline detection
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Fri, 07 Nov 2025 19:39:40 +0100
+
 polaric-aprsd (4.0.2) stable; urgency=medium
 
   * Fix problem with logrotate restart 
