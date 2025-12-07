@@ -52,14 +52,11 @@ public class StoredFilter
      */
     public StoredFilter(AprsServerConfig conf, String filename) {
         _conf = conf;
-        _filtmap = new HashMap<String, Filt>();
+        _filtmap = new HashMap<>();
         
         try (BufferedReader rd = new BufferedReader(new FileReader(filename))) {
-            while (rd.ready()) {
-                String line = rd.readLine();
-                if (line == null)
-                    break;
-                    
+            String line;
+            while ((line = rd.readLine()) != null) {
                 // Trim whitespace
                 line = line.trim();
                 
