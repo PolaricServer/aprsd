@@ -26,7 +26,7 @@ public class StoredFilter
     private AprsServerConfig _conf;
 
     /**
-     * A stored filter is actually combined filter (from AprsFilter class)
+     * A stored filter is actually a combined filter (from AprsFilter class)
      */
     public class Filt extends AprsFilter.Combined
     {
@@ -41,7 +41,7 @@ public class StoredFilter
     
     /**
      * Initialize the map of filters by reading and parsing filter specs from a file.
-     * A filter spec is as described in AprsFilter.java, Each filter is stored in the
+     * A filter spec is as described in AprsFilter.java. Each filter is stored in the
      * _filtmap so that it can quickly be looked up by name. If there is a syntax error 
      * in the filter spec, put out a warning in the log and continue to the next. 
      *
