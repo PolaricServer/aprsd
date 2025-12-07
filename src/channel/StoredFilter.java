@@ -54,8 +54,7 @@ public class StoredFilter
         _conf = conf;
         _filtmap = new HashMap<String, Filt>();
         
-        try {
-            BufferedReader rd = new BufferedReader(new FileReader(filename));
+        try (BufferedReader rd = new BufferedReader(new FileReader(filename))) {
             while (rd.ready()) {
                 String line = rd.readLine();
                 if (line == null)
@@ -85,13 +84,13 @@ public class StoredFilter
                 }
                 
                 try {
+                    // null userid is appropriate for stored filters that are not user-specific
                     Filt filter = new Filt(fspec, null);
                     _filtmap.put(name, filter);
                 } catch (Exception e) {
                     _conf.log().warn("StoredFilter", "Error parsing filter '" + name + "': " + e.getMessage());
                 }
             }
-            rd.close();
             _conf.log().info("StoredFilter", "Loaded " + _filtmap.size() + " filters from " + filename);
         } catch (IOException e) {
             _conf.log().error("StoredFilter", "Error reading filter file '" + filename + "': " + e.getMessage());
