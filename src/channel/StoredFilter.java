@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2024-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -40,7 +40,7 @@ public class StoredFilter
     
     
     /**
-     * Initialize the map of filter reading and parsing filter specs from a file.
+     * Initialize the map of filters by reading and parsing filter specs from a file.
      * A filter spec is as described in AprsFilter.java, Each filter is stored in the
      * _filtmap so that it can quickly be looked up by name. If there is a syntax error 
      * in the filter spec, put out a warning in the log and continue to the next. 
