@@ -28,7 +28,7 @@ public class StoredFilter
     /**
      * A stored filter is actually a combined filter (from AprsFilter class)
      */
-    public class Filt extends AprsFilter.Combined
+    public static class Filt extends AprsFilter.Combined
     {
         public Filt(String fspec, String userid) {
             super(fspec, userid);
@@ -38,6 +38,14 @@ public class StoredFilter
     
     private Map<String, Filt> _filtmap; 
     
+    
+
+    public StoredFilter(AprsServerConfig conf) {
+        _conf = conf;
+        _filtmap = new HashMap<>();
+    }
+    
+       
     
     /**
      * Initialize the map of filters by reading and parsing filter specs from a file.
@@ -50,10 +58,8 @@ public class StoredFilter
      * or 
      * # comment (to be ignored)
      */
-    public StoredFilter(AprsServerConfig conf, String filename) {
-        _conf = conf;
-        _filtmap = new HashMap<>();
-        
+    public void init(String filename) {
+    
         try (BufferedReader rd = new BufferedReader(new FileReader(filename))) {
             String line;
             while ((line = rd.readLine()) != null) {
@@ -89,8 +95,9 @@ public class StoredFilter
                 }
             }
             _conf.log().info("StoredFilter", "Loaded " + _filtmap.size() + " filters from " + filename);
+            
         } catch (IOException e) {
-            _conf.log().error("StoredFilter", "Error reading filter file '" + filename + "': " + e.getMessage());
+            _conf.log().warn("StoredFilter", "Error reading filter file '" + filename + "': " + e.getMessage());
         }
     }
     

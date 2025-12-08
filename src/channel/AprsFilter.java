@@ -31,6 +31,7 @@ import java.util.*;
  *  f - friend range
  *  t - type
  *  p - prefix 
+ *  P - predefined filter (see StoredFilter.java)
  *  d - digipeater (with wildcards)
  *  b - budlist (with wildcards) 
  *  u - unproto (with wildcards) 
@@ -56,6 +57,8 @@ import java.util.*;
 public abstract class AprsFilter {
 
     protected static AprsServerConfig _conf; 
+    protected static StoredFilter _predefined;
+    
     
     /**
      * Convert wildcard pattern (* and ?) to regex pattern.
@@ -71,6 +74,15 @@ public abstract class AprsFilter {
             return true;
         }
         public String toString() {return "All";}
+    }
+    
+    
+    
+    public static class Nothing extends AprsFilter {
+        @Override public boolean test(AprsPacket p) {
+            return false;
+        }
+        public String toString() {return "Nothing";}
     }
     
         
@@ -568,6 +580,7 @@ public abstract class AprsFilter {
             String[] fspecs = fspec.split(" ");
             AprsFilter[] f = new AprsFilter[10]; 
              
+            /* For each part of the filter spec */
             for (String fstr : fspecs) {
                 if (fstr.length() == 0)
                     continue;
@@ -576,16 +589,16 @@ public abstract class AprsFilter {
                 boolean exception = false;
                 
                 char firstChar = cmd.charAt(0);
-                if (firstChar == '-')  {
+                if (firstChar == '-')  { // Negation (exception)
                     exception = true;
                     cmd = cmd.substring(1);
                     firstChar = cmd.charAt(0);
                 }
-                if (firstChar == '&') {
+                if (firstChar == '&') {  // Part of conjunction
                     cmd = cmd.substring(1);
                     findex++;
                 }
-                else {
+                else {                  // Next part of disjunction - create new conjuncion
                     f = new AprsFilter[10];        
                     findex = 0;
                 }
@@ -594,6 +607,7 @@ public abstract class AprsFilter {
                     case "*" -> new All();
                     case "a" -> new Area(ff);
                     case "p" -> new Prefix(ff);
+                    case "P" -> _predefined.get(ff[1]);
                     case "b" -> new Budlist(ff);
                     case "u" -> new Unproto(ff);
                     case "d" -> new Digi(ff);
@@ -610,8 +624,14 @@ public abstract class AprsFilter {
                     case "C" -> new Chan(ff);
                     default -> null;
                 }; 
-                if (findex > 0)
+                if (f[findex] == null) {
+                    _conf.log().warn("AprsFilter", "Invalid filter: "+fstr);
+                    f[findex] = new Nothing();
+                }
+                
+                if (findex > 0) // filter is part of a conjunction
                     continue;
+                    
                 if (exception)
                     _xlist.add(f);
                 else
@@ -620,9 +640,10 @@ public abstract class AprsFilter {
         }
         
         
-        /* 
+        /** 
          * Go through rules and test.
-         * Negative results of exception rules will override any other rule regardless of order 
+         * Negative results of exception rules will override any other rule regardless of order
+         * Expressions are on a disjunctive normal form, so each part can be seen as a conjunction
          */
         public boolean test(AprsPacket p) {
             /* Check exceptions first - if any match, result is false */
@@ -704,6 +725,9 @@ public abstract class AprsFilter {
     
     public static void init(AprsServerConfig conf) {
         _conf = conf;
+        String fname = conf.getProperty("aprsfilters.file", "/etc/polaric-aprsd/aprsfilters");
+        _predefined = new StoredFilter(conf);
+        _predefined.init(fname);
     }
     
     
