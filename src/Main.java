@@ -173,6 +173,19 @@ public class Main extends ConfigBase implements AprsServerConfig {
     }
  
     
+    /**
+     * Check if a timestamp is older than a given age threshold.
+     * @param timestamp The timestamp to check
+     * @param maxAgeMs Maximum age in milliseconds
+     * @return true if the timestamp is older than the threshold, false otherwise
+     */
+    public boolean checkAge(Date timestamp, long maxAgeMs) {
+        if (timestamp == null)
+            return true;
+        long age = System.currentTimeMillis() - timestamp.getTime();
+        return age > maxAgeMs;
+    }
+    
     
     
     
