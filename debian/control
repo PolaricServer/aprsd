@@ -3,14 +3,14 @@ Section: java
 Priority: optional
 Maintainer: Øyvind Hanssen <oh@hans.priv.no>
 Uploaders: Øyvind Hanssen <oh@hans.priv.no>
-Build-Depends: debhelper-compat (= 13), default-jdk (>= 1.17), maven-debian-helper (>= 2.6), byacc-j, jflex
+Build-Depends: debhelper-compat (= 13), default-jdk-headless (>= 1.21), maven-debian-helper (>= 2.6), byacc-j, jflex
 Standards-Version: 4.5.1
 Homepage: http://aprs.no/polaricserver
 
 Package: polaric-aprsd
 Architecture: all
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${misc:Depends}, ${maven:Depends}, adduser, default-jre-headless (>= 1.17) | default-jdk (>= 1.17), libslf4j-java, libjackson2-core-java, libjackson2-databind-java, adduser, sudo, openssl, ssl-cert,
+Depends: ${misc:Depends}, ${maven:Depends}, adduser, default-jre-headless (>= 1.21) | default-jdk-headless (>= 1.21), libslf4j-java, libjackson2-core-java, libjackson2-databind-java, adduser, sudo, openssl, ssl-cert,
 Conflicts: polaric-database-plugin (<< 4.0), polaric-ais-plugin (<< 4.0) 
 Recommends:
 Suggests: polaric-webapp2 (>= 4.0)

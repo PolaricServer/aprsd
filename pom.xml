@@ -101,8 +101,8 @@
             <version>3.6.2</version>
             <configuration>
               <sourcepath>src:src/auth:src/httpd:src/util</sourcepath>
-                <source>17</source>
-                <target>17</target>
+                <source>21</source>
+                <target>21</target>
             </configuration>
         </plugin>
       </plugins>
