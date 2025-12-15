@@ -24,7 +24,9 @@ import no.polaric.aprsd.channel.*;
 import io.javalin.Javalin;
 import java.util.*;
 import java.io.*;
-
+import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.Month;
 
 /** 
  * Main class. Setup and start application.
@@ -32,8 +34,11 @@ import java.io.*;
 
 public class Main extends ConfigBase implements AprsServerConfig {
 
-    public  static String version = "4.0.3";
-    public  static String toaddr  = "APPS40";
+    /* Update these each time a release is published */
+    public  static String version  = "4.0.3+";
+    public  static String toaddr   = "APPS40";
+    public  static int rel_year  = 2025;
+    public  static int rel_month = 9;
     
     private static StationDB db = null;
     public  MyWebServer webserver;
@@ -407,15 +412,43 @@ public class Main extends ConfigBase implements AprsServerConfig {
     }
 
     
+    /* Return age in months since released */
+    public static int checkAge() 
+    {
+        ZoneId zone = ZoneId.of("UTC");
+        YearMonth ym = YearMonth.now(zone);
+        int year = ym.getYear();
+        int month = ym.getMonthValue();
+        
+        int years = year - rel_year;
+        int months = (years - 1)*12 + month; 
+        months -= (12-rel_month);
+        return months; 
+    }
+    
+    
+    
     public static void main(String[] args) 
     {
-        Main setup = new Main(); 
-        setup.init(args);
-        setup.start();        
+        int age = checkAge();
+        if (age > 24)
+        {
+            System.out.println();
+            System.out.println("*** Release {version} is {age) months old since released");
+            System.out.println("*** Please updgrade");
+            System.out.println();
+        }
+        if (age > 60)
+            System.out.println("*** More than 5 years. Terminating!");
+        else {    
+            Main setup = new Main(); 
+            setup.init(args);
+            setup.start();        
         
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            setup.stop();
-        }));
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                setup.stop();
+            }));
+        }
     }
 }
 
