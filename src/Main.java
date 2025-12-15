@@ -430,6 +430,10 @@ public class Main extends ConfigBase implements AprsServerConfig {
     
     public static void main(String[] args) 
     {
+        Main setup = new Main(); 
+        setup.init(args);
+            
+        int maxage = setup.getIntProperty("server.maxage", 60);
         int age = checkAge();
         if (age > 24)
         {
@@ -438,17 +442,16 @@ public class Main extends ConfigBase implements AprsServerConfig {
             System.out.println("*** Please updgrade");
             System.out.println();
         }
-        if (age > 60)
-            System.out.println("*** More than 5 years. Terminating!");
-        else {    
-            Main setup = new Main(); 
-            setup.init(args);
-            setup.start();        
+        if (age > 60) {
+            System.out.println("*** More than maximum age ({maxage} months). Terminating!");
+            System.exit(0);
+        }    
+           
+        setup.start();        
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            setup.stop();
+        }));
         
-            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                setup.stop();
-            }));
-        }
     }
 }
 
