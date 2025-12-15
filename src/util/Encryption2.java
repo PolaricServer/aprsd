@@ -45,7 +45,8 @@ public class Encryption2 {
      * bytes should be replaced with a random number which should also be used 
      * as a prefix to the ciphertext. 
      */
-    private IvParameterSpec getIv(byte[] prefix, String prefix2) {
+    private byte[] getIv(byte[] prefix, String prefix2) 
+    {
         /* 12 bytes nonce when using AES/GCM */
         byte[] iv = "000123456789".getBytes();
         iv[0] = prefix[0];
@@ -65,9 +66,8 @@ public class Encryption2 {
                     break;
             }
         }
-        return new IvParameterSpec(iv);
+        return iv;
     }
-    
     
     
     
@@ -80,10 +80,12 @@ public class Encryption2 {
         try {
             /* Prepare the initialization vector */
             byte[] prefix = SecUtils.getRandom(2); 
-            IvParameterSpec iv = getIv(prefix, nonce); 
+            byte[] iv = getIv(prefix, nonce); 
         
             /* Do the encryption */ 
-            _cipher.init(Cipher.ENCRYPT_MODE, _key, iv);
+            GCMParameterSpec parameterSpec = new GCMParameterSpec(96, iv); 
+            _cipher.init(Cipher.ENCRYPT_MODE, _key, parameterSpec);
+
             byte[] ctext = _cipher.doFinal(inp.getBytes());
         
             /* Prefix the resulting ciphertext */
@@ -99,6 +101,7 @@ public class Encryption2 {
     }
     
     
+    
     /**
      * Decrypt a string. 
      * If nonce is null, use day of the year instead % 256.
@@ -108,20 +111,25 @@ public class Encryption2 {
         try {
             /* Prepare the intitialization vector using 2 fist bytes of input */
             byte[] ibytes = SecUtils.b64decode(inp);
-            IvParameterSpec iv = getIv(ibytes, nonce); 
+            byte[] iv = getIv(ibytes, nonce); 
         
             /* Get the ciphertext without the prefix */
             byte[] ctext = Arrays.copyOfRange(ibytes, 2, ibytes.length);
                 
             /* Do the decryption and return result */  
-            _cipher.init(Cipher.DECRYPT_MODE, _key, iv);
+            GCMParameterSpec parameterSpec = new GCMParameterSpec(96, iv); 
+            _cipher.init(Cipher.DECRYPT_MODE, _key, parameterSpec);
             byte[] text = _cipher.doFinal(ctext);
             return new String(text);
         }
         catch (Exception e) {
+            if (e instanceof javax.crypto.AEADBadTagException)
+                return null;
             throw new Error("Error in encryption: "+e.getMessage(), e);
         }    
     }
+    
+    
     
 
     
