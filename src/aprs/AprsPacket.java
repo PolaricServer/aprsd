@@ -37,7 +37,7 @@ public class AprsPacket implements Cloneable {
     public String from, to, msgto, via, report; 
     public String from_orig, to_orig, via_orig; 
     public boolean thirdparty = false; 
-
+    public boolean encrypted = false; 
     
     public AprsPacket() 
        { time = new Date(); }

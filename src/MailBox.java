@@ -438,7 +438,7 @@ public abstract class MailBox {
             msg.from = msg.from+"@"+api.getRemoteCtl().getMycall();
             
             api.getMsgProcessor().sendMessage(addr[1], "MSG "+msg.from+">"+addr[0]+" "+msg.text, 
-                true, true, new MessageProcessor.Notification() {
+                true, true, true, new MessageProcessor.Notification() {
                     MailBox.User mb_ = mb;
                     Message m2_ = m2;
                     

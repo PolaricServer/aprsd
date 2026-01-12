@@ -88,8 +88,9 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private KeyedSet _users = new KeyedSet();
    private Map<String, Child> _children = new HashMap<String, Child>();
    
-   private Encryption _crypt; 
+   private OldEncryption _crypt;
    private String _encryptTo = ""; 
+   private String _encryptTo2 = "";
    private String _userInfo = ".*";
    
    
@@ -156,6 +157,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        _parent = api.getProperty("remotectl.connect", null);
        _log = new Logfile(api, "remotectl", "remotectl.log");
        _encryptTo = api.getProperty("remotectl.encrypt", "");
+       _encryptTo2 = api.getProperty("remotectl.encrypt2", "");
        _userInfo = api.getProperty("remotectl.userinfo", ".*");
        String key = api.getProperty("message.auth.key", "NOKEY");
        
@@ -165,7 +167,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
           _parent = null;
        mp.subscribe(_myCall, new Subscriber(), true);
        
-       _crypt = new Encryption( key );
+       _crypt = new OldEncryption( key );
        
        _msg = mp;
        _api = api;
@@ -286,10 +288,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */
    public void sendRequest(String dest, String cmd, String text)
    { 
+        var encr = dest.matches(_encryptTo2);
         var m = encodeCmd(dest, cmd, text);
         if (m==null)
             return; 
-        _msg.sendMessage(dest, m, true, true, this);
+        _msg.sendMessage(dest, m, true, true, encr, this);
         _log.info(null, "Send > "+dest+": "+cmd+" "+text);
    }
    
@@ -301,19 +304,22 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */  
     public void sendRequestAll(String cmd, String text, String origin)
     {
+        var encr = false;
         int n = 0;
         if (_parent != null && !_parent.equals(origin) && _parentCon) { 
+            encr = _parent.matches(_encryptTo2);
             var m = encodeCmd(_parent, cmd, text);
             if (m != null)
-                _msg.sendMessage(_parent, m, true, true, this); 
+                _msg.sendMessage(_parent, m, true, true, encr, this);
             n++; 
         }
         
         for (String r: getChildren() )
             if (!r.equals(origin) && isWithinInterest(r, text) ) {
+                encr = r.matches(_encryptTo2);
                 var m = encodeCmd(r, cmd, text);
                 if (m != null)
-                    _msg.sendMessage(r, m, true, true, this); 
+                    _msg.sendMessage(r, m, true, true, encr, this);
                 n++; 
             }
     

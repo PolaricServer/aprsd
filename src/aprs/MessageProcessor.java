@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,6 +15,7 @@
 package no.polaric.aprsd.aprs;
 import no.polaric.aprsd.*;
 import no.polaric.core.util.*;
+import no.polaric.aprsd.util.*;
 import no.polaric.aprsd.point.*;
 import no.polaric.aprsd.channel.*;
 import java.util.regex.*;
@@ -30,7 +31,7 @@ import java.util.*;
  
 public class MessageProcessor implements Runnable, Serializable
 {
-    
+
    /** 
     * Interface for message subscribers. 
     */
@@ -86,6 +87,7 @@ public class MessageProcessor implements Runnable, Serializable
    private static final int _MSGID_TX_STORE_SIZE =  256;
    
    
+   
    /**
     * The last nn received messages by sender-callsign + # + msgid 
     */
@@ -128,6 +130,11 @@ public class MessageProcessor implements Runnable, Serializable
    private String         _file;
    private AprsServerConfig  _api; 
     
+   /* Encryption of APRS messages */
+   private Encryption _encr;
+   
+   
+    
     
    private static String getNextId()
    {
@@ -155,7 +162,8 @@ public class MessageProcessor implements Runnable, Serializable
        _key         = api.getProperty("message.auth.key", "NOKEY");
        _defaultPath = api.getProperty("message.rfpath", "WIDE1-1");
        _alwaysRf    = api.getProperty("message.alwaysRf", "");
-       _thread  = new Thread(this, "MessageProcessor-"+(threadid++));
+       _thread      = new Thread(this, "MessageProcessor-"+(threadid++));
+       _encr        = new AesGcmSivEncryption(_key, Main.SALT_APRSMESSAGE);
        _thread.start();
        _api = api;
    }  
@@ -192,7 +200,7 @@ public class MessageProcessor implements Runnable, Serializable
     * @param msgid Message ident.
     */
     public synchronized void incomingMessage
-        (Station sender, String recipient, String text, String msgid)
+        (Station sender, String to, String recipient, String text, String msgid)
     {
        /* Is it an ACK or REJ message? */
         if (_myCall.equals(recipient) && text.matches("(ack|rej).+")) {
@@ -227,7 +235,11 @@ public class MessageProcessor implements Runnable, Serializable
             /* Have we seen this message-id before? */
             if (!recMessages.containsKey(sender.getIdent()+"#"+msgid)) { 
                 boolean result = !subs.verify;
-                if (subs.verify &&
+
+                /*
+                 * Check the recipient field?
+                 */
+                if (subs.verify && // FIXME: Add the APPSA1 test
                     text.length() > 9 && text.charAt(text.length()-9) == '#')
                 {
                    /* Verify message by extracting MAC field and comparing it
@@ -238,7 +250,19 @@ public class MessageProcessor implements Runnable, Serializable
                     result = mac.equals
                         (SecUtils.digestB64(_key+sender.getIdent()+recipient+text+msgid, 8));
                 }
-            
+
+                /*
+                 * If encrypted, decrypt and verify it here.
+                 */
+                if (to.equals(Main.toaddrE)) {
+                    text = _encr.decryptB64(text, msgid, null);
+                    result = (text != null);
+                    if (text == null)
+                        _api.log().info("MessageProc", "Decryption or msg authentication failed. msgid="+msgid);
+                    else
+                        _api.log().debug("MessageProc", "Decryption success: "+msgid);
+                }
+
                 result = result && subs.recipient.handleMessage(sender, recipient, text);
                 if (!result && msgid != null) 
                     _api.log().info("MessageProc", "Message authentication or processing failed. msgid="+msgid);
@@ -304,12 +328,22 @@ public class MessageProcessor implements Runnable, Serializable
     */  
    public synchronized void sendMessage(String recipient, String text,
                        boolean acked, boolean authenticated, Notification not)
+        { sendMessage(recipient, text, acked, authenticated, false, not); }
+    
+    
+    
+   public synchronized void sendMessage(String recipient, String text,
+                       boolean acked, boolean authenticated, boolean encrypt,  Notification not)
    {
       String msgid = null;
       String mac = "";
       if (acked) {
          msgid = getNextId();
-         if (authenticated)
+         if (encrypt) {
+            text = _encr.encryptB64(text, msgid, null);
+            mac = "";
+         }
+         else if (authenticated)
             mac = "#" + SecUtils.digestB64(_key+_myCall+recipient+text+msgid, 8);
       }
         
@@ -318,7 +352,7 @@ public class MessageProcessor implements Runnable, Serializable
                        + (msgid != null ? "{"+msgid : "");
       if (acked)
          _outgoing.put(msgid, new OutMessage(msgid, recipient, text, message, not));                      
-      sendPacket(message, recipient);       
+      sendPacket(message, recipient, encrypt);
    }
    
    
@@ -352,14 +386,23 @@ public class MessageProcessor implements Runnable, Serializable
    /**
     * Encode and send an APRS message packet.
     */
-   public void sendPacket(String message, String recipient)
-      { sendPacketFrom(_myCall, message, recipient); }
+   public void sendPacket(String message, String recipient, boolean encrypt)
+      { sendPacketFrom(_myCall, message, recipient, encrypt); }
       
+   public void sendPacket(String message, String recipient)
+      { sendPacketFrom(_myCall, message, recipient, false); }
+      
+   
    public void sendPacketFrom(String from, String message, String recipient)
+      { sendPacketFrom(from, message, recipient, false); }
+   
+   
+   public void sendPacketFrom(String from, String message, String recipient, boolean encrypt)
    {
        AprsPacket p = new AprsPacket();
+       p.encrypted = encrypt;
        p.from = from;
-       p.to = "APRS";
+       p.to = (encrypt ? Main.toaddrE : Main.toaddr);
        
        p.msgto = recipient;
        /* Need to set p.via, and differently for the two channels */

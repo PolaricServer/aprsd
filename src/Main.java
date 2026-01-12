@@ -34,11 +34,23 @@ import java.time.Month;
 
 public class Main extends ConfigBase implements AprsServerConfig {
 
-    /* Update these each time a release is published */
+    /* Update these each time a release is to be published */
     public  static String version  = "4.0.3+";
     public  static String toaddr   = "APPS40";
+    public  static String toaddrE  = "APPSE1";
+    public  static String toaddrA  = "APPSA1";
+
+    /* Year and month for release */
     public  static int rel_year  = 2025;
     public  static int rel_month = 9;
+
+    /* Salt strings used for generating crypto keys:
+     * One for APRS position packets and one for APRS messages.
+     * They don't have to be secret, but should be random and unique per service
+     */
+    public  static String SALT_APRSPOS     = "(9L73)_GHS^:(he#Ob6~C$eQ,yDdxZXx";
+    public  static String SALT_APRSMESSAGE = "#=^ouise@!_rQp,UL^{pUL.~!v[nnHSf";
+
     
     private static StationDB db = null;
     public  MyWebServer webserver;

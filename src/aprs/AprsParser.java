@@ -16,6 +16,7 @@ package no.polaric.aprsd.aprs;
 import no.polaric.aprsd.*;
 import no.polaric.aprsd.channel.*;
 import no.polaric.aprsd.point.*;
+import no.polaric.aprsd.util.*;
 import java.util.regex.*;
 import java.io.*;
 import java.net.*;
@@ -56,6 +57,9 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
        
     private MessageProcessor _msg;
     private List<ReportHandler> _subscribers = new LinkedList<ReportHandler>();
+    private String _key;
+    private AesGcmSivEncryption _encr;
+
 
     
     public AprsParser(AprsServerConfig a, MessageProcessor msg) 
@@ -63,6 +67,8 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
         _conf = a;
         _msg = msg;
         _hmsFormat.setTimeZone(TimeZone.getTimeZone("GMT")); 
+        _key = a.getProperty("message.auth.key", "NOKEY");
+        _encr = new AesGcmSivEncryption(_key, Main.SALT_APRSPOS);
     }  
     
     
@@ -142,6 +148,11 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
                parseOldTelemetry(p, station);
                break;
                
+            case '{':
+               /* User defined / experimental packet */
+               parseUserdefined(p, station);
+               break;
+
             default: 
                /* If the first character is not recognized as a valid APRS frame type, 
                 * The frame may be regarded as a status beacon. 
@@ -236,7 +247,34 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
     } 
     
     
+    private void parseUserdefined(AprsPacket p, Station station)
+    {
+        String msg = p.report;
+        if (msg.matches("\\{\\{\\:.+") )
+            parseEncrypted(p, station);
+    }
     
+
+
+    private void parseEncrypted(AprsPacket p, Station station)
+    {
+        String ciphertext = p.report.substring(3);
+        String text = _encr.decryptB91(ciphertext, station.getIdent(), null);
+        if (text == null)
+            _conf.log().info("AprsParser", "Cannot decrypt/authenticate packet");
+        else {
+            if (text.indexOf(":")==0)
+                text = station.getIdent()+text;
+            text.replaceFirst(":", ">"+Main.toaddrE+":");
+
+            AprsPacket pp = AprsPacket.fromString(text);
+            pp.source = p.source;
+            receivePacket(pp, false);
+        }
+    }
+
+
+
     /**
      * Parse APRS message.
      */
@@ -271,7 +309,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
            parseMetadata(station, content);
         
         if (_msg != null)
-           _msg.incomingMessage(station, recipient, content, msgid);  
+           _msg.incomingMessage(station, p.to, recipient, content, msgid);
         for (ReportHandler h:_subscribers)
             h.handleMessage(p.source, new Date(), station.getIdent(), recipient, content);
     }
