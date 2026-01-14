@@ -20,7 +20,6 @@ import java.nio.ByteBuffer;
 public abstract class Encryption {
     
 
-    
     /**
      * Encrypt a string.
      */
@@ -28,7 +27,7 @@ public abstract class Encryption {
     
     public String encryptB64(String inp, String nonce, String aad) {
         byte[] ctext = encrypt(inp, nonce, aad);
-        return SecUtils.b64encode(ctext);
+        return SecUtils.b64encode(ctext).replaceAll("=", "");
     }
 
     public String encryptB91(String inp, String nonce, String aad) {
@@ -43,6 +42,11 @@ public abstract class Encryption {
     public abstract String decrypt(byte[] inp, String nonce, String aad);
     
     public String decryptB64(String inp, String nonce, String aad) {
+    
+        int remainder = inp.length() % 4;
+        if (remainder != 0) 
+            inp += "=".repeat(4 - remainder);
+        
         byte[] ibytes = SecUtils.b64decode(inp);
         return decrypt(ibytes, nonce, aad);
     }
