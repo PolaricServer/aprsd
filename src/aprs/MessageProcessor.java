@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -79,10 +79,10 @@ public class MessageProcessor implements Runnable, Serializable
          {recipient = rec; verify = ver;}
    }
    
-
-   private static final int _MSG_INTERVAL = 30;
+   private static final int _MAX_TEXT_LEN = 61;
+   private static final int _MSG_INTERVAL = 40;
    private static final int _MSG_MAX_RETRY = 4; 
-   private static final int _MAX_MSGID = 10000; 
+   private static final int _MAX_MSGID = 9999; 
    private static final int _MSGID_STORE_SIZE = 1024;
    private static final int _MSGID_TX_STORE_SIZE =  256;
    
@@ -120,6 +120,8 @@ public class MessageProcessor implements Runnable, Serializable
        
    private Map<String, Subscriber> _subscribers = new HashMap<String, Subscriber>();
    private Map<String, OutMessage> _outgoing = new HashMap<String, OutMessage>();
+   private Map<String, String>     _partMsg = new HashMap<String, String>();
+   
    private static int     _msgno = 0;
    private AprsChannel    _inetChan, _rfChan;
    private String         _myCall; /* Move this ? */
@@ -191,6 +193,43 @@ public class MessageProcessor implements Runnable, Serializable
     
     
     
+    private String getMsgId(String msgid, int offset) 
+    {
+        try {
+            return "" + (Long.parseLong(msgid) + offset); 
+        }
+        catch (Exception e) {
+            return null;
+        }
+    }
+    
+    
+    
+    /**
+     * Process incoming ack or rej message. 
+     */
+    private void processAck(String to, String recipient, String text, String msgid) 
+    {
+        msgid = text.substring(3, text.length());
+
+        /* notify recipient about result? */
+        OutMessage m = _outgoing.get(msgid);
+        if (m != null) {
+            if (m.not != null) {
+                if (text.matches("(rej).+")) 
+                    m.not.reportFailure(m.recipient, m.msgtext);
+                else 
+                    m.not.reportSuccess(m.recipient, m.msgtext);
+            }
+            _outgoing.remove(msgid);
+        }
+        else {
+            _api.log().debug("MessageProc", "Received ACK/REJ for unknown message: msgid="+msgid);
+        }  
+    }
+    
+    
+    
    /**
     * Process incoming message.
     * Called by APRS Parser
@@ -204,22 +243,7 @@ public class MessageProcessor implements Runnable, Serializable
     {
        /* Is it an ACK or REJ message? */
         if (_myCall.equals(recipient) && text.matches("(ack|rej).+")) {
-            msgid = text.substring(3, text.length());
-
-            /* notify recipient about result? */
-            OutMessage m = _outgoing.get(msgid);
-            if (m != null) {
-                if (m.not != null) {
-                    if (text.matches("(rej).+")) 
-                        m.not.reportFailure(m.recipient, m.msgtext);
-                    else 
-                        m.not.reportSuccess(m.recipient, m.msgtext);
-                }
-                _outgoing.remove(msgid);
-            }
-            else {
-                _api.log().debug("MessageProc", "Received ACK/REJ for unknown message: msgid="+msgid);
-            }  
+            processAck(to, recipient, text, msgid); 
             return;
         } 
       
@@ -255,6 +279,43 @@ public class MessageProcessor implements Runnable, Serializable
                  * If encrypted, decrypt and verify it here.
                  */
                 if (to.equals(Main.toaddrE)) {
+                    
+                    /* If this message is the first part of a split message */
+                    if (text.charAt(text.length()-1) == ';') {
+                        /* Has the last part arrived? */
+                        String lastPartId = getMsgId(msgid, 1); 
+                        String last = _partMsg.get(lastPartId);
+                        if (last != null){
+                            _partMsg.remove(lastPartId);
+                            text = text.substring(0,text.length()-1) + last.substring(1);
+                        }
+                        else {
+                            _partMsg.put(msgid, text); 
+                            return;
+                        }
+                    }
+                    
+                    /* If this message is the last part of a split message */
+                    else if (text.charAt(0) == ';') {
+                        /* Ack it */
+                        sendAck(sender.getIdent(), msgid, true);
+                        
+                        /* Has the first part arrived? */
+                        String firstPartId = getMsgId(msgid, -1); 
+                        String first = _partMsg.get(firstPartId);
+                        if (first != null) {
+                            _partMsg.remove(firstPartId);
+                            text = first.substring(0, first.length()-1) + text.substring(1);
+                            msgid = firstPartId;
+                        }
+                        else {
+                            _partMsg.put(msgid, text);
+                            return;
+                        }
+                    }
+                    
+                    
+                    /* Decrypt the message */
                     text = _encr.decryptB64(text, msgid, null);
                     result = (text != null);
                     if (text == null)
@@ -326,15 +387,28 @@ public class MessageProcessor implements Runnable, Serializable
     * @param authenticated Set to true to generate a MAC (see above)
     * @param not Interface to which to send a notification of success/failure.
     */  
-   public synchronized void sendMessage(String recipient, String text,
+   public void sendMessage(String recipient, String text,
                        boolean acked, boolean authenticated, Notification not)
         { sendMessage(recipient, text, acked, authenticated, false, not); }
     
-    
+   
+   
+   public void sendMessage(String recipient, String text,
+                       boolean acked, boolean authenticated)
+     { sendMessage(recipient, text, acked, authenticated, null); }
+
+     
+     
+   public void sendMessage(String recipient, String text,
+                       boolean acked, boolean authenticated, boolean encr, Notification not)
+        { sendMessage(recipient, text, acked, authenticated, encr, not, false); }
+
+        
     
    public synchronized void sendMessage(String recipient, String text,
-                       boolean acked, boolean authenticated, boolean encrypt,  Notification not)
+                       boolean acked, boolean authenticated, boolean encrypt,  Notification not, boolean encpart)
    {
+      String nextPart = null;
       String msgid = null;
       String mac = "";
       if (acked) {
@@ -342,6 +416,14 @@ public class MessageProcessor implements Runnable, Serializable
          if (encrypt) {
             text = _encr.encryptB64(text, msgid, null);
             mac = "";
+            
+            /* If encrypted message is too long, split it in two parts */
+            if (text.length() > _MAX_TEXT_LEN) {
+                int len = text.length() / 2; 
+                int rmdr = text.length() % 2;
+                nextPart = ";" + text.substring(len+rmdr);
+                text = text.substring(0, len+rmdr) + ";";
+            }
          }
          else if (authenticated)
             mac = "#" + SecUtils.digestB64(_key+_myCall+recipient+text+msgid, 8);
@@ -352,18 +434,16 @@ public class MessageProcessor implements Runnable, Serializable
                        + (msgid != null ? "{"+msgid : "");
       if (acked)
          _outgoing.put(msgid, new OutMessage(msgid, recipient, text, message, not));                      
-      sendPacket(message, recipient, encrypt);
+      sendPacket(message, recipient, (encrypt||encpart));
+      
+      /* IF message is split, send the next part */
+      if (nextPart != null && !encpart)
+         sendMessage(recipient, nextPart, true, false, false, null, true);
    }
    
+
    
    
-   public void sendMessage(String recipient, String text,
-                       boolean acked, boolean authenticated)
-     { sendMessage(recipient, text, acked, authenticated, null); }
-
-
-
-
   /**
    * Send acknowledgement (or reject) message.
    */
@@ -512,6 +592,10 @@ public class MessageProcessor implements Runnable, Serializable
             n++;
             
         
+            /* 
+             * Iterate through sent messages that are not acked yet. 
+             * Resend up to _MSG_MAX_RETRY times. 
+             */
             Iterator<OutMessage> iter = _outgoing.values().iterator(); 
             iter.forEachRemaining(m -> {
                 Date t = new Date();
