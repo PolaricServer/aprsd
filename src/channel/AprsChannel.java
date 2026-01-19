@@ -15,6 +15,7 @@
 package no.polaric.aprsd.channel;
 import no.polaric.aprsd.*;
 import no.polaric.aprsd.aprs.*;
+import no.polaric.aprsd.util.*;
 import java.util.*;
 import java.util.regex.*;
 import java.io.*;
@@ -37,7 +38,9 @@ public abstract class AprsChannel extends Channel
      protected long _heardPackets, _duplicates, _sent;        
 
      protected static boolean canSend;
-
+    
+     private static String _key;
+     private static AesGcmSivEncryption _encr;
      
 
      /**
@@ -59,6 +62,9 @@ public abstract class AprsChannel extends Channel
         String myCall = conf.getProperty("default.mycall", "NOCALL").toUpperCase();
         if ("NOCALL".equals(myCall))
             canSend = false;
+        
+        _key = conf.getProperty("message.auth.key", "NOKEY");
+        _encr = new AesGcmSivEncryption(_key, Main.SALT_APRSPOS);
      }
 
      
@@ -257,7 +263,23 @@ public abstract class AprsChannel extends Channel
        { return _out; }
 
     
+    
+    /*
+     * Send packcet. 
+     */
     public abstract boolean sendPacket(AprsPacket p);
+    
+    public boolean sendPacket(AprsPacket p, boolean encrypt) 
+    {
+      if (encrypt) {
+        p.type = '{';
+        p.report = "{{:" + _encr.encryptB91(p.report, p.from, null);
+        p.to = Main.toaddrE;
+        p.encrypted = true;
+      }
+      return sendPacket(p);
+    }
+    
     
     
     /**

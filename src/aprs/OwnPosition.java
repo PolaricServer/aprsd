@@ -34,6 +34,8 @@ public class OwnPosition extends Station implements Runnable
     transient protected String     _pathRf, _comment;
     transient protected int        _maxPause, _minPause;
     
+    private boolean _encrypt;
+    
     private final static int _trackTime = 10;
     private final static byte ASCII_BASE = 33;
     
@@ -83,6 +85,8 @@ public class OwnPosition extends Station implements Runnable
         _compress = _api.getBoolProperty("ownposition.tx.compress", false);
         _maxPause = _api.getIntProperty("ownposition.tx.maxpause", 600);
         _minPause = _api.getIntProperty("ownposition.tx.minpause", 120);
+        _encrypt  = _api.getBoolProperty("ownposition.tx.encrypt", false);
+        
         if (_minPause == 0)
            _minPause = _maxPause;
         _description = _comment;
@@ -241,7 +245,7 @@ public class OwnPosition extends Station implements Runnable
         /* Send object report on RF, if appropriate */
         p.via = _pathRf; 
         if (_allowRf && _rfChan != null && _rfChan.isRf()) {
-           _rfChan.sendPacket(p);
+           _rfChan.sendPacket(p, _encrypt);
            sentRf = true;
         }
         
@@ -254,8 +258,7 @@ public class OwnPosition extends Station implements Runnable
             ig.gate_to_inet(p);
         else
             if (_inetChan != null && !_inetChan.isRf()) {
-                _api.log().debug("OwnPosition", "Send packet: "+p.toString());
-                _inetChan.sendPacket(p);
+                _inetChan.sendPacket(p, _encrypt);
             }
             
     }

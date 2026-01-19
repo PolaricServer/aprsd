@@ -261,14 +261,11 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
         String ciphertext = p.report.substring(3);
         String text = _encr.decryptB91(ciphertext, station.getIdent(), null);
         if (text == null)
-            _conf.log().info("AprsParser", "Cannot decrypt/authenticate packet");
+            _conf.log().info("AprsParser", "Cannot decrypt/authenticate packet: "+station.getIdent());
         else {
-            if (text.indexOf(":")==0)
-                text = station.getIdent()+text;
-            text.replaceFirst(":", ">"+Main.toaddrE+":");
-
-            AprsPacket pp = AprsPacket.fromString(text);
-            pp.source = p.source;
+            AprsPacket pp = p.clone(); 
+            pp.report = text;
+            pp.type = text.charAt(0);
             receivePacket(pp, false);
         }
     }
