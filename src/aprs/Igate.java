@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -123,7 +123,11 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
     /**
      * Gate packet (from RF) to internet.
      */
-    public void gate_to_inet(AprsPacket p)
+    public void gate_to_inet(AprsPacket p) {
+      gate_to_inet(p, false); 
+    }
+    
+    public void gate_to_inet(AprsPacket p, boolean encrypt)
     {
        /* Note, we assume that third-party headers are stripped 
         * by the channel-implementation.  
@@ -143,7 +147,7 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
          p.via += (",qAO,"+_myCall);
          
        if (_inetChan != null && !_inetChan.isRf()) 
-           _inetChan.sendPacket(p);
+           _inetChan.sendPacket(p, encrypt);
        
     }
 
@@ -168,6 +172,9 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
                       
           && /* AND No TCPXX, NOGATE, or RFONLY in header */
                ! p.via.matches(".*((TCPXX)|NOGATE|RFONLY|NO_TX).*") 
+          
+          && /* Not encrypted */
+               ! p.to.equals(Main.toaddrE)
        )    
        {        
           _conf.log().debug("Igate", "Gated to RF");

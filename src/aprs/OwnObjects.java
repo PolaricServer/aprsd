@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -42,6 +42,8 @@ public class OwnObjects implements Runnable
     private boolean         _forceUpdate;
     private int              _tid;
     
+    private boolean _encrypt;
+    
     
     public OwnObjects(AprsServerConfig api) 
     {
@@ -51,7 +53,7 @@ public class OwnObjects implements Runnable
         _rangeRf     = api.getIntProperty("objects.rfgate.range", 0);
         _txPeriod    = api.getIntProperty("objects.transmit.period", 360);
         _forceUpdate = api.getBoolProperty("objects.forceupdate", false);
-        
+        _encrypt     = api.getBoolProperty("objects.tx.encrypt", false);
            
         /* Should not expire as long as we have objects */        
          if (_txPeriod > 0) {
@@ -234,12 +236,12 @@ public class OwnObjects implements Runnable
        
        /* Send object report on aprs-is */
        if (_inetChan != null && !_inetChan.isRf()) 
-           _inetChan.sendPacket(p);
+           _inetChan.sendPacket(p, _encrypt);
             
        /* Send object report on RF, if appropriate */
        p.via = _pathRf;
        if (_allowRf && _rfChan != null && _rfChan.isRf() && object_in_range(obj, _rangeRf))
-           _rfChan.sendPacket(p);
+           _rfChan.sendPacket(p, _encrypt);
     }
     
     
