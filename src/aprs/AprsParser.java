@@ -54,6 +54,9 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
     protected static Predicate<String> _altitudePat = Pattern.compile  
        ("/A=[0-9]{6}").asPredicate();
        
+    /* DAO conversion factor: 1/100th arcminute to degrees 
+     * 1 arcminute = 1/60 degree, so 1/100th arcminute = 1/(60*100) = 1/6000 degree */
+    private static final double DAO_PRECISION_FACTOR = 6000.0;
        
     private MessageProcessor _msg;
     private List<ReportHandler> _subscribers = new LinkedList<ReportHandler>();
@@ -757,7 +760,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
         while (idx >= 0 && idx + 4 < comment.length()) {
             if (comment.charAt(idx + 4) == '!') {
                 // Found potential DAO pattern
-                char d = comment.charAt(idx + 1);
+                char d = comment.charAt(idx + 1); // Datum character (currently not used, reserved for future datum support)
                 char a = comment.charAt(idx + 2);
                 char o = comment.charAt(idx + 3);
                 
@@ -769,8 +772,8 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
                     
                     // Adjust for centered encoding: 0-90 represents -45 to +45
                     // where 45 is center (no offset)
-                    double latAdjust = (latOffset - 45) / 6000.0;  // 1/100th minute to degrees
-                    double lngAdjust = (lngOffset - 45) / 6000.0;  // 1/100th minute to degrees
+                    double latAdjust = (latOffset - 45) / DAO_PRECISION_FACTOR;
+                    double lngAdjust = (lngOffset - 45) / DAO_PRECISION_FACTOR;
                     
                     // Get current position
                     LatLng currentPos = (LatLng) pd.pos;
