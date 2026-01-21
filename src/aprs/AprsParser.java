@@ -63,6 +63,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
     private static final int BASE_91_MAX = 123;    // Maximum ASCII value for base-91 ({)
     private static final int BASE_91_OFFSET = 33;  // Base-91 offset for decoding
     private static final int DAO_CENTER_VALUE = 45; // Center value representing zero offset
+    private static final int DAO_PATTERN_LENGTH = 5; // Length of DAO pattern (!DAO!)
        
     private MessageProcessor _msg;
     private List<ReportHandler> _subscribers = new LinkedList<ReportHandler>();
@@ -758,13 +759,13 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
      */
     private String parseDAO(String comment, ReportHandler.PosData pd) 
     {
-        if (comment == null || comment.length() < 5 || pd == null || pd.pos == null)
+        if (comment == null || comment.length() < DAO_PATTERN_LENGTH || pd == null || pd.pos == null)
             return comment;
             
         // Search for !DAO! pattern anywhere in the comment
         int idx = comment.indexOf('!');
-        while (idx >= 0 && idx + 4 < comment.length()) {
-            if (comment.charAt(idx + 4) == '!') {
+        while (idx >= 0 && idx + (DAO_PATTERN_LENGTH - 1) < comment.length()) {
+            if (comment.charAt(idx + (DAO_PATTERN_LENGTH - 1)) == '!') {
                 // Found potential DAO pattern
                 char d = comment.charAt(idx + 1); // Datum character (currently not used, reserved for future datum support)
                 char a = comment.charAt(idx + 2);
@@ -792,7 +793,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
                     pd.pos = new LatLng(newLat, newLng);
                     
                     // Remove DAO extension from comment
-                    comment = comment.substring(0, idx) + comment.substring(idx + 5);
+                    comment = comment.substring(0, idx) + comment.substring(idx + DAO_PATTERN_LENGTH);
                     
                     // DAO processed, exit loop
                     break;
