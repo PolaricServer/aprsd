@@ -727,7 +727,70 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
               parseTelemetry((Station) station, ts, m.group(1)); 
            comment = comment.substring(0, m.start(1)-1) + " (telemetry) " + comment.substring(m.end(1)+1);
         }
-        /* FIXME: Add DAO parsing for extra precision */
+        /* DAO parsing for extra precision */
+        comment = parseDAO(comment, pd);
+        return comment;
+    }
+    
+    
+    /**
+     * Parse DAO (Datum and Added Precision) extension.
+     * !DAO! - is fixed length (5 characters) anywhere in the position comment
+     *   D - is the datum identifier (base-91)
+     *   A - is the added Latitude precision (base-91)
+     *   O - is the added Longitude precision (base-91)
+     * 
+     * The DAO extension adds 1/100th of a minute precision to lat/long.
+     * Base-91 characters represent values 0-90 (ASCII 33-123).
+     * 
+     * @param comment The comment string to parse
+     * @param pd Position data to update with extra precision
+     * @return The comment with DAO extension removed
+     */
+    private String parseDAO(String comment, ReportHandler.PosData pd) 
+    {
+        if (comment == null || comment.length() < 5 || pd == null || pd.pos == null)
+            return comment;
+            
+        // Search for !DAO! pattern anywhere in the comment
+        int idx = comment.indexOf('!');
+        while (idx >= 0 && idx + 4 < comment.length()) {
+            if (comment.charAt(idx + 4) == '!') {
+                // Found potential DAO pattern
+                char d = comment.charAt(idx + 1);
+                char a = comment.charAt(idx + 2);
+                char o = comment.charAt(idx + 3);
+                
+                // Validate that characters are in valid base-91 range (ASCII 33-123)
+                if (d >= 33 && d <= 123 && a >= 33 && a <= 123 && o >= 33 && o <= 123) {
+                    // Decode base-91 values (0-90)
+                    int latOffset = a - 33;  // 0-90
+                    int lngOffset = o - 33;  // 0-90
+                    
+                    // Adjust for centered encoding: 0-90 represents -45 to +45
+                    // where 45 is center (no offset)
+                    double latAdjust = (latOffset - 45) / 6000.0;  // 1/100th minute to degrees
+                    double lngAdjust = (lngOffset - 45) / 6000.0;  // 1/100th minute to degrees
+                    
+                    // Get current position
+                    LatLng currentPos = (LatLng) pd.pos;
+                    double newLat = currentPos.getLat() + latAdjust;
+                    double newLng = currentPos.getLng() + lngAdjust;
+                    
+                    // Update position with refined coordinates
+                    pd.pos = new LatLng(newLat, newLng);
+                    
+                    // Remove DAO extension from comment
+                    comment = comment.substring(0, idx) + comment.substring(idx + 5);
+                    
+                    // DAO processed, exit loop
+                    break;
+                }
+            }
+            // Search for next '!' character
+            idx = comment.indexOf('!', idx + 1);
+        }
+        
         return comment;
     }
     
