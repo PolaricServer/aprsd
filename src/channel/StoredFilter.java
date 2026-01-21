@@ -54,7 +54,7 @@ public class StoredFilter
      * in the filter spec, put out a warning in the log and continue to the next. 
      *
      * A line in the file is: 
-     * <name> <filterspec>
+     * name filterspec
      * or 
      * # comment (to be ignored)
      */
@@ -91,13 +91,13 @@ public class StoredFilter
                     Filt filter = new Filt(fspec, null);
                     _filtmap.put(name, filter);
                 } catch (Exception e) {
-                    _conf.log().warn("StoredFilter", "Error parsing filter '" + name + "': " + e.getMessage());
+                    _conf.log().warn("StoredFilter", "Error parsing filter '{name}': " + e.getMessage());
                 }
             }
-            _conf.log().info("StoredFilter", "Loaded " + _filtmap.size() + " filters from " + filename);
+            _conf.log().info("StoredFilter", "Loaded {_filtmap.size()} filters from " + filename);
             
         } catch (IOException e) {
-            _conf.log().warn("StoredFilter", "Error reading filter file '" + filename + "': " + e.getMessage());
+            _conf.log().warn("StoredFilter", "Error reading filter file '{filename}': " + e.getMessage());
         }
     }
     

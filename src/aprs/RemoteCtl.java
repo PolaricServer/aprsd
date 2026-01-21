@@ -1,9 +1,9 @@
 /* 
  * Copyright (C) 2017-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -833,15 +833,15 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
                 _tryPause--;
                 
             
-            /* Disconnect chldren not heard from in 40 minutes */
+            /* Disconnect chldren not heard from in 45 minutes */
             for (String x : getChildren()) 
-                if (getChild(x).getTime() + 2400000 <= (new Date()).getTime()) {
+                if (getChild(x).getTime() + 2700000 <= (new Date()).getTime()) {
                    _log.info(null, ""+x+" disconnected (timeout)");
                    disconnectChild(x);
                 }
                 
-            /* Wait for 10 minutes */
-            Thread.sleep(600000);
+            /* Wait for 15 minutes */
+            Thread.sleep(900000);
          }
       } catch (Exception e) {
             _api.log().warn("RemoteCtl", "Exception: "+e.getMessage());
