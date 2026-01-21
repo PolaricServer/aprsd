@@ -57,6 +57,12 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
     /* DAO conversion factor: 1/100th arcminute to degrees 
      * 1 arcminute = 1/60 degree, so 1/100th arcminute = 1/(60*100) = 1/6000 degree */
     private static final double DAO_PRECISION_FACTOR = 6000.0;
+    
+    /* Base-91 encoding constants for DAO */
+    private static final int BASE_91_MIN = 33;     // Minimum ASCII value for base-91 (!)
+    private static final int BASE_91_MAX = 123;    // Maximum ASCII value for base-91 ({)
+    private static final int BASE_91_OFFSET = 33;  // Base-91 offset for decoding
+    private static final int DAO_CENTER_VALUE = 45; // Center value representing zero offset
        
     private MessageProcessor _msg;
     private List<ReportHandler> _subscribers = new LinkedList<ReportHandler>();
@@ -764,16 +770,18 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
                 char a = comment.charAt(idx + 2);
                 char o = comment.charAt(idx + 3);
                 
-                // Validate that characters are in valid base-91 range (ASCII 33-123)
-                if (d >= 33 && d <= 123 && a >= 33 && a <= 123 && o >= 33 && o <= 123) {
+                // Validate that characters are in valid base-91 range
+                if (d >= BASE_91_MIN && d <= BASE_91_MAX && 
+                    a >= BASE_91_MIN && a <= BASE_91_MAX && 
+                    o >= BASE_91_MIN && o <= BASE_91_MAX) {
                     // Decode base-91 values (0-90)
-                    int latOffset = a - 33;  // 0-90
-                    int lngOffset = o - 33;  // 0-90
+                    int latOffset = a - BASE_91_OFFSET;
+                    int lngOffset = o - BASE_91_OFFSET;
                     
                     // Adjust for centered encoding: 0-90 represents -45 to +45
                     // where 45 is center (no offset)
-                    double latAdjust = (latOffset - 45) / DAO_PRECISION_FACTOR;
-                    double lngAdjust = (lngOffset - 45) / DAO_PRECISION_FACTOR;
+                    double latAdjust = (latOffset - DAO_CENTER_VALUE) / DAO_PRECISION_FACTOR;
+                    double lngAdjust = (lngOffset - DAO_CENTER_VALUE) / DAO_PRECISION_FACTOR;
                     
                     // Get current position
                     LatLng currentPos = (LatLng) pd.pos;
