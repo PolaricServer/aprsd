@@ -54,16 +54,8 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
     protected static Predicate<String> _altitudePat = Pattern.compile  
        ("/A=[0-9]{6}").asPredicate();
        
-    /* DAO conversion factor: 1/100th arcminute to degrees 
-     * 1 arcminute = 1/60 degree, so 1/100th arcminute = 1/(60*100) = 1/6000 degree */
-    private static final double DAO_PRECISION_FACTOR = 6000.0;
-    
-    /* Base-91 encoding constants for DAO */
-    private static final int BASE_91_MIN = 33;     // Minimum ASCII value for base-91 (!)
-    private static final int BASE_91_MAX = 123;    // Maximum ASCII value for base-91 ({)
-    private static final int BASE_91_OFFSET = 33;  // Base-91 offset for decoding
-    private static final int DAO_CENTER_VALUE = 45; // Center value representing zero offset
-    private static final int DAO_PATTERN_LENGTH = 5; // Length of DAO pattern (!DAO!)
+
+
        
     private MessageProcessor _msg;
     private List<ReportHandler> _subscribers = new LinkedList<ReportHandler>();
@@ -660,6 +652,9 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
     {        
         if (comment==null)
            return null;
+        
+        /* DAO parsing for extra precision */
+        comment = parseDAO(comment, pd);
         while( true ) {
            /* Course and speed: nnn/nnn */
            if (comment.length() >= 7 && _csPat.test(comment.substring(0,7))) {
@@ -737,74 +732,12 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
               parseTelemetry((Station) station, ts, m.group(1)); 
            comment = comment.substring(0, m.start(1)-1) + " (telemetry) " + comment.substring(m.end(1)+1);
         }
-        /* DAO parsing for extra precision */
-        comment = parseDAO(comment, pd);
+
         return comment;
     }
     
-    
-    /**
-     * Parse DAO (Datum and Added Precision) extension.
-     * !DAO! - is fixed length (5 characters) anywhere in the position comment
-     *   D - is the datum identifier (base-91)
-     *   A - is the added Latitude precision (base-91)
-     *   O - is the added Longitude precision (base-91)
-     * 
-     * The DAO extension adds 1/100th of a minute precision to lat/long.
-     * Base-91 characters represent values 0-90 (ASCII 33-123).
-     * 
-     * @param comment The comment string to parse
-     * @param pd Position data to update with extra precision
-     * @return The comment with DAO extension removed
-     */
-    private String parseDAO(String comment, ReportHandler.PosData pd) 
-    {
-        if (comment == null || comment.length() < DAO_PATTERN_LENGTH || pd == null || pd.pos == null)
-            return comment;
-            
-        // Search for !DAO! pattern anywhere in the comment
-        int idx = comment.indexOf('!');
-        while (idx >= 0 && idx + (DAO_PATTERN_LENGTH - 1) < comment.length()) {
-            if (comment.charAt(idx + (DAO_PATTERN_LENGTH - 1)) == '!') {
-                // Found potential DAO pattern
-                char d = comment.charAt(idx + 1); // Datum character (currently not used, reserved for future datum support)
-                char a = comment.charAt(idx + 2);
-                char o = comment.charAt(idx + 3);
-                
-                // Validate that characters are in valid base-91 range
-                if (d >= BASE_91_MIN && d <= BASE_91_MAX && 
-                    a >= BASE_91_MIN && a <= BASE_91_MAX && 
-                    o >= BASE_91_MIN && o <= BASE_91_MAX) {
-                    // Decode base-91 values (0-90)
-                    int latOffset = a - BASE_91_OFFSET;
-                    int lngOffset = o - BASE_91_OFFSET;
-                    
-                    // Adjust for centered encoding: 0-90 represents -45 to +45
-                    // where 45 is center (no offset)
-                    double latAdjust = (latOffset - DAO_CENTER_VALUE) / DAO_PRECISION_FACTOR;
-                    double lngAdjust = (lngOffset - DAO_CENTER_VALUE) / DAO_PRECISION_FACTOR;
-                    
-                    // Get current position
-                    LatLng currentPos = (LatLng) pd.pos;
-                    double newLat = currentPos.getLat() + latAdjust;
-                    double newLng = currentPos.getLng() + lngAdjust;
-                    
-                    // Update position with refined coordinates
-                    pd.pos = new LatLng(newLat, newLng);
-                    
-                    // Remove DAO extension from comment
-                    comment = comment.substring(0, idx) + comment.substring(idx + DAO_PATTERN_LENGTH);
-                    
-                    // DAO processed, exit loop
-                    break;
-                }
-            }
-            // Search for next '!' character
-            idx = comment.indexOf('!', idx + 1);
-        }
-        
-        return comment;
-    }
+
+
     
     
     /**

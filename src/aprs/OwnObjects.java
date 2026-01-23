@@ -53,7 +53,7 @@ public class OwnObjects implements Runnable
         _rangeRf     = api.getIntProperty("objects.rfgate.range", 0);
         _txPeriod    = api.getIntProperty("objects.transmit.period", 360);
         _forceUpdate = api.getBoolProperty("objects.forceupdate", false);
-        _encrypt     = api.getBoolProperty("objects.tx.encrypt", false);
+        _encrypt     = api.getBoolProperty("objects.tx.encrypt", false); 
            
         /* Should not expire as long as we have objects */        
          if (_txPeriod > 0) {
@@ -194,14 +194,14 @@ public class OwnObjects implements Runnable
     private DateFormat    _tsformat = new SimpleDateFormat("ddHHmm");    
 
  
-    /* Somewhat redundant - see HttpServer.showDMstring */
+    /* FIXME:  Redundant - see HttpServer.showDMstring and OwnPosition.showDMstring */
     protected double toGpsNumber(double ll)
     {
        int deg = (int) Math.floor(ll);
-       double minx = ll - deg;
-       if (ll < 0 && minx != 0.0) 
-          minx = 1 - minx;
-       double mins = ((double) Math.round( minx * 60 * 100)) / 100;
+       double minx = Math.abs(ll - deg);
+  //     if (ll < 0 && minx != 0.0) 
+  //        minx = 1 - minx;
+       double mins = ((double) Math.floor( minx * 60 * 100)) / 100;
        return deg * 100 + mins; 
     }
     
@@ -232,6 +232,10 @@ public class OwnObjects implements Runnable
        p.report = ";" + id + (delete ? "_" : "*") 
                    + posReport((obj.isTimeless() ? null : obj.getUpdated()), obj.getPosition(), obj.getSymbol(), obj.getSymtab())
                    + obj.getDescr(); 
+                   
+       if (!delete)
+           p.report += AprsUtil.generateDAO(obj.getPosition());
+           
        _api.log().debug("OwnObjects", "Send object report: "+ p.from+">"+p.to+":"+p.report);
        
        /* Send object report on aprs-is */

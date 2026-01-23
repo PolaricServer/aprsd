@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -150,11 +150,11 @@ public class OwnPosition extends Station implements Runnable
     protected String showDMstring(float ll, int ndeg)
     {
         int deg = (int) Math.floor(ll);
-        float minx = ll - deg;
-        if (ll < 0 && minx != 0.0) 
-            minx = 1 - minx; // FIXME: is this correct. Check code in PT as well?
+        float minx = Math.abs(ll - deg);
+   //     if (ll < 0 && minx != 0.0) 
+   //         minx = 1 - minx; // FIXME: is this correct. Check code in PT as well?
           
-        float mins = ((float) Math.round( minx * 60 * 100)) / 100;
+        float mins = ((float) Math.floor( minx * 60 * 100)) / 100;
         return String.format((Locale)null, "%0"+ndeg+"d%05.2f", deg, mins); 
     }  
 

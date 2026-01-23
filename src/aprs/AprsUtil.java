@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -64,7 +64,21 @@ public class AprsUtil
    // FIXME: Handle ambiguity in latitude ?
      
    protected static AprsServerConfig _conf   = null;
+   
+   
+
     
+   /* Base-91 encoding constants for DAO */
+   public static final int BASE91_MIN = 33;       // Minimum ASCII value for base-91 (!)
+   public static final int BASE91_MAX = 123;      // Maximum ASCII value for base-91 ({)
+   private static final int DAO_CENTER_VALUE = 45;  // Center value representing zero offset
+   private static final int DAO_PATTERN_LENGTH = 5; // Length of DAO pattern (!DAO!)
+    
+  /* DAO conversion factor: 1/100th arcminute to degrees 
+   * 1 arcminute = 1/60 degree, so 1/100th arcminute = 1/(60*100) = 1/6000 degree 
+   */
+   private static final double DAO_PRECISION_FACTOR = 6000.0;
+   
     
     
    /* Consider Moving this to AprsPacket */ 
@@ -333,7 +347,7 @@ public class AprsUtil
    }
     
     
-        
+   /* See also a more generic base 91 encoder/decoder in util */     
    protected static long base91Decode(byte c0, byte c1, byte c2, byte c3)
    {
         if (c0<33) c0=33; 
@@ -343,7 +357,90 @@ public class AprsUtil
         return (c0-33) * 753571 + (c1-33) * 8281 + (c2-33) * 91 + (c3-33);
    }
     
+    
+    
+    /**
+     * Parse DAO (Datum and Added Precision) extension.
+     * !DAO! - is fixed length (5 characters) anywhere in the position comment
+     *   D - is the datum identifier (base-91)
+     *   A - is the added Latitude precision (base-91)
+     *   O - is the added Longitude precision (base-91)
+     * 
+     * The DAO extension adds 1/100th of a minute precision to lat/long.
+     * Base-91 characters represent values 0-90 (ASCII 33-123).
+     * 
+     * @param comment The comment string to parse
+     * @param pd Position data to update with extra precision
+     * @return The comment with DAO extension removed
+     */
+    public static String parseDAO(String comment, ReportHandler.PosData pd) 
+    {
+        if (comment == null || comment.length() < DAO_PATTERN_LENGTH || pd == null || pd.pos == null)
+            return comment;
+            
+        // Search for !DAO! pattern anywhere in the comment
+        int idx = comment.indexOf('!');
+        while (idx >= 0 && idx + (DAO_PATTERN_LENGTH - 1) < comment.length()) {
+            if (comment.charAt(idx + (DAO_PATTERN_LENGTH - 1)) == '!') {
+                // Found potential DAO pattern
+                char d = comment.charAt(idx + 1); // Datum character (currently not used)
+                if (d != 'w')
+                    return comment; 
+                char a = comment.charAt(idx + 2);
+                char o = comment.charAt(idx + 3);
+                
+                // Validate that characters are in valid base-91 range
+                if (d >= BASE91_MIN && d <= BASE91_MAX && 
+                    a >= BASE91_MIN && a <= BASE91_MAX && 
+                    o >= BASE91_MIN && o <= BASE91_MAX) {
+                    
+                    // Adjust current position
+                    LatLng currentPos = (LatLng) pd.pos;
+                    double newLat = currentPos.getLat() + dao_decode(a);
+                    double newLng = currentPos.getLng() + dao_decode(o);
 
+                    // Update position with refined coordinates
+                    pd.pos = new LatLng(newLat, newLng);
+                    
+                    // Remove DAO extension from comment
+                    comment = comment.substring(0, idx) + comment.substring(idx + DAO_PATTERN_LENGTH);
+                    break;
+                }
+            }
+            // Search for next '!' character
+            idx = comment.indexOf('!', idx + 1);
+        }
+        
+        return comment;
+    }
+    
+    
+    
+    public static String generateDAO(LatLng pos) 
+    {
+        double latHmin = pos.getLat() * DAO_PRECISION_FACTOR;
+        double lngHmin = pos.getLng() * DAO_PRECISION_FACTOR;
+        double latOffset = latHmin - Math.floor(latHmin);
+        double lngOffset = lngHmin - Math.floor(lngHmin);
+        latOffset /= 100;
+        lngOffset /= 100;
+        return "!w" + dao_encode(latOffset) + dao_encode(lngOffset) + "!";
+    }
+        
+        
+    /* Convert from character to offset in degrees */
+    private static double dao_decode(char x) {
+        int offset = x - BASE91_MIN;
+        return ((double) offset) / 100 / DAO_PRECISION_FACTOR * 1.1; 
+    }
+    
+    
+    /* Convert from offset in minutes to character */
+    private static char dao_encode(double x) {
+        int offset = (int) Math.round(x * 10000 * 0.9);
+        return (char) (offset + BASE91_MIN);
+    }
+    
     
     protected static ReportHandler.PosData parseCompressedPos(String data)
     {
@@ -358,12 +455,15 @@ public class AprsUtil
           latDeg = 90.0 - ((double) base91Decode(y[0], y[1], y[2], y[3])) / 380926; 
           lngDeg = -180 + ((double) base91Decode(x[0], x[1], x[2], x[3])) / 190463;
      
+          /* If nmea source in T-byte is GGA, cs represent altitude */
           if (((csT[2]-33) & 0x18) == 0x10) 
           {
              /* Altitude */
              pd.altitude = Math.round( Math.pow(1.002, (csT[0]-33)*91 + (csT[1]-33)));
              pd.altitude *= 0.3048;
           }
+          
+          /* the cs represent course/speed */
           else if (csT[0] >= 0+33 && csT[0] <= 89+33) 
           { 
              /* Course/speed */
