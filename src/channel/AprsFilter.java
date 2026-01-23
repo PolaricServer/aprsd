@@ -486,6 +486,8 @@ public abstract class AprsFilter {
         }
         
         @Override public boolean test(AprsPacket p) {
+            if (p==null)
+                return false;
             if (p.type != ':')
                 return false;
             if (p.msgto == null)

@@ -162,7 +162,9 @@ public class InetChannel extends TcpChannel
                         continue;
                     }
                     AprsPacket p = AprsPacket.fromString(inp);
-                    if (_xfilter == null || _xfilter.test(p))
+                    if (p==null)
+                        ;
+                    else if (_xfilter == null || _xfilter.test(p))
                         receivePacket(p, false);
                     else
                         _blocked++;
