@@ -79,7 +79,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
        
    private MessageProcessor _msg;
    private MessageProcessor.MessageHandler _pmsg;
-   private AprsServerConfig _api;
+   private AprsServerConfig _conf;
    private Logfile   _log;
    private UserCb    _usercb;
    private ConnectCb _connectcb;
@@ -87,7 +87,6 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    private LinkedHashMap<String, LogEntry> _cmds = new LinkedHashMap<String, LogEntry>(); 
    private KeyedSet _users = new KeyedSet();
    private Map<String, Child> _children = new HashMap<String, Child>();
-   
    private OldEncryption _crypt;
    private String _encryptTo = ""; 
    private String _encryptTo2 = "";
@@ -148,31 +147,42 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    
    
    private int threadid=0;    
-   public RemoteCtl(AprsServerConfig api, MessageProcessor mp)
+   public RemoteCtl(AprsServerConfig conf, MessageProcessor mp)
    {
-       _myCall = api.getProperty("remotectl.mycall", "").toUpperCase();
+       _conf = conf;
+       _msg = mp;
+        init(); 
+       _thread = new Thread(this, "RemoteCtl-"+(threadid++));
+       _thread.start();
+   }
+   
+   
+   
+   public void init() 
+   {
+       String oldmycall = _myCall; 
+       _myCall = _conf.getProperty("remotectl.mycall", "").toUpperCase();
        if (_myCall.length() == 0)
-           _myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();
-       _radius = api.getIntProperty("remotectl.radius", -1); 
-       _parent = api.getProperty("remotectl.connect", null);
-       _log = new Logfile(api, "remotectl", "remotectl.log");
-       _encryptTo = api.getProperty("remotectl.encrypt", "");
-       _encryptTo2 = api.getProperty("remotectl.encrypt2", "");
-       _userInfo = api.getProperty("remotectl.userinfo", ".*");
-       String key = api.getProperty("message.auth.key", "NOKEY");
+           _myCall = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
+       _radius = _conf.getIntProperty("remotectl.radius", -1); 
+       _parent = _conf.getProperty("remotectl.connect", null);
+       _log = new Logfile(_conf, "remotectl", "remotectl.log");
+       _encryptTo = _conf.getProperty("remotectl.encrypt.old", "");
+       _encryptTo2 = _conf.getProperty("remotectl.encrypt", "");
+       _userInfo = _conf.getProperty("remotectl.userinfo", ".*");
+       String key = _conf.getProperty("message.auth.key", "NOKEY");
        
        if (_parent != null) 
           _parent = _parent.trim().toUpperCase();
        if ("".equals(_parent))
           _parent = null;
-       mp.subscribe(_myCall, new Subscriber(), true);
-       
+          
+       if (oldmycall == null || !oldmycall.equals(_myCall)) {
+          _msg.unsubscribe(oldmycall);
+          _msg.subscribe(_myCall, new Subscriber(), true);
+       }
+              
        _crypt = new OldEncryption( key );
-       
-       _msg = mp;
-       _api = api;
-       _thread = new Thread(this, "RemoteCtl-"+(threadid++));
-       _thread.start();
    }
    
    
@@ -212,7 +222,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */
     public void reportFailure(String id, String msg)
     {
-        _api.log().debug("RemoteCtl", "Command or msg delivery failed: "+id+" ("+msg+")");
+        _conf.log().debug("RemoteCtl", "Command or msg delivery failed: "+id+" ("+msg+")");
         if (!msg.matches("CON.*"))
             return;
       
@@ -339,8 +349,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
         String[] arg = msg.split("\\s+", 3);
         if (arg.length < 2 || !arg[0].matches("ALIAS|ICON|TAG|RMTAG"))
             return true;
-        Point x = _api.getDB().getItem(arg[1], null);
-        LatLng pos = _api.getOwnPos().getPosition();
+        Point x = _conf.getDB().getItem(arg[1], null);
+        LatLng pos = _conf.getOwnPos().getPosition();
         if (_radius <= 0 || pos == null) 
             return true; 
         if (x != null && x.distance(pos) > _radius*1000)
@@ -357,7 +367,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     */
    protected boolean processRequest(Station sender, String text)
    {    
-      _api.log().debug("RemoteCtl", "processRequest - from "+sender.getIdent()+": "+text);
+      _conf.log().debug("RemoteCtl", "processRequest - from "+sender.getIdent()+": "+text);
       String[] arg = text.split("\\s+", 2);
       if (arg.length == 0)
          return false;
@@ -383,12 +393,12 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
       
       /* Connect command */
       if (arg[0].equals("CON")) {
-         _api.log().debug("RemoteCtl", "Got CON from "+sender.getIdent());
+         _conf.log().debug("RemoteCtl", "Got CON from "+sender.getIdent());
          p = doConnect(sender, args);
          propagate = false;
       }
       else if (!sender.getIdent().equals(_parent) && !hasChild(sender.getIdent())) {
-         _api.log().debug("RemoteCtl", "Got command from unconnected node: "+sender);
+         _conf.log().debug("RemoteCtl", "Got command from unconnected node: "+sender);
          return false; 
       }
       
@@ -442,8 +452,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
      * Remove tags, aliases and icons associated with an item 
      */
     protected boolean doRemoveItem(Station sender, String arg) {
-        _api.log().debug("RemoteCtl", "Got RMITEM from "+sender.getIdent()+": "+arg);
-        _api.getDB().removeItem(arg.trim());
+        _conf.log().debug("RemoteCtl", "Got RMITEM from "+sender.getIdent()+": "+arg);
+        _conf.getDB().removeItem(arg.trim());
         return true;
     }
     
@@ -451,7 +461,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
     
    
     protected boolean doRemoveNode(Station sender, String arg) {
-        _api.log().debug("RemoteCtl", "Got RMNODE from "+sender.getIdent()+": "+arg);
+        _conf.log().debug("RemoteCtl", "Got RMNODE from "+sender.getIdent()+": "+arg);
         arg=arg.trim();
         
         /* Is the removed node a direct parent or child? */
@@ -474,7 +484,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
      */
     protected boolean doMessage(Station sender, String arg)
     {
-        _api.log().debug("RemoteCtl", "Got message from "+sender.getIdent()+": "+arg);
+        _conf.log().debug("RemoteCtl", "Got message from "+sender.getIdent()+": "+arg);
         if (_pmsg != null) 
             return _pmsg.handleMessage(sender, null, arg);
         return false;
@@ -515,7 +525,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
                     }
                 }
                 else
-                    _api.log().warn("RemoteCtl", "Number format error in CON request from "+sender.getIdent());
+                    _conf.log().warn("RemoteCtl", "Number format error in CON request from "+sender.getIdent());
             }
             addChild(sender.getIdent(), rad, new LatLng(lat,lng));
             
@@ -536,19 +546,19 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doUser(Station sender, String args, boolean add)
    {
         if (args == null) {
-            _api.log().warn("RemoteCtl", "Missing arguments to remote USER or RMUSER command");
+            _conf.log().warn("RemoteCtl", "Missing arguments to remote USER or RMUSER command");
             return false;
         }
         
         String u = args.trim();     
         String[] uu = u.split("@");
         if (uu.length < 2) {
-            _api.log().warn("RemoteCtl", "Invalid user format (expected user@node): "+u);
+            _conf.log().warn("RemoteCtl", "Invalid user format (expected user@node): "+u);
             return false;
         }
         
         if (add) {
-            _api.log().debug("RemoteCtl", "doUser.add: "+u);
+            _conf.log().debug("RemoteCtl", "doUser.add: "+u);
             _users.add(uu[1], u);
             
             if (_usercb != null)
@@ -571,19 +581,19 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doSetTag(Station sender, String args)
    {
       if (args == null) {
-          _api.log().warn("RemoteCtl", "Missing arguments to remote TAG command");
+          _conf.log().warn("RemoteCtl", "Missing arguments to remote TAG command");
           return false;
       }
       
-      _api.log().debug("RemoteCtl", "Set TAG from "+sender.getIdent());
+      _conf.log().debug("RemoteCtl", "Set TAG from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
       if (arg.length < 2) {
-          _api.log().warn("RemoteCtl", "Missing arguments to remote TAG command");
+          _conf.log().warn("RemoteCtl", "Missing arguments to remote TAG command");
           return false;
       }
       
-      PointObject item = _api.getDB().getItem(arg[0].trim(), null);
+      PointObject item = _conf.getDB().getItem(arg[0].trim(), null);
       arg[1] = arg[1].trim();
       
       if (item == null)
@@ -602,19 +612,19 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doRemoveTag(Station sender, String args)
    {
       if (args == null) {
-          _api.log().warn("RemoteCtl", "Missing arguments to remote RMTAG command");
+          _conf.log().warn("RemoteCtl", "Missing arguments to remote RMTAG command");
           return false;
       }
       
-      _api.log().debug("RemoteCtl", "Remove TAG from "+sender.getIdent());
+      _conf.log().debug("RemoteCtl", "Remove TAG from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
       if (arg.length < 2) {
-          _api.log().warn("RemoteCtl", "Missing arguments to remote RMTAG command");
+          _conf.log().warn("RemoteCtl", "Missing arguments to remote RMTAG command");
           return false;
       }
       
-      PointObject item = _api.getDB().getItem(arg[0].trim(), null);
+      PointObject item = _conf.getDB().getItem(arg[0].trim(), null);
       arg[1] = arg[1].trim();
       
       if (item == null)
@@ -633,19 +643,19 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doSetAlias(Station sender, String args)
    {
         if (args == null) {
-            _api.log().warn("RemoteCtl", "Missing arguments to remote ALIAS command");
+            _conf.log().warn("RemoteCtl", "Missing arguments to remote ALIAS command");
             return false;
         }
       
-        _api.log().debug("RemoteCtl", "Set ALIAS from "+sender.getIdent());
+        _conf.log().debug("RemoteCtl", "Set ALIAS from "+sender.getIdent());
         String[] arg = args.split("\\s+", 2);
       
         if (arg.length < 2) {
-            _api.log().warn("RemoteCtl", "Missing arguments to remote ALIAS command");
+            _conf.log().warn("RemoteCtl", "Missing arguments to remote ALIAS command");
             return false;
         }
       
-        TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
+        TrackerPoint item = _conf.getDB().getItem(arg[0].trim(), null);
         if (item==null || item.expired())
             return false; 
         
@@ -665,19 +675,19 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doSetIcon(Station sender, String args)
    {
       if (args == null) {
-          _api.log().warn("RemoteCtl", "Missing arguments to remote ICON command");
+          _conf.log().warn("RemoteCtl", "Missing arguments to remote ICON command");
           return false;
       }
       
-      _api.log().debug("RemoteCtl", "Set ICON from "+sender.getIdent());
+      _conf.log().debug("RemoteCtl", "Set ICON from "+sender.getIdent());
       String[] arg = args.split("\\s+", 2);
       
       if (arg.length < 2) {
-          _api.log().warn("RemoteCtl", "Missing arguments to remote ICON command");
+          _conf.log().warn("RemoteCtl", "Missing arguments to remote ICON command");
           return false;
       }
       
-      TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
+      TrackerPoint item = _conf.getDB().getItem(arg[0].trim(), null);
       if (item==null || item.expired())
         return false; 
         
@@ -697,25 +707,25 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doRman(Station sender, String args)
    {
         if (args == null) {
-            _api.log().warn("RemoteCtl", "Missing arguments to remote RMAN command");
+            _conf.log().warn("RemoteCtl", "Missing arguments to remote RMAN command");
             return false;
         }
       
-        _api.log().debug("RemoteCtl", "Set alias/icon (RMAN) from "+sender.getIdent());
+        _conf.log().debug("RemoteCtl", "Set alias/icon (RMAN) from "+sender.getIdent());
         String[] arg = args.split("\\s+", 3);
       
         if (arg.length < 3) {
-            _api.log().warn("RemoteCtl", "Missing arguments to remote RMAN command");
+            _conf.log().warn("RemoteCtl", "Missing arguments to remote RMAN command");
             return false;
         }
       
-        TrackerPoint item = _api.getDB().getItem(arg[0].trim(), null);
+        TrackerPoint item = _conf.getDB().getItem(arg[0].trim(), null);
         if (item==null || item.expired())
             return false; 
             
         /* If item is already managed, remove.. */
         if (item.hasTag("MANAGED")) {
-            StationDB.Hist hdb = _api.getDB().getHistDB(); 
+            StationDB.Hist hdb = _conf.getDB().getHistDB(); 
             if (hdb != null)
                 hdb.removeManagedItem(item.getIdent());
             item.removeTag("MANAGED");
@@ -731,18 +741,18 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
    protected boolean doRmRman(Station sender, String args)
    {
         if (args == null) {
-            _api.log().warn("RemoteCtl", "Missing arguments to remote RMRMAN command");
+            _conf.log().warn("RemoteCtl", "Missing arguments to remote RMRMAN command");
             return false;
         }
       
-        _api.log().debug("RemoteCtl", "Remove RMAN from "+sender.getIdent());
-        TrackerPoint item = _api.getDB().getItem(args.trim(), null);
+        _conf.log().debug("RemoteCtl", "Remove RMAN from "+sender.getIdent());
+        TrackerPoint item = _conf.getDB().getItem(args.trim(), null);
         if (item==null || item.expired())
             return false; 
             
         /* If item is already managed, remove.. */
         if (item.hasTag("MANAGED")) {
-            StationDB.Hist hdb = _api.getDB().getHistDB(); 
+            StationDB.Hist hdb = _conf.getDB().getHistDB(); 
             if (hdb != null)
                 hdb.removeManagedItem(item.getIdent());
             item.removeTag("MANAGED");
@@ -814,11 +824,11 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
 
          while (true) {
             if (_parent != null && _tryPause <= 0) {
-                _api.log().debug("RemoteCtl", "Send CON: "+_parent);
+                _conf.log().debug("RemoteCtl", "Send CON: "+_parent);
                
                 /* Now get position and radius if set */
                 String arg = "";
-                LatLng pos = _api.getOwnPos().getPosition();
+                LatLng pos = _conf.getOwnPos().getPosition();
                 if (_radius > 0 && pos != null) {
                     arg += " "+_radius+" "+ 
                         ((float) Math.round(pos.getLat()*1000))/1000+" "+ 
@@ -844,7 +854,7 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
             Thread.sleep(900000);
          }
       } catch (Exception e) {
-            _api.log().warn("RemoteCtl", "Exception: "+e.getMessage());
+            _conf.log().warn("RemoteCtl", "Exception: "+e.getMessage());
         }
    } 
 }

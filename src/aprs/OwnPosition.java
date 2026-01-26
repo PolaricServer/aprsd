@@ -34,7 +34,7 @@ public class OwnPosition extends Station implements Runnable
     transient protected String     _pathRf, _comment;
     transient protected int        _maxPause, _minPause;
     
-    private boolean _encrypt;
+    private boolean _encrypt, _encryptrf;
     
     private final static int _trackTime = 10;
     private final static byte ASCII_BASE = 33;
@@ -78,14 +78,15 @@ public class OwnPosition extends Station implements Runnable
             setSymtab(sym.charAt(0));
             setSymbol(sym.charAt(1));
         }
-        _txOn     = _api.getBoolProperty("ownposition.tx.on", false);        
-        _allowRf  = _api.getBoolProperty("ownposition.tx.allowrf", false);
-        _pathRf   = _api.getProperty("ownposition.tx.rfpath", "WIDE1-1"); 
-        _comment  = _api.getProperty("ownposition.tx.comment", "");
-        _compress = _api.getBoolProperty("ownposition.tx.compress", false);
-        _maxPause = _api.getIntProperty("ownposition.tx.maxpause", 600);
-        _minPause = _api.getIntProperty("ownposition.tx.minpause", 120);
-        _encrypt  = _api.getBoolProperty("ownposition.tx.encrypt", false);
+        _txOn      = _api.getBoolProperty("ownposition.tx.on", false);        
+        _allowRf   = _api.getBoolProperty("ownposition.tx.allowrf", false);
+        _pathRf    = _api.getProperty("ownposition.tx.rfpath", "WIDE1-1"); 
+        _comment   = _api.getProperty("ownposition.tx.comment", "");
+        _compress  = _api.getBoolProperty("ownposition.tx.compress", false);
+        _maxPause  = _api.getIntProperty("ownposition.tx.maxpause", 600);
+        _minPause  = _api.getIntProperty("ownposition.tx.minpause", 120);
+        _encrypt   = _api.getBoolProperty("ownposition.tx.encrypt", false);
+        _encryptrf = _api.getBoolProperty("ownposition.tx.encrypt.rf", false);
         
         if (_minPause == 0)
            _minPause = _maxPause;
@@ -146,17 +147,6 @@ public class OwnPosition extends Station implements Runnable
       }
        
        
-       
-    protected String showDMstring(float ll, int ndeg)
-    {
-        int deg = (int) Math.floor(ll);
-        float minx = Math.abs(ll - deg);
-   //     if (ll < 0 && minx != 0.0) 
-   //         minx = 1 - minx; // FIXME: is this correct. Check code in PT as well?
-          
-        float mins = ((float) Math.floor( minx * 60 * 100)) / 100;
-        return String.format((Locale)null, "%0"+ndeg+"d%05.2f", deg, mins); 
-    }  
 
 
 
@@ -203,12 +193,7 @@ public class OwnPosition extends Station implements Runnable
             return getSymtab() + lat_c + lon_c + getSymbol() + cst_c;
         }
         else {
-            /* Format latitude and longitude values, etc. */
-            char lat_sn = (pos.getLat() < 0 ? 'S' : 'N');
-            char long_we = (pos.getLng() < 0 ? 'W' : 'E');
-            float latf = Math.abs((float) pos.getLat());
-            float longf = Math.abs((float) pos.getLng());
-            return showDMstring(latf,2) + lat_sn + getSymtab() + showDMstring(longf, 3)+ long_we + getSymbol();
+            return AprsUtil.posReport(null, pos, getSymbol(), getSymtab(), false);
         }
     }
     
@@ -245,7 +230,7 @@ public class OwnPosition extends Station implements Runnable
         /* Send object report on RF, if appropriate */
         p.via = _pathRf; 
         if (_allowRf && _rfChan != null && _rfChan.isRf()) {
-           _rfChan.sendPacket(p, _encrypt);
+           _rfChan.sendPacket(p, (_encrypt && _encryptrf));
            sentRf = true;
         }
         

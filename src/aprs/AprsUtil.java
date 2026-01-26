@@ -53,9 +53,14 @@ public class AprsUtil
        ("[\\\\/0-9A-Z][\\x20-\\x7f]{12}.*").asPredicate();
        
     
-   protected static DateFormat _dtgFormat = new SimpleDateFormat("ddhhmm");
-   protected static DateFormat _hmsFormat = new SimpleDateFormat("hhmmss");
-    
+     // Use for parsing as well? 
+   public static DecimalFormat _latformat = new DecimalFormat("0000.00'N';0000.00'S'");
+   public static DecimalFormat _lngformat = new DecimalFormat("00000.00'E';00000.00'W'");
+   public static DateFormat    _tsformat  = new SimpleDateFormat("ddHHmm");    
+   public static DateFormat    _dtgFormat = new SimpleDateFormat("ddhhmm");
+   public static DateFormat    _hmsFormat = new SimpleDateFormat("hhmmss");
+        
+
    // FIXME: These are also defined in HttpServer.java
    protected static Calendar utcTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
    protected static Calendar localTime = Calendar.getInstance();
@@ -79,6 +84,31 @@ public class AprsUtil
    */
    private static final double DAO_PRECISION_FACTOR = 6000.0;
    
+   
+     
+    /* FIXME:  Somewhat redundant - see HttpServer.showDMstring and OwnPosition.showDMstring */
+    public static double toGpsNumber(double ll)
+    {
+       int deg = (int) Math.floor(ll);
+       double minx = Math.abs(ll - deg);
+  //     if (ll < 0 && minx != 0.0) 
+  //        minx = 1 - minx;// FIXME: is this correct. Check code in PT as well?
+  
+       double mins = ((double) Math.floor( minx * 60 * 100)) / 100;
+       return deg * 100 + mins; 
+    }
+    
+
+    
+    public static String posReport(Date d, LatLng pos, char sym, char symtab, boolean tstamped)
+    {
+        _tsformat.setCalendar(utcTime);
+        return 
+                (tstamped ? (( d==null ? "111111" : _tsformat.format(d)) + "z" ) : "") 
+               + _latformat.format(toGpsNumber(pos.getLat())) + symtab 
+               + _lngformat.format(toGpsNumber(pos.getLng())) + sym ;  
+    }
+    
     
     
    /* Consider Moving this to AprsPacket */ 

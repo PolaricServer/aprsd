@@ -1,9 +1,9 @@
 /* 
- * Copyright (C) 2018-2025 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018-2026 by Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -181,14 +181,17 @@ public class SysAdminApi extends ServerBase {
     (
         String mycall, 
         boolean igate, boolean rfigate, boolean objigate, 
+        boolean obj_encrypt, boolean obj_encryptrf,
+        boolean remotectl,
         int radius, 
         String path_igate,
-        String path_messages, 
-        String path_objects, 
-        String always_rf, 
-        boolean remotectl,
+        String path_messages,
+        String path_objects,
+        String always_rf,
+
         int remote_radius,
         String rc_server,
+        String encryptto,
         String authkey
     ) 
     {
@@ -198,14 +201,17 @@ public class SysAdminApi extends ServerBase {
                 conf.getBoolProperty("igate.on", false),
                 conf.getBoolProperty("igate.rfgate.allow", false),
                 conf.getBoolProperty("objects.rfgate.allow", false),
+                conf.getBoolProperty("objects.tx.encrypt", false),
+                conf.getBoolProperty("objects.tx.encrypt.rf", false),
+                conf.getBoolProperty("remotectl.on", false),
                 conf.getIntProperty("objects.rfgate.range", 10),
                 conf.getProperty("igate.rfgate.path", ""),
                 conf.getProperty("message.rfpath", ""),
                 conf.getProperty("objects.rfpath", ""),
                 conf.getProperty("message.alwaysRf", ""),
-                conf.getBoolProperty("remotectl.on", false),
                 conf.getIntProperty("remotectl.radius", 10),
                 conf.getProperty("remotectl.connect", ""),
+                conf.getProperty("remotectl.encrypt", ""),
                 conf.getProperty("message.auth.key", "")
             );
         }
@@ -217,6 +223,8 @@ public class SysAdminApi extends ServerBase {
             prop.setProperty("igate.rfgate.allow", ""+rfigate);
             prop.setProperty("objects.rfgate.allow", ""+objigate);
             prop.setProperty("objects.rfgate.range", ""+radius);
+            prop.setProperty("objects.tx.encrypt", ""+obj_encrypt);
+            prop.setProperty("objects.tx.encrypt.rf", ""+obj_encryptrf);
             prop.setProperty("igate.rfgate.path", path_igate);
             prop.setProperty("message.rfpath", path_messages);
             prop.setProperty("objects.rfpath", path_objects);
@@ -224,6 +232,7 @@ public class SysAdminApi extends ServerBase {
             prop.setProperty("remotectl.on", ""+remotectl);
             prop.setProperty("remotectl.radius", ""+remote_radius);
             prop.setProperty("remotectl.connect", rc_server);
+            prop.setProperty("remotectl.encrypt", encryptto);
             prop.setProperty("message.auth.key", authkey);
         }
         
@@ -238,6 +247,7 @@ public class SysAdminApi extends ServerBase {
         String comment,
         double[] pos,
         boolean gpson, boolean adjustclock,
+        boolean encrypt, boolean encryptrf,
         String gpsport,
         int baud, 
         int minpause, int maxpause, int mindist, int maxturn
@@ -254,6 +264,8 @@ public class SysAdminApi extends ServerBase {
                 conf.getPosProperty("ownposition.pos"), 
                 conf.getBoolProperty("ownposition.gps.on", false),
                 conf.getBoolProperty("ownposition.gps.adjustclock", false),
+                conf.getBoolProperty("ownposition.tx.encrypt", false),
+                conf.getBoolProperty("ownposition.tx.encrypt.rf", false),
                 conf.getProperty("ownposition.gps.port", ""),
                 conf.getIntProperty("ownposition.gps.baud", 4800),
                 conf.getIntProperty("ownposition.tx.minpause", 0),
@@ -274,6 +286,8 @@ public class SysAdminApi extends ServerBase {
             prop.setProperty("ownposition.pos", pos[0]+","+pos[1]);
             prop.setProperty("ownposition.gps.on", ""+gpson);
             prop.setProperty("ownposition.gps.adjustclock", ""+adjustclock);
+            prop.setProperty("ownposition.tx.encrypt", ""+encrypt);
+            prop.setProperty("ownposition.tx.encrypt.rf", ""+encryptrf);
             prop.setProperty("ownposition.gps.port", gpsport);
             prop.setProperty("ownposition.gps.baud", ""+baud);
             prop.setProperty("ownposition.tx.minpause", ""+minpause);
@@ -378,7 +392,11 @@ public class SysAdminApi extends ServerBase {
         a.put("/system/adm/server", (ctx) -> {
             ServerConfigData confdata = (ServerConfigData) ServerBase.fromJson(ctx.body(), ServerConfigData.class);
             confdata.save(_conf);
-            // FIXME: Make sure server reboots/reloads settings
+            // Make sure reloads settings
+            _conf.getOwnObjects().init();
+            _conf.getIgate().init();
+            _conf.getMsgProcessor().init();
+            _conf.getRemoteCtl().init();
             ctx.result("Ok");
         });
         
@@ -399,7 +417,8 @@ public class SysAdminApi extends ServerBase {
         a.put("/system/adm/ownpos", (ctx) -> {
             OwnPos opos = (OwnPos) ServerBase.fromJson(ctx.body(), OwnPos.class);
             opos.save(_conf);
-            // FIXME: Make sure server reboots/reloads settings
+            // Make sure server reloads settings
+            _conf.getOwnPos().init();
             ctx.result("Ok");
         });
         

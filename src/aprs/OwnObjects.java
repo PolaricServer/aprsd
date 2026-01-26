@@ -31,30 +31,23 @@ import java.text.*;
  
 public class OwnObjects implements Runnable
 { 
-    private AprsChannel     _inetChan, _rfChan;
-    private boolean         _allowRf;
-    private String          _pathRf;
-    private int             _rangeRf;
-    private int             _txPeriod;
-    private AprsServerConfig   _api;
-    private Set<String>     _ownObjects = new LinkedHashSet<String>();
-    private Thread          _thread;
-    private boolean         _forceUpdate;
+    private AprsChannel      _inetChan, _rfChan;
+    private boolean          _allowRf;
+    private String           _pathRf;
+    private int              _rangeRf;
+    private int              _txPeriod;
+    private AprsServerConfig _conf;
+    private Set<String>      _ownObjects = new LinkedHashSet<String>();
+    private Thread           _thread;
+    private boolean          _forceUpdate;
     private int              _tid;
     
-    private boolean _encrypt;
+    private boolean _encrypt, _encryptrf;
     
     
-    public OwnObjects(AprsServerConfig api) 
+    public OwnObjects(AprsServerConfig conf) 
     {
-        _api = api;
-        _allowRf     = api.getBoolProperty("objects.rfgate.allow", false);
-        _pathRf      = api.getProperty("objects.rfgate.path", ""); 
-        _rangeRf     = api.getIntProperty("objects.rfgate.range", 0);
-        _txPeriod    = api.getIntProperty("objects.transmit.period", 360);
-        _forceUpdate = api.getBoolProperty("objects.forceupdate", false);
-        _encrypt     = api.getBoolProperty("objects.tx.encrypt", false); 
-           
+        _conf = conf;
         /* Should not expire as long as we have objects */        
          if (_txPeriod > 0) {
             _thread = new Thread(this, "OwnObjects-"+(_tid++));
@@ -62,6 +55,18 @@ public class OwnObjects implements Runnable
          }
     }  
        
+    
+    public void init() 
+    {
+        _pathRf      = _conf.getProperty("objects.rfgate.path", ""); 
+        _rangeRf     = _conf.getIntProperty("objects.rfgate.range", 0);
+        _txPeriod    = _conf.getIntProperty("objects.transmit.period", 360);
+        _forceUpdate = _conf.getBoolProperty("objects.forceupdate",   false);
+        _encrypt     = _conf.getBoolProperty("objects.tx.encrypt",    false); 
+        _encryptrf   = _conf.getBoolProperty("objects.tx.encrypt.rf", false); 
+        _allowRf     = _conf.getBoolProperty("objects.rfgate.allow",  false);
+    }
+    
        
     public int nItems() 
         { return _ownObjects.size(); }
@@ -77,7 +82,7 @@ public class OwnObjects implements Runnable
     { 
         if (!_ownObjects.contains(id))
             return null;
-        return (AprsObject) _api.getDB().getItem(id, null);
+        return (AprsObject) _conf.getDB().getItem(id, null);
     }
         
     
@@ -87,7 +92,7 @@ public class OwnObjects implements Runnable
     public synchronized boolean add(String id, ReportHandler.PosData pos,
                         String comment, boolean perm)
     {
-         AprsObject obj = (AprsObject) _api.getDB().getItem(id, null);
+         AprsObject obj = (AprsObject) _conf.getDB().getItem(id, null);
 
          /* Ignore if object already exists.
           * FIXME: If object exists, we may take over the name, but since
@@ -95,12 +100,12 @@ public class OwnObjects implements Runnable
           * intendeed. For now we only take over our own, if forceupdate = true
           */
          if (obj == null || !obj.visible() ||
-             (_forceUpdate && (_ownObjects.contains(id) || obj.getOwner() == _api.getOwnPos())))
+             (_forceUpdate && (_ownObjects.contains(id) || obj.getOwner() == _conf.getOwnPos())))
          {
             if (id.length() > 9)
                 id = id.substring(0,9);
-            _api.getOwnPos().setUpdated(new Date());
-            obj = _api.getDB().newObject(_api.getOwnPos(), id);
+            _conf.getOwnPos().setUpdated(new Date());
+            obj = _conf.getDB().newObject(_conf.getOwnPos(), id);
             obj.update(new Date(), pos, comment,  "");
             obj.setTimeless(perm);
             _ownObjects.add(id);
@@ -110,7 +115,7 @@ public class OwnObjects implements Runnable
             return true;
          }
        
-         _api.log().warn("OwnObject", "Object "+id+" already exists somewhere else");
+         _conf.log().warn("OwnObject", "Object "+id+" already exists somewhere else");
          return false;
     }
     
@@ -123,7 +128,7 @@ public class OwnObjects implements Runnable
     public synchronized void clear()
     {
         for (String oid: _ownObjects) {
-           AprsObject obj = (AprsObject) _api.getDB().getItem(oid+'@'+_api.getOwnPos().getIdent(), null);
+           AprsObject obj = (AprsObject) _conf.getDB().getItem(oid+'@'+_conf.getOwnPos().getIdent(), null);
            if (obj!=null) {
               sendObjectReport(obj, true);
               obj.kill();
@@ -139,7 +144,7 @@ public class OwnObjects implements Runnable
      */
     public synchronized boolean delete(String id)
     {
-        AprsObject obj = (AprsObject) _api.getDB().getItem(id+'@'+_api.getOwnPos().getIdent(), null);
+        AprsObject obj = (AprsObject) _conf.getDB().getItem(id+'@'+_conf.getOwnPos().getIdent(), null);
         if (obj==null)
             return false;
         obj.kill();
@@ -158,9 +163,8 @@ public class OwnObjects implements Runnable
     
     public synchronized boolean mayExpire(Station s)
     {
-        return (s != _api.getOwnPos()) || _ownObjects.isEmpty();
+        return (s != _conf.getOwnPos()) || _ownObjects.isEmpty();
     }        
-            
     
        
     public void setChannels(AprsChannel rf, AprsChannel inet)
@@ -169,50 +173,22 @@ public class OwnObjects implements Runnable
         setInetChan(inet);
     }
     
+    
     public void setRfChan(AprsChannel rf) {
       if (rf != null && !rf.isRf())
-         _api.log().warn("OwnObjects", "Non-RF channel used as RF channel");
+         _conf.log().warn("OwnObjects", "Non-RF channel used as RF channel");
       _rfChan = rf;
     }
     
+    
     public void setInetChan(AprsChannel inet) {
       if (inet != null && inet.isRf())
-         _api.log().warn("OwnObjects", "RF channel used as internet channel");
+         _conf.log().warn("OwnObjects", "RF channel used as internet channel");
       _inetChan = inet;
     }
     
-    
 
     
-     // Redundant. see HttpServer
-    private static Calendar _utcTime = Calendar.getInstance(TimeZone.getTimeZone("UTC"), Locale.getDefault());
-
-    
-     // Use for parsing as well?
-    private DecimalFormat _latformat = new DecimalFormat("0000.00'N';0000.00'S'");
-    private DecimalFormat _lngformat = new DecimalFormat("00000.00'E';00000.00'W'");
-    private DateFormat    _tsformat = new SimpleDateFormat("ddHHmm");    
-
- 
-    /* FIXME:  Redundant - see HttpServer.showDMstring and OwnPosition.showDMstring */
-    protected double toGpsNumber(double ll)
-    {
-       int deg = (int) Math.floor(ll);
-       double minx = Math.abs(ll - deg);
-  //     if (ll < 0 && minx != 0.0) 
-  //        minx = 1 - minx;
-       double mins = ((double) Math.floor( minx * 60 * 100)) / 100;
-       return deg * 100 + mins; 
-    }
-    
-    
-    protected String posReport(Date d, LatLng pos, char sym, char symtab)
-    {
-        _tsformat.setCalendar(_utcTime);
-        return (d==null ? "111111" : _tsformat.format(d)) + "z"  
-               + _latformat.format(toGpsNumber(pos.getLat())) + symtab 
-               + _lngformat.format(toGpsNumber(pos.getLng())) + sym ;  
-    }
     
     
    /**
@@ -224,19 +200,19 @@ public class OwnObjects implements Runnable
          return;
        String id = (obj.getIdent().replaceFirst("@.*","") + "         ").substring(0,9);
        AprsPacket p = new AprsPacket();
-       p.from = _api.getOwnPos().getIdent();
-       p.to = _api.getToAddr();
+       p.from = _conf.getOwnPos().getIdent();
+       p.to = _conf.getToAddr();
        p.type = ';';
        
        /* Should type char be part of report ? */
        p.report = ";" + id + (delete ? "_" : "*") 
-                   + posReport((obj.isTimeless() ? null : obj.getUpdated()), obj.getPosition(), obj.getSymbol(), obj.getSymtab())
+                   + AprsUtil.posReport((obj.isTimeless() ? null : obj.getUpdated()), obj.getPosition(), obj.getSymbol(), obj.getSymtab(), true)
                    + obj.getDescr(); 
                    
        if (!delete)
            p.report += AprsUtil.generateDAO(obj.getPosition());
            
-       _api.log().debug("OwnObjects", "Send object report: "+ p.from+">"+p.to+":"+p.report);
+       _conf.log().debug("OwnObjects", "Send object report: "+ p.from+">"+p.to+":"+p.report);
        
        /* Send object report on aprs-is */
        if (_inetChan != null && !_inetChan.isRf()) 
@@ -245,7 +221,7 @@ public class OwnObjects implements Runnable
        /* Send object report on RF, if appropriate */
        p.via = _pathRf;
        if (_allowRf && _rfChan != null && _rfChan.isRf() && object_in_range(obj, _rangeRf))
-           _rfChan.sendPacket(p, _encrypt);
+           _rfChan.sendPacket(p, (_encrypt && _encryptrf));
     }
     
     
@@ -253,9 +229,9 @@ public class OwnObjects implements Runnable
     private boolean object_in_range(AprsObject obj, int range)
     {
         /* If own position is not set, object is NOT in range */
-        if (_api.getOwnPos() == null || _api.getOwnPos().getPosition() == null)
+        if (_conf.getOwnPos() == null || _conf.getOwnPos().getPosition() == null)
             return false;
-        return (obj.distance(_api.getOwnPos()) < range*1000);
+        return (obj.distance(_conf.getOwnPos()) < range*1000);
     }
     
     
@@ -290,10 +266,10 @@ public class OwnObjects implements Runnable
             Thread.sleep(6000);
             synchronized(this) {
               String err = null; 
-              if (_api.getOwnPos()==null || _api.getOwnPos().getIdent()==null)
+              if (_conf.getOwnPos()==null || _conf.getOwnPos().getIdent()==null)
                 continue;
               for (String oid: _ownObjects) {
-                 AprsObject obj = (AprsObject) _api.getDB().getItem(oid+'@'+_api.getOwnPos().getIdent(), null);
+                 AprsObject obj = (AprsObject) _conf.getDB().getItem(oid+'@'+_conf.getOwnPos().getIdent(), null);
                  if (obj != null)
                     sendObjectReport(obj, false);
                  else 
@@ -305,7 +281,7 @@ public class OwnObjects implements Runnable
                  
             Thread.sleep(_txPeriod * 1000 - 3000);
          } catch (Exception e) 
-            { _api.log().error("OwnObjects", "Run thread: "+e); 
+            { _conf.log().error("OwnObjects", "Run thread: "+e); 
                e.printStackTrace(System.out); }
        }
     }

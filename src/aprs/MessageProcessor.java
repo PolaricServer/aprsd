@@ -130,7 +130,7 @@ public class MessageProcessor implements Runnable, Serializable
    private String         _defaultPath;
    private String         _alwaysRf;
    private String         _file;
-   private AprsServerConfig  _api; 
+   private AprsServerConfig  _conf; 
     
    /* Encryption of APRS messages */
    private Encryption _encr;
@@ -149,31 +149,39 @@ public class MessageProcessor implements Runnable, Serializable
 
    
    
-   
    private int threadid=0;
-   public MessageProcessor(AprsServerConfig api)
+   public void init() 
    {
-       _file = api.getProperty("message.file", "messages.dat");
+       _file = _conf.getProperty("message.file", "messages.dat");
        if (_file.charAt(0) != '/')
            _file = System.getProperties().getProperty("datadir", ".")+"/"+_file; 
    
-       _myCall = api.getProperty("message.mycall", "").toUpperCase();
+       _myCall = _conf.getProperty("message.mycall", "").toUpperCase();
        if (_myCall.length() == 0)
-           _myCall = api.getProperty("default.mycall", "NOCALL").toUpperCase();
+           _myCall = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
      
-       _key         = api.getProperty("message.auth.key", "NOKEY");
-       _defaultPath = api.getProperty("message.rfpath", "WIDE1-1");
-       _alwaysRf    = api.getProperty("message.alwaysRf", "");
+       _key         = _conf.getProperty("message.auth.key", "NOKEY");
+       _defaultPath = _conf.getProperty("message.rfpath", "WIDE1-1");
+       _alwaysRf    = _conf.getProperty("message.alwaysRf", "");
        _thread      = new Thread(this, "MessageProcessor-"+(threadid++));
        _encr        = new AesGcmSivEncryption(_key, Main.SALT_APRSMESSAGE);
+   }
+   
+   
+   
+
+   public MessageProcessor(AprsServerConfig conf)
+   {
+        _conf = conf;
+        init();
        _thread.start();
-       _api = api;
    }  
        
            
     public String getMycall() {
        return _myCall;
     }
+    
       
     public void setChannels(AprsChannel rf, AprsChannel inet)
     {
@@ -182,12 +190,12 @@ public class MessageProcessor implements Runnable, Serializable
     }
     public void setRfChan(AprsChannel rf) {
       if (rf != null && !rf.isRf())
-         _api.log().warn("MessageProcessor", "Non-RF channel used as RF channel");
+         _conf.log().warn("MessageProcessor", "Non-RF channel used as RF channel");
       _rfChan = rf;
     }
     public void setInetChan(AprsChannel inet) {
       if (inet != null && inet.isRf())
-         _api.log().warn("MessageProcessor", "RF channel used as internet channel");
+         _conf.log().warn("MessageProcessor", "RF channel used as internet channel");
       _inetChan = inet;
     }
     
@@ -224,7 +232,7 @@ public class MessageProcessor implements Runnable, Serializable
             _outgoing.remove(msgid);
         }
         else {
-            _api.log().debug("MessageProc", "Received ACK/REJ for unknown message: msgid="+msgid);
+            _conf.log().debug("MessageProc", "Received ACK/REJ for unknown message: msgid="+msgid);
         }  
     }
     
@@ -319,14 +327,14 @@ public class MessageProcessor implements Runnable, Serializable
                     text = _encr.decryptB64(text, msgid, null);
                     result = (text != null);
                     if (text == null)
-                        _api.log().info("MessageProc", "Decryption or msg authentication failed. msgid="+msgid);
+                        _conf.log().info("MessageProc", "Decryption or msg authentication failed. msgid="+msgid);
                     else
-                        _api.log().debug("MessageProc", "Decryption success: "+msgid);
+                        _conf.log().debug("MessageProc", "Decryption success: "+msgid);
                 }
 
                 result = result && subs.recipient.handleMessage(sender, recipient, text);
                 if (!result && msgid != null) 
-                    _api.log().info("MessageProc", "Message authentication or processing failed. msgid="+msgid);
+                    _conf.log().info("MessageProc", "Message authentication or processing failed. msgid="+msgid);
                     
                 if (msgid != null) {
                     recMessages.put( sender.getIdent()+"#"+msgid, new MsgRec(result));
@@ -334,7 +342,7 @@ public class MessageProcessor implements Runnable, Serializable
                 }
             }
             else {
-                _api.log().debug("MessageProc", "Duplicate message from "+sender.getIdent()+" msgid="+msgid);
+                _conf.log().debug("MessageProc", "Duplicate message from "+sender.getIdent()+" msgid="+msgid);
                 msgid=null;
                 // If duplicate, just ignore message (don't ack it)
             }
@@ -510,7 +518,7 @@ public class MessageProcessor implements Runnable, Serializable
           else
              p.via = AprsChannel.getReversePath(path); 
              
-          _api.log().debug("MessageProc", "Sending message to "+recipient+" on RF: "+p.via);
+          _conf.log().debug("MessageProc", "Sending message to "+recipient+" on RF: "+p.via);
           if (_rfChan != null && _rfChan.isRf()) 
             _rfChan.sendPacket(p);
           sentOnRf = true;
@@ -525,14 +533,14 @@ public class MessageProcessor implements Runnable, Serializable
            * Otherwise, use qAC
            */
           p.via = sentOnRf ? "qAR,"+_myCall : "qAC,"+_myCall;
-          _api.log().debug("MessageProc", "Sending message to "+recipient+" on INET: "+p.via);
+          _conf.log().debug("MessageProc", "Sending message to "+recipient+" on INET: "+p.via);
           if (_inetChan != null && !_inetChan.isRf())
             _inetChan.sendPacket(p);
        }  
     
        if ((_inetChan == null || !_inetChan.isActive()) && 
            (_rfChan == null || !_rfChan.isActive()))
-          _api.log().warn("MessageProc", "Cannot send message. No channel.");
+          _conf.log().warn("MessageProc", "Cannot send message. No channel.");
    }
 
    
@@ -541,7 +549,7 @@ public class MessageProcessor implements Runnable, Serializable
     public void save()
     { 
        try { 
-           _api.log().debug("MessageProc", "Saving message data...");
+           _conf.log().debug("MessageProc", "Saving message data...");
            FileOutputStream fs = new FileOutputStream(_file);
            ObjectOutput ofs = new ObjectOutputStream(fs);
              
@@ -549,7 +557,7 @@ public class MessageProcessor implements Runnable, Serializable
            ofs.writeObject(recMessages); 
            ofs.writeObject(txMessages);
        } catch (Exception e) {
-           _api.log().warn("MessageProc", "Cannot save: "+e);
+           _conf.log().warn("MessageProc", "Cannot save: "+e);
        } 
     }
 
@@ -557,7 +565,7 @@ public class MessageProcessor implements Runnable, Serializable
     public void restore()
      {        
          try {     
-             _api.log().debug("MessageProc", "Restoring message data...");
+             _conf.log().debug("MessageProc", "Restoring message data...");
              FileInputStream fs = new FileInputStream(_file);
              ObjectInput ifs = new ObjectInputStream(fs);
           
@@ -565,7 +573,7 @@ public class MessageProcessor implements Runnable, Serializable
              recMessages = (RecMessages) ifs.readObject(); 
              txMessages = (TxMessages) ifs.readObject();
          } catch (Exception e) {
-             _api.log().warn("MessageProc", "Cannot restore: "+e);
+             _conf.log().warn("MessageProc", "Cannot restore: "+e);
          } 
      }
      
@@ -621,7 +629,7 @@ public class MessageProcessor implements Runnable, Serializable
             }
 
          } catch (Exception e) 
-             { _api.log().warn("MessageProc", ""+e);
+             { _conf.log().warn("MessageProc", ""+e);
                e.printStackTrace(System.out);}
        }
     }
