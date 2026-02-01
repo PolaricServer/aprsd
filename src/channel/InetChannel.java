@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2020-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2020-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -13,6 +13,7 @@
  */
  
 package no.polaric.aprsd.channel;
+import no.polaric.core.*;
 import no.polaric.aprsd.*;
 import no.polaric.aprsd.aprs.*;
 import java.io.*;
@@ -30,16 +31,16 @@ public class InetChannel extends TcpChannel
     private  BufferedReader _rder = null;
     private AprsFilter _xfilter;
     private long _blocked = 0;
+
     
 
-
-    public InetChannel(AprsServerConfig conf, String id) 
-       { super(conf, id); }
+    public InetChannel(AprsServerConfig conf, String id) {
+        super(conf, id); 
+    }
        
        
        
     @Override public void activate(AprsServerConfig a) {
-       super.activate(_conf);
        String id = getIdent();
        _user = _conf.getProperty("channel."+id+".user", "").toUpperCase();
        if (_user.length() == 0)
@@ -49,6 +50,10 @@ public class InetChannel extends TcpChannel
        String xfilt = _conf.getProperty("channel."+id+".xfilter", "*");
        _xfilter = AprsFilter.createFilter( xfilt, null);
        setReceiveFilter(_conf.getProperty("channel."+id+".rfilter", "")); 
+        log = new Logfile(_conf, "channel."+id, "channel."+id+".log");  
+        log.info(null, "Channel activated");
+        _conf.log().info("InetChannel", "Channel activated: "+id); 
+        super.activate(_conf);
     }
     
     
@@ -158,7 +163,7 @@ public class InetChannel extends TcpChannel
                 if (inp != null) {
                     if (inp.charAt(0) == '#') {
                         if (inp.length() > 7 && inp.matches("# Note:.*"))
-                            _conf.log().info("InetChannel", inp.substring(2));
+                            log.info(null, inp.substring(2));
                         continue;
                     }
                     AprsPacket p = AprsPacket.fromString(inp);
@@ -166,16 +171,18 @@ public class InetChannel extends TcpChannel
                         ;
                     else if (_xfilter == null || _xfilter.test(p))
                         receivePacket(p, false);
-                    else
+                    else {
+                        log.log(null, "BLOCKED: "+p.toString()); 
                         _blocked++;
+                    }
                 }
                 else {   
-                    _conf.log().info("InetChannel", chId()+"Disconnected from APRS server '"+getHost()+"'");
+                    log.info(null, "Disconnected from APRS server '"+getHost()+"'");
                     break; 
                 }
             }
             catch (java.net.SocketException e) {
-                _conf.log().info("InetChannel", chId()+"Socket closed"+e.getMessage());
+                log.info(null, "Socket closed"+e.getMessage());
                 break;
             }
          }

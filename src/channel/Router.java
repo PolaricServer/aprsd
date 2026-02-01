@@ -14,6 +14,7 @@
  
  
 package no.polaric.aprsd.channel;
+import no.polaric.core.*;
 import no.polaric.aprsd.*;
 import no.polaric.aprsd.aprs.*;
 import java.io.*;
@@ -109,15 +110,20 @@ public class Router extends AprsChannel
      * Start the service 
      */
     @Override public void activate(AprsServerConfig a) {        
+        String id = getIdent();
        _state = State.RUNNING;
         resetCounters();
+        
+        log = new Logfile(_conf, "channel."+id, "channel."+id+".log");  
+        log.info(null, "Channel activated");
+        _conf.log().info(null, "Channel activated: "+id);       
                
-       /* Configure, Get contained channels */
-       String chn = _conf.getProperty("channel."+getIdent()+".channels", "");
+        /* Configure, Get contained channels */
+        String chn = _conf.getProperty("channel."+getIdent()+".channels", "");
         _chnames = chn.split(",(\\s)*");
         _channels = new AprsChannel[_chnames.length];
         _filters = new AprsFilter[_chnames.length];
-        _conf.log().info("Router", "Initializing "+_chnames.length+" channels");
+        log.info(null, "Initializing "+_chnames.length+" channels");
 
         for (int i=0; i<_chnames.length; i++) {
             Channel ch = _conf.getChanManager().get(_chnames[i]);
@@ -126,8 +132,9 @@ public class Router extends AprsChannel
                 ch = _conf.getChanManager().newInstance(_conf, type, _chnames[i]); 
                 if (_conf.getBoolProperty("channel."+_chnames[i]+".on", false))
                     ch.activate(_conf);
+                log.info(null, "--> Channel "+_chnames[i]+" : " + type);
             }    
-
+            
             if (ch instanceof AprsChannel ach) {
                 ach.setInRouter(this);
                 _channels[i] = ach;
@@ -135,11 +142,11 @@ public class Router extends AprsChannel
                 _filters[i] = AprsFilter.createFilter( filt, null );
             }
             else {
-                _conf.log().warn("Router", "Channel '"+_chnames[i]+"' isn't an AprsChannel");
+                log.warn(null, "Channel '"+_chnames[i]+"' isn't an AprsChannel");
                 _channels[i] = null;
             }
             if (_channels[i] == null)
-                _conf.log().warn("Router", "Channel '"+_chnames[i]+"' is set to null");
+                log.warn(null, "Channel '"+_chnames[i]+"' is set to null");
         }
        
        /* Set up a receiver and use it to subscribe to the contained channels */
@@ -174,6 +181,7 @@ public class Router extends AprsChannel
                     ch.setInRouter(null);
                 }
         _recv = null;
+        log.info(null, "Channel deactivated");
     }
     
     

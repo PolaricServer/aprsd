@@ -61,7 +61,8 @@ public abstract class TcpChannel extends AprsChannel
         int port = _conf.getIntProperty("channel."+id+".port", 21);
         int retr  = _conf.getIntProperty("channel."+id+".retry", 4);
         long rtime = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "10")) * 60 * 1000;
-        
+        _logPackets = _api.getBoolProperty("channel."+id+".logpackets", false);
+                
         /* Set up backup channel */
         _backup = _conf.getProperty("channel."+id+".backup", "");
         if (!_conf.getChanManager().isBackup(_backup))
@@ -73,7 +74,7 @@ public abstract class TcpChannel extends AprsChannel
             back.deActivate();
         
         /* Set up comm device */
-        _comm = new TcpComm(_conf, id, host, port, retr, rtime);
+        _comm = new TcpComm(_conf, id, host, port, retr, rtime, log);
         _comm.activate( 
             ()-> receiveLoop(),
             ()-> {

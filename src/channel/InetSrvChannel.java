@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2025-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -13,6 +13,7 @@
  */
  
 package no.polaric.aprsd.channel;
+import no.polaric.core.*;
 import no.polaric.aprsd.*;
 import no.polaric.aprsd.aprs.*;
 import java.io.*;
@@ -63,6 +64,9 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         String filt =  _conf.getProperty("channel."+id+".infilter", "*");
         _filter = AprsFilter.createFilter( filt, null);
         _defaultfilt = _conf.getProperty("channel."+id+".defaultfilt", "");
+        log = new Logfile(_conf, "channel."+id, "channel."+id+".log");  
+        log.info(null, "Channel activated");
+        _conf.log().info("InetSrvChannel", "Channel activated: "+id); 
         
         _serverthread = new Thread(this);
         _serverthread.start(); 
@@ -184,9 +188,12 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
     /**
      * Handle incoming packet. To be called from clients. 
      */
-    public void handlePacket(AprsPacket p) {
-        if (_filter.test(p))
-            receivePacket(p, false);
+    public boolean handlePacket(AprsPacket p) {
+        if (!_filter.test(p))
+            return false; 
+        
+        receivePacket(p, false);
+        return true;
     }
     
     
@@ -197,7 +204,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         try {
             server = new ServerSocket(_portnr);
             server.setSoTimeout(10000);
-            _conf.log().info("InetSrvChannel", "Listening on port "+_portnr);
+            log.info(null, "Listening on port "+_portnr);
             _state = State.RUNNING;
             
             while (_state == State.RUNNING) {
@@ -205,7 +212,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
                 try {
                     Socket conn = server.accept(); 
                     synchronized(this) {
-                        InetSrvClient worker = new InetSrvClient(_conf, conn, this);
+                        InetSrvClient worker = new InetSrvClient(_conf, conn, this, log);
                         _clients.add(worker);
                         _nclients++;
                     }
@@ -215,11 +222,11 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
             }
         }
         catch (Exception ex) {
-            _conf.log().warn("InetSrvChannel", "ERROR: "+ex.getMessage());
+            log.warn(null, ex.getMessage());
         }
         finally {
             try {
-                _conf.log().info("InetSrvChannel","CLOSING");
+                log.info(null,"CLOSING");
                 if (server!=null) 
                     server.close();
             } catch (Exception e) {}

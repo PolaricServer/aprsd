@@ -1,5 +1,5 @@
  /* 
- * Copyright (C) 2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -15,21 +15,26 @@
  package no.polaric.aprsd.channel;
  import no.polaric.aprsd.*;
  import java.io.*;
-
+ import no.polaric.core.*;
+ 
+ 
+ 
+ 
  
  /* Communication device */
  
  public abstract class CommDevice implements Runnable {
      
-    protected AprsServerConfig     _conf; 
-    private   String        _ident;
-    protected Channel.State _state = Channel.State.OFF;
+    protected AprsServerConfig  _conf; 
+    private   String            _ident;
+    protected Channel.State     _state = Channel.State.OFF;
     
     private   boolean       _running = false;
     private   Thread        _thread;
     protected Worker        _worker;
     protected FailHandler   _failHandler; 
- 
+    protected Logfile       log;
+    
     
     /* To be implemented using a lambda function */
     protected interface Worker {
@@ -42,6 +47,7 @@
     
        
     public CommDevice(AprsServerConfig conf, String id) {
+        log = conf.log();
         _conf= conf; 
         _ident = id;
     }

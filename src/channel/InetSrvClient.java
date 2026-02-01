@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2025-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -13,6 +13,7 @@
  */
  
 package no.polaric.aprsd.channel;
+import no.polaric.core.*;
 import no.polaric.aprsd.*;
 import no.polaric.aprsd.aprs.*;
 import java.io.*;
@@ -44,7 +45,7 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
     private   AprsFilter _filter;
     private   boolean _login;
     private   long _txpackets, _rxpackets;
-    
+    protected Logfile log = new Logfile.Dummy();
         
     public static record Info 
        ( String userid, String addr, String software, boolean verified, 
@@ -52,7 +53,7 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
     {}
     
     
-    public InetSrvClient(AprsServerConfig api, Socket conn, InetSrvChannel chan) 
+    public InetSrvClient(AprsServerConfig api, Socket conn, InetSrvChannel chan, Logfile logf) 
     {
         _api = api;
         _conn = conn;
@@ -60,6 +61,9 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
         _ipaddr = _conn.getInetAddress().getHostAddress();
         _rxpackets = _txpackets = 0;
         
+        if (logf != null)
+            log = logf;
+            
         if (conn != null) {
             Thread workerthread = new Thread(this);
             workerthread.start();
@@ -158,13 +162,15 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
                 _writer.println("#");
                 _writer.flush();
             }
-            if (_software.matches("Polaric\\-APRSD ([01].+)")) 
+            if (_software.matches("Polaric\\-APRSD ([01].+)")) {
+                log.info(null, "Login rejected - too old software: "+_userid);
                 return;
+            }
                 
             String mycall = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
             _writer.println("# logresp "+_userid+ (_verified ? " verified" : " unverified" ) + ", server " + mycall);
             _writer.flush();
-            _api.log().info("InetSrvChannel", "User "+_userid+" verification "+(_verified ? "Ok": "Failed"));
+            log.info(null, "User "+_userid+" verification "+(_verified ? "Ok": "Failed"));
             _login = true;
         }
         catch (SocketTimeoutException e) {
@@ -250,9 +256,11 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
         _rxpackets++;
         
         /* Pass packet to receivers */
-        _chan.receivePacket(p, false);
-        /* Send packet to other clients (except this) */
-        _chan.sendPacket(p, this);
+        if (!_chan.receivePacket(p, false))
+            log.log(null, "BLOCKED ("+_userid+"): "+p.toString());
+        else
+            /* Send packet to other clients (except this) */
+            _chan.sendPacket(p, this);
     }
     
     
@@ -274,7 +282,7 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
     /* Main thread. Get incoming packets and commands from connected client. */
     public void run() {
         try {          
-            _api.log().info("InetSrvChannel", "Incoming connection from: "+_ipaddr);
+            log.info(null, "Incoming connection from: "+_ipaddr);
             _istream = _conn.getInputStream();
             _ostream = _conn.getOutputStream();
             _writer = new PrintWriter(_ostream);
@@ -298,13 +306,13 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
                 }
             }
             _login = false; 
-            _api.log().info("InetSrvChannel", "Connection closed: "+_ipaddr);
+            log.info(null, "Connection closed: "+_ipaddr);
         }
         catch (SocketException ex) {
-            _api.log().warn("InetSrvChannel", "Connection ("+_ipaddr+"): "+ex.getMessage());
+            log.warn(null, "Connection ("+_ipaddr+"): "+ex.getMessage());
         }
         catch (Exception ex) {
-             _api.log().warn("InetSrvChannel", "Connection ("+_ipaddr+"): "+ex.getMessage());
+             log.warn(null, "Connection ("+_ipaddr+"): "+ex.getMessage());
              ex.printStackTrace(System.out);
         }
         finally {

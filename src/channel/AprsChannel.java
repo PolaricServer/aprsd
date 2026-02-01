@@ -29,8 +29,8 @@ import java.lang.reflect.Constructor;
 public abstract class AprsChannel extends Channel 
 {
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
-     private static boolean _logPackets = false; 
      
+     protected boolean _logPackets = false; 
      protected AprsServerConfig _conf; 
      protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap<String, Heard>();
     
@@ -57,7 +57,6 @@ public abstract class AprsChannel extends Channel
      
      public static void init(AprsServerConfig conf) {
         AprsFilter.init(conf); 
-        _logPackets = conf.getBoolProperty("channel.logpackets", true);
         canSend = true;
         String myCall = conf.getProperty("default.mycall", "NOCALL").toUpperCase();
         if ("NOCALL".equals(myCall))
@@ -159,7 +158,7 @@ public abstract class AprsChannel extends Channel
             try {
                 _rfilterPattern = Pattern.compile(filter);
             } catch (PatternSyntaxException e) {
-                _conf.log().warn("AprsChannel", "Invalid regex pattern in rfilter: " + filter);
+                log.warn(null, "Invalid regex pattern in rfilter: " + filter);
                 _rfilterPattern = null;
             }
         } else {
@@ -389,7 +388,7 @@ public abstract class AprsChannel extends Channel
           
        p.source = this;
        if (_logPackets)
-          _conf.log().log(null, chId()+p);
+          log.log(null, chId()+p);
        _heardPackets++;
        dup = _dupCheck.checkPacket(p.from, p.to, p.report);
        if (!dup) 
