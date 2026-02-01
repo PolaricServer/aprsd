@@ -15,6 +15,7 @@
 package no.polaric.aprsd.aprs;
 import no.polaric.aprsd.*;
 import no.polaric.core.*;
+import no.polaric.core.util.*;
 import no.polaric.aprsd.point.*;
 import java.util.regex.*;
 import java.io.*;
@@ -566,15 +567,13 @@ public class AprsUtil
     
    
    protected static int b64to12bit(String s) {
-      com.mindprod.base64.Base64 b64 = new com.mindprod.base64.Base64();
-      byte[] bytes = b64.decode(s+"AA");
+      byte[] bytes = SecUtils.b64decode(s+"AA");
       return (new BigInteger(bytes)).intValue() >> 12;
    }
     
     
    protected static int b64to18bit(String s) {
-        com.mindprod.base64.Base64 b64 = new com.mindprod.base64.Base64();
-        byte[] bytes = b64.decode(s+"A");
+        byte[] bytes = SecUtils.b64decode(s+"A");
         int x =  (new BigInteger(bytes)).intValue() >> 6;
         
         if ((bytes[1] & 0x02) > 0) {
