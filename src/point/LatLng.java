@@ -27,6 +27,7 @@ import java.io.Serializable;
     public double getLat() {return _lat;}
     public double getLng() {return _lng;}
   
+    public boolean isNull() {return (_lat==0.0 && _lng==0.0); }
  
     public double distance(LatLng ll) {
         double er = 6366.707;

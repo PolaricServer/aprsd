@@ -70,6 +70,10 @@ public class OwnPosition extends Station implements Runnable
     
     public void init() {
         String ownpos = _api.getProperty("ownposition.pos", ""); 
+        String ownposm = _api.getProperty("ownposition.pos.manual", "");
+        if (ownposm != null && !ownposm.equals("")) 
+            ownpos = ownposm;
+        
         String myCall = _api.getProperty("ownposition.mycall", "").toUpperCase();
         if (myCall.length() == 0)
            myCall = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
@@ -214,7 +218,7 @@ public class OwnPosition extends Station implements Runnable
      */
     protected void sendPosReport()
     {
-        if ( !_txOn )
+        if ( !_txOn || getPosition() == null || getPosition().isNull())
             return;
         boolean sentRf = false;
         AprsPacket p = new AprsPacket();
@@ -263,9 +267,10 @@ public class OwnPosition extends Station implements Runnable
      */
     public synchronized void updatePosition(Date t, LatLng pos, char symtab, char symbol)
     {
-          update(new Date(),new ReportHandler.PosData(pos, symbol, symtab), _comment, "");
-          _timeSinceReport = 0;
-          sendPosReport();
+        _api.setProperty("ownposition.pos.manual", pos.getLat()+","+pos.getLng());
+        update(new Date(),new ReportHandler.PosData(pos, symbol, symtab), _comment, "");
+        _timeSinceReport = 0;
+        sendPosReport();
     }
 
     
