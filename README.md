@@ -39,5 +39,5 @@ You will need JDK (OpenJDK) version 17 or later. Maven is used for the build pro
 
 From version 4.0 we use *Javalin* for the webserver-part and a webserver-framework is factored out in a separate software-component: [polaric-core](https://github.com/PolaricServer/Polaric-Core). This is built separately but is just a *'mvn install'*. The polaric-core is also available from Maven Central.
 
-
+<a href="https://www.buymeacoffee.com/la7eca" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 150px !important;" ></a>
 
