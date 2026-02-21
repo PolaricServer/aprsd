@@ -266,7 +266,17 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
             _conf.log().info("AprsParser", "Cannot decrypt/authenticate packet: "+station.getIdent());
         else {
             AprsPacket pp = p.clone(); 
-            pp.report = text;
+            int idx = text.indexOf(':');
+            if (idx == 0)
+                pp.report = text.substring(1);
+            else if (idx < 10) {
+                pp.from = text.substring(0, idx+1);
+                pp.report = text.substring(idx+1);
+            }
+            else {
+                _conf.log().info("AprsParser", "Error in decrypted packet: "+station.getIdent());
+                return;
+            }
             pp.type = text.charAt(0);
             receivePacket(pp, false);
         }

@@ -272,7 +272,7 @@ public abstract class AprsChannel extends Channel
     {
       if (encrypt) {
         p.type = '{';
-        p.report = "{{:" + _encr.encryptB91(p.report, p.from, null);
+        p.report = "{{:" + _encr.encryptB91(":"+p.report, p.from, null);
         p.to = Main.toaddrE;
         p.encrypted = true;
       }

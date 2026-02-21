@@ -19,6 +19,9 @@ import java.nio.ByteBuffer;
  */
 public abstract class Encryption {
     
+    
+    public static final int PBKDF2_ITERATIONS = 16384;
+    
 
     /**
      * Encrypt a string.
@@ -64,7 +67,7 @@ public abstract class Encryption {
         throws NoSuchAlgorithmException, InvalidKeySpecException {
     
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), 65536, 256);
+        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), PBKDF2_ITERATIONS, 256);
         SecretKey secret = new SecretKeySpec(factory.generateSecret(spec)
             .getEncoded(), "AES");
         return secret;
