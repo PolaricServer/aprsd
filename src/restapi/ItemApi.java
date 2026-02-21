@@ -127,9 +127,10 @@ public class ItemApi extends ServerBase {
     private Object _itemInfo(Context ctx) {
         try {
             var ident = ctx.pathParam("ident");
-            var st = _api.getDB().getItem(ident, null);
+            var xident = urlDecode(ident);
+            var st = _api.getDB().getItem(xident, null);
             if (st==null)
-                return ERROR(ctx, 404, "Unknown tracker item: "+ident); 
+                return ERROR(ctx, 404, "Unknown tracker item: "+xident); 
             if (!authForItem(ctx, st))
                 return ERROR(ctx, 403, "Not authorized for access to item");
             return st.getJsInfo();
@@ -142,11 +143,11 @@ public class ItemApi extends ServerBase {
     
     private Object _itemPos(Context ctx) {
         try {
-            // var ident = req.splat()[0];     
             var ident = ctx.pathParam("ident");
-            var st = _api.getDB().getItem(ident, null);
+            var xident = urlDecode(ident);
+            var st = _api.getDB().getItem(xident, null);
             if (st==null)
-                return ERROR(ctx, 404, "Unknown tracker item: "+ident); 
+                return ERROR(ctx, 404, "Unknown tracker item: "+xident); 
             if (!authForItem(ctx, st))
                 return ERROR(ctx, 403, "Not authorized for access to item");
             LatLng pos = st.getPosition();
@@ -320,13 +321,13 @@ public class ItemApi extends ServerBase {
         a.get("/item/{ident}/info", (ctx) -> {
             var res = _itemInfo(ctx);
             if (res != null)
-                ctx.json(_itemInfo(ctx));
+                ctx.json(res);
         });
         
         a.get("/item/{ident}/xinfo", (ctx) -> {
             var res = _itemInfo(ctx);
             if (res != null)
-                ctx.json(_itemInfo(ctx));
+                ctx.json(res);
         });
         
         

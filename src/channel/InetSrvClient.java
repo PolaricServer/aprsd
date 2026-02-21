@@ -255,8 +255,8 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
         
         _rxpackets++;
         
-        /* Pass packet to receivers */
-        if (!_chan.receivePacket(p, false))
+        /* Filter and pass packet to receivers */
+        if (!_chan.handlePacket(p))
             log.log(null, "BLOCKED ("+_userid+"): "+p.toString());
         else
             /* Send packet to other clients (except this) */

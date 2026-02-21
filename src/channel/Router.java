@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -123,18 +123,18 @@ public class Router extends AprsChannel
         _chnames = chn.split(",(\\s)*");
         _channels = new AprsChannel[_chnames.length];
         _filters = new AprsFilter[_chnames.length];
-        log.info(null, "Initializing "+_chnames.length+" channels");
-
+        log.info(null, "Connecting to "+_chnames.length+" channels");
+        
         for (int i=0; i<_chnames.length; i++) {
+            String type = _conf.getProperty("channel."+_chnames[i]+".type", "");
             Channel ch = _conf.getChanManager().get(_chnames[i]);
             if (ch == null) {
-                String type = _conf.getProperty("channel."+_chnames[i]+".type", "");
                 ch = _conf.getChanManager().newInstance(_conf, type, _chnames[i]); 
                 if (_conf.getBoolProperty("channel."+_chnames[i]+".on", false))
                     ch.activate(_conf);
-                log.info(null, "--> Channel "+_chnames[i]+" : " + type);
             }    
             
+            log.info(null, "--> Channel "+_chnames[i]+" : " + type);
             if (ch instanceof AprsChannel ach) {
                 ach.setInRouter(this);
                 _channels[i] = ach;
