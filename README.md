@@ -1,31 +1,30 @@
 # Polaric APRSD
 
-The "*Polaric Server*" is mainly a web based service to present APRS tracking information on maps and where 
-the information is updated in real-time. It is originally targeted for use by radio amateurs in voluntary 
-search and rescue service in Norway. It consists of a web application and a server program (APRS daemon). 
+The "*Polaric Server*" is mainly a web-based service to present APRS-tracking information on maps and where 
+the information is updated in real-time. It was originally targeted for use by radio amateurs in voluntary 
+search and rescue service in Norway. It consists of a web-application and a server program (APRS daemon). The project has a focus on the ability to run as a "offline" service, on interoperability and security.
  
-The APRS daemon gets data from a TNC or APRS-IS or a combination. Users can present 
+The APRS daemon (aprsd) gets data from a TNC or APRS-IS or a combination. Users can present 
 and manipulate the information through a HTTP service (REST API) and updates is streamed through a Websocket. 
-The daemon can also be set up as an igate (internet gateway) and can be installed and run independently 
-of the web app. It has its own webserver. 
+The daemon can also be set up as an igate (internet gateway) or a edge APRS-IS server. It can be installed and run independently of the web app. It provides its own webserver based on the *polaric-core* framework. 
 
 *Polaric-aprsd* is meant to be used as a backend-server for *polaric-webapp2*.
 
 http://aprs.no runs a recent version of this software. More documentation on the project can be found here: 
-http://aprs.no/polaricserver or https://polaricserver.readthedocs.io
+http://aprs.no/polaricserver.
 
 ## Installation
 
 We provide deb (Debian/Ubuntu..) packages. For information on getting started on a Debian based platform please 
 see: https://polaricserver.readthedocs.io/en/latest/gettingstarted.html
 
-From version 4.0, Polaric APRSD uses systemd for service management. See [docs/systemd-migration.md](docs/systemd-migration.md) for migration details and usage instructions.
+From version 4.0, Polaric-APRSD uses *systemd* for service management. See [docs/systemd-migration.md](docs/systemd-migration.md) for migration details and usage instructions.
 
 Documentation on the project can be found here: 
 http://aprs.no/polaricserver
 
-To configure a server, use the webapp2. Some command-line scripts are also available: 
-polaric-setcall, polaric-password, etc.   
+To configure a server, use the client app: *webapp2*. Some command-line scripts are also available: 
+*polaric-setcall*, *polaric-password*, etc.   
 
 For first-time login use account: username=admin, password=polaric. Remember to change the password at your fist
 convenience. 
