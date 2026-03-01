@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2012-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2012-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -154,7 +154,7 @@ public class AprsObject extends AprsPoint implements Serializable
         _altsym = pd.symtab;
         _killed = false;  
         _owner.setUpdated(new Date());      
-        _api.getDB().updateItem(this, prevpos);
+        _conf.getDB().updateItem(this, prevpos);
     }
     
     
@@ -163,7 +163,7 @@ public class AprsObject extends AprsPoint implements Serializable
      */ 
     protected boolean _expired() 
     {    Date now = new Date(); 
-         return (_owner != _api.getOwnPos() && // Do not expire own objects
+         return (_owner != _conf.getOwnPos() && // Do not expire own objects
                 (_owner.expired() || now.getTime() > (_updated.getTime() + _expiretime))) ; 
     }
     

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2025-26 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -35,8 +35,8 @@ import java.time.Month;
 public class Main extends ConfigBase implements AprsServerConfig {
 
     /* Update these each time a release is to be published */
-    public  static String version  = "4.0.3+";
-    public  static String toaddr   = "APPS40";
+    public  static String version  = "4.1";
+    public  static String toaddr   = "APPS41";
     public  static String toaddrE  = "APPSE1";
     public  static String toaddrA  = "APPSA1";
 
@@ -266,7 +266,7 @@ public class Main extends ConfigBase implements AprsServerConfig {
            
            /* Config */
            conf = this;
-           PluginManager.setServerApi(conf);
+           PluginManager.setServerConf(conf);
            setLogger( new Logfile(this, "aprsd") );
            
            ViewFilter.init(conf);
@@ -342,7 +342,7 @@ public class Main extends ConfigBase implements AprsServerConfig {
         bullboard = new BullBoard(conf, msgProc);
                         
         Signs.init(conf);
-        TrackerPoint.setApi(this);
+        TrackerPoint.setConf(this);
         Station.init(conf); 
             
         if (getBoolProperty("remotectl.on", false)) {

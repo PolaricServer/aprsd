@@ -1,3 +1,19 @@
+/* 
+ * Copyright (C) 2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ */
+ 
+ 
+
 package no.polaric.aprsd;
 import java.util.*;
 
@@ -40,7 +56,7 @@ public class PluginManager
     /* Name-Object map (objects posted by plugin to be used by core or other plugins) */
    private static Map<String, Object> _properties = new HashMap<String, Object>();
    
-   private static AprsServerConfig api;
+   private static AprsServerConfig conf;
 
    /* FIXME: Shorter path to get/put methods */
    public static Map<String, Object> properties() 
@@ -67,8 +83,8 @@ public class PluginManager
     * set the api. Must be done at startup of server. 
     * @param a the server interface. 
     */    
-   public static void setServerApi(AprsServerConfig a)
-     { api = a; }  
+   public static void setServerConf(AprsServerConfig a)
+     { conf = a; }  
      
 
      
@@ -97,7 +113,7 @@ public class PluginManager
         
           for (String cx : p.getDependencies())
              add(cx);
-          p.activate(api);
+          p.activate(conf);
           _plugins.put(cn, p);
         }
         catch (Exception e)
@@ -124,7 +140,7 @@ public class PluginManager
  
     public static void startWebservices() {
         for (Plugin p : _plugins.values())
-            p.startWebservice(api);
+            p.startWebservice(conf);
     }
     
     

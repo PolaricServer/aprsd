@@ -1,15 +1,15 @@
 /* 
- * Copyright (C) 2018-2025 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018-2026 by Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  */
  
 
@@ -31,11 +31,11 @@ import java.util.stream.*;
  */
 public class SystemApi extends ServerBase {
 
-    private AprsServerConfig _api; 
+    private AprsServerConfig _conf; 
     
-    public SystemApi(AprsServerConfig api) {
-        super(api);
-        _api = api;
+    public SystemApi(AprsServerConfig conf) {
+        super(conf);
+        _conf = conf;
     }
     
     /* SAR mode info */
@@ -97,7 +97,7 @@ public class SystemApi extends ServerBase {
          * Get own position. 
          ******************************************/
         a.get("/system/ownpos", (ctx) -> {
-            var p = _api.getOwnPos();
+            var p = _conf.getOwnPos();
             LatLng pos = (LatLng) p.getPosition();
             double[] cpos = null;
             if (pos!=null) 
@@ -117,12 +117,12 @@ public class SystemApi extends ServerBase {
                 ERROR(ctx, 400, "Couldn't parse input");   
                 return; 
             }
-            var p = _api.getOwnPos();
+            var p = _conf.getOwnPos();
             p.updatePosition(new Date(), 
                       new LatLng( op.pos[1], op.pos[0]), 
                       (op.symtab==null ? '/' : op.symtab.charAt(0)),
                       (op.sym==null ? 'c' : op.sym.charAt(0)));
-            _api.log().info("RestApi", "Own position changed by '"+uid+"'");
+            _conf.log().info("RestApi", "Own position changed by '"+uid+"'");
             systemNotification("ADMIN", "Own position changed by '"+uid+"'", 120);
             ctx.result("Ok");
         });

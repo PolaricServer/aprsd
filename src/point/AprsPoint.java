@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -32,8 +32,8 @@ public abstract class AprsPoint extends TrackerPoint implements Serializable, Cl
     protected int         _ambiguity = 0;
     
     
-    public static void setApi(AprsServerConfig api) {
-        _symTab = new SymTable (api, System.getProperties().getProperty("confdir", ".")+"/symbols");
+    public static void setConf(AprsServerConfig c) {
+        _symTab = new SymTable (c, System.getProperties().getProperty("confdir", ".")+"/symbols");
     }
     
     
@@ -83,7 +83,7 @@ public abstract class AprsPoint extends TrackerPoint implements Serializable, Cl
        if (override && _icon != null)
           return _icon; 
        if (_symTab == null) {
-         _api.log().error("AprsPoint", "Symbol table is null");
+         _conf.log().error("AprsPoint", "Symbol table is null");
          return "ERROR";
        }
        return _symTab.getIcon(_symbol, _altsym);

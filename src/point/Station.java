@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -34,8 +34,8 @@ public class Station extends AprsPoint implements Serializable, Cloneable
    }
 
  
-    public static void init(AprsServerConfig api)
-      { int exptime = api.getIntProperty("aprs.expiretime", 60);
+    public static void init(AprsServerConfig conf)
+      { int exptime = conf.getIntProperty("aprs.expiretime", 60);
         setExpiretime(exptime * 60 * 1000);
       }
     
@@ -106,7 +106,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
        
     public Telemetry getTelemetry() {
        if (_telemetry == null)
-          _telemetry = new Telemetry(_api, getIdent()); 
+          _telemetry = new Telemetry(_conf, getIdent()); 
        return _telemetry;
     }
        
@@ -117,7 +117,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
        { _pathinfo = p; }
        
     public Set<String> getTrafficFrom() { 
-        StationDB db = _api.getDB();
+        StationDB db = _conf.getDB();
         if (db==null || db.getRoutes() == null)
             return null; 
         return db.getRoutes().getToEdges(getIdent()); 
@@ -125,7 +125,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
        
                        
     public Set<String> getTrafficTo()
-       { return _api.getDB().getRoutes().getFromEdges(getIdent());}
+       { return _conf.getDB().getRoutes().getFromEdges(getIdent());}
               
               
     public boolean isInfra() { 
@@ -158,7 +158,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
    
    
     @Override public Source getSource()
-       { return _api.getChanManager().get(_source); }
+       { return _conf.getChanManager().get(_source); }
        
        
     @Override public String getSourceId()
@@ -210,7 +210,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     
     @Override public synchronized void reset()
     {  
-        _api.getDB().getRoutes().removeNode(this.getIdent());
+        _conf.getDB().getRoutes().removeNode(this.getIdent());
         super.reset(); 
     }
      
@@ -223,7 +223,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
         
     public synchronized void update(Date ts, ReportHandler.PosData pd, String descr, String pathinfo)
     { 
-        StationDB db = _api.getDB();
+        StationDB db = _conf.getDB();
         LatLng prevpos = (getPosition()==null ? null : getPosition());
         if (saveToTrail(ts, pd.pos, pd.speed, pd.course, _pathinfo)) {
              updatePosition(ts, pd.pos, pd.ambiguity);
@@ -248,7 +248,7 @@ public class Station extends AprsPoint implements Serializable, Cloneable
             setChanging();
         }
         isChanging();         
-        _api.getDB().updateItem(this, prevpos);
+        _conf.getDB().updateItem(this, prevpos);
     }
     
 
@@ -258,9 +258,9 @@ public class Station extends AprsPoint implements Serializable, Cloneable
     {
         if (!super._expired()) 
             return false;
-        if (!_api.getDB().getOwnObjects().mayExpire(this))
+        if (!_conf.getDB().getOwnObjects().mayExpire(this))
             return false;
-        _api.getDB().getRoutes().removeNode(this.getIdent());
+        _conf.getDB().getRoutes().removeNode(this.getIdent());
         return true; 
     }
     

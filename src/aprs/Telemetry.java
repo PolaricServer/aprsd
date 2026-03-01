@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2015-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2015-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -202,7 +202,7 @@ public class Telemetry implements Serializable
         _lastSeq = seq; 
         
         /* Notify client about change */
-        var api = TrackerPoint.getApi();
+        var api = TrackerPoint.getConf();
         if (_ident == null)
             return;
             

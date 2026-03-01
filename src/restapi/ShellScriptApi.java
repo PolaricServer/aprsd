@@ -1,16 +1,17 @@
  
 /* 
- * Copyright (C) 2020-2025 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2020-2026 by Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
+ 
  */
  
 package no.polaric.aprsd;
@@ -35,15 +36,15 @@ import java.util.concurrent.TimeUnit;
  
 public class ShellScriptApi extends ServerBase {
 
-    private ServerConfig _api; 
+    private ServerConfig _conf; 
     private Map<String, Script> _scripts = new HashMap<String, Script>();
     private String _fname;
     private String _sdir;
     private File   _slog;
     
-    public ShellScriptApi(ServerConfig api) {
-        super(api);
-        _api = api;
+    public ShellScriptApi(ServerConfig conf) {
+        super(conf);
+        _conf = conf;
         /* Set up config */
         String confdir = System.getProperties().getProperty("confdir", "."); 
         _fname = confdir+"/scripts.conf";
@@ -206,7 +207,7 @@ public class ShellScriptApi extends ServerBase {
                         !x[3].toUpperCase().matches("TRUE|FALSE") ||
                         !x[4].toUpperCase().matches("TRUE|FALSE"))
                     {
-                        _api.log().warn("ShellScriptApi", "Syntax error in config. Line: "+lineno);
+                        _conf.log().warn("ShellScriptApi", "Syntax error in config. Line: "+lineno);
                         continue;
                     }
                     int nargs = Integer.parseInt(x[2]);
@@ -218,9 +219,9 @@ public class ShellScriptApi extends ServerBase {
             return true;
         }
         catch (FileNotFoundException  e) 
-            { _api.log().error("ShellScriptApi", "No config file present."); }
+            { _conf.log().error("ShellScriptApi", "No config file present."); }
         catch (Exception  e) 
-            { _api.log().error("ShellScriptApi", ""+e); }
+            { _conf.log().error("ShellScriptApi", ""+e); }
         return false; 
     }
     
@@ -286,7 +287,7 @@ public class ShellScriptApi extends ServerBase {
                     for (String a : arg.args)
                         cmdarg.add(a);
 
-                _api.log().debug("ShellScriptApi", "Invoking script: "+cmd);
+                _conf.log().debug("ShellScriptApi", "Invoking script: "+cmd);
                 ProcessBuilder pb = new ProcessBuilder(cmdarg);
                 pb.redirectError(Redirect.appendTo(_slog));
                 if (!script.rtext) 
@@ -297,7 +298,7 @@ public class ShellScriptApi extends ServerBase {
                  * Scripts that start long running things are marked as so and will fork them off
                  */
                 synchronized (this) {
-                    ProcessRunner runner = new ProcessRunner(_api, uid, pb, script);
+                    ProcessRunner runner = new ProcessRunner(_conf, uid, pb, script);
                     if (script.longrun) {
                         runner.startDetached();
                         ctx.result("Script launched ok"); 

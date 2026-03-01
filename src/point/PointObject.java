@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ // * Copyright (C) 2014-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -38,7 +38,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
      */
     protected Set<String> _tags = new HashSet<String>();
     protected static SortedMap<String, Integer> _tagUse = new TreeMap<String, Integer>();
-    protected static AprsServerConfig   _api = null;
+    protected static AprsServerConfig   _conf = null;
         
     protected boolean  _nodb = false;
             
@@ -149,7 +149,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
        _incrementTag(tag);      
         _tags.add(tag); 
         
-        StationDB.Hist hdb = _api.getDB().getHistDB(); 
+        StationDB.Hist hdb = _conf.getDB().getHistDB(); 
         if (hdb != null && !_nodb)
             hdb.setTag(this, tag, false);
     }
@@ -164,7 +164,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
         _decrementTag(tag);
         _tags.remove(tag); 
         
-        StationDB.Hist hdb = _api.getDB().getHistDB(); 
+        StationDB.Hist hdb = _conf.getDB().getHistDB(); 
         if (hdb != null && !_nodb)
             hdb.setTag(this, tag, true);
     }
@@ -178,7 +178,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
         for (String x : _tags) {
            _decrementTag(x);   
             /* Mark as removed in hist db, if necessary */
-            StationDB.Hist hdb = _api.getDB().getHistDB(); 
+            StationDB.Hist hdb = _conf.getDB().getHistDB(); 
             if (hdb != null && !_nodb)
                 hdb.setTag(this, x, true);
         }

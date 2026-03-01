@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2014-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2014-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -380,7 +380,7 @@ class TrafficTo extends Pred
             if (toset==null)
                 return false;
             for (String id : toset) {
-                var item = TrackerPoint.getApi().getDB().getItem(id, null);
+                var item = TrackerPoint.getConf().getDB().getItem(id, null);
                 if (to.eval(item, scale))
                     return true;
             }

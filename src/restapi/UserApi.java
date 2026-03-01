@@ -1,15 +1,15 @@
 /* 
- * Copyright (C) 2017-2023 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2017-2026 by Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  */
 
 
@@ -32,7 +32,7 @@ import com.fasterxml.jackson.annotation.*;
  */
 public class UserApi extends ServerBase {
 
-    private AprsServerConfig _api; 
+    private AprsServerConfig _conf; 
     
     
     public static class GroupInfo {
@@ -104,12 +104,12 @@ public class UserApi extends ServerBase {
     
     
     
-    public UserApi(AprsServerConfig api,  UserDb u, GroupDb g) {
-        super(api);
-        _api = api;
+    public UserApi(AprsServerConfig c,  UserDb u, GroupDb g) {
+        super(c);
+        _conf = c;
         _users = u;
         _groups = g; 
-        _psub = (PubSub) api.getWebserver().pubSub();
+        _psub = (PubSub) _conf.getWebserver().pubSub();
     }
     
     
@@ -120,6 +120,8 @@ public class UserApi extends ServerBase {
      */
     public void ERROR(Context ctx, int status, String msg)
       { ctx.status(status); ctx.result(msg); }
+      
+      
       
     /** 
      * Get user info for serialising as JSON 
@@ -192,10 +194,10 @@ public class UserApi extends ServerBase {
          ************************************************/
         a.get("/loginusers", (ctx) -> {
             List<String> us = new ArrayList<String>(); 
-            for (String name : ((WebServer)_api.getWebserver()).loginUsers())
+            for (String name : ((WebServer)_conf.getWebserver()).loginUsers())
                 us.add(name);
-            if (((AprsServerConfig)_api).getRemoteCtl() != null) 
-                for (String name: ((AprsServerConfig)_api).getRemoteCtl().getUsers())
+            if (((AprsServerConfig)_conf).getRemoteCtl() != null) 
+                for (String name: ((AprsServerConfig)_conf).getRemoteCtl().getUsers())
                     us.add(name);
             ctx.json(us);
         });
@@ -289,7 +291,7 @@ public class UserApi extends ServerBase {
                     return;
                 }
             } 
-            if (uu.callsign != null && !uu.callsign.equals("") && ((AprsServerConfig)_api).getMsgProcessor().getMycall().equals(uu.callsign)) {
+            if (uu.callsign != null && !uu.callsign.equals("") && ((AprsServerConfig)_conf).getMsgProcessor().getMycall().equals(uu.callsign)) {
                 ERROR(ctx, 400, "Cannot use the same callsign as this server: "+ uu.callsign);
                 return;
             }

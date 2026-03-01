@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2023 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -38,14 +38,14 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     public static void setNotifier(Notifier n)
         { _change = n; }
     
-    public static void setApi(AprsServerConfig api) { 
-       _api = api; 
-       _colTab = new ColourTable (api, System.getProperties().getProperty("confdir", ".")+"/trailcolours");
-       AprsPoint.setApi(api);
+    public static void setConf(AprsServerConfig c) { 
+       _conf = c; 
+       _colTab = new ColourTable (c, System.getProperties().getProperty("confdir", ".")+"/trailcolours");
+       AprsPoint.setConf(c);
     }
        
-    public static AprsServerConfig getApi() 
-        { return _api; }
+    public static AprsServerConfig getConf() 
+        { return _conf; }
         
         
     /*
@@ -198,8 +198,8 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
         {
            if (_trail.length() == 1)
                _trailcolor = _colTab.nextColour();
-           if (_api.getDB().getRoutes() != null)
-              _api.getDB().getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
+           if (_conf.getDB().getRoutes() != null)
+              _conf.getDB().getRoutes().removeOldEdges(getIdent(), _trail.oldestPoint());
            setChanging();   
         }
         return true;
@@ -371,7 +371,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     {  
       if (changeOf(_alias, a)) {
         _alias = a;
-        StationDB.Hist hdb = _api.getDB().getHistDB(); 
+        StationDB.Hist hdb = _conf.getDB().getHistDB(); 
         if (hdb != null && !_nodb)
             hdb.setAlias(this, a);
          setChanging();
@@ -390,7 +390,7 @@ public abstract class TrackerPoint extends PointObject implements Serializable, 
     {  
       if (changeOf(_icon, a)) {
         _icon = a;    
-        StationDB.Hist hdb = _api.getDB().getHistDB(); 
+        StationDB.Hist hdb = _conf.getDB().getHistDB(); 
         if (hdb != null && !_nodb)
             hdb.setIcon(this, a);
         setChanging();

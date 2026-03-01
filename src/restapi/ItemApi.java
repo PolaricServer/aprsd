@@ -1,15 +1,15 @@
 /* 
- * Copyright (C) 2018-2023 by Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2018-2026 by Øyvind Hanssen (ohanssen@acm.org)
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * GNU Affero General Public License for more details.
  */
  
 
@@ -32,11 +32,11 @@ import no.polaric.aprsd.aprs.*;
  */
 public class ItemApi extends ServerBase {
 
-    private AprsServerConfig _api; 
+    private AprsServerConfig _conf; 
     
-    public ItemApi(AprsServerConfig api) {
-        super(api);
-        _api = api;
+    public ItemApi(AprsServerConfig conf) {
+        super(conf);
+        _conf = conf;
     }
     
     public static class JsPoint {
@@ -128,7 +128,7 @@ public class ItemApi extends ServerBase {
         try {
             var ident = ctx.pathParam("ident");
             var xident = urlDecode(ident);
-            var st = _api.getDB().getItem(xident, null);
+            var st = _conf.getDB().getItem(xident, null);
             if (st==null)
                 return ERROR(ctx, 404, "Unknown tracker item: "+xident); 
             if (!authForItem(ctx, st))
@@ -145,7 +145,7 @@ public class ItemApi extends ServerBase {
         try {
             var ident = ctx.pathParam("ident");
             var xident = urlDecode(ident);
-            var st = _api.getDB().getItem(xident, null);
+            var st = _conf.getDB().getItem(xident, null);
             if (st==null)
                 return ERROR(ctx, 404, "Unknown tracker item: "+xident); 
             if (!authForItem(ctx, st))
@@ -164,7 +164,7 @@ public class ItemApi extends ServerBase {
         try {
             // var ident = req.splat()[0];
             var ident = ctx.pathParam("ident");
-            var st = _api.getDB().getItem(ident, null);
+            var st = _conf.getDB().getItem(ident, null);
             if (st==null)
                 return ERROR(ctx, 404, "Unknown tracker item: "+ident); 
             if (!authForItem(ctx, st))
@@ -196,7 +196,7 @@ public class ItemApi extends ServerBase {
             
         try {
             List<JsPoint> result = 
-                _api.getDB().search(srch, tagList)
+                _conf.getDB().search(srch, tagList)
                     .stream()
                     .filter( x -> authForItem(ctx, x))
                     .map( x -> new JsPoint( 
@@ -220,11 +220,11 @@ public class ItemApi extends ServerBase {
         var uid = getAuthInfo(ctx).userid; 
         if (alias==null)
             alias = "NULL";
-        if (_api.getRemoteCtl() != null)
-            _api.getRemoteCtl().sendRequestAll("ALIAS", ident+" "+alias, null);
-        _api.log().info("SystemApi", 
+        if (_conf.getRemoteCtl() != null)
+            _conf.getRemoteCtl().sendRequestAll("ALIAS", ident+" "+alias, null);
+        _conf.log().info("SystemApi", 
             "ALIAS: '"+alias+"' for '"+ident+"' by user '"+uid+"'");    
-        _api.getWebserver().notifyUser(uid, new ServerConfig.Notification
+        _conf.getWebserver().notifyUser(uid, new ServerConfig.Notification
             ("system", "system", "Alias: '"+alias+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
     }
     
@@ -238,11 +238,11 @@ public class ItemApi extends ServerBase {
         var uid = getAuthInfo(ctx).userid;
         if (icon==null)
             icon="NULL";
-        if (_api.getRemoteCtl() != null)
-            _api.getRemoteCtl().sendRequestAll("ICON", ident+" "+icon, null);
-        _api.log().info("SystemApi", 
+        if (_conf.getRemoteCtl() != null)
+            _conf.getRemoteCtl().sendRequestAll("ICON", ident+" "+icon, null);
+        _conf.log().info("SystemApi", 
             "ICON: '"+icon+"' for '"+ident+"' by user '"+uid+"'");    
-        _api.getWebserver().notifyUser(uid, new ServerConfig.Notification
+        _conf.getWebserver().notifyUser(uid, new ServerConfig.Notification
             ("system", "system", "Icon: '"+icon+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
     } 
     
@@ -255,12 +255,12 @@ public class ItemApi extends ServerBase {
         var uid = getAuthInfo(ctx).userid; 
         if (tag==null)
             return;
-        if (_api.getRemoteCtl() != null)
-            _api.getRemoteCtl().sendRequestAll("TAG", ident+" "+tag, null);
-        _api.log().info("SystemApi", 
+        if (_conf.getRemoteCtl() != null)
+            _conf.getRemoteCtl().sendRequestAll("TAG", ident+" "+tag, null);
+        _conf.log().info("SystemApi", 
             "TAG: '"+tag+"' for '"+ident+"' by user '"+uid+"'");    
         if (!"RMANAGED".equals(tag))
-            _api.getWebserver().notifyUser(uid, new ServerConfig.Notification
+            _conf.getWebserver().notifyUser(uid, new ServerConfig.Notification
                 ("system", "system", "Tag: '"+tag+ "' for '"+ident+"' set by user '"+uid+"'", new Date(), 10) );     
     }
     
@@ -270,12 +270,12 @@ public class ItemApi extends ServerBase {
         var uid = getAuthInfo(ctx).userid; 
         if (tag==null)
             return;
-        if (_api.getRemoteCtl() != null)
-            _api.getRemoteCtl().sendRequestAll("RMTAG", ident+" "+tag, null);
-        _api.log().info("SystemApi", 
+        if (_conf.getRemoteCtl() != null)
+            _conf.getRemoteCtl().sendRequestAll("RMTAG", ident+" "+tag, null);
+        _conf.log().info("SystemApi", 
             "RMTAG: '"+tag+"' for '"+ident+"' by user '"+uid+"'");    
         if (!"RMANAGED".equals(tag))
-            _api.getWebserver().notifyUser(uid, new ServerConfig.Notification
+            _conf.getWebserver().notifyUser(uid, new ServerConfig.Notification
                 ("system", "system", "Tag: '"+tag+ "' for '"+ident+"' removed by user '"+uid+"'", new Date(), 10) );     
     }
     
@@ -372,7 +372,7 @@ public class ItemApi extends ServerBase {
          *******************************************/
         a.get("/item/{ident}/alias", (ctx) -> {
             var ident = ctx.pathParam("ident");
-            var st = _api.getDB().getItem(ident, null);
+            var st = _conf.getDB().getItem(ident, null);
             if (st==null) {
                 ERROR(ctx, 404, "Unknown tracker item: "+ident);
                 return;
@@ -391,7 +391,7 @@ public class ItemApi extends ServerBase {
          *******************************************/
         a.put("/item/{ident}/alias", (ctx) -> { 
             var ident = ctx.pathParam("ident");
-            var st = _api.getDB().getItem(ident, null);
+            var st = _conf.getDB().getItem(ident, null);
             if (st==null) {
                 ERROR(ctx, 404, "Unknown tracker item: "+ident);
                 return;
@@ -425,7 +425,7 @@ public class ItemApi extends ServerBase {
          *******************************************/
         a.put("/item/{ident}/chcolor", (ctx) -> {
             var ident = ctx.pathParam("ident");
-            TrackerPoint st = _api.getDB().getItem(ident, null);
+            TrackerPoint st = _conf.getDB().getItem(ident, null);
             if (st==null) {
                 ERROR(ctx, 404, "Unknown tracker item: "+ident); 
                 return;
@@ -444,7 +444,7 @@ public class ItemApi extends ServerBase {
          *******************************************/
         a.put("/item/{ident}/reset", (ctx) -> {  
             var ident = ctx.pathParam("ident");
-            var st = _api.getDB().getItem(ident, null);
+            var st = _conf.getDB().getItem(ident, null);
             if (st==null) {
                 ERROR(ctx, 404, "Unknown tracker item: "+ident); 
                 return;
@@ -464,7 +464,7 @@ public class ItemApi extends ServerBase {
          ******************************************/
         a.get("/item/{ident}/tags", (ctx) -> {
             var ident = ctx.pathParam("ident");
-            var st = _api.getDB().getItem(ident, null);
+            var st = _conf.getDB().getItem(ident, null);
             if (st==null) {
                 ERROR(ctx, 404, "Unknown tracker item: "+ident); 
                 return;
@@ -484,7 +484,7 @@ public class ItemApi extends ServerBase {
          ******************************************/
         a.post("/item/{ident}/tags", (ctx) -> {
             var ident = ctx.pathParam("ident");
-            var st = _api.getDB().getItem(ident, null);
+            var st = _conf.getDB().getItem(ident, null);
             if (st==null) {
                 ERROR(ctx, 404, "Unknown tracker item: "+ident); 
                 return;
@@ -511,7 +511,7 @@ public class ItemApi extends ServerBase {
         a.delete("/item/{ident}/tags/{tag}", (ctx) -> {
             var ident = ctx.pathParam("ident");
             var tag = ctx.pathParam("tag"); 
-            var st = _api.getDB().getItem(ident, null);
+            var st = _conf.getDB().getItem(ident, null);
             if (st==null) {
                 ERROR(ctx, 404, "Unknown tracker item: "+ident); 
                 return;
@@ -539,7 +539,7 @@ public class ItemApi extends ServerBase {
          * Remove all items
          ******************************************/
         a.delete("/item", (ctx) -> {
-            _api.getDB().clearItems();
+            _conf.getDB().clearItems();
             ctx.result("Ok"); 
         });
         
@@ -550,7 +550,7 @@ public class ItemApi extends ServerBase {
          *********************************************/
         a.get("/telemetry/{ident}/descr", (ctx) -> {
             var ident = ctx.pathParam("ident");
-            var st = _api.getDB().getItem(ident, null);
+            var st = _conf.getDB().getItem(ident, null);
             if (st==null) {
                 ERROR(ctx, 404, "Unknown tracker item: "+ident); 
                 return;
@@ -572,7 +572,7 @@ public class ItemApi extends ServerBase {
          ******************************************/
         a.get("/telemetry/{ident}/meta", (ctx) -> {
             var ident = ctx.pathParam("ident");
-            var st = _api.getDB().getItem(ident, null);
+            var st = _conf.getDB().getItem(ident, null);
             if (st==null) {
                 ERROR(ctx, 404, "Unknown tracker item: "+ident); 
                 return;
@@ -594,7 +594,7 @@ public class ItemApi extends ServerBase {
          *************************************************/
         a.get("/telemetry/{ident}/current", (ctx) -> {
             var ident = ctx.pathParam("ident");
-            var st = _api.getDB().getItem(ident, null);
+            var st = _conf.getDB().getItem(ident, null);
             if (st==null) {
                 ERROR(ctx, 404, "Unknown tracker item: "+ident); 
                 return;
@@ -618,7 +618,7 @@ public class ItemApi extends ServerBase {
             var ident = ctx.pathParam("ident");
             var hours = ctx.queryParam("hours");
             
-            var st = _api.getDB().getItem(ident, null);
+            var st = _conf.getDB().getItem(ident, null);
             if (st==null) {
                 ERROR(ctx, 404, "Unknown tracker item: "+ident); 
                 return;
