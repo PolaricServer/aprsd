@@ -11,10 +11,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- 
  */
  
-package no.polaric.aprsd;
+package no.polaric.aprsd.api;
+import no.polaric.aprsd.*;
 import no.polaric.aprsd.point.*;
 import no.polaric.aprsd.filter.*;
 import no.polaric.core.*;
