@@ -1,3 +1,15 @@
+polaric-aprsd (4.1) stable; urgency=medium
+
+  * Move to Java 21
+  * Allow named (APRS-IS) filters to be predefined in a file 
+  * Release age check at startup
+  * Encryption support - allow APRS messages or position packets to be encrypted using AES-256
+  * Support for !DAO! extra precision for positions
+  * Logging/logfiles for individual channels
+  * Various fixes.
+
+ -- Oyvind Hanssen <ohanssen@acm.org>  Sun, 01 Mar 2026 20:17:21 +0100
+
 polaric-aprsd (4.0.3) stable; urgency=medium
 
   * Fix problem with saving config (if remotectl off)

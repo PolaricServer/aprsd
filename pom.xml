@@ -6,7 +6,7 @@
 
   <groupId>no.polaric</groupId>
   <artifactId>polaric-aprsd</artifactId>
-  <version>4.0.3</version>
+  <version>4.1</version>
 
   <name>Polaric Aprsd</name>
   
@@ -29,7 +29,7 @@
         <dependency>
             <groupId>no.polaric</groupId>
             <artifactId>polaric-core</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3</version>
         </dependency>
 
         <dependency>
@@ -47,13 +47,13 @@
         <dependency>
           <groupId>com.fazecast</groupId>
           <artifactId>jSerialComm</artifactId>
-          <version>2.11.0</version>
+          <version>2.11.4</version>
         </dependency>
 
         <dependency>
           <groupId>org.bouncycastle</groupId>
           <artifactId>bcprov-jdk18on</artifactId>
-          <version>1.78</version>
+          <version>1.83</version>
         </dependency>
   </dependencies>
     

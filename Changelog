@@ -529,3 +529,46 @@ V.4.0
   * Various fixes and adjustments
   
   
+V.4.0.1
+-------
+
+  (aprsd)
+  Fix permissions for password file
+  
+V.4.0.2
+-------
+
+  (aprsd)
+  Logrotate restart fix
+  
+V.4.0.3
+-------
+
+  (aprsd)
+  * Add offline detector
+  * Replace hostname-based ICMP checks with HTTP(s) requests to /system/ping
+
+  
+V.4.1
+-----
+
+  (aprsd)
+  * Move to Java 21
+  * Allow named (APRS-IS) filters to be predefined in a file 
+  * Release age check at startup
+  * Encryption support - allow APRS messages or position packets to be encrypted using AES-256
+  * Support for !DAO! extra precision for positions
+  * Logging/logfiles for individual channels
+  * Various fixes..
+
+  (webapp2)
+  * Encryption config
+  * Direct navigation between config widgets
+  * Various fixes..
+
+  (database-plugin)
+  * Move to Java 21
+  * Optimize getPointsVia query
+  
+  
+
