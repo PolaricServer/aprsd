@@ -41,8 +41,8 @@ public class Main extends ConfigBase implements AprsServerConfig {
     public  static String toaddrA  = "APPSA1";
 
     /* Year and month for release */
-    public  static int rel_year  = 2025;
-    public  static int rel_month = 9;
+    public  static int rel_year  = 2026;
+    public  static int rel_month = 3;
 
     /* Salt strings used for generating crypto keys:
      * One for APRS position packets and one for APRS messages.
