@@ -45,7 +45,7 @@ public class InetChannel extends TcpChannel
        _user = _conf.getProperty("channel."+id+".user", "").toUpperCase();
        if (_user.length() == 0)
        _user = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
-       _pass  = _conf.getProperty("channel."+id+".pass", "-1");
+       _pass  = _conf.getProperty("channel."+id+".pass", "");
        _filter = _conf.getProperty("channel."+id+".filter", "");
        String xfilt = _conf.getProperty("channel."+id+".xfilter", "*");
        _xfilter = AprsFilter.createFilter( xfilt, null);
@@ -64,7 +64,8 @@ public class InetChannel extends TcpChannel
     @JsonTypeName("APRSIS")
     public static class JsConfig extends Channel.JsConfig {
         public long heardpackets, heard, duplicates, sentpackets, blocked;
-        public int port, pass; 
+        public int port; 
+        public String pass; 
         public String host, filter, xfilter;
     }
        
@@ -79,7 +80,7 @@ public class InetChannel extends TcpChannel
         cnf.type  = "APRSIS";
         cnf.host  = _conf.getProperty("channel."+getIdent()+".host", "localhost");
         cnf.port  = _conf.getIntProperty("channel."+getIdent()+".port", 21);
-        cnf.pass  = _conf.getIntProperty("channel."+getIdent()+".pass", 0); 
+        cnf.pass  = _conf.getProperty("channel."+getIdent()+".pass", ""); 
         cnf.filter = _conf.getProperty("channel."+getIdent()+".filter", "");
         cnf.xfilter = _conf.getProperty("channel."+getIdent()+".xfilter", "*");
         return cnf;

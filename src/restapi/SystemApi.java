@@ -17,6 +17,7 @@ package no.polaric.aprsd.api;
 import no.polaric.aprsd.*;
 import no.polaric.aprsd.point.*;
 import no.polaric.core.*;
+import no.polaric.core.util.*;
 import no.polaric.core.httpd.*;
 import no.polaric.core.auth.*;
 import io.javalin.Javalin;
@@ -73,8 +74,8 @@ public class SystemApi extends ServerBase {
      * Set up the webservices. 
      */
     public void start() {     
-    
-        protect("/system/sarmode", "operator");
+        protect("/system/xcode",  "operator");
+        protect("/system/xcode/*", "operator");
         protect("/system/ownpos",  "admin");
     
     
@@ -92,6 +93,18 @@ public class SystemApi extends ServerBase {
             var tags = PointObject.getUsedTags();
             ctx.json(tags);
         });
+        
+        /*******************************************************
+         * Generate an extended validation code for a callsign.
+         * Requires log-in with operator privileges. 
+         *******************************************************/
+        a.get("/system/xcode/{call}", (ctx) -> {
+            String call = ctx.pathParam("call");
+            String key = _conf.getProperty("xverify.key", "NOKEY"); 
+            String pass = SecUtils.hmacB64(call, key, 16);
+            ctx.result(pass);
+        });
+        
         
         
         /******************************************

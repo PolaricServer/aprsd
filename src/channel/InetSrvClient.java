@@ -14,6 +14,7 @@
  
 package no.polaric.aprsd.channel;
 import no.polaric.core.*;
+import no.polaric.core.util.*;
 import no.polaric.aprsd.*;
 import no.polaric.aprsd.aprs.*;
 import java.io.*;
@@ -29,7 +30,7 @@ import java.util.concurrent.*;
  
 public class InetSrvClient extends InetSrvChannel.Client implements Runnable 
 {
-    private   AprsServerConfig _api;
+    private   AprsServerConfig _conf;
     private   InetSrvChannel _chan;
     private   Socket _conn;
     private   String _ipaddr;
@@ -43,6 +44,7 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
     private   boolean _verified = false;
     private   String  _filt;
     private   AprsFilter _filter;
+    private   String  _authkey;
     private   boolean _login;
     private   long _txpackets, _rxpackets;
     protected Logfile log = new Logfile.Dummy();
@@ -53,13 +55,14 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
     {}
     
     
-    public InetSrvClient(AprsServerConfig api, Socket conn, InetSrvChannel chan, Logfile logf) 
+    public InetSrvClient(AprsServerConfig c, Socket conn, InetSrvChannel chan, Logfile logf) 
     {
-        _api = api;
+        _conf = c;
         _conn = conn;
         _chan = chan;
         _ipaddr = _conn.getInetAddress().getHostAddress();
-        _rxpackets = _txpackets = 0;
+        _rxpackets = _txpackets = 0;       
+        _authkey = _conf.getProperty("xverify.key", "NOKEY");
         
         if (logf != null)
             log = logf;
@@ -86,6 +89,10 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
      * given as a decimal number. 
      */
     protected void verify(String call, String pass) {
+        if (_chan.isXverify()) {
+            verifyX(call, pass);
+            return;
+        }
 	    String[] x = call.split("-");
 	    String c = x[0];
 	    int hash = 0x73e2; 
@@ -99,6 +106,19 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
             hash ^= c.charAt(i+1); 
         } 
         _verified =  (Integer.parseInt(pass) == (hash & 0x7fff)); 
+    }
+    
+    
+    
+    /**
+     * Extended passcode verification. 
+     * Use HMAC-SHA256 with callsign and a shared secret. 
+     * Use the 16 first bytes of generated hash and. 
+     */
+    protected void verifyX(String call, String pass) {
+        String gpass = SecUtils.hmacB64(call, _authkey, 16);
+        log.info(null, "Extended verification: "+call+": "+pass+" == "+ gpass);
+        _verified = gpass.equals(pass);
     }
     
     
@@ -162,12 +182,12 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
                 _writer.println("#");
                 _writer.flush();
             }
-            if (_software.matches("Polaric\\-APRSD ([01].+)")) {
-                log.info(null, "Login rejected - too old software: "+_userid);
+            if (_software.matches("Polaric\\-APRSD ([01].+)|(2\\.(0|1))")) {
+                log.info(null, "Login rejected - software is too old: "+_userid);
                 return;
             }
                 
-            String mycall = _api.getProperty("default.mycall", "NOCALL").toUpperCase();
+            String mycall = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
             _writer.println("# logresp "+_userid+ (_verified ? " verified" : " unverified" ) + ", server " + mycall);
             _writer.flush();
             log.info(null, "User "+_userid+" verification "+(_verified ? "Ok": "Failed"));
@@ -215,7 +235,7 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
      */
     protected boolean qProcess(AprsPacket p) {
         String[] qq = p.getQcode();
-        String mycall = _api.getProperty("default.mycall", "NOCALL");
+        String mycall = _conf.getProperty("default.mycall", "NOCALL");
         
         if (qq != null && qq[0].matches("qAZ"))
             return false;

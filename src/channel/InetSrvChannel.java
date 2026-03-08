@@ -42,6 +42,8 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
     private AprsFilter _filter;
     private String _defaultfilt;
     private Thread _serverthread;
+    private boolean _xverify; 
+    
 
     public static class Client {
     }
@@ -64,6 +66,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         String filt =  _conf.getProperty("channel."+id+".infilter", "*");
         _filter = AprsFilter.createFilter( filt, null);
         _defaultfilt = _conf.getProperty("channel."+id+".defaultfilt", "");
+        _xverify = _conf.getBoolProperty("channel."+id+".xverify", false);;
         log = new Logfile(_conf, "channel."+id, "channel."+id+".log");  
         log.info(null, "Channel activated");
         _conf.log().info("InetSrvChannel", "Channel activated: "+id); 
@@ -101,6 +104,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         public int port; 
         public String filter;
         public String defaultfilt;
+        public boolean xverify;
     }
        
        
@@ -115,6 +119,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         cnf.port  = _conf.getIntProperty("channel."+getIdent()+".port", 14580);
         cnf.filter = _conf.getProperty("channel."+getIdent()+".infilter", "*");
         cnf.defaultfilt = _conf.getProperty("channel."+getIdent()+".defaultfilt", "");
+        cnf.xverify = _conf.getBoolProperty("channel."+getIdent()+".xverify", false);
         return cnf;
     }
     
@@ -127,6 +132,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         props.setProperty("channel."+getIdent()+".port", ""+cnf.port);
         props.setProperty("channel."+getIdent()+".infilter", ""+cnf.filter);
         props.setProperty("channel."+getIdent()+".defaultfilt", ""+cnf.defaultfilt);
+        props.setProperty("channel."+getIdent()+".xverify", ""+cnf.xverify);
     }
     
     
@@ -155,6 +161,9 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         return _logins.contains(login);
     }
     
+    public boolean isXverify() {
+        return _xverify;
+    }
     
     
     // Do we need some modifications here? 

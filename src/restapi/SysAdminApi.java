@@ -193,7 +193,8 @@ public class SysAdminApi extends ServerBase {
         int remote_radius,
         String rc_server,
         String encryptto,
-        String authkey
+        String authkey,
+        String xverify_key
     ) 
     {
         public ServerConfigData(AprsServerConfig conf) {
@@ -213,7 +214,8 @@ public class SysAdminApi extends ServerBase {
                 conf.getIntProperty("remotectl.radius", 10),
                 conf.getProperty("remotectl.connect", ""),
                 conf.getProperty("remotectl.encrypt", ""),
-                conf.getProperty("message.auth.key", "")
+                conf.getProperty("message.auth.key", ""),
+                conf.getProperty("xverify.key", "")
             );
         }
         
@@ -235,6 +237,7 @@ public class SysAdminApi extends ServerBase {
             prop.setProperty("remotectl.connect", rc_server);
             prop.setProperty("remotectl.encrypt", encryptto);
             prop.setProperty("message.auth.key", authkey);
+            prop.setProperty("xverify.key", xverify_key);
         }
         
     }
