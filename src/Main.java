@@ -35,7 +35,7 @@ import java.time.Month;
 public class Main extends ConfigBase implements AprsServerConfig {
 
     /* Update these each time a release is to be published */
-    public  static String version  = "4.1";
+    public  static String version  = "4.1+";
     public  static String toaddr   = "APPS41";
     public  static String toaddrE  = "APPSE1";
     public  static String toaddrA  = "APPSA1";
