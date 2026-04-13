@@ -54,14 +54,14 @@ public abstract class TcpChannel extends AprsChannel
 
  
     /** Start the service */
-    public void activate(AprsServerConfig a) {
+    public void activate(AprsServerConfig conf) {
         resetCounters();
         String id = getIdent();
         String host = _conf.getProperty("channel."+id+".host", "localhost");
         int port = _conf.getIntProperty("channel."+id+".port", 21);
         int retr  = _conf.getIntProperty("channel."+id+".retry", 4);
         long rtime = Long.parseLong(_api.getProperty("channel."+id+".retry.time", "10")) * 60 * 1000;
-        _logPackets = _api.getBoolProperty("channel."+id+".logpackets", false);
+        _logPackets = _conf.getBoolProperty("channel."+id+".logpackets", false);
                 
         /* Set up backup channel */
         _backup = _conf.getProperty("channel."+id+".backup", "");
@@ -80,7 +80,7 @@ public abstract class TcpChannel extends AprsChannel
             ()-> {
                     var bu = _conf.getChanManager().get(_backup);
                     if (bu != null) 
-                        bu.activate(a);
+                        bu.activate(_conf);
                }
          );
     }

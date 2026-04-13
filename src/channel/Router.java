@@ -115,6 +115,7 @@ public class Router extends AprsChannel
         resetCounters();
         
         log = new Logfile(_conf, "channel."+id, "channel."+id+".log");  
+        _logPackets = _conf.getBoolProperty("channel."+id+".logpackets", false);
         log.info(null, "Channel activated");
         _conf.log().info(null, "Channel activated: "+id);       
                

@@ -83,6 +83,7 @@ public abstract class TncChannel extends AprsChannel
         int baud = _conf.getIntProperty("channel."+id+".baud", 9600);
         int retr = _conf.getIntProperty("channel."+id+".retry", 0);
         long rtime = Long.parseLong(_conf.getProperty("channel."+id+".retry.time", "30")) * 60 * 1000; 
+        _logPackets = _conf.getBoolProperty("channel."+id+".logpackets", false);
         _serial = new SerialComm(_conf, id, port, baud, retr, rtime);
         _serial.activate( ()-> receiveLoop(), ()->{} );
     }
