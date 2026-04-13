@@ -29,9 +29,6 @@ import java.util.*;
  
 public class MailBoxApi extends ServerBase {
 
-    private AprsServerConfig _api; 
-    
-    
     
     public MailBoxApi(AprsServerConfig conf) {
         super(conf);
@@ -111,7 +108,7 @@ public class MailBoxApi extends ServerBase {
                     }
                     msg.from = callsign;
                 }
-                if (! MailBox.postMessage(_api, (MailBox.Message) msg) )
+                if (! MailBox.postMessage((AprsServerConfig) _conf, (MailBox.Message) msg) )
                     ERROR(ctx, 404, "Couldn't deliver message to: "+msg.to);
                 else
                     ctx.result("Ok");

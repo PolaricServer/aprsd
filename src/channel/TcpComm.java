@@ -107,6 +107,7 @@ public class TcpComm extends CommDevice implements Runnable
             }
             catch (java.net.ConnectException e) {
                 log.warn("TcpComm", "Server '"+_host+"' : "+e.getMessage());
+                e.printStackTrace(System.out);
             }
             catch (java.net.SocketTimeoutException e) {
                 log.warn("TcpComm", "Server '"+_host+"' : socket timeout");
