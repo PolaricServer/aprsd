@@ -299,18 +299,27 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
           PointObject.restoreTags(ifs);
           _api.log().debug("StationDBImp", "Restoring points...");
           int size = ifs.readInt();
-          for (int i=0; i<size; i++)
+          for (int i=1; i<size; i++)
           { 
-              TrackerPoint st = (TrackerPoint) ifs.readObject(); 
-             _addRtItem(st);
+            try {
+                TrackerPoint st = (TrackerPoint) ifs.readObject(); 
+                _addRtItem(st);
+            }
+            catch (EOFException e) { }
           }
-          ifs.close();
         }
         catch (Exception e) {
             _api.log().warn("StationDBImp", "Cannot restore data: "+e);
             _map.clear();
             _routes = new RouteInfo();
         } 
+        
+        finally {
+            try {
+                if (ifs != null)
+                    ifs.close();
+            } catch (Exception e) {}
+        }
     }
     
     
