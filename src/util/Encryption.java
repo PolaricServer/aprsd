@@ -65,12 +65,7 @@ public abstract class Encryption {
      */
     public static SecretKey getKeyFromPassword(String password, String salt)
         throws NoSuchAlgorithmException, InvalidKeySpecException {
-    
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        KeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes(), PBKDF2_ITERATIONS, 256);
-        SecretKey secret = new SecretKeySpec(factory.generateSecret(spec)
-            .getEncoded(), "AES");
-        return secret;
+        return SecUtils.pbkdf2_aes(password, salt, PBKDF2_ITERATIONS);
     }
     
 
