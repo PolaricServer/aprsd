@@ -277,7 +277,8 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
                 _conf.log().info("AprsParser", "Error in decrypted packet: "+station.getIdent());
                 return;
             }
-            pp.type = text.charAt(0);
+            pp.type = text.charAt(1);
+            _conf.log().info("AprsParser", "Decrypt packet success: "+pp);
             receivePacket(pp, false);
         }
     }
