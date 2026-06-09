@@ -14,91 +14,112 @@
  
 package no.polaric.aprsd.aprs;
 import java.util.*;
-import java.text.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.*;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 
 
 /**
  * Duplicate checking.
+ *
+ * Uses ConcurrentHashMap so that multiple channel threads can check and
+ * register packets concurrently without serialising on a single lock.
+ * putIfAbsent() provides atomic check-and-insert semantics.  Cleanup of
+ * the short-term realtime map is amortised: a full scan is triggered only
+ * every CLEANUP_INTERVAL new insertions rather than on every call.
  */
 public class DupCheck 
 {
-     private static final Boolean TRUE = true;
-     private static final long RT_TIMEOUT = 1000 * 30; /* 30 seconds */
-     
-     private LinkedHashMap<String, Date> _realtime  = 
-        new LinkedHashMap<String, Date>(); 
-        
-     private LinkedHashMap<String, Boolean> _timestamped = 
-        new LinkedHashMap<String, Boolean>() 
-        {
-            protected boolean removeEldestEntry(Map.Entry e)
-                { return size() > 75000; }
-        };
-    
-     
-     private void removeOldRtEntries()
+     private static final long RT_TIMEOUT      = 1000 * 30; /* 30 seconds */
+     private static final int  CLEANUP_INTERVAL = 200;      /* clean _realtime every N new entries */
+     private static final int  MAX_TIMESTAMPED  = 75000;    /* max entries in _timestamped */
+
+     /* composed-key → first-seen time (ms); short-term window */
+     private final ConcurrentHashMap<String, Long> _realtime = new ConcurrentHashMap<>();
+
+     /* composed-key → true; permanent store, size-bounded */
+     private final ConcurrentHashMap<String, Boolean> _timestamped = new ConcurrentHashMap<>();
+
+     /* counts new insertions into _realtime to amortise cleanup */
+     private final AtomicLong _insertions = new AtomicLong(0);
+
+     /* Thread-safe date formatter – replaces SimpleDateFormat */
+     private static final DateTimeFormatter _dhmsFormatter =
+         DateTimeFormatter.ofPattern("ddHHmmss").withZone(ZoneOffset.UTC);
+
+
+     /** Remove entries older than RT_TIMEOUT from _realtime. */
+     private void cleanupRealtime()
      {
-          Iterator<Date> it = _realtime.values().iterator();
-          Date now = new Date();
-          while (it.hasNext()) {
-              Date x = it.next();
-              if (now.getTime() > x.getTime() + RT_TIMEOUT) 
-                 it.remove();
-              else
-                 return;
-          }
-     } 
-     
-     
-     private static DateFormat _dhmsFormat = new SimpleDateFormat("ddHHmmss");
-     static {
-        _dhmsFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+         long cutoff = System.currentTimeMillis() - RT_TIMEOUT;
+         _realtime.entrySet().removeIf(e -> e.getValue() < cutoff);
      }
-     
-     public synchronized boolean checkTS(String from, Date ts)
+
+
+     /** Trim _timestamped to below MAX_TIMESTAMPED when needed. */
+     private void trimTimestamped()
      {
-         String composed = from + ":"+_dhmsFormat.format(ts);
-         if (_timestamped.containsKey(composed))
-             return true;
-         _timestamped.put(composed, TRUE);
-         return  false;
+         if (_timestamped.size() > MAX_TIMESTAMPED)
+             _timestamped.keySet().removeIf(k -> _timestamped.size() > MAX_TIMESTAMPED * 9 / 10);
      }
-     
-     
+
+
      /**
-      *  Returns true if packet is a duplicate.
+      * Timestamp-based duplicate check (used for extra position reports).
+      * Returns true if the (callsign, timestamp) pair has been seen before.
       */
-     public synchronized boolean checkPacket(String from, String to, String report)
+     public boolean checkTS(String from, Date ts)
      {
-         String composed = from+to+report;
-         if (report == null || report.length() < 1)
-            return false;
-         switch(report.charAt(0))
+         String composed = from + ":" + _dhmsFormatter.format(ts.toInstant());
+         if (_timestamped.putIfAbsent(composed, Boolean.TRUE) != null)
+             return true;
+         trimTimestamped();
+         return false;
+     }
+
+
+     /**
+      * Returns true if the packet is a duplicate.
+      */
+     public boolean checkPacket(String from, String to, String report)
+     {
+         if (report == null || report.isEmpty())
+             return false;
+
+         String composed = from + to + report;
+         long   now      = System.currentTimeMillis();
+
+         switch (report.charAt(0))
          {
-              /* Timestamped position reports are unique and 
-               * any reports which are seen before, can be
-               * therefore be regarded as duplicates 
-               */
-              case '@': case '/':
-              {
-                  if (_timestamped.containsKey(composed))
-                    return true;
-                  _timestamped.put(composed, TRUE);
-              }
-    
-              /* For any other report types, we should only look for
-               * duplicates within a timeframe of a few minutes. 
-               */
-              default: 
-              {
-                  removeOldRtEntries();
-                  if (_realtime.containsKey(composed))
-                     return true; 
-                  _realtime.put(composed, new Date());
-              }
+             /* Timestamped position reports are unique; any repeat seen before
+              * can therefore be regarded as a duplicate.
+              */
+             case '@': case '/':
+             {
+                 if (_timestamped.putIfAbsent(composed, Boolean.TRUE) != null)
+                     return true;
+                 trimTimestamped();
+                 /* Fall through: also register in the short-term store. */
+             }
+
+             /* For any other report types, look for duplicates only within
+              * the short-term window.
+              */
+             default:
+             {
+                 Long existing = _realtime.putIfAbsent(composed, now);
+                 if (existing != null) {
+                     if (now - existing < RT_TIMEOUT)
+                         return true;              /* within window → duplicate */
+                     _realtime.put(composed, now); /* entry expired → overwrite, treat as new */
+                 } else if (_insertions.incrementAndGet() % CLEANUP_INTERVAL == 0) {
+                     cleanupRealtime();            /* amortised background cleanup */
+                 }
+             }
          }
          return false;
-     } 
+     }
 }
 
