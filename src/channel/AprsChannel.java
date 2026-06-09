@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2016-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2016-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -66,6 +66,7 @@ public abstract class AprsChannel extends Channel
         _encr = new AesGcmSivEncryption(_key, Main.SALT_APRSPOS);
      }
 
+     
      
      public void resetCounters() {
        _heardPackets = _duplicates = _sent = 0;

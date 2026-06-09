@@ -38,7 +38,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     private String     _file;
     private String     _stnsave;
     private boolean    _kill = false; 
-    private RTree<TrackerPoint, Point> _geoindex = RTree.star().maxChildren(6).create();
+    private volatile RTree<TrackerPoint, Point> _geoindex = RTree.star().maxChildren(6).create();
     
     
     public StationDBImp(AprsServerConfig api)
@@ -101,7 +101,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     public synchronized void updateItem(TrackerPoint s, LatLng prevpos) {
         /* Remove existing point in r-tree index */
         _removeGItem(s, prevpos);
-        _map.remove(s.getIdent());
+//        _map.remove(s.getIdent());
         
         /* Add it with new position */
         _addRtItem(s);

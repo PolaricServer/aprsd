@@ -105,7 +105,13 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
             hash ^= c.charAt(i) << 8; 
             hash ^= c.charAt(i+1); 
         } 
-        _verified =  (Integer.parseInt(pass) == (hash & 0x7fff)); 
+        try {
+            _verified =  (Integer.parseInt(pass) == (hash & 0x7fff));
+        }
+        catch (NumberFormatException e) {
+            log.warn(null, "Verification - input is not a number: "+pass+" ("+call+")");
+            _verified = false;
+        }
     }
     
     
