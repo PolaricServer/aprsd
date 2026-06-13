@@ -50,6 +50,8 @@ public class InetChannel extends TcpChannel
        String xfilt = _conf.getProperty("channel."+id+".xfilter", "*");
        _xfilter = AprsFilter.createFilter( xfilt, null);
        setReceiveFilter(_conf.getProperty("channel."+id+".rfilter", "")); 
+       _decryptOnSend = _conf.getBoolProperty("channel."+id+".decryptOnSend", false);
+       
         log = new Logfile(_conf, "channel."+id, "channel."+id+".log");  
         log.info(null, "Channel activated");
         _conf.log().info("InetChannel", "Channel activated: "+id); 
@@ -104,6 +106,7 @@ public class InetChannel extends TcpChannel
      */ 
     public boolean sendPacket(AprsPacket p)
     {  
+        preSendPacket(p); 
         if (!isReady() || !canSend)
             return false; 
         if (p.via == null || p.via.equals("")) {

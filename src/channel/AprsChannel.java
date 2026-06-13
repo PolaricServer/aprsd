@@ -29,10 +29,9 @@ import java.lang.reflect.Constructor;
 public abstract class AprsChannel extends Channel 
 {
      private static final long HRD_TIMEOUT = 1000 * 60 * 40; /* 40 minutes */
-     
      protected boolean _logPackets = false; 
-     protected AprsServerConfig _conf; 
      protected LinkedHashMap<String, Heard> _heard = new LinkedHashMap<String, Heard>();
+     protected boolean _decryptOnSend = false; 
     
      /* Statistics */
      protected long _heardPackets, _duplicates, _sent;        
@@ -41,8 +40,10 @@ public abstract class AprsChannel extends Channel
     
      private static String _key;
      private static AesGcmSivEncryption _encr;
+     private static AesGcmSivEncryption _cencr; // Channel encryption - use only for transit over internet! 
+     protected static AprsServerConfig  _conf; 
      
-
+     
      /**
       * Information about APRS packet heard on the channel. 
       */ 
@@ -57,6 +58,7 @@ public abstract class AprsChannel extends Channel
      
      public static void init(AprsServerConfig conf) {
         AprsFilter.init(conf); 
+        _conf = conf;
         canSend = true;
         String myCall = conf.getProperty("default.mycall", "NOCALL").toUpperCase();
         if ("NOCALL".equals(myCall))
@@ -66,6 +68,33 @@ public abstract class AprsChannel extends Channel
         _encr = new AesGcmSivEncryption(_key, Main.SALT_APRSPOS);
      }
 
+     
+     
+     public static AprsPacket decrypt(AprsPacket p, String ident) {
+        String ciphertext = p.report.substring(3);
+        String text = _encr.decryptB91(ciphertext, ident, null);
+        if (text == null)
+            _conf.log().info("AprsParser", "Cannot decrypt/authenticate packet: "+ident);
+        else {
+            AprsPacket pp = p.clone(); 
+            int idx = text.indexOf(':');
+            if (idx == 0)
+                pp.report = text.substring(1);
+            else if (idx < 10) {
+                pp.from = text.substring(0, idx+1);
+                pp.report = text.substring(idx+1);
+            }
+            else {
+                _conf.log().info("AprsParser", "Error in decrypted packet: "+ident);
+                return null;
+            }
+            pp.type = text.charAt(1);
+            _conf.log().info("AprsParser", "Decrypt packet success: "+pp);
+            return pp;
+        }
+        return null;
+     }
+     
      
      
      public void resetCounters() {
@@ -265,10 +294,16 @@ public abstract class AprsChannel extends Channel
     
     
     /*
-     * Send packcet. 
+     * Send packet. 
      */
     public abstract boolean sendPacket(AprsPacket p);
     
+    
+    /**
+     * Send packet.
+     * For application. Allow application to specify if packet should be encrypted.
+     * See also the decrypt() static method that can be used by application-level or channels.
+     */
     public boolean sendPacket(AprsPacket p, boolean encrypt) 
     {
       if (encrypt) {
@@ -278,6 +313,21 @@ public abstract class AprsChannel extends Channel
         p.encrypted = true;
       }
       return sendPacket(p);
+    }
+    
+    
+    
+    /** 
+     * Prepare packet for sending.
+     * If we for a channel want to decrypt all packet before sent, put this first in
+     * the sendPacket impl and arrange for the _decryptOnSend to be configured. 
+     * NOTE that decryption on send should be used with care. Encryption should be 
+     * end-to-end if possible.
+     */
+    protected void preSendPacket(AprsPacket p) 
+    {
+         if (_decryptOnSend && p.encrypted)
+            decrypt(p, p.from);
     }
     
     

@@ -252,37 +252,12 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
     private void parseUserdefined(AprsPacket p, Station station)
     {
         String msg = p.report;
-        if (msg.matches("\\{\\{\\:.+") )
-            parseEncrypted(p, station);
-    }
-    
-
-
-    private void parseEncrypted(AprsPacket p, Station station)
-    {
-        String ciphertext = p.report.substring(3);
-        String text = _encr.decryptB91(ciphertext, station.getIdent(), null);
-        if (text == null)
-            _conf.log().info("AprsParser", "Cannot decrypt/authenticate packet: "+station.getIdent());
-        else {
-            AprsPacket pp = p.clone(); 
-            int idx = text.indexOf(':');
-            if (idx == 0)
-                pp.report = text.substring(1);
-            else if (idx < 10) {
-                pp.from = text.substring(0, idx+1);
-                pp.report = text.substring(idx+1);
-            }
-            else {
-                _conf.log().info("AprsParser", "Error in decrypted packet: "+station.getIdent());
-                return;
-            }
-            pp.type = text.charAt(1);
-            _conf.log().info("AprsParser", "Decrypt packet success: "+pp);
+        if (msg.matches("\\{\\{\\:.+") ) {
+            AprsPacket pp = AprsChannel.decrypt(p, station.getIdent());
             receivePacket(pp, false);
         }
     }
-
+    
 
 
     /**

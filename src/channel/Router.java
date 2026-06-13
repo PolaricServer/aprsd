@@ -190,7 +190,7 @@ public class Router extends AprsChannel
     /** 
      * Send packet to contained channels, except the one it came from 
      */
-    public boolean sendPacket(AprsPacket p) {
+    @Override public boolean sendPacket(AprsPacket p) {
         boolean sent = false; 
         int i=0;
         

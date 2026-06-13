@@ -42,7 +42,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
     private AprsFilter _filter;
     private String _defaultfilt;
     private Thread _serverthread;
-    private boolean _xverify; 
+    private boolean _xverify, _cencrypt;
     
 
     public static class Client {
@@ -66,7 +66,9 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         String filt =  _conf.getProperty("channel."+id+".infilter", "*");
         _filter = AprsFilter.createFilter( filt, null);
         _defaultfilt = _conf.getProperty("channel."+id+".defaultfilt", "");
-        _xverify = _conf.getBoolProperty("channel."+id+".xverify", false);;
+        _xverify = _conf.getBoolProperty("channel."+id+".xverify", false);
+        _decryptOnSend = _conf.getBoolProperty("channel."+id+".decryptOnSend", false);
+    
         log = new Logfile(_conf, "channel."+id, "channel."+id+".log");  
         log.info(null, "Channel activated");
         _conf.log().info("InetSrvChannel", "Channel activated: "+id); 
@@ -179,6 +181,7 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
      */
     public synchronized boolean sendPacket(AprsPacket p, InetSrvClient except)
     {     
+        preSendPacket(p); 
         boolean sent = false; 
         for (Client x : _clients)
             if (x instanceof InetSrvClient c && c != except)
