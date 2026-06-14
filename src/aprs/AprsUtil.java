@@ -112,6 +112,27 @@ public class AprsUtil
     
     
     
+   /**
+    * Get the last digipeated callsign from the via path.
+    * Scans the path for a callsign marked with '*', which indicates the last
+    * station that digipeated (relayed) the packet. This is useful for LoRa APRS
+    * packets where the LoRa gateway appears as a digipeater in the path.
+    * @param via The via/path string from an APRS packet (comma-separated)
+    * @return The callsign of the last digipeated station without the '*', or null if none found
+    */
+   public static String lastDigied(String via) {
+      if (via == null || via.isEmpty())
+         return null;
+      String[] parts = via.split(",");
+      String last = null;
+      for (String part : parts) {
+         if (part.endsWith("*"))
+            last = part.substring(0, part.length() - 1);
+      }
+      return last;
+   }
+
+   
    /* Consider Moving this to AprsPacket */ 
    public static String[] getQcode(AprsPacket p) {
       String[] vias = p.via.split(",(\\s)*");
