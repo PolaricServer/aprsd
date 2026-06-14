@@ -126,6 +126,7 @@ public class AprsUtil
       String[] parts = via.split(",");
       String last = null;
       for (String part : parts) {
+         part = part.trim();
          if (part.endsWith("*"))
             last = part.substring(0, part.length() - 1);
       }
