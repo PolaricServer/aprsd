@@ -35,7 +35,6 @@ public class MyWebServer extends WebServer {
     private ZeroConf _zconf = new ZeroConf();
     private RemoteCtl _rctl; 
     
-    
     /*
      * Attributes to user-session can be put here .
      */
@@ -59,6 +58,37 @@ public class MyWebServer extends WebServer {
     public long nMapUpdates() {
         return (_jmapupd==null ? 0 : _jmapupd.nUpdates());
     }
+
+    
+    @Override
+    protected void setupRoutes() {
+        /* Start REST APIs */
+        UserApi ua = new UserApi((AprsServerConfig) _conf, userDb(), groupDb());
+        ua.start();
+        ItemApi ia = new ItemApi((AprsServerConfig) _conf);
+        ia.start();
+        AprsObjectApi aoa = new AprsObjectApi((AprsServerConfig) _conf);
+        aoa.start();
+        SystemApi sa = new SystemApi((AprsServerConfig) _conf);
+        sa.start();
+        SysAdminApi saa = new SysAdminApi((AprsServerConfig) _conf);
+        saa.start();
+        BullBoardApi bba = new BullBoardApi((AprsServerConfig) _conf);
+        bba.start();
+        MailBoxApi mba = new MailBoxApi((AprsServerConfig) _conf);
+        mba.start();
+        SarApi sar = new SarApi((AprsServerConfig) _conf);
+        sar.start();
+        ShellScriptApi ssa = new ShellScriptApi((AprsServerConfig) _conf);
+        ssa.start();
+                
+        _jmapupd = new JsonMapUpdater((AprsServerConfig) _conf);
+        _jmapupd.start("jmapdata");
+        
+        /* Start webservices (REST API) of plugins BEFORE Webserver is started */
+        PluginManager.startWebservices();
+    }
+
     
     
     public void start() {
@@ -103,36 +133,12 @@ public class MyWebServer extends WebServer {
             MailBox mb = ((MyWebServer.UserSessionInfo) ses).mailbox;
             mb.removeAddresses(); 
         });
-        
-        
+                
         MailBox.init((AprsServerConfig) _conf);
-        
-        _jmapupd = new JsonMapUpdater((AprsServerConfig) _conf);
-        _jmapupd.start("jmapdata");
-        
-        /* Start REST APIs */
-        UserApi ua = new UserApi((AprsServerConfig) _conf, userDb(), groupDb());
-        ua.start();
-        ItemApi ia = new ItemApi((AprsServerConfig) _conf);
-        ia.start();
-        AprsObjectApi aoa = new AprsObjectApi((AprsServerConfig) _conf);
-        aoa.start();
-        SystemApi sa = new SystemApi((AprsServerConfig) _conf);
-        sa.start();
-        SysAdminApi saa = new SysAdminApi((AprsServerConfig) _conf);
-        saa.start();
-        BullBoardApi bba = new BullBoardApi((AprsServerConfig) _conf);
-        bba.start();
-        MailBoxApi mba = new MailBoxApi((AprsServerConfig) _conf);
-        mba.start();
-        SarApi sar = new SarApi((AprsServerConfig) _conf);
-        sar.start();
-        ShellScriptApi ssa = new ShellScriptApi((AprsServerConfig) _conf);
-        ssa.start();
-        
-         var mycall = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
-         var secure = _conf.getBoolProperty("httpserver.secure", false);
-         var proxy  = _conf.getBoolProperty("httpserver.proxy", true);
+
+        var mycall = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
+        var secure = _conf.getBoolProperty("httpserver.secure", false);
+        var proxy  = _conf.getBoolProperty("httpserver.proxy", true);
          
         _zconf.registerMdns("_polaric_aprsd._tcp.local.", mycall, _port,
              "secure="+(secure?"yes":"no")+", "+"proxy="+(proxy?"yes":"no"));

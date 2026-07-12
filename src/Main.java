@@ -336,12 +336,12 @@ public class Main extends ConfigBase implements AprsServerConfig {
          / /    \\____/_/\\__,_/_/ /_/\\___/  
         /_/  S e r v e r  4    
         """);
-        
+
         properties().put("API", this);
         msgProc = new MessageProcessor(this);
         parser = new AprsParser(conf, msgProc);
         bullboard = new BullBoard(conf, msgProc);
-                        
+        
         Signs.init(conf);
         TrackerPoint.setConf(this);
         Station.init(conf); 
@@ -353,21 +353,17 @@ public class Main extends ConfigBase implements AprsServerConfig {
             
         /* Igate */
         igate = new Igate(conf);
-            
         db = new StationDBImp(this);
         ownobjects = db.getOwnObjects(); 
-        
         int http_port = getIntProperty("httpserver.port", 8081);
         String filepath = getProperty("httpserver.filepath", "/");
         String filedir = getProperty("httpserver.filedir", "/usr/share/polaric");
         webserver = new MyWebServer(this, http_port, filepath, filedir);
         
         PluginManager.addList(getProperty("plugins", ""));
-        webserver.start();    
+        webserver.start();  
         TrackerPoint.setNotifier(webserver.getJsonMapUpdater());
           
-        /* Start webservices (REST API) of plugins after Webserver is started */
-        PluginManager.startWebservices();
             
             
         /* 
