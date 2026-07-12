@@ -183,12 +183,13 @@ public class InetSrvClient extends InetSrvChannel.Client implements Runnable
                 _filter = AprsFilter.createFilter(_filt, _userid);
             
             if (_software.matches("Polaric\\-APRSD ([12].+)")) {
+                log.info(null, "Warning issued - software is old: "+_userid);
                 _writer.println("#");
                 _writer.println("# Note: Upgrade to a newer version of Polaric-Server is required");
                 _writer.println("#");
                 _writer.flush();
             }
-            if (_software.matches("Polaric\\-APRSD ([01].+)|(2\\.(0|1))")) {
+            if (_software.matches( "Polaric\\-APRSD (([01].+)|((2\\.[0-9])(\\+)?))" )) {
                 log.info(null, "Login rejected - software is too old: "+_userid);
                 return;
             }

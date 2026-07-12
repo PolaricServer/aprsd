@@ -50,6 +50,7 @@ public class Main extends ConfigBase implements AprsServerConfig {
      */
     public  static String SALT_APRSPOS     = "(9L73)_GHS^:(he#Ob6~C$eQ,yDdxZXx";
     public  static String SALT_APRSMESSAGE = "#=^ouise@!_rQp,UL^{pUL.~!v[nnHSf";
+    public  static String SALT_APRSIS      = "mlO.4bVVd+-ib6a3kP%<GAK/fyTZjidm";
 
     
     private static StationDB db = null;
