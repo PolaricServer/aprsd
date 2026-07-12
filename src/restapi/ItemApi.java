@@ -392,6 +392,7 @@ public class ItemApi extends ServerBase {
          *******************************************/
         a.put("/item/{ident}/alias", (ctx) -> { 
             var ident = ctx.pathParam("ident");
+            var uid = getAuthInfo(ctx).userid; 
             var st = _conf.getDB().getItem(ident, null);
             if (st==null) {
                 ERROR(ctx, 404, "Unknown tracker item: "+ident);
@@ -401,10 +402,22 @@ public class ItemApi extends ServerBase {
                 ERROR(ctx, 403, "Not authorized for access to item");
                 return;
             }    
-            if (st.hasTag("MANAGED") || st.hasTag("RMAN")) {
-                ERROR(ctx, 401, "Alias can only be set by owner");
+            /* FIXME: This may confusing for the user */
+            if (st.hasTag("MANAGED")) {
+                String user = st.getTagData("MANAGED");
+                if (user!=null && user.equals(uid))
+                    ERROR(ctx, 401, "MANAGED");
+                else   
+                    ERROR(ctx, 401, "Item is owned/managed by user: "+user);
                 return;
             }    
+            /* FIXME: This should probably go away */
+            if (st.hasTag("RMAN")) {
+                ERROR(ctx, 401, "Item is owned/managed on remote server");
+                return;
+            }
+            
+            
             ItemInfo.Alias aa = (ItemInfo.Alias) 
                 ServerBase.fromJson(ctx.body(), ItemInfo.Alias.class);    
             if (a==null) {

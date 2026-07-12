@@ -37,6 +37,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
      * used an how many point-objects using each. 
      */
     protected Set<String> _tags = new HashSet<String>();
+    protected Map<String, String> _tagData = new HashMap<String,String>();
     protected static SortedMap<String, Integer> _tagUse = new TreeMap<String, Integer>();
     protected static AprsServerConfig   _conf = null;
         
@@ -139,15 +140,30 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
         return _tags;
     }
     
-     
+    
     /**
      * Set tag on this object. 
      */
     public void setTag(String tag) {
+        setTag(tag, null);
+    }
+    
+    
+    /**
+     * Set tag on this object. 
+     * Tagdata is optional. Null means no tagdata.
+     */
+    public void setTag(String tag, String tagdata) {
        if (tag == null || tag.equals("") || _tags.contains(tag)) 
           return; 
        _incrementTag(tag);      
         _tags.add(tag); 
+        
+        /* Optionally associate tag with some data */
+        if (tagdata != null) {
+            _tagData.remove(tag);
+            _tagData.put(tag, tagdata);
+        }
         
         StationDB.Hist hdb = _conf.getDB().getHistDB(); 
         if (hdb != null && !_nodb)
@@ -163,6 +179,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
             return;
         _decrementTag(tag);
         _tags.remove(tag); 
+        _tagData.remove(tag);
         
         StationDB.Hist hdb = _conf.getDB().getHistDB(); 
         if (hdb != null && !_nodb)
@@ -183,6 +200,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
                 hdb.setTag(this, x, true);
         }
         _tags.clear();
+        _tagData.clear();
     }
     
     
@@ -207,7 +225,6 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
     }
     
     
-    
     public boolean _tagIsOn(String tag) {
         return ( hasTag( "\\+?(" + tag + ")") && !hasTag("\\-"+tag) );
     }
@@ -221,6 +238,9 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
     }
     
     
+    public String getTagData(String tag) {
+        return _tagData.get(tag);
+    }
     
     
     protected String      _icon; 
