@@ -105,11 +105,19 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
     /** 
      * Return the set of used tags. 
      */
-    public static Set<String> getUsedTags() 
-       { return _tagUse.keySet(); }
+    public static Set<String> getUsedTags() { 
+        Set<String> result = new TreeSet<String>();
+        /* Copy tagUse set. Don't include '+tag' if 'tag' exists too */
+        for (String tag: _tagUse.keySet())
+            if (tag.charAt(0) != '+' || _tagUse.get(tag.substring(1)) == null)
+                result.add(tag);
+        return result; 
+    }
     
-    public static boolean tagIsUsed(String tag)
-       { return _tagUse.get(tag) != null; }
+    
+    public static boolean tagIsUsed(String tag) { 
+        return _tagUse.get(tag) != null; 
+    }
        
     
     
