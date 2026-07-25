@@ -36,6 +36,7 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
      * There is also a static map to keep track of what tag-names are 
      * used an how many point-objects using each. 
      */
+    protected short _utags = 0;
     protected Set<String> _tags = new HashSet<String>();
     protected Map<String, String> _tagData = new HashMap<String,String>();
     protected static SortedMap<String, Integer> _tagUse = new TreeMap<String, Integer>();
@@ -166,6 +167,8 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
           return; 
        _incrementTag(tag);      
         _tags.add(tag); 
+        if (tag.charAt(0) == '+' || tag.charAt(0) == '-')
+            _utags++;
         
         /* Optionally associate tag with some data */
         if (tagdata != null) {
@@ -188,6 +191,8 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
         _decrementTag(tag);
         _tags.remove(tag); 
         _tagData.remove(tag);
+        if (tag.charAt(0) == '+' || tag.charAt(0) == '-')
+            _utags--;
         
         StationDB.Hist hdb = _conf.getDB().getHistDB(); 
         if (hdb != null && !_nodb)
@@ -209,6 +214,12 @@ public abstract class PointObject extends Point implements Cloneable, Serializab
         }
         _tags.clear();
         _tagData.clear();
+        _utags = 0;
+    }
+    
+    
+    public boolean hasUserTags() {
+        return _utags > 0;
     }
     
     

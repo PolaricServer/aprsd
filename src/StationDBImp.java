@@ -101,7 +101,6 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
     public synchronized void updateItem(TrackerPoint s, LatLng prevpos) {
         /* Remove existing point in r-tree index */
         _removeGItem(s, prevpos);
-//        _map.remove(s.getIdent());
         
         /* Add it with new position */
         _addRtItem(s);
@@ -264,7 +263,7 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
              /* Save all points that matches regex */
              for (TrackerPoint s: _map.values()) { 
                 if (!(s instanceof OwnPosition)
-                       && s.getIdent().matches("("+_stnsave+")|.*\\@("+_stnsave+")"))
+                       && (s.hasUserTags() || s.getIdent().matches("("+_stnsave+")|.*\\@("+_stnsave+")")))
                     ofs.writeObject(s); 
              }
              
