@@ -403,7 +403,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
     {
         String cm[] = new String[1];
         ReportHandler.PosData pd = parseMicEPos(p, cm);
-        if (pd == null)
+        if (pd == null || !pd.isValid())
             return;
         
         String comment = cm[0];
@@ -609,7 +609,7 @@ public class AprsParser extends AprsUtil implements AprsChannel.Receiver
             pd = parseCompressedPos(data);
             comment = data.substring(13);
          }
-         if (pd==null)
+         if (pd==null || !pd.isValid())
             return;
          if (pd.symbol == '_')
             comment = parseWX(comment);

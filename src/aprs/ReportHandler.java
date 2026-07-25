@@ -37,6 +37,11 @@ public interface ReportHandler
        public char symbol, symtab;
        public long altitude = -1; 
        
+       public boolean isValid() {
+           return pos != null && !pos.isNull();
+       }
+       
+       
        public PosData () {}
        public PosData (LatLng p, char sym, char stab)
           {pos=p; symbol=sym; symtab=stab; }
