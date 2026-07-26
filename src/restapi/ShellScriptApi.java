@@ -109,14 +109,14 @@ public class ShellScriptApi extends ServerBase {
         private Script _script;
         private String _rtext; 
         private String _uid; 
-        private ServerConfig _api;   
+        private ServerConfig _conf;   
         private static final int NOT_EXPIRE = 60; 
         
         
-        public ProcessRunner(ServerConfig api, String uid, ProcessBuilder p, Script scr) {
+        public ProcessRunner(ServerConfig cnf, String uid, ProcessBuilder p, Script scr) {
             _pb = p;
             _script = scr;
-            _api = api; 
+            _conf = cnf; 
             _uid = uid;
         }
         
@@ -134,8 +134,12 @@ public class ShellScriptApi extends ServerBase {
                     _rtext = "";
                     BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
                     String line;
-                    while ((line = bri.readLine()) != null)
-                        _rtext += "\r\n" + line;
+                    boolean first = true;
+                    while ((line = bri.readLine()) != null )
+                        if (!line.equals("") && first) {
+                            _rtext += (first ? "" : "\r\n") + line;
+                            first = false;
+                        }
                 }
                 return p.exitValue(); 
             }    
@@ -150,18 +154,20 @@ public class ShellScriptApi extends ServerBase {
             Thread thread = new Thread( () -> {
                 try {
                     int res = runAndWait(14400); 
+                    Thread.sleep(1000);
+                    _conf.log().info("ShellScriptApi", "Script finished ["+_uid+"]: "+getText());
                     if (res == 0) {
-                        _api.getWebserver().notifyUser(_uid, 
+                        _conf.getWebserver().notifyUser(_uid, 
                             new ServerConfig.Notification("system", "system", 
                                 _script.sinfo.name +": "+ (getText()!=null ? getText() : "success"), new Date(), NOT_EXPIRE));
                     }    
                     else if (res == -1) {
-                        _api.getWebserver().notifyUser(_uid, 
+                        _conf.getWebserver().notifyUser(_uid, 
                             new ServerConfig.Notification("error", "system", 
                                 _script.sinfo.name +": killed (timeout): ", new Date(), NOT_EXPIRE));
                     }   
                     else {
-                        _api.getWebserver().notifyUser(_uid, 
+                        _conf.getWebserver().notifyUser(_uid, 
                             new ServerConfig.Notification("error", "system", 
                                 _script.sinfo.name + ": "+(getText()!=null ? "("+res+") "+getText() : "Error ("+res+")"), 
                                 new Date(), NOT_EXPIRE));
@@ -175,6 +181,7 @@ public class ShellScriptApi extends ServerBase {
         }
         
     }
+    
     
     
     /** 
@@ -234,7 +241,8 @@ public class ShellScriptApi extends ServerBase {
     public void start() {     
        
        protect("/scripts");
-        
+       protect("/scripts/*");
+       
         /* 
          * GET /scripts 
          * Get list of available commands/scripts 
@@ -253,10 +261,10 @@ public class ShellScriptApi extends ServerBase {
          * Execute a script/command. Arguments given as JSON data
          */
         a.post("/scripts/{name}", (ctx) -> {
+            var uid = getAuthInfo(ctx).userid;   
             var name = ctx.pathParam("name"); 
             try {
                 var script = _scripts.get(name);
-                var uid = getAuthInfo(ctx).userid;     
                 ScriptArg arg = null;
                 if (ctx.body().length() > 0) {
                     arg = (ScriptArg) 
@@ -287,7 +295,7 @@ public class ShellScriptApi extends ServerBase {
                     for (String a : arg.args)
                         cmdarg.add(a);
 
-                _conf.log().debug("ShellScriptApi", "Invoking script: "+cmd);
+                _conf.log().info("ShellScriptApi", "Invoking script: "+cmd);
                 ProcessBuilder pb = new ProcessBuilder(cmdarg);
                 pb.redirectError(Redirect.appendTo(_slog));
                 if (!script.rtext) 
