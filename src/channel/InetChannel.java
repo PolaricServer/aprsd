@@ -153,7 +153,9 @@ public class InetChannel extends TcpChannel
     {    
          _rder = new BufferedReader(new InputStreamReader(_comm.getInputStream(), _rx_encoding));
          _out = new PrintWriter(new OutputStreamWriter(_comm.getOutputStream(), _tx_encoding));         
-         _out.print("user "+_user +" pass "+_pass+ " vers Polaric-APRSD "+_conf.getVersion());
+         _out.print("user "+_user +
+             (_pass!=null&&!_pass.equals("") ? " pass "+_pass : "") + 
+             " vers Polaric-APRSD "+_conf.getVersion());
          
          if (_filter.length() > 0)
              _out.print(" filter "+_filter);

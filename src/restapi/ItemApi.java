@@ -120,7 +120,7 @@ public class ItemApi extends ServerBase {
     
     protected boolean sarAuthForItem(Context ctx, PointObject x) {
         return (authForItem(ctx, x) && 
-           ( x.hasTag(getAuthInfo(ctx).tagsAuth) || getAuthInfo(ctx).admin) );
+           ( x.hasTag(getAuthInfo(ctx).tagsAuth) || getAuthInfo(ctx).admin) || getAuthInfo(ctx).operator);
     }
     
     

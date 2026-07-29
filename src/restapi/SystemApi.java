@@ -74,7 +74,7 @@ public class SystemApi extends ServerBase {
      * Set up the webservices. 
      */
     public void start() {     
-        protect("/system/xcode",  "operator");
+        protect("/system/xcode",   "operator");
         protect("/system/xcode/*", "operator");
         protect("/system/ownpos",  "admin");
     
@@ -100,7 +100,11 @@ public class SystemApi extends ServerBase {
          *******************************************************/
         a.get("/system/xcode/{call}", (ctx) -> {
             String call = ctx.pathParam("call");
-            String key = _conf.getProperty("xverify.key", "NOKEY"); 
+            String key = _conf.getProperty("xverify.key", null); 
+            if (key == null || key.equals("")) {
+                ERROR(ctx, 400, "Key not set");
+                return;
+            }
             String pass = SecUtils.hmacB64(call, key, 16);
             ctx.result(pass);
         });
