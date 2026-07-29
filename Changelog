@@ -571,4 +571,34 @@ V.4.1
   * Optimize getPointsVia query
   
   
+  
+V.4.2 (july 26)
+---------------
 
+  (polaric-core -> v.1.1.0)
+  * Move to Javalin 7.2.2
+  * Use binary format for keys
+  * Various fixes
+  
+  (aprsd)
+  * Support extended verification of APRS-IS clients
+  * Allow per-channel packet-log config
+  * Encryption code, move part of key-derivation to polaric-core
+  * Allow decryption on send on some channels
+  * Allow tags with data some fixes to tag handling
+  * Check for invalid (0,0) positions 
+  * Various fixes
+  
+  (webapp2)
+  * Generate extended verification code (HMAC-SHA256) for APRS-IS clients. Key config.
+  * Line2points, etc to support measurement
+  * Use newer version of echarts
+  * Tag management fixes
+  * Tag setting presets, allow defining in JSON file
+  * Various fixes
+  
+  (database-plugin)
+  * Dbsync work
+  * Database cleaning fixes.. 
+  * Various fixes..
+  

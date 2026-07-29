@@ -1,8 +1,14 @@
-polaric-aprsd (4.1+) UNRELEASED; urgency=medium
+polaric-aprsd (4.2) stable; urgency=medium
 
-  * Hacking..
+  * Support extended verification of APRS-IS clients
+  * Allow per-channel packet-log config
+  * Encryption code, move part of key-derivation to polaric-core
+  * Allow decryption on send on some channels
+  * Allow tags with data some fixes to tag handling
+  * Check for invalid (0,0) positions 
+  * Various fixes
 
- -- Oyvind Hanssen <oivindh@la7eca>  Wed, 04 Mar 2026 20:05:01 +0100
+ -- Oyvind Hanssen <ohanssen@acm.org>  Mon, 27 Jul 2026 11:38:01 +0200
 
 polaric-aprsd (4.1) stable; urgency=medium
 
