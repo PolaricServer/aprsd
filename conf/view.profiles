@@ -2,7 +2,8 @@
 # This is an example of a filter script.
 #
 # Modify this for your own needs. 
-# See http://aprs.no/dokuwiki/doku.php?id=filter.profiles for more information. 
+# See https://polaricserver.readthedocs.io/en/latest/filterscript.html
+# 
 #
 
 
@@ -23,7 +24,7 @@ Infrastructure = ident ~ "LD.+" OR
 
 Object = ident ~ ".+@.+";
 WXstn  = symbol ~ "/_";
-
+SOTA   = ident ~ "(.+@ON6ZQ)|(.*@F4JTV-10)";      
 
 # points with tag "SAR", prefix LE or certain APRS symbols are likely
 # involved in some SAR operation.
@@ -32,8 +33,9 @@ sarRelated = *SAR OR *sar OR
              ident ~ "LE.*|.@LE.*" OR
              symbol ~ "/a|Es|Ls|Ms|Ss|/c|\\c|/o|/h|/\+|/P|/\!|\\\!";
 
+LoRa       = symbol ~ "L[&_a]";
 
-             
+
              
 ####################################################
 # Automatic tagging. 
@@ -42,6 +44,9 @@ sarRelated = *SAR OR *sar OR
 
 AUTOTAG {
     sarRelated => { *SAR };
+    
+    LoRa OR
+    TRAFFIC LoRa    => { *LoRa };
 }
 
              
@@ -77,6 +82,8 @@ PROFILE track {
       
    slow OR *slow            => { trail-length = 40, trail-time = 20 };
    *longtrail               => { trail-length = 120, trail-time = 60 };
+   
+    SOTA => { hide-all };
 }
 
 
