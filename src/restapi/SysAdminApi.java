@@ -221,7 +221,7 @@ public class SysAdminApi extends ServerBase {
         
         public void save(AprsServerConfig conf) {
             Properties  prop = conf.config();
-            prop.setProperty("default.mycall", mycall);
+            prop.setProperty("default.mycall", mycall.toUpperCase());
             prop.setProperty("igate.on", ""+igate);
             prop.setProperty("igate.rfgate.allow", ""+rfigate);
             prop.setProperty("objects.rfgate.allow", ""+objigate);
@@ -234,7 +234,7 @@ public class SysAdminApi extends ServerBase {
             prop.setProperty("message.alwaysRf", ""+always_rf);
             prop.setProperty("remotectl.on", ""+remotectl);
             prop.setProperty("remotectl.radius", ""+remote_radius);
-            prop.setProperty("remotectl.connect", rc_server);
+            prop.setProperty("remotectl.connect", rc_server.toUpperCase());
             prop.setProperty("remotectl.encrypt", encryptto);
             prop.setProperty("message.auth.key", authkey);
             prop.setProperty("xverify.key", xverify_key);
@@ -400,7 +400,11 @@ public class SysAdminApi extends ServerBase {
             _conf.getOwnObjects().init();
             _conf.getIgate().init();
             _conf.getMsgProcessor().init();
-            _conf.getRemoteCtl().init();
+            
+            var rctl = _conf.getRemoteCtl();
+            if (rctl != null)
+                _conf.getRemoteCtl().init();
+                
             ctx.result("Ok");
         });
         

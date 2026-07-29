@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2024-2025 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
+ * Copyright (C) 2024-2026 by LA7ECA, Øyvind Hanssen (ohanssen@acm.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -91,13 +91,13 @@ public class StoredFilter
                     Filt filter = new Filt(fspec, null);
                     _filtmap.put(name, filter);
                 } catch (Exception e) {
-                    _conf.log().warn("StoredFilter", "Error parsing filter '{name}': " + e.getMessage());
+                    _conf.log().warn("StoredFilter", "Error parsing filter '"+name+"': " + e.getMessage());
                 }
             }
-            _conf.log().info("StoredFilter", "Loaded {_filtmap.size()} filters from " + filename);
+            _conf.log().info("StoredFilter", "Loaded "+_filtmap.size()+" filters from " + filename);
             
         } catch (IOException e) {
-            _conf.log().warn("StoredFilter", "Error reading filter file '{filename}': " + e.getMessage());
+            _conf.log().warn("StoredFilter", "Error reading filter file '"+filename+"': " + e.getMessage());
         }
     }
     

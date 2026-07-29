@@ -377,7 +377,6 @@ public class StationDBImp extends StationDBBase implements StationDB, Runnable
          _api.log().info("StationDBImp", "rebuilding index");
          rebuildIndex();
          
-         s_runtime.runFinalization ();
          s_runtime.gc ();
          Thread.currentThread ().yield ();
          _api.log().debug("StationDBImp", "Garbage collection finished");
