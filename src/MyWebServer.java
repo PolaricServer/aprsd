@@ -140,6 +140,7 @@ public class MyWebServer extends WebServer {
         var secure = _conf.getBoolProperty("httpserver.secure", false);
         var proxy  = _conf.getBoolProperty("httpserver.proxy", true);
          
+        _zconf = new ZeroConf("polaric-"+mycall+".local");
         _zconf.registerMdns("_polaric_aprsd._tcp.local.", mycall, _port,
              "secure="+(secure?"yes":"no")+", "+"proxy="+(proxy?"yes":"no"));
             
