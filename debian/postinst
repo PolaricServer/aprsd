@@ -31,9 +31,6 @@ case "$1" in
            chown polaric:polaric /var/lib/polaric/users.dat
            chmod 644 /var/lib/polaric/users.dat
         fi
-        if [[ ! -e "/etc/polaric-aprsd/keys/keystore.jks" ]] ; then 
-           polaric-importcert-snakeoil yes
-        fi
         
         echo
         echo "******** Polaric-aprsd ********"
