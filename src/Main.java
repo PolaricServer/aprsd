@@ -191,6 +191,12 @@ public class Main extends ConfigBase implements AprsServerConfig {
     }
  
     
+        
+    public void simpleInit() {
+        _defaultConf = new Properties(); 
+        setLogger( new Logfile(this, "aprsd") );
+    }
+    
     
     
     
