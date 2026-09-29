@@ -6,9 +6,7 @@ search and rescue service in Norway. It consists of a web-application and a serv
  
 The APRS daemon (aprsd) gets data from a TNC or APRS-IS or a combination. Users can present 
 and manipulate the information through a HTTP service (REST API) and updates is streamed through a Websocket. 
-The daemon can also be set up as an igate (internet gateway) or a edge APRS-IS server. It can be installed and run independently of the web app. It provides its own webserver based on the *polaric-core* framework. 
-
-*Polaric-aprsd* is meant to be used as a backend-server for *polaric-webapp2*.
+The daemon can also be set up as an igate (internet gateway) or a edge APRS-IS server. It provides its own webserver based on the *polaric-core* framework. It should normally be used with the Polaric-Webapp2 frontend webserver and client-app, i.e. the aprsd is designed to be used as a backend for the webapp2. 
 
 http://aprs.no runs a recent version of this software. More documentation on the project can be found here: 
 http://aprs.no/polaricserver.
