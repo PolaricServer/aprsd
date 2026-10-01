@@ -407,8 +407,11 @@ public class SysAdminApi extends ServerBase {
                 _conf.getRemoteCtl().init();
             
             String newCall = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
-            if (!newCall.equals(oldCall)) {
-                File changeCallScript = new File("/etc/polaric-aprsd/scripts/changecall.sh");
+            if (!newCall.equals(oldCall)) {        
+                String confDir = System.getProperty("confdir", ".");
+                String scriptDir = System.getProperty("scriptdir", confDir + "/scripts");
+                File changeCallScript = new File(scriptDir, "changecall.sh");
+                
                 if (changeCallScript.exists()) {
                     ProcessBuilder pb = new ProcessBuilder(changeCallScript.getAbsolutePath(), oldCall, newCall);
                     pb.inheritIO();
