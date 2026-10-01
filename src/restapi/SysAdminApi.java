@@ -394,6 +394,7 @@ public class SysAdminApi extends ServerBase {
          * Update server config
          ******************************************/
         a.put("/system/adm/server", (ctx) -> {
+            String oldCall = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
             ServerConfigData confdata = (ServerConfigData) ServerBase.fromJson(ctx.body(), ServerConfigData.class);
             confdata.save(_conf);
             // Make sure reloads settings
@@ -404,6 +405,16 @@ public class SysAdminApi extends ServerBase {
             var rctl = _conf.getRemoteCtl();
             if (rctl != null)
                 _conf.getRemoteCtl().init();
+            
+            String newCall = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
+            if (!newCall.equals(oldCall)) {
+                File changeCallScript = new File("/etc/polaric-aprsd/scripts/changecall.sh");
+                if (changeCallScript.exists()) {
+                    ProcessBuilder pb = new ProcessBuilder(changeCallScript.getAbsolutePath(), oldCall, newCall);
+                    pb.inheritIO();
+                    pb.start();
+                }
+            }
                 
             ctx.result("Ok");
         });
