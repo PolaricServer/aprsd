@@ -70,7 +70,7 @@ public class OfflineDetector {
         if (!baseUrl2.isEmpty()) _baseUrls.add(baseUrl2);
         if (!baseUrl3.isEmpty()) _baseUrls.add(baseUrl3);
         
-        // Default check interval: 60 seconds, minimum 5 seconds to prevent excessive CPU usage
+        // Default check interval: 120 seconds, minimum 5 seconds to prevent excessive CPU usage
         int interval = config.getIntProperty("offlinedetector.interval", 120);
         _checkInterval = Math.max(interval, 10);
         

@@ -143,7 +143,8 @@ public class MyWebServer extends WebServer {
         _zconf = new ZeroConf("polaric-"+mycall+".local");
         _zconf.registerMdns("_polaric_aprsd._tcp.local.", mycall, _port,
              "secure="+(secure?"yes":"no")+", "+"proxy="+(proxy?"yes":"no"));
-            
+             
+        _conf.log().info("WebServer", "Registering on mDNS: polaric-"+mycall+".local");
             
             
         /* At shutdown. Send a message to other nodes */
