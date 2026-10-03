@@ -397,7 +397,7 @@ public class SysAdminApi extends ServerBase {
             String oldCall = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
             ServerConfigData confdata = (ServerConfigData) ServerBase.fromJson(ctx.body(), ServerConfigData.class);
             confdata.save(_conf);
-            // Make sure reloads settings
+            // Make sure it reloads settings
             _conf.getOwnObjects().init();
             _conf.getIgate().init();
             _conf.getMsgProcessor().init();
@@ -413,7 +413,10 @@ public class SysAdminApi extends ServerBase {
                 File changeCallScript = new File(scriptDir, "changecall.sh");
                 
                 if (changeCallScript.exists()) {
-                    ProcessBuilder pb = new ProcessBuilder(changeCallScript.getAbsolutePath(), oldCall, newCall);
+                    /* Save properties so that script can access the updated callsign */
+                    _conf.saveConfig();
+                    /* Run the external script */
+                    ProcessBuilder pb = new ProcessBuilder(changeCallScript.getAbsolutePath());
                     pb.inheritIO();
                     pb.start();
                 }

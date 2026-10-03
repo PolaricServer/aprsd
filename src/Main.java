@@ -60,7 +60,7 @@ public class Main extends ConfigBase implements AprsServerConfig {
     public  static  AprsChannel ch2 = null;
     public  static  OwnObjects ownobjects;   
     public  static  OwnPosition ownpos = null; 
-    public static   BullBoard bullboard = null;
+    public  static  BullBoard bullboard = null;
     public  static  Igate igate  = null;
     private static  Channel.Manager _chanManager = new Channel.Manager();
     public  static  RemoteCtl rctl;
@@ -83,9 +83,11 @@ public class Main extends ConfigBase implements AprsServerConfig {
     public void saveConfig() 
     { 
        try {
-            _defaultConf.clear();
+            Properties p = _defaultConf;
+            _defaultConf = new Properties();
             FileOutputStream cfout = new FileOutputStream(_xconf);
             config().storeToXML(cfout, "Configuration for Polaric APRSD");
+            _defaultConf = p;
        }
        catch (java.io.IOException e) {log().warn("Main", "Cannot write file "+e);}
     }

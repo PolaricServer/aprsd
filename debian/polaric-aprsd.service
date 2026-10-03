@@ -14,12 +14,32 @@ TimeoutStopSec=60
 # Optional: make systemd wait a little before attempting restarts started by its own
 RestartSec=10
 
+##################################
 # Security hardening options
-NoNewPrivileges=true
+#################################
+
+# Consider the security implications of the NoNewPrivileges directive
+NoNewPrivileges=false
+
+# Isolate temporary directories
 PrivateTmp=true
-ProtectSystem=full
+
+# true: Makes /usr and /boot read-only.
+# full: Makes /usr, /boot, and /etc read-only.
+# strict: Makes the entire file system read-only for this service.
+# false: Full write access (governed only by standard user permissions).
+ProtectSystem=strict
+
+# true: Home directories are completely invisible (appears empty/inaccessible).
+# read-only: Directories are visible, but the service cannot write to them.
+# tmpfs: Creates a temporary, empty mock home directory layout.
+# false: Standard access to home directories.
 ProtectHome=true
-ReadWritePaths=/var/log/polaric /var/lib/polaric /etc/polaric-aprsd
+
+# Punch holes in the sandbox
+ReadWritePaths=/var/log/polaric /var/lib/polaric /etc/polaric-aprsd /etc/polaric-webapp2/ssl
+
+
 
 # Resource limits
 LimitNOFILE=65536
