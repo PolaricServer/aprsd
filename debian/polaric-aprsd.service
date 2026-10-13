@@ -37,7 +37,7 @@ ProtectSystem=strict
 ProtectHome=true
 
 # Punch holes in the sandbox
-ReadWritePaths=/var/log/polaric /var/lib/polaric /etc/polaric-aprsd /etc/polaric-webapp2/ssl
+ReadWritePaths=/var/log/polaric /var/lib/polaric /etc/polaric-aprsd -/etc/polaric-webapp2/ssl
 
 
 

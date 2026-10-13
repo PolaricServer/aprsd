@@ -231,6 +231,8 @@ public class BullBoard implements MessageProcessor.MessageHandler {
         scheduler.scheduleAtFixedRate( () -> 
             {
                 try {
+                    _api.log().debug("BullBoard", "Schedule cleanup: "+ttl_bull+", "+ttl_ann);
+                
                     _bulletins.cleanUp(ttl_bull); 
                     _announcements.cleanUp(ttl_ann); 
                     
@@ -249,7 +251,7 @@ public class BullBoard implements MessageProcessor.MessageHandler {
                     _api.log().warn("BullBoard", "Exception in scheduled action: "+e);
                     e.printStackTrace(System.out);
                 }
-            } ,5, 5, MINUTES); 
+            } ,10, 10, MINUTES); 
     }
     
     
