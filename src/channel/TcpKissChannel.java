@@ -44,7 +44,8 @@ public class TcpKissChannel extends TcpChannel
     @Override public void activate(AprsServerConfig a) {
        super.activate(_conf);
        _kissport = _conf.getIntProperty("channel."+getIdent()+".kissport", 0);
-       _log = new Logfile(_conf, getIdent(), "rf.log");
+        String logdir = _conf.getProperty("logdir", "/var/log/polaric");   
+       _log = new Logfile(_conf, getIdent(), logdir+"/rf.log");
     }
     
     

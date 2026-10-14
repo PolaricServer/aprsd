@@ -77,7 +77,8 @@ public abstract class TncChannel extends AprsChannel
         _myCall = _conf.getProperty("channel."+id+".mycall", "").toUpperCase();
         if (_myCall.length() == 0)
            _myCall = _conf.getProperty("default.mycall", "NOCALL").toUpperCase(); 
-        _log = new Logfile(_conf, id, "rf.log");   
+        String logdir = _conf.getProperty("logdir", "/var/log/polaric");   
+        _log = new Logfile(_conf, id, logdir+"/rf.log");   
         
         String port = _conf.getProperty("channel."+id+".port", "/dev/ttyS0");
         int baud = _conf.getIntProperty("channel."+id+".baud", 9600);

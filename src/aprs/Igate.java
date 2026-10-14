@@ -58,7 +58,8 @@ public class Igate implements AprsChannel.Receiver, ManagedObject
         _alwaysRf    = _conf.getProperty("message.alwaysRf", "");       
         if (_myCall.length() == 0)
            _myCall   = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();      
-        _log         = new Logfile(_conf, "igate", "igate.log");  
+        String logdir = _conf.getProperty("logdir", "/var/log/polaric");   
+        _log         = new Logfile(_conf, "igate", logdir+"/igate.log");  
     }
     
        

@@ -166,7 +166,8 @@ public class RemoteCtl implements Runnable, MessageProcessor.Notification
            _myCall = _conf.getProperty("default.mycall", "NOCALL").toUpperCase();
        _radius = _conf.getIntProperty("remotectl.radius", -1); 
        _parent = _conf.getProperty("remotectl.connect", null);
-       _log = new Logfile(_conf, "remotectl", "remotectl.log");
+        String logdir = _conf.getProperty("logdir", "/var/log/polaric");   
+       _log = new Logfile(_conf, "remotectl", logdir+"/remotectl.log");
        _encryptTo = _conf.getProperty("remotectl.encrypt.old", "");
        _encryptTo2 = _conf.getProperty("remotectl.encrypt", "");
        _userInfo = _conf.getProperty("remotectl.userinfo", ".*");

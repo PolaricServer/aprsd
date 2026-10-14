@@ -69,7 +69,8 @@ public class InetSrvChannel extends AprsChannel implements Runnable {
         _xverify = _conf.getBoolProperty("channel."+id+".xverify", false);
         _decryptOnSend = _conf.getBoolProperty("channel."+id+".decryptOnSend", false);
     
-        log = new Logfile(_conf, "channel."+id, "channel."+id+".log");  
+        String logdir = _conf.getProperty("logdir", "/var/log/polaric");   
+        log = new Logfile(_conf, "channel."+id, logdir+"/channel."+id+".log");  
         log.info(null, "Channel activated");
         _conf.log().info("InetSrvChannel", "Channel activated: "+id); 
         

@@ -52,7 +52,8 @@ public class InetChannel extends TcpChannel
        setReceiveFilter(_conf.getProperty("channel."+id+".rfilter", "")); 
        _decryptOnSend = _conf.getBoolProperty("channel."+id+".decryptOnSend", false);
        
-        log = new Logfile(_conf, "channel."+id, "channel."+id+".log");  
+        String logdir = _conf.getProperty("logdir", "/var/log/polaric");   
+        log = new Logfile(_conf, "channel."+id, logdir+"/channel."+id+".log");  
         log.info(null, "Channel activated");
         _conf.log().info("InetChannel", "Channel activated: "+id); 
         super.activate(_conf);
